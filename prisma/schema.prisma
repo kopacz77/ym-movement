@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?
+  role          Role      @default(STUDENT)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  student       Student?
+  createdNotes  StudentNote[]
+}
+
+model Student {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  phone            String?
+  maxLessonsPerWeek Int       @default(3)
+  notes            String?
+  level            Level     @default(PRELIMINARY)
+  emergencyContact Json?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lessons          Lesson[]
+  payments         Payment[]
+  studentNotes     StudentNote[]
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudentNote {
+  id          String   @id @default(cuid())
+  studentId   String
+  content     String
+  type        String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  @@index([studentId])
+  @@index([createdById])
+}
+
+model Lesson {
+  id                  String       @id @default(cuid())
+  studentId           String
+  rinkId              String
+  startTime           DateTime
+  endTime             DateTime
+  duration            Int
+  type                LessonType   @default(PRIVATE)
+  area                RinkArea     @default(MAIN_RINK)
+  status              LessonStatus @default(SCHEDULED)
+  cancellationReason  String?
+  cancellationTime    DateTime?
+  notes               String?
+  price               Float
+  timeSlotId          String?
+  googleCalendarEventId String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  rink                Rink         @relation(fields: [rinkId], references: [id])
+  student             Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  timeSlot            RinkTimeSlot? @relation(fields: [timeSlotId], references: [id])
+  payment             Payment?
+
+  @@index([startTime])
+  @@index([studentId])
+  @@index([rinkId])
+  @@index([timeSlotId])
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  lessonId       String        @unique
+  studentId      String
+  amount         Float
+  method         PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  referenceCode  String        @unique
+  verifiedBy     String?
+  verifiedAt     DateTime?
+  reminderSentAt DateTime?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  lesson         Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  student        Student       @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([status])
+  @@index([referenceCode])
+}
+
+model Rink {
+  id                String            @id @default(cuid())
+  name              String            @unique
+  timezone          String
+  address           String
+  maxCapacity       Int?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  lessons           Lesson[]
+  recurringPatterns RecurringPattern[]
+  timeSlots         RinkTimeSlot[]
+}
+
+model RinkTimeSlot {
+  id          String   @id @default(cuid())
+  rinkId      String
+  startTime   DateTime
+  endTime     DateTime
+  maxStudents Int      @default(1)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  recurringId String?
+  lessons     Lesson[]
+  rink        Rink     @relation(fields: [rinkId], references: [id], onDelete: Cascade)
+
+  @@index([rinkId])
+  @@index([startTime])
+  @@index([recurringId])
+}
+
+model RecurringPattern {
+  id          String   @id @default(cuid())
+  rinkId      String
+  daysOfWeek  Int[]
+  startDate   DateTime
+  endDate     DateTime
+  startTime   String
+  duration    Int
+  maxStudents Int      @default(1)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  rink        Rink     @relation(fields: [rinkId], references: [id], onDelete: Cascade)
+
+  @@index([rinkId])
+}
+
+enum Role {
+  ADMIN
+  COACH
+  STUDENT
+}
+
+enum Level {
+  PRE_PRELIMINARY
+  PRELIMINARY
+  PRE_JUVENILE
+  JUVENILE
+  INTERMEDIATE
+  NOVICE
+  JUNIOR
+  SENIOR
+}
+
+enum LessonType {
+  PRIVATE
+  GROUP
+  CHOREOGRAPHY
+  COMPETITION_PREP
+}
+
+enum RinkArea {
+  MAIN_RINK
+  PRACTICE_RINK
+  DANCE_STUDIO
+}
+
+enum LessonStatus {
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentMethod {
+  VENMO
+  ZELLE
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
