@@ -5,6 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core'
+import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 
 interface CalendarProps {
   initialView?: 'timeGridWeek' | 'timeGridDay' | 'dayGridMonth'
@@ -14,13 +15,9 @@ interface CalendarProps {
   onDateSelect?: (info: DateSelectArg) => void
   onEventClick?: (info: EventClickArg) => void
   onEventDrop?: (info: EventDropArg) => void
-  businessHours?: {
-    daysOfWeek?: number[]
-    startTime?: string
-    endTime?: string
-  }
-  slotMinTime?: string // New prop for visible start time
-  slotMaxTime?: string // New prop for visible end time
+  businessHours?: { daysOfWeek?: number[], startTime?: string, endTime?: string }
+  slotMinTime?: string
+  slotMaxTime?: string
 }
 
 export function Calendar({
@@ -32,27 +29,25 @@ export function Calendar({
   onEventClick,
   onEventDrop,
   businessHours = {
-    daysOfWeek: [0, 1, 2, 3, 4, 5, 6], // 0 = Sunday, 1 = Monday, etc.
+    daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
     startTime: '05:00',
     endTime: '18:00',
   },
-  slotMinTime, // optionally provided
-  slotMaxTime, // optionally provided
+  slotMinTime,
+  slotMaxTime,
 }: CalendarProps) {
   return (
-    <div className="h-[calc(100vh-12rem)]"> {/* Adjust height as needed */}
+    <div className="h-[calc(100vh-12rem)]">
       <FullCalendar
         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
         initialView={initialView}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          right: 'dayGridMonth,timeGridWeek,timeGridDay',
         }}
-        // Use provided slotMinTime/slotMaxTime or fallback to default values
         slotMinTime={slotMinTime || "05:00:00"}
         slotMaxTime={slotMaxTime || "18:00:00"}
-        expandRows={true}
         selectable={selectable}
         selectMirror={true}
         dayMaxEvents={true}
