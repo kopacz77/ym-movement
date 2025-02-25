@@ -1,15 +1,10 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
@@ -31,7 +26,9 @@ interface ChartData {
 export const RevenueChart = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
   const { toast } = useToast();
-  const { data, isLoading, error } = api.admin.getRevenueReport.useQuery(
+  
+  // UPDATED: Use the "analytics" namespace for revenue procedures.
+  const { data, isLoading, error } = api.admin.analytics.getRevenueReport.useQuery(
     { period: timeRange },
     { retry: 3 }
   );
@@ -46,19 +43,20 @@ export const RevenueChart = () => {
     }
   }, [error, toast]);
 
-  // Process data for the chart
   const chartData = React.useMemo(() => {
     if (!data) return [];
-    // Group payments by date and sum amounts
+    
     const groupedData = (data as PaymentData[]).reduce((acc: Record<string, number>, payment) => {
       const date = new Date(payment.createdAt).toISOString().split('T')[0];
       acc[date] = (acc[date] || 0) + payment.amount;
       return acc;
     }, {});
 
-    // Convert to array format for Recharts
     return Object.entries(groupedData)
-      .map(([date, amount]): ChartData => ({ date, revenue: amount }))
+      .map(([date, amount]): ChartData => ({
+        date,
+        revenue: amount,
+      }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [data]);
 
@@ -104,7 +102,10 @@ export const RevenueChart = () => {
             <div>Average: {formatCurrency(averageRevenue)}/day</div>
           </div>
         </div>
-        <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
+        <Select
+          value={timeRange}
+          onValueChange={(value: TimeRange) => setTimeRange(value)}
+        >
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
@@ -117,13 +118,19 @@ export const RevenueChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <LineChart
+            data={chartData}
+            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 12 }}
               tickFormatter={(date) =>
-                new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                new Date(date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
               }
             />
             <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
@@ -138,7 +145,14 @@ export const RevenueChart = () => {
                 })
               }
             />
-            <Line type="monotone" dataKey="revenue" stroke="#8884d8" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            <Line
+              type="monotone"
+              dataKey="revenue"
+              stroke="#8884d8"
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

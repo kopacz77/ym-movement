@@ -1,13 +1,15 @@
 // features/admin/components/students/profile/StudentNotes.tsx
 "use client";
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
-import { Save, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { TRPCClientError, TRPCClientErrorLike } from '@trpc/client';
 
 interface StudentNotesProps {
   studentId: string;
@@ -17,39 +19,66 @@ interface Note {
   id: string;
   content: string;
   createdAt: Date;
-  createdBy: { name: string; };
+  createdBy: {
+    name: string;
+  };
   type: 'ADMIN' | 'INSTRUCTOR';
 }
 
 export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   const [newNote, setNewNote] = React.useState('');
   const { toast } = useToast();
-  const { data: notes, isLoading } = api.admin.getStudentNotes.useQuery(
-    { studentId },
-    {
-      onError: (err) => {
-        toast({
-          title: "Error loading notes",
-          description: err.message,
-          variant: "destructive",
-        });
-      },
-    }
-  );
 
-  const addNote = api.admin.addStudentNote.useMutation({
+  // Using useEffect to handle errors instead of onError in the query options
+  const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading notes",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
+
+  // Access notes directly from student
+  const notes = React.useMemo(() => {
+    if (!student?.notes) return [];
+    
+    // Convert the single notes field to an array of note objects
+    return [{
+      id: '1',
+      content: student.notes,
+      createdAt: student.createdAt,
+      createdBy: { name: 'System' },
+      type: 'ADMIN' as const
+    }];
+  }, [student]);
+
+  const addNote = api.admin.student.addStudentNote.useMutation({
     onSuccess: () => {
       toast({ title: "Note added successfully" });
       setNewNote('');
     },
-    onError: (err) => {
-      toast({ title: "Error adding note", description: err.message, variant: "destructive" });
+    // Fixed: Use the correct type for the error parameter
+    onError: (error) => {
+      toast({
+        title: "Error adding note",
+        description: error.message,
+        variant: "destructive"
+      });
     },
   });
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
-    addNote.mutate({ studentId, content: newNote, type: 'ADMIN' });
+    
+    addNote.mutate({
+      studentId,
+      content: newNote,
+      type: 'ADMIN'
+    });
   };
 
   return (
@@ -65,7 +94,10 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
             onChange={(e) => setNewNote(e.target.value)}
           />
           <div className="flex justify-end">
-            <Button onClick={handleAddNote} disabled={!newNote.trim() || addNote.isLoading}>
+            <Button
+              onClick={handleAddNote}
+              disabled={!newNote.trim() || addNote.isPending}
+            >
               <Plus className="h-4 w-4 mr-2" /> Add Note
             </Button>
           </div>

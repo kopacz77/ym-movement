@@ -1,69 +1,89 @@
-// src/features/admin/components/students/StudentManager.tsx
+// src/features/admin/components/students/management/StudentManager.tsx
 "use client";
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { StudentForm } from './StudentForm';
+// Import StudentForm from profile directory instead of local import
+import { StudentForm } from '@/features/admin/components/students/profile/StudentForm';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Search, Plus, MoreHorizontal, Edit, Trash, CheckCircle, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { TRPCClientError } from '@trpc/client';
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  level: string;
+  weeklyHours: number;
+  active: boolean;
+}
 
 export const StudentManager = () => {
   const [search, setSearch] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { toast } = useToast();
 
-  // Fetch students
-  const { data: students, isLoading, refetch } = api.admin.getStudents.useQuery(
-    { search },
-    {
-      onError: (err) => {
-        toast({ title: "Error loading students", description: err.message, variant: "destructive" });
-      },
-    }
+  // Fetch students - updated to use student namespace
+  const { data: studentsData, isLoading, refetch, error } = api.admin.student.getStudents.useQuery(
+    { search }
   );
 
-  // Delete student mutation
-  const deleteStudent = api.admin.deleteStudent.useMutation({
+  // Handle errors with useEffect
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading students",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  }, [error, toast]);
+  
+  // Extract students with proper typing
+  const students = studentsData?.students || [];
+
+  // Delete student mutation - using toggleStatus to deactivate instead
+  const toggleStudentStatus = api.admin.student.toggleStatus.useMutation({
     onSuccess: () => {
-      toast({ title: "Success", description: "Student deleted successfully" });
+      toast({
+        title: "Success",
+        description: "Student status updated successfully"
+      });
       refetch();
     },
-    onError: (err) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
     },
   });
 
-  // Update student status mutation
-  const updateStatus = api.admin.updateStudentStatus.useMutation({
-    onSuccess: () => {
-      toast({ title: "Success", description: "Student status updated successfully" });
-      refetch();
-    },
-    onError: (err) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    },
-  });
-
-  const handleEdit = (student: any) => {
+  const handleEdit = (student: Student) => {
     setSelectedStudent(student);
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (studentId: string) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      deleteStudent.mutate({ studentId });
+  const handleDeleteStudent = async (studentId: string) => {
+    if (window.confirm('Are you sure you want to deactivate this student?')) {
+      toggleStudentStatus.mutate({ 
+        studentId,
+        active: false 
+      });
     }
   };
 
   const handleStatusChange = (studentId: string, active: boolean) => {
-    updateStatus.mutate({ studentId, active });
+    toggleStudentStatus.mutate({ studentId, active });
   };
 
   return (
@@ -73,7 +93,12 @@ export const StudentManager = () => {
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search students..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input
+              placeholder="Search students..."
+              className="pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
             <DialogTrigger asChild>
@@ -119,14 +144,18 @@ export const StudentManager = () => {
                 <TableCell colSpan={6} className="text-center">No students found</TableCell>
               </TableRow>
             ) : (
-              students?.map((student) => (
+              students?.map((student: any) => (
                 <TableRow key={student.id}>
-                  <TableCell>{student.name}</TableCell>
-                  <TableCell>{student.email}</TableCell>
-                  <TableCell>{student.level}</TableCell>
-                  <TableCell>{student.weeklyHours} hours</TableCell>
+                  <TableCell>{student.user?.name || 'N/A'}</TableCell>
+                  <TableCell>{student.user?.email || 'N/A'}</TableCell>
+                  <TableCell>{student.level || 'N/A'}</TableCell>
+                  <TableCell>{student.maxLessonsPerWeek || 0} lessons</TableCell>
                   <TableCell>
-                    <Badge variant={student.active ? "success" : "secondary"}>
+                    {/* Fixed: Using default variant with custom styling instead of "success" */}
+                    <Badge
+                      variant={student.active ? "default" : "secondary"}
+                      className={student.active ? "bg-green-100 text-green-800" : ""}
+                    >
                       {student.active ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
@@ -152,7 +181,10 @@ export const StudentManager = () => {
                             </>
                           )}
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(student.id)}>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteStudent(student.id)}
+                        >
                           <Trash className="mr-2 h-4 w-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

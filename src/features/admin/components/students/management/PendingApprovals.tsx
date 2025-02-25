@@ -28,7 +28,11 @@ export const TimeSlotList = () => {
                   <p className="font-medium">3:00 PM - 4:00 PM</p>
                   <p className="text-sm text-gray-500">Main Rink</p>
                 </div>
-                <Badge variant={true ? "success" : "destructive"}>
+                {/* Fixed: Changed variant="success" to variant="default" with custom className for success styling */}
+                <Badge 
+                  variant="default"
+                  className="bg-green-100 text-green-800 hover:bg-green-200"
+                >
                   {2}/4 Students
                 </Badge>
               </div>

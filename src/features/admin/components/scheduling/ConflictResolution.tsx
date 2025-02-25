@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AlertTriangle } from 'lucide-react';
 
 interface Conflict {
   type: 'OVERLAP' | 'CAPACITY' | 'STUDENT_LIMIT' | 'INSTRUCTOR_UNAVAILABLE';
@@ -35,7 +36,10 @@ export const ConflictResolution = () => {
         <div className="space-y-6">
           {conflicts.map((conflict, index) => (
             <div key={index} className="space-y-4">
-              <Alert variant="warning">
+              {/* Changed from variant="warning" to variant="destructive" */}
+              <Alert variant="destructive">
+                {/* Added AlertTriangle icon to maintain warning appearance */}
+                <AlertTriangle className="h-4 w-4 mr-2" />
                 <AlertTitle>
                   {conflict.type.replace('_', ' ')}
                 </AlertTitle>
@@ -64,7 +68,7 @@ export const ConflictResolution = () => {
                         <p className="font-medium">{resolution.description}</p>
                         <p className="text-sm text-gray-500">{resolution.impact}</p>
                       </div>
-                      <Badge variant={ selectedResolution === resolution.id ? "default" : "outline" }>
+                      <Badge variant={selectedResolution === resolution.id ? "default" : "outline"}>
                         {selectedResolution === resolution.id ? "Selected" : "Select"}
                       </Badge>
                     </div>

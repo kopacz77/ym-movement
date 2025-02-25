@@ -1,11 +1,12 @@
-"use client"
-import React from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+"use client";
+
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -14,16 +15,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/use-toast"
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const bulkTimeSlotSchema = z.object({
   rinkId: z.string().min(1, "Please select a rink"),
@@ -36,18 +37,42 @@ const bulkTimeSlotSchema = z.object({
   breakDuration: z.coerce.number().optional(),
   maxStudents: z.coerce.number().min(1, "At least 1 student required"),
   daysOfWeek: z.array(z.number()).min(1, "Select at least one day"),
-})
+});
 
-type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>
+type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>;
 
 interface BulkTimeSlotFormProps {
-  rinks: Array<{ id: string; name: string }>
-  onSubmit: () => void
+  rinks: Array<{ id: string; name: string }>;
+  onSubmitAction: () => void; // renamed per recommendation
 }
 
-export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => {
-  const { toast } = useToast()
-  const utils = api.useUtils()
+export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
+  rinks,
+  onSubmitAction,
+}) => {
+  const toast = useToast();
+  const utils = api.useUtils();
+  
+  // Use the schedule namespace for bulk time slot creation.
+  const createBulkSlots = api.admin.schedule.createBulkTimeSlots.useMutation({
+    onSuccess: () => {
+      toast.toast({
+        title: "Success",
+        description: "Time slots created successfully"
+      });
+      // Invalidate the getTimeSlots query.
+      utils.admin.schedule.getTimeSlots.invalidate();
+      onSubmitAction();
+    },
+    onError: (error: any) => {
+      toast.toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    },
+  });
+
   const form = useForm<BulkTimeSlotFormValues>({
     resolver: zodResolver(bulkTimeSlotSchema),
     defaultValues: {
@@ -55,27 +80,15 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
       maxStudents: 1,
       daysOfWeek: [],
     },
-  })
-  const createBulkSlots = api.admin.createBulkTimeSlots.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Time slots created successfully",
-      })
-      utils.admin.getTimeSlots.invalidate()
-      onSubmit()
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      })
-    },
-  })
+  });
+
   const handleSubmit = (values: BulkTimeSlotFormValues) => {
-    createBulkSlots.mutate(values)
-  }
+    createBulkSlots.mutate(values);
+  };
+
+  // Get the state of the mutation
+  const isPending = createBulkSlots.isPending;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -103,6 +116,7 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -131,6 +145,7 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             )}
           />
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -159,6 +174,7 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="slotDuration"
@@ -179,6 +195,7 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             </FormItem>
           )}
         />
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -213,6 +230,7 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="maxStudents"
@@ -231,6 +249,7 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="daysOfWeek"
@@ -257,11 +276,11 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
                           <Checkbox
                             checked={field.value?.includes(day.value)}
                             onCheckedChange={(checked) => {
-                              const currentValue = field.value || []
+                              const currentValue = field.value || [];
                               const newValue = checked
                                 ? [...currentValue, day.value]
-                                : currentValue.filter((value) => value !== day.value)
-                              field.onChange(newValue)
+                                : currentValue.filter((d) => d !== day.value);
+                              field.onChange(newValue);
                             }}
                           />
                         </FormControl>
@@ -277,15 +296,17 @@ export const BulkTimeSlotForm = ({ rinks, onSubmit }: BulkTimeSlotFormProps) => 
             </FormItem>
           )}
         />
+
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onSubmit}>
+          <Button type="button" variant="outline" onClick={onSubmitAction}>
             Cancel
           </Button>
-          <Button type="submit" disabled={createBulkSlots.isLoading}>
-            {createBulkSlots.isLoading ? "Creating..." : "Create Slots"}
+          {/* Fix: Change isLoading to isPending */}
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Creating..." : "Create Slots"}
           </Button>
         </div>
       </form>
     </Form>
-  )
-}
+  );
+};

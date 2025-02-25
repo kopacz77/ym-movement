@@ -1,10 +1,9 @@
-import { AdminSidebar } from '@/features/admin/components/AdminSidebar';
+import { AdminSidebar } from '@/features/admin/components/layout/AdminSidebar';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * AdminLayout wraps all admin pages.
+ */
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen">
       <AdminSidebar />

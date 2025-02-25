@@ -1,10 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["class"],
+  darkMode: "class",
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/features/**/*.{js,ts,jsx,tsx,mdx}"  // This is important for your features folder
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -49,11 +54,6 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      // Extend borderColor to merge existing defaults and add our custom "border" key.
-      borderColor: (theme: any) => ({
-        ...theme("borderColor"),
-        border: theme("colors.border"),
-      }),
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -76,4 +76,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+}

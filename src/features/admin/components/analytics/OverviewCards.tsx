@@ -1,3 +1,4 @@
+// src/features/admin/components/analytics/OverviewCards.tsx
 "use client";
 import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,10 +9,10 @@ import { TRPCClientError } from '@trpc/client';
 
 export const OverviewCards = () => {
   const { toast } = useToast();
-  const { data, error, isLoading } = api.admin.getOverview.useQuery(undefined, {
-    refetchInterval: 30000,
-    retry: 3,
-  });
+  const { data, error, isLoading } = api.admin.analytics.getOverview.useQuery(
+    undefined, 
+    { refetchInterval: 30000, retry: 3 }
+  );
 
   useEffect(() => {
     if (error instanceof TRPCClientError) {
@@ -77,7 +78,7 @@ export const OverviewCards = () => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {stats.map((stat) => (
-        <Card key={stat.title}>
+        <Card key={stat.title} className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
             <stat.icon className="h-4 w-4 text-muted-foreground" />

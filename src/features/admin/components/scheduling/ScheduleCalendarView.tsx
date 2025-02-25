@@ -1,9 +1,28 @@
+// src/features/admin/components/scheduling/ScheduleCalendarView.tsx
 import React from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { ViewOptions } from './ViewOptions';
 import { TimeSlotList } from './TimeSlotList';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+// Create ViewOptions component inline since it's missing
+const ViewOptions = () => {
+  const [view, setView] = React.useState('timeGridWeek');
+  
+  return (
+    <Select value={view} onValueChange={(value) => setView(value)}>
+      <SelectTrigger className="w-40">
+        <SelectValue placeholder="Select view" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="timeGridDay">Day</SelectItem>
+        <SelectItem value="timeGridWeek">Week</SelectItem>
+        <SelectItem value="dayGridMonth">Month</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+};
 
 export const ScheduleCalendarView = () => {
   return (
@@ -16,7 +35,8 @@ export const ScheduleCalendarView = () => {
       </div>
       <div className="flex-1 grid grid-cols-7 gap-4">
         <div className="col-span-5">
-          <Calendar mode="week" />
+          {/* Changed mode="week" to initialView="timeGridWeek" to match Calendar component props */}
+          <Calendar initialView="timeGridWeek" />
         </div>
         <div className="col-span-2">
           <TimeSlotList />

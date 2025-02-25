@@ -1,40 +1,42 @@
+"use client";
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { BookingValidation } from './BookingValidation';
-import { StudentSelector } from './StudentSelector';
 
-export const BookingDialog = ({ slot, onClose }: { slot: any; onClose: () => void }) => {
+// Use absolute paths (adjust as needed) to import the components.
+import { BookingValidation } from '@/features/admin/components/scheduling/BookingValidation';
+import { StudentSelector } from '@/features/admin/components/scheduling/StudentSelector';
+import { BookingForm } from '@/features/admin/components/scheduling/BookingForm';
+import { LessonType } from '@prisma/client';
+
+// Note: We use "onCloseAction" instead of "onClose" to meet serialization requirements.
+interface BookingDialogProps {
+  slot: any; // Replace with your CalendarSlot type if available
+  onCloseAction: () => void;
+}
+
+export const BookingDialog: React.FC<BookingDialogProps> = ({ slot, onCloseAction }) => {
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogTrigger asChild>
-        <Button>Book Lesson</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={true} onOpenChange={onCloseAction}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Book a Lesson</DialogTitle>
-          <DialogDescription>
-            Select a student and verify booking details
-          </DialogDescription>
+          <DialogTitle>Book Lesson</DialogTitle>
+          <DialogDescription>Fill in the booking details below</DialogDescription>
         </DialogHeader>
         <div className="space-y-6">
+          {/* Render student selector */}
           <StudentSelector />
-          <BookingValidation studentId="" timeSlotId="" validations={[
-            { passed: true, message: "Student has available lesson slots" },
-            { passed: true, message: "Time slot is available" },
-            { passed: false, message: "Payment method required" }
-          ]} />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
-            <Button>Confirm Booking</Button>
-          </div>
+          {/* Render booking validations - fix: change prop name */}
+          <BookingValidation
+            slot={slot}
+            studentId=""
+            lessonType={LessonType.PRIVATE}
+            onValidationCompleteAction={(isValid: boolean) => {
+              // Optionally handle validation result.
+            }}
+          />
+          {/* Render booking form */}
+          <BookingForm slot={slot} open={true} onCloseAction={onCloseAction} />
         </div>
       </DialogContent>
     </Dialog>

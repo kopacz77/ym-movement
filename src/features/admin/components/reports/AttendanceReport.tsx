@@ -1,13 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const AttendanceReport = () => {
   return (
@@ -27,7 +20,7 @@ export const AttendanceReport = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* This will be populated with real data */}
+            {/* Populate with real data */}
           </TableBody>
         </Table>
       </CardContent>

@@ -3,10 +3,15 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
+/**
+ * AdminBreadcrumbs renders a breadcrumb navigation for admin pages.
+ * The pathname is defaulted to an empty string if null.
+ */
 export const AdminBreadcrumbs = () => {
-  const pathname = usePathname();
+  // Use a default empty string in case pathname is null.
+  const pathname = usePathname() ?? "";
   const paths = pathname.split('/').filter(Boolean);
-
+  
   return (
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
       <Link href="/admin" className="hover:text-foreground">

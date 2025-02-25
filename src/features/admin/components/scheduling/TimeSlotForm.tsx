@@ -1,4 +1,5 @@
 "use client"
+
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -44,7 +45,8 @@ interface TimeSlotFormProps {
   initialEndTime: Date | null
   initialRinkId?: string
   rinks: Array<{ id: string; name: string }>
-  onSubmit: () => void
+  onSubmitAction?: () => void // Make this optional
+  onSubmit?: () => void // Keep old prop for compatibility
 }
 
 export const TimeSlotForm = ({
@@ -52,34 +54,40 @@ export const TimeSlotForm = ({
   initialEndTime,
   initialRinkId,
   rinks,
-  onSubmit,
+  onSubmitAction,
+  onSubmit, // Added back for compatibility
 }: TimeSlotFormProps) => {
   const { toast } = useToast()
   const utils = api.useUtils()
+  
+  // Use onSubmitAction if available, otherwise fallback to onSubmit
+  const handleFormSubmitComplete = onSubmitAction || onSubmit || (() => {})
 
-  // Add this for cache invalidation
   const form = useForm<TimeSlotFormValues>({
     resolver: zodResolver(timeSlotSchema),
     defaultValues: {
       rinkId: initialRinkId || '',
       startTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : '',
-      duration: initialEndTime && initialStartTime ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60)) : 60,
+      duration: initialEndTime && initialStartTime
+        ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60))
+        : 60,
       maxStudents: 1,
       isRecurring: false,
     },
   })
 
-  const createTimeSlot = api.admin.createTimeSlot.useMutation({
+  // Using the correct namespaced API path
+  const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Time slot created successfully",
       })
-      // Invalidate and refetch the time slots query
-      utils.admin.getTimeSlots.invalidate()
-      onSubmit()
+      // Using correct namespaced API path for invalidation
+      utils.admin.schedule.getTimeSlots.invalidate()
+      handleFormSubmitComplete()
     },
-    onError: (error) => {
+    onError: (error) => { // Removed explicit type annotation to let TypeScript infer it
       toast({
         title: "Error",
         description: error.message,
@@ -96,7 +104,7 @@ export const TimeSlotForm = ({
       startTime,
       endTime,
       maxStudents: values.maxStudents,
-      isRecurring: values.isRecurring,
+      isActive: true,
       ...(values.isRecurring && values.recurringDays && values.recurringUntil
         ? {
             recurringPattern: {
@@ -136,6 +144,7 @@ export const TimeSlotForm = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="startTime"
@@ -149,6 +158,7 @@ export const TimeSlotForm = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="duration"
@@ -164,11 +174,12 @@ export const TimeSlotForm = ({
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
-              <FormDescription> Minimum duration is 15 minutes </FormDescription>
+              <FormDescription>Minimum duration is 15 minutes</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="maxStudents"
@@ -176,20 +187,26 @@ export const TimeSlotForm = ({
             <FormItem>
               <FormLabel>Maximum Students</FormLabel>
               <FormControl>
-                <Input type="number" min={1} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="isRecurring"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base"> Recurring Schedule </FormLabel>
-                <FormDescription> Create a recurring pattern for this time slot </FormDescription>
+                <FormLabel className="text-base">Recurring Schedule</FormLabel>
+                <FormDescription>Create a recurring pattern for this time slot</FormDescription>
               </div>
               <FormControl>
                 <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -197,6 +214,7 @@ export const TimeSlotForm = ({
             </FormItem>
           )}
         />
+
         {form.watch('isRecurring') && (
           <>
             <FormField
@@ -220,7 +238,9 @@ export const TimeSlotForm = ({
                             }
                           }}
                         />
-                        <label htmlFor={`day-${index}`} className="text-sm">{day}</label>
+                        <label htmlFor={`day-${index}`} className="text-sm">
+                          {day}
+                        </label>
                       </div>
                     ))}
                   </div>
@@ -243,12 +263,13 @@ export const TimeSlotForm = ({
             />
           </>
         )}
+
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onSubmit}>
+          <Button type="button" variant="outline" onClick={handleFormSubmitComplete}>
             Cancel
           </Button>
-          <Button type="submit" disabled={createTimeSlot.isLoading}>
-            {createTimeSlot.isLoading ? "Creating..." : "Create Time Slot"}
+          <Button type="submit" disabled={createTimeSlot.isPending}>
+            {createTimeSlot.isPending ? "Creating..." : "Create Time Slot"}
           </Button>
         </div>
       </form>

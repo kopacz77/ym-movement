@@ -175,7 +175,7 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
     }),
-  createBulkTimeSlots: protectedProcedure
+    createBulkTimeSlots: protectedProcedure
     .input(
       z.object({
         rinkId: z.string(),
@@ -192,18 +192,30 @@ export const scheduleRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const slots = [];
+      
+      // Parse dates and reset time components to midnight
       let currentDate = new Date(input.startDate);
-      const endDate = new Date(input.endDate);
+      currentDate.setHours(0, 0, 0, 0);
+      
+      let endDate = new Date(input.endDate);
+      endDate.setHours(0, 0, 0, 0);
+      
+      // Get the day after the end date for comparison
+      const dayAfterEndDate = new Date(endDate);
+      dayAfterEndDate.setDate(dayAfterEndDate.getDate() + 1);
+  
       // Parse the daily start and end times into hours and minutes
       const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(':').map(Number);
       const [dailyEndHour, dailyEndMinute] = input.dailyEndTime.split(':').map(Number);
+  
       // Parse break start time if provided
       let breakStartHour: number | undefined, breakStartMinute: number | undefined;
       if (input.breakStartTime && input.breakDuration) {
         [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
       }
-      // Loop through each day from startDate to endDate
-      while (currentDate <= endDate) {
+  
+      // Loop through each day from startDate up to and including endDate
+      while (currentDate < dayAfterEndDate) {
         // Check if this day's number is in the allowed days (0 = Sunday, 6 = Saturday)
         if (input.daysOfWeek.includes(currentDate.getDay())) {
           // Create period 1: from dailyStartTime to breakStartTime (if break provided) or to dailyEndTime otherwise
@@ -215,6 +227,7 @@ export const scheduleRouter = createTRPCRouter({
           } else {
             period1End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
           }
+  
           // Subdivide period1 into slots
           let slotStart = new Date(period1Start);
           while (slotStart.getTime() + input.slotDuration * 60000 <= period1End.getTime()) {
@@ -228,6 +241,7 @@ export const scheduleRouter = createTRPCRouter({
             });
             slotStart = slotEnd;
           }
+  
           // If break time is provided, create period 2: from break end to dailyEndTime
           if (input.breakStartTime && input.breakDuration) {
             const breakEnd = new Date(currentDate);
@@ -236,6 +250,7 @@ export const scheduleRouter = createTRPCRouter({
             const period2Start = new Date(breakEnd);
             const period2End = new Date(currentDate);
             period2End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
+  
             slotStart = new Date(period2Start);
             while (slotStart.getTime() + input.slotDuration * 60000 <= period2End.getTime()) {
               const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
@@ -250,14 +265,17 @@ export const scheduleRouter = createTRPCRouter({
             }
           }
         }
+        
         // Move to the next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
+  
       if (slots.length > 0) {
         await ctx.prisma.rinkTimeSlot.createMany({
           data: slots,
         });
       }
+      
       return { success: true, count: slots.length };
     }),
   createLesson: protectedProcedure

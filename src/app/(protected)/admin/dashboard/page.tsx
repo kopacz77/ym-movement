@@ -8,36 +8,37 @@ import { PendingApprovals } from '@/features/admin/components/management/Pending
 
 export default function AdminDashboardPage() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
       </div>
-      {/* Overview Cards */}
-      <Suspense fallback={
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="p-6 bg-gray-100 rounded-lg animate-pulse h-32" />
-          ))}
+      
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="md:col-span-8">
+          <Suspense fallback={<LoadingSkeleton />}>
+            <OverviewCards />
+          </Suspense>
         </div>
-      }>
-        <OverviewCards />
-      </Suspense>
-      
-      {/* Charts Section */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Suspense fallback={<div className="h-[400px] bg-gray-100 rounded-lg animate-pulse" />}>
-          <RevenueChart />
-        </Suspense>
-        <Suspense fallback={<div className="h-[400px] bg-gray-100 rounded-lg animate-pulse" />}>
-          <StudentActivityChart />
-        </Suspense>
+        
+        <div className="md:col-span-4">
+          <Suspense fallback={<LoadingSkeleton />}>
+            <PendingApprovals />
+          </Suspense>
+        </div>
       </div>
       
-      {/* Pending Approvals Section */}
-      <div className="mt-6">
-        <Suspense fallback={<div className="h-[300px] bg-gray-100 rounded-lg animate-pulse" />}>
-          <PendingApprovals />
-        </Suspense>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="md:col-span-8">
+          <Suspense fallback={<LoadingSkeleton />}>
+            <RevenueChart />
+          </Suspense>
+        </div>
+        
+        <div className="md:col-span-4">
+          <Suspense fallback={<LoadingSkeleton />}>
+            <StudentActivityChart />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

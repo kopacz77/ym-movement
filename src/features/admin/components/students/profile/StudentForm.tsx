@@ -1,40 +1,30 @@
 "use client";
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { Textarea } from '@/components/ui/textarea';
-import { StudentFormData } from '../types';
+import { Level } from '@prisma/client';
 
+// Updated schema to match the expected API types
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   phone: z.string().optional(),
-  level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'COMPETITION']),
-  weeklyHours: z.coerce.number().min(1, 'Minimum 1 hour per week'),
-  maxWeeklyHours: z.coerce.number().min(1, 'Minimum 1 hour per week'),
-  emergencyContact: z.string().optional(),
-  emergencyPhone: z.string().optional(),
+  level: z.nativeEnum(Level),
+  maxLessonsPerWeek: z.coerce.number().min(1, 'Minimum 1 hour per week'),
+  emergencyContact: z.object({
+    name: z.string(),
+    phone: z.string(),
+    relationship: z.string(),
+  }).optional(),
   notes: z.string().optional(),
   dateOfBirth: z.string().optional(),
 });
@@ -42,42 +32,75 @@ const studentSchema = z.object({
 type StudentFormValues = z.infer<typeof studentSchema>;
 
 interface StudentFormProps {
-  student?: any; // The student object for editing
-  onSubmit: () => void;
+  student?: any;
+  onSubmitAction?: () => void;
 }
 
-export const StudentForm = ({ student, onSubmit }: StudentFormProps) => {
+export const StudentForm = ({
+  student,
+  onSubmitAction = () => {},
+}: StudentFormProps) => {
   const { toast } = useToast();
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
-    defaultValues: student || { weeklyHours: 1, maxWeeklyHours: 2, level: 'BEGINNER' },
+    defaultValues: {
+      ...student,
+      maxLessonsPerWeek: student?.maxLessonsPerWeek || 1,
+      level: student?.level || 'PRE_PRELIMINARY' as Level,
+      // Ensure emergency contact is properly structured
+      emergencyContact: student?.emergencyContact ? {
+        name: student.emergencyContact.name || '',
+        phone: student.emergencyContact.phone || '',
+        relationship: student.emergencyContact.relationship || '',
+      } : undefined,
+    },
   });
 
-  const mutation = student
-    ? api.admin.updateStudent.useMutation({
-        onSuccess: () => {
-          toast({ title: "Success", description: "Student updated successfully" });
-          onSubmit();
-        },
-        onError: (err) => {
-          toast({ title: "Error", description: err.message, variant: "destructive" });
-        },
-      })
-    : api.admin.createStudent.useMutation({
-        onSuccess: () => {
-          toast({ title: "Success", description: "Student created successfully" });
-          onSubmit();
-        },
-        onError: (err) => {
-          toast({ title: "Error", description: err.message, variant: "destructive" });
-        },
+  const updateStudent = api.admin.student.updateStudent.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Student updated successfully"
       });
+      onSubmitAction();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    },
+  });
+
+  const createStudent = api.admin.student.createStudent.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Student created successfully"
+      });
+      onSubmitAction();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    },
+  });
 
   const handleSubmit = (values: StudentFormValues) => {
     if (student) {
-      mutation.mutate({ id: student.id, ...values });
+      updateStudent.mutate({
+        ...values,
+        id: student.id,
+      });
     } else {
-      mutation.mutate(values);
+      createStudent.mutate({
+        ...values,
+        sendEmail: true,
+      });
     }
   };
 
@@ -152,10 +175,11 @@ export const StudentForm = ({ student, onSubmit }: StudentFormProps) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="BEGINNER">Beginner</SelectItem>
-                    <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
-                    <SelectItem value="ADVANCED">Advanced</SelectItem>
-                    <SelectItem value="COMPETITION">Competition</SelectItem>
+                    {Object.values(Level).map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {level.replace('_', ' ')}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -164,60 +188,62 @@ export const StudentForm = ({ student, onSubmit }: StudentFormProps) => {
           />
           <FormField
             control={form.control}
-            name="weeklyHours"
+            name="maxLessonsPerWeek"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Weekly Hours</FormLabel>
                 <FormControl>
-                  <Input type="number" min={1} {...field} />
+                  <Input type="number" min={1} {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
                 </FormControl>
                 <FormDescription>Current allocated hours per week</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="maxWeeklyHours"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Maximum Weekly Hours</FormLabel>
-                <FormControl>
-                  <Input type="number" min={1} {...field} />
-                </FormControl>
-                <FormDescription>Maximum allowed hours per week</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="emergencyContact"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Emergency Contact</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="emergencyPhone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Emergency Phone</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Emergency Contact</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="emergencyContact.name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="emergencyContact.phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Phone</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="emergencyContact.relationship"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Relationship</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         <FormField
           control={form.control}
@@ -233,11 +259,16 @@ export const StudentForm = ({ student, onSubmit }: StudentFormProps) => {
           )}
         />
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onSubmit}>
+          <Button type="button" variant="outline" onClick={onSubmitAction}>
             Cancel
           </Button>
-          <Button type="submit" disabled={mutation.isLoading}>
-            {mutation.isLoading ? "Saving..." : (student ? "Update" : "Create")}
+          <Button 
+            type="submit" 
+            disabled={updateStudent.isPending || createStudent.isPending}
+          >
+            {updateStudent.isPending || createStudent.isPending 
+              ? "Saving..." 
+              : (student ? "Update" : "Create")}
           </Button>
         </div>
       </form>

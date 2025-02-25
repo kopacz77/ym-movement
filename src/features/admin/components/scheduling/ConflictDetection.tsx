@@ -1,3 +1,4 @@
+// src/features/admin/components/scheduling/ConflictDetection.tsx
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,8 @@ export const ConflictDetection = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <Alert variant="warning">
+          {/* Changed from variant="warning" to variant="destructive" */}
+          <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Time Slot Overlap Detected</AlertTitle>
             <AlertDescription className="space-y-2">

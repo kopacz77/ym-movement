@@ -15,7 +15,8 @@ export const ScheduleExceptions = () => {
         <div className="space-y-6">
           <div>
             <Label>Exception Date</Label>
-            <Calendar mode="single" />
+            {/* Changed mode="single" to initialView="dayGridMonth" */}
+            <Calendar initialView="dayGridMonth" />
           </div>
           <div>
             <Label>Exception Type</Label>

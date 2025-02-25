@@ -6,6 +6,9 @@ interface PageHeaderProps {
   children?: React.ReactNode;
 }
 
+/**
+ * PageHeader combines the breadcrumb navigation with the page title and optional description.
+ */
 export const PageHeader = ({ title, description, children }: PageHeaderProps) => {
   return (
     <div className="flex flex-col gap-4 pb-6">

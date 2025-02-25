@@ -1,0 +1,66 @@
+// src/components/ui/draggable.tsx
+"use client";
+
+import React, { ReactNode, useState } from 'react';
+import { cn } from "@/lib/utils";
+
+interface DraggableProps {
+  children: ReactNode;
+  className?: string;
+  isDraggable?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  dragData?: any;
+}
+
+export const Draggable = ({
+  children,
+  className,
+  isDraggable = true,
+  onDragStart,
+  onDragEnd,
+  dragData
+}: DraggableProps) => {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    if (!isDraggable) return;
+    
+    setIsDragging(true);
+    
+    // Set the drag image and data
+    if (dragData) {
+      e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+    }
+    
+    // Allow custom drag start handler
+    if (onDragStart) {
+      onDragStart(e);
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setIsDragging(false);
+    
+    // Allow custom drag end handler
+    if (onDragEnd) {
+      onDragEnd(e);
+    }
+  };
+
+  return (
+    <div
+      draggable={isDraggable}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      className={cn(
+        "cursor-grab active:cursor-grabbing",
+        isDragging && "opacity-50",
+        !isDraggable && "cursor-default",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+};

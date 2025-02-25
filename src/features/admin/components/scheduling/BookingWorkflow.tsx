@@ -1,10 +1,8 @@
 import React from 'react';
-import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
 import { Card } from '@/components/ui/card';
 import { BookingDialog } from './BookingDialog';
-
-const localizer = momentLocalizer(moment);
+import { Calendar } from '@/components/ui/calendar';
+import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 
 interface CalendarEvent {
   id: string;
@@ -19,34 +17,39 @@ export const CalendarInteractions = () => {
   const [selectedSlot, setSelectedSlot] = React.useState<any>(null);
   const [showBookingDialog, setShowBookingDialog] = React.useState(false);
 
-  const handleSelectSlot = (slotInfo: any) => {
+  const handleSelectSlot = (slotInfo: DateSelectArg) => {
     setSelectedSlot(slotInfo);
     setShowBookingDialog(true);
   };
 
-  const handleEventClick = (event: CalendarEvent) => {
+  const handleEventClick = (event: EventClickArg) => {
     // Handle existing event click
   };
 
-  const handleDragEvent = (event: CalendarEvent, start: Date, end: Date) => {
+  const handleDragEvent = (dropInfo: any) => {
     // Handle event drag and drop
   };
 
   return (
     <Card className="p-4">
       <Calendar
-        localizer={localizer}
+        initialView="timeGridWeek"
         events={[]}
-        views={['month', 'week', 'day']}
-        selectable
-        resizable
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleEventClick}
+        selectable={true}
+        onDateSelect={handleSelectSlot}
+        onEventClick={handleEventClick}
         onEventDrop={handleDragEvent}
-        className="h-[600px]"
+        businessHours={{
+          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+          startTime: "05:00",
+          endTime: "18:00",
+        }}
       />
       {showBookingDialog && (
-        <BookingDialog slot={selectedSlot} onClose={() => setShowBookingDialog(false)} />
+        <BookingDialog 
+          slot={selectedSlot} 
+          onCloseAction={() => setShowBookingDialog(false)} 
+        />
       )}
     </Card>
   );

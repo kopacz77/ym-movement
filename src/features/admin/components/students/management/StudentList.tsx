@@ -1,5 +1,6 @@
 // features/admin/components/students/management/StudentList.tsx
 "use client";
+
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -13,21 +14,26 @@ import { useToast } from '@/components/ui/use-toast';
 import { Student } from '../types';
 
 interface StudentListProps {
-  onEdit: (studentId: string) => void;
-  onViewProfile: (studentId: string) => void;
+  onEditAction: (studentId: string) => void;
+  onViewProfileAction: (studentId: string) => void;
 }
 
-export const StudentList: React.FC<StudentListProps> = ({ onEdit, onViewProfile }) => {
+export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewProfileAction }) => {
   const [search, setSearch] = React.useState('');
   const { toast } = useToast();
-  const { data: studentsData, isLoading } = api.admin.getStudents.useQuery(
-    { search },
-    {
-      onError: (err) => {
-        toast({ title: "Error loading students", description: err.message, variant: "destructive" });
-      },
+  
+  // Use the student namespace for this API call
+  const { data: studentsData, isLoading, error } = api.admin.student.getStudents.useQuery({ search });
+
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading students",
+        description: error.message,
+        variant: "destructive"
+      });
     }
-  );
+  }, [error, toast]);
 
   const students = studentsData?.students || [];
 
@@ -50,7 +56,12 @@ export const StudentList: React.FC<StudentListProps> = ({ onEdit, onViewProfile 
       <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search students..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Search students..."
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
       <div className="rounded-md border">
@@ -75,40 +86,47 @@ export const StudentList: React.FC<StudentListProps> = ({ onEdit, onViewProfile 
                 <TableCell colSpan={6} className="text-center">No students found</TableCell>
               </TableRow>
             ) : (
-              students.map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell className="font-medium">{student.user.name}</TableCell>
-                  <TableCell>{student.user.email}</TableCell>
-                  <TableCell>
-                    <Badge className={getLevelColor(student.level)}>
-                      {student.level.replace('_', ' ')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={student.active ? 'default' : 'secondary'}>
-                      {student.active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{student.totalLessons || 0} lessons</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onViewProfile(student.id)}>
-                          View Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(student.id)}>
-                          Edit
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+              students.map((student) => {
+                // Determine active state, defaulting to true if not available
+                const isActive = (student as any).active !== undefined 
+                  ? (student as any).active 
+                  : true;
+                
+                return (
+                  <TableRow key={student.id}>
+                    <TableCell className="font-medium">{student.user.name}</TableCell>
+                    <TableCell>{student.user.email}</TableCell>
+                    <TableCell>
+                      <Badge className={getLevelColor(student.level)}>
+                        {student.level.replace('_', ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={isActive ? 'default' : 'secondary'}>
+                        {isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{student.lessons?.length || 0} lessons</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onViewProfileAction(student.id)}>
+                            View Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onEditAction(student.id)}>
+                            Edit
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
