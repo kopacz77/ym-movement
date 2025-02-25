@@ -76,7 +76,14 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
   const form = useForm<BulkTimeSlotFormValues>({
     resolver: zodResolver(bulkTimeSlotSchema),
     defaultValues: {
+      rinkId: '',
+      startDate: '',
+      endDate: '',
+      dailyStartTime: '',
+      dailyEndTime: '',
       slotDuration: 30,
+      breakStartTime: '',
+      breakDuration: 0,
       maxStudents: 1,
       daysOfWeek: [],
     },

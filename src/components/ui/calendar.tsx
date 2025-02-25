@@ -5,7 +5,6 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import resourceTimelinePlugin from '@fullcalendar/resource-timeline'
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core'
 
 interface CalendarProps {
@@ -45,7 +44,7 @@ export function Calendar({
     <div className="bg-white border rounded-lg shadow-sm">
       <div className="h-[calc(100vh-12rem)] w-full">
         <FullCalendar
-          plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin, resourceTimelinePlugin]}
+          plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
           initialView={initialView}
           headerToolbar={{
             left: 'prev,next today',

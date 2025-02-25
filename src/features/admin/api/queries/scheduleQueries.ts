@@ -179,58 +179,90 @@ export const scheduleRouter = createTRPCRouter({
     .input(
       z.object({
         rinkId: z.string(),
-        startDate: z.string(), // or z.date() if you want to pass Date objects
+        startDate: z.string(),
         endDate: z.string(),
-        dailyStartTime: z.string(), // e.g., "08:00"
-        dailyEndTime: z.string(), // e.g., "21:00"
+        dailyStartTime: z.string(),
+        dailyEndTime: z.string(),
         slotDuration: z.number().min(15),
-        breakStartTime: z.string().optional(), // e.g., "12:00"
-        breakDuration: z.number().optional(), // in minutes
+        breakStartTime: z.string().optional(),
+        breakDuration: z.number().optional(),
         maxStudents: z.number().min(1),
-        daysOfWeek: z.array(z.number()).min(1), // e.g., [0, 1, 2, 3, 4, 5] for Sunday to Friday
+        daysOfWeek: z.array(z.number()).min(1),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const slots = [];
       
-      // Parse dates and reset time components to midnight
-      let currentDate = new Date(input.startDate);
-      currentDate.setHours(0, 0, 0, 0);
+      // Parse dates manually to avoid timezone issues
+      const startParts = input.startDate.split('-').map(Number);
+      const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
       
-      let endDate = new Date(input.endDate);
-      endDate.setHours(0, 0, 0, 0);
+      const endParts = input.endDate.split('-').map(Number);
+      const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
       
-      // Get the day after the end date for comparison
-      const dayAfterEndDate = new Date(endDate);
-      dayAfterEndDate.setDate(dayAfterEndDate.getDate() + 1);
-  
-      // Parse the daily start and end times into hours and minutes
+      // Gather all dates in range that match selected days of week
+      const dates = [];
+      const currentDate = new Date(startDate);
+      
+      // Loop through each day from start to end (inclusive)
+      while (currentDate <= endDate) {
+        // Check if this day of week is selected
+        if (input.daysOfWeek.includes(currentDate.getDay())) {
+          // Clone the date to avoid reference issues
+          dates.push(new Date(currentDate));
+        }
+        
+        // Move to next day
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      
+      // Parse time components
       const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(':').map(Number);
       const [dailyEndHour, dailyEndMinute] = input.dailyEndTime.split(':').map(Number);
-  
-      // Parse break start time if provided
-      let breakStartHour: number | undefined, breakStartMinute: number | undefined;
-      if (input.breakStartTime && input.breakDuration) {
-        [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
-      }
-  
-      // Loop through each day from startDate up to and including endDate
-      while (currentDate < dayAfterEndDate) {
-        // Check if this day's number is in the allowed days (0 = Sunday, 6 = Saturday)
-        if (input.daysOfWeek.includes(currentDate.getDay())) {
-          // Create period 1: from dailyStartTime to breakStartTime (if break provided) or to dailyEndTime otherwise
-          const period1Start = new Date(currentDate);
-          period1Start.setHours(dailyStartHour, dailyStartMinute, 0, 0);
-          const period1End = new Date(currentDate);
-          if (input.breakStartTime && input.breakDuration) {
-            period1End.setHours(breakStartHour!, breakStartMinute!, 0, 0);
-          } else {
-            period1End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
-          }
-  
-          // Subdivide period1 into slots
-          let slotStart = new Date(period1Start);
-          while (slotStart.getTime() + input.slotDuration * 60000 <= period1End.getTime()) {
+      
+      // Process each selected date
+      for (const date of dates) {
+        // Create period 1: from dailyStartTime to breakStartTime (if break provided) or to dailyEndTime
+        const period1Start = new Date(date);
+        period1Start.setHours(dailyStartHour, dailyStartMinute, 0, 0);
+        
+        const period1End = new Date(date);
+        
+        if (input.breakStartTime && input.breakDuration) {
+          const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
+          period1End.setHours(breakStartHour, breakStartMinute, 0, 0);
+        } else {
+          period1End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
+        }
+        
+        // Subdivide period1 into slots
+        let slotStart = new Date(period1Start);
+        while (slotStart.getTime() + input.slotDuration * 60000 <= period1End.getTime()) {
+          const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
+          slots.push({
+            rinkId: input.rinkId,
+            startTime: new Date(slotStart),
+            endTime: new Date(slotEnd),
+            maxStudents: input.maxStudents,
+            isActive: true,
+          });
+          slotStart = new Date(slotEnd);
+        }
+        
+        // If break time is provided, create period 2: from break end to dailyEndTime
+        if (input.breakStartTime && input.breakDuration) {
+          const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
+          
+          const breakEnd = new Date(date);
+          // Add the break duration to the break start time
+          breakEnd.setHours(breakStartHour, breakStartMinute + input.breakDuration, 0, 0);
+          
+          const period2Start = new Date(breakEnd);
+          const period2End = new Date(date);
+          period2End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
+          
+          slotStart = new Date(period2Start);
+          while (slotStart.getTime() + input.slotDuration * 60000 <= period2End.getTime()) {
             const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
             slots.push({
               rinkId: input.rinkId,
@@ -239,35 +271,9 @@ export const scheduleRouter = createTRPCRouter({
               maxStudents: input.maxStudents,
               isActive: true,
             });
-            slotStart = slotEnd;
-          }
-  
-          // If break time is provided, create period 2: from break end to dailyEndTime
-          if (input.breakStartTime && input.breakDuration) {
-            const breakEnd = new Date(currentDate);
-            // Add the break duration to the break start time
-            breakEnd.setHours(breakStartHour!, breakStartMinute! + input.breakDuration, 0, 0);
-            const period2Start = new Date(breakEnd);
-            const period2End = new Date(currentDate);
-            period2End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
-  
-            slotStart = new Date(period2Start);
-            while (slotStart.getTime() + input.slotDuration * 60000 <= period2End.getTime()) {
-              const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
-              slots.push({
-                rinkId: input.rinkId,
-                startTime: new Date(slotStart),
-                endTime: new Date(slotEnd),
-                maxStudents: input.maxStudents,
-                isActive: true,
-              });
-              slotStart = slotEnd;
-            }
+            slotStart = new Date(slotEnd);
           }
         }
-        
-        // Move to the next day
-        currentDate.setDate(currentDate.getDate() + 1);
       }
   
       if (slots.length > 0) {
@@ -275,9 +281,10 @@ export const scheduleRouter = createTRPCRouter({
           data: slots,
         });
       }
-      
+  
       return { success: true, count: slots.length };
     }),
+
   createLesson: protectedProcedure
     .input(
       z.object({
