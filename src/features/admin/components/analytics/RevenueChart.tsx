@@ -1,11 +1,8 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency } from '@/lib/utils';
@@ -15,7 +12,7 @@ type TimeRange = 'week' | 'month' | 'year';
 
 interface PaymentData {
   amount: number;
-  createdAt: Date;
+  createdAt: string | Date; // Accept both string and Date types
 }
 
 interface ChartData {
@@ -26,7 +23,7 @@ interface ChartData {
 export const RevenueChart = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
   const { toast } = useToast();
-  
+
   // UPDATED: Use the "analytics" namespace for revenue procedures.
   const { data, isLoading, error } = api.admin.analytics.getRevenueReport.useQuery(
     { period: timeRange },
@@ -47,8 +44,25 @@ export const RevenueChart = () => {
     if (!data) return [];
     
     const groupedData = (data as PaymentData[]).reduce((acc: Record<string, number>, payment) => {
-      const date = new Date(payment.createdAt).toISOString().split('T')[0];
-      acc[date] = (acc[date] || 0) + payment.amount;
+      // Safely handle the date conversion
+      let dateObj: Date;
+      
+      if (payment.createdAt instanceof Date) {
+        dateObj = payment.createdAt;
+      } else if (typeof payment.createdAt === 'string') {
+        dateObj = new Date(payment.createdAt);
+      } else {
+        // Fallback to current date if createdAt is invalid
+        console.warn('Invalid createdAt value:', payment.createdAt);
+        dateObj = new Date();
+      }
+      
+      // Make sure the date is valid before using toISOString
+      if (!isNaN(dateObj.getTime())) {
+        const date = dateObj.toISOString().split('T')[0];
+        acc[date] = (acc[date] || 0) + payment.amount;
+      }
+      
       return acc;
     }, {});
 
@@ -102,10 +116,7 @@ export const RevenueChart = () => {
             <div>Average: {formatCurrency(averageRevenue)}/day</div>
           </div>
         </div>
-        <Select
-          value={timeRange}
-          onValueChange={(value: TimeRange) => setTimeRange(value)}
-        >
+        <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
@@ -118,10 +129,7 @@ export const RevenueChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
+          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
@@ -133,7 +141,10 @@ export const RevenueChart = () => {
                 })
               }
             />
-            <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
+            <YAxis
+              tick={{ fontSize: 12 }}
+              tickFormatter={(value) => `$${value}`}
+            />
             <Tooltip
               formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
               labelFormatter={(label) =>

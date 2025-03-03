@@ -1,5 +1,6 @@
 // src/app/(protected)/admin/students/page.tsx
 "use client";
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StudentList } from '@/features/admin/components/students/management/StudentList';
@@ -40,12 +41,18 @@ export default function AdminStudentsPage() {
         </TabsList>
         
         <TabsContent value="list">
-          <StudentList onEdit={handleEdit} onViewProfile={handleViewProfile} />
+          <StudentList 
+            onEditAction={handleEdit} 
+            onViewProfileAction={handleViewProfile} 
+          />
         </TabsContent>
         
         <TabsContent value="profile">
           {selectedStudentId && (
-            <StudentProfile studentId={selectedStudentId} onEdit={() => handleEdit(selectedStudentId)} />
+            <StudentProfile 
+              studentId={selectedStudentId}
+              onEditAction={() => handleEdit(selectedStudentId)}
+            />
           )}
         </TabsContent>
       </Tabs>
@@ -56,7 +63,10 @@ export default function AdminStudentsPage() {
             <DialogTitle>Edit Student</DialogTitle>
           </DialogHeader>
           {selectedStudentId && (
-            <StudentForm studentId={selectedStudentId} onSubmit={() => setIsEditDialogOpen(false)} />
+            <StudentForm 
+              student={{ id: selectedStudentId }}
+              onSubmitAction={() => setIsEditDialogOpen(false)} 
+            />
           )}
         </DialogContent>
       </Dialog>

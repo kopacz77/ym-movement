@@ -1,29 +1,137 @@
+// src/features/admin/components/reports/AttendanceReport.tsx
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Card, CardContent } from '@/components/ui/card';
+import { api } from '@/lib/api';
 
-export const AttendanceReport = () => {
+interface AttendanceReportProps {
+  period: 'week' | 'month' | 'year';
+}
+
+// Define types for the API response data
+interface ActivityDataItem {
+  date: string;
+  attendanceRate: number;
+  totalLessons: number;
+  completedLessons: number;
+  cancelledLessons: number;
+}
+
+export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) => {
+  // Fetch student activity data using your analytics endpoint
+  const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery({ 
+    period 
+  });
+
+  // Calculate averages with very explicit type handling
+  const averageAttendance = React.useMemo(() => {
+    if (!data || !Array.isArray(data) || data.length === 0) return 0;
+    
+    const totalAttendance = data.reduce((sum: number, item: any) => {
+      const rate = typeof item.attendanceRate === 'number' ? item.attendanceRate : 0;
+      return sum + rate;
+    }, 0);
+    
+    return totalAttendance / data.length;
+  }, [data]);
+
+  const totalLessons = React.useMemo(() => {
+    if (!data || !Array.isArray(data)) return 0;
+    
+    return data.reduce((sum: number, item: any) => {
+      const lessons = typeof item.totalLessons === 'number' ? item.totalLessons : 0;
+      return sum + lessons;
+    }, 0);
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[400px] flex items-center justify-center">
+        <p>Loading attendance data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-[400px] flex items-center justify-center">
+        <p className="text-red-500">Error loading attendance data</p>
+      </div>
+    );
+  }
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className="w-full h-[400px] flex items-center justify-center">
+        <p>No attendance data available for the selected period</p>
+      </div>
+    );
+  }
+
+  // Use the data safely now that we've validated it
+  const safeData = data as ActivityDataItem[];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Attendance Report</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Student</TableHead>
-              <TableHead>Total Lessons</TableHead>
-              <TableHead>Attended</TableHead>
-              <TableHead>Missed</TableHead>
-              <TableHead>Attendance Rate</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* Populate with real data */}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <div className="w-full h-[400px]">
+      <ResponsiveContainer width="100%" height="80%">
+        <LineChart data={safeData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="date" 
+            tickFormatter={(date) => {
+              return new Date(date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+              });
+            }} 
+          />
+          <YAxis tickFormatter={(value) => `${value}%`} />
+          <Tooltip 
+            formatter={(value, name) => [
+              `${Number(value).toFixed(1)}%`, 
+              name === 'completedLessons' ? 'Completed' : 
+              name === 'attendanceRate' ? 'Attendance Rate' :
+              name === 'cancelledLessons' ? 'Cancelled' : name
+            ]} 
+            labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          />
+          <Legend />
+          <Line 
+            type="monotone" 
+            dataKey="attendanceRate" 
+            name="Attendance Rate" 
+            stroke="#8884d8" 
+            strokeWidth={2}
+            activeDot={{ r: 8 }} 
+          />
+          <Line 
+            type="monotone" 
+            dataKey="cancelledLessons" 
+            name="Cancellations" 
+            stroke="#ff8042" 
+            strokeWidth={2}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm font-medium text-muted-foreground">Average Attendance Rate</div>
+            <div className="text-2xl font-bold">{averageAttendance.toFixed(1)}%</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm font-medium text-muted-foreground">Total Lessons</div>
+            <div className="text-2xl font-bold">{totalLessons}</div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

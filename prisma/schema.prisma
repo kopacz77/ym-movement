@@ -21,19 +21,22 @@ model User {
 }
 
 model Student {
-  id               String    @id @default(cuid())
-  userId           String    @unique
+  id               String         @id @default(cuid())
+  userId           String         @unique
   phone            String?
-  maxLessonsPerWeek Int       @default(3)
+  maxLessonsPerWeek Int           @default(3)
   notes            String?
-  level            Level     @default(PRELIMINARY)
+  level            Level          @default(PRELIMINARY)
   emergencyContact Json?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  isApproved       Boolean        @default(false)
+  approvedAt       DateTime?
+  approvedById     String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   lessons          Lesson[]
   payments         Payment[]
   studentNotes     StudentNote[]
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model StudentNote {
@@ -131,6 +134,14 @@ model RinkTimeSlot {
   @@index([rinkId])
   @@index([startTime])
   @@index([recurringId])
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RecurringPattern {

@@ -1,6 +1,7 @@
+// src/features/admin/components/students/profile/StudentForm.tsx
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +14,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { Level } from '@prisma/client';
 
-// Updated schema to match the expected API types
+// Updated schema to match the expected API types - making emergencyContact properties optional
 const studentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
@@ -21,9 +22,9 @@ const studentSchema = z.object({
   level: z.nativeEnum(Level),
   maxLessonsPerWeek: z.coerce.number().min(1, 'Minimum 1 hour per week'),
   emergencyContact: z.object({
-    name: z.string(),
-    phone: z.string(),
-    relationship: z.string(),
+    name: z.string().optional().default(""),
+    phone: z.string().optional().default(""),
+    relationship: z.string().optional().default(""),
   }).optional(),
   notes: z.string().optional(),
   dateOfBirth: z.string().optional(),
@@ -36,25 +37,61 @@ interface StudentFormProps {
   onSubmitAction?: () => void;
 }
 
-export const StudentForm = ({
+export const StudentForm: React.FC<StudentFormProps> = ({
   student,
   onSubmitAction = () => {},
-}: StudentFormProps) => {
+}) => {
   const { toast } = useToast();
+  const [formInitialized, setFormInitialized] = React.useState(false);
+
+  // Load student data by ID if needed
+  const { data: studentData, isLoading } = api.admin.student.getStudent.useQuery(
+    { studentId: student?.id || "" },
+    { enabled: !!student?.id && !student?.level }
+  );
+
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: {
-      ...student,
-      maxLessonsPerWeek: student?.maxLessonsPerWeek || 1,
-      level: student?.level || 'PRE_PRELIMINARY' as Level,
-      // Ensure emergency contact is properly structured
-      emergencyContact: student?.emergencyContact ? {
-        name: student.emergencyContact.name || '',
-        phone: student.emergencyContact.phone || '',
-        relationship: student.emergencyContact.relationship || '',
-      } : undefined,
+      name: "",
+      email: "",
+      phone: "",
+      maxLessonsPerWeek: 1,
+      level: 'PRE_PRELIMINARY' as Level,
+      emergencyContact: {
+        name: "",
+        phone: "",
+        relationship: "",
+      },
+      notes: "",
+      dateOfBirth: "",
     },
   });
+
+  // Update form values when data is loaded
+  useEffect(() => {
+    if ((student || studentData) && !formInitialized) {
+      const data = studentData || student;
+      
+      const values = {
+        name: data?.user?.name || "",
+        email: data?.user?.email || "",
+        phone: data?.phone || "",
+        maxLessonsPerWeek: data?.maxLessonsPerWeek || 1,
+        level: data?.level || 'PRE_PRELIMINARY' as Level,
+        emergencyContact: data?.emergencyContact ? {
+          name: data.emergencyContact.name || "",
+          phone: data.emergencyContact.phone || "",
+          relationship: data.emergencyContact.relationship || "",
+        } : undefined,
+        notes: data?.notes || "",
+        dateOfBirth: data?.dateOfBirth || "",
+      };
+      
+      form.reset(values);
+      setFormInitialized(true);
+    }
+  }, [student, studentData, form, formInitialized]);
 
   const updateStudent = api.admin.student.updateStudent.useMutation({
     onSuccess: () => {
@@ -91,184 +128,159 @@ export const StudentForm = ({
   });
 
   const handleSubmit = (values: StudentFormValues) => {
-    if (student) {
+    // Ensure emergencyContact is properly formatted with non-optional fields
+    const formattedValues = {
+      ...values,
+      emergencyContact: values.emergencyContact ? {
+        name: values.emergencyContact.name || "",
+        phone: values.emergencyContact.phone || "",
+        relationship: values.emergencyContact.relationship || "",
+      } : undefined
+    };
+
+    if (student?.id) {
       updateStudent.mutate({
-        ...values,
+        ...formattedValues,
         id: student.id,
       });
     } else {
       createStudent.mutate({
-        ...values,
+        ...formattedValues,
         sendEmail: true,
       });
     }
   };
 
+  if (isLoading) {
+    return <div>Loading student data...</div>;
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="dateOfBirth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date of Birth</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormField control={form.control} name="name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="phone" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Birth</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Skill Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(Level).map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level.replace('_', ' ')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="maxLessonsPerWeek"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weekly Hours</FormLabel>
+          <FormField control={form.control} name="level" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Skill Level</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
                 <FormControl>
-                  <Input type="number" min={1} {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormDescription>Current allocated hours per week</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {Object.values(Level).map((level) => (
+                    <SelectItem key={level} value={level}>
+                      {level.replace('_', ' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="maxLessonsPerWeek" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Weekly Hours</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min={1} 
+                  {...field} 
+                  value={field.value || 1}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)} 
+                />
+              </FormControl>
+              <FormDescription>Current allocated hours per week</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )} />
         </div>
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Emergency Contact</h3>
           <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="emergencyContact.name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="emergencyContact.phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact Phone</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="emergencyContact.relationship"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Relationship</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormField control={form.control} name="emergencyContact.name" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact Name</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="emergencyContact.phone" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact Phone</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="emergencyContact.relationship" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Relationship</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
           </div>
         </div>
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="Any additional notes about the student..." />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Notes</FormLabel>
+            <FormControl>
+              <Textarea {...field} value={field.value || ""} placeholder="Any additional notes about the student..." />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
         <div className="flex justify-end gap-4">
           <Button type="button" variant="outline" onClick={onSubmitAction}>
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            disabled={updateStudent.isPending || createStudent.isPending}
-          >
-            {updateStudent.isPending || createStudent.isPending 
-              ? "Saving..." 
-              : (student ? "Update" : "Create")}
+          <Button type="submit" disabled={updateStudent.isPending || createStudent.isPending}>
+            {updateStudent.isPending || createStudent.isPending ? "Saving..." : (student?.id ? "Update" : "Create")}
           </Button>
         </div>
       </form>

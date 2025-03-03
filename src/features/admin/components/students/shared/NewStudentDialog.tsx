@@ -1,11 +1,9 @@
-// features/admin/components/students/shared/NewStudentDialog.tsx
+// src/features/admin/components/students/shared/NewStudentDialog.tsx
 "use client";
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +12,9 @@ import { Level } from '@prisma/client';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const newStudentSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -27,25 +28,55 @@ const newStudentSchema = z.object({
 type NewStudentFormData = z.infer<typeof newStudentSchema>;
 
 export const NewStudentDialog = () => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const utils = api.useUtils();
+
   const form = useForm<NewStudentFormData>({
     resolver: zodResolver(newStudentSchema),
-    defaultValues: { maxLessonsPerWeek: 1, sendEmail: true, level: Level.PRE_PRELIMINARY }
-  });
-  const createStudent = api.admin.createStudent.useMutation({
-    onSuccess: (data) => {
-      toast({ title: "Success", description: "Student created successfully. Confirmation email sent." });
-      setOpen(false);
-      form.reset();
-    },
-    onError: (error) => {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    defaultValues: {
+      maxLessonsPerWeek: 1,
+      sendEmail: true,
+      level: Level.PRE_PRELIMINARY,
+      name: "",
+      email: "",
+      phone: ""
     }
   });
+
+  // Fix: Use the correct path to the createStudent procedure
+  const createStudent = api.admin.student.createStudent.useMutation({
+    onSuccess: (data) => {
+      toast({
+        title: "Success",
+        description: "Student created successfully."
+      });
+      setOpen(false);
+      form.reset({
+        maxLessonsPerWeek: 1,
+        sendEmail: true,
+        level: Level.PRE_PRELIMINARY,
+        name: "",
+        email: "",
+        phone: ""
+      });
+      // Invalidate any queries that should be refreshed
+      utils.admin.student.getStudents.invalidate();
+      utils.admin.student.getPendingApprovals.invalidate();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   const onSubmit = (data: NewStudentFormData) => {
     createStudent.mutate(data);
   };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -66,7 +97,7 @@ export const NewStudentDialog = () => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Student name" {...field} />
+                  <Input placeholder="Student name" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -75,7 +106,7 @@ export const NewStudentDialog = () => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="student@example.com" {...field} />
+                  <Input type="email" placeholder="student@example.com" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -83,7 +114,7 @@ export const NewStudentDialog = () => {
             <FormField control={form.control} name="level" render={({ field }) => (
               <FormItem>
                 <FormLabel>Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select level" />
@@ -104,7 +135,7 @@ export const NewStudentDialog = () => {
               <FormItem>
                 <FormLabel>Phone (optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Phone number" {...field} />
+                  <Input placeholder="Phone number" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,15 +144,36 @@ export const NewStudentDialog = () => {
               <FormItem>
                 <FormLabel>Max Lessons per Week</FormLabel>
                 <FormControl>
-                  <Input type="number" min={1} {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
+                  <Input 
+                    type="number" 
+                    min={1} 
+                    {...field} 
+                    value={field.value || 1}
+                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
+            <FormField control={form.control} name="sendEmail" render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Send welcome email
+                  </FormLabel>
+                </div>
+              </FormItem>
+            )} />
             <div className="pt-4 flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={createStudent.isLoading}>
-                {createStudent.isLoading ? "Creating..." : "Create Student"}
+              <Button type="submit" disabled={createStudent.isPending}>
+                {createStudent.isPending ? "Creating..." : "Create Student"}
               </Button>
             </div>
           </form>

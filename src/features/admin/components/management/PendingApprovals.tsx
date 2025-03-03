@@ -1,45 +1,68 @@
+// src/features/admin/components/management/PendingApprovals.tsx
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
-import { StudentForm } from '@/features/admin/components/students/profile/StudentForm';
-import { formatDate } from '@/lib/date';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { formatDate } from '@/lib/date';
 
-export const PendingApprovals: React.FC = () => {
-  const toast = useToast();
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
-  const [isReviewOpen, setIsReviewOpen] = useState(false);
+export const PendingApprovals = () => {
+  // Always call all hooks at the top level
+  const { toast } = useToast();
+  const utils = api.useUtils();
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  // Use the student namespace for pending approvals.
-  const { data: pendingStudents, isLoading, refetch, error } = 
-    api.admin.student.getPendingApprovals.useQuery(undefined);
+  // Use the student namespace for pending approvals
+  const { data: pendingStudents, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();
 
-  // Handle errors in a useEffect (remove onError from query options)
+  // IMPORTANT: Always declare mutations at the top level, not conditionally
+  const approveStudent = api.admin.student.approveStudent.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Student approved successfully",
+      });
+      // Invalidate the query to refresh the data
+      utils.admin.student.getPendingApprovals.invalidate();
+      setIsRefreshing(true);
+      // Set a timer to turn off refreshing state
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 1000);
+    },
+    onError: (err) => {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      // Explicitly type error as having a message string.
-      const err = error as { message: string };
-      toast.toast({
+      toast({
         title: "Error loading pending approvals",
-        description: err.message,
+        description: error.message,
         variant: "destructive",
       });
     }
   }, [error, toast]);
 
-  if (isLoading) {
+  const handleApprove = (studentId: string, studentName: string) => {
+    toast({
+      title: "Processing",
+      description: `Approving student ${studentName}...`,
+    });
+    approveStudent.mutate({ studentId });
+  };
+
+  // Loading state
+  if (isLoading || isRefreshing) {
     return (
       <Card>
         <CardHeader>
@@ -54,6 +77,7 @@ export const PendingApprovals: React.FC = () => {
     );
   }
 
+  // Empty state
   if (!pendingStudents || pendingStudents.length === 0) {
     return (
       <Card>
@@ -69,24 +93,7 @@ export const PendingApprovals: React.FC = () => {
     );
   }
 
-  // Mutation to approve student (assumed defined in your student router)
-  const approveStudent = api.admin.student.approveStudent.useMutation({
-    onSuccess: () => {
-      toast.toast({
-        title: "Success",
-        description: "Student approved successfully",
-      });
-      refetch();
-    },
-    onError: (err: any) => {
-      toast.toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
-    },
-  });
-
+  // Normal state with data
   return (
     <Card>
       <CardHeader>
@@ -94,14 +101,10 @@ export const PendingApprovals: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {pendingStudents.map((student: any) => (
-            <div
-              key={student.id}
-              className="flex items-center justify-between p-4 border rounded-lg"
-            >
+          {pendingStudents.map((student) => (
+            <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  {/* Assuming the student object has a nested user property */}
                   <p className="font-medium">{student.user?.name || "Unnamed"}</p>
                   <Badge>New Registration</Badge>
                 </div>
@@ -111,46 +114,16 @@ export const PendingApprovals: React.FC = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedStudent(student);
-                    setIsReviewOpen(true);
-                  }}
+                <Button 
+                  onClick={() => handleApprove(student.id, student.user?.name || "Student")}
+                  disabled={approveStudent.isPending}
                 >
-                  Review
-                </Button>
-                {/* If a rejectStudent procedure exists, uncomment the following:
-                <Button variant="outline" onClick={() => rejectStudent.mutate({ studentId: student.id })}>
-                  Reject
-                </Button> */}
-                <Button onClick={() => approveStudent.mutate({ studentId: student.id })}>
-                  Approve
+                  {approveStudent.isPending ? "Processing..." : "Approve"}
                 </Button>
               </div>
             </div>
           ))}
         </div>
-        <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Review Student Application</DialogTitle>
-              <DialogDescription>
-                Review and modify student details before approval.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedStudent && (
-              <StudentForm
-                student={selectedStudent}
-                onSubmit={() => {
-                  setIsReviewOpen(false);
-                  setSelectedStudent(null);
-                  refetch();
-                }}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
       </CardContent>
     </Card>
   );

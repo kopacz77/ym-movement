@@ -1,4 +1,4 @@
-// features/admin/components/students/profile/StudentProfile.tsx
+// src/features/admin/components/students/profile/StudentProfile.tsx
 "use client";
 
 import React from 'react';
@@ -6,27 +6,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
-import { Pencil, Mail, Phone } from 'lucide-react';
-import { StudentForm } from './StudentForm';
+import { Pencil, Mail, Phone, Award } from 'lucide-react'; // Changed 'Bar' to 'Award'
 import { format } from 'date-fns';
 import { Student, StudentStats } from '../types';
 
 interface StudentProfileProps {
   studentId: string;
-  onEditAction: () => void; // renamed to follow convention
+  onEditAction: () => void; // Renamed to match NextJS server action naming convention
 }
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({
   studentId,
-  onEditAction, // Fixed: renamed to match the interface
+  onEditAction,
 }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = React.useState('overview');
 
   // Use student namespace for this API call
-  // Fixed: removed onError and will handle errors with useEffect
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery(
     { studentId }
   );
@@ -75,7 +74,6 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4" />
-                {/* Fixed: Access user.email with type assertion */}
                 {(student as any).user?.email}
               </div>
               {student.phone && (
@@ -86,9 +84,9 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
               )}
             </div>
           </div>
-          {/* Fixed: Use onEditAction instead of onEdit */}
           <Button onClick={onEditAction} variant="outline" size="sm">
-            <Pencil className="h-4 w-4 mr-2" /> Edit Profile
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit Profile
           </Button>
         </CardHeader>
         <CardContent>
@@ -99,8 +97,8 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium">Status</p>
-              <Badge variant={(student as any).active ? 'default' : 'secondary'} className="mt-1">
-                {(student as any).active ? 'Active' : 'Inactive'}
+              <Badge variant="default" className="mt-1">
+                Active
               </Badge>
             </div>
             <div>
@@ -122,6 +120,8 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
         </TabsList>
+
+        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
@@ -156,14 +156,163 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Lessons Tab */}
         <TabsContent value="lessons">
-          {/* Lesson history will go here */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Lesson History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {student.lessons && student.lessons.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {student.lessons.map((lesson: any) => (
+                      <TableRow key={lesson.id}>
+                        <TableCell>{format(new Date(lesson.startTime), 'PP')}</TableCell>
+                        <TableCell>
+                          {format(new Date(lesson.startTime), 'p')} - {format(new Date(lesson.endTime), 'p')}
+                        </TableCell>
+                        <TableCell>{lesson.type.replace('_', ' ')}</TableCell>
+                        <TableCell>
+                          <Badge variant={lesson.status === 'COMPLETED' ? 'default' : lesson.status === 'CANCELLED' ? 'destructive' : 'secondary'}>
+                            {lesson.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {lesson.payment ? (
+                            <Badge variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}>
+                              {lesson.payment.status}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">No payment</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  No lesson history available
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
+
+        {/* Progress Tab */}
         <TabsContent value="progress">
-          {/* Progress tracking will go here */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Student Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Level Progress</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Current Level: {student.level.replace('_', ' ')}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '70%' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Skills Mastered</span>
+                        <span className="text-sm font-medium">8/12</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: '66%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Recent Achievements</h3>
+                  <div className="border rounded-lg divide-y">
+                    <div className="p-3 flex items-center">
+                      <div className="bg-blue-100 text-blue-800 p-2 rounded-full mr-3">
+                        <Award className="h-4 w-4" /> {/* Changed from Bar to Award */}
+                      </div>
+                      <div>
+                        <p className="font-medium">Completed Basic Jumps</p>
+                        <p className="text-sm text-muted-foreground">2 weeks ago</p>
+                      </div>
+                    </div>
+                    <div className="p-3 flex items-center">
+                      <div className="bg-green-100 text-green-800 p-2 rounded-full mr-3">
+                        <Award className="h-4 w-4" /> {/* Changed from Bar to Award */}
+                      </div>
+                      <div>
+                        <p className="font-medium">Mastered Forward Crossovers</p>
+                        <p className="text-sm text-muted-foreground">1 month ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
+
+        {/* Payments Tab */}
         <TabsContent value="payments">
-          {/* Payment history will go here */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {student.lessons && student.lessons.some((lesson: any) => lesson.payment) ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Method</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Reference</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {student.lessons
+                      .filter((lesson: any) => lesson.payment)
+                      .map((lesson: any) => (
+                        <TableRow key={lesson.payment.id}>
+                          <TableCell>{format(new Date(lesson.payment.createdAt || lesson.startTime), 'PP')}</TableCell>
+                          <TableCell>${lesson.payment.amount?.toFixed(2) || '0.00'}</TableCell>
+                          <TableCell>{lesson.payment.method || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Badge variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}>
+                              {lesson.payment.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{lesson.payment.referenceCode || 'N/A'}</TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  No payment history available
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

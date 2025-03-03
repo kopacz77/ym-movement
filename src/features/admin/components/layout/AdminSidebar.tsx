@@ -10,6 +10,7 @@ const navigation = [
   { name: 'Schedule', href: '/admin/schedule', icon: Calendar },
   { name: 'Students', href: '/admin/students', icon: Users },
   { name: 'Payments', href: '/admin/payments', icon: CreditCard },
+ // { name: 'Skills & Achievements', href: '/admin/skills', icon: Award },
   { name: 'Reports', href: '/admin/reports', icon: ChartBar },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
