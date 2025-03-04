@@ -1,16 +1,16 @@
 // src/app/(protected)/student/dashboard/page.tsx
 "use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { UpcomingLessons } from '@/features/student/components/dashboard/UpcomingLessons';
 import { LessonSummary } from '@/features/student/components/dashboard/LessonSummary';
 import Link from 'next/link';
-
-// Temporarily using a static student ID
-// In production, this would be taken from the authenticated user's session
-const MOCK_STUDENT_ID = "student123";
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export default function StudentDashboardPage() {
+  // Use the hook without passing any parameter
+  // The LessonSummary and UpcomingLessons components will use their own calls to useCurrentUser
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -19,16 +19,14 @@ export default function StudentDashboardPage() {
           <Button>Book a Lesson</Button>
         </Link>
       </div>
-      
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-8">
-          <UpcomingLessons studentId={MOCK_STUDENT_ID} />
+          <UpcomingLessons />
         </div>
         <div className="md:col-span-4">
-          <LessonSummary studentId={MOCK_STUDENT_ID} />
+          <LessonSummary />
         </div>
       </div>
-      
       <Card>
         <CardHeader>
           <CardTitle>Payment Information</CardTitle>
@@ -36,8 +34,7 @@ export default function StudentDashboardPage() {
         <CardContent>
           <div className="space-y-4">
             <p>
-              We accept payments via Venmo and Zelle. Please make payments within 24 hours
-              of booking your lesson to avoid automatic cancellation.
+              We accept payments via Venmo and Zelle. Please make payments within 24 hours of booking your lesson to avoid automatic cancellation.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="border rounded-lg p-4">

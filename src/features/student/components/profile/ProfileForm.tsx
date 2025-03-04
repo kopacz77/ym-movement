@@ -1,5 +1,6 @@
 // src/features/student/components/profile/ProfileForm.tsx
 "use client";
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,23 +9,69 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
-import { StudentProfile } from '../../types';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
-interface ProfileFormProps {
-  student: StudentProfile;
-}
-
-export const ProfileForm = ({ student }: ProfileFormProps) => {
-  const [phone, setPhone] = useState(student.phone || "");
-  const [emergencyName, setEmergencyName] = useState(student.emergencyContact?.name || "");
-  const [emergencyPhone, setEmergencyPhone] = useState(student.emergencyContact?.phone || "");
-  const [emergencyRelationship, setEmergencyRelationship] = useState(
-    student.emergencyContact?.relationship || ""
-  );
+export const ProfileForm = () => {
+  const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
+  
+  // Profile form state
+  const [phone, setPhone] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [emergencyRelationship, setEmergencyRelationship] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { toast } = useToast();
-  
+
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
+
+  // Fetch student profile
+  const { data: studentData, isLoading } = api.student.profile.getStudentProfile.useQuery(
+    { studentId }, 
+    { 
+      enabled: isReady && !!studentId,
+    }
+  );
+
+  // Initialize form with fetched data
+  useEffect(() => {
+    if (studentData) {
+      // Handle phone number
+      if (studentData.phone) {
+        setPhone(studentData.phone);
+      }
+      
+      // Handle emergency contact - using type assertions and explicit checks
+      if (studentData.emergencyContact) {
+        const emergencyContactObj = studentData.emergencyContact as Record<string, unknown>;
+        
+        // Individually check and set each property, ensuring it's a string
+        if (emergencyContactObj && typeof emergencyContactObj === 'object') {
+          const nameValue = emergencyContactObj['name'];
+          if (nameValue && typeof nameValue === 'string') {
+            setEmergencyName(nameValue);
+          }
+          
+          const phoneValue = emergencyContactObj['phone'];
+          if (phoneValue && typeof phoneValue === 'string') {
+            setEmergencyPhone(phoneValue);
+          }
+          
+          const relationshipValue = emergencyContactObj['relationship'];
+          if (relationshipValue && typeof relationshipValue === 'string') {
+            setEmergencyRelationship(relationshipValue);
+          }
+        }
+      }
+    }
+  }, [studentData]);
+
   const updateProfile = api.student.profile.updateStudentProfile.useMutation({
     onSuccess: () => {
       toast({
@@ -42,13 +89,23 @@ export const ProfileForm = ({ student }: ProfileFormProps) => {
       setIsSubmitting(false);
     }
   });
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!studentId) {
+      toast({
+        title: "Error",
+        description: "Student ID not available. Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     updateProfile.mutate({
-      studentId: student.id,
+      studentId,
       phone: phone || undefined,
       emergencyContact: {
         name: emergencyName,
@@ -57,7 +114,22 @@ export const ProfileForm = ({ student }: ProfileFormProps) => {
       },
     });
   };
-  
+
+  if (isLoading || !isReady || !studentData) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center h-64">
+            <p>Loading profile...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -71,14 +143,23 @@ export const ProfileForm = ({ student }: ProfileFormProps) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" value={student.user.name || ""} disabled />
+                  <Input 
+                    id="name" 
+                    value={studentData.user && typeof studentData.user === 'object' && 
+                           'name' in studentData.user && studentData.user.name || ""} 
+                    disabled 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" value={student.user.email} disabled />
+                  <Input 
+                    id="email" 
+                    value={studentData.user && typeof studentData.user === 'object' && 
+                           'email' in studentData.user && studentData.user.email || ""} 
+                    disabled 
+                  />
                 </div>
               </div>
-              
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input
@@ -88,15 +169,17 @@ export const ProfileForm = ({ student }: ProfileFormProps) => {
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
-              
               <div className="flex items-center gap-2">
                 <Label>Level:</Label>
-                <Badge>{student.level.replace('_', ' ')}</Badge>
+                <Badge>
+                  {typeof studentData.level === 'string' ? 
+                    studentData.level.replace('_', ' ') : 
+                    "Unknown Level"}
+                </Badge>
               </div>
-              
               <div className="flex items-center gap-2">
                 <Label>Weekly Lesson Limit:</Label>
-                <span>{student.maxLessonsPerWeek} lessons</span>
+                <span>{studentData.maxLessonsPerWeek || 0} lessons</span>
               </div>
             </div>
           </div>
@@ -113,7 +196,6 @@ export const ProfileForm = ({ student }: ProfileFormProps) => {
                   onChange={(e) => setEmergencyName(e.target.value)}
                 />
               </div>
-              
               <div>
                 <Label htmlFor="emergency-phone">Contact Phone</Label>
                 <Input
@@ -123,7 +205,6 @@ export const ProfileForm = ({ student }: ProfileFormProps) => {
                   onChange={(e) => setEmergencyPhone(e.target.value)}
                 />
               </div>
-              
               <div>
                 <Label htmlFor="emergency-relationship">Relationship</Label>
                 <Input

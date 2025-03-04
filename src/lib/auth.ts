@@ -1,3 +1,4 @@
+// src/lib/auth.ts
 import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
@@ -5,21 +6,30 @@ import { prisma } from "@/lib/prisma";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
-  session: { strategy: "jwt" },
-  providers: [], // Add your auth providers here
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  pages: {
+    signIn: "/auth/login",
+  },
+  // Providers are defined in the route handler
+  providers: [],
   callbacks: {
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub,
-      },
-    }),
-    jwt: ({ token, user }) => {
+    async jwt({ token, user }) {
       if (user) {
-        return { ...token, id: user.id };
+        token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
   },
+  debug: process.env.NODE_ENV === "development",
 };

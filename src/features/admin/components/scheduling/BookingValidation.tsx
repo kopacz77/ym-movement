@@ -3,6 +3,7 @@ import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { LessonType } from '@prisma/client';
+import { startOfWeek, endOfWeek } from 'date-fns';
 
 // Define CalendarSlot interface
 interface CalendarSlot {

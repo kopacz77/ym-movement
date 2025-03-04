@@ -1,5 +1,6 @@
 // src/features/student/components/booking/BookingCalendar.tsx
 "use client";
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,42 +12,58 @@ import { useToast } from '@/components/ui/use-toast';
 import { BookingDialog } from './BookingDialog';
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import { TRPCClientError } from '@trpc/client';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
-interface BookingCalendarProps {
-  studentId: string;
-}
-
-export const BookingCalendar = ({ studentId }: BookingCalendarProps) => {
+export const BookingCalendar = () => {
   const [date, setDate] = useState(new Date());
   const [selectedRink, setSelectedRink] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
-  
   const { toast } = useToast();
+  const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
   
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
+
   // Fetch all available rinks
   const { data: rinks } = api.student.availability.getRinks.useQuery();
-  
+
   // Fetch available time slots
-  const { data: availableSlots, isLoading } = api.student.availability.getAvailableTimeSlots.useQuery({
-    startDate: startOfDay(date),
-    endDate: endOfDay(addDays(date, 6)),
-    rinkId: selectedRink || undefined,
-  }, {
-    onError: (error: TRPCClientError<any>) => {
+  const { data: availableSlots, isLoading, error } = api.student.availability.getAvailableTimeSlots.useQuery(
+    {
+      startDate: startOfDay(date),
+      endDate: endOfDay(addDays(date, 6)),
+      rinkId: selectedRink || undefined,
+    },
+    {
+      enabled: isReady // Only fetch when we're ready
+    }
+  );
+
+  // Handle errors with useEffect instead of onError in the query options
+  useEffect(() => {
+    if (error) {
+      const errorMessage = error instanceof TRPCClientError 
+        ? error.message 
+        : "An unexpected error occurred while loading time slots.";
+      
       toast({
         title: "Error loading time slots",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
-  });
-  
+  }, [error, toast]);
+
   // Convert slots to FullCalendar events
   const events = availableSlots?.map((slot: any) => {
     const studentCount = slot.currentStudents;
     const isAvailable = studentCount < slot.maxStudents;
-    
     return {
       id: slot.id,
       title: `${studentCount}/${slot.maxStudents} students${isAvailable ? ' - Available' : ' - Full'}`,
@@ -58,15 +75,14 @@ export const BookingCalendar = ({ studentId }: BookingCalendarProps) => {
       },
     };
   }) || [];
-  
+
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     // For now, we'll just use this for navigation, not booking
     setDate(selectInfo.start);
   };
-  
+
   const handleEventClick = (clickInfo: EventClickArg) => {
     const slot = clickInfo.event.extendedProps;
-    
     // Check if the slot is available
     if (slot.currentStudents >= slot.maxStudents) {
       toast({
@@ -76,11 +92,10 @@ export const BookingCalendar = ({ studentId }: BookingCalendarProps) => {
       });
       return;
     }
-    
     setSelectedSlot(slot);
     setIsBookingDialogOpen(true);
   };
-  
+
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -102,7 +117,7 @@ export const BookingCalendar = ({ studentId }: BookingCalendarProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {isLoading || !isReady ? (
           <div className="flex justify-center items-center h-[600px]">
             <p>Loading calendar...</p>
           </div>
@@ -122,8 +137,7 @@ export const BookingCalendar = ({ studentId }: BookingCalendarProps) => {
             />
           </div>
         )}
-        
-        {isBookingDialogOpen && selectedSlot && (
+        {isBookingDialogOpen && selectedSlot && studentId && (
           <BookingDialog
             slot={selectedSlot}
             studentId={studentId}

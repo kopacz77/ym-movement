@@ -15,38 +15,28 @@ import { Search, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
-// Modify the interface to match the actual data from the API
-interface PaymentDetails {
-  id: string;
-  status: string;
-  amount: number;
-  method: string;
-  referenceCode: string;
-}
-
-interface LessonWithPayment {
-  id: string;
-  startTime: Date;
-  endTime: Date;
-  type: string;
-  status: string;
-  notes: string | null; // Changed from string | undefined to string | null
-  rink: {
-    name: string;
-  };
-  payment: PaymentDetails | null;
-}
-
 export default function StudentPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
+  
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
 
   // Get student lessons with payments
-  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery({
-    studentId,
-  });
+  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
+    { studentId },
+    { 
+      enabled: isReady && !!studentId,
+      retry: false
+    }
+  );
 
   // Handle errors with useEffect
   useEffect(() => {
@@ -60,26 +50,23 @@ export default function StudentPaymentsPage() {
   }, [error, toast]);
 
   // Filter lessons to only include those with payments
-  // Use type assertion to make TypeScript happy
   const paymentsData = lessons ? lessons.filter(lesson => lesson.payment !== null) : [];
-  
+
   // Convert to our expected type
-  const payments: LessonWithPayment[] = paymentsData.map(lesson => ({
+  const payments = paymentsData.map(lesson => ({
     ...lesson,
     payment: lesson.payment
-  } as LessonWithPayment));
+  }));
 
   // Filter payments based on search query and tab
   const filteredPayments = payments.filter((lesson) => {
-    const matchesSearch = searchQuery 
-      ? (lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = searchQuery
+      ? (lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
          format(new Date(lesson.startTime), 'PPP').toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
-    
-    const matchesTab = activeTab === 'all' 
-      ? true 
+    const matchesTab = activeTab === 'all'
+      ? true
       : lesson.payment?.status.toLowerCase() === activeTab.toLowerCase();
-    
     return matchesSearch && matchesTab;
   });
 
@@ -103,11 +90,11 @@ export default function StudentPaymentsPage() {
       </div>
       <div className="relative max-w-md">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input 
-          placeholder="Search by reference code or date..." 
-          className="pl-8" 
-          value={searchQuery} 
-          onChange={(e) => setSearchQuery(e.target.value)} 
+        <Input
+          placeholder="Search by reference code or date..."
+          className="pl-8"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
       <Card>
@@ -121,7 +108,7 @@ export default function StudentPaymentsPage() {
           </Tabs>
         </CardHeader>
         <CardContent className="pt-4">
-          {isLoading ? (
+          {!isReady || isLoading ? (
             <div className="flex justify-center items-center h-32">
               <p>Loading payments...</p>
             </div>

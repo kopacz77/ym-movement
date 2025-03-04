@@ -14,35 +14,8 @@ import { CancellationDialog } from '@/features/student/components/schedule/Cance
 import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
-// Create an interface for the expected API response
-interface LessonDetails {
-  id: string;
-  startTime: Date;
-  endTime: Date;
-  duration: number;
-  type: string;
-  status: LessonStatus;
-  price: number;
-  notes: string | null;
-  cancellationReason?: string | null; // Add this line
-  cancellationTime?: Date | null;    // Add this as well for completeness
-  rink: {
-    name: string;
-    address: string;
-  };
-  payment?: {
-    id: string;
-    status: string;
-    amount: number;
-    method: string;
-    referenceCode: string;
-  } | null;
-}
-
 interface LessonDetailsPageProps {
-  params: {
-    lessonId: string;
-  };
+  params: { lessonId: string; };
 }
 
 export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
@@ -51,13 +24,27 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
   const { toast } = useToast();
   const router = useRouter();
   const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
+  
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
 
   // Get lesson details
-  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery({
-    studentId,
-    startDate: new Date(0), // From the beginning of time
-    endDate: new Date(8640000000000000), // To the end of time
-  });
+  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
+    { 
+      studentId,
+      startDate: new Date(0), // From the beginning of time
+      endDate: new Date(8640000000000000), // To the end of time
+    },
+    { 
+      enabled: isReady && !!studentId,
+      retry: false
+    }
+  );
 
   // Handle errors with useEffect
   useEffect(() => {
@@ -91,13 +78,13 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
     ...currentLesson,
     // Convert null to undefined for notes if needed
     notes: currentLesson.notes === null ? undefined : currentLesson.notes
-  } as unknown as LessonDetails : null;
+  } : null;
 
   const canCancel = typedLesson && 
     new Date(typedLesson.startTime) > new Date() && 
     typedLesson.status === LessonStatus.SCHEDULED;
 
-  if (isLoading) {
+  if (!isReady || isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <p>Loading lesson details...</p>
@@ -145,6 +132,7 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
             <CardTitle>Lesson Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Rest of the component remains the same */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Lesson Type</h3>
@@ -198,6 +186,7 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
             <CardTitle>Payment Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Rest of the payment section remains the same */}
             {typedLesson.payment ? (
               <>
                 <div className="grid grid-cols-2 gap-4">

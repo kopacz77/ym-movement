@@ -1,6 +1,7 @@
 // src/features/student/components/dashboard/UpcomingLessons.tsx
 "use client";
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -8,33 +9,54 @@ import { Calendar, Clock, MapPin } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import Link from 'next/link';
-import { LessonWithDetails } from '../../types';
-import { TRPCClientError } from '@trpc/client';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
-interface UpcomingLessonsProps {
-  studentId: string;
-}
-
-export const UpcomingLessons = ({ studentId }: UpcomingLessonsProps) => {
+export const UpcomingLessons = () => {
   const { toast } = useToast();
+  const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
   
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
+
+  // Use useMemo to create a stable date reference
+  const currentDate = useMemo(() => new Date(), []);
+
   // Fetch upcoming lessons for the student
-  const { data: lessons, isLoading } = api.student.profile.getStudentLessons.useQuery({
-    studentId,
-    status: 'SCHEDULED',
-    startDate: new Date(),
-  }, {
-    onError: (error: TRPCClientError<any>) => {
+  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
+    { 
+      studentId, 
+      status: 'SCHEDULED', 
+      startDate: currentDate
+    }, 
+    { 
+      enabled: isReady && !!studentId,
+      retry: false
+    }
+  );
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Error loading lessons",
         description: error.message,
         variant: "destructive",
       });
     }
-  });
+  }, [error, toast]);
 
   // Only show the next 3 lessons
   const upcomingLessons = lessons?.slice(0, 3);
+  
+  // Show loading state when either:
+  // 1. We don't have a studentId yet
+  // 2. We're fetching the data
+  const showLoading = !isReady || isLoading || !studentId;
 
   return (
     <Card>
@@ -45,7 +67,7 @@ export const UpcomingLessons = ({ studentId }: UpcomingLessonsProps) => {
         </Link>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {showLoading ? (
           <div className="flex justify-center items-center h-48">
             <p>Loading lessons...</p>
           </div>
@@ -58,7 +80,7 @@ export const UpcomingLessons = ({ studentId }: UpcomingLessonsProps) => {
           </div>
         ) : (
           <div className="space-y-4">
-            {upcomingLessons.map((lesson: LessonWithDetails) => (
+            {upcomingLessons.map((lesson) => (
               <div key={lesson.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium">{lesson.type.replace('_', ' ')} Lesson</h3>
@@ -66,22 +88,18 @@ export const UpcomingLessons = ({ studentId }: UpcomingLessonsProps) => {
                     {format(new Date(lesson.startTime), 'EEE, MMM d')}
                   </span>
                 </div>
-                
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>
-                      {format(new Date(lesson.startTime), 'h:mm a')} - 
-                      {format(new Date(lesson.endTime), 'h:mm a')}
+                      {format(new Date(lesson.startTime), 'h:mm a')} - {format(new Date(lesson.endTime), 'h:mm a')}
                     </span>
                   </div>
-                  
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span>{lesson.rink.name}</span>
                   </div>
                 </div>
-                
                 <div className="mt-4 flex justify-end">
                   <Link href={`/student/schedule/${lesson.id}`}>
                     <Button variant="outline" size="sm">View Details</Button>

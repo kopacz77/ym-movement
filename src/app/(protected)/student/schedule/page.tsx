@@ -8,46 +8,28 @@ import { LessonCard } from '@/features/student/components/schedule/LessonCard';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { LessonWithDetails } from '@/features/student/types';
-
-// Define an interface that matches the actual API response
-interface LessonData {
-  id: string;
-  startTime: Date;
-  endTime: Date;
-  type: string;
-  status: string;
-  price: number;
-  notes: string | null;
-  rink: {
-    id: string;
-    name: string;
-    address: string;
-    timezone: string;
-    maxCapacity: number | null;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  payment: {
-    lessonId: string;
-    id: string;
-    status: string;
-    amount: number;
-    method: string;
-    referenceCode: string;
-    reminderSentAt: Date | null;
-  } | null;
-}
 
 export default function StudentSchedulePage() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
+  
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
 
   // Get all student lessons
-  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery({
-    studentId
-  });
+  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
+    { studentId }, 
+    { 
+      enabled: isReady && !!studentId,
+      retry: false
+    }
+  );
 
   // Handle errors with useEffect
   useEffect(() => {
@@ -60,31 +42,34 @@ export default function StudentSchedulePage() {
     }
   }, [error, toast]);
 
-  // Type-safe filtering using API response type
-  const typedLessons = lessons as LessonData[] || [];
+  // Type-safe filtering
+  const typedLessons = lessons || [];
 
   // Filter lessons by status
   const upcomingLessons = typedLessons.filter(
     (lesson) => new Date(lesson.startTime) > new Date() && lesson.status === 'SCHEDULED'
   );
-  
   const pastLessons = typedLessons.filter(
     (lesson) => new Date(lesson.startTime) <= new Date() || lesson.status !== 'SCHEDULED'
   );
 
   // Helper function to calculate duration in minutes and transform to the expected type
-  const transformToLessonWithDetails = (lesson: LessonData): LessonWithDetails => {
+  const transformToLessonWithDetails = (lesson: any) => {
     // Calculate duration in minutes
     const startTime = new Date(lesson.startTime);
     const endTime = new Date(lesson.endTime);
     const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
-    
     return {
       ...lesson,
       duration: durationInMinutes,
       notes: lesson.notes === null ? undefined : lesson.notes
-    } as LessonWithDetails;
+    };
   };
+
+  // Show loading state when either:
+  // 1. We don't have a studentId yet
+  // 2. We're fetching the data
+  const showLoading = !isReady || isLoading || !studentId;
 
   return (
     <div className="space-y-6">
@@ -99,7 +84,7 @@ export default function StudentSchedulePage() {
           </TabsList>
         </div>
         <TabsContent value="upcoming" className="pt-4">
-          {isLoading ? (
+          {showLoading ? (
             <div className="flex justify-center items-center h-32">
               <p>Loading lessons...</p>
             </div>
@@ -112,16 +97,13 @@ export default function StudentSchedulePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {upcomingLessons.map((lesson) => (
-                <LessonCard 
-                  key={lesson.id} 
-                  lesson={transformToLessonWithDetails(lesson)} 
-                />
+                <LessonCard key={lesson.id} lesson={transformToLessonWithDetails(lesson)} />
               ))}
             </div>
           )}
         </TabsContent>
         <TabsContent value="past" className="pt-4">
-          {isLoading ? (
+          {showLoading ? (
             <div className="flex justify-center items-center h-32">
               <p>Loading lessons...</p>
             </div>
@@ -134,10 +116,7 @@ export default function StudentSchedulePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {pastLessons.map((lesson) => (
-                <LessonCard 
-                  key={lesson.id} 
-                  lesson={transformToLessonWithDetails(lesson)} 
-                />
+                <LessonCard key={lesson.id} lesson={transformToLessonWithDetails(lesson)} />
               ))}
             </div>
           )}

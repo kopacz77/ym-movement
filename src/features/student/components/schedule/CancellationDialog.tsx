@@ -1,6 +1,7 @@
 // src/features/student/components/schedule/CancellationDialog.tsx
 "use client";
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +9,6 @@ import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { TRPCClientError } from '@trpc/client';
 
 interface CancellationDialogProps {
   lessonId: string;
@@ -19,29 +19,35 @@ interface CancellationDialogProps {
 export const CancellationDialog = ({ lessonId, open, onCloseAction }: CancellationDialogProps) => {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const { toast } = useToast();
   const router = useRouter();
   
-  const cancelLesson = api.student.booking.cancelLesson.useMutation({
-    onSuccess: () => {
+  // Create mutation without onSuccess/onError callbacks
+  const cancelLesson = api.student.booking.cancelLesson.useMutation();
+
+  // Handle success and error states with useEffect
+  useEffect(() => {
+    if (cancelLesson.isSuccess) {
       toast({
         title: "Lesson cancelled",
         description: "Your lesson has been cancelled successfully.",
       });
       router.push('/student/schedule');
       onCloseAction();
-    },
-    onError: (error: TRPCClientError<any>) => {
+    }
+  }, [cancelLesson.isSuccess, router, onCloseAction, toast]);
+
+  useEffect(() => {
+    if (cancelLesson.error) {
       toast({
         title: "Error cancelling lesson",
-        description: error.message,
+        description: cancelLesson.error.message,
         variant: "destructive",
       });
       setIsSubmitting(false);
     }
-  });
-  
+  }, [cancelLesson.error, toast]);
+
   const handleCancellation = () => {
     if (reason.trim() === "") {
       toast({
@@ -58,49 +64,46 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
       reason,
     });
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onCloseAction}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Cancel Lesson</DialogTitle>
         </DialogHeader>
-        
         <div className="space-y-4">
           <div className="flex items-start gap-2 p-4 bg-yellow-50 rounded-lg">
             <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
             <div>
               <p className="font-medium text-yellow-800">Cancellation Policy</p>
               <p className="text-sm text-yellow-700 mt-1">
-                Lessons must be cancelled at least 24 hours in advance. Late cancellations
-                may still be charged. Frequent cancellations may affect your booking privileges.
+                Lessons must be cancelled at least 24 hours in advance. Late cancellations may still be charged. 
+                Frequent cancellations may affect your booking privileges.
               </p>
             </div>
           </div>
-          
           <div className="space-y-2">
             <label className="text-sm font-medium">Reason for Cancellation</label>
-            <Textarea
+            <Textarea 
               placeholder="Please provide a reason for cancelling this lesson"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </div>
-          
           <div className="flex justify-end gap-2 pt-2">
             <Button 
               variant="outline" 
-              onClick={onCloseAction}
-              disabled={isSubmitting}
+              onClick={onCloseAction} 
+              disabled={isSubmitting || cancelLesson.isPending}
             >
               Go Back
             </Button>
             <Button 
-              variant="destructive"
-              onClick={handleCancellation}
-              disabled={isSubmitting}
+              variant="destructive" 
+              onClick={handleCancellation} 
+              disabled={isSubmitting || cancelLesson.isPending}
             >
-              {isSubmitting ? "Cancelling..." : "Confirm Cancellation"}
+              {isSubmitting || cancelLesson.isPending ? "Cancelling..." : "Confirm Cancellation"}
             </Button>
           </div>
         </div>

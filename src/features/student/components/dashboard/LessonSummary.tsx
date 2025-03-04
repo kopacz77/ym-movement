@@ -1,31 +1,50 @@
 // src/features/student/components/dashboard/LessonSummary.tsx
 "use client";
+
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { TRPCClientError } from '@trpc/client';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
-interface LessonSummaryProps {
-  studentId: string;
-}
-
-export const LessonSummary = ({ studentId }: LessonSummaryProps) => {
+export const LessonSummary = () => {
   const { toast } = useToast();
+  const { id: studentId } = useCurrentUser();
+  const [isReady, setIsReady] = useState(false);
   
-  const { data: stats, isLoading } = api.student.profile.getStudentLessonStats.useQuery({
-    studentId,
-  }, {
-    onError: (error: TRPCClientError<any>) => {
+  // Only fetch data when studentId is available
+  useEffect(() => {
+    if (studentId) {
+      setIsReady(true);
+    }
+  }, [studentId]);
+
+  const { data: stats, isLoading, error } = api.student.profile.getStudentLessonStats.useQuery(
+    { studentId }, 
+    { 
+      enabled: isReady && !!studentId,
+      retry: false
+    }
+  );
+
+  // Handle errors with useEffect
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Error loading lesson stats",
         description: error.message,
         variant: "destructive",
       });
     }
-  });
+  }, [error, toast]);
 
   const weeklyProgressPercentage = stats ? (stats.thisWeekCount / stats.maxAllowed) * 100 : 0;
+
+  // Show loading state when either:
+  // 1. We don't have a studentId yet
+  // 2. We're fetching the data
+  const showLoading = !isReady || isLoading || !studentId;
 
   return (
     <Card>
@@ -33,7 +52,7 @@ export const LessonSummary = ({ studentId }: LessonSummaryProps) => {
         <CardTitle>Lesson Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {showLoading ? (
           <div className="animate-pulse space-y-3">
             <div className="h-4 bg-gray-200 rounded w-3/4"></div>
             <div className="h-4 bg-gray-200 rounded"></div>
@@ -55,7 +74,6 @@ export const LessonSummary = ({ studentId }: LessonSummaryProps) => {
                 <span className="text-sm text-muted-foreground">Cancelled</span>
               </div>
             </div>
-            
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Weekly Lessons</span>
