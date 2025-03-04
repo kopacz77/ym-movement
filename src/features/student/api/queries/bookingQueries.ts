@@ -28,7 +28,7 @@ export const bookingRouter = createTRPCRouter({
             lessons: true,
           },
         });
-
+        
         if (!timeSlot) {
           throw new TRPCError({
             code: 'NOT_FOUND',
@@ -44,12 +44,14 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 3. Check if student has reached weekly lesson limit
+        // 3. Get student info and check weekly lesson limit
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
-          include: { user: true },
+          include: {
+            user: true,
+          },
         });
-
+        
         if (!student) {
           throw new TRPCError({
             code: 'NOT_FOUND',
@@ -67,6 +69,7 @@ export const bookingRouter = createTRPCRouter({
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
 
+        // Count lessons in current week
         const weeklyLessonsCount = await ctx.prisma.lesson.count({
           where: {
             studentId: input.studentId,
@@ -87,39 +90,53 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 4. Create Google Calendar event
+        // 4. Try to create Google Calendar event
         let googleEventId = null;
         try {
-          googleEventId = await googleCalendar.createEvent({
-            summary: `${input.type} Lesson with ${student.user.name}`,
-            description: `
-              Lesson Type: ${input.type}
-              Area: ${input.area || 'MAIN_RINK'}
-              ${input.notes ? `Notes: ${input.notes}` : ''}
-            `,
-            startTime: timeSlot.startTime,
-            endTime: timeSlot.endTime,
-            attendees: [
-              { email: student.user.email },
-              { email: process.env.INSTRUCTOR_EMAIL! },
-            ],
-            location: timeSlot.rink.address,
-          });
+          // Only attempt calendar integration if name and email are available
+          if (student.user?.name && student.user?.email) {
+            console.log(`Attempting to create calendar event for ${student.user.name}`);
+            
+            googleEventId = await googleCalendar.createEvent({
+              summary: `${input.type} Lesson with ${student.user.name}`,
+              description: `
+                Lesson Type: ${input.type}
+                Area: ${input.area || 'MAIN_RINK'}
+                ${input.notes ? `Notes: ${input.notes}` : ''}
+              `,
+              startTime: timeSlot.startTime,
+              endTime: timeSlot.endTime,
+              attendees: [
+                { email: student.user.email },
+                { email: process.env.INSTRUCTOR_EMAIL || 'instructor@example.com' },
+              ],
+              location: timeSlot.rink.address,
+            });
+            
+            if (googleEventId) {
+              console.log(`Created Google Calendar event with ID: ${googleEventId}`);
+            } else {
+              console.log('Failed to create Google Calendar event, continuing without calendar integration');
+            }
+          } else {
+            console.log('Skipping calendar integration - missing student name or email');
+          }
         } catch (error) {
           console.error('Error creating Google Calendar event:', error);
           // Continue with booking even if calendar fails
         }
 
-        // 5. Calculate price (in a real app, this would come from settings)
+        // 5. Calculate price
         const defaultPrices = {
           PRIVATE: 75,
           GROUP: 45,
           CHOREOGRAPHY: 90,
           COMPETITION_PREP: 95,
         };
+        
         const price = defaultPrices[input.type];
 
-        // 6. Create the lesson booking with transaction
+        // 6. Create the lesson and payment in a transaction
         const result = await ctx.prisma.$transaction(async (prisma) => {
           // Create the lesson
           const lesson = await prisma.lesson.create({
@@ -187,7 +204,9 @@ export const bookingRouter = createTRPCRouter({
       try {
         // 1. Find the lesson
         const lesson = await ctx.prisma.lesson.findUnique({
-          where: { id: input.lessonId },
+          where: {
+            id: input.lessonId,
+          },
           include: {
             timeSlot: true,
           },
@@ -210,8 +229,7 @@ export const bookingRouter = createTRPCRouter({
 
         // 3. Check cancellation policy - example: 24 hours notice
         const cancellationDeadline = 24; // hours
-        const hoursUntilLesson = 
-          (lesson.startTime.getTime() - new Date().getTime()) / (1000 * 60 * 60);
+        const hoursUntilLesson = (lesson.startTime.getTime() - new Date().getTime()) / (1000 * 60 * 60);
         
         if (hoursUntilLesson < cancellationDeadline) {
           throw new TRPCError({
@@ -223,16 +241,21 @@ export const bookingRouter = createTRPCRouter({
         // 4. Delete Google Calendar event if it exists
         if (lesson.googleCalendarEventId) {
           try {
-            await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
+            const deleted = await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
+            if (deleted) {
+              console.log(`Deleted Google Calendar event: ${lesson.googleCalendarEventId}`);
+            }
           } catch (error) {
             console.error('Error deleting Google Calendar event:', error);
-            // Continue with cancellation even if calendar fails
+            // Continue with cancellation even if calendar deletion fails
           }
         }
 
         // 5. Update the lesson status
         const updatedLesson = await ctx.prisma.lesson.update({
-          where: { id: input.lessonId },
+          where: {
+            id: input.lessonId,
+          },
           data: {
             status: LessonStatus.CANCELLED,
             cancellationReason: input.reason,

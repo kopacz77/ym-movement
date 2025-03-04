@@ -1,7 +1,7 @@
 // src/app/(protected)/student/schedule/[lessonId]/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +15,13 @@ import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface LessonDetailsPageProps {
-  params: { lessonId: string; };
+  params: {
+    lessonId: string;
+  };
 }
 
 export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
+  // Access lessonId directly - this is the correct approach for Next.js 15
   const { lessonId } = params;
   const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
@@ -37,8 +40,7 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
   const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
     { 
       studentId,
-      startDate: new Date(0), // From the beginning of time
-      endDate: new Date(8640000000000000), // To the end of time
+     
     },
     { 
       enabled: isReady && !!studentId,

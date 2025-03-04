@@ -16,7 +16,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const BookingCalendar = () => {
   const [date, setDate] = useState(new Date());
-  const [selectedRink, setSelectedRink] = useState<string>("");
+  const [selectedRink, setSelectedRink] = useState<string>("all_rinks");
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -38,7 +38,7 @@ export const BookingCalendar = () => {
     {
       startDate: startOfDay(date),
       endDate: endOfDay(addDays(date, 6)),
-      rinkId: selectedRink || undefined,
+      rinkId: selectedRink === "all_rinks" ? undefined : selectedRink,
     },
     {
       enabled: isReady // Only fetch when we're ready
@@ -106,7 +106,7 @@ export const BookingCalendar = () => {
               <SelectValue placeholder="All Rinks" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Rinks</SelectItem>
+              <SelectItem value="all_rinks">All Rinks</SelectItem>
               {rinks?.map((rink: any) => (
                 <SelectItem key={rink.id} value={rink.id}>
                   {rink.name}

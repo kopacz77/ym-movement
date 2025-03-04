@@ -105,11 +105,14 @@ export const profileRouter = createTRPCRouter({
 
         if (input.startDate || input.endDate) {
           where.startTime = {};
+        
           if (input.startDate) {
-            where.startTime.gte = input.startDate;
+            const minDate = new Date('1970-01-01'); 
+            where.startTime.gte = input.startDate < minDate ? minDate : input.startDate;
           }
           if (input.endDate) {
-            where.startTime.lte = input.endDate;
+            const maxDate = new Date('2100-01-01'); // Reasonable future limit
+            where.startTime.lte = input.endDate > maxDate ? maxDate : input.endDate;
           }
         }
 
