@@ -1,13 +1,6 @@
-// src/contexts/AuthContext.tsx
 "use client";
 
-import { 
-  createContext, 
-  useContext, 
-  useState, 
-  useEffect, 
-  ReactNode 
-} from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -38,21 +31,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
-  
+
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUser = async () => {
       if (session?.user) {
         try {
           const response = await fetch("/api/auth/me");
-          if (response.ok) {
-            const userData = await response.json();
+          if (!response.ok) {
+            if (isMounted) {
+              await signOut({ redirect: false });
+              router.push("/auth/login");
+            }
+            return;
+          }
+          
+          const userData = await response.json();
+          if (isMounted) {
             setUser(userData);
-          } else {
-            await signOut({ redirect: false });
-            router.push("/auth/login");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
+          if (isMounted) {
+            await signOut({ redirect: false });
+            router.push("/auth/login");
+          }
         }
       }
     };
@@ -60,8 +64,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (status === "authenticated") {
       fetchUser();
     } else if (status === "unauthenticated") {
-      setUser(null);
+      if (isMounted) {
+        setUser(null);
+      }
     }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [session, status, router]);
 
   const logout = async () => {
@@ -70,10 +80,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading: status === "loading",
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        isLoading: status === "loading", 
         isAuthenticated: !!user,
         logout,
       }}

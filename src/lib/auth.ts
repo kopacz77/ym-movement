@@ -1,6 +1,5 @@
-// src/lib/auth.ts
 import { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter"; // Note this is the correct import
 import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {

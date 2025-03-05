@@ -1,25 +1,29 @@
-// src/features/admin/components/analytics/OverviewCards.tsx
 "use client";
+
 import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Calendar, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
-import { TRPCClientError } from '@trpc/client';
 
 export const OverviewCards = () => {
   const { toast } = useToast();
+
   const { data, error, isLoading } = api.admin.analytics.getOverview.useQuery(
     undefined, 
-    { refetchInterval: 30000, retry: 3 }
+    { 
+      refetchInterval: 30000, 
+      retry: 3 
+    }
   );
 
+  // Handle errors with useEffect
   useEffect(() => {
-    if (error instanceof TRPCClientError) {
-      toast({
-        title: "Error loading overview",
-        description: error.message,
-        variant: "destructive",
+    if (error) {
+      toast({ 
+        title: "Error loading overview", 
+        description: error.message, 
+        variant: "destructive" 
       });
     }
   }, [error, toast]);

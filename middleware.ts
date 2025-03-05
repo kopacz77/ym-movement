@@ -1,4 +1,3 @@
-// src/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -8,16 +7,16 @@ const bypassAuthInDev = process.env.NODE_ENV === 'development' && process.env.EN
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  
+
   // Check if the path is a public route
   const isPublicPath = path === "/" || 
-                      path === "/auth/login" || 
-                      path === "/auth/signup" || 
-                      path.startsWith("/api/auth");
+                       path === "/auth/login" || 
+                       path === "/auth/signup" || 
+                       path.startsWith("/api/auth");
 
   // Get the token and check if the user is authenticated
-  const token = await getToken({ 
-    req: request, 
+  const token = await getToken({
+    req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
   

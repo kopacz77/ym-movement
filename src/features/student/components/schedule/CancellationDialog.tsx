@@ -32,8 +32,12 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
         title: "Lesson cancelled",
         description: "Your lesson has been cancelled successfully.",
       });
-      router.push('/student/schedule');
+      
+      // Call the onCloseAction callback to trigger a refetch in the parent component
       onCloseAction();
+      
+      // Refresh the schedule page data 
+      router.refresh();
     }
   }, [cancelLesson.isSuccess, router, onCloseAction, toast]);
 
@@ -77,19 +81,21 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
             <div>
               <p className="font-medium text-yellow-800">Cancellation Policy</p>
               <p className="text-sm text-yellow-700 mt-1">
-                Lessons must be cancelled at least 24 hours in advance. Late cancellations may still be charged. 
+                Lessons must be cancelled at least 24 hours in advance. Late cancellations may still be charged.
                 Frequent cancellations may affect your booking privileges.
               </p>
             </div>
           </div>
+          
           <div className="space-y-2">
             <label className="text-sm font-medium">Reason for Cancellation</label>
             <Textarea 
-              placeholder="Please provide a reason for cancelling this lesson"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              placeholder="Please provide a reason for cancelling this lesson" 
+              value={reason} 
+              onChange={(e) => setReason(e.target.value)} 
             />
           </div>
+          
           <div className="flex justify-end gap-2 pt-2">
             <Button 
               variant="outline" 

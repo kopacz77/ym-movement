@@ -1,4 +1,3 @@
-// src/providers/index.tsx
 'use client';
 
 import * as React from 'react';
@@ -16,10 +15,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     defaultOptions: {
       queries: {
         staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: false,
+        retry: 1,
       },
     },
   }));
-  
+
   const [trpcClient] = useState(() => api.createClient({
     links: [
       httpBatchLink({

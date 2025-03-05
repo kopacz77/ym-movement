@@ -5,6 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from '@prisma/client';
 import { googleCalendar } from '@/lib/google/calendar';
 import { randomUUID } from 'crypto';
+import { startOfWeek as dateStartOfWeek, endOfWeek as dateEndOfWeek } from 'date-fns';
 
 export const bookingRouter = createTRPCRouter({
   bookLesson: publicProcedure
@@ -20,24 +21,34 @@ export const bookingRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log(`[BOOKING] Starting booking process for student ${input.studentId}`);
+        
         // 1. Get the time slot to check availability
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
           include: {
             rink: true,
-            lessons: true,
+            lessons: {
+              where: { 
+                status: LessonStatus.SCHEDULED // Only count active lessons toward capacity
+              }
+            },
           },
         });
-        
+
         if (!timeSlot) {
+          console.log(`[BOOKING] Time slot ${input.timeSlotId} not found`);
           throw new TRPCError({
             code: 'NOT_FOUND',
             message: 'Time slot not found',
           });
         }
 
+        console.log(`[BOOKING] Time slot has ${timeSlot.lessons.length}/${timeSlot.maxStudents} lessons`);
+        
         // 2. Check if slot is available
         if (timeSlot.lessons.length >= timeSlot.maxStudents) {
+          console.log(`[BOOKING] Time slot ${input.timeSlotId} is fully booked`);
           throw new TRPCError({
             code: 'CONFLICT',
             message: 'Time slot is fully booked',
@@ -51,39 +62,42 @@ export const bookingRouter = createTRPCRouter({
             user: true,
           },
         });
-        
+
         if (!student) {
+          console.log(`[BOOKING] Student ${input.studentId} not found`);
           throw new TRPCError({
             code: 'NOT_FOUND',
             message: 'Student not found',
           });
         }
 
-        // Get start and end of current week
+        // Get start and end of current week (Sunday to Saturday)
         const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        startOfWeek.setHours(0, 0, 0, 0);
+        const startOfWeek = dateStartOfWeek(now, { weekStartsOn: 0 }); // 0 = Sunday
+        const endOfWeek = dateEndOfWeek(now, { weekStartsOn: 0 });
         
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        // Reset the time to beginning/end of day
+        startOfWeek.setHours(0, 0, 0, 0);
         endOfWeek.setHours(23, 59, 59, 999);
 
-        // Count lessons in current week
+        console.log(`[BOOKING] Checking weekly lessons for week ${startOfWeek.toISOString()} to ${endOfWeek.toISOString()}`);
+
+        // Count lessons in current week - only count SCHEDULED lessons
         const weeklyLessonsCount = await ctx.prisma.lesson.count({
           where: {
             studentId: input.studentId,
-            startTime: {
-              gte: startOfWeek,
-              lte: endOfWeek,
+            startTime: { 
+              gte: startOfWeek, 
+              lte: endOfWeek 
             },
-            status: {
-              not: LessonStatus.CANCELLED,
-            },
+            status: LessonStatus.SCHEDULED, // Only count active scheduled lessons
           },
         });
 
+        console.log(`[BOOKING] Student has ${weeklyLessonsCount}/${student.maxLessonsPerWeek} lessons this week`);
+
         if (weeklyLessonsCount >= student.maxLessonsPerWeek) {
+          console.log(`[BOOKING] Student ${input.studentId} has reached weekly limit of ${student.maxLessonsPerWeek} lessons`);
           throw new TRPCError({
             code: 'FORBIDDEN',
             message: `You have reached your weekly limit of ${student.maxLessonsPerWeek} lessons`,
@@ -92,14 +106,15 @@ export const bookingRouter = createTRPCRouter({
 
         // 4. Try to create Google Calendar event
         let googleEventId = null;
+        
         try {
           // Only attempt calendar integration if name and email are available
           if (student.user?.name && student.user?.email) {
-            console.log(`Attempting to create calendar event for ${student.user.name}`);
+            console.log(`[BOOKING] Attempting to create calendar event for ${student.user.name}`);
             
             googleEventId = await googleCalendar.createEvent({
               summary: `${input.type} Lesson with ${student.user.name}`,
-              description: `
+              description: ` 
                 Lesson Type: ${input.type}
                 Area: ${input.area || 'MAIN_RINK'}
                 ${input.notes ? `Notes: ${input.notes}` : ''}
@@ -112,17 +127,17 @@ export const bookingRouter = createTRPCRouter({
               ],
               location: timeSlot.rink.address,
             });
-            
+
             if (googleEventId) {
-              console.log(`Created Google Calendar event with ID: ${googleEventId}`);
+              console.log(`[BOOKING] Created Google Calendar event with ID: ${googleEventId}`);
             } else {
-              console.log('Failed to create Google Calendar event, continuing without calendar integration');
+              console.log('[BOOKING] Failed to create Google Calendar event, continuing without calendar integration');
             }
           } else {
-            console.log('Skipping calendar integration - missing student name or email');
+            console.log('[BOOKING] Skipping calendar integration - missing student name or email');
           }
         } catch (error) {
-          console.error('Error creating Google Calendar event:', error);
+          console.error('[BOOKING] Error creating Google Calendar event:', error);
           // Continue with booking even if calendar fails
         }
 
@@ -133,10 +148,12 @@ export const bookingRouter = createTRPCRouter({
           CHOREOGRAPHY: 90,
           COMPETITION_PREP: 95,
         };
-        
+
         const price = defaultPrices[input.type];
+        console.log(`[BOOKING] Calculated price: $${price} for lesson type ${input.type}`);
 
         // 6. Create the lesson and payment in a transaction
+        console.log('[BOOKING] Creating lesson and payment records');
         const result = await ctx.prisma.$transaction(async (prisma) => {
           // Create the lesson
           const lesson = await prisma.lesson.create({
@@ -167,6 +184,9 @@ export const bookingRouter = createTRPCRouter({
           });
 
           // Create payment record
+          const paymentRef = `PAY-${randomUUID().substring(0, 8)}`;
+          console.log(`[BOOKING] Generated payment reference: ${paymentRef}`);
+          
           const payment = await prisma.payment.create({
             data: {
               lessonId: lesson.id,
@@ -174,17 +194,22 @@ export const bookingRouter = createTRPCRouter({
               amount: price,
               method: input.paymentMethod,
               status: PaymentStatus.PENDING,
-              referenceCode: `PAY-${randomUUID().substring(0, 8)}`,
+              referenceCode: paymentRef,
             },
           });
 
           return { lesson, payment };
         });
 
+        console.log(`[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`);
         return result;
       } catch (error) {
-        console.error('Error booking lesson:', error);
-        if (error instanceof TRPCError) throw error;
+        console.error('[BOOKING] Error booking lesson:', error);
+        
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to book lesson',
@@ -202,6 +227,8 @@ export const bookingRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log(`[CANCEL] Starting cancellation process for lesson ${input.lessonId}`);
+        
         // 1. Find the lesson
         const lesson = await ctx.prisma.lesson.findUnique({
           where: {
@@ -213,6 +240,7 @@ export const bookingRouter = createTRPCRouter({
         });
 
         if (!lesson) {
+          console.log(`[CANCEL] Lesson ${input.lessonId} not found`);
           throw new TRPCError({
             code: 'NOT_FOUND',
             message: 'Lesson not found',
@@ -220,7 +248,9 @@ export const bookingRouter = createTRPCRouter({
         }
 
         // 2. Check if the lesson can be cancelled (not in the past)
-        if (lesson.startTime < new Date()) {
+        const now = new Date();
+        if (lesson.startTime < now) {
+          console.log(`[CANCEL] Cannot cancel past lesson ${input.lessonId}`);
           throw new TRPCError({
             code: 'FORBIDDEN',
             message: 'Cannot cancel past lessons',
@@ -229,9 +259,12 @@ export const bookingRouter = createTRPCRouter({
 
         // 3. Check cancellation policy - example: 24 hours notice
         const cancellationDeadline = 24; // hours
-        const hoursUntilLesson = (lesson.startTime.getTime() - new Date().getTime()) / (1000 * 60 * 60);
+        const hoursUntilLesson = (lesson.startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+        
+        console.log(`[CANCEL] Lesson starts in ${hoursUntilLesson.toFixed(1)} hours, deadline is ${cancellationDeadline} hours`);
         
         if (hoursUntilLesson < cancellationDeadline) {
+          console.log(`[CANCEL] Too late to cancel lesson ${input.lessonId} (${hoursUntilLesson.toFixed(1)}h < ${cancellationDeadline}h)`);
           throw new TRPCError({
             code: 'FORBIDDEN',
             message: `Lessons must be cancelled at least ${cancellationDeadline} hours in advance`,
@@ -241,17 +274,21 @@ export const bookingRouter = createTRPCRouter({
         // 4. Delete Google Calendar event if it exists
         if (lesson.googleCalendarEventId) {
           try {
+            console.log(`[CANCEL] Attempting to delete Google Calendar event: ${lesson.googleCalendarEventId}`);
             const deleted = await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
             if (deleted) {
-              console.log(`Deleted Google Calendar event: ${lesson.googleCalendarEventId}`);
+              console.log(`[CANCEL] Deleted Google Calendar event: ${lesson.googleCalendarEventId}`);
+            } else {
+              console.log(`[CANCEL] Failed to delete Google Calendar event: ${lesson.googleCalendarEventId}`);
             }
           } catch (error) {
-            console.error('Error deleting Google Calendar event:', error);
+            console.error('[CANCEL] Error deleting Google Calendar event:', error);
             // Continue with cancellation even if calendar deletion fails
           }
         }
 
         // 5. Update the lesson status
+        console.log(`[CANCEL] Updating lesson ${input.lessonId} status to CANCELLED`);
         const updatedLesson = await ctx.prisma.lesson.update({
           where: {
             id: input.lessonId,
@@ -264,10 +301,15 @@ export const bookingRouter = createTRPCRouter({
           },
         });
 
+        console.log(`[CANCEL] Successfully cancelled lesson ${input.lessonId}`);
         return updatedLesson;
       } catch (error) {
-        console.error('Error cancelling lesson:', error);
-        if (error instanceof TRPCError) throw error;
+        console.error('[CANCEL] Error cancelling lesson:', error);
+        
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to cancel lesson',

@@ -1,4 +1,3 @@
-// src/app/auth/login/page.tsx
 "use client";
 
 import { useState } from 'react';
@@ -21,14 +20,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
-
+      
       if (result?.error) {
         toast({
           title: "Login Failed",
@@ -39,19 +38,23 @@ export default function LoginPage() {
         return;
       }
 
-      // Fetch the user role to redirect appropriately
+      // Fetch the user role to redirect appropriately - use modern async/await pattern
       const response = await fetch('/api/auth/me');
-      const userData = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch user information');
+      }
       
+      const userData = await response.json();
       if (userData.role === 'ADMIN') {
         router.push('/admin/dashboard');
       } else {
         router.push('/student/dashboard');
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: "Login Error",
-        description: "An unexpected error occurred",
+        description: errorMessage,
         variant: "destructive",
       });
       setIsLoading(false);
@@ -72,10 +75,10 @@ export default function LoginPage() {
               <Input 
                 id="email" 
                 type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="Enter your email" 
+                required 
               />
             </div>
             <div className="space-y-2">
@@ -83,10 +86,10 @@ export default function LoginPage() {
               <Input 
                 id="password" 
                 type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="Enter your password" 
+                required 
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>

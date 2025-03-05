@@ -1,4 +1,3 @@
-// src/features/student/components/booking/BookingCalendar.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,12 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { format, addDays, startOfDay, endOfDay, isSameDay } from 'date-fns';
+import { format, addDays, startOfDay, endOfDay } from 'date-fns';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { BookingDialog } from './BookingDialog';
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
-import { TRPCClientError } from '@trpc/client';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const BookingCalendar = () => {
@@ -22,7 +20,7 @@ export const BookingCalendar = () => {
   const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
-  
+
   // Only fetch data when studentId is available
   useEffect(() => {
     if (studentId) {
@@ -35,27 +33,24 @@ export const BookingCalendar = () => {
 
   // Fetch available time slots
   const { data: availableSlots, isLoading, error } = api.student.availability.getAvailableTimeSlots.useQuery(
-    {
-      startDate: startOfDay(date),
-      endDate: endOfDay(addDays(date, 6)),
-      rinkId: selectedRink === "all_rinks" ? undefined : selectedRink,
+    { 
+      startDate: startOfDay(date), 
+      endDate: endOfDay(addDays(date, 6)), 
+      rinkId: selectedRink === "all_rinks" ? undefined : selectedRink, 
     },
-    {
+    { 
       enabled: isReady // Only fetch when we're ready
     }
   );
 
-  // Handle errors with useEffect instead of onError in the query options
+  // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      const errorMessage = error instanceof TRPCClientError 
-        ? error.message 
-        : "An unexpected error occurred while loading time slots.";
-      
-      toast({
-        title: "Error loading time slots",
-        description: errorMessage,
-        variant: "destructive",
+      const errorMessage = error.message || "An unexpected error occurred while loading time slots.";
+      toast({ 
+        title: "Error loading time slots", 
+        description: errorMessage, 
+        variant: "destructive", 
       });
     }
   }, [error, toast]);
@@ -83,6 +78,7 @@ export const BookingCalendar = () => {
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const slot = clickInfo.event.extendedProps;
+    
     // Check if the slot is available
     if (slot.currentStudents >= slot.maxStudents) {
       toast({
@@ -92,6 +88,7 @@ export const BookingCalendar = () => {
       });
       return;
     }
+    
     setSelectedSlot(slot);
     setIsBookingDialogOpen(true);
   };
@@ -123,8 +120,8 @@ export const BookingCalendar = () => {
           </div>
         ) : (
           <div className="h-[600px]">
-            <Calendar
-              initialView="timeGridWeek"
+            <Calendar 
+              initialView="timeGridWeek" 
               events={events}
               selectable={true}
               onDateSelect={handleDateSelect}

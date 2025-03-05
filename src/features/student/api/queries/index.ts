@@ -1,4 +1,3 @@
-// src/features/student/api/queries/index.ts
 import { createTRPCRouter } from '@/lib/trpc';
 import { availabilityRouter } from './availabilityQueries';
 import { bookingRouter } from './bookingQueries';

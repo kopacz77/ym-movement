@@ -15,20 +15,19 @@ import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface LessonDetailsPageProps {
-  params: {
-    lessonId: string;
-  };
+  params: Promise<{ lessonId: string }>;
 }
 
 export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
-  // Access lessonId directly - this is the correct approach for Next.js 15
-  const { lessonId } = params;
+  // Use React.use() to unwrap the params promise
+  const { lessonId } = React.use(params);
+  
   const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
-  
+
   // Only fetch data when studentId is available
   useEffect(() => {
     if (studentId) {
@@ -37,15 +36,9 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
   }, [studentId]);
 
   // Get lesson details
-  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
-    { 
-      studentId,
-     
-    },
-    { 
-      enabled: isReady && !!studentId,
-      retry: false
-    }
+  const { data: lessons, isLoading, error, refetch } = api.student.profile.getStudentLessons.useQuery(
+    { studentId },
+    { enabled: isReady && !!studentId, retry: false }
   );
 
   // Handle errors with useEffect
@@ -74,7 +67,7 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
 
   // Find the current lesson
   const currentLesson = lessons?.find(l => l.id === lessonId);
-
+  
   // Convert to proper type if found
   const typedLesson = currentLesson ? {
     ...currentLesson,
@@ -85,6 +78,13 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
   const canCancel = typedLesson && 
     new Date(typedLesson.startTime) > new Date() && 
     typedLesson.status === LessonStatus.SCHEDULED;
+
+  // Function to handle post-cancellation refresh
+  const handleCancellationComplete = () => {
+    setIsCancelling(false);
+    // Explicitly refetch the data to update the UI
+    refetch();
+  };
 
   if (!isReady || isLoading) {
     return (
@@ -128,13 +128,13 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
           )}
         </div>
       </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Lesson Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Rest of the component remains the same */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Lesson Type</h3>
@@ -183,12 +183,12 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
             )}
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader>
             <CardTitle>Payment Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Rest of the payment section remains the same */}
             {typedLesson.payment ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
@@ -218,7 +218,8 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
                   <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">
                     <h3 className="font-medium text-yellow-800">Payment Instructions</h3>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Please make your payment via {typedLesson.payment.method} using the reference code above. Include the reference code in your payment notes.
+                      Please make your payment via {typedLesson.payment.method} using the reference code above. 
+                      Include the reference code in your payment notes.
                     </p>
                     <div className="mt-2">
                       {typedLesson.payment.method === 'VENMO' && (
@@ -237,11 +238,12 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
           </CardContent>
         </Card>
       </div>
+      
       {isCancelling && (
-        <CancellationDialog
-          lessonId={lessonId}
-          open={isCancelling}
-          onCloseAction={() => setIsCancelling(false)}
+        <CancellationDialog 
+          lessonId={lessonId} 
+          open={isCancelling} 
+          onCloseAction={handleCancellationComplete} 
         />
       )}
     </div>

@@ -1,4 +1,3 @@
-// src/app/(protected)/student/dashboard/page.tsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,8 @@ import Link from 'next/link';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export default function StudentDashboardPage() {
-  // Use the hook without passing any parameter
-  // The LessonSummary and UpcomingLessons components will use their own calls to useCurrentUser
+  const user = useCurrentUser();
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -19,6 +18,7 @@ export default function StudentDashboardPage() {
           <Button>Book a Lesson</Button>
         </Link>
       </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-8">
           <UpcomingLessons />
@@ -27,6 +27,7 @@ export default function StudentDashboardPage() {
           <LessonSummary />
         </div>
       </div>
+      
       <Card>
         <CardHeader>
           <CardTitle>Payment Information</CardTitle>

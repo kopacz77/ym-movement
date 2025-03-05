@@ -1,14 +1,21 @@
+/** @type {import('next').NextConfig} */
 const path = require('path');
 
-/** @type {import('next').NextConfig} */
+// Optional bundle analyzer setup
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000']
-    }
+    optimizeCss: true,
+    optimizePackageImports: ['@/components/ui'],
   },
-  serverExternalPackages: ['@prisma/client'],
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -18,4 +25,7 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig;
+// Export with bundle analyzer for production builds
+module.exports = process.env.NODE_ENV === 'production' 
+  ? withBundleAnalyzer(nextConfig)
+  : nextConfig;

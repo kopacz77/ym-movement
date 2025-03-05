@@ -1,5 +1,5 @@
-// src/components/ui/calendar.tsx
 "use client"
+
 import React from 'react'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -40,39 +40,42 @@ export function Calendar({
   slotMinTime,
   slotMaxTime,
 }: CalendarProps) {
+  // Use modern React 19 class to modify props before passing to component
+  const calendarProps = {
+    plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
+    initialView,
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay',
+    },
+    slotMinTime: slotMinTime || "05:00:00",
+    slotMaxTime: slotMaxTime || "18:00:00",
+    selectable,
+    selectMirror: true,
+    dayMaxEvents: true,
+    weekends: true,
+    events,
+    // Only include resources if they exist
+    ...(resources ? { resources } : {}),
+    select: onDateSelect,
+    eventClick: onEventClick,
+    eventDrop: onEventDrop,
+    businessHours,
+    editable: true,
+    droppable: true,
+    allDaySlot: false,
+    slotDuration: "00:30:00",
+    slotLabelInterval: "00:30",
+    stickyHeaderDates: true,
+    nowIndicator: true,
+    height: "100%"
+  };
+
   return (
     <div className="bg-white border rounded-lg shadow-sm">
       <div className="h-[calc(100vh-12rem)] w-full">
-        <FullCalendar
-          plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
-          initialView={initialView}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
-          slotMinTime={slotMinTime || "05:00:00"}
-          slotMaxTime={slotMaxTime || "18:00:00"}
-          selectable={selectable}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={true}
-          events={events}
-          // Only include resources if they exist
-          {...(resources ? { resources } : {})}
-          select={onDateSelect}
-          eventClick={onEventClick}
-          eventDrop={onEventDrop}
-          businessHours={businessHours}
-          editable={true}
-          droppable={true}
-          allDaySlot={false}
-          slotDuration="00:30:00"
-          slotLabelInterval="00:30"
-          stickyHeaderDates={true}
-          nowIndicator={true}
-          height="100%"
-        />
+        <FullCalendar {...calendarProps} />
       </div>
     </div>
   )
