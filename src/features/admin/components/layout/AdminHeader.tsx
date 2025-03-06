@@ -1,6 +1,5 @@
 // src/features/admin/components/layout/AdminHeader.tsx
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -48,21 +47,34 @@ export const AdminHeader = () => {
       <div className="flex h-full items-center justify-between px-6">
         <div className="flex items-center space-x-2">
           <div className="rounded-lg bg-blue-500 p-1.5">
-            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
           </div>
-          <span className="text-xl font-semibold">Yura Min Academy</span>
+          <span className="text-xl font-semibold">YM Movement</span>
         </div>
+        
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 mr-4">
+          <div className="flex items-center gap-2 mr-4">S
             <span className="text-sm font-medium">
               {session?.user?.name || 'Admin'}
             </span>
           </div>
+          
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
+          
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="icon">

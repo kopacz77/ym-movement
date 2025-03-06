@@ -1,4 +1,4 @@
-// src/features/admin/components/students/shared/NewStudentDialog.tsx
+// Updated src/features/admin/components/students/shared/NewStudentDialog.tsx
 "use client";
 
 import React, { useState } from 'react';
@@ -31,7 +31,7 @@ export const NewStudentDialog = () => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const utils = api.useUtils();
-
+  
   const form = useForm<NewStudentFormData>({
     resolver: zodResolver(newStudentSchema),
     defaultValues: {
@@ -43,8 +43,8 @@ export const NewStudentDialog = () => {
       phone: ""
     }
   });
-
-  // Fix: Use the correct path to the createStudent procedure
+  
+  // Use the correct path to the createStudent procedure
   const createStudent = api.admin.student.createStudent.useMutation({
     onSuccess: (data) => {
       toast({
@@ -60,6 +60,7 @@ export const NewStudentDialog = () => {
         email: "",
         phone: ""
       });
+      
       // Invalidate any queries that should be refreshed
       utils.admin.student.getStudents.invalidate();
       utils.admin.student.getPendingApprovals.invalidate();
@@ -72,7 +73,7 @@ export const NewStudentDialog = () => {
       });
     }
   });
-
+  
   const onSubmit = (data: NewStudentFormData) => {
     createStudent.mutate(data);
   };
@@ -81,7 +82,8 @@ export const NewStudentDialog = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> New Student
+          <Plus className="mr-2 h-4 w-4" />
+          New Student
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -90,89 +92,141 @@ export const NewStudentDialog = () => {
           <DialogDescription>
             Create a new student account. An email invitation will be sent if enabled.
           </DialogDescription>
-        </DialogHeader>
+          </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Student name" {...field} value={field.value || ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="email" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="student@example.com" {...field} value={field.value || ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="level" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Level</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
+            <FormField 
+              control={form.control} 
+              name="name" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder="Student name" 
+                      {...field} 
+                      value={field.value || ""} 
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {Object.values(Level).map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level.replace('_', ' ')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="phone" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone (optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Phone number" {...field} value={field.value || ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="maxLessonsPerWeek" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Lessons per Week</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    min={1} 
-                    {...field} 
-                    value={field.value || 1}
-                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="sendEmail" render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Send welcome email
-                  </FormLabel>
-                </div>
-              </FormItem>
-            )} />
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="email" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="student@example.com" 
+                      {...field} 
+                      value={field.value || ""} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="level" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Level</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.values(Level).map((level) => (
+                        <SelectItem key={level} value={level}>
+                          {level.replace('_', ' ')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="phone" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone (optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Phone number" 
+                      {...field} 
+                      value={field.value || ""} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="maxLessonsPerWeek" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Lessons per Week</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min={1} 
+                      {...field} 
+                      value={field.value || 1} 
+                      onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="sendEmail" 
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox 
+                      checked={field.value} 
+                      onCheckedChange={field.onChange} 
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Send welcome email
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )} 
+            />
+            
             <div className="pt-4 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={createStudent.isPending}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={createStudent.isPending}
+              >
                 {createStudent.isPending ? "Creating..." : "Create Student"}
               </Button>
             </div>

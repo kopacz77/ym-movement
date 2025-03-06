@@ -1,4 +1,4 @@
-// src/app/api/auth/signup/route.ts
+// Updated src/app/api/auth/signup/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcrypt";
 import { prisma } from "@/lib/prisma";
@@ -25,17 +25,17 @@ export async function POST(req: NextRequest) {
     const existingUser = await prisma.user.findUnique({
       where: { email: validatedData.email },
     });
-
+    
     if (existingUser) {
       return NextResponse.json(
-        { message: "User already exists" },
+        { message: "User already exists" }, 
         { status: 409 }
       );
     }
-
+    
     // Hash password
     const hashedPassword = await hash(validatedData.password, 10);
-
+    
     // Create user and student profile in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create the user
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
           role: "STUDENT",
         },
       });
-
+      
       // Create the student profile
       const student = await tx.student.create({
         data: {
@@ -58,23 +58,24 @@ export async function POST(req: NextRequest) {
           isApproved: false,
         },
       });
-
+      
       return { user, student };
     });
-
+    
     // Remove password from result
     const { password, ...user } = result.user;
-
+    
     return NextResponse.json(
       { 
         message: "User created successfully", 
-        user,
-        student: result.student
-      },
+        user, 
+        student: result.student 
+      }, 
       { status: 201 }
     );
   } catch (error) {
     console.error("Error creating user:", error);
+    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: "Validation error", errors: error.errors },

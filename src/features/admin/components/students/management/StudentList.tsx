@@ -1,6 +1,5 @@
 // src/features/admin/components/students/management/StudentList.tsx
 "use client";
-
 import React, { useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -17,14 +16,17 @@ interface StudentListProps {
   onViewProfileAction: (studentId: string) => void;
 }
 
-export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewProfileAction }) => {
+export const StudentList: React.FC<StudentListProps> = ({
+  onEditAction,
+  onViewProfileAction
+}) => {
   const [search, setSearch] = React.useState('');
   const { toast } = useToast();
 
   // Add proper input object to fix the null/undefined issue
-  const { data: studentsData, isLoading, error } = api.admin.student.getStudents.useQuery({
-    search: search || undefined
-  });
+  const { data: studentsData, isLoading, error } = api.admin.student.getStudents.useQuery(
+    { search: search || undefined }
+  );
 
   useEffect(() => {
     if (error) {
@@ -65,6 +67,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
           />
         </div>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>

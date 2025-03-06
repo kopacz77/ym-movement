@@ -33,27 +33,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    let isMounted = true;
+    // Create an abort controller for cleanup
+    const abortController = new AbortController();
+    const signal = abortController.signal;
     
     const fetchUser = async () => {
       if (session?.user) {
         try {
-          const response = await fetch("/api/auth/me");
+          const response = await fetch("/api/auth/me", { signal });
+          
           if (!response.ok) {
-            if (isMounted) {
-              await signOut({ redirect: false });
-              router.push("/auth/login");
-            }
+            // Handle failed fetch
+            await signOut({ redirect: false });
+            router.push("/auth/login");
             return;
           }
           
           const userData = await response.json();
-          if (isMounted) {
+          
+          // Only update state if component is still mounted
+          if (!signal.aborted) {
             setUser(userData);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
-          if (isMounted) {
+          // Only process error if not caused by abort
+          if (!signal.aborted) {
+            console.error("Error fetching user data:", error);
             await signOut({ redirect: false });
             router.push("/auth/login");
           }
@@ -64,13 +69,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (status === "authenticated") {
       fetchUser();
     } else if (status === "unauthenticated") {
-      if (isMounted) {
-        setUser(null);
-      }
+      setUser(null);
     }
     
+    // Cleanup function
     return () => {
-      isMounted = false;
+      abortController.abort();
     };
   }, [session, status, router]);
 
@@ -80,10 +84,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        isLoading: status === "loading", 
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading: status === "loading",
         isAuthenticated: !!user,
         logout,
       }}

@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -17,7 +16,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -37,8 +36,8 @@ export default function LoginPage() {
         setIsLoading(false);
         return;
       }
-
-      // Fetch the user role to redirect appropriately - use modern async/await pattern
+      
+      // Fetch the user role to redirect appropriately
       const response = await fetch('/api/auth/me');
       if (!response.ok) {
         throw new Error('Failed to fetch user information');
@@ -65,7 +64,7 @@ export default function LoginPage() {
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to Yura Min Academy</CardTitle>
+          <CardTitle className="text-2xl">Welcome to YM Movement</CardTitle>
           <CardDescription>Login to your account</CardDescription>
         </CardHeader>
         <CardContent>

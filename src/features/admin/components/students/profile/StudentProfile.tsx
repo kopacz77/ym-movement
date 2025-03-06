@@ -1,7 +1,6 @@
 // src/features/admin/components/students/profile/StudentProfile.tsx
 "use client";
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -9,13 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
-import { Pencil, Mail, Phone, Award } from 'lucide-react'; // Changed 'Bar' to 'Award'
+import { Pencil, Mail, Phone, Award } from 'lucide-react';
 import { format } from 'date-fns';
-import { Student, StudentStats } from '../types';
 
 interface StudentProfileProps {
   studentId: string;
-  onEditAction: () => void; // Renamed to match NextJS server action naming convention
+  onEditAction: () => void;
 }
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({
@@ -31,7 +29,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   );
 
   // Added: Handle errors with useEffect
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       toast({
         title: "Error loading student profile",
@@ -184,13 +182,23 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                         </TableCell>
                         <TableCell>{lesson.type.replace('_', ' ')}</TableCell>
                         <TableCell>
-                          <Badge variant={lesson.status === 'COMPLETED' ? 'default' : lesson.status === 'CANCELLED' ? 'destructive' : 'secondary'}>
+                          <Badge 
+                            variant={
+                              lesson.status === 'COMPLETED' 
+                                ? 'default' 
+                                : lesson.status === 'CANCELLED' 
+                                  ? 'destructive' 
+                                  : 'secondary'
+                            }
+                          >
                             {lesson.status}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           {lesson.payment ? (
-                            <Badge variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}>
+                            <Badge 
+                              variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}
+                            >
                               {lesson.payment.status}
                             </Badge>
                           ) : (
@@ -226,28 +234,32 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                         <span className="text-sm font-medium">Current Level: {student.level.replace('_', ' ')}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '70%' }}></div>
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full" 
+                          style={{ width: '70%' }}
+                        ></div>
                       </div>
                     </div>
-                    
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-medium">Skills Mastered</span>
                         <span className="text-sm font-medium">8/12</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: '66%' }}></div>
+                        <div 
+                          className="bg-green-600 h-2.5 rounded-full" 
+                          style={{ width: '66%' }}
+                        ></div>
                       </div>
                     </div>
                   </div>
                 </div>
-                
                 <div>
                   <h3 className="text-lg font-medium mb-2">Recent Achievements</h3>
                   <div className="border rounded-lg divide-y">
                     <div className="p-3 flex items-center">
                       <div className="bg-blue-100 text-blue-800 p-2 rounded-full mr-3">
-                        <Award className="h-4 w-4" /> {/* Changed from Bar to Award */}
+                        <Award className="h-4 w-4" />
                       </div>
                       <div>
                         <p className="font-medium">Completed Basic Jumps</p>
@@ -256,7 +268,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                     </div>
                     <div className="p-3 flex items-center">
                       <div className="bg-green-100 text-green-800 p-2 rounded-full mr-3">
-                        <Award className="h-4 w-4" /> {/* Changed from Bar to Award */}
+                        <Award className="h-4 w-4" />
                       </div>
                       <div>
                         <p className="font-medium">Mastered Forward Crossovers</p>
@@ -297,7 +309,9 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                           <TableCell>${lesson.payment.amount?.toFixed(2) || '0.00'}</TableCell>
                           <TableCell>{lesson.payment.method || 'N/A'}</TableCell>
                           <TableCell>
-                            <Badge variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}>
+                            <Badge 
+                              variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}
+                            >
                               {lesson.payment.status}
                             </Badge>
                           </TableCell>

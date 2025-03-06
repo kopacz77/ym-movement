@@ -1,19 +1,17 @@
+// Updated src/features/admin/components/analytics/RevenueChart.tsx
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, } from 'recharts';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+} from 'recharts';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency } from '@/lib/utils';
-import { TRPCClientError } from '@trpc/client';
 
 type TimeRange = 'week' | 'month' | 'year';
-
-interface PaymentData {
-  amount: number;
-  createdAt: string | Date; // Accept both string and Date types
-}
 
 interface ChartData {
   date: string;
@@ -23,15 +21,15 @@ interface ChartData {
 export const RevenueChart = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
   const { toast } = useToast();
-
-  // UPDATED: Use the "analytics" namespace for revenue procedures.
+  
+  // Use the "analytics" namespace for revenue procedures
   const { data, isLoading, error } = api.admin.analytics.getRevenueReport.useQuery(
     { period: timeRange },
     { retry: 3 }
   );
-
+  
   useEffect(() => {
-    if (error instanceof TRPCClientError) {
+    if (error) {
       toast({
         title: "Error loading revenue data",
         description: error.message,
@@ -39,41 +37,60 @@ export const RevenueChart = () => {
       });
     }
   }, [error, toast]);
-
+  
   const chartData = React.useMemo(() => {
-    if (!data) return [];
+    if (!data || !Array.isArray(data)) return [];
     
-    const groupedData = (data as PaymentData[]).reduce((acc: Record<string, number>, payment) => {
-      // Safely handle the date conversion
-      let dateObj: Date;
+    const formattedData: ChartData[] = [];
+    
+    for (const item of data) {
+      // Safe type checking
+      if (typeof item !== 'object' || item === null) continue;
       
-      if (payment.createdAt instanceof Date) {
-        dateObj = payment.createdAt;
-      } else if (typeof payment.createdAt === 'string') {
-        dateObj = new Date(payment.createdAt);
-      } else {
-        // Fallback to current date if createdAt is invalid
-        console.warn('Invalid createdAt value:', payment.createdAt);
-        dateObj = new Date();
+      // Extract date with fallback
+      let date = '';
+      let revenue = 0;
+      
+      if ('date' in item && typeof item.date === 'string') {
+        date = item.date;
+      } else if ('createdAt' in item) {
+        // Handle alternative date property
+        const createdAt = item.createdAt;
+        if (createdAt instanceof Date) {
+          date = createdAt.toISOString().split('T')[0];
+        } else if (typeof createdAt === 'string') {
+          date = new Date(createdAt).toISOString().split('T')[0];
+        }
       }
       
-      // Make sure the date is valid before using toISOString
-      if (!isNaN(dateObj.getTime())) {
-        const date = dateObj.toISOString().split('T')[0];
-        acc[date] = (acc[date] || 0) + payment.amount;
+      // Extract amount/revenue with fallback
+      if ('revenue' in item && typeof item.revenue === 'number') {
+        revenue = item.revenue;
+      } else if ('totalRevenue' in item && typeof item.totalRevenue === 'number') {
+        revenue = item.totalRevenue;
+      } else if ('amount' in item && typeof item.amount === 'number') {
+        revenue = item.amount;
       }
       
-      return acc;
-    }, {});
-
-    return Object.entries(groupedData)
-      .map(([date, amount]): ChartData => ({
-        date,
-        revenue: amount,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      // Only add valid data points
+      if (date && revenue) {
+        // Check if date already exists in our formatted data
+        const existingIndex = formattedData.findIndex(d => d.date === date);
+        if (existingIndex >= 0) {
+          formattedData[existingIndex].revenue += revenue;
+        } else {
+          formattedData.push({ date, revenue });
+        }
+      }
+    }
+    
+    // Sort by date
+    return formattedData.sort((a, b) => a.date.localeCompare(b.date));
   }, [data]);
-
+  
+  const totalRevenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
+  const averageRevenue = chartData.length > 0 ? totalRevenue / chartData.length : 0;
+  
   if (isLoading) {
     return (
       <Card className="w-full h-[400px]">
@@ -89,7 +106,7 @@ export const RevenueChart = () => {
       </Card>
     );
   }
-
+  
   if (error) {
     return (
       <Card className="w-full h-[400px] border-red-200 bg-red-50">
@@ -103,9 +120,6 @@ export const RevenueChart = () => {
     );
   }
 
-  const totalRevenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
-  const averageRevenue = chartData.length > 0 ? totalRevenue / chartData.length : 0;
-
   return (
     <Card className="w-full h-[400px]">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -116,7 +130,10 @@ export const RevenueChart = () => {
             <div>Average: {formatCurrency(averageRevenue)}/day</div>
           </div>
         </div>
-        <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
+        <Select 
+          value={timeRange} 
+          onValueChange={(value: TimeRange) => setTimeRange(value)}
+        >
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
@@ -129,40 +146,39 @@ export const RevenueChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <LineChart 
+            data={chartData} 
+            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 12 }}
-              tickFormatter={(date) =>
-                new Date(date).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                })
-              }
+            <XAxis 
+              dataKey="date" 
+              tick={{ fontSize: 12 }} 
+              tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+              })} 
             />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              tickFormatter={(value) => `$${value}`}
+            <YAxis 
+              tick={{ fontSize: 12 }} 
+              tickFormatter={(value) => `$${value}`} 
             />
-            <Tooltip
-              formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
-              labelFormatter={(label) =>
-                new Date(label).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })
-              }
+            <Tooltip 
+              formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']} 
+              labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+              })} 
             />
-            <Line
-              type="monotone"
-              dataKey="revenue"
-              stroke="#8884d8"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
+            <Line 
+              type="monotone" 
+              dataKey="revenue" 
+              stroke="#8884d8" 
+              strokeWidth={2} 
+              dot={{ r: 4 }} 
+              activeDot={{ r: 6 }} 
             />
           </LineChart>
         </ResponsiveContainer>

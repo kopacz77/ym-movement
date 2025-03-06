@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google';
 import { Providers } from '@/providers';
 
 // Modern font loading
-const inter = Inter({ 
-  subsets: ['latin'], 
+const inter = Inter({
+  subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
 });

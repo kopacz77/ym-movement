@@ -1,6 +1,7 @@
 // src/features/admin/components/scheduling/ScheduleManager.tsx
 "use client";
-import React, { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -20,13 +21,13 @@ interface TimeSlotFormData {
   rinkId?: string;
 }
 
-export const ScheduleManager: React.FC = () => {
+export function ScheduleManager() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg | null>(null);
-  const toast = useToast();
+  const { toast } = useToast();
   const utils = api.useUtils();
 
   // Get rinks data
@@ -69,7 +70,7 @@ export const ScheduleManager: React.FC = () => {
   // Delete time slot mutation
   const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
     onSuccess: () => {
-      toast.toast({
+      toast({
         title: "Success",
         description: "Time slot deleted successfully"
       });
@@ -77,8 +78,8 @@ export const ScheduleManager: React.FC = () => {
       setSelectedEvent(null);
       utils.admin.schedule.getTimeSlots.invalidate();
     },
-    onError: (err: any) => {
-      toast.toast({
+    onError: (err) => {
+      toast({
         title: "Error",
         description: err.message,
         variant: "destructive"
@@ -89,14 +90,14 @@ export const ScheduleManager: React.FC = () => {
   // Assign student mutation
   const assignStudent = api.admin.schedule.assignStudentToTimeSlot.useMutation({
     onSuccess: () => {
-      toast.toast({
+      toast({
         title: "Success",
         description: "Student assigned successfully"
       });
       utils.admin.schedule.getTimeSlots.invalidate();
     },
-    onError: (err: any) => {
-      toast.toast({
+    onError: (err) => {
+      toast({
         title: "Error",
         description: err.message,
         variant: "destructive"
@@ -107,14 +108,14 @@ export const ScheduleManager: React.FC = () => {
   // Unassign student mutation
   const unassignStudent = api.admin.schedule.unassignStudent.useMutation({
     onSuccess: () => {
-      toast.toast({
+      toast({
         title: "Success",
         description: "Student unassigned successfully"
       });
       utils.admin.schedule.getTimeSlots.invalidate();
     },
-    onError: (err: any) => {
-      toast.toast({
+    onError: (err) => {
+      toast({
         title: "Error",
         description: err.message,
         variant: "destructive"
@@ -122,40 +123,41 @@ export const ScheduleManager: React.FC = () => {
     },
   });
 
-  const handleDateSelect = (selectInfo: DateSelectArg) => {
+  const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
     setTimeSlotFormData({
       startTime: selectInfo.start,
       endTime: selectInfo.end,
-      rinkId: selectInfo.resource?.id,
+      // Don't try to access resource property as it doesn't exist on DateSelectArg
+      rinkId: undefined, // We'll need to select the rink manually in the form
     });
     setIsCreateDialogOpen(true);
-  };
+  }, []);
 
-  const handleCreateTimeSlotClick = () => {
+  const handleCreateTimeSlotClick = useCallback(() => {
     setTimeSlotFormData({
       startTime: null,
       endTime: null,
     });
     setIsCreateDialogOpen(true);
-  };
+  }, []);
 
-  const handleEventClick = (clickInfo: EventClickArg) => {
+  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
     setSelectedEvent(clickInfo);
     setIsManageDialogOpen(true);
-  };
+  }, []);
 
-  const handleEventDrop = (dropInfo: EventDropArg) => {
+  const handleEventDrop = useCallback((dropInfo: EventDropArg) => {
     // For updateTimeSlot, we need to get the actual mutation function
     const updateTimeSlot = api.admin.schedule.updateTimeSlot.useMutation({
       onSuccess: () => {
-        toast.toast({
+        toast({
           title: "Success",
           description: "Time slot updated successfully"
         });
         utils.admin.schedule.getTimeSlots.invalidate();
       },
-      onError: (error: any) => {
-        toast.toast({
+      onError: (error) => {
+        toast({
           title: "Error",
           description: "Failed to update time slot",
           variant: "destructive"
@@ -170,7 +172,7 @@ export const ScheduleManager: React.FC = () => {
       startTime: dropInfo.event.start!,
       endTime: dropInfo.event.end!,
     });
-  };
+  }, [toast, utils.admin.schedule]);
 
   return (
     <div className="space-y-6">
@@ -187,7 +189,9 @@ export const ScheduleManager: React.FC = () => {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>
-                  {timeSlotFormData?.startTime ? "Create Time Slot for Selected Time" : "Create New Time Slot"}
+                  {timeSlotFormData?.startTime
+                    ? "Create Time Slot for Selected Time"
+                    : "Create New Time Slot"}
                 </DialogTitle>
               </DialogHeader>
               {timeSlotFormData && (
@@ -196,7 +200,7 @@ export const ScheduleManager: React.FC = () => {
                   initialEndTime={timeSlotFormData.endTime}
                   initialRinkId={timeSlotFormData.rinkId}
                   rinks={rinks || []}
-                  onSubmit={() => {
+                  onSubmitAction={() => {
                     setIsCreateDialogOpen(false);
                     setTimeSlotFormData(null);
                   }}
@@ -204,7 +208,7 @@ export const ScheduleManager: React.FC = () => {
               )}
             </DialogContent>
           </Dialog>
-          
+
           {/* Bulk Create Slots Dialog */}
           <Dialog open={isBulkCreateOpen} onOpenChange={setIsBulkCreateOpen}>
             <DialogTrigger asChild>
@@ -254,18 +258,16 @@ export const ScheduleManager: React.FC = () => {
                   <p>{selectedEvent.event.extendedProps.rink?.name}</p>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <p className="font-medium">Assign Student</p>
                 <div className="flex gap-2">
-                  <Select
-                    onValueChange={(studentId: string) => {
-                      assignStudent.mutate({
-                        timeSlotId: selectedEvent.event.id,
-                        studentId,
-                      });
-                    }}
-                  >
+                  <Select onValueChange={(studentId: string) => {
+                    assignStudent.mutate({
+                      timeSlotId: selectedEvent.event.id,
+                      studentId,
+                    });
+                  }}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Select student" />
                     </SelectTrigger>
@@ -279,7 +281,7 @@ export const ScheduleManager: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <p className="font-medium">Assigned Students</p>
                 <div className="space-y-1">
@@ -304,7 +306,7 @@ export const ScheduleManager: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button
                   variant="outline"
@@ -365,4 +367,4 @@ export const ScheduleManager: React.FC = () => {
       </Card>
     </div>
   );
-};
+}

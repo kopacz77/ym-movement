@@ -1,4 +1,4 @@
-// src/features/student/components/booking/BookingDialog.tsx
+// Updated src/features/student/components/booking/BookingDialog.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -12,7 +12,6 @@ import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { LessonType, PaymentMethod } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import { TRPCClientErrorLike } from '@trpc/client';
 
 interface BookingDialogProps {
   slot: any;
@@ -27,7 +26,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-
+  
   const bookLesson = api.student.booking.bookLesson.useMutation();
   
   // Handle errors with useEffect
@@ -53,7 +52,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
       onCloseAction();
     }
   }, [bookLesson.isSuccess, bookLesson.data, router, onCloseAction, toast]);
-
+  
   const handleBooking = () => {
     setIsSubmitting(true);
     bookLesson.mutate({
@@ -64,7 +63,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
       notes: notes.trim() || undefined,
     });
   };
-
+  
   // Get lesson type price (in a real app, this would come from settings)
   const getLessonTypePrice = (type: LessonType) => {
     const prices = {
@@ -100,11 +99,15 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
               <span>{slot.rink.name}</span>
             </div>
           </div>
+          
           {/* Booking options */}
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Lesson Type</label>
-              <Select value={lessonType} onValueChange={(val) => setLessonType(val as LessonType)}>
+              <Select 
+                value={lessonType} 
+                onValueChange={(val) => setLessonType(val as LessonType)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select lesson type" />
                 </SelectTrigger>
@@ -124,9 +127,13 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="space-y-2">
               <label className="text-sm font-medium">Payment Method</label>
-              <Select value={paymentMethod} onValueChange={(val) => setPaymentMethod(val as PaymentMethod)}>
+              <Select 
+                value={paymentMethod} 
+                onValueChange={(val) => setPaymentMethod(val as PaymentMethod)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select payment method" />
                 </SelectTrigger>
@@ -136,20 +143,29 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="space-y-2">
               <label className="text-sm font-medium">Additional Notes (Optional)</label>
-              <Textarea
-                placeholder="Any special requirements or notes for the instructor"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+              <Textarea 
+                placeholder="Any special requirements or notes for the instructor" 
+                value={notes} 
+                onChange={(e) => setNotes(e.target.value)} 
               />
             </div>
           </div>
+          
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onCloseAction} disabled={isSubmitting}>
+            <Button 
+              variant="outline" 
+              onClick={onCloseAction} 
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button onClick={handleBooking} disabled={isSubmitting || bookLesson.isPending}>
+            <Button 
+              onClick={handleBooking} 
+              disabled={isSubmitting || bookLesson.isPending}
+            >
               {isSubmitting || bookLesson.isPending ? "Booking..." : "Book Lesson"}
             </Button>
           </div>

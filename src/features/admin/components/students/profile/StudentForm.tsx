@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +40,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   onSubmitAction = () => {},
 }) => {
   const { toast } = useToast();
-  const [formInitialized, setFormInitialized] = React.useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
 
   // Load student data by ID if needed
   const { data: studentData, isLoading } = api.admin.student.getStudent.useQuery(
@@ -49,7 +48,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
     { enabled: !!student?.id && !student?.level }
   );
 
-  // React 19 friendly form initialization
+  // Initialize form with default values first
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: {
@@ -72,8 +71,6 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   useEffect(() => {
     if ((student || studentData) && !formInitialized) {
       const data = studentData || student;
-      
-      // Safety checks for React 19 strict mode
       if (!data) return;
       
       const values = {
@@ -188,13 +185,118 @@ export const StudentForm: React.FC<StudentFormProps> = ({
               </FormItem>
             )}
           />
-          {/* Rest of form fields removed for brevity */}
+          <FormField
+            control={form.control}
+            name="level"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Level</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(Level).map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {level.replace('_', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="maxLessonsPerWeek"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Max Lessons per Week</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={1}
+                    {...field}
+                    value={field.value || 1}
+                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date of Birth</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         
-        {/* Emergency contact section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Emergency Contact</h3>
-          {/* Emergency contact fields here */}
+          <FormField
+            control={form.control}
+            name="emergencyContact.name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="emergencyContact.phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="emergencyContact.relationship"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Relationship</FormLabel>
+                <FormControl>
+                  <Input {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         
         <FormField
@@ -227,8 +329,8 @@ export const StudentForm: React.FC<StudentFormProps> = ({
             type="submit"
             disabled={updateStudent.isPending || createStudent.isPending}
           >
-            {updateStudent.isPending || createStudent.isPending 
-              ? "Saving..." 
+            {updateStudent.isPending || createStudent.isPending
+              ? "Saving..."
               : (student?.id ? "Update" : "Create")}
           </Button>
         </div>

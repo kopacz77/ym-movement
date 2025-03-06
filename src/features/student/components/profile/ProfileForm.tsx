@@ -1,6 +1,5 @@
 // src/features/student/components/profile/ProfileForm.tsx
 "use client";
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,10 +32,8 @@ export const ProfileForm = () => {
 
   // Fetch student profile
   const { data: studentData, isLoading } = api.student.profile.getStudentProfile.useQuery(
-    { studentId }, 
-    { 
-      enabled: isReady && !!studentId,
-    }
+    { studentId },
+    { enabled: isReady && !!studentId }
   );
 
   // Initialize form with fetched data
@@ -92,7 +89,6 @@ export const ProfileForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!studentId) {
       toast({
         title: "Error",
@@ -145,8 +141,7 @@ export const ProfileForm = () => {
                   <Label htmlFor="name">Name</Label>
                   <Input 
                     id="name" 
-                    value={studentData.user && typeof studentData.user === 'object' && 
-                           'name' in studentData.user && studentData.user.name || ""} 
+                    value={studentData.user && typeof studentData.user === 'object' && 'name' in studentData.user && studentData.user.name || ""} 
                     disabled 
                   />
                 </div>
@@ -154,27 +149,24 @@ export const ProfileForm = () => {
                   <Label htmlFor="email">Email</Label>
                   <Input 
                     id="email" 
-                    value={studentData.user && typeof studentData.user === 'object' && 
-                           'email' in studentData.user && studentData.user.email || ""} 
+                    value={studentData.user && typeof studentData.user === 'object' && 'email' in studentData.user && studentData.user.email || ""} 
                     disabled 
                   />
                 </div>
               </div>
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  placeholder="e.g. +1 (555) 123-4567"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                <Input 
+                  id="phone" 
+                  placeholder="e.g. +1 (555) 123-4567" 
+                  value={phone} 
+                  onChange={(e) => setPhone(e.target.value)} 
                 />
               </div>
               <div className="flex items-center gap-2">
                 <Label>Level:</Label>
                 <Badge>
-                  {typeof studentData.level === 'string' ? 
-                    studentData.level.replace('_', ' ') : 
-                    "Unknown Level"}
+                  {typeof studentData.level === 'string' ? studentData.level.replace('_', ' ') : "Unknown Level"}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
@@ -189,29 +181,29 @@ export const ProfileForm = () => {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="emergency-name">Contact Name</Label>
-                <Input
-                  id="emergency-name"
-                  placeholder="Full name"
-                  value={emergencyName}
-                  onChange={(e) => setEmergencyName(e.target.value)}
+                <Input 
+                  id="emergency-name" 
+                  placeholder="Full name" 
+                  value={emergencyName} 
+                  onChange={(e) => setEmergencyName(e.target.value)} 
                 />
               </div>
               <div>
                 <Label htmlFor="emergency-phone">Contact Phone</Label>
-                <Input
-                  id="emergency-phone"
-                  placeholder="e.g. +1 (555) 123-4567"
-                  value={emergencyPhone}
-                  onChange={(e) => setEmergencyPhone(e.target.value)}
+                <Input 
+                  id="emergency-phone" 
+                  placeholder="e.g. +1 (555) 123-4567" 
+                  value={emergencyPhone} 
+                  onChange={(e) => setEmergencyPhone(e.target.value)} 
                 />
               </div>
               <div>
                 <Label htmlFor="emergency-relationship">Relationship</Label>
-                <Input
-                  id="emergency-relationship"
-                  placeholder="e.g. Parent, Spouse, Friend"
-                  value={emergencyRelationship}
-                  onChange={(e) => setEmergencyRelationship(e.target.value)}
+                <Input 
+                  id="emergency-relationship" 
+                  placeholder="e.g. Parent, Spouse, Friend" 
+                  value={emergencyRelationship} 
+                  onChange={(e) => setEmergencyRelationship(e.target.value)} 
                 />
               </div>
             </div>

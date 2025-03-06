@@ -1,3 +1,4 @@
+// Updated middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -10,13 +11,13 @@ export async function middleware(request: NextRequest) {
 
   // Check if the path is a public route
   const isPublicPath = path === "/" || 
-                       path === "/auth/login" || 
-                       path === "/auth/signup" || 
-                       path.startsWith("/api/auth");
+                      path === "/auth/login" || 
+                      path === "/auth/signup" || 
+                      path.startsWith("/api/auth");
 
   // Get the token and check if the user is authenticated
-  const token = await getToken({
-    req: request,
+  const token = await getToken({ 
+    req: request, 
     secret: process.env.NEXTAUTH_SECRET,
   });
   
@@ -30,7 +31,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
     
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    const loginUrl = new URL("/auth/login", request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Redirect authenticated users away from login/signup pages
@@ -38,7 +40,8 @@ export async function middleware(request: NextRequest) {
     // Redirect to the appropriate dashboard based on role
     const role = token.role as string;
     const redirectPath = role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
-    return NextResponse.redirect(new URL(redirectPath, request.url));
+    const dashboardUrl = new URL(redirectPath, request.url);
+    return NextResponse.redirect(dashboardUrl);
   }
 
   // Handle role-based access for admin and student routes
@@ -47,12 +50,14 @@ export async function middleware(request: NextRequest) {
     
     // Prevent students from accessing admin routes
     if (path.startsWith("/admin") && role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/student/dashboard", request.url));
+      const studentDashboard = new URL("/student/dashboard", request.url);
+      return NextResponse.redirect(studentDashboard);
     }
     
     // Prevent admins from accessing student routes
     if (path.startsWith("/student") && role !== "STUDENT") {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+      const adminDashboard = new URL("/admin/dashboard", request.url);
+      return NextResponse.redirect(adminDashboard);
     }
   }
 

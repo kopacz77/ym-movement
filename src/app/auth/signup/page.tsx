@@ -67,7 +67,7 @@ export default function SignupPage() {
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Join Yura Min Academy</CardTitle>
+          <CardTitle className="text-2xl">Join YM Movement</CardTitle>
           <CardDescription>Create a new student account</CardDescription>
         </CardHeader>
         <CardContent>

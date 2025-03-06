@@ -1,5 +1,5 @@
+// src/features/student/components/booking/BookingCalendar.tsx
 "use client";
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,24 +33,22 @@ export const BookingCalendar = () => {
 
   // Fetch available time slots
   const { data: availableSlots, isLoading, error } = api.student.availability.getAvailableTimeSlots.useQuery(
-    { 
-      startDate: startOfDay(date), 
-      endDate: endOfDay(addDays(date, 6)), 
-      rinkId: selectedRink === "all_rinks" ? undefined : selectedRink, 
+    {
+      startDate: startOfDay(date),
+      endDate: endOfDay(addDays(date, 6)),
+      rinkId: selectedRink === "all_rinks" ? undefined : selectedRink,
     },
-    { 
-      enabled: isReady // Only fetch when we're ready
-    }
+    { enabled: isReady } // Only fetch when we're ready
   );
 
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
       const errorMessage = error.message || "An unexpected error occurred while loading time slots.";
-      toast({ 
-        title: "Error loading time slots", 
-        description: errorMessage, 
-        variant: "destructive", 
+      toast({
+        title: "Error loading time slots",
+        description: errorMessage,
+        variant: "destructive",
       });
     }
   }, [error, toast]);
@@ -59,6 +57,7 @@ export const BookingCalendar = () => {
   const events = availableSlots?.map((slot: any) => {
     const studentCount = slot.currentStudents;
     const isAvailable = studentCount < slot.maxStudents;
+    
     return {
       id: slot.id,
       title: `${studentCount}/${slot.maxStudents} students${isAvailable ? ' - Available' : ' - Full'}`,
@@ -120,8 +119,8 @@ export const BookingCalendar = () => {
           </div>
         ) : (
           <div className="h-[600px]">
-            <Calendar 
-              initialView="timeGridWeek" 
+            <Calendar
+              initialView="timeGridWeek"
               events={events}
               selectable={true}
               onDateSelect={handleDateSelect}
@@ -134,6 +133,7 @@ export const BookingCalendar = () => {
             />
           </div>
         )}
+        
         {isBookingDialogOpen && selectedSlot && studentId && (
           <BookingDialog
             slot={selectedSlot}

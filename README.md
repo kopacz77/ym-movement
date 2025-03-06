@@ -1,4 +1,4 @@
-# Yura Min Academy Admin & Scheduling System
+# YM Movement Admin & Scheduling System
 A full-stack application built with Next.js, TRPC, Prisma, and Tailwind CSS to manage lessons, student registrations, scheduling, and payments. This system also integrates with Google Calendar to synchronize lesson events and offers an admin dashboard for analytics and reporting.
 
 # Overview

@@ -1,6 +1,5 @@
 // src/features/student/components/dashboard/LessonSummary.tsx
 "use client";
-
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
@@ -12,7 +11,7 @@ export const LessonSummary = () => {
   const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
-  
+
   // Only fetch data when studentId is available
   useEffect(() => {
     if (studentId) {
@@ -21,10 +20,10 @@ export const LessonSummary = () => {
   }, [studentId]);
 
   const { data: stats, isLoading, error } = api.student.profile.getStudentLessonStats.useQuery(
-    { studentId }, 
+    { studentId },
     { 
       enabled: isReady && !!studentId,
-      retry: false
+      retry: false 
     }
   );
 
@@ -39,7 +38,9 @@ export const LessonSummary = () => {
     }
   }, [error, toast]);
 
-  const weeklyProgressPercentage = stats ? (stats.thisWeekCount / stats.maxAllowed) * 100 : 0;
+  const weeklyProgressPercentage = stats 
+    ? (stats.thisWeekCount / stats.maxAllowed) * 100 
+    : 0;
 
   // Show loading state when either:
   // 1. We don't have a studentId yet
@@ -74,6 +75,7 @@ export const LessonSummary = () => {
                 <span className="text-sm text-muted-foreground">Cancelled</span>
               </div>
             </div>
+            
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Weekly Lessons</span>

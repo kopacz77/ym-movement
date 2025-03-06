@@ -27,5 +27,5 @@ const nextConfig = {
 
 // Export with bundle analyzer for production builds
 module.exports = process.env.NODE_ENV === 'production' 
-  ? withBundleAnalyzer(nextConfig)
+  ? withBundleAnalyzer(nextConfig) 
   : nextConfig;

@@ -16,8 +16,7 @@ interface LessonCardProps {
 }
 
 export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
-  const isUpcoming = new Date(lesson.startTime) > new Date() && 
-                      lesson.status === LessonStatus.SCHEDULED;
+  const isUpcoming = new Date(lesson.startTime) > new Date() && lesson.status === LessonStatus.SCHEDULED;
   
   const getStatusBadge = () => {
     switch (lesson.status) {
@@ -35,7 +34,7 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
   const getPaymentBadge = () => {
     if (!lesson.payment) return null;
     
-    switch (lesson.payment.status) {
+    switch (lesson.payment.status as PaymentStatus) {
       case PaymentStatus.PENDING:
         return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Payment Pending</Badge>;
       case PaymentStatus.COMPLETED:

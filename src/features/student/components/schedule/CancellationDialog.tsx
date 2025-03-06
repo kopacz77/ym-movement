@@ -1,6 +1,5 @@
 // src/features/student/components/schedule/CancellationDialog.tsx
 "use client";
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  
+
   // Create mutation without onSuccess/onError callbacks
   const cancelLesson = api.student.booking.cancelLesson.useMutation();
 
@@ -32,11 +31,9 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
         title: "Lesson cancelled",
         description: "Your lesson has been cancelled successfully.",
       });
-      
       // Call the onCloseAction callback to trigger a refetch in the parent component
       onCloseAction();
-      
-      // Refresh the schedule page data 
+      // Refresh the schedule page data
       router.refresh();
     }
   }, [cancelLesson.isSuccess, router, onCloseAction, toast]);
@@ -63,6 +60,7 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
     }
     
     setIsSubmitting(true);
+    
     cancelLesson.mutate({
       lessonId,
       reason,
@@ -81,7 +79,8 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
             <div>
               <p className="font-medium text-yellow-800">Cancellation Policy</p>
               <p className="text-sm text-yellow-700 mt-1">
-                Lessons must be cancelled at least 24 hours in advance. Late cancellations may still be charged.
+                Lessons must be cancelled at least 24 hours in advance. 
+                Late cancellations may still be charged. 
                 Frequent cancellations may affect your booking privileges.
               </p>
             </div>
@@ -89,24 +88,24 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
           
           <div className="space-y-2">
             <label className="text-sm font-medium">Reason for Cancellation</label>
-            <Textarea 
-              placeholder="Please provide a reason for cancelling this lesson" 
-              value={reason} 
-              onChange={(e) => setReason(e.target.value)} 
+            <Textarea
+              placeholder="Please provide a reason for cancelling this lesson"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
             />
           </div>
           
           <div className="flex justify-end gap-2 pt-2">
-            <Button 
-              variant="outline" 
-              onClick={onCloseAction} 
+            <Button
+              variant="outline"
+              onClick={onCloseAction}
               disabled={isSubmitting || cancelLesson.isPending}
             >
               Go Back
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleCancellation} 
+            <Button
+              variant="destructive"
+              onClick={handleCancellation}
               disabled={isSubmitting || cancelLesson.isPending}
             >
               {isSubmitting || cancelLesson.isPending ? "Cancelling..." : "Confirm Cancellation"}

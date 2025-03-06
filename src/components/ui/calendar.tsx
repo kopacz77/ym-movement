@@ -1,5 +1,5 @@
+// src/components/ui/calendar.tsx
 "use client"
-
 import React from 'react'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'

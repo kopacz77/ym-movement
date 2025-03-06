@@ -1,4 +1,4 @@
-// src/features/student/components/dashboard/UpcomingLessons.tsx
+// Updated src/features/student/components/dashboard/UpcomingLessons.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -22,23 +22,23 @@ export const UpcomingLessons = () => {
       setIsReady(true);
     }
   }, [studentId]);
-
+  
   // Use useMemo to create a stable date reference
   const currentDate = useMemo(() => new Date(), []);
-
+  
   // Fetch upcoming lessons for the student
   const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
     { 
       studentId, 
       status: 'SCHEDULED', 
-      startDate: currentDate
+      startDate: currentDate 
     }, 
     { 
-      enabled: isReady && !!studentId,
-      retry: false
+      enabled: isReady && !!studentId, 
+      retry: false 
     }
   );
-
+  
   // Handle errors
   useEffect(() => {
     if (error) {
@@ -49,7 +49,7 @@ export const UpcomingLessons = () => {
       });
     }
   }, [error, toast]);
-
+  
   // Only show the next 3 lessons
   const upcomingLessons = lessons?.slice(0, 3);
   

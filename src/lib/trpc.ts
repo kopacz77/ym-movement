@@ -33,14 +33,11 @@ const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
     // Don't expose internal errors in production
-    const isSafeError = error.code === 'BAD_REQUEST' || 
-                         error.code === 'UNAUTHORIZED' || 
-                         error.code === 'FORBIDDEN';
-                         
+    const isSafeError = error.code === 'BAD_REQUEST' || error.code === 'UNAUTHORIZED' || error.code === 'FORBIDDEN';
     const sanitizedMessage = process.env.NODE_ENV === 'production' && !isSafeError 
       ? 'An unexpected error occurred' 
       : error.message;
-      
+    
     return {
       ...shape,
       message: sanitizedMessage,

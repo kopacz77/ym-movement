@@ -52,7 +52,7 @@ export const StudentHeader = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <span className="text-xl font-semibold">Yura Min Academy</span>
+          <span className="text-xl font-semibold">YM Movement</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 mr-4">
