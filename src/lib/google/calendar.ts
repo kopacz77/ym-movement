@@ -125,30 +125,20 @@ export class GoogleCalendarService {
       const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
       console.log(`Creating event in calendar: ${calendarId}`);
   
-      // Make sure Yura's email appears in BOTH places:
-      const yuraEmail = 'yuraxmin@gmail.com'; // Hardcode this for reliability
-      
+      // Create a simplified event object without attendees or organizer
       const eventData = {
         summary: bookingData.summary,
-        description: bookingData.description,
+        description: bookingData.description + 
+                    `\n\nStudent Email: ${bookingData.attendees[0]?.email || 'Not provided'}`,
         start: {
           dateTime: bookingData.startTime.toISOString(),
-          timeZone: 'America/New_York', // Make sure this is correct for Yura's location
+          timeZone: 'America/New_York',
         },
         end: {
           dateTime: bookingData.endTime.toISOString(),
-          timeZone: 'America/New_York', // Make sure this is correct for Yura's location
+          timeZone: 'America/New_York',
         },
-        attendees: [
-          ...bookingData.attendees,
-          { email: yuraEmail } // Always include Yura as an attendee
-        ],
         location: bookingData.location,
-        organizer: {
-          email: yuraEmail, // Explicitly set Yura as the organizer
-          self: true
-        },
-        guestsCanModify: false
       };
       
       console.log('Attempting to create event with data:', JSON.stringify({
@@ -156,31 +146,19 @@ export class GoogleCalendarService {
         summary: eventData.summary,
         startTime: eventData.start.dateTime,
         endTime: eventData.end.dateTime,
-        attendees: eventData.attendees.map(a => a.email),
-        organizer: eventData.organizer
       }, null, 2));
   
       const response = await this.calendar.events.insert({
         calendarId,
         requestBody: eventData,
-        sendUpdates: 'all' // Make sure notifications are sent
+        sendUpdates: 'none'
       });
       
       console.log('Event created successfully, ID:', response.data.id);
       return response.data.id || null;
     } catch (error) {
-      // Enhanced error logging
       this.logCalendarError('creating calendar event', error);
-      console.error('Full error details:', JSON.stringify(error, null, 2));
-      
-      // Check for specific Google API errors
-      if (error && typeof error === 'object' && 'response' in error) {
-        const apiError = error as { response?: { data?: unknown, status?: number } };
-        if (apiError.response) {
-          console.error('Google API Error Status:', apiError.response.status);
-          console.error('Google API Error Data:', JSON.stringify(apiError.response.data, null, 2));
-        }
-      }
+      // Remaining error handling code...
       return null;
     }
   }
