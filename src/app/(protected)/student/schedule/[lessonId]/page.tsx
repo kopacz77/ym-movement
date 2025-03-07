@@ -1,115 +1,172 @@
 // src/app/(protected)/student/schedule/[lessonId]/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { Calendar, Clock, MapPin, DollarSign } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { format } from 'date-fns';
+import { Loader2, Calendar, Clock, MapPin, CreditCard, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { LessonStatus } from '@prisma/client';
-import { CancellationDialog } from '@/features/student/components/schedule/CancellationDialog';
+import { PaymentMethod, LessonStatus } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { TRPCClientError } from '@trpc/client';
+import { Textarea } from '@/components/ui/textarea';
 
-interface LessonDetailsPageProps {
-  params: { lessonId: string };
-}
-
-export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
-  const { lessonId } = params;
-  const [isCancelling, setIsCancelling] = useState(false);
+export default function LessonDetailsPage({ params }: { params: { lessonId: string } }) {
+  const lessonId = params.lessonId;
+  const [lessonData, setLessonData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
   const { toast } = useToast();
   const router = useRouter();
-  const { id: studentId } = useCurrentUser();
-  const [isReady, setIsReady] = useState(false);
 
-  // Only fetch data when studentId is available
-  useEffect(() => {
-    if (studentId) {
-      setIsReady(true);
+  // Use the new API path for getting a lesson
+  const { data, isLoading: apiLoading, error: apiError } = api.student.lessons.getLesson.useQuery(
+    { id: lessonId },
+    {
+      enabled: !!lessonId,
+      refetchOnWindowFocus: false,
+      retry: 1 // Only retry once
     }
-  }, [studentId]);
-
-  // Get lesson details
-  const { data: lessons, isLoading, error, refetch } = api.student.profile.getStudentLessons.useQuery(
-    { studentId },
-    { enabled: isReady && !!studentId, retry: false }
   );
 
-  // Handle errors with useEffect
-  useEffect(() => {
-    if (error) {
+  // Use the new API path for canceling a lesson
+  const cancelLesson = api.student.lessons.cancelLesson.useMutation({
+    onSuccess: () => {
+      setIsCancelDialogOpen(false);
       toast({
-        title: "Error loading lesson",
-        description: error.message,
-        variant: "destructive",
+        title: 'Lesson cancelled',
+        description: 'Your lesson has been successfully cancelled.',
       });
       router.push('/student/schedule');
-    }
-  }, [error, toast, router]);
-
-  // Check if the requested lesson belongs to this student
-  useEffect(() => {
-    if (lessons && !lessons.some(l => l.id === lessonId)) {
+    },
+    onError: (error) => { // Remove the explicit type here
       toast({
-        title: "Lesson not found",
-        description: "The requested lesson was not found or does not belong to you.",
-        variant: "destructive",
+        title: 'Error cancelling lesson',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive',
       });
-      router.push('/student/schedule');
     }
-  }, [lessons, lessonId, toast, router]);
+  });
 
-  // Find the current lesson
-  const currentLesson = lessons?.find(l => l.id === lessonId);
+  useEffect(() => {
+    if (data) {
+      setLessonData(data);
+      setIsLoading(false);
+    }
+    if (apiError) {
+      setError(apiError instanceof Error ? apiError.message : 'Failed to load lesson details');
+      setIsLoading(false);
+    }
+  }, [data, apiError]);
 
-  // Convert to proper type if found
-  const typedLesson = currentLesson ? {
-    ...currentLesson,
-    // Convert null to undefined for notes if needed
-    notes: currentLesson.notes === null ? undefined : currentLesson.notes
-  } : null;
-
-  const canCancel = typedLesson && 
-    new Date(typedLesson.startTime) > new Date() && 
-    typedLesson.status === LessonStatus.SCHEDULED;
-
-  // Function to handle post-cancellation refresh
-  const handleCancellationComplete = () => {
-    setIsCancelling(false);
-    // Explicitly refetch the data to update the UI
-    refetch();
+  const handleCancelClick = () => {
+    setIsCancelDialogOpen(true);
   };
 
-  if (!isReady || isLoading) {
+  const handleCancellationSubmit = () => {
+    cancelLesson.mutate({
+      lessonId,
+      reason: cancellationReason || 'No reason provided'
+    });
+  };
+
+  // Simple Cancel Lesson Dialog implementation
+  const CancelLessonDialog = () => (
+    <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Cancel Lesson</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <p className="mb-4">Are you sure you want to cancel this lesson? This action cannot be undone.</p>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Reason for cancellation (optional)</label>
+            <Textarea 
+              placeholder="Please provide a reason for cancellation" 
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)}>
+            Keep Lesson
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={handleCancellationSubmit}
+            disabled={cancelLesson.isPending} 
+          >
+            {cancelLesson.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
+  if (isLoading || apiLoading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <p>Loading lesson details...</p>
+      <div className="flex justify-center items-center h-[500px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!typedLesson) {
+  if (error) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <p>Lesson not found</p>
+      <div className="flex flex-col items-center justify-center h-[500px] text-center">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h2 className="text-xl font-bold mb-2">Error Loading Lesson</h2>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <Button onClick={() => router.push('/student/schedule')}>
+          Back to Schedule
+        </Button>
       </div>
     );
   }
 
-  const getStatusBadge = () => {
-    switch (typedLesson.status) {
-      case LessonStatus.SCHEDULED:
-        return <Badge className="bg-blue-100 text-blue-800">Scheduled</Badge>;
-      case LessonStatus.COMPLETED:
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case LessonStatus.CANCELLED:
-        return <Badge className="bg-red-100 text-red-800">Cancelled</Badge>;
+  if (!lessonData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[500px] text-center">
+        <AlertCircle className="h-12 w-12 text-warning mb-4" />
+        <h2 className="text-xl font-bold mb-2">Lesson Not Found</h2>
+        <p className="text-muted-foreground mb-4">The requested lesson could not be found.</p>
+        <Button onClick={() => router.push('/student/schedule')}>
+          Back to Schedule
+        </Button>
+      </div>
+    );
+  }
+
+  const getStatusBadge = (status: LessonStatus) => {
+    switch (status) {
+      case 'SCHEDULED':
+        return <Badge className="bg-green-500">Scheduled</Badge>;
+      case 'CANCELLED':
+        return <Badge variant="destructive">Cancelled</Badge>;
+      case 'COMPLETED':
+        return <Badge variant="outline">Completed</Badge>;
       default:
-        return <Badge>{typedLesson.status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const getPaymentStatusBadge = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return <Badge variant="secondary">Payment Pending</Badge>;
+      case 'COMPLETED':
+        return <Badge className="bg-green-500">Paid</Badge>;
+      case 'FAILED':
+        return <Badge variant="destructive">Payment Failed</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -117,69 +174,70 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Lesson Details</h1>
-        <div className="flex items-center gap-2">
-          {getStatusBadge()}
-          {canCancel && (
-            <Button 
-              variant="outline" 
-              onClick={() => setIsCancelling(true)}
-            >
+        <div className="flex space-x-2">
+          {lessonData.status === 'SCHEDULED' && (
+            <Button variant="destructive" onClick={handleCancelClick}>
               Cancel Lesson
             </Button>
           )}
+          <Button variant="outline" onClick={() => router.push('/student/schedule')}>
+            Back to Schedule
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Lesson Information</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+              <span>Lesson Information</span>
+              {getStatusBadge(lessonData.status)}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Lesson Type</h3>
-                <p>{typedLesson.type.replace('_', ' ')}</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Date</p>
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <p>{format(new Date(lessonData.startTime), 'MMMM d, yyyy')}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Duration</h3>
-                <p>{typedLesson.duration} minutes</p>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Time</p>
+                <div className="flex items-center">
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <p>
+                    {format(new Date(lessonData.startTime), 'h:mm a')} - {format(new Date(lessonData.endTime), 'h:mm a')}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-1 col-span-2">
+                <p className="text-sm text-muted-foreground">Location</p>
+                <div className="flex items-center">
+                  <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <p>{lessonData.rink?.name || 'No location specified'}</p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Type</p>
+                <p>{lessonData.type || 'Not specified'}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Duration</p>
+                <p>{lessonData.duration} minutes</p>
               </div>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Date</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{format(new Date(typedLesson.startTime), 'EEEE, MMMM d, yyyy')}</span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Time</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span>
-                  {format(new Date(typedLesson.startTime), 'h:mm a')} - {format(new Date(typedLesson.endTime), 'h:mm a')}
-                </span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Location</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{typedLesson.rink.name}</span>
-                <p className="text-sm text-muted-foreground">{typedLesson.rink.address}</p>
-              </div>
-            </div>
-            {typedLesson.notes && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>
-                <p className="mt-1">{typedLesson.notes}</p>
+            {lessonData.notes && (
+              <div className="space-y-1 pt-2 border-t">
+                <p className="text-sm text-muted-foreground">Notes</p>
+                <p>{lessonData.notes}</p>
               </div>
             )}
-            {typedLesson.status === LessonStatus.CANCELLED && typedLesson.cancellationReason && (
-              <div className="p-3 bg-red-50 border border-red-100 rounded-md">
-                <h3 className="text-sm font-medium text-red-800">Cancellation Reason</h3>
-                <p className="text-sm text-red-700 mt-1">{typedLesson.cancellationReason}</p>
+            {lessonData.status === 'CANCELLED' && lessonData.cancellationReason && (
+              <div className="space-y-1 pt-2 border-t">
+                <p className="text-sm text-muted-foreground">Cancellation Reason</p>
+                <p>{lessonData.cancellationReason}</p>
               </div>
             )}
           </CardContent>
@@ -187,66 +245,60 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Payment Information</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+              <span>Payment Information</span>
+              {lessonData.payment && getPaymentStatusBadge(lessonData.payment.status)}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {typedLesson.payment ? (
-              <>
+            {lessonData.payment ? (
+              <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Amount</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
-                      <span>${typedLesson.payment.amount.toFixed(2)}</span>
-                    </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Amount</p>
+                    <p>${lessonData.payment.amount.toFixed(2)}</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-                    <p className="mt-1">
-                      {typedLesson.payment.status === 'COMPLETED' ? 'Paid' : 'Pending'}
-                    </p>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Method</p>
+                    <p>{lessonData.payment.method}</p>
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <p className="text-sm text-muted-foreground">Reference Code</p>
+                    <p className="font-mono">{lessonData.payment.referenceCode}</p>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Payment Method</h3>
-                  <p className="mt-1">{typedLesson.payment.method}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Reference Code</h3>
-                  <p className="mt-1">{typedLesson.payment.referenceCode}</p>
-                </div>
-                {typedLesson.payment.status !== 'COMPLETED' && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">
-                    <h3 className="font-medium text-yellow-800">Payment Instructions</h3>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Please make your payment via {typedLesson.payment.method} using the reference code above. 
-                      Include the reference code in your payment notes.
-                    </p>
-                    <div className="mt-2">
-                      {typedLesson.payment.method === 'VENMO' && (
-                        <p className="text-sm font-medium">Venmo: @yura-min</p>
-                      )}
-                      {typedLesson.payment.method === 'ZELLE' && (
-                        <p className="text-sm font-medium">Zelle: +1 (714) 743-7071</p>
-                      )}
+                {lessonData.payment.status === 'PENDING' && (
+                  <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
+                    <div className="flex items-start">
+                      <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-amber-800">Payment Pending</p>
+                        <p className="text-sm text-amber-700 mt-1">
+                          Please complete your payment using {lessonData.payment.method === PaymentMethod.VENMO ? 'Venmo' : 'Zelle'}.
+                          Include your reference code ({lessonData.payment.referenceCode}) when making the payment.
+                        </p>
+                        <div className="mt-3">
+                          <Badge variant="outline" className="font-medium text-amber-700 border-amber-300 bg-amber-50">
+                            {lessonData.payment.method === PaymentMethod.VENMO ? '@yura-min' : 'Zelle: 714-743-7071'}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             ) : (
-              <p className="text-muted-foreground">No payment information available.</p>
+              <div className="text-center py-4">
+                <CreditCard className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground">No payment information available</p>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {isCancelling && (
-        <CancellationDialog
-          lessonId={lessonId}
-          open={isCancelling}
-          onCloseAction={handleCancellationComplete}
-        />
-      )}
+      {/* Inline cancel dialog */}
+      {isCancelDialogOpen && <CancelLessonDialog />}
     </div>
   );
 }

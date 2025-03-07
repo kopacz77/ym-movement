@@ -125,11 +125,11 @@ export class GoogleCalendarService {
       const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
       console.log(`Creating event in calendar: ${calendarId}`);
   
-      // Create a simplified event object without attendees or organizer
+      // Create a simplified event object without attendees
       const eventData = {
         summary: bookingData.summary,
         description: bookingData.description + 
-                    `\n\nStudent Email: ${bookingData.attendees[0]?.email || 'Not provided'}`,
+                    `\n\nStudent: ${bookingData.attendees[0]?.email || 'Not provided'}`,
         start: {
           dateTime: bookingData.startTime.toISOString(),
           timeZone: 'America/New_York',
@@ -151,14 +151,23 @@ export class GoogleCalendarService {
       const response = await this.calendar.events.insert({
         calendarId,
         requestBody: eventData,
-        sendUpdates: 'none'
+        sendUpdates: 'none' // Don't send updates since we removed attendees
       });
       
       console.log('Event created successfully, ID:', response.data.id);
       return response.data.id || null;
     } catch (error) {
       this.logCalendarError('creating calendar event', error);
-      // Remaining error handling code...
+      console.error('Full error details:', JSON.stringify(error, null, 2));
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const apiError = error as { response?: { data?: unknown, status?: number } };
+        if (apiError.response) {
+          console.error('Google API Error Status:', apiError.response.status);
+          console.error('Google API Error Data:', JSON.stringify(apiError.response.data, null, 2));
+        }
+      }
+      
       return null;
     }
   }

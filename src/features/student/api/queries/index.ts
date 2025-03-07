@@ -1,10 +1,12 @@
-import { createTRPCRouter } from '@/lib/trpc';
-import { availabilityRouter } from './availabilityQueries';
-import { bookingRouter } from './bookingQueries';
-import { profileRouter } from './profileQueries';
+// src/features/student/api/queries/index.ts (MODIFIED)
+import { createTRPCRouter } from "@/lib/trpc";
+import { bookingRouter } from "./bookingQueries";
+import { lessonRouter } from "./lessonQueries"; // Import the new router
+
+// Add any other imports for existing routers
 
 export const studentRouter = createTRPCRouter({
-  availability: availabilityRouter,
   booking: bookingRouter,
-  profile: profileRouter,
+  lessons: lessonRouter, // Add the new namespace
+ 
 });
