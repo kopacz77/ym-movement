@@ -4,6 +4,7 @@ import { createTRPCRouter, publicProcedure } from '@/lib/trpc';
 import { TRPCError } from '@trpc/server';
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from '@prisma/client';
 import { googleCalendar } from '@/lib/google/calendar';
+import { sendLessonConfirmationEmail } from '@/lib/email'; // Import the new email function
 import { randomUUID } from 'crypto';
 import { startOfWeek as dateStartOfWeek, endOfWeek as dateEndOfWeek } from 'date-fns';
 
@@ -112,9 +113,11 @@ export const bookingRouter = createTRPCRouter({
           if (student.user?.name && student.user?.email) {
             console.log(`[BOOKING] Attempting to create calendar event for ${student.user.name}`);
             
+            // Updated: Don't include price in the calendar event description
             googleEventId = await googleCalendar.createEvent({
-              summary: `${input.type} Lesson with ${student.user.name}`,
+              summary: `Ice Dance Lesson with ${student.user.name}`,
               description: ` 
+                Student: ${student.user.name}
                 Lesson Type: ${input.type}
                 Area: ${input.area || 'MAIN_RINK'}
                 ${input.notes ? `Notes: ${input.notes}` : ''}
@@ -141,7 +144,7 @@ export const bookingRouter = createTRPCRouter({
           // Continue with booking even if calendar fails
         }
 
-        // 5. Calculate price
+        // 5. Calculate price (unchanged, but needed for payment record)
         const defaultPrices = {
           PRIVATE: 75,
           GROUP: 45,
@@ -154,6 +157,10 @@ export const bookingRouter = createTRPCRouter({
 
         // 6. Create the lesson and payment in a transaction
         console.log('[BOOKING] Creating lesson and payment records');
+        // Generate payment reference code
+        const paymentRef = `PAY-${randomUUID().substring(0, 8)}`;
+        console.log(`[BOOKING] Generated payment reference: ${paymentRef}`);
+        
         const result = await ctx.prisma.$transaction(async (prisma) => {
           // Create the lesson
           const lesson = await prisma.lesson.create({
@@ -184,9 +191,6 @@ export const bookingRouter = createTRPCRouter({
           });
 
           // Create payment record
-          const paymentRef = `PAY-${randomUUID().substring(0, 8)}`;
-          console.log(`[BOOKING] Generated payment reference: ${paymentRef}`);
-          
           const payment = await prisma.payment.create({
             data: {
               lessonId: lesson.id,
@@ -202,6 +206,37 @@ export const bookingRouter = createTRPCRouter({
         });
 
         console.log(`[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`);
+        
+        // 7. Send confirmation email to the student
+        if (student.user?.email && student.user?.name) {
+          try {
+            console.log(`[BOOKING] Sending confirmation email to ${student.user.email}`);
+            
+            await sendLessonConfirmationEmail(
+              student.user.email,
+              student.user.name,
+              {
+                startTime: timeSlot.startTime,
+                endTime: timeSlot.endTime,
+                type: input.type,
+                rinkName: timeSlot.rink.name,
+                rinkAddress: timeSlot.rink.address,
+                rinkTimezone: timeSlot.rink.timezone,
+              },
+              input.paymentMethod,
+              paymentRef,
+              googleEventId
+            );
+            
+            console.log(`[BOOKING] Successfully sent confirmation email to ${student.user.email}`);
+          } catch (emailError) {
+            console.error('[BOOKING] Error sending confirmation email:', emailError);
+            // Continue even if email fails - the booking itself was successful
+          }
+        } else {
+          console.log('[BOOKING] Skipping confirmation email - missing student name or email');
+        }
+        
         return result;
       } catch (error) {
         console.error('[BOOKING] Error booking lesson:', error);
@@ -218,6 +253,7 @@ export const bookingRouter = createTRPCRouter({
       }
     }),
 
+  // The cancel lesson functionality remains unchanged
   cancelLesson: publicProcedure
     .input(
       z.object({
