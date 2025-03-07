@@ -1,20 +1,44 @@
 // src/features/admin/components/students/management/StudentManager.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-// Import StudentForm from profile directory instead of local import
-import { StudentForm } from '@/features/admin/components/students/profile/StudentForm';
-import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, Plus, MoreHorizontal, Edit, Trash, CheckCircle, XCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { TRPCClientError } from '@trpc/client';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { StudentForm } from "@/features/admin/components/students/profile/StudentForm";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  Plus,
+  MoreHorizontal,
+  Edit,
+  Trash,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Student {
   id: string;
@@ -26,36 +50,35 @@ interface Student {
 }
 
 export const StudentManager = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { toast } = useToast();
 
-  // Fetch students - updated to use student namespace
-  const { data: studentsData, isLoading, refetch, error } = api.admin.student.getStudents.useQuery(
-    { search }
-  );
+  // Fetch students from the student namespace using the search query
+  const { data: studentsData, isLoading, refetch, error } =
+    api.admin.student.getStudents.useQuery({ search });
 
-  // Handle errors with useEffect
+  // Handle errors
   useEffect(() => {
     if (error) {
       toast({
         title: "Error loading students",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   }, [error, toast]);
-  
-  // Extract students with proper typing
+
+  // Extract students array (fallback to empty array)
   const students = studentsData?.students || [];
 
-  // Delete student mutation - using toggleStatus to deactivate instead
+  // Toggle student status mutation for activating/deactivating
   const toggleStudentStatus = api.admin.student.toggleStatus.useMutation({
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Student status updated successfully"
+        description: "Student status updated successfully",
       });
       refetch();
     },
@@ -63,7 +86,7 @@ export const StudentManager = () => {
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     },
   });
@@ -74,10 +97,12 @@ export const StudentManager = () => {
   };
 
   const handleDeleteStudent = async (studentId: string) => {
-    if (window.confirm('Are you sure you want to deactivate this student?')) {
-      toggleStudentStatus.mutate({ 
+    if (
+      window.confirm("Are you sure you want to deactivate this student?")
+    ) {
+      toggleStudentStatus.mutate({
         studentId,
-        active: false 
+        active: false,
       });
     }
   };
@@ -108,11 +133,13 @@ export const StudentManager = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
-                <DialogTitle>{selectedStudent ? 'Edit Student' : 'Add New Student'}</DialogTitle>
+                <DialogTitle>
+                  {selectedStudent ? "Edit Student" : "Add New Student"}
+                </DialogTitle>
               </DialogHeader>
               <StudentForm
                 student={selectedStudent}
-                onSubmit={() => {
+                onSubmitAction={() => {
                   setIsFormOpen(false);
                   setSelectedStudent(null);
                   refetch();
@@ -137,21 +164,26 @@ export const StudentManager = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                <TableCell colSpan={6} className="text-center">
+                  Loading...
+                </TableCell>
               </TableRow>
-            ) : students?.length === 0 ? (
+            ) : students.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center">No students found</TableCell>
+                <TableCell colSpan={6} className="text-center">
+                  No students found
+                </TableCell>
               </TableRow>
             ) : (
-              students?.map((student: any) => (
+              students.map((student: any) => (
                 <TableRow key={student.id}>
-                  <TableCell>{student.user?.name || 'N/A'}</TableCell>
-                  <TableCell>{student.user?.email || 'N/A'}</TableCell>
-                  <TableCell>{student.level || 'N/A'}</TableCell>
-                  <TableCell>{student.maxLessonsPerWeek || 0} lessons</TableCell>
+                  <TableCell>{student.user?.name || "N/A"}</TableCell>
+                  <TableCell>{student.user?.email || "N/A"}</TableCell>
+                  <TableCell>{student.level || "N/A"}</TableCell>
                   <TableCell>
-                    {/* Fixed: Using default variant with custom styling instead of "success" */}
+                    {student.maxLessonsPerWeek || 0} lessons
+                  </TableCell>
+                  <TableCell>
                     <Badge
                       variant={student.active ? "default" : "secondary"}
                       className={student.active ? "bg-green-100 text-green-800" : ""}
@@ -170,7 +202,11 @@ export const StudentManager = () => {
                         <DropdownMenuItem onClick={() => handleEdit(student)}>
                           <Edit className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(student.id, !student.active)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleStatusChange(student.id, !student.active)
+                          }
+                        >
                           {student.active ? (
                             <>
                               <XCircle className="mr-2 h-4 w-4" /> Deactivate

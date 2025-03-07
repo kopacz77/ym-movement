@@ -8,22 +8,19 @@ import { useToast } from '@/components/ui/use-toast';
 
 export const OverviewCards = () => {
   const { toast } = useToast();
-
+  
   const { data, error, isLoading } = api.admin.analytics.getOverview.useQuery(
     undefined, 
-    { 
-      refetchInterval: 30000, 
-      retry: 3 
-    }
+    { refetchInterval: 30000, retry: 3 }
   );
 
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({ 
-        title: "Error loading overview", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Error loading overview",
+        description: error.message,
+        variant: "destructive"
       });
     }
   }, [error, toast]);

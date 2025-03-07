@@ -1,9 +1,8 @@
-// src/features/scheduling/components/scheduling/ConflictDetector.tsx
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ValidationResult } from '../../utils/validationUtils';
+import { ValidationResult } from '../../utils/ValidationUtils';
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 interface ConflictDetectorProps {

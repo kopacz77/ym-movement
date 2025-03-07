@@ -1,4 +1,3 @@
-// src/features/scheduling/components/calendar/CalendarGrid.tsx
 "use client";
 import React from 'react';
 import { format, addMinutes, startOfWeek, endOfWeek } from 'date-fns';
@@ -8,14 +7,19 @@ import { TimeSlotCell } from './TimeSlotCell';
 interface CalendarGridProps {
   view: CalendarView;
   slots: CalendarSlot[];
-  onSlotClick: (slot: CalendarSlot) => void;
-  onSlotHover?: (slot: CalendarSlot) => void;
+  onSlotClickAction: (slot: CalendarSlot) => void; // Renamed to indicate a Server Action
+  onSlotHoverAction?: (slot: CalendarSlot) => void; // Renamed to indicate a Server Action
 }
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 8); // 8 AM to 10 PM
 const MINUTES = [0, 30]; // 30-minute intervals
 
-export const CalendarGrid: React.FC<CalendarGridProps> = ({ view, slots, onSlotClick, onSlotHover }) => {
+export const CalendarGrid: React.FC<CalendarGridProps> = ({ 
+  view, 
+  slots, 
+  onSlotClickAction, 
+  onSlotHoverAction 
+}) => {
   const startDate = startOfWeek(view.startDate);
   const endDate = endOfWeek(view.endDate);
 
@@ -52,8 +56,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ view, slots, onSlotC
                 <TimeSlotCell
                   key={`${dayIndex}-${hour}-${minute}`}
                   slot={slot}
-                  onClick={() => slot && onSlotClick(slot)}
-                  onHover={() => slot && onSlotHover?.(slot)}
+                  onClick={() => slot && onSlotClickAction(slot)}
+                  onHover={() => slot && onSlotHoverAction?.(slot)}
                 />
               );
             }))}

@@ -1,135 +1,149 @@
-// features/admin/components/students/progress/ProgressChart.tsx
+// features/admin/components/students/progress/LessonProgress.tsx
 "use client";
 
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
-interface ProgressChartProps {
+interface LessonProgressProps {
   studentId: string;
 }
 
-export const ProgressChart: React.FC<ProgressChartProps> = ({ studentId }) => {
-  const [timeRange, setTimeRange] = React.useState<'month' | 'quarter' | 'year'>('month');
+// Use type instead of interface to better match the API return type
+type LessonStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+
+// Properly define API lesson type for React 19 compatibility
+type APILesson = {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  type: string;
+  status: LessonStatus;
+  notes: string | null;
+  duration: number;
+  rink: {
+    id: string;
+    name: string;
+    timezone: string;
+    address: string;
+    maxCapacity: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  student: {
+    user: {
+      id: string;
+      name: string | null;
+      email: string;
+      createdAt: Date;
+      updatedAt: Date;
+      emailVerified: Date | null;
+    };
+  };
+  payment: {
+    id: string;
+    amount: number;
+    status: string;
+  } | null;
+};
+
+export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => {
   const { toast } = useToast();
+  
+  // Use a consistent query pattern for React 19
+  const { data: lessons, isLoading, error } = api.admin.schedule.getLessonsByDate.useQuery({
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+    endDate: new Date()
+  });
 
-  // Get lessons and calculate progress from them
-  const { data: lessons, isLoading, error } = api.admin.schedule.getLessonsByDate.useQuery(
-    { 
-      startDate: calculateStartDate(timeRange),
-      endDate: new Date()
-    },
-    {
-      select: (data) => {
-        // Filter for this student's lessons
-        const studentLessons = data.filter(lesson => 
-          lesson.student?.user?.id === studentId && 
-          lesson.status !== 'CANCELLED'
-        );
+  // Filter lessons for the specific student
+  const studentLessons = React.useMemo(() => {
+    if (!lessons) return [];
+    return lessons.filter(lesson => 
+      lesson.student?.user?.id === studentId && 
+      lesson.status !== 'CANCELLED'
+    );
+  }, [lessons, studentId]);
 
-        // Process lessons into progress data points
-        return processLessonsIntoProgressData(studentLessons);
-      }
-    }
-  );
-
-  // Handle errors with useEffect
+  // Using useEffect for error handling is more React 19 friendly
   useEffect(() => {
     if (error) {
       toast({
-        title: "Error loading progress data",
+        title: "Error loading lesson progress",
         description: error.message,
         variant: "destructive"
       });
     }
   }, [error, toast]);
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Progress Tracking</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          Loading...
-        </CardContent>
-      </Card>
-    );
-  }
+  const getStatusColor = (status: LessonStatus) => {
+    switch (status) {
+      case 'COMPLETED': return 'bg-green-100 text-green-800';
+      case 'SCHEDULED': return 'bg-blue-100 text-blue-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Progress Tracking</CardTitle>
-        <Select 
-          value={timeRange} 
-          onValueChange={(value: 'month' | 'quarter' | 'year') => setTimeRange(value)}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Select period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="month">Month</SelectItem>
-            <SelectItem value="quarter">Quarter</SelectItem>
-            <SelectItem value="year">Year</SelectItem>
-          </SelectContent>
-        </Select>
+      <CardHeader>
+        <CardTitle>Lesson Progress</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={lessons || []}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={(date) => new Date(date).toLocaleDateString()}
-              />
-              <YAxis />
-              <Tooltip
-                labelFormatter={(label) => new Date(label).toLocaleDateString()}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="attendance" 
-                stroke="#8884d8" 
-                name="Attendance Rate" 
-              />
-              <Line 
-                type="monotone" 
-                dataKey="completion" 
-                stroke="#82ca9d" 
-                name="Completion Rate" 
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        {isLoading ? (
+          <div className="text-center py-4">Loading progress...</div>
+        ) : !studentLessons?.length ? (
+          <div className="text-center py-4 text-muted-foreground">No lesson progress recorded yet</div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Notes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {studentLessons.map((lesson: APILesson) => (
+                <TableRow key={lesson.id}>
+                  <TableCell>{format(new Date(lesson.startTime), 'PP')}</TableCell>
+                  <TableCell>
+                    {format(new Date(lesson.startTime), 'p')} - {format(new Date(lesson.endTime), 'p')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {lesson.status === 'COMPLETED' ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <Badge variant="default" className={getStatusColor(lesson.status)}>
+                        {lesson.status}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>{lesson.type.replace('_', ' ')}</TableCell>
+                  <TableCell>{lesson.rink.name}</TableCell>
+                  <TableCell className="max-w-xs">
+                    <p className="text-sm text-muted-foreground truncate">
+                      {lesson.notes ?? '-'}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );
 };
-
-// Helper function to calculate start date based on time range
-function calculateStartDate(timeRange: 'month' | 'quarter' | 'year'): Date {
-  const now = new Date();
-  switch (timeRange) {
-    case 'month':
-      return new Date(now.setMonth(now.getMonth() - 1));
-    case 'quarter':
-      return new Date(now.setMonth(now.getMonth() - 3));
-    case 'year':
-      return new Date(now.setFullYear(now.getFullYear() - 1));
-  }
-}
-
-// Helper function to process lessons into progress data
-function processLessonsIntoProgressData(lessons: any[]) {
-  return lessons.map(lesson => ({
-    date: lesson.startTime,
-    attendance: lesson.status === 'COMPLETED' ? 100 : 0,
-    completion: lesson.status === 'COMPLETED' ? 100 : 
-                lesson.status === 'SCHEDULED' ? 0 : 50
-  }));
-}

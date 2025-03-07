@@ -1,18 +1,18 @@
-// src/features/scheduling/hooks/useTimeSlots.ts
 import { useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { CalendarSlot, TimeRange, BookingConstraints } from '../types';
 import { useToast } from '@/components/ui/use-toast';
+import { TRPCClientErrorLike } from '@trpc/client';
 
 export const useTimeSlots = (constraints?: BookingConstraints) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const createTimeSlot = api.admin.createTimeSlot.useMutation({
+  const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
     onSuccess: () => {
       toast({ title: "Success", description: "Time slot created successfully" });
     },
-    onError: (error) => {
+    onError: (error: TRPCClientErrorLike<any>) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });

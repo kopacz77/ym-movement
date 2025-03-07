@@ -1,7 +1,41 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
-import { PaymentStatus, LessonStatus } from "@prisma/client";
+import { PaymentStatus, LessonStatus, LessonType, RinkArea, Level } from "@prisma/client";
+import { startOfMonth, endOfMonth } from "date-fns";
+
+// Define proper type interfaces for our data structures
+interface ActivityData {
+  date: string;
+  totalLessons: number;
+  completedLessons: number;
+  cancelledLessons: number;
+  byType: Record<string, number>;
+  byArea: Record<string, number>;
+}
+
+interface RevenueData {
+  date: string;
+  totalRevenue: number;
+  byMethod: Record<string, number>;
+  byLessonType: Record<string, number>;
+  byStudentLevel: Record<string, number>;
+}
+
+interface AttendanceData {
+  total: number;
+  attended: number;
+  cancelled: number;
+  scheduled: number;
+  attendanceRate: number;
+  lessons: Array<{
+    id: string;
+    date: Date;
+    status: string;
+    cancellationReason?: string;
+    duration: number;
+  }>;
+}
 
 export const analyticsRouter = createTRPCRouter({
   getOverview: publicProcedure.query(async ({ ctx }) => {
@@ -69,29 +103,44 @@ export const analyticsRouter = createTRPCRouter({
         });
 
         // Group by date and calculate statistics
-        const activityByDate = lessons.reduce((acc, lesson) => {
+        const activityByDate: Record<string, ActivityData> = {};
+        
+        lessons.forEach(lesson => {
           const date = lesson.startTime.toISOString().split('T')[0];
-          if (!acc[date]) {
-            acc[date] = { date, totalLessons: 0, completedLessons: 0, cancelledLessons: 0, byType: {}, byArea: {} };
+          
+          if (!activityByDate[date]) {
+            activityByDate[date] = { 
+              date, 
+              totalLessons: 0, 
+              completedLessons: 0, 
+              cancelledLessons: 0, 
+              byType: {}, 
+              byArea: {} 
+            };
           }
-          acc[date].totalLessons++;
+          
+          activityByDate[date].totalLessons++;
+          
           if (lesson.status === LessonStatus.COMPLETED) {
-            acc[date].completedLessons++;
+            activityByDate[date].completedLessons++;
           } else if (lesson.status === LessonStatus.CANCELLED) {
-            acc[date].cancelledLessons++;
+            activityByDate[date].cancelledLessons++;
           }
+          
           // Track by lesson type
-          if (!acc[date].byType[lesson.type]) {
-            acc[date].byType[lesson.type] = 0;
+          const lessonType = lesson.type as string;
+          if (!activityByDate[date].byType[lessonType]) {
+            activityByDate[date].byType[lessonType] = 0;
           }
-          acc[date].byType[lesson.type]++;
+          activityByDate[date].byType[lessonType]++;
+          
           // Track by area
-          if (!acc[date].byArea[lesson.area]) {
-            acc[date].byArea[lesson.area] = 0;
+          const areaType = lesson.area as string;
+          if (!activityByDate[date].byArea[areaType]) {
+            activityByDate[date].byArea[areaType] = 0;
           }
-          acc[date].byArea[lesson.area]++;
-          return acc;
-        }, {});
+          activityByDate[date].byArea[areaType]++;
+        });
 
         return Object.values(activityByDate);
       } catch (error) {
@@ -141,10 +190,13 @@ export const analyticsRouter = createTRPCRouter({
         });
 
         // Group by date
-        const revenueByDate = payments.reduce((acc, payment) => {
+        const revenueByDate: Record<string, RevenueData> = {};
+        
+        payments.forEach(payment => {
           const date = payment.createdAt.toISOString().split('T')[0];
-          if (!acc[date]) {
-            acc[date] = {
+          
+          if (!revenueByDate[date]) {
+            revenueByDate[date] = {
               date,
               totalRevenue: 0,
               byMethod: {},
@@ -152,31 +204,34 @@ export const analyticsRouter = createTRPCRouter({
               byStudentLevel: {},
             };
           }
-          acc[date].totalRevenue += payment.amount;
+          
+          revenueByDate[date].totalRevenue += payment.amount;
 
           // Group by payment method
-          if (!acc[date].byMethod[payment.method]) {
-            acc[date].byMethod[payment.method] = 0;
+          const paymentMethod = payment.method as string;
+          if (!revenueByDate[date].byMethod[paymentMethod]) {
+            revenueByDate[date].byMethod[paymentMethod] = 0;
           }
-          acc[date].byMethod[payment.method] += payment.amount;
+          revenueByDate[date].byMethod[paymentMethod] += payment.amount;
 
           // Group by lesson type
           if (payment.lesson?.type) {
-            if (!acc[date].byLessonType[payment.lesson.type]) {
-              acc[date].byLessonType[payment.lesson.type] = 0;
+            const lessonType = payment.lesson.type as string;
+            if (!revenueByDate[date].byLessonType[lessonType]) {
+              revenueByDate[date].byLessonType[lessonType] = 0;
             }
-            acc[date].byLessonType[payment.lesson.type] += payment.amount;
+            revenueByDate[date].byLessonType[lessonType] += payment.amount;
           }
 
           // Group by student level
           if (payment.lesson?.student?.level) {
-            if (!acc[date].byStudentLevel[payment.lesson.student.level]) {
-              acc[date].byStudentLevel[payment.lesson.student.level] = 0;
+            const studentLevel = payment.lesson.student.level as string;
+            if (!revenueByDate[date].byStudentLevel[studentLevel]) {
+              revenueByDate[date].byStudentLevel[studentLevel] = 0;
             }
-            acc[date].byStudentLevel[payment.lesson.student.level] += payment.amount;
+            revenueByDate[date].byStudentLevel[studentLevel] += payment.amount;
           }
-          return acc;
-        }, {});
+        });
 
         return Object.values(revenueByDate);
       } catch (error) {
@@ -184,6 +239,67 @@ export const analyticsRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch revenue data",
+          cause: error,
+        });
+      }
+    }),
+
+  // New endpoint for student attendance
+  getStudentAttendance: protectedProcedure
+    .input(
+      z.object({
+        studentId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        // Default to current month if dates not provided
+        const startDate = input.startDate || startOfMonth(new Date());
+        const endDate = input.endDate || endOfMonth(new Date());
+
+        // Get all lessons for the student in the date range
+        const lessons = await ctx.prisma.lesson.findMany({
+          where: {
+            studentId: input.studentId,
+            startTime: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+          orderBy: {
+            startTime: 'asc',
+          },
+        });
+
+        // Calculate attendance metrics
+        const total = lessons.length;
+        const attended = lessons.filter(lesson => lesson.status === LessonStatus.COMPLETED).length;
+        const cancelled = lessons.filter(lesson => lesson.status === LessonStatus.CANCELLED).length;
+        const scheduled = lessons.filter(lesson => lesson.status === LessonStatus.SCHEDULED).length;
+
+        const attendanceData: AttendanceData = {
+          total,
+          attended,
+          cancelled,
+          scheduled,
+          attendanceRate: total > 0 ? (attended / total) * 100 : 0,
+          lessons: lessons.map(lesson => ({
+            id: lesson.id,
+            date: lesson.startTime,
+            status: lesson.status,
+            cancellationReason: lesson.cancellationReason || undefined,
+            duration: lesson.duration,
+          })),
+        };
+
+        return attendanceData;
+      } catch (error) {
+        console.error("Error fetching student attendance:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch student attendance data",
           cause: error,
         });
       }

@@ -1,8 +1,8 @@
-// src/features/scheduling/components/bookings/BookingValidator.tsx
 import React, { useEffect } from 'react';
+import { startOfWeek, endOfWeek } from 'date-fns';
 import { CalendarSlot } from '../../types';
 import { Level, LessonType } from '@prisma/client';
-import { validateTimeSlotBooking, StudentBookingConstraints } from '../../utils/validationUtils';
+import { validateTimeSlotBooking, StudentBookingConstraints } from '../../utils/ValidationUtils';
 import { ConflictDetector } from '../scheduling/ConflictDetector';
 import { api } from '@/lib/api';
 
@@ -19,8 +19,8 @@ export const BookingValidator: React.FC<BookingValidatorProps> = ({
   lessonType,
   onValidationComplete
 }) => {
-  // Fetch student data
-  const { data: student } = api.admin.getStudent.useQuery(
+  // Fetch student data - using correct API endpoint with namespacing
+  const { data: student } = api.admin.student.getStudent.useQuery(
     { studentId },
     { enabled: !!studentId }
   );
@@ -28,7 +28,9 @@ export const BookingValidator: React.FC<BookingValidatorProps> = ({
   // Fetch current week's lessons
   const startOfWeekDate = startOfWeek(new Date(slot.startTime));
   const endOfWeekDate = endOfWeek(new Date(slot.startTime));
-  const { data: weekLessons } = api.admin.getStudentLessons.useQuery(
+  
+  // Updated API endpoint with correct namespace structure
+  const { data: weekLessons } = api.student.profile.getStudentLessons.useQuery(
     { studentId, startDate: startOfWeekDate, endDate: endOfWeekDate },
     { enabled: !!studentId }
   );

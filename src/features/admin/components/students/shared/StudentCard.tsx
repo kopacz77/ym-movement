@@ -1,18 +1,18 @@
-// features/admin/components/students/shared/StudentCard.tsx
+// src/features/admin/components/students/shared/StudentCard.tsx
 "use client";
-import React from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Mail, Phone } from 'lucide-react';
-import { Level } from '@prisma/client';
-import { format } from 'date-fns';
-import { Student } from '../types';
+import React from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, Mail, Phone } from "lucide-react";
+import { Level } from "@prisma/client";
+import { format } from "date-fns";
+import { Student } from "../types";
 
 interface StudentCardProps {
   student: {
     id: string;
-    user: { name: string; email: string; };
+    user: { name: string; email: string };
     level: Level;
     phone?: string | null;
     active: boolean;
@@ -20,20 +20,20 @@ interface StudentCardProps {
     lastLesson?: Date;
     totalLessons?: number;
   };
-  onViewProfile: (studentId: string) => void;
+  onViewProfileAction: (studentId: string) => void;
 }
 
-export const StudentCard: React.FC<StudentCardProps> = ({ student, onViewProfile }) => {
+export const StudentCard: React.FC<StudentCardProps> = ({ student, onViewProfileAction }) => {
   const getLevelColor = (level: Level) => {
     const colors: Record<Level, string> = {
-      PRE_PRELIMINARY: 'bg-blue-100 text-blue-800',
-      PRELIMINARY: 'bg-green-100 text-green-800',
-      PRE_JUVENILE: 'bg-yellow-100 text-yellow-800',
-      JUVENILE: 'bg-orange-100 text-orange-800',
-      INTERMEDIATE: 'bg-purple-100 text-purple-800',
-      NOVICE: 'bg-pink-100 text-pink-800',
-      JUNIOR: 'bg-red-100 text-red-800',
-      SENIOR: 'bg-indigo-100 text-indigo-800',
+      PRE_PRELIMINARY: "bg-blue-100 text-blue-800",
+      PRELIMINARY: "bg-green-100 text-green-800",
+      PRE_JUVENILE: "bg-yellow-100 text-yellow-800",
+      JUVENILE: "bg-orange-100 text-orange-800",
+      INTERMEDIATE: "bg-purple-100 text-purple-800",
+      NOVICE: "bg-pink-100 text-pink-800",
+      JUNIOR: "bg-red-100 text-red-800",
+      SENIOR: "bg-indigo-100 text-indigo-800",
     };
     return colors[level];
   };
@@ -55,10 +55,10 @@ export const StudentCard: React.FC<StudentCardProps> = ({ student, onViewProfile
           </div>
           <div className="flex flex-col gap-2 items-end">
             <Badge className={getLevelColor(student.level)}>
-              {student.level.replace('_', ' ')}
+              {student.level.replace("_", " ")}
             </Badge>
-            <Badge variant={student.active ? 'default' : 'secondary'}>
-              {student.active ? 'Active' : 'Inactive'}
+            <Badge variant={student.active ? "default" : "secondary"}>
+              {student.active ? "Active" : "Inactive"}
             </Badge>
           </div>
         </div>
@@ -68,20 +68,24 @@ export const StudentCard: React.FC<StudentCardProps> = ({ student, onViewProfile
           {student.nextLesson && (
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>Next Lesson: {format(new Date(student.nextLesson), 'PPp')}</span>
+              <span>Next Lesson: {format(new Date(student.nextLesson), "PPp")}</span>
             </div>
           )}
           {student.lastLesson && (
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span>Last Lesson: {format(new Date(student.lastLesson), 'PP')}</span>
+              <span>Last Lesson: {format(new Date(student.lastLesson), "PP")}</span>
             </div>
           )}
           <div className="flex items-center justify-between mt-4">
             <span className="text-sm text-muted-foreground">
               Total Lessons: {student.totalLessons || 0}
             </span>
-            <Button variant="outline" size="sm" onClick={() => onViewProfile(student.id)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onViewProfileAction(student.id)}
+            >
               View Profile
             </Button>
           </div>

@@ -1,15 +1,15 @@
-// features/admin/components/students/progress/StudentAttendance.tsx
+// src/features/admin/components/students/progress/StudentAttendance.tsx
 "use client";
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Info } from 'lucide-react';
-import { AttendanceData } from '../types';
+import { Info } from 'lucide-react';
 
 interface StudentAttendanceProps {
   studentId: string;
@@ -18,30 +18,42 @@ interface StudentAttendanceProps {
 export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
   const [date, setDate] = React.useState(new Date());
   const { toast } = useToast();
-  const { data: attendance, isLoading } = api.admin.getStudentAttendance.useQuery(
-    { studentId, startDate: startOfMonth(date), endDate: endOfMonth(date) },
-    {
-      onError: (err) => {
-        toast({ title: "Error loading attendance", description: err.message, variant: "destructive" });
-      },
-    }
+  
+  // Use our new API endpoint
+  const { data: attendance, isLoading, error } = api.admin.analytics.getStudentAttendance.useQuery(
+    { 
+      studentId, 
+      startDate: startOfMonth(date), 
+      endDate: endOfMonth(date) 
+    },
+    { enabled: !!studentId }
   );
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading attendance", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
+  }, [error, toast]);
 
   const getLessonStyles = (day: Date) => {
     if (!attendance) return {};
+    
     const lesson = attendance.lessons.find(
       l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
+    
     if (!lesson) return {};
+    
     switch (lesson.status) {
-      case 'COMPLETED':
-        return { backgroundColor: '#dcfce7', color: '#166534' };
-      case 'CANCELLED':
-        return { backgroundColor: '#fee2e2', color: '#991b1b' };
-      case 'SCHEDULED':
-        return { backgroundColor: '#dbeafe', color: '#1e40af' };
-      default:
-        return {};
+      case 'COMPLETED': return { backgroundColor: '#dcfce7', color: '#166534' };
+      case 'CANCELLED': return { backgroundColor: '#fee2e2', color: '#991b1b' };
+      case 'SCHEDULED': return { backgroundColor: '#dbeafe', color: '#1e40af' };
+      default: return {};
     }
   };
 
@@ -63,48 +75,48 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
           <div className="flex items-center justify-center h-[400px]">Loading...</div>
         ) : (
           <div className="flex gap-4">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(newDate) => newDate && setDate(newDate)}
-              className="rounded-md border"
-              components={{
-                Day: ({ day, ...props }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        {...props}
-                        className="w-9 h-9 rounded-md hover:bg-accent"
-                        style={getLessonStyles(day)}
-                      >
-                        {format(day, 'd')}
-                      </button>
-                    </PopoverTrigger>
-                    {attendance?.lessons.some(
-                      l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-                    ) && (
-                      <PopoverContent className="w-80">
-                        <div className="space-y-2">
-                          {attendance.lessons
-                            .filter(l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
-                            .map((lesson, idx) => (
-                              <div key={idx} className="text-sm">
-                                <div className="font-medium">{format(new Date(lesson.date), 'h:mm a')}</div>
-                                <div className="text-muted-foreground">Status: {lesson.status}</div>
-                                {lesson.cancellationReason && (
-                                  <div className="text-red-600 text-xs mt-1">
-                                    Reason: {lesson.cancellationReason}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                        </div>
-                      </PopoverContent>
-                    )}
-                  </Popover>
-                ),
-              }}
-            />
+            <div className="rounded-md border p-3">
+              <Calendar
+                selected={date}
+                onSelect={(newDate: Date | null) => newDate && setDate(newDate)}
+                components={{
+                  Day: ({ day, ...props }: { day: Date; [key: string]: any }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button 
+                          {...props} 
+                          className="w-9 h-9 rounded-md hover:bg-accent"
+                          style={getLessonStyles(day)}
+                        >
+                          {format(day, 'd')}
+                        </button>
+                      </PopoverTrigger>
+                      {attendance?.lessons.some(
+                        l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+                      ) && (
+                        <PopoverContent className="w-80">
+                          <div className="space-y-2">
+                            {attendance.lessons
+                              .filter(l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
+                              .map((lesson, idx) => (
+                                <div key={lesson.id || idx} className="text-sm">
+                                  <div className="font-medium">{format(new Date(lesson.date), 'h:mm a')}</div>
+                                  <div className="text-muted-foreground">Status: {lesson.status}</div>
+                                  {lesson.cancellationReason && (
+                                    <div className="text-red-600 text-xs mt-1">
+                                      Reason: {lesson.cancellationReason}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                          </div>
+                        </PopoverContent>
+                      )}
+                    </Popover>
+                  ),
+                }}
+              />
+            </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Legend</p>
               <div className="space-y-1">

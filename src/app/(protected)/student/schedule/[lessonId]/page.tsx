@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Calendar, Clock, MapPin, DollarSign, X } from 'lucide-react';
+import { Calendar, Clock, MapPin, DollarSign } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { LessonStatus } from '@prisma/client';
@@ -15,13 +15,11 @@ import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface LessonDetailsPageProps {
-  params: Promise<{ lessonId: string }>;
+  params: { lessonId: string };
 }
 
 export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
-  // Use React.use() to unwrap the params promise
-  const { lessonId } = React.use(params);
-  
+  const { lessonId } = params;
   const [isCancelling, setIsCancelling] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -67,7 +65,7 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
 
   // Find the current lesson
   const currentLesson = lessons?.find(l => l.id === lessonId);
-  
+
   // Convert to proper type if found
   const typedLesson = currentLesson ? {
     ...currentLesson,
@@ -122,13 +120,16 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
         <div className="flex items-center gap-2">
           {getStatusBadge()}
           {canCancel && (
-            <Button variant="outline" onClick={() => setIsCancelling(true)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsCancelling(true)}
+            >
               Cancel Lesson
             </Button>
           )}
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -183,7 +184,7 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
             )}
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Payment Information</CardTitle>
@@ -238,12 +239,12 @@ export default function LessonDetailsPage({ params }: LessonDetailsPageProps) {
           </CardContent>
         </Card>
       </div>
-      
+
       {isCancelling && (
-        <CancellationDialog 
-          lessonId={lessonId} 
-          open={isCancelling} 
-          onCloseAction={handleCancellationComplete} 
+        <CancellationDialog
+          lessonId={lessonId}
+          open={isCancelling}
+          onCloseAction={handleCancellationComplete}
         />
       )}
     </div>

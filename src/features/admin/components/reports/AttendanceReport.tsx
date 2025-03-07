@@ -23,12 +23,14 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) =>
     period 
   });
 
-  // Calculate averages with very explicit type handling
+  // Calculate averages with explicit type handling
   const averageAttendance = React.useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) return 0;
     
     const totalAttendance = data.reduce((sum: number, item: any) => {
-      const rate = typeof item.attendanceRate === 'number' ? item.attendanceRate : 0;
+      const rate = typeof item.attendanceRate === 'number'
+        ? item.attendanceRate
+        : (item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0);
       return sum + rate;
     }, 0);
     
@@ -68,8 +70,15 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) =>
     );
   }
 
-  // Use the data safely now that we've validated it
-  const safeData = data as ActivityDataItem[];
+  // Map the API data to our ActivityDataItem format by computing attendanceRate
+  const safeData: ActivityDataItem[] = data.map((item: any) => ({
+    date: item.date,
+    totalLessons: item.totalLessons,
+    completedLessons: item.completedLessons,
+    cancelledLessons: item.cancelledLessons,
+    attendanceRate:
+      item.totalLessons > 0 ? Math.round((item.completedLessons / item.totalLessons) * 100) : 0,
+  }));
 
   return (
     <div className="w-full h-[400px]">
