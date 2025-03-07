@@ -1,16 +1,13 @@
-// src/features/student/api/queries/lessonQueries.ts (NEW FILE)
+// src/features/student/api/queries/lessonQueries.ts
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '@/lib/trpc';
 import { TRPCError } from '@trpc/server';
 
 export const lessonRouter = createTRPCRouter({
-  // New endpoint to get a specific lesson by ID
   getLesson: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        console.log(`[LESSON] Fetching lesson details for ${input.id}`);
-        
         // Get the lesson with related data
         const lesson = await ctx.prisma.lesson.findUnique({
           where: { 
@@ -23,21 +20,16 @@ export const lessonRouter = createTRPCRouter({
         });
 
         if (!lesson) {
-          console.log(`[LESSON] Lesson ${input.id} not found`);
           throw new TRPCError({ 
             code: "NOT_FOUND", 
             message: "Lesson not found" 
           });
         }
 
-        console.log(`[LESSON] Successfully retrieved lesson ${input.id}`);
         return lesson;
       } catch (error) {
-        console.error('[LESSON] Error fetching lesson:', error);
-        
-        if (error instanceof TRPCError) {
-          throw error;
-        }
+        console.error('Error fetching lesson details:', error);
+        if (error instanceof TRPCError) throw error;
         
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -47,8 +39,6 @@ export const lessonRouter = createTRPCRouter({
       }
     }),
 
-  // This is a wrapper around the existing cancelLesson in bookingQueries
-  // to make it accessible from the expected API path
   cancelLesson: publicProcedure
     .input(z.object({ 
       lessonId: z.string(),
@@ -56,10 +46,7 @@ export const lessonRouter = createTRPCRouter({
     }))
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`[LESSON] Forwarding cancel request for lesson ${input.lessonId}`);
-        
-        // The actual cancelLesson implementation remains in bookingQueries
-        // This is just a wrapper to make it available at the expected API path
+        // Update the lesson status to cancelled
         const result = await ctx.prisma.lesson.update({
           where: { id: input.lessonId },
           data: {
@@ -69,14 +56,10 @@ export const lessonRouter = createTRPCRouter({
           }
         });
         
-        console.log(`[LESSON] Successfully cancelled lesson ${input.lessonId}`);
         return result;
       } catch (error) {
-        console.error('[LESSON] Error cancelling lesson:', error);
-        
-        if (error instanceof TRPCError) {
-          throw error;
-        }
+        console.error('Error cancelling lesson:', error);
+        if (error instanceof TRPCError) throw error;
         
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',

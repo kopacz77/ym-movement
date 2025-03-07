@@ -45,7 +45,7 @@ export default function LessonDetailsPage({ params }: { params: { lessonId: stri
       });
       router.push('/student/schedule');
     },
-    onError: (error) => { // Remove the explicit type here
+    onError: (error) => { // Remove the explicit Error type annotation here
       toast({
         title: 'Error cancelling lesson',
         description: error.message || 'An unexpected error occurred',
