@@ -126,7 +126,7 @@ export const bookingRouter = createTRPCRouter({
               endTime: timeSlot.endTime,
               attendees: [
                 { email: student.user.email },
-                { email: process.env.INSTRUCTOR_EMAIL || 'instructor@example.com' },
+                // No need to add Yura here as she'll be added directly in the calendar service
               ],
               location: timeSlot.rink.address,
             });
