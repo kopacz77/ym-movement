@@ -1,4 +1,3 @@
-// src/app/(protected)/student/schedule/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -55,7 +54,6 @@ export default function StudentSchedulePage() {
 
   // Helper function to calculate duration in minutes and transform to the expected type
   const transformToLessonWithDetails = (lesson: any) => {
-    // Calculate duration in minutes
     const startTime = new Date(lesson.startTime);
     const endTime = new Date(lesson.endTime);
     const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
@@ -91,7 +89,7 @@ export default function StudentSchedulePage() {
           ) : upcomingLessons.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">You don't have any upcoming lessons.</p>
+                <p className="text-muted-foreground">You don&apos;t have any upcoming lessons.</p>
               </CardContent>
             </Card>
           ) : (
@@ -110,7 +108,7 @@ export default function StudentSchedulePage() {
           ) : pastLessons.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">You don't have any past lessons.</p>
+                <p className="text-muted-foreground">You don&apos;t have any past lessons.</p>
               </CardContent>
             </Card>
           ) : (

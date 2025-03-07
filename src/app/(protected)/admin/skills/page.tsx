@@ -1,9 +1,16 @@
 // src/app/(protected)/admin/skills/page.tsx
 
-/*
+
 
 "use client";
 
+const PlaceholderPage = () => {
+  return null;
+};
+
+export default PlaceholderPage;
+
+/*
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -314,3 +321,4 @@ export default function SkillsManagementPage() {
 }
 
 */
+

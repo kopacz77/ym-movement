@@ -1,4 +1,3 @@
-// Updated src/features/student/components/dashboard/UpcomingLessons.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -73,7 +72,7 @@ export const UpcomingLessons = () => {
           </div>
         ) : !upcomingLessons?.length ? (
           <div className="flex flex-col items-center justify-center h-48 text-center">
-            <p className="text-muted-foreground mb-4">You don't have any upcoming lessons</p>
+            <p className="text-muted-foreground mb-4">You don&apos;t have any upcoming lessons</p>
             <Link href="/student/book">
               <Button>Book a Lesson</Button>
             </Link>
