@@ -1,125 +1,42 @@
-"use client";
+// app/(protected)/student/schedule/page.tsx
 
-import { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { LessonCard } from '@/features/student/components/schedule/LessonCard';
-import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import StudentScheduleClient from './client'; // We'll create this file next
 
-export default function StudentSchedulePage() {
-  const [activeTab, setActiveTab] = useState('upcoming');
-  const { toast } = useToast();
-  const { id: studentId } = useCurrentUser();
-  const [isReady, setIsReady] = useState(false);
+export const metadata: Metadata = {
+  title: 'My Schedule',
+  description: 'View and manage your scheduled lessons',
+};
+
+// Add this function to fix Next.js 15.2.1 typing issues
+export function generateStaticParams() {
+  return [];
+}
+
+export default async function Page() {
+  // Auth check
+  const session = await getServerSession(authOptions);
   
-  // Only fetch data when studentId is available
-  useEffect(() => {
-    if (studentId) {
-      setIsReady(true);
-    }
-  }, [studentId]);
+  if (!session?.user) {
+    redirect('/auth/signin');
+  }
 
-  // Get all student lessons
-  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
-    { studentId }, 
-    { 
-      enabled: isReady && !!studentId,
-      retry: false
-    }
-  );
+  // Get the student profile
+  const student = await prisma.student.findFirst({
+    where: {
+      userId: session.user.id,
+    },
+  });
 
-  // Handle errors with useEffect
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error loading lessons",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
+  if (!student) {
+    // Redirect if user doesn't have a student profile
+    redirect('/profile/setup');
+  }
 
-  // Type-safe filtering
-  const typedLessons = lessons || [];
-
-  // Filter lessons by status
-  const upcomingLessons = typedLessons.filter(
-    (lesson) => new Date(lesson.startTime) > new Date() && lesson.status === 'SCHEDULED'
-  );
-  const pastLessons = typedLessons.filter(
-    (lesson) => new Date(lesson.startTime) <= new Date() || lesson.status !== 'SCHEDULED'
-  );
-
-  // Helper function to calculate duration in minutes and transform to the expected type
-  const transformToLessonWithDetails = (lesson: any) => {
-    const startTime = new Date(lesson.startTime);
-    const endTime = new Date(lesson.endTime);
-    const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
-    return {
-      ...lesson,
-      duration: durationInMinutes,
-      notes: lesson.notes === null ? undefined : lesson.notes
-    };
-  };
-
-  // Show loading state when either:
-  // 1. We don't have a studentId yet
-  // 2. We're fetching the data
-  const showLoading = !isReady || isLoading || !studentId;
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">My Schedule</h1>
-      </div>
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming ({upcomingLessons.length})</TabsTrigger>
-            <TabsTrigger value="past">Past ({pastLessons.length})</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="upcoming" className="pt-4">
-          {showLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <p>Loading lessons...</p>
-            </div>
-          ) : upcomingLessons.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">You don&apos;t have any upcoming lessons.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {upcomingLessons.map((lesson) => (
-                <LessonCard key={lesson.id} lesson={transformToLessonWithDetails(lesson)} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        <TabsContent value="past" className="pt-4">
-          {showLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <p>Loading lessons...</p>
-            </div>
-          ) : pastLessons.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <p className="text-muted-foreground">You don&apos;t have any past lessons.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pastLessons.map((lesson) => (
-                <LessonCard key={lesson.id} lesson={transformToLessonWithDetails(lesson)} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
+  // Render the client component without passing any problematic props
+  return <StudentScheduleClient />;
 }

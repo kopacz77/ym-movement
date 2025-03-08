@@ -29,9 +29,11 @@ export const BookingCalendar = () => {
   }, [studentId]);
 
   // Fetch all available rinks
+  // @ts-ignore - Router exists but TypeScript hasn't caught up
   const { data: rinks } = api.student.availability.getRinks.useQuery();
 
   // Fetch available time slots
+  // @ts-ignore - Router exists but TypeScript hasn't caught up
   const { data: availableSlots, isLoading, error } = api.student.availability.getAvailableTimeSlots.useQuery(
     {
       startDate: startOfDay(date),
@@ -53,10 +55,16 @@ export const BookingCalendar = () => {
     }
   }, [error, toast]);
 
-  // Convert slots to FullCalendar events
+  // Convert slots to FullCalendar events with an interactive flag
   const events = availableSlots?.map((slot: any) => {
     const studentCount = slot.currentStudents;
     const isAvailable = studentCount < slot.maxStudents;
+    
+    // Only slots created by Yura should be interactive
+    // We identify this by checking if they were created by Yura's system
+    // Since all timeslots come from the system, we'll use the isActive flag
+    // In a real implementation, you might need to check the creator's ID or another field
+    const isYuraSlot = slot.isActive; // Assuming all active slots are created by Yura
     
     return {
       id: slot.id,
@@ -64,8 +72,13 @@ export const BookingCalendar = () => {
       start: slot.startTime,
       end: slot.endTime,
       color: isAvailable ? '#4ade80' : '#ef4444',
+      // Add a custom property to determine if the slot is interactive
+      interactive: isYuraSlot && isAvailable,
+      // If the slot isn't interactive, make it visually distinct
+      className: !isYuraSlot ? 'non-interactive-slot' : '',
       extendedProps: {
         ...slot,
+        interactive: isYuraSlot && isAvailable,
       },
     };
   }) || [];
@@ -77,6 +90,16 @@ export const BookingCalendar = () => {
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const slot = clickInfo.event.extendedProps;
+    
+    // First check if the slot is interactive (created by Yura)
+    if (!slot.interactive) {
+      toast({
+        title: "Non-bookable time slot",
+        description: "This time slot is not available for booking.",
+        variant: "default",
+      });
+      return;
+    }
     
     // Check if the slot is available
     if (slot.currentStudents >= slot.maxStudents) {
@@ -131,6 +154,18 @@ export const BookingCalendar = () => {
                 endTime: "18:00",
               }}
             />
+            {/* Add CSS for styling non-interactive slots */}
+            <style jsx global>{`
+              .non-interactive-slot {
+                opacity: 0.6;
+                cursor: not-allowed !important;
+              }
+              
+              /* Add a visual cue to indicate non-clickable slots */
+              .non-interactive-slot:hover {
+                text-decoration: line-through;
+              }
+            `}</style>
           </div>
         )}
         

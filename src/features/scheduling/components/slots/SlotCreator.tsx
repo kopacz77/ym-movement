@@ -100,8 +100,8 @@ export const SlotCreator: React.FC<SlotCreatorProps> = ({ open, onClose, default
             />
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-              <Button type="submit" disabled={createTimeSlot.isLoading}>
-                {createTimeSlot.isLoading ? "Creating..." : "Create"}
+              <Button type="submit" disabled={createTimeSlot.isPending}>
+                {createTimeSlot.isPending ? "Creating..." : "Create"}
               </Button>
             </div>
           </form>

@@ -7,14 +7,14 @@ const prismaClientSingleton = () => {
     log: [
       // Remove 'query' from this array to stop SQL query logging
       // Use only errors and warnings
-      {
-        emit: 'event',
-        level: 'error',
-      },
-      {
-        emit: 'stdout',
-        level: 'warn',
-      },
+     // {
+     //   emit: 'event',
+       // level: 'error',
+      //},
+     // {
+     //   emit: 'stdout',
+     //   level: 'warn',
+     // },
       // {
       //   emit: 'stdout', 
       //   level: 'query',  // COMMENT OUT OR REMOVE THIS
