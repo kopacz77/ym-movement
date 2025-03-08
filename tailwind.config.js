@@ -1,4 +1,6 @@
 // tailwind.config.js
+import animate from "tailwindcss-animate";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
@@ -12,7 +14,6 @@ export default {
     "./src/features/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
-    // v4 uses logical properties
     container: {
       center: true,
       padding: "2rem",
@@ -77,8 +78,5 @@ export default {
       },
     },
   },
-  plugins: [
-    // Import as ESM for v4
-    import("tailwindcss-animate")
-  ],
+  plugins: [animate],
 }
