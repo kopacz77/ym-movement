@@ -8,7 +8,7 @@ import { PendingApprovals } from '@/features/admin/components/management/Pending
 
 export default function AdminDashboardPage() {
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
       </div>

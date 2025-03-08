@@ -4,7 +4,7 @@ import { StudentSidebar } from '@/features/student/components/layout/StudentSide
 
 export default function StudentLayout({ children }: { children: React.ReactNode; }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-50">
       <StudentHeader />
       <div className="flex h-[calc(100vh-4rem)]">
         <StudentSidebar />

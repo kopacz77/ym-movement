@@ -11,7 +11,7 @@ export default function StudentDashboardPage() {
   const user = useCurrentUser();
   
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <Link href="/student/book">
@@ -33,7 +33,7 @@ export default function StudentDashboardPage() {
           <CardTitle>Payment Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+        <div className="flex flex-col gap-4">
             <p>
               We accept payments via Venmo and Zelle. Please make payments within 24 hours of booking your lesson to avoid automatic cancellation.
             </p>

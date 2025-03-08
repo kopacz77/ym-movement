@@ -81,9 +81,9 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
         <DialogHeader>
           <DialogTitle>Book a Lesson</DialogTitle>
         </DialogHeader>
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6">
           {/* Time slot details */}
-          <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+          <div className="bg-gray-50 p-4 rounded-lg flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{format(new Date(slot.startTime), 'EEEE, MMMM d, yyyy')}</span>
@@ -101,8 +101,8 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
           </div>
           
           {/* Booking options */}
-          <div className="space-y-4">
-            <div className="space-y-2">
+          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Lesson Type</label>
               <Select 
                 value={lessonType} 
@@ -128,7 +128,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
               </Select>
             </div>
             
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Payment Method</label>
               <Select 
                 value={paymentMethod} 

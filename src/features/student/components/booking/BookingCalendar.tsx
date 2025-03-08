@@ -71,7 +71,7 @@ export const BookingCalendar = () => {
       title: `${studentCount}/${slot.maxStudents} students${isAvailable ? ' - Available' : ' - Full'}`,
       start: slot.startTime,
       end: slot.endTime,
-      color: isAvailable ? '#4ade80' : '#ef4444',
+      color: isAvailable ? 'rgb(74 222 128)' : 'rgb(239 68 68)',
       // Add a custom property to determine if the slot is interactive
       interactive: isYuraSlot && isAvailable,
       // If the slot isn't interactive, make it visually distinct
