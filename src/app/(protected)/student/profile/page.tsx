@@ -4,11 +4,10 @@
 import { useEffect, useState } from 'react';
 import { ProfileForm } from '@/features/student/components/profile/ProfileForm';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export default function StudentProfilePage() {
-  const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
   
@@ -31,10 +30,8 @@ export default function StudentProfilePage() {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading profile",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading profile", {
+        description: error.message
       });
     }
   }, [error, toast]);

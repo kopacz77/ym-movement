@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Plus, Medal, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -31,7 +31,6 @@ interface SkillsManagerProps {
 
 export const SkillsManager: React.FC<SkillsManagerProps> = ({ studentId }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   const { data: allSkills, isLoading: isLoadingSkills } = api.admin.progress.getSkills.useQuery();

@@ -5,19 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 
 export default function StudentSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [reminderNotifications, setReminderNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   
-  const { toast } = useToast();
   
   const handleSaveSettings = () => {
     // In a real app, this would save the settings to the backend
-    toast({
-      title: "Settings saved",
+    toast("Settings saved", {
       description: "Your preferences have been updated.",
     });
   };

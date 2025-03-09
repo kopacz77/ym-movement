@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 const bulkTimeSlotSchema = z.object({
   rinkId: z.string().min(1, "Please select a rink"),
@@ -50,14 +50,12 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
   rinks,
   onSubmitAction,
 }) => {
-  const toast = useToast();
   const utils = api.useUtils();
   
   // Use the schedule namespace for bulk time slot creation.
   const createBulkSlots = api.admin.schedule.createBulkTimeSlots.useMutation({
     onSuccess: () => {
-      toast.toast({
-        title: "Success",
+      toast("Success", {
         description: "Time slots created successfully"
       });
       // Invalidate the getTimeSlots query.
@@ -65,10 +63,8 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
       onSubmitAction();
     },
     onError: (error: any) => {
-      toast.toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: error.message
       });
     },
   });

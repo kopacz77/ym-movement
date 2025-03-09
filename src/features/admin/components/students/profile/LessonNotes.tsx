@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { Plus } from 'lucide-react';
@@ -27,7 +27,6 @@ interface Note {
 export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId }) => {
   const [note, setNote] = React.useState('');
   const [notes, setNotes] = React.useState<Note[]>([]);
-  const { toast } = useToast();
 
   // Updated to use correct namespace and removed onError option
   const { data: lessons, isLoading, error } = api.admin.schedule.getLessonsByDate.useQuery(
@@ -46,10 +45,8 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading lesson details",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading lesson details", {
+        description: error.message
       });
     }
   }, [error, toast]);
@@ -85,7 +82,7 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
   // Updated to use correct namespace for adding notes
   const addNote = api.admin.student.addStudentNote.useMutation({
     onSuccess: () => {
-      toast({ title: "Note added successfully" });
+      toast("Note added successfully");
       setNote('');
       // Optimistically add the new note to the display
       setNotes(prevNotes => [
@@ -99,10 +96,8 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
       ]);
     },
     onError: (error) => {
-      toast({
-        title: "Error adding note",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error adding note", {
+        description: error.message
       });
     },
   });

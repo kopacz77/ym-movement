@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { LogOut, Bell } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,24 +20,20 @@ import {
 
 export const AdminHeader = () => {
   const router = useRouter();
-  const { toast } = useToast();
   const { data: session } = useSession();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
     try {
       await signOut({ redirect: false });
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+      toast("Logged out", {
+        description: "You have been successfully logged out."
       });
       router.push('/auth/login');
     } catch (error) {
       console.error("Logout error:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem logging out.",
-        variant: "destructive",
+      toast.error("Error", {
+        description: "There was a problem logging out."
       });
     }
   };

@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { api } from '@/lib/api'
-import { useToast } from '@/components/ui/use-toast'
+import { toast } from "sonner"
 
 const timeSlotSchema = z.object({
   rinkId: z.string().min(1, 'Please select a rink'),
@@ -57,7 +57,6 @@ export const TimeSlotForm = ({
   onSubmitAction,
   onSubmit, // Added back for compatibility
 }: TimeSlotFormProps) => {
-  const { toast } = useToast()
   const utils = api.useUtils()
   
   // Use onSubmitAction if available, otherwise fallback to onSubmit
@@ -79,19 +78,16 @@ export const TimeSlotForm = ({
   // Using the correct namespaced API path
   const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Time slot created successfully",
+      toast("Success", {
+        description: "Time slot created successfully"
       })
       // Using correct namespaced API path for invalidation
       utils.admin.schedule.getTimeSlots.invalidate()
       handleFormSubmitComplete()
     },
     onError: (error) => { // Removed explicit type annotation to let TypeScript infer it
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error", {
+        description: error.message
       })
     },
   })

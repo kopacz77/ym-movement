@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { format, addDays, startOfDay, endOfDay } from 'date-fns';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { BookingDialog } from './BookingDialog';
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -17,7 +17,6 @@ export const BookingCalendar = () => {
   const [selectedRink, setSelectedRink] = useState<string>("all_rinks");
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
-  const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
 
@@ -47,10 +46,8 @@ export const BookingCalendar = () => {
   useEffect(() => {
     if (error) {
       const errorMessage = error.message || "An unexpected error occurred while loading time slots.";
-      toast({
-        title: "Error loading time slots",
-        description: errorMessage,
-        variant: "destructive",
+      toast.error("Error loading time slots", {
+        description: errorMessage
       });
     }
   }, [error, toast]);
@@ -93,20 +90,16 @@ export const BookingCalendar = () => {
     
     // First check if the slot is interactive (created by Yura)
     if (!slot.interactive) {
-      toast({
-        title: "Non-bookable time slot",
-        description: "This time slot is not available for booking.",
-        variant: "default",
+      toast("Non-bookable time slot", {
+        description: "This time slot is not available for booking."
       });
       return;
     }
     
     // Check if the slot is available
     if (slot.currentStudents >= slot.maxStudents) {
-      toast({
-        title: "Time slot unavailable",
-        description: "This time slot is already fully booked.",
-        variant: "destructive",
+      toast.error("Time slot unavailable", {
+        description: "This time slot is already fully booked."
       });
       return;
     }

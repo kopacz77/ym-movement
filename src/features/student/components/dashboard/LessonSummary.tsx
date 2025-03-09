@@ -3,12 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Progress } from '@/components/ui/progress';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const LessonSummary = () => {
-  const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
 
@@ -30,10 +29,8 @@ export const LessonSummary = () => {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading lesson stats",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading lesson stats", {
+        description: error.message
       });
     }
   }, [error, toast]);

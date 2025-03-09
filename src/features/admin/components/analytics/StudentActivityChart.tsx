@@ -20,7 +20,7 @@ import {
   Legend,
 } from 'recharts';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 
 type ActivityMetric = 'lessons' | 'attendance' | 'cancellations';
 type TimeRange = 'week' | 'month' | 'year';
@@ -47,7 +47,6 @@ interface ChartData {
 export const StudentActivityChart: React.FC = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
   const [metric, setMetric] = useState<ActivityMetric>('lessons');
-  const toast = useToast();
 
   // Call the procedure using the namespaced path.
   const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery(
@@ -58,10 +57,8 @@ export const StudentActivityChart: React.FC = () => {
   useEffect(() => {
     if (error) {
       const err = error as { message: string };
-      toast.toast({
-        title: "Error loading student activity",
-        description: err.message || "An unexpected error occurred",
-        variant: "destructive",
+      toast.error("Error loading student activity", {
+        description: err.message || "An unexpected error occurred"
       });
     }
   }, [error, toast]);

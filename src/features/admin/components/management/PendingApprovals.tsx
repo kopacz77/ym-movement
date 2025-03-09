@@ -5,13 +5,12 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/date';
 
 export const PendingApprovals = () => {
   // Always call all hooks at the top level
-  const { toast } = useToast();
   const utils = api.useUtils();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
@@ -21,9 +20,8 @@ export const PendingApprovals = () => {
   // IMPORTANT: Always declare mutations at the top level, not conditionally
   const approveStudent = api.admin.student.approveStudent.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Student approved successfully",
+      toast("Success", {
+        description: "Student approved successfully"
       });
       // Invalidate the query to refresh the data
       utils.admin.student.getPendingApprovals.invalidate();
@@ -34,10 +32,8 @@ export const PendingApprovals = () => {
       }, 1000);
     },
     onError: (err) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
+      toast.error("Error", {
+        description: err.message
       });
     },
   });
@@ -45,18 +41,15 @@ export const PendingApprovals = () => {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading pending approvals",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading pending approvals", {
+        description: error.message
       });
     }
   }, [error, toast]);
 
   const handleApprove = (studentId: string, studentName: string) => {
-    toast({
-      title: "Processing",
-      description: `Approving student ${studentName}...`,
+    toast("Processing", {
+      description: `Approving student ${studentName}...`
     });
     approveStudent.mutate({ studentId });
   };

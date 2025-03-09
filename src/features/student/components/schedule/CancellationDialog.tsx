@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -18,7 +18,6 @@ interface CancellationDialogProps {
 export const CancellationDialog = ({ lessonId, open, onCloseAction }: CancellationDialogProps) => {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
   const router = useRouter();
 
   // Create mutation without onSuccess/onError callbacks
@@ -27,9 +26,8 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
   // Handle success and error states with useEffect
   useEffect(() => {
     if (cancelLesson.isSuccess) {
-      toast({
-        title: "Lesson cancelled",
-        description: "Your lesson has been cancelled successfully.",
+      toast("Lesson cancelled", {
+        description: "Your lesson has been cancelled successfully."
       });
       // Call the onCloseAction callback to trigger a refetch in the parent component
       onCloseAction();
@@ -40,10 +38,8 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
 
   useEffect(() => {
     if (cancelLesson.error) {
-      toast({
-        title: "Error cancelling lesson",
-        description: cancelLesson.error.message,
-        variant: "destructive",
+      toast.error("Error cancelling lesson", {
+        description: cancelLesson.error.message
       });
       setIsSubmitting(false);
     }
@@ -51,10 +47,8 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
 
   const handleCancellation = () => {
     if (reason.trim() === "") {
-      toast({
-        title: "Cancellation reason required",
-        description: "Please provide a reason for cancellation.",
-        variant: "destructive",
+      toast.error("Cancellation reason required", {
+        description: "Please provide a reason for cancellation."
       });
       return;
     }

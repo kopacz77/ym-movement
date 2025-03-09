@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Plus, Medal, Trash } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -29,7 +29,6 @@ interface AchievementsManagerProps {
 
 export const AchievementsManager: React.FC<AchievementsManagerProps> = ({ studentId }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   const { data: allAchievements, isLoading: isLoadingAchievements } = api.admin.progress.getAchievements.useQuery();

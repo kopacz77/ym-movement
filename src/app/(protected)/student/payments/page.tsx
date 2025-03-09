@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { format } from 'date-fns';
 import { Search, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
@@ -18,7 +18,6 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 export default function StudentPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
   
@@ -41,10 +40,8 @@ export default function StudentPaymentsPage() {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading payments",
+      toast.error("Error loading payments", {
         description: error.message,
-        variant: "destructive",
       });
     }
   }, [error, toast]);

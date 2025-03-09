@@ -4,20 +4,17 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { formatCurrency } from '@/lib/utils';
 import { CreditCard, CheckCircle, Clock } from 'lucide-react';
 
 export const PaymentStats = () => {
-  const { toast } = useToast();
   const { data, isLoading, error } = api.admin.payments.getPaymentStats.useQuery();
 
   React.useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading payment stats",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading payment stats", {
+        description: error.message
       });
     }
   }, [error, toast]);

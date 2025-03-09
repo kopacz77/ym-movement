@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { Check, Clock, Calendar, MapPin } from 'lucide-react';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { LessonType, PaymentMethod } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 
@@ -24,7 +24,6 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.VENMO);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
   const router = useRouter();
   
   const bookLesson = api.student.booking.bookLesson.useMutation();
@@ -32,26 +31,23 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   // Handle errors with useEffect
   useEffect(() => {
     if (bookLesson.error) {
-      toast({
-        title: "Error booking lesson",
-        description: bookLesson.error.message,
-        variant: "destructive",
+      toast.error("Error booking lesson", {
+        description: bookLesson.error.message
       });
       setIsSubmitting(false);
     }
-  }, [bookLesson.error, toast]);
+  }, [bookLesson.error]);
   
   // Handle success with useEffect
   useEffect(() => {
     if (bookLesson.isSuccess && bookLesson.data) {
-      toast({
-        title: "Lesson booked successfully",
-        description: "Your lesson has been scheduled.",
+      toast("Lesson booked successfully", {
+        description: "Your lesson has been scheduled."
       });
       router.push(`/student/schedule/${bookLesson.data.lesson.id}`);
       onCloseAction();
     }
-  }, [bookLesson.isSuccess, bookLesson.data, router, onCloseAction, toast]);
+  }, [bookLesson.isSuccess, bookLesson.data, router, onCloseAction]);
   
   const handleBooking = () => {
     setIsSubmitting(true);

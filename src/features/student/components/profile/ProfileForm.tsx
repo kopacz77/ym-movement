@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const ProfileForm = () => {
@@ -20,8 +20,6 @@ export const ProfileForm = () => {
   const [emergencyPhone, setEmergencyPhone] = useState("");
   const [emergencyRelationship, setEmergencyRelationship] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { toast } = useToast();
 
   // Only fetch data when studentId is available
   useEffect(() => {
@@ -71,17 +69,14 @@ export const ProfileForm = () => {
 
   const updateProfile = api.student.profile.updateStudentProfile.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+      toast("Profile updated", {
+        description: "Your profile has been updated successfully."
       });
       setIsSubmitting(false);
     },
     onError: (error) => {
-      toast({
-        title: "Error updating profile",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error updating profile", {
+        description: error.message
       });
       setIsSubmitting(false);
     }
@@ -90,10 +85,8 @@ export const ProfileForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentId) {
-      toast({
-        title: "Error",
-        description: "Student ID not available. Please try again later.",
-        variant: "destructive",
+      toast.error("Error", {
+        description: "Student ID not available. Please try again later."
       });
       return;
     }

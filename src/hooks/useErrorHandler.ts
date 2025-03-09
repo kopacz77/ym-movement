@@ -1,17 +1,13 @@
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback } from "react";
 
 export function useErrorHandler() {
-  const { toast } = useToast();
-  
   const onTRPCError = useCallback((error: TRPCClientError<any>) => {
-    toast({
-      title: "Error",
-      description: error.message,
-      variant: "destructive",
+    toast.error("Error", {
+      description: error.message
     });
-  }, [toast]);
+  }, []);
 
   return { onTRPCError };
 }

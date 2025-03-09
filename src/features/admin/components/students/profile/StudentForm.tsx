@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Textarea } from '@/components/ui/textarea';
 import { Level } from '@prisma/client';
 
@@ -39,7 +39,6 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   student,
   onSubmitAction = () => {},
 }) => {
-  const { toast } = useToast();
   const [formInitialized, setFormInitialized] = useState(false);
 
   // Load student data by ID if needed
@@ -95,34 +94,28 @@ export const StudentForm: React.FC<StudentFormProps> = ({
 
   const updateStudent = api.admin.student.updateStudent.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Student updated successfully"
       });
       onSubmitAction();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: error.message
       });
     },
   });
 
   const createStudent = api.admin.student.createStudent.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Student created successfully"
       });
       onSubmitAction();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: error.message
       });
     },
   });

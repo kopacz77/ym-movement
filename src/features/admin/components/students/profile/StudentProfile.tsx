@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Pencil, Mail, Phone, Award } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -20,7 +20,6 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   studentId,
   onEditAction,
 }) => {
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = React.useState('overview');
 
   // Use student namespace for this API call
@@ -31,10 +30,8 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   // Added: Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading student profile",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error loading student profile", {
+        description: error.message
       });
     }
   }, [error, toast]);

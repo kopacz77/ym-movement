@@ -8,7 +8,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { formatCurrency } from '@/lib/utils';
 
 type TimeRange = 'week' | 'month' | 'year';
@@ -20,7 +20,6 @@ interface ChartData {
 
 export const RevenueChart = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>('month');
-  const { toast } = useToast();
   
   // Use the "analytics" namespace for revenue procedures
   const { data, isLoading, error } = api.admin.analytics.getRevenueReport.useQuery(
@@ -30,10 +29,8 @@ export const RevenueChart = () => {
   
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading revenue data",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading revenue data", {
+        description: error.message
       });
     }
   }, [error, toast]);

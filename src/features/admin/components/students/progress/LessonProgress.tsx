@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { format } from 'date-fns';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
@@ -52,7 +52,6 @@ type APILesson = {
 };
 
 export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => {
-  const { toast } = useToast();
 
   const { data: lessons, isLoading, error } = api.admin.schedule.getLessonsByDate.useQuery({ 
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
@@ -66,10 +65,8 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading lesson progress",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error loading lesson progress", {
+        description: error.message
       });
     }
   }, [error, toast]);

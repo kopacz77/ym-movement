@@ -10,7 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Level } from '@prisma/client';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,7 +29,6 @@ type NewStudentFormData = z.infer<typeof newStudentSchema>;
 
 export const NewStudentDialog = () => {
   const [open, setOpen] = useState(false);
-  const { toast } = useToast();
   const utils = api.useUtils();
   
   const form = useForm<NewStudentFormData>({
@@ -47,8 +46,7 @@ export const NewStudentDialog = () => {
   // Use the correct path to the createStudent procedure
   const createStudent = api.admin.student.createStudent.useMutation({
     onSuccess: (data) => {
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Student created successfully."
       });
       setOpen(false);
@@ -66,10 +64,8 @@ export const NewStudentDialog = () => {
       utils.admin.student.getPendingApprovals.invalidate();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: error.message
       });
     }
   });

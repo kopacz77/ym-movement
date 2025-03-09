@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { StudentForm } from "@/features/admin/components/students/profile/StudentForm";
 import { api } from "@/lib/api";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +53,6 @@ export const StudentManager = () => {
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const { toast } = useToast();
 
   // Fetch students from the student namespace using the search query
   const { data: studentsData, isLoading, refetch, error } =
@@ -62,10 +61,8 @@ export const StudentManager = () => {
   // Handle errors
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading students",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading students", {
+        description: error.message
       });
     }
   }, [error, toast]);
@@ -76,17 +73,14 @@ export const StudentManager = () => {
   // Toggle student status mutation for activating/deactivating
   const toggleStudentStatus = api.admin.student.toggleStatus.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Student status updated successfully",
+      toast("Success", {
+        description: "Student status updated successfully"
       });
       refetch();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error", {
+        description: error.message
       });
     },
   });

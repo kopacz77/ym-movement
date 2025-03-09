@@ -4,10 +4,9 @@ import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Calendar, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 
 export const OverviewCards = () => {
-  const { toast } = useToast();
   
   const { data, error, isLoading } = api.admin.analytics.getOverview.useQuery(
     undefined, 
@@ -17,10 +16,8 @@ export const OverviewCards = () => {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading overview",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error loading overview", {
+        description: error.message
       });
     }
   }, [error, toast]);

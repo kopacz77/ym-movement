@@ -6,12 +6,11 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import Link from 'next/link';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 export const UpcomingLessons = () => {
-  const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
   
@@ -41,10 +40,8 @@ export const UpcomingLessons = () => {
   // Handle errors
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading lessons",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading lessons", {
+        description: error.message
       });
     }
   }, [error, toast]);

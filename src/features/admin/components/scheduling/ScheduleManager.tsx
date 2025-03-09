@@ -4,7 +4,10 @@
 import { useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TimeSlotForm } from './TimeSlotForm';
@@ -14,6 +17,7 @@ import { toast } from 'sonner';
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import { Plus, X } from 'lucide-react';
 import { format } from 'date-fns';
+import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 
 interface TimeSlotFormData {
   startTime: Date | null;
@@ -31,10 +35,10 @@ export function ScheduleManager() {
 
   // Get rinks data
   const { data: rinks, isLoading: isLoadingRinks } = api.admin.schedule.getRinks.useQuery();
-  
+
   // Get students data
   const { data: students } = api.admin.student.getStudents.useQuery();
-  
+
   // Get time slots data
   const { data: timeSlots, isLoading: isLoadingSlots } = api.admin.schedule.getTimeSlots.useQuery({});
 
@@ -44,9 +48,8 @@ export function ScheduleManager() {
     const studentNames = slot.lessons
       ?.map((lesson) => lesson.student.user.name)
       .join(', ');
-    const title = `${studentCount}/${slot.maxStudents} students${
-      studentNames ? ` (${studentNames})` : ''
-    } - ${slot.rink.name}`;
+    const title = `${studentCount}/${slot.maxStudents} students${studentNames ? ` (${studentNames})` : ''
+      } - ${slot.rink.name}`;
     return {
       id: slot.id,
       title,
@@ -159,7 +162,7 @@ export function ScheduleManager() {
       startTime: dropInfo.event.start!,
       endTime: dropInfo.event.end!,
     });
-  }, [toast, utils.admin.schedule]);
+  }, [utils.admin.schedule]);
 
   return (
     <div className="space-y-6">
@@ -336,19 +339,22 @@ export function ScheduleManager() {
 
       <Card className="shadow-sm">
         <CardContent className="p-0">
-          <Calendar
-            initialView="timeGridWeek"
+          {/* Replace Calendar component with FullCalendar */}
+          <FullCalendar
+            plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin, resourceTimeGridPlugin]}
+            initialView="resourceTimeGridWeek"  // Use resource-specific view
             events={events}
             resources={resources}
             selectable={true}
-            onDateSelect={handleDateSelect}
-            onEventClick={handleEventClick}
-            onEventDrop={handleEventDrop}
+            select={handleDateSelect}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
             businessHours={{
               daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
               startTime: "05:00",
               endTime: "18:00",
             }}
+            height="auto"
           />
         </CardContent>
       </Card>

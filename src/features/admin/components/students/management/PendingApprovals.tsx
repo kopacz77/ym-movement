@@ -5,14 +5,13 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/date';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StudentForm } from '@/features/admin/components/students/profile/StudentForm';
 
 export const PendingApprovals = () => {
-  const { toast } = useToast();
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const utils = api.useUtils(); // Get tRPC utils for invalidation
@@ -25,10 +24,8 @@ export const PendingApprovals = () => {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading pending approvals",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading pending approvals", {
+        description: error.message
       });
     }
   }, [error, toast]);
@@ -36,18 +33,15 @@ export const PendingApprovals = () => {
   // Approval mutation
   const approveStudent = api.admin.student.approveStudent.useMutation({
     onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: `Student ${data?.user?.name || 'unknown'} approved successfully`,
+      toast("Success", {
+        description: `Student ${data?.user?.name || 'unknown'} approved successfully`
       });
       // Invalidate the query to refresh the data
       utils.admin.student.getPendingApprovals.invalidate();
     },
     onError: (err) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
+      toast.error("Error", {
+        description: err.message
       });
     },
   });
@@ -58,18 +52,16 @@ export const PendingApprovals = () => {
   };
 
   const handleApprove = (studentId: string, studentName: string) => {
-    toast({
-      title: "Processing",
-      description: `Approving student ${studentName}...`,
+    toast("Processing", {
+      description: `Approving student ${studentName}...`
     });
     
     approveStudent.mutate(
       { studentId },
       {
         onSuccess: () => {
-          toast({
-            title: "Success",
-            description: `Student ${studentName} approved successfully`,
+          toast("Success", {
+            description: `Student ${studentName} approved successfully`
           });
           
           // Force a refresh

@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { LessonCard } from '@/features/student/components/schedule/LessonCard';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 // Define the type that exactly matches what LessonCard expects
@@ -58,7 +58,6 @@ interface LessonWithDetails {
 
 export default function StudentScheduleClient() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const { toast } = useToast();
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
   
@@ -82,10 +81,8 @@ export default function StudentScheduleClient() {
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading lessons",
-        description: error.message || "Failed to load lessons",
-        variant: "destructive",
+      toast.error("Error loading lessons", {
+        description: error.message || "Failed to load lessons"
       });
     }
   }, [error, toast]);

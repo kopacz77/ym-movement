@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { api } from '@/lib/api';
 import { format } from 'date-fns';
 import { Plus } from 'lucide-react';
@@ -27,17 +27,14 @@ interface Note {
 
 export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   const [newNote, setNewNote] = React.useState('');
-  const { toast } = useToast();
 
   // Using useEffect to handle errors instead of onError in the query options
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading notes",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error loading notes", {
+        description: error.message
       });
     }
   }, [error, toast]);
@@ -58,15 +55,13 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
 
   const addNote = api.admin.student.addStudentNote.useMutation({
     onSuccess: () => {
-      toast({ title: "Note added successfully" });
+      toast("Note added successfully");
       setNewNote('');
     },
     // Fixed: Use the correct type for the error parameter
     onError: (error) => {
-      toast({
-        title: "Error adding note",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error adding note", {
+        description: error.message
       });
     },
   });

@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { Info } from 'lucide-react';
 
@@ -17,7 +17,6 @@ interface StudentAttendanceProps {
 
 export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
   const [date, setDate] = React.useState(new Date());
-  const { toast } = useToast();
   
   // Use our new API endpoint
   const { data: attendance, isLoading, error } = api.admin.analytics.getStudentAttendance.useQuery(
@@ -32,10 +31,8 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
   // Handle errors
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading attendance", 
-        description: error.message, 
-        variant: "destructive" 
+      toast.error("Error loading attendance", {
+        description: error.message
       });
     }
   }, [error, toast]);

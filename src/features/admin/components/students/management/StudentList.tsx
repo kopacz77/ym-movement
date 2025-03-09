@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Level } from '@prisma/client';
 import { MoreHorizontal, Search } from 'lucide-react';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 
 interface StudentListProps {
   onEditAction: (studentId: string) => void;
@@ -21,7 +21,6 @@ export const StudentList: React.FC<StudentListProps> = ({
   onViewProfileAction
 }) => {
   const [search, setSearch] = React.useState('');
-  const { toast } = useToast();
 
   // Add proper input object to fix the null/undefined issue
   const { data: studentsData, isLoading, error } = api.admin.student.getStudents.useQuery(
@@ -30,10 +29,8 @@ export const StudentList: React.FC<StudentListProps> = ({
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error loading students",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Error loading students", {
+        description: error.message
       });
     }
   }, [error, toast]);
