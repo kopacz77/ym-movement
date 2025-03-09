@@ -1,8 +1,9 @@
+// src/app/layout.tsx
 import '@/styles/globals.css';
 import { Inter } from 'next/font/google';
 import { Providers } from '@/providers';
+import { Toaster } from "@/components/ui/sonner"; // Add this import
 
-// Modern font loading
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className={inter.className}>
         <Providers>{children}</Providers>
+        <Toaster /> {/* Add this component */}
       </body>
     </html>
   );

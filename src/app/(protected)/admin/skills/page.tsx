@@ -21,7 +21,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from 'sonner';
 import { Plus, Trash } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,7 +46,6 @@ export default function SkillsManagementPage() {
   const [activeTab, setActiveTab] = React.useState('skills');
   const [isAddSkillOpen, setIsAddSkillOpen] = React.useState(false);
   const [isAddAchievementOpen, setIsAddAchievementOpen] = React.useState(false);
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   const { data: skills, isLoading: isLoadingSkills } = api.admin.progress.getSkills.useQuery();
@@ -54,20 +53,17 @@ export default function SkillsManagementPage() {
 
   const createSkill = api.admin.progress.createSkill.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Skill created",
-        description: "The skill has been added successfully",
-      });
+      toast("Skill added", {
+  description: "The new skill has been added successfully.",
+});
       utils.admin.progress.getSkills.invalidate();
       setIsAddSkillOpen(false);
       skillForm.reset();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error("Error", {
+  description: "Failed to add skill: " + error.message,
+});
     },
   });
 

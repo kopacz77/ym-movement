@@ -1,11 +1,17 @@
 // src/features/admin/components/scheduling/CalendarEventsSystem.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import { EventClickArg, EventDropArg } from '@fullcalendar/core';
+import type { EventResizeStopArg } from '@fullcalendar/interaction';
+import { Button } from '@/components/ui/button';
+import { TRPCClientErrorLike } from '@trpc/client';
 
 interface CalendarEvent {
   id: string;
@@ -19,37 +25,129 @@ interface CalendarEvent {
   extendedProps?: any;
 }
 
+// Define TimeSlot interface based on your schema
+interface TimeSlot {
+  id: string;
+  rinkId: string;
+  startTime: Date;
+  endTime: Date;
+  maxStudents: number;
+  isActive: boolean;
+  lessons?: any[];
+  rink?: {
+    id: string;
+    name: string;
+  };
+  [key: string]: any;
+}
+
 export const CalendarEventsSystem = () => {
   const [selectedRink, setSelectedRink] = useState<string>('MAIN_RINK');
   const [viewMode, setViewMode] = useState<'timeGridDay' | 'timeGridWeek' | 'dayGridMonth'>('timeGridWeek');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // This method would typically use your API to validate the event move
-  const validateEventMove = async (event: CalendarEvent, start: Date, end: Date): Promise<boolean> => {
-    // In a real implementation, you'd check for overlapping events, availability, etc.
-    // For now, we'll just return true to allow the move
-    return true;
-  };
+  const utils = api.useContext();
+  
+  // Get events from the API
+  const { data, isLoading: eventsLoading, error } = api.admin.schedule.getTimeSlots.useQuery(
+    { rinkId: selectedRink }
+  );
 
-  // This method would update the event in your database via API
-  const updateEventInDatabase = async (updatedEvent: CalendarEvent): Promise<void> => {
-    try {
-      // In a real implementation, you'd call your API
-      // For example: await api.admin.schedule.updateEvent.mutate(updatedEvent);
+  // Process data when it changes
+  useEffect(() => {
+    if (data) {
+      // Convert time slots to calendar events format
+      const calendarEvents = data.map((slot: TimeSlot) => ({
+        id: slot.id,
+        title: slot.title || 'Available Time Slot',
+        start: new Date(slot.startTime),
+        end: new Date(slot.endTime),
+        rinkId: slot.rinkId,
+        maxStudents: slot.maxStudents,
+        currentStudents: slot.lessons?.length || 0,
+        type: 'PRIVATE' as const,
+        extendedProps: slot
+      }));
       
-      // For now, we'll just show a success toast
-      toast({
-        title: "Event updated",
-        description: `Event "${updatedEvent.title}" has been rescheduled.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Update failed",
-        description: "There was an error updating the event.",
-        variant: "destructive",
+      setEvents(calendarEvents);
+    }
+  }, [data]);
+
+  // Handle query errors
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load events", {
+        description: error.message
       });
     }
+  }, [error]);
+
+  // Update event mutation
+  const updateTimeSlot = api.admin.schedule.updateTimeSlot.useMutation({
+    onSuccess: () => {
+      toast("Event updated", {
+        description: "The event has been updated successfully."
+      });
+      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+    },
+    onError: (err) => {
+      toast.error("Update failed", {
+        description: err.message
+      });
+    }
+  });
+
+  // Create event mutation
+  const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
+    onSuccess: () => {
+      toast("Event created", {
+        description: "New event has been scheduled successfully."
+      });
+      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+    },
+    onError: (err) => {
+      toast.error("Creation failed", {
+        description: err.message
+      });
+    }
+  });
+
+  // Delete event mutation
+  const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
+    onSuccess: () => {
+      toast("Event deleted", {
+        description: "The event has been removed from the schedule."
+      });
+      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+    },
+    onError: (err) => {
+      toast.error("Deletion failed", {
+        description: err.message
+      });
+    }
+  });
+
+  // This method checks for business hours and minimum duration
+  const validateEventMove = (event: CalendarEvent, start: Date, end: Date): boolean => {
+    // Simple validation - check for business hours and minimum duration
+    const businessStartHour = 5; // 5 AM
+    const businessEndHour = 18; // 6 PM
+    
+    const startHour = start.getHours();
+    const endHour = end.getHours();
+    
+    if (startHour < businessStartHour || endHour > businessEndHour) {
+      return false;
+    }
+    
+    // Check minimum duration (15 minutes)
+    const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+    if (durationMinutes < 15) {
+      return false;
+    }
+    
+    return true;
   };
 
   const handleEventDrop = async (info: EventDropArg) => {
@@ -67,7 +165,7 @@ export const CalendarEventsSystem = () => {
     };
 
     // Check if the move is valid
-    const isValidMove = await validateEventMove(
+    const isValidMove = validateEventMove(
       droppedEvent,
       droppedEvent.start,
       droppedEvent.end
@@ -75,39 +173,106 @@ export const CalendarEventsSystem = () => {
     
     if (!isValidMove) {
       info.revert();
-      toast({
-        title: "Invalid move",
-        description: "This event cannot be moved to the selected time slot.",
-        variant: "destructive",
+      toast.error("Invalid move", {
+        description: "This event cannot be moved to the selected time slot. Check business hours and minimum duration."
       });
       return;
     }
 
-    // Update event in database and state
+    // Update event in database
     try {
-      await updateEventInDatabase(droppedEvent);
-      setEvents(currentEvents => 
-        currentEvents.map(e => e.id === droppedEvent.id ? droppedEvent : e)
-      );
+      await updateTimeSlot.mutateAsync({
+        id: droppedEvent.id,
+        startTime: droppedEvent.start,
+        endTime: droppedEvent.end
+      });
     } catch (error) {
       info.revert();
-      toast({
-        title: "Update failed",
-        description: "There was an error updating the event.",
-        variant: "destructive",
-      });
+      // Error is already handled by the mutation
     }
   };
 
-  const handleEventResize = async (info: any) => {
-    // Similar implementation to handleEventDrop
-    // Would validate and update the event with the new duration
+  const handleEventResize = async (info: EventResizeStopArg) => {
+    // Store original event state
+    const originalStart = info.event.start;
+    const originalEnd = info.event.end;
+    
+    // Convert the FullCalendar event to our CalendarEvent type
+    const resizedEvent = {
+      id: info.event.id,
+      title: info.event.title,
+      start: info.event.start as Date,
+      end: info.event.end as Date,
+      rinkId: info.event.extendedProps?.rinkId || selectedRink,
+      maxStudents: info.event.extendedProps?.maxStudents || 1, 
+      currentStudents: info.event.extendedProps?.currentStudents || 0,
+      type: info.event.extendedProps?.type || 'PRIVATE',
+      extendedProps: info.event.extendedProps
+    };
+
+    // Check if the resize is valid
+    const isValidResize = validateEventMove(
+      resizedEvent,
+      resizedEvent.start,
+      resizedEvent.end
+    );
+    
+    if (!isValidResize) {
+      // Since we can't use revert(), refresh the calendar to undo the change
+      toast.error("Invalid duration", {
+        description: "The event cannot be resized to this duration. Check business hours and minimum duration."
+      });
+      
+      // Refresh the events to revert the change
+      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+      return;
+    }
+
+    // Update event in database
+    try {
+      await updateTimeSlot.mutateAsync({
+        id: resizedEvent.id,
+        startTime: resizedEvent.start,
+        endTime: resizedEvent.end
+      });
+    } catch (error) {
+      // Error is already handled by the mutation
+      // Refresh the events to revert the change
+      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+    }
+  };
+
+  const handleDateSelect = async (selectInfo: any) => {
+    const title = prompt('Please enter a title for the new event:');
+    if (!title) return; // User cancelled
+
+    try {
+      await createTimeSlot.mutateAsync({
+        rinkId: selectedRink,
+        startTime: selectInfo.start,
+        endTime: selectInfo.end,
+        maxStudents: 1,
+        isActive: true
+      });
+      
+      selectInfo.view.calendar.unselect(); // Clear selection
+    } catch (error) {
+      // Error is already handled by the mutation
+    }
+  };
+
+  const handleEventClick = (info: EventClickArg) => {
+    if (confirm(`Are you sure you want to delete '${info.event.title}'?`)) {
+      deleteTimeSlot.mutate({
+        id: info.event.id
+      });
+    }
   };
 
   return (
     <Card>
       <CardContent>
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-4 mb-4 items-center">
           <Select value={selectedRink} onValueChange={setSelectedRink}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select rink" />
@@ -132,22 +297,56 @@ export const CalendarEventsSystem = () => {
               <SelectItem value="dayGridMonth">Month View</SelectItem>
             </SelectContent>
           </Select>
+          
+          <Button 
+            onClick={() => utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink })} 
+            disabled={eventsLoading}
+            variant="outline"
+          >
+            Refresh
+          </Button>
         </div>
 
-        <Calendar 
-          initialView={viewMode}
-          events={events}
-          onEventDrop={handleEventDrop}
-          onEventClick={(info: EventClickArg) => {
-            // Handle event click
-            console.log('Event clicked:', info.event);
-          }}
-          businessHours={{
-            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-            startTime: '05:00',
-            endTime: '18:00',
-          }}
-        />
+        <div className="h-[600px]">
+          {eventsLoading ? (
+            <div className="flex items-center justify-center h-full">
+              Loading events...
+            </div>
+          ) : (
+            <FullCalendar 
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              initialView={viewMode}
+              events={events}
+              editable={true}
+              selectable={true}
+              eventDrop={handleEventDrop}
+              eventResize={handleEventResize}
+              eventClick={handleEventClick}
+              select={handleDateSelect}
+              businessHours={{
+                daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+                startTime: '05:00',
+                endTime: '18:00',
+              }}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridDay,timeGridWeek,dayGridMonth'
+              }}
+              height="100%"
+              slotDuration="00:15:00"
+              slotLabelInterval="01:00:00"
+              allDaySlot={false}
+              nowIndicator={true}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false,
+                hour12: false
+              }}
+            />
+          )}
+        </div>
       </CardContent>
     </Card>
   );

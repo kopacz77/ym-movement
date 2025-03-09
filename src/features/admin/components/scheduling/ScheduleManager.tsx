@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TimeSlotForm } from './TimeSlotForm';
 import { BulkTimeSlotForm } from './BulkTimeSlotForm';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import { Plus, X } from 'lucide-react';
 import { format } from 'date-fns';
@@ -27,7 +27,6 @@ export function ScheduleManager() {
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg | null>(null);
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   // Get rinks data
@@ -70,8 +69,7 @@ export function ScheduleManager() {
   // Delete time slot mutation
   const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Time slot deleted successfully"
       });
       setIsManageDialogOpen(false);
@@ -79,10 +77,8 @@ export function ScheduleManager() {
       utils.admin.schedule.getTimeSlots.invalidate();
     },
     onError: (err) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: err.message
       });
     },
   });
@@ -90,17 +86,14 @@ export function ScheduleManager() {
   // Assign student mutation
   const assignStudent = api.admin.schedule.assignStudentToTimeSlot.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Student assigned successfully"
       });
       utils.admin.schedule.getTimeSlots.invalidate();
     },
     onError: (err) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: err.message
       });
     },
   });
@@ -108,17 +101,14 @@ export function ScheduleManager() {
   // Unassign student mutation
   const unassignStudent = api.admin.schedule.unassignStudent.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Student unassigned successfully"
       });
       utils.admin.schedule.getTimeSlots.invalidate();
     },
     onError: (err) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive"
+      toast.error("Error", {
+        description: err.message
       });
     },
   });
@@ -150,17 +140,14 @@ export function ScheduleManager() {
     // For updateTimeSlot, we need to get the actual mutation function
     const updateTimeSlot = api.admin.schedule.updateTimeSlot.useMutation({
       onSuccess: () => {
-        toast({
-          title: "Success",
+        toast("Success", {
           description: "Time slot updated successfully"
         });
         utils.admin.schedule.getTimeSlots.invalidate();
       },
       onError: (error) => {
-        toast({
-          title: "Error",
-          description: "Failed to update time slot",
-          variant: "destructive"
+        toast.error("Error", {
+          description: "Failed to update time slot"
         });
         dropInfo.revert();
       }

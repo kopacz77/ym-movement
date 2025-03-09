@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { RevenueReport } from '@/features/admin/components/reports/RevenueReport';
 import { AttendanceReport } from '@/features/admin/components/reports/AttendanceReport';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
@@ -16,8 +16,7 @@ import { formatCurrency } from '@/lib/utils';
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
-  const { toast } = useToast();
-
+  
   // Fetch overview data for summary
   const { data: overviewData, isLoading: isLoadingOverview } = api.admin.analytics.getOverview.useQuery();
 
@@ -49,15 +48,13 @@ export default function ReportsPage() {
   };
 
   const handleExport = () => {
-    toast({
-      title: "Export started",
+    toast("Export started", {
       description: "Your report is being prepared for download.",
     });
     
     // In a real implementation, this would trigger an export to CSV or PDF
     setTimeout(() => {
-      toast({
-        title: "Export complete",
+      toast("Export complete", {
         description: "Your report has been downloaded.",
       });
     }, 1500);

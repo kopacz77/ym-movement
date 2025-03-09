@@ -7,15 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
-
+  
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -28,10 +27,8 @@ export default function LoginPage() {
       });
       
       if (result?.error) {
-        toast({
-          title: "Login Failed",
+        toast.error("Login Failed", {
           description: result.error,
-          variant: "destructive",
         });
         setIsLoading(false);
         return;
@@ -51,10 +48,8 @@ export default function LoginPage() {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      toast({
-        title: "Login Error",
+      toast.error("Login Error", {
         description: errorMessage,
-        variant: "destructive",
       });
       setIsLoading(false);
     }

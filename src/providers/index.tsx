@@ -1,3 +1,4 @@
+// src/providers/index.tsx
 'use client';
 import * as React from 'react';
 import { useState } from 'react';
@@ -7,7 +8,8 @@ import { api } from '@/lib/api';
 import superjson from 'superjson';
 import { SessionProvider } from 'next-auth/react';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { Toaster } from '@/components/ui/toaster';
+// Remove this: import { Toaster } from '@/components/ui/toaster';
+// The Toaster will now be in the layout file directly
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -35,7 +37,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <api.Provider client={trpcClient} queryClient={queryClient}>
           <QueryClientProvider client={queryClient}>
             {children}
-            <Toaster />
+            {/* Remove this: <Toaster /> */}
           </QueryClientProvider>
         </api.Provider>
       </AuthProvider>

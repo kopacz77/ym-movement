@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Clock, DollarSign, MapPin, Save } from 'lucide-react';
 import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
@@ -76,7 +76,6 @@ interface Rink {
 }
 
 export default function SettingsPage() {
-  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
 
   // State for settings
@@ -132,17 +131,14 @@ export default function SettingsPage() {
   const saveSettingsMutation = api.admin.settings.saveSettings.useMutation({
     onSuccess: () => {
       setIsSaving(false);
-      toast({
-        title: "Settings saved",
-        description: "Your changes have been successfully saved.",
+      toast("Settings saved", {
+        description: "Your changes have been applied successfully.",
       });
     },
     onError: (error: any) => {
       setIsSaving(false);
-      toast({
-        title: "Error",
-        description: `Failed to save settings: ${error.message}`,
-        variant: "destructive",
+      toast.error("Error", {
+        description: "Failed to save settings: " + error.message,
       });
     }
   });

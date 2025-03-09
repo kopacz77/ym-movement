@@ -1,130 +1,75 @@
 "use client"
-import React from 'react'
-import FullCalendar from '@fullcalendar/react'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction'
-import { DateSelectArg, EventClickArg, EventDropArg, DayCellContentArg } from '@fullcalendar/core'
 
-interface CalendarProps {
-  initialView?: 'timeGridWeek' | 'timeGridDay' | 'dayGridMonth'
-  events?: any[]
-  resources?: any[]
-  selectable?: boolean
-  onDateSelect?: (info: DateSelectArg) => void
-  onEventClick?: (info: EventClickArg) => void
-  onEventDrop?: (info: EventDropArg) => void
-  businessHours?: {
-    daysOfWeek?: number[],
-    startTime?: string,
-    endTime?: string
-  }
-  slotMinTime?: string
-  slotMaxTime?: string
-  // Additional props for date selection (expected by StudentAttendance.tsx)
-  selected?: Date
-  onSelect?: (date: Date | null) => void
-  components?: {
-    Day?: React.ComponentType<{ day: Date; [key: string]: any }>
-  }
-}
+import * as React from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { DayPicker } from "react-day-picker"
 
-export function Calendar({
-  initialView = 'dayGridMonth',
-  events = [],
-  resources,
-  selectable = true,
-  onDateSelect,
-  onEventClick,
-  onEventDrop,
-  businessHours = {
-    daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-    startTime: '05:00',
-    endTime: '18:00',
-  },
-  slotMinTime,
-  slotMaxTime,
-  selected,
-  onSelect,
-  components,
-}: CalendarProps) {
-  const calendarProps = React.useMemo(() => {
-    const props: any = {
-      plugins: [timeGridPlugin, dayGridPlugin, interactionPlugin],
-      initialView,
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay',
-      },
-      slotMinTime: slotMinTime || "05:00:00",
-      slotMaxTime: slotMaxTime || "18:00:00",
-      selectable,
-      selectMirror: true,
-      dayMaxEvents: true,
-      weekends: true,
-      events,
-      ...(resources ? { resources } : {}),
-      select: onDateSelect,
-      eventClick: onEventClick,
-      eventDrop: onEventDrop,
-      businessHours,
-      editable: true,
-      droppable: true,
-      allDaySlot: false,
-      slotDuration: "00:30:00",
-      slotLabelInterval: "00:30",
-      stickyHeaderDates: true,
-      nowIndicator: true,
-      height: "100%",
-    };
-    // Map onSelect prop to FullCalendar's dateClick event
-    if (onSelect) {
-      props.dateClick = (arg: DateClickArg) => {
-        onSelect(new Date(arg.date));
-      }
-    }
-    // Map custom day renderer to FullCalendar's dayCellContent
-    if (components?.Day) {
-      const DayComponent = components.Day;
-      props.dayCellContent = (arg: DayCellContentArg) => {
-        return <DayComponent day={arg.date} {...arg} />;
-      }
-    }
-    // Add custom class to highlight the selected day
-    if (selected) {
-      props.dayCellClassNames = (arg: { date: Date }) => {
-        const classes: string[] = [];
-        const selectedStr = selected.toISOString().split("T")[0];
-        const cellStr = arg.date.toISOString().split("T")[0];
-        if (selectedStr === cellStr) {
-          classes.push("selected-day"); // You can style .selected-day in your CSS
-        }
-        return classes;
-      }
-    }
-    return props;
-  }, [
-    initialView,
-    events,
-    resources,
-    selectable,
-    onDateSelect,
-    onEventClick,
-    onEventDrop,
-    businessHours,
-    slotMinTime,
-    slotMaxTime,
-    onSelect,
-    components,
-    selected,
-  ]);
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
 
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  ...props
+}: React.ComponentProps<typeof DayPicker>) {
   return (
-    <div className="bg-white border rounded-lg shadow-sm">
-      <div className="h-[calc(100vh-12rem)] w-full">
-        <FullCalendar {...calendarProps} />
-      </div>
-    </div>
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={cn("p-3", className)}
+      classNames={{
+        months: "flex flex-col sm:flex-row gap-2",
+        month: "flex flex-col gap-4",
+        caption: "flex justify-center pt-1 relative items-center w-full",
+        caption_label: "text-sm font-medium",
+        nav: "flex items-center gap-1",
+        nav_button: cn(
+          buttonVariants({ variant: "outline" }),
+          "size-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+        ),
+        nav_button_previous: "absolute left-1",
+        nav_button_next: "absolute right-1",
+        table: "w-full border-collapse space-x-1",
+        head_row: "flex",
+        head_cell:
+          "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+        row: "flex w-full mt-2",
+        cell: cn(
+          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md",
+          props.mode === "range"
+            ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+            : "[&:has([aria-selected])]:rounded-md"
+        ),
+        day: cn(
+          buttonVariants({ variant: "ghost" }),
+          "size-8 p-0 font-normal aria-selected:opacity-100"
+        ),
+        day_range_start:
+          "day-range-start aria-selected:bg-primary aria-selected:text-primary-foreground",
+        day_range_end:
+          "day-range-end aria-selected:bg-primary aria-selected:text-primary-foreground",
+        day_selected:
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_today: "bg-accent text-accent-foreground",
+        day_outside:
+          "day-outside text-muted-foreground aria-selected:text-muted-foreground",
+        day_disabled: "text-muted-foreground opacity-50",
+        day_range_middle:
+          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_hidden: "invisible",
+        ...classNames,
+      }}
+      components={{
+        IconLeft: ({ className, ...props }) => (
+          <ChevronLeft className={cn("size-4", className)} {...props} />
+        ),
+        IconRight: ({ className, ...props }) => (
+          <ChevronRight className={cn("size-4", className)} {...props} />
+        ),
+      }}
+      {...props}
+    />
   )
 }
+
+export { Calendar }

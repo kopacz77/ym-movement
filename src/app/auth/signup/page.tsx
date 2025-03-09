@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Level } from '@prisma/client';
 
@@ -20,7 +20,6 @@ export default function SignupPage() {
   const [level, setLevel] = useState<Level>(Level.PRE_PRELIMINARY);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,18 +44,17 @@ export default function SignupPage() {
         throw new Error(data.message || 'Something went wrong');
       }
 
-      toast({
-        title: "Account Created",
-        description: "Your account has been created and is pending approval. You'll receive an email when approved.",
+      toast("Account created", {
+        description: "Your account has been created successfully!",
       });
 
       // Redirect to login page after successful signup
       router.push('/auth/login');
     } catch (error) {
-      toast({
-        title: "Signup Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
+      toast.error("Error", {
+        description: error instanceof Error 
+          ? error.message 
+          : "An error occurred during sign up",
       });
     } finally {
       setIsLoading(false);

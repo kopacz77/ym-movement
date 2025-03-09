@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { api } from '@/lib/api';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { PaymentStatus } from '@prisma/client';
 import { format } from 'date-fns';
 import { Search, Check, X, Send, FileText } from 'lucide-react';
@@ -24,7 +24,6 @@ export default function PaymentsPage() {
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'ALL'>('ALL');
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
-  const { toast } = useToast();
   const utils = api.useUtils();
 
   // Fetch payments with filters
@@ -40,60 +39,51 @@ export default function PaymentsPage() {
   );
 
   // Verify payment mutation
-  const verifyPayment = api.admin.payments.verifyPayment.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Payment verified",
-        description: "The payment has been marked as completed.",
-      });
-      utils.admin.payments.getPayments.invalidate();
-      setSelectedPaymentId(null);
-    },
-    onError: (error) => {
-      toast({
-        title: "Verification failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+const verifyPayment = api.admin.payments.verifyPayment.useMutation({
+  onSuccess: () => {
+    toast("Payment verified", {
+      description: "The payment has been marked as completed.",
+    });
+    utils.admin.payments.getPayments.invalidate();
+    setSelectedPaymentId(null);
+  },
+  onError: (error) => {
+    toast.error("Verification failed", {
+      description: error.message,
+    });
+  },
+});
 
-  // Send reminder mutation
-  const sendReminder = api.admin.payments.sendPaymentReminder.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Reminder sent",
-        description: "Payment reminder has been sent to the student.",
-      });
-      utils.admin.payments.getPayments.invalidate();
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to send reminder",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+// Send reminder mutation
+const sendReminder = api.admin.payments.sendPaymentReminder.useMutation({
+  onSuccess: () => {
+    toast("Reminder sent", {
+      description: "Payment reminder has been sent to the student.",
+    });
+    utils.admin.payments.getPayments.invalidate();
+  },
+  onError: (error) => {
+    toast.error("Failed to send reminder", {
+      description: error.message,
+    });
+  },
+});
 
-  // Add note mutation
-  const addNote = api.admin.payments.addPaymentNote.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Note added",
-        description: "The note has been added to the payment.",
-      });
-      utils.admin.payments.getPaymentById.invalidate({ paymentId: selectedPaymentId! });
-      setIsNoteDialogOpen(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to add note",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+// Add note mutation
+const addNote = api.admin.payments.addPaymentNote.useMutation({
+  onSuccess: () => {
+    toast("Note added", {
+      description: "The note has been added to the payment.",
+    });
+    utils.admin.payments.getPaymentById.invalidate({ paymentId: selectedPaymentId! });
+    setIsNoteDialogOpen(false);
+  },
+  onError: (error) => {
+    toast.error("Failed to add note", {
+      description: error.message,
+    });
+  },
+});
 
   const handleVerifyPayment = (paymentId: string) => {
     verifyPayment.mutate({
