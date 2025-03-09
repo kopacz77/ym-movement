@@ -1,10 +1,12 @@
-// src/features/student/components/booking/BookingCalendar.tsx
 "use client";
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import { format, addDays, startOfDay, endOfDay } from 'date-fns';
 import { api } from '@/lib/api';
 import { toast } from "sonner";
@@ -135,17 +137,19 @@ export const BookingCalendar = () => {
           </div>
         ) : (
           <div className="h-[600px]">
-            <Calendar
+            <FullCalendar
+              plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
               initialView="timeGridWeek"
               events={events}
               selectable={true}
-              onDateSelect={handleDateSelect}
-              onEventClick={handleEventClick}
+              select={handleDateSelect}
+              eventClick={handleEventClick}
               businessHours={{
                 daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
                 startTime: "05:00",
                 endTime: "18:00",
               }}
+              height="100%"
             />
             {/* Add CSS for styling non-interactive slots */}
             <style jsx global>{`

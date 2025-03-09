@@ -1,4 +1,3 @@
-// src/features/admin/components/students/progress/StudentAttendance.tsx
 "use client";
 
 import React, { useEffect } from 'react';
@@ -10,6 +9,7 @@ import { api } from '@/lib/api';
 import { toast } from "sonner";
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { Info } from 'lucide-react';
+import type { DayProps, DateRange } from 'react-day-picker';
 
 interface StudentAttendanceProps {
   studentId: string;
@@ -75,42 +75,45 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
             <div className="rounded-md border p-3">
               <Calendar
                 selected={date}
-                onSelect={(newDate: Date | null) => newDate && setDate(newDate)}
+                onSelect={(range: DateRange | undefined) => range?.from && setDate(range.from)}
                 components={{
-                  Day: ({ day, ...props }: { day: Date; [key: string]: any }) => (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button 
-                          {...props} 
-                          className="w-9 h-9 rounded-md hover:bg-accent"
-                          style={getLessonStyles(day)}
-                        >
-                          {format(day, 'd')}
-                        </button>
-                      </PopoverTrigger>
-                      {attendance?.lessons.some(
-                        l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-                      ) && (
-                        <PopoverContent className="w-80">
-                          <div className="space-y-2">
-                            {attendance.lessons
-                              .filter(l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
-                              .map((lesson, idx) => (
-                                <div key={lesson.id || idx} className="text-sm">
-                                  <div className="font-medium">{format(new Date(lesson.date), 'h:mm a')}</div>
-                                  <div className="text-muted-foreground">Status: {lesson.status}</div>
-                                  {lesson.cancellationReason && (
-                                    <div className="text-red-600 text-xs mt-1">
-                                      Reason: {lesson.cancellationReason}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                          </div>
-                        </PopoverContent>
-                      )}
-                    </Popover>
-                  ),
+                  Day: (props: DayProps) => {
+                    const day = props.date;
+                    return (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button 
+                            {...props} 
+                            className="w-9 h-9 rounded-md hover:bg-accent"
+                            style={getLessonStyles(day)}
+                          >
+                            {format(day, 'd')}
+                          </button>
+                        </PopoverTrigger>
+                        {attendance?.lessons.some(
+                          l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+                        ) && (
+                          <PopoverContent className="w-80">
+                            <div className="space-y-2">
+                              {attendance.lessons
+                                .filter(l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
+                                .map((lesson, idx) => (
+                                  <div key={lesson.id || idx} className="text-sm">
+                                    <div className="font-medium">{format(new Date(lesson.date), 'h:mm a')}</div>
+                                    <div className="text-muted-foreground">Status: {lesson.status}</div>
+                                    {lesson.cancellationReason && (
+                                      <div className="text-red-600 text-xs mt-1">
+                                        Reason: {lesson.cancellationReason}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+                          </PopoverContent>
+                        )}
+                      </Popover>
+                    );
+                  },
                 }}
               />
             </div>
