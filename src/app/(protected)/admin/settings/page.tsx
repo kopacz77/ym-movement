@@ -314,20 +314,20 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Scheduling Settings</h3>
                   <div className="space-y-2">
-                    <Label htmlFor="default-lesson-duration">Default Lesson Duration (minutes)</Label>
+                    <Label htmlFor="default-lesson-duration" className="w-full">Default Lesson Duration (minutes)</Label>
                     <Select
                       value={operationalSettings.defaultLessonDuration}
-                      onValueChange={(value) => setOperationalSettings(prev => ({ ...prev, defaultLessonDuration: value }))}
+                      onValueChange={(value) => setOperationalSettings(prev => ({ ...prev, defaultLessonDuration: value }))} 
                     >
-                      <SelectTrigger id="default-lesson-duration">
+                      <SelectTrigger id="default-lesson-duration" className="w-full">
                         <SelectValue placeholder="Select duration" />
-                      </SelectTrigger>
+                      </SelectTrigger >
                       <SelectContent>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">60 minutes</SelectItem>
-                        <SelectItem value="90">90 minutes</SelectItem>
-                        <SelectItem value="120">120 minutes</SelectItem>
+                        <SelectItem value="30" className="w-full">30 minutes</SelectItem>
+                        <SelectItem value="45" className="w-full">45 minutes</SelectItem>
+                        <SelectItem value="60" className="w-full">60 minutes</SelectItem>
+                        <SelectItem value="90" className="w-full">90 minutes</SelectItem>
+                        <SelectItem value="120" className="w-full">120 minutes</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

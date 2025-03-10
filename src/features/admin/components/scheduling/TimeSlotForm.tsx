@@ -68,7 +68,7 @@ export const TimeSlotForm = ({
       rinkId: initialRinkId || '',
       startTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : '',
       duration: initialEndTime && initialStartTime
-        ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60))
+      ? Math.max(60, Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60)))
         : 60,
       maxStudents: 1,
       isRecurring: false,
@@ -124,13 +124,13 @@ export const TimeSlotForm = ({
               <FormLabel>Rink</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a rink" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="w-full min-w-[200px]">
                   {rinks.map((rink) => (
-                    <SelectItem key={rink.id} value={rink.id}>
+                    <SelectItem key={rink.id} value={rink.id} className="w-full">
                       {rink.name}
                     </SelectItem>
                   ))}

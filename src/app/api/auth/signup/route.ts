@@ -12,6 +12,7 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z.string().optional(),
   level: z.nativeEnum(Level),
+  parentConsent: z.boolean().optional(), // Added properly inside the schema
 });
 
 export async function POST(req: NextRequest) {
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
           level: validatedData.level,
           maxLessonsPerWeek: 3, // Default value
           isApproved: false,
+          parentConsent: validatedData.parentConsent || false, // Use the validated data
         },
       });
       

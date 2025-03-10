@@ -144,6 +144,8 @@ export const BookingCalendar = () => {
               selectable={true}
               select={handleDateSelect}
               eventClick={handleEventClick}
+              slotMinTime="05:00:00"  // Start at 5am
+              slotMaxTime="18:00:00"  // End at 6pm
               businessHours={{
                 daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
                 startTime: "05:00",

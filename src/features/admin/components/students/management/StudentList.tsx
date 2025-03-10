@@ -114,10 +114,10 @@ export const StudentList: React.FC<StudentListProps> = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onViewProfileAction(student.id)}>
+                          <DropdownMenuItem onClick={() => onViewProfileAction(student.id)} className="w-full">
                             View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onEditAction(student.id)}>
+                          <DropdownMenuItem onClick={() => onEditAction(student.id)} className="w-full">
                             Edit
                           </DropdownMenuItem>
                         </DropdownMenuContent>

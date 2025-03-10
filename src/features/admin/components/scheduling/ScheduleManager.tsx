@@ -17,8 +17,8 @@ import { toast } from 'sonner';
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import { Plus, X } from 'lucide-react';
 import { format } from 'date-fns';
-import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
-import resourceDayGridPlugin from '@fullcalendar/resource-daygrid';
+//import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
+//import resourceDayGridPlugin from '@fullcalendar/resource-daygrid';
 
 interface TimeSlotFormData {
   startTime: Date | null;
@@ -56,7 +56,7 @@ export function ScheduleManager() {
       title,
       start: slot.startTime,
       end: slot.endTime,
-      resourceId: slot.rinkId,
+      //resourceId: slot.rinkId,
       extendedProps: {
         ...slot,
         currentStudents: studentCount,
@@ -65,10 +65,10 @@ export function ScheduleManager() {
   }) || [];
 
   // Convert rinks to FullCalendar resources
-  const resources = rinks?.map((rink) => ({
-    id: rink.id,
-    title: rink.name,
-  })) || [];
+  //const resources = rinks?.map((rink) => ({
+    //id: rink.id,
+    //title: rink.name,
+  //})) || [];
 
   // Delete time slot mutation
   const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
@@ -168,7 +168,7 @@ export function ScheduleManager() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Schedule Management</h1>
+        <h1 className="text-2xl font-bold">{/*Schedule Management*/}</h1>
         <div className="flex gap-2">
           {/* Create Time Slot Dialog */}
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -346,11 +346,11 @@ export function ScheduleManager() {
               dayGridPlugin,
               timeGridPlugin,
               interactionPlugin,
-              resourceTimeGridPlugin
+              //resourceTimeGridPlugin
             ]}
-            initialView="resourceTimeGridDay"
+            initialView="timeGridWeek"
             events={events}
-            resources={resources}
+            //resources={resources}
             // Keep all your original props below
             headerToolbar={{
               left: 'prev,next today',
@@ -358,6 +358,9 @@ export function ScheduleManager() {
               right: 'resourceTimeGridDay,timeGridWeek,dayGridMonth'
             }}
             slotDuration="00:30:00"
+            slotMinTime="05:00:00"  // Start at 5am
+            slotMaxTime="18:00:00"  // End at 6pm
+            defaultTimedEventDuration="01:00:00"
             allDaySlot={false}
             editable={true}
             selectable={true}

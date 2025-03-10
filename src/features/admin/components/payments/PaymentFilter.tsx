@@ -18,12 +18,12 @@ export const PaymentFilter: React.FC<PaymentFilterProps> = ({
       <Select value={currentFilter} onValueChange={(value: PaymentStatus | 'ALL') => onFilterChange(value)}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Filter by status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">All Statuses</SelectItem>
-          <SelectItem value="PENDING">Pending</SelectItem>
-          <SelectItem value="COMPLETED">Completed</SelectItem>
-          <SelectItem value="FAILED">Failed</SelectItem>
+        </SelectTrigger >
+        <SelectContent className="w-full">
+          <SelectItem value="ALL" className="w-full">All Statuses</SelectItem>
+          <SelectItem value="PENDING" className="w-full">Pending</SelectItem>
+          <SelectItem value="COMPLETED" className="w-full">Completed</SelectItem>
+          <SelectItem value="FAILED" className="w-full">Failed</SelectItem>
         </SelectContent>
       </Select>
     </div>

@@ -29,6 +29,7 @@ model Student {
   level            Level          @default(PRELIMINARY)
   emergencyContact Json?
   isApproved       Boolean        @default(false)
+  parentConsent     Boolean       @default(false)
   approvedAt       DateTime?
   approvedById     String?
   createdAt        DateTime       @default(now())

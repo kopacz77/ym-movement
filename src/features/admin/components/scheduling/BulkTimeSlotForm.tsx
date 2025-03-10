@@ -77,7 +77,7 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
       endDate: '',
       dailyStartTime: '',
       dailyEndTime: '',
-      slotDuration: 30,
+      slotDuration: 60,
       breakStartTime: '',
       breakDuration: 0,
       maxStudents: 1,
@@ -103,13 +103,13 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
               <FormLabel>Rink</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a rink" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   {rinks.map((rink) => (
-                    <SelectItem key={rink.id} value={rink.id}>
+                    <SelectItem key={rink.id} value={rink.id} className="w-full">
                       {rink.name}
                     </SelectItem>
                   ))}

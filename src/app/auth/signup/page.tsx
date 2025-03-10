@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Level } from '@prisma/client';
+import { Checkbox } from '@/components/ui/checkbox'; // Added import for Checkbox
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -18,6 +19,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [level, setLevel] = useState<Level>(Level.PRE_PRELIMINARY);
+  const [parentConsent, setParentConsent] = useState(false); // Added state for parent consent
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -34,7 +36,8 @@ export default function SignupPage() {
           email,
           password,
           phone,
-          level
+          level,
+          parentConsent
         }),
       });
 
@@ -126,6 +129,27 @@ export default function SignupPage() {
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Parental Consent Checkbox */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="parentConsent"
+                  checked={parentConsent}
+                  onCheckedChange={(checked) => setParentConsent(checked === true)}
+                />
+                <Label 
+                  htmlFor="parentConsent" 
+                  className="text-sm font-medium leading-none cursor-pointer"
+                >
+                  I am a parent/legal guardian creating this account for my child
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                For students under 13, accounts must be created and managed by a parent or legal guardian.
+              </p>
+            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing up..." : "Sign Up"}
             </Button>
@@ -136,6 +160,16 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link href="/auth/login" className="text-blue-600 hover:underline">
               Login
+            </Link>
+          </p>
+          <p className="text-xs text-center text-gray-400 mt-2">
+            By signing up, you agree to our{" "}
+            <Link href="/terms" className="text-blue-500 hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-blue-500 hover:underline">
+              Privacy Policy
             </Link>
           </p>
         </CardFooter>
