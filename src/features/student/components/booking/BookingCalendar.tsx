@@ -52,7 +52,7 @@ export const BookingCalendar = () => {
         description: errorMessage
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Convert slots to FullCalendar events with an interactive flag
   const events = availableSlots?.map((slot: any) => {

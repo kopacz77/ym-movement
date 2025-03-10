@@ -37,7 +37,7 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Access notes directly from student
   const notes = React.useMemo(() => {

@@ -1,6 +1,9 @@
 // src/features/admin/components/scheduling/ScheduleCalendarView.tsx
 import React from 'react';
-import { Calendar } from '@/components/ui/calendar';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import dayGridPlugin from '@fullcalendar/daygrid'; // Added for month view
 import { TimeSlotList } from './TimeSlotList';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -25,6 +28,13 @@ const ViewOptions = () => {
 };
 
 export const ScheduleCalendarView = () => {
+  const [calendarView, setCalendarView] = React.useState('timeGridWeek');
+  
+  // Update calendar view when selection changes
+  const handleViewChange = (view: string) => {
+    setCalendarView(view);
+  };
+  
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -35,8 +45,13 @@ export const ScheduleCalendarView = () => {
       </div>
       <div className="flex-1 grid grid-cols-7 gap-4">
         <div className="col-span-5">
-          {/* Changed mode="week" to initialView="timeGridWeek" to match Calendar component props */}
-          <Calendar initialView="timeGridWeek" />
+          {/* Changed Calendar to FullCalendar with required plugins */}
+          <FullCalendar
+            plugins={[timeGridPlugin, interactionPlugin, dayGridPlugin]}
+            initialView="timeGridWeek"
+            headerToolbar={false} // Hide the built-in header since we have custom controls
+            height="100%"
+          />
         </div>
         <div className="col-span-2">
           <TimeSlotList />

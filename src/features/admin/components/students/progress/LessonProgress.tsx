@@ -69,7 +69,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   const getStatusColor = (status: LessonStatus) => {
     switch (status) {

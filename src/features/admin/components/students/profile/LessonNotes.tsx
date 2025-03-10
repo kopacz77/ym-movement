@@ -49,7 +49,7 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Find the specific lesson by ID
   const currentLesson = lessons?.find(l => l.id === lessonId);

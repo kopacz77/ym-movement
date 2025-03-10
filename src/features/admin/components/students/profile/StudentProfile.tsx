@@ -34,7 +34,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   if (isLoading) {
     return (

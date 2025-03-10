@@ -61,7 +61,7 @@ export const StudentActivityChart: React.FC = () => {
         description: err.message || "An unexpected error occurred"
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Transform API data into the format expected by our chart.
   const chartData = useMemo<ChartData[]>(() => {

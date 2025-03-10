@@ -34,7 +34,7 @@ export default function StudentProfilePage() {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   if (!isReady || isLoading) {
     return (

@@ -33,7 +33,7 @@ export const RevenueChart = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
   
   const chartData = React.useMemo(() => {
     if (!data || !Array.isArray(data)) return [];

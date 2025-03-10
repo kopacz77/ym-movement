@@ -65,7 +65,7 @@ export const StudentManager = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Extract students array (fallback to empty array)
   const students = studentsData?.students || [];

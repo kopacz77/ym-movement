@@ -85,7 +85,7 @@ export default function StudentSchedulePage() {
         description: error.message || "Failed to load lessons"
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Cast the raw API data to our Lesson type
   const typedLessons = (lessons || []) as Lesson[];

@@ -44,7 +44,7 @@ export const UpcomingLessons = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
   
   // Only show the next 3 lessons
   const upcomingLessons = lessons?.slice(0, 3);

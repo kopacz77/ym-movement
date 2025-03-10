@@ -45,7 +45,7 @@ export const PendingApprovals = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   const handleApprove = (studentId: string, studentName: string) => {
     toast("Processing", {

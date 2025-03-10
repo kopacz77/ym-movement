@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { BookingDialog } from './BookingDialog';
-import { Calendar } from '@/components/ui/calendar';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 
 interface CalendarEvent {
@@ -32,13 +34,14 @@ export const CalendarInteractions = () => {
 
   return (
     <Card className="p-4">
-      <Calendar
+      <FullCalendar
+        plugins={[timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
         events={[]}
         selectable={true}
-        onDateSelect={handleSelectSlot}
-        onEventClick={handleEventClick}
-        onEventDrop={handleDragEvent}
+        select={handleSelectSlot}          
+        eventClick={handleEventClick}       
+        eventDrop={handleDragEvent}          
         businessHours={{
           daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
           startTime: "05:00",

@@ -33,7 +33,7 @@ export const LessonSummary = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   const weeklyProgressPercentage = stats 
     ? (stats.thisWeekCount / stats.maxAllowed) * 100 

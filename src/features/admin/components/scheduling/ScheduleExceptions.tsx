@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 
 export const ScheduleExceptions = () => {
+  // Add state for the selected date
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
+
   return (
     <Card>
       <CardHeader>
@@ -15,8 +18,13 @@ export const ScheduleExceptions = () => {
         <div className="space-y-6">
           <div>
             <Label>Exception Date</Label>
-            {/* Changed mode="single" to initialView="dayGridMonth" */}
-            <Calendar initialView="dayGridMonth" />
+            {/* Corrected to use proper Calendar props */}
+            <Calendar 
+              mode="single" 
+              selected={selectedDate} 
+              onSelect={setSelectedDate}
+              className="mt-1"
+            />
           </div>
           <div>
             <Label>Exception Type</Label>

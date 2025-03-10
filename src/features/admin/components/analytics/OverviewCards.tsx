@@ -20,7 +20,7 @@ export const OverviewCards = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   if (isLoading) {
     return (

@@ -35,7 +35,7 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   const getLessonStyles = (day: Date) => {
     if (!attendance) return {};

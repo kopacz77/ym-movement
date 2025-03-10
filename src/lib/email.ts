@@ -246,7 +246,7 @@ export async function sendLessonConfirmationEmail(
     const { data, error } = await resend.emails.send({
       from: 'YM - Movement <noreply@ym-movement.com>',
       to: studentEmail,
-      reply_to: 'yuraxmin@gmail.com',
+      replyTo: 'yuraxmin@gmail.com',
       subject: `Lesson Confirmation: Ice Dance Lesson with ${studentName}`,
       html: emailContent,
     });

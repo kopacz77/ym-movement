@@ -1,4 +1,4 @@
-import { AdminBreadcrumbs } from "./AdminBreadcrumbs";
+import { AdminBreadcrumbs } from "./AdminBreadCrumbs";
 
 interface PageHeaderProps {
   title: string;

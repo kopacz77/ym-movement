@@ -34,7 +34,7 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
       // Refresh the schedule page data
       router.refresh();
     }
-  }, [cancelLesson.isSuccess, router, onCloseAction, toast]);
+  }, [cancelLesson.isSuccess, router, onCloseAction]);
 
   useEffect(() => {
     if (cancelLesson.error) {
@@ -43,7 +43,7 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
       });
       setIsSubmitting(false);
     }
-  }, [cancelLesson.error, toast]);
+  }, [cancelLesson.error]);
 
   const handleCancellation = () => {
     if (reason.trim() === "") {

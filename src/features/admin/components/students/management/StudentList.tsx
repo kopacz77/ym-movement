@@ -33,7 +33,7 @@ export const StudentList: React.FC<StudentListProps> = ({
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   const students = studentsData?.students || [];
 

@@ -44,7 +44,7 @@ export default function StudentPaymentsPage() {
         description: error.message,
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Filter lessons to only include those with payments
   const paymentsData = lessons ? lessons.filter(lesson => lesson.payment !== null) : [];

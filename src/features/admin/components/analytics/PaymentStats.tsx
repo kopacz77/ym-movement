@@ -17,7 +17,7 @@ export const PaymentStats = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   if (isLoading) {
     return (

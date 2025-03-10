@@ -28,7 +28,7 @@ export const PendingApprovals = () => {
         description: error.message
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   // Approval mutation
   const approveStudent = api.admin.student.approveStudent.useMutation({
