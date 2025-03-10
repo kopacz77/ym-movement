@@ -2,6 +2,7 @@
 import '@/styles/globals.css';
 import { Inter } from 'next/font/google';
 import { Providers } from '@/providers';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from "@/components/ui/sonner"; // Add this import
 
 const inter = Inter({
