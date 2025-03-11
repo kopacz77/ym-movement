@@ -123,7 +123,7 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
     }),
-  createRecurringPattern: protectedProcedure
+    createRecurringPattern: protectedProcedure
     .input(
       z.object({
         rinkId: z.string(),
@@ -134,6 +134,13 @@ export const scheduleRouter = createTRPCRouter({
         duration: z.number().min(30),
         maxStudents: z.number().min(1),
         isActive: z.boolean().default(true),
+      }).refine((data) => {
+        // Check if date range exceeds 30 days
+        const dayDifference = Math.ceil((data.endDate.getTime() - data.startDate.getTime()) / (1000 * 60 * 60 * 24));
+        return dayDifference <= 30;
+      }, {
+        message: "Date range cannot exceed 30 days",
+        path: ["endDate"],
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -165,7 +172,7 @@ export const scheduleRouter = createTRPCRouter({
             data: slots,
           });
         }
-        return pattern;
+        return { pattern, slotsCreated: slots.length };
       } catch (error) {
         console.error('Error creating recurring pattern:', error);
         throw new TRPCError({
@@ -175,21 +182,40 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
     }),
+    
     createBulkTimeSlots: protectedProcedure
-    .input(
-      z.object({
-        rinkId: z.string(),
-        startDate: z.string(),
-        endDate: z.string(),
-        dailyStartTime: z.string(),
-        dailyEndTime: z.string(),
-        slotDuration: z.number().min(15),
-        breakStartTime: z.string().optional(),
-        breakDuration: z.number().optional(),
-        maxStudents: z.number().min(1),
-        daysOfWeek: z.array(z.number()).min(1),
-      })
-    )
+.input(
+  z.object({
+    rinkId: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    dailyStartTime: z.string(),
+    dailyEndTime: z.string(),
+    slotDuration: z.number().min(15),
+    breakStartTime: z.string().optional(),
+    breakDuration: z.number().optional(),
+    maxStudents: z.number().min(1),
+    daysOfWeek: z.array(z.number()).min(1),
+  }).refine((data) => {
+    const startParts = data.startDate.split('-').map(Number);
+    const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+    
+    const endParts = data.endDate.split('-').map(Number);
+    const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+    
+    // Ensure end date is not before start date
+    if (endDate < startDate) {
+      return false;
+    }
+    
+    // Check if date range exceeds 30 days
+    const dayDifference = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+    return dayDifference <= 30;
+  }, {
+    message: "Date range cannot exceed 30 days",
+    path: ["endDate"],
+  })
+)
     .mutation(async ({ ctx, input }) => {
       const slots = [];
       

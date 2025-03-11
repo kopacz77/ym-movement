@@ -1,4 +1,5 @@
-import React from 'react';
+// src/features/admin/components/scheduling/RecurringPatternForm.tsx
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,14 +7,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Form, 
   FormControl, 
+  FormDescription,
   FormField, 
   FormItem, 
   FormLabel, 
   FormMessage
 } from '@/components/ui/form';
-import { useForm } from 'react-hook-form'; // Imported from react-hook-form instead
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { addDays, differenceInDays, isAfter, parse } from 'date-fns';
+import { toast } from 'sonner';
 
 const daysOfWeek = [
   { id: 0, label: 'Sunday' },
@@ -25,11 +29,32 @@ const daysOfWeek = [
   { id: 6, label: 'Saturday' },
 ];
 
-// Define form schema
+// Define form schema with validation for 30-day limit
 const formSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   daysOfWeek: z.array(z.number()).min(1, "Select at least one day")
+}).refine((data) => {
+  if (!data.startDate || !data.endDate) return true; // Let the required validation handle empty values
+  
+  try {
+    const start = parse(data.startDate, 'yyyy-MM-dd', new Date());
+    const end = parse(data.endDate, 'yyyy-MM-dd', new Date());
+    
+    // Ensure end date is not before start date
+    if (isAfter(start, end)) {
+      return false;
+    }
+    
+    // Check if date range exceeds 30 days
+    const dayDifference = differenceInDays(end, start);
+    return dayDifference <= 30;
+  } catch (error) {
+    return false;
+  }
+}, {
+  message: "Date range cannot exceed 30 days",
+  path: ["endDate"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,9 +70,41 @@ export const RecurringPatternForm = () => {
     }
   });
 
+  // Auto-update end date when start date changes
+  const startDate = form.watch('startDate');
+  useEffect(() => {
+    if (startDate) {
+      try {
+        const start = parse(startDate, 'yyyy-MM-dd', new Date());
+        const suggestedEndDate = addDays(start, 30);
+        // Format the date back to yyyy-MM-dd string
+        const endDateString = suggestedEndDate.toISOString().split('T')[0];
+        
+        // Only set the end date if it's empty or the current range exceeds 30 days
+        const currentEndDate = form.getValues('endDate');
+        if (!currentEndDate) {
+          form.setValue('endDate', endDateString);
+        } else {
+          try {
+            const end = parse(currentEndDate, 'yyyy-MM-dd', new Date());
+            const dayDifference = differenceInDays(end, start);
+            if (dayDifference > 30) {
+              form.setValue('endDate', endDateString);
+            }
+          } catch (error) {
+            // Ignore parse errors
+          }
+        }
+      } catch (error) {
+        // Ignore parse errors
+      }
+    }
+  }, [startDate, form]);
+
   const onSubmit = (data: FormValues) => {
     console.log('Form submitted:', data);
     // Handle submission logic here
+    toast.success("Recurring pattern created successfully");
   };
 
   return (
@@ -77,10 +134,13 @@ export const RecurringPatternForm = () => {
               name="endDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>End Date</FormLabel>
+                  <FormLabel>End Date <span className="text-sm text-muted-foreground">(Max 30 days)</span></FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Date range cannot exceed 30 days
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -107,7 +167,7 @@ export const RecurringPatternForm = () => {
                                 onCheckedChange={(checked) => {
                                   const updatedValue = checked
                                     ? [...field.value, day.id]
-                                    : field.value.filter((value: number) => value !== day.id); // Fixed type issue
+                                    : field.value.filter((value: number) => value !== day.id);
                                   field.onChange(updatedValue);
                                 }}
                               />

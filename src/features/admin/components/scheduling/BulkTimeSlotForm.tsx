@@ -1,6 +1,7 @@
+// src/features/admin/components/scheduling/BulkTimeSlotForm.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +26,28 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { addDays, differenceInDays, isAfter, parse } from "date-fns";
+
+// Create a custom validator for start and end dates
+const dateRangeValidator = (startDate: string, endDate: string) => {
+  if (!startDate || !endDate) return true; // Let the required validation handle empty values
+  
+  try {
+    const start = parse(startDate, 'yyyy-MM-dd', new Date());
+    const end = parse(endDate, 'yyyy-MM-dd', new Date());
+    
+    // Ensure end date is not before start date
+    if (isAfter(start, end)) {
+      return false;
+    }
+    
+    // Check if date range exceeds 30 days
+    const dayDifference = differenceInDays(end, start);
+    return dayDifference <= 30;
+  } catch (error) {
+    return false;
+  }
+};
 
 const bulkTimeSlotSchema = z.object({
   rinkId: z.string().min(1, "Please select a rink"),
@@ -37,6 +60,9 @@ const bulkTimeSlotSchema = z.object({
   breakDuration: z.coerce.number().optional(),
   maxStudents: z.coerce.number().min(1, "At least 1 student required"),
   daysOfWeek: z.array(z.number()).min(1, "Select at least one day"),
+}).refine((data) => dateRangeValidator(data.startDate, data.endDate), {
+  message: "Date range cannot exceed 30 days",
+  path: ["endDate"], // Show the error on the end date field
 });
 
 type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>;
@@ -54,9 +80,9 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
   
   // Use the schedule namespace for bulk time slot creation.
   const createBulkSlots = api.admin.schedule.createBulkTimeSlots.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast("Success", {
-        description: "Time slots created successfully"
+        description: `${data.count} time slots created successfully`
       });
       // Invalidate the getTimeSlots query.
       utils.admin.schedule.getTimeSlots.invalidate();
@@ -84,6 +110,27 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
       daysOfWeek: [],
     },
   });
+
+  // Auto-update end date when start date changes
+  const startDate = form.watch('startDate');
+  useEffect(() => {
+    if (startDate) {
+      try {
+        const start = parse(startDate, 'yyyy-MM-dd', new Date());
+        const suggestedEndDate = addDays(start, 30);
+        // Format the date back to yyyy-MM-dd string
+        const endDateString = suggestedEndDate.toISOString().split('T')[0];
+        
+        // Only set the end date if it's empty or the current range exceeds 30 days
+        const currentEndDate = form.getValues('endDate');
+        if (!currentEndDate || !dateRangeValidator(startDate, currentEndDate)) {
+          form.setValue('endDate', endDateString);
+        }
+      } catch (error) {
+        // Ignore parse errors
+      }
+    }
+  }, [startDate, form]);
 
   const handleSubmit = (values: BulkTimeSlotFormValues) => {
     createBulkSlots.mutate(values);
@@ -139,11 +186,14 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date</FormLabel>
+                <FormLabel>End Date <span className="text-sm text-muted-foreground">(Max 30 days)</span></FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
+                <FormDescription>
+                  Date range cannot exceed 30 days
+                </FormDescription>
               </FormItem>
             )}
           />
@@ -304,7 +354,6 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
           <Button type="button" variant="outline" onClick={onSubmitAction}>
             Cancel
           </Button>
-          {/* Fix: Change isLoading to isPending */}
           <Button type="submit" disabled={isPending}>
             {isPending ? "Creating..." : "Create Slots"}
           </Button>
