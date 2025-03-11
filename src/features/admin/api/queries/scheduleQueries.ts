@@ -184,39 +184,46 @@ export const scheduleRouter = createTRPCRouter({
     }),
     
     createBulkTimeSlots: protectedProcedure
-.input(
-  z.object({
-    rinkId: z.string(),
-    startDate: z.string(),
-    endDate: z.string(),
-    dailyStartTime: z.string(),
-    dailyEndTime: z.string(),
-    slotDuration: z.number().min(15),
-    breakStartTime: z.string().optional(),
-    breakDuration: z.number().optional(),
-    maxStudents: z.number().min(1),
-    daysOfWeek: z.array(z.number()).min(1),
-  }).refine((data) => {
-    const startParts = data.startDate.split('-').map(Number);
-    const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-    
-    const endParts = data.endDate.split('-').map(Number);
-    const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
-    
-    // Ensure end date is not before start date
-    if (endDate < startDate) {
-      return false;
-    }
-    
-    // Check if date range exceeds 30 days
-    const dayDifference = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-    return dayDifference <= 30;
-  }, {
-    message: "Date range cannot exceed 30 days",
-    path: ["endDate"],
-  })
-)
+    .input(
+      z.object({
+        rinkId: z.string(),
+        startDate: z.string(),
+        endDate: z.string(),
+        dailyStartTime: z.string(),
+        dailyEndTime: z.string(),
+        slotDuration: z.number().min(15),
+        breakStartTime: z.string().optional(),
+        breakDuration: z.number().optional(),
+        maxStudents: z.number().min(1),
+        daysOfWeek: z.array(z.number()).min(1),
+      }).refine((data) => {
+        const startParts = data.startDate.split('-').map(Number);
+        const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+        
+        const endParts = data.endDate.split('-').map(Number);
+        const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+        
+        // Ensure end date is not before start date
+        if (endDate < startDate) {
+          return false;
+        }
+        
+        // Check if date range exceeds 30 days
+        const dayDifference = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        return dayDifference <= 30;
+      }, {
+        message: "Date range cannot exceed 30 days",
+        path: ["endDate"],
+      })
+    )
     .mutation(async ({ ctx, input }) => {
+      console.log("Bulk create input:", {
+        dates: `${input.startDate} to ${input.endDate}`,
+        times: `${input.dailyStartTime} to ${input.dailyEndTime}`,
+        days: input.daysOfWeek,
+        slotDuration: input.slotDuration,
+      });
+      
       const slots = [];
       
       // Parse dates manually to avoid timezone issues
@@ -241,6 +248,8 @@ export const scheduleRouter = createTRPCRouter({
         // Move to next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
+      
+      console.log(`Selected ${dates.length} dates based on days of week filters`);
       
       // Parse time components
       const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(':').map(Number);
@@ -272,16 +281,19 @@ export const scheduleRouter = createTRPCRouter({
             maxStudents: input.maxStudents,
             isActive: true,
           });
-          slotStart = new Date(slotEnd);
+          
+          // FIX #1: Advance slot start time by slotDuration instead of using the previous end time
+          slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
         }
         
         // If break time is provided, create period 2: from break end to dailyEndTime
         if (input.breakStartTime && input.breakDuration) {
           const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
           
-          const breakEnd = new Date(date);
-          // Add the break duration to the break start time
-          breakEnd.setHours(breakStartHour, breakStartMinute + input.breakDuration, 0, 0);
+          // FIX #2: Correctly calculate break end time
+          const breakStart = new Date(date);
+          breakStart.setHours(breakStartHour, breakStartMinute, 0, 0);
+          const breakEnd = new Date(breakStart.getTime() + (input.breakDuration * 60000));
           
           const period2Start = new Date(breakEnd);
           const period2End = new Date(date);
@@ -297,17 +309,29 @@ export const scheduleRouter = createTRPCRouter({
               maxStudents: input.maxStudents,
               isActive: true,
             });
-            slotStart = new Date(slotEnd);
+            
+            // FIX #1 (repeated): Advance slot start time by slotDuration
+            slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
           }
         }
       }
-  
+    
+      // Safety check - don't allow creating too many slots
+      if (slots.length > 200) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Attempted to create too many slots (${slots.length}). Please check your configuration.`,
+        });
+      }
+    
+      console.log(`Creating ${slots.length} time slots`);
+    
       if (slots.length > 0) {
         await ctx.prisma.rinkTimeSlot.createMany({
           data: slots,
         });
       }
-  
+    
       return { success: true, count: slots.length };
     }),
 
