@@ -352,6 +352,7 @@ export function ScheduleManager() {
             events={events}
             //resources={resources}
             // Keep all your original props below
+            timeZone="UTC"
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
