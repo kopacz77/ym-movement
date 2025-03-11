@@ -61,7 +61,7 @@ export const AdminHeader = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 mr-4">S
+          <div className="flex items-center gap-2 mr-4">
             <span className="text-sm font-medium">
               {session?.user?.name || 'Admin'}
             </span>
