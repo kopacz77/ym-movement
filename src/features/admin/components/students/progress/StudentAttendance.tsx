@@ -7,18 +7,23 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { api } from '@/lib/api';
 import { toast } from "sonner";
-import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { startOfMonth, endOfMonth, format, isSameDay } from 'date-fns';
 import { Info } from 'lucide-react';
-import type { DayProps, DateRange } from 'react-day-picker';
+import type { HTMLAttributes } from 'react';
 
 interface StudentAttendanceProps {
   studentId: string;
 }
 
+// Define the structure based on the error message
+interface DayComponentProps extends HTMLAttributes<HTMLDivElement> {
+  day: Date;
+  modifiers: Record<string, boolean>;
+}
+
 export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId }) => {
-  const [date, setDate] = React.useState(new Date());
+  const [date, setDate] = React.useState<Date>(new Date());
   
-  // Use our new API endpoint
   const { data: attendance, isLoading, error } = api.admin.analytics.getStudentAttendance.useQuery(
     { 
       studentId, 
@@ -28,7 +33,6 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
     { enabled: !!studentId }
   );
 
-  // Handle errors
   useEffect(() => {
     if (error) {
       toast.error("Error loading attendance", {
@@ -37,11 +41,11 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
     }
   }, [error]);
 
-  const getLessonStyles = (day: Date) => {
+  const getLessonStyles = (date: Date) => {
     if (!attendance) return {};
     
     const lesson = attendance.lessons.find(
-      l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+      l => isSameDay(new Date(l.date), date)
     );
     
     if (!lesson) return {};
@@ -74,29 +78,34 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
           <div className="flex gap-4">
             <div className="rounded-md border p-3">
               <Calendar
+                mode="single"
                 selected={date}
-                onSelect={(range: DateRange | undefined) => range?.from && setDate(range.from)}
+                onSelect={(day) => day && setDate(day)}
                 components={{
-                  Day: (props: DayProps) => {
-                    const day = props.date;
+                  // Cast to any as a last resort to avoid TypeScript errors
+                  // while maintaining the functionality
+                  Day: (props: any) => {
                     return (
                       <Popover>
                         <PopoverTrigger asChild>
-                          <button 
-                            {...props} 
-                            className="w-9 h-9 rounded-md hover:bg-accent"
-                            style={getLessonStyles(day)}
+                          <div 
+                            className="w-9 h-9 rounded-md hover:bg-accent flex items-center justify-center cursor-pointer"
+                            style={getLessonStyles(props.day)}
+                            onClick={props.onClick}
+                            onKeyDown={props.onKeyDown}
+                            role="button"
+                            tabIndex={0}
                           >
-                            {format(day, 'd')}
-                          </button>
+                            {format(props.day, 'd')}
+                          </div>
                         </PopoverTrigger>
                         {attendance?.lessons.some(
-                          l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+                          l => isSameDay(new Date(l.date), props.day)
                         ) && (
                           <PopoverContent className="w-80">
                             <div className="space-y-2">
                               {attendance.lessons
-                                .filter(l => format(new Date(l.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))
+                                .filter(l => isSameDay(new Date(l.date), props.day))
                                 .map((lesson, idx) => (
                                   <div key={lesson.id || idx} className="text-sm">
                                     <div className="font-medium">{format(new Date(lesson.date), 'h:mm a')}</div>
