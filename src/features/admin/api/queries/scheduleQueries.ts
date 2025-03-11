@@ -204,15 +204,9 @@ export const scheduleRouter = createTRPCRouter({
         const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
         
         // Ensure end date is not before start date
-        if (endDate < startDate) {
-          return false;
-        }
-        
-        // Check if date range exceeds 30 days
-        const dayDifference = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-        return dayDifference <= 30;
+        return endDate >= startDate;
       }, {
-        message: "Date range cannot exceed 30 days",
+        message: "End date must be on or after start date",
         path: ["endDate"],
       })
     )
