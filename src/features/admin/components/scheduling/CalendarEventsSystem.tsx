@@ -317,7 +317,7 @@ export const CalendarEventsSystem = () => {
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView={viewMode}
               events={events}
-              timeZone="local"
+              timeZone="UTC"
               editable={true}
               selectable={true}
               eventDrop={handleEventDrop}
