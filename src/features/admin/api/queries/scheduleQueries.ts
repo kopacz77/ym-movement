@@ -217,52 +217,52 @@ export const scheduleRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      console.log("Bulk create input:", {
-        dates: `${input.startDate} to ${input.endDate}`,
-        times: `${input.dailyStartTime} to ${input.dailyEndTime}`,
-        days: input.daysOfWeek,
-        slotDuration: input.slotDuration,
-      });
-      
       const slots = [];
       
-      // Parse dates manually to avoid timezone issues
+      // Debug info
+      console.log("Creating bulk time slots with input:", input);
+      
+      // Parse dates EXPLICITLY noting we want midnight local time
       const startParts = input.startDate.split('-').map(Number);
-      const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+      const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], 0, 0, 0);
       
       const endParts = input.endDate.split('-').map(Number);
-      const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+      const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], 23, 59, 59);
+      
+      // Check date range more robustly
+      const dayDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (dayDifference > 90) { // Relaxed to 90 days as requested
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Selected date range is ${dayDifference} days. For ranges over 90 days, please confirm.`,
+        });
+      }
       
       // Gather all dates in range that match selected days of week
       const dates = [];
       const currentDate = new Date(startDate);
       
-      // Loop through each day from start to end (inclusive)
+      // Loop through each day, respecting the exact date range
       while (currentDate <= endDate) {
-        // Check if this day of week is selected
         if (input.daysOfWeek.includes(currentDate.getDay())) {
-          // Clone the date to avoid reference issues
           dates.push(new Date(currentDate));
         }
-        
-        // Move to next day
         currentDate.setDate(currentDate.getDate() + 1);
       }
       
-      console.log(`Selected ${dates.length} dates based on days of week filters`);
+      console.log(`Found ${dates.length} matching dates for days: ${input.daysOfWeek.join(', ')}`);
       
       // Parse time components
       const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(':').map(Number);
       const [dailyEndHour, dailyEndMinute] = input.dailyEndTime.split(':').map(Number);
       
-      // Process each selected date
+      // Process each date with EXPLICIT timezone handling
       for (const date of dates) {
-        // Create period 1: from dailyStartTime to breakStartTime (if break provided) or to dailyEndTime
+        // Set period 1 times, being explicit about maintaining the date
         const period1Start = new Date(date);
         period1Start.setHours(dailyStartHour, dailyStartMinute, 0, 0);
         
         const period1End = new Date(date);
-        
         if (input.breakStartTime && input.breakDuration) {
           const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
           period1End.setHours(breakStartHour, breakStartMinute, 0, 0);
@@ -270,7 +270,7 @@ export const scheduleRouter = createTRPCRouter({
           period1End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
         }
         
-        // Subdivide period1 into slots
+        // Create period 1 slots with fixed increments
         let slotStart = new Date(period1Start);
         while (slotStart.getTime() + input.slotDuration * 60000 <= period1End.getTime()) {
           const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
@@ -282,23 +282,26 @@ export const scheduleRouter = createTRPCRouter({
             isActive: true,
           });
           
-          // FIX #1: Advance slot start time by slotDuration instead of using the previous end time
+          // FIX: Advance by duration - crucial fix!
           slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
         }
         
-        // If break time is provided, create period 2: from break end to dailyEndTime
+        // Handle break time correctly
         if (input.breakStartTime && input.breakDuration) {
           const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
           
-          // FIX #2: Correctly calculate break end time
+          // Create break start time
           const breakStart = new Date(date);
           breakStart.setHours(breakStartHour, breakStartMinute, 0, 0);
+          
+          // Calculate break end by adding milliseconds - crucial fix!
           const breakEnd = new Date(breakStart.getTime() + (input.breakDuration * 60000));
           
           const period2Start = new Date(breakEnd);
           const period2End = new Date(date);
           period2End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
           
+          // Create period 2 slots with the same fixed increment approach
           slotStart = new Date(period2Start);
           while (slotStart.getTime() + input.slotDuration * 60000 <= period2End.getTime()) {
             const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
@@ -310,17 +313,25 @@ export const scheduleRouter = createTRPCRouter({
               isActive: true,
             });
             
-            // FIX #1 (repeated): Advance slot start time by slotDuration
+            // Same fixed increment approach
             slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
           }
         }
       }
     
-      // Safety check - don't allow creating too many slots
-      if (slots.length > 200) {
+      // Print first few slots for debugging
+      if (slots.length > 0) {
+        console.log("Sample of slots to be created:");
+        slots.slice(0, 3).forEach((slot, i) => {
+          console.log(`Slot ${i+1}: ${slot.startTime.toISOString()} to ${slot.endTime.toISOString()}`);
+        });
+      }
+    
+      // Safety check with more reasonable limit
+      if (slots.length > 1000) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: `Attempted to create too many slots (${slots.length}). Please check your configuration.`,
+          message: `Attempting to create too many slots (${slots.length}). Please check your settings.`,
         });
       }
     
