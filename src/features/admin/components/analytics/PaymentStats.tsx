@@ -9,7 +9,7 @@ import { formatCurrency } from '@/lib/utils';
 import { CreditCard, CheckCircle, Clock } from 'lucide-react';
 
 export const PaymentStats = () => {
-  const { data, isLoading, error } = api.admin.payments.getPaymentStats.useQuery();
+  const { data, isLoading, error } = api.admin.payment.getPaymentStats.useQuery();
 
   React.useEffect(() => {
     if (error) {

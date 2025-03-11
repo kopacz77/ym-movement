@@ -1,3 +1,4 @@
+// src/app/(protected)/admin/settings/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -12,8 +13,9 @@ import { Separator } from '@/components/ui/separator';
 import { api } from '@/lib/api';
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, DollarSign, MapPin, Save } from 'lucide-react';
+import { Clock, DollarSign, MapPin, Save, Lock } from 'lucide-react';
 import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
+import ChangePasswordForm from '@/features/auth/components/ChangePasswordForm';
 
 // Define interfaces for the settings
 interface OperationalSettings {
@@ -263,6 +265,10 @@ export default function SettingsPage() {
           <TabsTrigger value="locations" className="flex items-center">
             <MapPin className="h-4 w-4 mr-2" />
             Rink Management
+          </TabsTrigger>
+          <TabsTrigger value="account" className="flex items-center">
+            <Lock className="h-4 w-4 mr-2" />
+            Account Security
           </TabsTrigger>
         </TabsList>
 
@@ -610,6 +616,21 @@ export default function SettingsPage() {
                   </Card>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Account Security Settings */}
+        <TabsContent value="account">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Security</CardTitle>
+              <CardDescription>
+                Manage your account security settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChangePasswordForm />
             </CardContent>
           </Card>
         </TabsContent>

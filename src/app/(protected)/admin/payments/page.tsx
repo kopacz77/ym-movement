@@ -27,24 +27,24 @@ export default function PaymentsPage() {
   const utils = api.useUtils();
 
   // Fetch payments with filters
-  const { data: payments, isLoading } = api.admin.payments.getPayments.useQuery({
+  const { data: payments, isLoading } = api.admin.payment.getPayments.useQuery({
     search: searchQuery || undefined,
     status: statusFilter !== 'ALL' ? statusFilter : undefined
   });
 
   // Get selected payment details
-  const { data: selectedPayment } = api.admin.payments.getPaymentById.useQuery(
+  const { data: selectedPayment } = api.admin.payment.getPaymentById.useQuery(
     { paymentId: selectedPaymentId! },
     { enabled: !!selectedPaymentId }
   );
 
   // Verify payment mutation
-const verifyPayment = api.admin.payments.verifyPayment.useMutation({
+const verifyPayment = api.admin.payment.verifyPayment.useMutation({
   onSuccess: () => {
     toast("Payment verified", {
       description: "The payment has been marked as completed.",
     });
-    utils.admin.payments.getPayments.invalidate();
+    utils.admin.payment.getPayments.invalidate();
     setSelectedPaymentId(null);
   },
   onError: (error) => {
@@ -55,12 +55,12 @@ const verifyPayment = api.admin.payments.verifyPayment.useMutation({
 });
 
 // Send reminder mutation
-const sendReminder = api.admin.payments.sendPaymentReminder.useMutation({
+const sendReminder = api.admin.payment.sendPaymentReminder.useMutation({
   onSuccess: () => {
     toast("Reminder sent", {
       description: "Payment reminder has been sent to the student.",
     });
-    utils.admin.payments.getPayments.invalidate();
+    utils.admin.payment.getPayments.invalidate();
   },
   onError: (error) => {
     toast.error("Failed to send reminder", {
@@ -70,12 +70,12 @@ const sendReminder = api.admin.payments.sendPaymentReminder.useMutation({
 });
 
 // Add note mutation
-const addNote = api.admin.payments.addPaymentNote.useMutation({
+const addNote = api.admin.payment.addPaymentNote.useMutation({
   onSuccess: () => {
     toast("Note added", {
       description: "The note has been added to the payment.",
     });
-    utils.admin.payments.getPaymentById.invalidate({ paymentId: selectedPaymentId! });
+    utils.admin.payment.getPaymentById.invalidate({ paymentId: selectedPaymentId! });
     setIsNoteDialogOpen(false);
   },
   onError: (error) => {

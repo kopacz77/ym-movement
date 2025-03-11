@@ -264,3 +264,53 @@ export async function sendLessonConfirmationEmail(
     return { id: 'error-fallback', error: error };
   }
 }
+
+/**
+ * Sends a password reset email to a user
+ * @param email User's email address
+ * @param name User's name
+ * @param token Reset token
+ * @returns Promise with the result of the email send operation
+ */
+export async function sendPasswordResetEmail(email: string, name: string, token: string) {
+  try {
+    const resetUrl = `${BASE_URL}/auth/reset-password?token=${token}`;
+    
+    const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">Reset Your Password</h1>
+      <p>Hello ${name || 'there'},</p>
+      <p>We received a request to reset your password for your YM Movement account.</p>
+      <p>Please click the button below to set a new password:</p>
+      <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Reset Password</a>
+      <p style="margin-top: 20px; color: #666;">This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+    </div>
+    `;
+
+    if (!resendApiKey) {
+      console.warn('RESEND_API_KEY not found, using fallback email method');
+      return await fallbackEmailMethod(email, 'Reset Your YM Movement Password', emailContent);
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: 'YM Movement <noreply@ym-movement.com>',
+      to: email,
+      subject: 'Reset Your YM Movement Password',
+      html: emailContent,
+    });
+
+    if (error) {
+      console.error('Error sending password reset email:', error);
+      throw new Error(`Failed to send password reset email: ${error.message}`);
+    }
+
+    console.log('Password reset email sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Exception sending password reset email:', error);
+    // Return a mock result instead of throwing
+    return { id: 'error-fallback', error: error };
+  }
+}

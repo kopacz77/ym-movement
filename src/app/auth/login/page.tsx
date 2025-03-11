@@ -1,3 +1,4 @@
+// src/app/auth/login/page.tsx
 "use client";
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
@@ -85,6 +86,11 @@ export default function LoginPage() {
                 placeholder="Enter your password" 
                 required 
               />
+              <div className="text-right">
+                <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Loading..." : "Login"}
