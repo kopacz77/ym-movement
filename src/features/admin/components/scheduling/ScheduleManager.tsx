@@ -350,9 +350,8 @@ export function ScheduleManager() {
             ]}
             initialView="timeGridWeek"
             events={events}
-            //resources={resources}
-            // Keep all your original props below
             timeZone="UTC"
+            now={new Date().toISOString()} 
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',

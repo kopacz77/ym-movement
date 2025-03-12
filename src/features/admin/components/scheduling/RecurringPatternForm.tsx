@@ -18,6 +18,14 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addDays, differenceInDays, isAfter, parse } from 'date-fns';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const daysOfWeek = [
   { id: 0, label: 'Sunday' },
@@ -29,10 +37,14 @@ const daysOfWeek = [
   { id: 6, label: 'Saturday' },
 ];
 
-// Define form schema with validation for 30-day limit
+// Define form schema with validation but without 30-day limit
 const formSchema = z.object({
+  rinkId: z.string().min(1, "Please select a rink"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  duration: z.coerce.number().min(30, "Minimum duration is 30 minutes"),
+  maxStudents: z.coerce.number().min(1, "At least 1 student required"),
   daysOfWeek: z.array(z.number()).min(1, "Select at least one day")
 }).refine((data) => {
   if (!data.startDate || !data.endDate) return true; // Let the required validation handle empty values
@@ -42,59 +54,66 @@ const formSchema = z.object({
     const end = parse(data.endDate, 'yyyy-MM-dd', new Date());
     
     // Ensure end date is not before start date
-    if (isAfter(start, end)) {
-      return false;
-    }
-    
-    // Check if date range exceeds 30 days
-    const dayDifference = differenceInDays(end, start);
-    return dayDifference <= 30;
+    return !isAfter(start, end);
   } catch (error) {
     return false;
   }
 }, {
-  message: "Date range cannot exceed 30 days",
+  message: "End date must be on or after start date",
   path: ["endDate"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const RecurringPatternForm = () => {
+interface RecurringPatternFormProps {
+  rinks: Array<{ id: string; name: string }>;
+  onSubmitAction?: () => void;
+}
+
+export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPatternFormProps) => {
+  const utils = api.useUtils();
+
   // Initialize react-hook-form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      rinkId: '',
       startDate: '',
       endDate: '',
+      startTime: '09:00',
+      duration: 60,
+      maxStudents: 1,
       daysOfWeek: []
     }
   });
 
-  // Auto-update end date when start date changes
+  // Create recurring pattern mutation
+  const createRecurringPattern = api.admin.schedule.createRecurringPattern.useMutation({
+    onSuccess: (data) => {
+      toast.success("Recurring pattern created successfully", {
+        description: `Created ${data.slotsCreated} time slots`
+      });
+      utils.admin.schedule.getTimeSlots.invalidate();
+      if (onSubmitAction) onSubmitAction();
+    },
+    onError: (error) => {
+      toast.error("Failed to create recurring pattern", {
+        description: error.message
+      });
+    }
+  });
+
+  // Suggest end date for convenience but don't enforce any limit
   const startDate = form.watch('startDate');
   useEffect(() => {
-    if (startDate) {
+    if (startDate && !form.getValues('endDate')) {
       try {
         const start = parse(startDate, 'yyyy-MM-dd', new Date());
-        const suggestedEndDate = addDays(start, 30);
+        // Suggest 4 weeks forward as a reasonable default
+        const suggestedEndDate = addDays(start, 28);
         // Format the date back to yyyy-MM-dd string
         const endDateString = suggestedEndDate.toISOString().split('T')[0];
-        
-        // Only set the end date if it's empty or the current range exceeds 30 days
-        const currentEndDate = form.getValues('endDate');
-        if (!currentEndDate) {
-          form.setValue('endDate', endDateString);
-        } else {
-          try {
-            const end = parse(currentEndDate, 'yyyy-MM-dd', new Date());
-            const dayDifference = differenceInDays(end, start);
-            if (dayDifference > 30) {
-              form.setValue('endDate', endDateString);
-            }
-          } catch (error) {
-            // Ignore parse errors
-          }
-        }
+        form.setValue('endDate', endDateString);
       } catch (error) {
         // Ignore parse errors
       }
@@ -102,9 +121,39 @@ export const RecurringPatternForm = () => {
   }, [startDate, form]);
 
   const onSubmit = (data: FormValues) => {
-    console.log('Form submitted:', data);
-    // Handle submission logic here
-    toast.success("Recurring pattern created successfully");
+    // Log form data for debugging
+    console.log('Recurring pattern form submitted:', data);
+    
+    // Parse dates properly
+    const startDate = parse(data.startDate, 'yyyy-MM-dd', new Date());
+    const endDate = parse(data.endDate, 'yyyy-MM-dd', new Date());
+    
+    // Ensure dates are set to beginning/end of day to avoid timezone issues
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+    
+    const formattedStartTime = data.startTime.split(':').slice(0, 2).join(':');
+    
+    // Count how many days and slots will be created for user feedback
+    const dayDifference = differenceInDays(endDate, startDate) + 1;
+    const daysCount = data.daysOfWeek.length;
+    const estimatedSlots = Math.ceil(dayDifference / 7 * daysCount);
+    
+    toast.info("Creating recurring pattern", {
+      description: `Creating approximately ${estimatedSlots} time slots across ${dayDifference} days`
+    });
+    
+    // Submit to API
+    createRecurringPattern.mutate({
+      rinkId: data.rinkId,
+      daysOfWeek: data.daysOfWeek,
+      startDate: startDate,
+      endDate: endDate,
+      startTime: formattedStartTime,
+      duration: data.duration,
+      maxStudents: data.maxStudents,
+      isActive: true
+    });
   };
 
   return (
@@ -117,30 +166,115 @@ export const RecurringPatternForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="startDate"
+              name="rinkId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Start Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
+                  <FormLabel>Rink</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a rink" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {rinks.map((rink) => (
+                        <SelectItem key={rink.id} value={rink.id}>
+                          {rink.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Create a schedule spanning your selected date range
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Time will be the same for all selected days
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration (minutes)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={30} 
+                        step={15} 
+                        {...field} 
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="endDate"
+              name="maxStudents"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>End Date <span className="text-sm text-muted-foreground">(Max 30 days)</span></FormLabel>
+                  <FormLabel>Maximum Students per Slot</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input 
+                      type="number" 
+                      min={1} 
+                      {...field} 
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
-                  <FormDescription>
-                    Date range cannot exceed 30 days
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -183,7 +317,21 @@ export const RecurringPatternForm = () => {
               )}
             />
             
-            <Button type="submit">Create Recurring Pattern</Button>
+            <div className="flex justify-end gap-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onSubmitAction}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={createRecurringPattern.isPending}
+              >
+                {createRecurringPattern.isPending ? "Creating..." : "Create Recurring Pattern"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>

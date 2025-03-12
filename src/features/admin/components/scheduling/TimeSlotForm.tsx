@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -75,6 +75,18 @@ export const TimeSlotForm = ({
     },
   })
 
+  // Debug initial values
+  useEffect(() => {
+    console.log("TimeSlotForm initial values:", {
+      startTime: initialStartTime ? initialStartTime.toISOString() : null,
+      formattedStartTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : null,
+      endTime: initialEndTime ? initialEndTime.toISOString() : null,
+      duration: initialEndTime && initialStartTime
+        ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60))
+        : null
+    });
+  }, [initialStartTime, initialEndTime]);
+
   // Using the correct namespaced API path
   const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
     onSuccess: () => {
@@ -93,8 +105,20 @@ export const TimeSlotForm = ({
   })
 
   const handleSubmit = (values: TimeSlotFormValues) => {
+    // Create dates that will be treated consistently with timezone
     const startTime = new Date(values.startTime)
     const endTime = new Date(startTime.getTime() + values.duration * 60000)
+    
+    // Log the time values for debugging
+    console.log("Creating time slot with:", {
+      rinkId: values.rinkId,
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      durationMinutes: values.duration,
+      isRecurring: values.isRecurring,
+      recurringDays: values.recurringDays,
+    });
+    
     const timeSlotData = {
       rinkId: values.rinkId,
       startTime,
@@ -110,6 +134,12 @@ export const TimeSlotForm = ({
           }
         : {}),
     }
+    
+    // Ensure React and server are treating dates consistently
+    toast.info("Creating slot", {
+      description: `${format(startTime, "h:mm a")} - ${format(endTime, "h:mm a")}`
+    });
+    
     createTimeSlot.mutate(timeSlotData)
   }
 
@@ -150,6 +180,9 @@ export const TimeSlotForm = ({
               <FormControl>
                 <Input type="datetime-local" {...field} />
               </FormControl>
+              <FormDescription>
+                Times will be scheduled exactly as entered (for location-based scheduling)
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
