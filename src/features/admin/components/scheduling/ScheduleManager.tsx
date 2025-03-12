@@ -16,7 +16,8 @@ import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import { Plus, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, startOfDay } from 'date-fns'; 
+
 //import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 //import resourceDayGridPlugin from '@fullcalendar/resource-daygrid';
 
@@ -164,6 +165,16 @@ export function ScheduleManager() {
       endTime: dropInfo.event.end!,
     });
   }, [utils.admin.schedule]);
+
+  const calculateTodayInUTC = () => {
+    const localDate = new Date();
+    const year = localDate.getFullYear();
+    const month = localDate.getMonth();
+    const day = localDate.getDate();
+    
+    // Create date with local day values but in UTC context
+    return new Date(Date.UTC(year, month, day, 12, 0, 0)).toISOString();
+  };
 
   return (
     <div className="space-y-6">
@@ -351,12 +362,11 @@ export function ScheduleManager() {
             initialView="timeGridWeek"
             events={events}
             timeZone="UTC"
-            now={new Date().toISOString()} 
-            todayHighlight={true} 
+            now={calculateTodayInUTC()}
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
-              right: 'resourceTimeGridDay,timeGridWeek,dayGridMonth'
+              right: 'timeGridWeek,dayGridMonth'
             }}
             slotDuration="00:30:00"
             slotMinTime="05:00:00"  // Start at 5am

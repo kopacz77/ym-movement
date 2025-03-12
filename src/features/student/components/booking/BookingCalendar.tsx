@@ -22,6 +22,17 @@ export const BookingCalendar = () => {
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
 
+   // Function to calculate today in UTC that matches local date
+   const calculateTodayInUTC = () => {
+    const localDate = new Date();
+    const year = localDate.getFullYear();
+    const month = localDate.getMonth();
+    const day = localDate.getDate();
+
+    // Create date with local day values but in UTC context
+    return new Date(Date.UTC(year, month, day, 12, 0, 0)).toISOString();
+  };
+
   // Only fetch data when studentId is available
   useEffect(() => {
     if (studentId) {
@@ -58,13 +69,13 @@ export const BookingCalendar = () => {
   const events = availableSlots?.map((slot: any) => {
     const studentCount = slot.currentStudents;
     const isAvailable = studentCount < slot.maxStudents;
-    
+
     // Only slots created by Yura should be interactive
     // We identify this by checking if they were created by Yura's system
     // Since all timeslots come from the system, we'll use the isActive flag
     // In a real implementation, you might need to check the creator's ID or another field
     const isYuraSlot = slot.isActive; // Assuming all active slots are created by Yura
-    
+
     return {
       id: slot.id,
       title: `${studentCount}/${slot.maxStudents} students${isAvailable ? ' - Available' : ' - Full'}`,
@@ -89,7 +100,7 @@ export const BookingCalendar = () => {
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const slot = clickInfo.event.extendedProps;
-    
+
     // First check if the slot is interactive (created by Yura)
     if (!slot.interactive) {
       toast("Non-bookable time slot", {
@@ -97,7 +108,7 @@ export const BookingCalendar = () => {
       });
       return;
     }
-    
+
     // Check if the slot is available
     if (slot.currentStudents >= slot.maxStudents) {
       toast.error("Time slot unavailable", {
@@ -105,7 +116,7 @@ export const BookingCalendar = () => {
       });
       return;
     }
-    
+
     setSelectedSlot(slot);
     setIsBookingDialogOpen(true);
   };
@@ -141,6 +152,13 @@ export const BookingCalendar = () => {
               plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
               initialView="timeGridWeek"
               events={events}
+              timeZone="UTC"                   
+              now={calculateTodayInUTC()} 
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridWeek,dayGridMonth' 
+              }}
               selectable={true}
               select={handleDateSelect}
               eventClick={handleEventClick}
@@ -151,6 +169,7 @@ export const BookingCalendar = () => {
                 startTime: "05:00",
                 endTime: "18:00",
               }}
+              allDaySlot={false} 
               height="100%"
             />
             {/* Add CSS for styling non-interactive slots */}
@@ -167,7 +186,7 @@ export const BookingCalendar = () => {
             `}</style>
           </div>
         )}
-        
+
         {isBookingDialogOpen && selectedSlot && studentId && (
           <BookingDialog
             slot={selectedSlot}
