@@ -48,7 +48,7 @@ export const CalendarEventsSystem = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const utils = api.useContext();
-  
+
   // Get events from the API
   const { data, isLoading: eventsLoading, error } = api.admin.schedule.getTimeSlots.useQuery(
     { rinkId: selectedRink }
@@ -69,7 +69,7 @@ export const CalendarEventsSystem = () => {
         type: 'PRIVATE' as const,
         extendedProps: slot
       }));
-      
+
       setEvents(calendarEvents);
     }
   }, [data]);
@@ -133,20 +133,20 @@ export const CalendarEventsSystem = () => {
     // Simple validation - check for business hours and minimum duration
     const businessStartHour = 5; // 5 AM
     const businessEndHour = 18; // 6 PM
-    
+
     const startHour = start.getHours();
     const endHour = end.getHours();
-    
+
     if (startHour < businessStartHour || endHour > businessEndHour) {
       return false;
     }
-    
+
     // Check minimum duration (15 minutes)
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
     if (durationMinutes < 15) {
       return false;
     }
-    
+
     return true;
   };
 
@@ -158,7 +158,7 @@ export const CalendarEventsSystem = () => {
       start: info.event.start as Date,
       end: info.event.end as Date,
       rinkId: info.event.extendedProps?.rinkId || selectedRink,
-      maxStudents: info.event.extendedProps?.maxStudents || 1, 
+      maxStudents: info.event.extendedProps?.maxStudents || 1,
       currentStudents: info.event.extendedProps?.currentStudents || 0,
       type: info.event.extendedProps?.type || 'PRIVATE',
       extendedProps: info.event.extendedProps
@@ -170,7 +170,7 @@ export const CalendarEventsSystem = () => {
       droppedEvent.start,
       droppedEvent.end
     );
-    
+
     if (!isValidMove) {
       info.revert();
       toast.error("Invalid move", {
@@ -196,7 +196,7 @@ export const CalendarEventsSystem = () => {
     // Store original event state
     const originalStart = info.event.start;
     const originalEnd = info.event.end;
-    
+
     // Convert the FullCalendar event to our CalendarEvent type
     const resizedEvent = {
       id: info.event.id,
@@ -204,7 +204,7 @@ export const CalendarEventsSystem = () => {
       start: info.event.start as Date,
       end: info.event.end as Date,
       rinkId: info.event.extendedProps?.rinkId || selectedRink,
-      maxStudents: info.event.extendedProps?.maxStudents || 1, 
+      maxStudents: info.event.extendedProps?.maxStudents || 1,
       currentStudents: info.event.extendedProps?.currentStudents || 0,
       type: info.event.extendedProps?.type || 'PRIVATE',
       extendedProps: info.event.extendedProps
@@ -216,13 +216,13 @@ export const CalendarEventsSystem = () => {
       resizedEvent.start,
       resizedEvent.end
     );
-    
+
     if (!isValidResize) {
       // Since we can't use revert(), refresh the calendar to undo the change
       toast.error("Invalid duration", {
         description: "The event cannot be resized to this duration. Check business hours and minimum duration."
       });
-      
+
       // Refresh the events to revert the change
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
       return;
@@ -254,7 +254,7 @@ export const CalendarEventsSystem = () => {
         maxStudents: 1,
         isActive: true
       });
-      
+
       selectInfo.view.calendar.unselect(); // Clear selection
     } catch (error) {
       // Error is already handled by the mutation
@@ -284,8 +284,8 @@ export const CalendarEventsSystem = () => {
             </SelectContent>
           </Select>
 
-          <Select 
-            value={viewMode} 
+          <Select
+            value={viewMode}
             onValueChange={(value: 'timeGridDay' | 'timeGridWeek' | 'dayGridMonth') => setViewMode(value)}
           >
             <SelectTrigger className="w-[200px]">
@@ -297,9 +297,9 @@ export const CalendarEventsSystem = () => {
               <SelectItem value="dayGridMonth">Month View</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Button 
-            onClick={() => utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink })} 
+
+          <Button
+            onClick={() => utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink })}
             disabled={eventsLoading}
             variant="outline"
           >
@@ -313,11 +313,12 @@ export const CalendarEventsSystem = () => {
               Loading events...
             </div>
           ) : (
-            <FullCalendar 
+            <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView={viewMode}
               events={events}
               timeZone="UTC"
+              now={new Date().toISOString()}  
               editable={true}
               selectable={true}
               eventDrop={handleEventDrop}
