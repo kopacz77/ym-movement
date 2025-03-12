@@ -352,6 +352,7 @@ export function ScheduleManager() {
             events={events}
             timeZone="UTC"
             now={new Date().toISOString()} 
+            todayHighlight={true} 
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
