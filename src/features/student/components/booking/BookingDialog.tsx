@@ -104,7 +104,8 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 value={lessonType} 
                 onValueChange={(val) => setLessonType(val as LessonType)}
               >
-                <SelectTrigger>
+                
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select lesson type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,7 +131,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 value={paymentMethod} 
                 onValueChange={(val) => setPaymentMethod(val as PaymentMethod)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select payment method" />
                 </SelectTrigger>
                 <SelectContent>

@@ -188,162 +188,165 @@ export const scheduleRouter = createTRPCRouter({
   }
 }),
     
-    createBulkTimeSlots: protectedProcedure
-    .input(
-      z.object({
-        rinkId: z.string(),
-        startDate: z.string(),
-        endDate: z.string(),
-        dailyStartTime: z.string(),
-        dailyEndTime: z.string(),
-        slotDuration: z.number().min(15),
-        breakStartTime: z.string().optional(),
-        breakDuration: z.number().optional(),
-        maxStudents: z.number().min(1),
-        daysOfWeek: z.array(z.number()).min(1),
-      }).refine((data) => {
-        const startParts = data.startDate.split('-').map(Number);
-        const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-        
-        const endParts = data.endDate.split('-').map(Number);
-        const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
-        
-        // Ensure end date is not before start date
-        return endDate >= startDate;
-      }, {
-        message: "End date must be on or after start date",
-        path: ["endDate"],
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const slots = [];
+createBulkTimeSlots: protectedProcedure
+.input(
+  z.object({
+    rinkId: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    dailyStartTime: z.string(),
+    dailyEndTime: z.string(),
+    slotDuration: z.number().min(15),
+    breakStartTime: z.string().optional(),
+    breakDuration: z.number().optional(),
+    maxStudents: z.number().min(1),
+    daysOfWeek: z.array(z.number()).min(1),
+  }).refine((data) => {
+    const startParts = data.startDate.split('-').map(Number);
+    const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+    
+    const endParts = data.endDate.split('-').map(Number);
+    const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+    
+    // Ensure end date is not before start date
+    return endDate >= startDate;
+  }, {
+    message: "End date must be on or after start date",
+    path: ["endDate"],
+  })
+)
+.mutation(async ({ ctx, input }) => {
+  const slots = [];
+  
+  // Debug info
+  console.log("Creating bulk time slots with input:", input);
+  
+  // Parse dates as midnight UTC to preserve day values
+  const startParts = input.startDate.split('-').map(Number);
+  const startDate = new Date(Date.UTC(startParts[0], startParts[1] - 1, startParts[2], 0, 0, 0));
+  
+  const endParts = input.endDate.split('-').map(Number);
+  const endDate = new Date(Date.UTC(endParts[0], endParts[1] - 1, endParts[2], 23, 59, 59));
+  
+  // Check date range more robustly
+  const dayDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  if (dayDifference > 90) { // Relaxed to 90 days as requested
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `Selected date range is ${dayDifference} days. For ranges over 90 days, please confirm.`,
+    });
+  }
+  
+  // Gather all dates in range that match selected days of week
+  const dates = [];
+  const currentDate = new Date(startDate);
+  
+  // Loop through each day, respecting the exact date range
+  while (currentDate <= endDate) {
+    if (input.daysOfWeek.includes(currentDate.getUTCDay())) {
+      dates.push(new Date(currentDate));
+    }
+    // Increment by 24 hours in milliseconds to avoid DST issues
+    currentDate.setTime(currentDate.getTime() + (24 * 60 * 60 * 1000));
+  }
+  
+  console.log(`Found ${dates.length} matching dates for days: ${input.daysOfWeek.join(', ')}`);
+  
+  // Parse time components
+  const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(':').map(Number);
+  const [dailyEndHour, dailyEndMinute] = input.dailyEndTime.split(':').map(Number);
+  
+  // Process each date with EXPLICIT timezone handling using UTC methods
+  for (const date of dates) {
+    // Set period 1 times, being explicit about using UTC methods
+    const period1Start = new Date(date);
+    period1Start.setUTCHours(dailyStartHour, dailyStartMinute, 0, 0);
+    
+    const period1End = new Date(date);
+    if (input.breakStartTime && input.breakDuration) {
+      const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
+      period1End.setUTCHours(breakStartHour, breakStartMinute, 0, 0);
+    } else {
+      period1End.setUTCHours(dailyEndHour, dailyEndMinute, 0, 0);
+    }
+    
+    // Create period 1 slots with fixed increments
+    let slotStart = new Date(period1Start);
+    while (slotStart.getTime() + input.slotDuration * 60000 <= period1End.getTime()) {
+      const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
+      slots.push({
+        rinkId: input.rinkId,
+        startTime: new Date(slotStart),
+        endTime: new Date(slotEnd),
+        maxStudents: input.maxStudents,
+        isActive: true,
+      });
       
-      // Debug info
-      console.log("Creating bulk time slots with input:", input);
+      // FIX: Advance by duration - crucial fix!
+      slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
+    }
+    
+    // Handle break time correctly
+    if (input.breakStartTime && input.breakDuration) {
+      const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
       
-      // Parse dates EXPLICITLY noting we want midnight local time
-      const startParts = input.startDate.split('-').map(Number);
-      const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2], 0, 0, 0);
+      // Create break start time
+      const breakStart = new Date(date);
+      breakStart.setUTCHours(breakStartHour, breakStartMinute, 0, 0);
       
-      const endParts = input.endDate.split('-').map(Number);
-      const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2], 23, 59, 59);
+      // Calculate break end by adding milliseconds - crucial fix!
+      const breakEnd = new Date(breakStart.getTime() + (input.breakDuration * 60000));
       
-      // Check date range more robustly
-      const dayDifference = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (dayDifference > 90) { // Relaxed to 90 days as requested
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: `Selected date range is ${dayDifference} days. For ranges over 90 days, please confirm.`,
+      const period2Start = new Date(breakEnd);
+      const period2End = new Date(date);
+      period2End.setUTCHours(dailyEndHour, dailyEndMinute, 0, 0);
+      
+      // Create period 2 slots with the same fixed increment approach
+      slotStart = new Date(period2Start);
+      while (slotStart.getTime() + input.slotDuration * 60000 <= period2End.getTime()) {
+        const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
+        slots.push({
+          rinkId: input.rinkId,
+          startTime: new Date(slotStart),
+          endTime: new Date(slotEnd),
+          maxStudents: input.maxStudents,
+          isActive: true,
         });
-      }
-      
-      // Gather all dates in range that match selected days of week
-      const dates = [];
-      const currentDate = new Date(startDate);
-      
-      // Loop through each day, respecting the exact date range
-      while (currentDate <= endDate) {
-        if (input.daysOfWeek.includes(currentDate.getDay())) {
-          dates.push(new Date(currentDate));
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      
-      console.log(`Found ${dates.length} matching dates for days: ${input.daysOfWeek.join(', ')}`);
-      
-      // Parse time components
-      const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(':').map(Number);
-      const [dailyEndHour, dailyEndMinute] = input.dailyEndTime.split(':').map(Number);
-      
-      // Process each date with EXPLICIT timezone handling
-      for (const date of dates) {
-        // Set period 1 times, being explicit about maintaining the date
-        const period1Start = new Date(date);
-        period1Start.setHours(dailyStartHour, dailyStartMinute, 0, 0);
         
-        const period1End = new Date(date);
-        if (input.breakStartTime && input.breakDuration) {
-          const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
-          period1End.setHours(breakStartHour, breakStartMinute, 0, 0);
-        } else {
-          period1End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
-        }
-        
-        // Create period 1 slots with fixed increments
-        let slotStart = new Date(period1Start);
-        while (slotStart.getTime() + input.slotDuration * 60000 <= period1End.getTime()) {
-          const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
-          slots.push({
-            rinkId: input.rinkId,
-            startTime: new Date(slotStart),
-            endTime: new Date(slotEnd),
-            maxStudents: input.maxStudents,
-            isActive: true,
-          });
-          
-          // FIX: Advance by duration - crucial fix!
-          slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
-        }
-        
-        // Handle break time correctly
-        if (input.breakStartTime && input.breakDuration) {
-          const [breakStartHour, breakStartMinute] = input.breakStartTime.split(':').map(Number);
-          
-          // Create break start time
-          const breakStart = new Date(date);
-          breakStart.setHours(breakStartHour, breakStartMinute, 0, 0);
-          
-          // Calculate break end by adding milliseconds - crucial fix!
-          const breakEnd = new Date(breakStart.getTime() + (input.breakDuration * 60000));
-          
-          const period2Start = new Date(breakEnd);
-          const period2End = new Date(date);
-          period2End.setHours(dailyEndHour, dailyEndMinute, 0, 0);
-          
-          // Create period 2 slots with the same fixed increment approach
-          slotStart = new Date(period2Start);
-          while (slotStart.getTime() + input.slotDuration * 60000 <= period2End.getTime()) {
-            const slotEnd = new Date(slotStart.getTime() + input.slotDuration * 60000);
-            slots.push({
-              rinkId: input.rinkId,
-              startTime: new Date(slotStart),
-              endTime: new Date(slotEnd),
-              maxStudents: input.maxStudents,
-              isActive: true,
-            });
-            
-            // Same fixed increment approach
-            slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
-          }
-        }
+        // Same fixed increment approach
+        slotStart = new Date(slotStart.getTime() + input.slotDuration * 60000);
       }
-    
-      // Print first few slots for debugging
-      if (slots.length > 0) {
-        console.log("Sample of slots to be created:");
-        slots.slice(0, 3).forEach((slot, i) => {
-          console.log(`Slot ${i+1}: ${slot.startTime.toISOString()} to ${slot.endTime.toISOString()}`);
-        });
-      }
-    
-      // Safety check with more reasonable limit
-      if (slots.length > 1000) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: `Attempting to create too many slots (${slots.length}). Please check your settings.`,
-        });
-      }
-    
-      console.log(`Creating ${slots.length} time slots`);
-    
-      if (slots.length > 0) {
-        await ctx.prisma.rinkTimeSlot.createMany({
-          data: slots,
-        });
-      }
-    
-      return { success: true, count: slots.length };
-    }),
+    }
+  }
+
+  // Print first few slots for debugging
+  if (slots.length > 0) {
+    console.log("Sample of slots to be created:");
+    slots.slice(0, 3).forEach((slot, i) => {
+      console.log(`Slot ${i+1}: ${slot.startTime.toISOString()} to ${slot.endTime.toISOString()}`);
+      // Also log the hour and minute values in UTC for clarity
+      console.log(`  UTC Hours: ${slot.startTime.getUTCHours()}:${slot.startTime.getUTCMinutes()} to ${slot.endTime.getUTCHours()}:${slot.endTime.getUTCMinutes()}`);
+    });
+  }
+
+  // Safety check with more reasonable limit
+  if (slots.length > 1000) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `Attempting to create too many slots (${slots.length}). Please check your settings.`,
+    });
+  }
+
+  console.log(`Creating ${slots.length} time slots`);
+
+  if (slots.length > 0) {
+    await ctx.prisma.rinkTimeSlot.createMany({
+      data: slots,
+    });
+  }
+
+  return { success: true, count: slots.length };
+}),
 
   createLesson: protectedProcedure
     .input(

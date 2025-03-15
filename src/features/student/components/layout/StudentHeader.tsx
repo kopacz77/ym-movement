@@ -4,9 +4,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { LogOut, Bell } from "lucide-react";
+import { LogOut, Bell, Menu } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ export const StudentHeader = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     try {
@@ -40,8 +42,8 @@ export const StudentHeader = () => {
   };
 
   return (
-    <header className="h-16 bg-white border-b shadow-sm">
-      <div className="flex h-full items-center justify-between px-6">
+    <header className="h-16 bg-white border-b shadow-sm safe-top">
+      <div className="flex h-full items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2">
           <div className="rounded-lg bg-blue-500 p-1.5">
             <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
@@ -50,22 +52,22 @@ export const StudentHeader = () => {
           </div>
           <span className="text-xl font-semibold">YM Movement</span>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 mr-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="hidden md:flex items-center gap-2 mr-4">
             <span className="text-sm font-medium">
               {session?.user?.name || 'Student'}
             </span>
           </div>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
             <Bell className="h-5 w-5" />
           </Button>
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
                 <LogOut className="h-5 w-5" />
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className={isMobile ? "w-[90%] max-w-md mx-auto" : ""}>
               <AlertDialogHeader>
                 <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
                 <AlertDialogDescription>

@@ -1,7 +1,7 @@
 // src/features/admin/components/scheduling/ScheduleManager.tsx
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import FullCalendar from '@fullcalendar/react';
@@ -15,11 +15,9 @@ import { BulkTimeSlotForm } from './BulkTimeSlotForm';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
-import { Plus, X } from 'lucide-react';
-import { format, startOfDay } from 'date-fns'; 
-
-//import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
-//import resourceDayGridPlugin from '@fullcalendar/resource-daygrid';
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { format, addDays } from 'date-fns'; 
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface TimeSlotFormData {
   startTime: Date | null;
@@ -33,6 +31,9 @@ export function ScheduleManager() {
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<any>(null);
+  const isMobile = useIsMobile();
+  const [currentDate, setCurrentDate] = useState(new Date());
   const utils = api.useUtils();
 
   // Get rinks data
@@ -50,26 +51,19 @@ export function ScheduleManager() {
     const studentNames = slot.lessons
       ?.map((lesson) => lesson.student.user.name)
       .join(', ');
-    const title = `${studentCount}/${slot.maxStudents} students${studentNames ? ` (${studentNames})` : ''
+    const title = `${studentCount}/${slot.maxStudents} students${studentNames ? ` (${studentNames})` : ''}
       } - ${slot.rink.name}`;
     return {
       id: slot.id,
       title,
       start: slot.startTime,
       end: slot.endTime,
-      //resourceId: slot.rinkId,
       extendedProps: {
         ...slot,
         currentStudents: studentCount,
       },
     };
   }) || [];
-
-  // Convert rinks to FullCalendar resources
-  //const resources = rinks?.map((rink) => ({
-    //id: rink.id,
-    //title: rink.name,
-  //})) || [];
 
   // Delete time slot mutation
   const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
@@ -79,6 +73,7 @@ export function ScheduleManager() {
       });
       setIsManageDialogOpen(false);
       setSelectedEvent(null);
+      setSelectedSlot(null);
       utils.admin.schedule.getTimeSlots.invalidate();
     },
     onError: (err) => {
@@ -122,7 +117,6 @@ export function ScheduleManager() {
     setTimeSlotFormData({
       startTime: selectInfo.start,
       endTime: selectInfo.end,
-      // Don't try to access resource property as it doesn't exist on DateSelectArg
       rinkId: undefined, // We'll need to select the rink manually in the form
     });
     setIsCreateDialogOpen(true);
@@ -166,25 +160,79 @@ export function ScheduleManager() {
     });
   }, [utils.admin.schedule]);
 
-  const calculateTodayInUTC = () => {
-    const localDate = new Date();
-    const year = localDate.getFullYear();
-    const month = localDate.getMonth();
-    const day = localDate.getDate();
+  // Format time to show without timezone conversion
+  const formatTime = (date: Date) => {
+    // Just use hours and minutes as displayed in UTC
+    return `${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
+  };
+
+  // Navigate to the previous week
+  const goToPrevWeek = () => {
+    setCurrentDate(prev => addDays(prev, -7));
+  };
+
+  // Navigate to the next week
+  const goToNextWeek = () => {
+    setCurrentDate(prev => addDays(prev, 7));
+  };
+
+  // Go to today
+  const goToToday = () => {
+    setCurrentDate(new Date());
+  };
+
+  // Format the date range for display (e.g., "Mar 16 - 22, 2025")
+  const dateRangeText = () => {
+    const endDate = addDays(currentDate, 6);
+    const startMonth = format(currentDate, 'MMM');
+    const endMonth = format(endDate, 'MMM');
     
-    // Create date with local day values but in UTC context
-    return new Date(Date.UTC(year, month, day, 12, 0, 0)).toISOString();
+    if (startMonth === endMonth) {
+      return `${startMonth} ${format(currentDate, 'd')} - ${format(endDate, 'd')}, ${format(currentDate, 'yyyy')}`;
+    } else {
+      return `${startMonth} ${format(currentDate, 'd')} - ${endMonth} ${format(endDate, 'd')}, ${format(currentDate, 'yyyy')}`;
+    }
+  };
+
+  // Process events for display in the custom list view
+  const processEventsForCustomList = () => {
+    if (!timeSlots) return [];
+    
+    // Group events by day
+    const groupedEvents = timeSlots.reduce((groups, slot) => {
+      const date = format(new Date(slot.startTime), 'yyyy-MM-dd');
+      
+      if (!groups[date]) {
+        groups[date] = {
+          date: new Date(slot.startTime),
+          slots: []
+        };
+      }
+      
+      groups[date].slots.push(slot);
+      return groups;
+    }, {} as Record<string, { date: Date; slots: any[] }>);
+    
+    // Convert to array and sort by date
+    return Object.values(groupedEvents)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  };
+
+  // Handle clicking a slot in the custom mobile list
+  const handleMobileSlotClick = (slot: any) => {
+    setSelectedSlot(slot);
+    setIsManageDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{/*Schedule Management*/}</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h1 className="text-2xl font-bold">Schedule Management</h1>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
           {/* Create Time Slot Dialog */}
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={handleCreateTimeSlotClick}>
+              <Button onClick={handleCreateTimeSlotClick} className="w-full md:w-auto">
                 <Plus className="mr-2 h-4 w-4" /> Create Time Slot
               </Button>
             </DialogTrigger>
@@ -214,7 +262,7 @@ export function ScheduleManager() {
           {/* Bulk Create Slots Dialog */}
           <Dialog open={isBulkCreateOpen} onOpenChange={setIsBulkCreateOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full md:w-auto">
                 <Plus className="mr-2 h-4 w-4" /> Bulk Create Slots
               </Button>
             </DialogTrigger>
@@ -237,27 +285,44 @@ export function ScheduleManager() {
           <DialogHeader>
             <DialogTitle>Manage Time Slot</DialogTitle>
           </DialogHeader>
-          {selectedEvent && (
+          {(selectedEvent || selectedSlot) && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="font-medium">Start Time</p>
-                  <p>{format(selectedEvent.event.start!, "PPp")}</p>
+                  {selectedEvent ? (
+                    <p>{`${selectedEvent.event.start!.getUTCHours()}:${String(selectedEvent.event.start!.getUTCMinutes()).padStart(2, '0')}`}</p>
+                  ) : (
+                    <p>{`${new Date(selectedSlot.startTime).getUTCHours()}:${String(new Date(selectedSlot.startTime).getUTCMinutes()).padStart(2, '0')}`}</p>
+                  )}
                 </div>
                 <div>
                   <p className="font-medium">End Time</p>
-                  <p>{format(selectedEvent.event.end!, "PPp")}</p>
+                  {selectedEvent ? (
+                    <p>{`${selectedEvent.event.end!.getUTCHours()}:${String(selectedEvent.event.end!.getUTCMinutes()).padStart(2, '0')}`}</p>
+                  ) : (
+                    <p>{`${new Date(selectedSlot.endTime).getUTCHours()}:${String(new Date(selectedSlot.endTime).getUTCMinutes()).padStart(2, '0')}`}</p>
+                  )}
                 </div>
                 <div>
                   <p className="font-medium">Students</p>
                   <p>
-                    {selectedEvent.event.extendedProps.currentStudents} /{" "}
-                    {selectedEvent.event.extendedProps.maxStudents}
+                    {selectedEvent ? (
+                      `${selectedEvent.event.extendedProps.currentStudents} / ${selectedEvent.event.extendedProps.maxStudents}`
+                    ) : (
+                      `${selectedSlot.lessons?.length || 0} / ${selectedSlot.maxStudents}`
+                    )}
                   </p>
                 </div>
                 <div>
                   <p className="font-medium">Rink</p>
-                  <p>{selectedEvent.event.extendedProps.rink?.name}</p>
+                  <p>
+                    {selectedEvent ? (
+                      selectedEvent.event.extendedProps.rink?.name
+                    ) : (
+                      selectedSlot.rink?.name
+                    )}
+                  </p>
                 </div>
               </div>
 
@@ -266,11 +331,11 @@ export function ScheduleManager() {
                 <div className="flex gap-2">
                   <Select onValueChange={(studentId: string) => {
                     assignStudent.mutate({
-                      timeSlotId: selectedEvent.event.id,
+                      timeSlotId: selectedEvent ? selectedEvent.event.id : selectedSlot.id,
                       studentId,
                     });
                   }}>
-                    <SelectTrigger className="w-[200px]">
+                    <SelectTrigger className="w-full md:w-[200px]">
                       <SelectValue placeholder="Select student" />
                     </SelectTrigger>
                     <SelectContent>
@@ -286,8 +351,11 @@ export function ScheduleManager() {
 
               <div className="space-y-2">
                 <p className="font-medium">Assigned Students</p>
-                <div className="space-y-1">
-                  {selectedEvent.event.extendedProps.lessons?.map((lesson: any) => (
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {(selectedEvent ? 
+                    selectedEvent.event.extendedProps.lessons : 
+                    selectedSlot.lessons
+                  )?.map((lesson: any) => (
                     <div
                       key={lesson.id}
                       className="flex items-center justify-between p-2 border rounded"
@@ -309,11 +377,13 @@ export function ScheduleManager() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex flex-col md:flex-row justify-end gap-2 pt-4">
                 <Button
                   variant="outline"
+                  className="w-full md:w-auto"
                   onClick={() => {
                     setSelectedEvent(null);
+                    setSelectedSlot(null);
                     setIsManageDialogOpen(false);
                   }}
                 >
@@ -321,12 +391,21 @@ export function ScheduleManager() {
                 </Button>
                 <Button
                   variant="outline"
+                  className="w-full md:w-auto"
                   onClick={() => {
-                    setTimeSlotFormData({
-                      startTime: selectedEvent.event.start!,
-                      endTime: selectedEvent.event.end!,
-                      rinkId: selectedEvent.event.extendedProps.rinkId,
-                    });
+                    const slotData = selectedEvent ? 
+                      {
+                        startTime: selectedEvent.event.start!,
+                        endTime: selectedEvent.event.end!,
+                        rinkId: selectedEvent.event.extendedProps.rinkId,
+                      } : 
+                      {
+                        startTime: new Date(selectedSlot.startTime),
+                        endTime: new Date(selectedSlot.endTime),
+                        rinkId: selectedSlot.rinkId,
+                      };
+                    
+                    setTimeSlotFormData(slotData);
                     setIsCreateDialogOpen(true);
                     setIsManageDialogOpen(false);
                   }}
@@ -335,9 +414,11 @@ export function ScheduleManager() {
                 </Button>
                 <Button
                   variant="destructive"
+                  className="w-full md:w-auto"
                   onClick={() => {
+                    const slotId = selectedEvent ? selectedEvent.event.id : selectedSlot.id;
                     if (confirm("Are you sure you want to delete this time slot?")) {
-                      deleteTimeSlot.mutate({ id: selectedEvent.event.id });
+                      deleteTimeSlot.mutate({ id: slotId });
                     }
                   }}
                 >
@@ -351,40 +432,134 @@ export function ScheduleManager() {
 
       <Card className="shadow-sm">
         <CardContent className="p-0">
-          {/* Replace Calendar component with FullCalendar */}
-          <FullCalendar
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-              //resourceTimeGridPlugin
-            ]}
-            initialView="timeGridWeek"
-            events={events}
-            timeZone="UTC"
-            now={calculateTodayInUTC()}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'timeGridWeek,dayGridMonth'
-            }}
-            slotDuration="00:30:00"
-            slotMinTime="05:00:00"  // Start at 5am
-            slotMaxTime="18:00:00"  // End at 6pm
-            defaultTimedEventDuration="01:00:00"
-            allDaySlot={false}
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
-            weekends={true}
-            select={handleDateSelect}
-            eventClick={handleEventClick}
-            // Don't add handlers that don't exist in your code
-            height="auto"
-            // Use type assertion to satisfy TypeScript
-            {...({} as any)}
-          />
+          {isMobile ? (
+            // Custom mobile list view
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <Button variant="outline" size="sm" onClick={goToPrevWeek}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="text-center">
+                  <span className="font-medium">{dateRangeText()}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={goToNextWeek}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mb-4"
+                onClick={goToToday}
+              >
+                Today
+              </Button>
+              
+              {/* Custom list view for mobile */}
+              <div className="space-y-4">
+                {processEventsForCustomList().map((day) => (
+                  <div key={format(day.date, 'yyyy-MM-dd')} className="mb-4">
+                    {/* Day header */}
+                    <div className="py-2 px-3 bg-slate-100 rounded-t-md">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold">{format(day.date, 'EEEE')}</span>
+                        <span>{format(day.date, 'MMMM d, yyyy')}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Time slots for this day */}
+                    <div className="border border-slate-200 rounded-b-md">
+                      {day.slots
+                        .sort((a: any, b: any) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                        .map((slot: any) => {
+                          const studentCount = slot.lessons?.length || 0;
+                          const studentNames = slot.lessons
+                            ?.map((lesson: any) => lesson.student.user.name)
+                            .join(', ');
+                            
+                          return (
+                            <div 
+                              key={slot.id}
+                              className="p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50"
+                              onClick={() => handleMobileSlotClick(slot)}
+                            >
+                              <div className="flex justify-between">
+                                <div className="font-medium">
+                                  {`${new Date(slot.startTime).getUTCHours()}:${String(new Date(slot.startTime).getUTCMinutes()).padStart(2, '0')} - 
+                                  ${new Date(slot.endTime).getUTCHours()}:${String(new Date(slot.endTime).getUTCMinutes()).padStart(2, '0')}`}
+                                </div>
+                                <div>
+                                  {`${studentCount}/${slot.maxStudents}`}
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-600 flex justify-between">
+                                <div>{slot.rink.name}</div>
+                                {studentNames && <div className="italic">{studentNames}</div>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Desktop calendar view
+            <FullCalendar
+              plugins={[
+                dayGridPlugin,
+                timeGridPlugin,
+                interactionPlugin,
+              ]}
+              initialView="timeGridWeek"
+              events={events}
+              timeZone="UTC"
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridWeek,dayGridMonth'
+              }}
+              slotDuration="00:30:00"
+              slotMinTime="05:00:00"  // Start at 5am
+              slotMaxTime="18:00:00"  // End at 6pm
+              defaultTimedEventDuration="01:00:00"
+              allDaySlot={false}
+              editable={true}
+              selectable={true}
+              selectMirror={true}
+              dayMaxEvents={true}
+              weekends={true}
+              select={handleDateSelect}
+              eventClick={handleEventClick}
+              eventDrop={handleEventDrop}
+              height="700px"
+              displayEventTime={true}
+              eventTimeFormat={{
+                hour: '2-digit',
+                minute: '2-digit',
+                omitZeroMinute: false,
+                hour12: false
+              }}
+              eventContent={(arg) => {
+                const start = new Date(arg.event.startStr);
+                const end = new Date(arg.event.endStr);
+                
+                // Use UTC hours to avoid timezone conversion
+                const startFormatted = `${start.getUTCHours()}:${String(start.getUTCMinutes()).padStart(2, '0')}`;
+                const endFormatted = `${end.getUTCHours()}:${String(end.getUTCMinutes()).padStart(2, '0')}`;
+                
+                return {
+                  html: `
+                    <div class="fc-event-main-frame">
+                      <div class="fc-event-time">${startFormatted} - ${endFormatted}</div>
+                      <div class="fc-event-title">${arg.event.title}</div>
+                    </div>
+                  `
+                };
+              }}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

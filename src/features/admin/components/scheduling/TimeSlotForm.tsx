@@ -98,16 +98,22 @@ export const TimeSlotForm = ({
   })
 
   const handleSubmit = (values: TimeSlotFormValues) => {
-    // Create dates that will be treated consistently with timezone
-    const startTime = new Date(values.startTime)
-    const endTime = new Date(startTime.getTime() + values.duration * 60000)
+    // Parse the datetime string into parts - THIS IS THE CRITICAL FIX
+    const [datePart, timePart] = values.startTime.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes] = timePart.split(':').map(Number);
+    
+    // Create date using UTC to preserve the exact time as entered
+    const startTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+    const endTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0) + values.duration * 60000);
     
     // Log the time values for debugging
     console.log("Creating single time slot with:", {
       rinkId: values.rinkId,
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
-      durationMinutes: values.duration
+      durationMinutes: values.duration,
+      formInput: values.startTime
     });
     
     // Simplified data object without recurring pattern
@@ -119,9 +125,9 @@ export const TimeSlotForm = ({
       isActive: true,
     }
     
-    // Ensure React and server are treating dates consistently
+    // Display time as entered without timezone adjustment
     toast.info("Creating slot", {
-      description: `${format(startTime, "h:mm a")} - ${format(endTime, "h:mm a")}`
+      description: `${hours}:${minutes.toString().padStart(2, '0')} for ${values.duration} minutes - EXACT time shown`
     });
     
     createTimeSlot.mutate(timeSlotData)
@@ -165,7 +171,7 @@ export const TimeSlotForm = ({
                 <Input type="datetime-local" {...field} />
               </FormControl>
               <FormDescription>
-                Times will be scheduled exactly as entered (for location-based scheduling)
+                Times will be displayed exactly as entered (no timezone conversion)
               </FormDescription>
               <FormMessage />
             </FormItem>

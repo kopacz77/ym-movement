@@ -1,3 +1,4 @@
+    /* src/styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,5 +84,156 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Make form inputs more touch-friendly */
+  input, 
+  select, 
+  button,
+  .select-trigger,
+  .btn {
+    min-height: 44px !important;
+  }
+
+  /* Adjust spacing for mobile */
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+  
+  /* Ensure tables are responsive */
+  table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+  }
+  
+  /* Fix z-index for mobile menu */
+  .z-50 {
+    z-index: 50 !important;
+  }
+}
+
+/* FullCalendar Mobile Improvements */
+.fc-toolbar.fc-header-toolbar {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .fc-toolbar.fc-header-toolbar {
+    display: grid;
+    grid-template-areas: 
+      "left right"
+      "center center";
+  }
+
+  .fc-toolbar-chunk:nth-child(1) {
+    grid-area: left;
+  }
+  
+  .fc-toolbar-chunk:nth-child(2) {
+    grid-area: center;
+    margin-top: 0.5rem;
+  }
+  
+  .fc-toolbar-chunk:nth-child(3) {
+    grid-area: right;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* Make the timeGrid view more compact */
+  .fc-timeGridWeek-view .fc-col-header-cell {
+    font-size: 0.65rem !important;
+    padding: 2px !important;
+  }
+  
+  /* Fixes for FullCalendar timeGridWeek on mobile */
+  .fc-timeGridWeek-view .fc-scrollgrid-sync-table {
+    min-width: 700px !important;
+  }
+
+  .fc-timeGridWeek-view .fc-scroller {
+    overflow-x: auto !important;
+  }
+
+  /* Adjust cell sizes to be more readable on mobile */
+  .fc-timegrid-slot {
+    height: 1.5em !important;
+  }
+
+  /* Force proper rendering of grid elements */
+  .fc-timegrid-body {
+    min-width: 100% !important;
+  }
+
+  /* Ensure the scrollers work properly on mobile */
+  .fc-scroller {
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure time slot labels are visible */
+  .fc-timegrid-slot-label-cushion {
+    font-size: 0.65rem !important;
+  }
+  
+  /* Increase event text contrast */
+  .fc-event-title {
+    font-weight: bold !important;
+  }
+  
+  /* List view improvements */
+  .fc-list-day-cushion {
+    padding: 4px 8px !important;
+  }
+  
+  .fc-list-event td {
+    padding: 4px 8px !important;
+  }
+  
+  .fc-list-event-title {
+    font-size: 0.875rem !important;
+  }
+  
+  .fc-list-event-time {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Side Navigation Improvements */
+.mobile-nav-padding {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Notch and Dynamic Island Safe Areas (iOS) */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Improve scrolling experience on mobile */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 }

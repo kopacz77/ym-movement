@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Calendar, Clock, CreditCard, Settings, User } from "lucide-react";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 
 const navigation = [
   { name: 'Dashboard', href: '/student/dashboard', icon: Clock },
@@ -16,11 +17,18 @@ const navigation = [
 ];
 
 export const StudentSidebar = () => {
+  const isMobile = useIsMobile();
+  
   // Using React 19 compatible hooks
   const pathname = usePathname() ?? '';
 
+  // For mobile, we won't show the sidebar at all
+  if (isMobile) {
+    return null;
+  }
+
   return (
-    <div className="w-64 bg-white border-r h-full overflow-y-auto">
+    <div className="sticky top-16 h-[calc(100vh-4rem)] z-40 w-64 bg-white border-r overflow-y-auto">
       <nav className="flex flex-col gap-1 p-4">
         {navigation.map((item) => {
           const isActive = pathname === item.href;

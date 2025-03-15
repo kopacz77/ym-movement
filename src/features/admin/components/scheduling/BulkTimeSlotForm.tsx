@@ -61,7 +61,6 @@ const bulkTimeSlotSchema = z.object({
   maxStudents: z.coerce.number().min(1, "At least 1 student required"),
   daysOfWeek: z.array(z.number()).min(1, "Select at least one day"),
 }).refine((data) => dateRangeValidator(data.startDate, data.endDate), {
-  message: "Date range cannot exceed 30 days",
   path: ["endDate"], // Show the error on the end date field
 });
 
@@ -69,7 +68,7 @@ type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>;
 
 interface BulkTimeSlotFormProps {
   rinks: Array<{ id: string; name: string }>;
-  onSubmitAction: () => void; // renamed per recommendation
+  onSubmitAction: () => void;
 }
 
 export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
@@ -111,28 +110,15 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
     },
   });
 
-  // Auto-update end date when start date changes
-  const startDate = form.watch('startDate');
-  useEffect(() => {
-    if (startDate) {
-      try {
-        const start = parse(startDate, 'yyyy-MM-dd', new Date());
-        const suggestedEndDate = addDays(start, 30);
-        // Format the date back to yyyy-MM-dd string
-        const endDateString = suggestedEndDate.toISOString().split('T')[0];
-        
-        // Only set the end date if it's empty or the current range exceeds 30 days
-        const currentEndDate = form.getValues('endDate');
-        if (!currentEndDate || !dateRangeValidator(startDate, currentEndDate)) {
-          form.setValue('endDate', endDateString);
-        }
-      } catch (error) {
-        // Ignore parse errors
-      }
-    }
-  }, [startDate, form]);
+  // Removed auto-update end date functionality as requested
 
   const handleSubmit = (values: BulkTimeSlotFormValues) => {
+    // Simply pass the raw form values to the API
+    // Tell the user what times they'll see
+    toast.info("Creating slots", {
+      description: `From ${values.dailyStartTime} to ${values.dailyEndTime} - EXACT times shown, no timezone conversion`
+    });
+    
     createBulkSlots.mutate(values);
   };
 
@@ -186,14 +172,11 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date <span className="text-sm text-muted-foreground">(Max 30 days)</span></FormLabel>
+                <FormLabel>End Date <span className="text-sm text-muted-foreground"></span></FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
-                <FormDescription>
-                  Date range cannot exceed 30 days
-                </FormDescription>
               </FormItem>
             )}
           />
@@ -209,6 +192,9 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
+                <FormDescription>
+                  Exact time as shown - no timezone conversion
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -222,6 +208,9 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
+                <FormDescription>
+                  Exact time as shown - no timezone conversion
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
