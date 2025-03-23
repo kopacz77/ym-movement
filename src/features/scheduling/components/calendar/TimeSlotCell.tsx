@@ -1,7 +1,7 @@
 // src/features/scheduling/components/calendar/TimeSlotCell.tsx
-import React from 'react';
-import { CalendarSlot } from '../../types';
-import { cn } from '@/lib/utils';
+import type React from "react";
+import type { CalendarSlot } from "../../types";
+import { cn } from "@/lib/utils";
 
 interface TimeSlotCellProps {
   slot?: CalendarSlot;
@@ -11,26 +11,28 @@ interface TimeSlotCellProps {
 
 export const TimeSlotCell: React.FC<TimeSlotCellProps> = ({ slot, onClick, onHover }) => {
   const getSlotColor = (slot?: CalendarSlot) => {
-    if (!slot) return 'bg-gray-50';
-    if (!slot.isActive) return 'bg-gray-100';
+    if (!slot) return "bg-gray-50";
+    if (!slot.isActive) return "bg-gray-100";
     switch (slot.status) {
-      case 'booked':
-        return 'bg-blue-100';
-      case 'partial':
-        return 'bg-yellow-100';
-      case 'cancelled':
-        return 'bg-red-100';
+      case "booked":
+        return "bg-blue-100";
+      case "partial":
+        return "bg-yellow-100";
+      case "cancelled":
+        return "bg-red-100";
       default:
-        return 'bg-green-100';
+        return "bg-green-100";
     }
   };
 
   return (
-    <div
+    <button
+      type="button"
+      disabled={!slot?.isActive}
       className={cn(
-        'h-12 border-b border-r relative transition-colors',
+        "h-12 border-b border-r relative transition-colors w-full text-left p-0 m-0 rounded-none appearance-none focus:outline-none focus:ring-2 focus:ring-primary/50",
         getSlotColor(slot),
-        slot?.isActive && 'hover:bg-opacity-80 cursor-pointer'
+        slot?.isActive && "hover:bg-opacity-80 cursor-pointer",
       )}
       onClick={onClick}
       onMouseEnter={onHover}
@@ -42,11 +44,11 @@ export const TimeSlotCell: React.FC<TimeSlotCellProps> = ({ slot, onClick, onHov
           </div>
           {slot.lessons && slot.lessons.length > 0 && (
             <div className="text-xs truncate">
-              {slot.lessons.length} lesson{slot.lessons.length !== 1 ? 's' : ''}
+              {slot.lessons.length} lesson{slot.lessons.length !== 1 ? "s" : ""}
             </div>
           )}
         </div>
       )}
-    </div>
+    </button>
   );
 };

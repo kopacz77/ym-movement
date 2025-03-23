@@ -1,18 +1,24 @@
 // src/features/admin/components/scheduling/ScheduleCalendarView.tsx
-import React from 'react';
-import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import dayGridPlugin from '@fullcalendar/daygrid'; // Added for month view
-import { TimeSlotList } from './TimeSlotList';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React from "react";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import dayGridPlugin from "@fullcalendar/daygrid"; // Added for month view
+import { TimeSlotList } from "./TimeSlotList";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Create ViewOptions component inline since it's missing
 const ViewOptions = () => {
-  const [view, setView] = React.useState('timeGridWeek');
-  
+  const [view, setView] = React.useState("timeGridWeek");
+
   return (
     <Select value={view} onValueChange={(value) => setView(value)}>
       <SelectTrigger className="w-40">
@@ -28,13 +34,13 @@ const ViewOptions = () => {
 };
 
 export const ScheduleCalendarView = () => {
-  const [calendarView, setCalendarView] = React.useState('timeGridWeek');
-  
+  const [calendarView, setCalendarView] = React.useState("timeGridWeek");
+
   // Update calendar view when selection changes
   const handleViewChange = (view: string) => {
     setCalendarView(view);
   };
-  
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">

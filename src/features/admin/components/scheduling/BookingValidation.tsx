@@ -1,9 +1,9 @@
 "use client";
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle, XCircle } from 'lucide-react';
-import { LessonType } from '@prisma/client';
-import { startOfWeek, endOfWeek } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle } from "lucide-react";
+import type { LessonType, RinkArea, Lesson } from "@prisma/client";
+import { useEffect } from "react"; // Regular import for runtime usage
+import type { FC } from "react"; // Type-only import
 
 // Define CalendarSlot interface
 interface CalendarSlot {
@@ -15,9 +15,9 @@ interface CalendarSlot {
   currentStudents: number;
   isActive: boolean;
   rinkId: string;
-  rinkArea: any; // Update with the correct type if available
-  status: 'available' | 'booked' | 'partial' | 'cancelled';
-  lessons?: any[]; // Update with the correct type if available
+  rinkArea: RinkArea;
+  status: "available" | "booked" | "partial" | "cancelled";
+  lessons?: Lesson[];
 }
 
 // Define the props expected by BookingValidation.
@@ -25,21 +25,21 @@ export interface BookingValidationProps {
   slot: CalendarSlot;
   studentId: string;
   lessonType: LessonType;
-  onValidationCompleteAction?: (isValid: boolean) => void; // Renamed
+  onValidationCompleteAction?: (isValid: boolean) => void;
 }
 
-export const BookingValidation: React.FC<BookingValidationProps> = ({
+export const BookingValidation: FC<BookingValidationProps> = ({
   slot,
   studentId,
   lessonType,
-  onValidationCompleteAction, // Updated to match interface
+  onValidationCompleteAction,
 }) => {
   // For demonstration, we assume validations pass.
-  React.useEffect(() => {
+  useEffect(() => {
     if (onValidationCompleteAction) {
       onValidationCompleteAction(true);
     }
-  }, [slot, studentId, lessonType, onValidationCompleteAction]);
+  }, [onValidationCompleteAction]);
 
   return (
     <div>

@@ -1,5 +1,6 @@
 // src/features/scheduling/types/index.ts
-import { Lesson, RinkTimeSlot, LessonType, RinkArea, LessonStatus } from "@prisma/client";
+import type { Lesson, LessonType, RinkArea } from "@prisma/client";
+import { RinkTimeSlot, LessonStatus } from "@prisma/client";
 
 export interface CalendarSlot {
   id: string;
@@ -11,14 +12,14 @@ export interface CalendarSlot {
   isActive: boolean;
   rinkId: string;
   rinkArea: RinkArea;
-  status: 'available' | 'booked' | 'partial' | 'cancelled';
+  status: "available" | "booked" | "partial" | "cancelled";
   lessons?: Lesson[];
 }
 
 export interface CalendarView {
   startDate: Date;
   endDate: Date;
-  view: 'day' | 'week' | 'month';
+  view: "day" | "week" | "month";
   rinkId?: string;
   rinkArea?: RinkArea;
 }

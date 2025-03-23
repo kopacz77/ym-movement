@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import React, { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { format } from 'date-fns'
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
 import {
   Form,
   FormControl,
@@ -15,34 +15,34 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { api } from '@/lib/api'
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 // Simplified schema without recurring pattern fields
 const timeSlotSchema = z.object({
-  rinkId: z.string().min(1, 'Please select a rink'),
-  startTime: z.string().min(1, 'Start time is required'),
-  duration: z.coerce.number().min(15, 'Minimum duration is 15 minutes'),
-  maxStudents: z.coerce.number().min(1, 'At least 1 student required'),
-})
+  rinkId: z.string().min(1, "Please select a rink"),
+  startTime: z.string().min(1, "Start time is required"),
+  duration: z.coerce.number().min(15, "Minimum duration is 15 minutes"),
+  maxStudents: z.coerce.number().min(1, "At least 1 student required"),
+});
 
-type TimeSlotFormValues = z.infer<typeof timeSlotSchema>
+type TimeSlotFormValues = z.infer<typeof timeSlotSchema>;
 
 interface TimeSlotFormProps {
-  initialStartTime: Date | null
-  initialEndTime: Date | null
-  initialRinkId?: string
-  rinks: Array<{ id: string; name: string }>
-  onSubmitAction?: () => void
-  onSubmit?: () => void // Kept for compatibility
+  initialStartTime: Date | null;
+  initialEndTime: Date | null;
+  initialRinkId?: string;
+  rinks: Array<{ id: string; name: string }>;
+  onSubmitAction?: () => void;
+  onSubmit?: () => void; // Kept for compatibility
 }
 
 export const TimeSlotForm = ({
@@ -53,22 +53,26 @@ export const TimeSlotForm = ({
   onSubmitAction,
   onSubmit,
 }: TimeSlotFormProps) => {
-  const utils = api.useUtils()
-  
+  const utils = api.useUtils();
+
   // Use onSubmitAction if available, otherwise fallback to onSubmit
-  const handleFormSubmitComplete = onSubmitAction || onSubmit || (() => {})
+  const handleFormSubmitComplete = onSubmitAction || onSubmit || (() => {});
 
   const form = useForm<TimeSlotFormValues>({
     resolver: zodResolver(timeSlotSchema),
     defaultValues: {
-      rinkId: initialRinkId || '',
-      startTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : '',
-      duration: initialEndTime && initialStartTime
-        ? Math.max(60, Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60)))
-        : 60,
+      rinkId: initialRinkId || "",
+      startTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : "",
+      duration:
+        initialEndTime && initialStartTime
+          ? Math.max(
+              60,
+              Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60)),
+            )
+          : 60,
       maxStudents: 1,
     },
-  })
+  });
 
   // Debug initial values
   useEffect(() => {
@@ -76,46 +80,49 @@ export const TimeSlotForm = ({
       startTime: initialStartTime ? initialStartTime.toISOString() : null,
       formattedStartTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : null,
       endTime: initialEndTime ? initialEndTime.toISOString() : null,
-      duration: initialEndTime && initialStartTime
-        ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60))
-        : null
+      duration:
+        initialEndTime && initialStartTime
+          ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60))
+          : null,
     });
   }, [initialStartTime, initialEndTime]);
 
   const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
     onSuccess: () => {
       toast("Success", {
-        description: "Time slot created successfully"
-      })
-      utils.admin.schedule.getTimeSlots.invalidate()
-      handleFormSubmitComplete()
+        description: "Time slot created successfully",
+      });
+      utils.admin.schedule.getTimeSlots.invalidate();
+      handleFormSubmitComplete();
     },
     onError: (error) => {
       toast.error("Error", {
-        description: error.message
-      })
+        description: error.message,
+      });
     },
-  })
+  });
 
   const handleSubmit = (values: TimeSlotFormValues) => {
     // Parse the datetime string into parts - THIS IS THE CRITICAL FIX
-    const [datePart, timePart] = values.startTime.split('T');
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hours, minutes] = timePart.split(':').map(Number);
-    
+    const [datePart, timePart] = values.startTime.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hours, minutes] = timePart.split(":").map(Number);
+
     // Create date using UTC to preserve the exact time as entered
     const startTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
-    const endTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0) + values.duration * 60000);
-    
+    const endTime = new Date(
+      Date.UTC(year, month - 1, day, hours, minutes, 0) + values.duration * 60000,
+    );
+
     // Log the time values for debugging
     console.log("Creating single time slot with:", {
       rinkId: values.rinkId,
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
       durationMinutes: values.duration,
-      formInput: values.startTime
+      formInput: values.startTime,
     });
-    
+
     // Simplified data object without recurring pattern
     const timeSlotData = {
       rinkId: values.rinkId,
@@ -123,15 +130,17 @@ export const TimeSlotForm = ({
       endTime,
       maxStudents: values.maxStudents,
       isActive: true,
-    }
-    
+    };
+
     // Display time as entered without timezone adjustment
     toast.info("Creating slot", {
-      description: `${hours}:${minutes.toString().padStart(2, '0')} for ${values.duration} minutes - EXACT time shown`
+      description: `${hours}:${minutes.toString().padStart(2, "0")} for ${
+        values.duration
+      } minutes - EXACT time shown`,
     });
-    
-    createTimeSlot.mutate(timeSlotData)
-  }
+
+    createTimeSlot.mutate(timeSlotData);
+  };
 
   return (
     <Form {...form}>
@@ -228,5 +237,5 @@ export const TimeSlotForm = ({
         </div>
       </form>
     </Form>
-  )
-}
+  );
+};

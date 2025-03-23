@@ -1,9 +1,9 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Calendar, Clock, User } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar, Clock, User } from "lucide-react";
 
 export const ExistingBookings = () => {
   return (
@@ -33,8 +33,12 @@ export const ExistingBookings = () => {
                 <Badge>Confirmed</Badge>
               </div>
               <div className="mt-4 flex gap-2">
-                <Button size="sm" variant="outline">Reschedule</Button>
-                <Button size="sm" variant="destructive">Cancel</Button>
+                <Button size="sm" variant="outline">
+                  Reschedule
+                </Button>
+                <Button size="sm" variant="destructive">
+                  Cancel
+                </Button>
               </div>
             </div>
           </div>

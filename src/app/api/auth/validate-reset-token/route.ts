@@ -1,41 +1,46 @@
 // src/app/api/auth/validate-reset-token/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token');
+    // Get token from query parameters
+    const url = new URL(req.url);
+    const token = url.searchParams.get("token");
 
     if (!token) {
-      return NextResponse.json(
-        { message: 'Token is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Token is required" }, { status: 400 });
     }
 
-    // Find the token
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
-    });
+    // Find the reset token with raw query
+    const results = await prisma.$queryRaw`
+      SELECT t.expires 
+      FROM "PasswordResetToken" t
+      WHERE t.token = ${token}
+    `;
 
-    // Check if token exists and is still valid
-    if (!resetToken || resetToken.expires < new Date()) {
-      return NextResponse.json(
-        { message: 'Invalid or expired token' },
-        { status: 400 }
-      );
+    const tokenData = Array.isArray(results) && results.length > 0 ? results[0] : null;
+
+    // Check if token exists
+    if (!tokenData) {
+      return NextResponse.json({ valid: false, message: "Invalid token" }, { status: 200 });
     }
 
-    return NextResponse.json(
-      { valid: true },
-      { status: 200 }
-    );
+    // Check if token is expired
+    const now = new Date();
+    const expires = new Date(tokenData.expires);
+
+    if (now > expires) {
+      return NextResponse.json({ valid: false, message: "Token has expired" }, { status: 200 });
+    }
+
+    // Token is valid
+    return NextResponse.json({ valid: true }, { status: 200 });
   } catch (error) {
-    console.error('Error validating reset token:', error);
+    console.error("Token validation error:", error);
     return NextResponse.json(
-      { message: 'Something went wrong' },
-      { status: 500 }
+      { error: "An error occurred while validating the token" },
+      { status: 500 },
     );
   }
 }

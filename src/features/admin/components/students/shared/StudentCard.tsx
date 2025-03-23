@@ -1,11 +1,11 @@
 // src/features/admin/components/students/shared/StudentCard.tsx
 "use client";
-import React from "react";
+import type React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Mail, Phone } from "lucide-react";
-import { Level } from "@prisma/client";
+import type { Level } from "@prisma/client";
 import { format } from "date-fns";
 import { Student } from "../types";
 
@@ -81,11 +81,7 @@ export const StudentCard: React.FC<StudentCardProps> = ({ student, onViewProfile
             <span className="text-sm text-muted-foreground">
               Total Lessons: {student.totalLessons || 0}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onViewProfileAction(student.id)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onViewProfileAction(student.id)}>
               View Profile
             </Button>
           </div>

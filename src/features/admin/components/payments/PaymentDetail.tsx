@@ -1,14 +1,42 @@
 // src/features/admin/components/payments/PaymentDetail.tsx
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Check, FileText, Send, ExternalLink } from 'lucide-react';
-import { formatDate, formatDateTime } from '@/lib/date';
-import { formatCurrency } from '@/lib/utils';
-import { PaymentStatus } from '@prisma/client';
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Check, FileText, Send, ExternalLink } from "lucide-react";
+import { formatDate, formatDateTime } from "@/lib/date";
+import { formatCurrency } from "@/lib/utils";
+import type { PaymentStatus, PaymentMethod, LessonType } from "@prisma/client";
+
+// Updated type definition to handle null values from database
+interface Payment {
+  id: string;
+  amount: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  referenceCode: string;
+  verifiedBy: string | null | undefined; // Changed to accept null
+  verifiedAt?: Date | null; // Added null option
+  reminderSentAt?: Date | null; // Added null option
+  notes?: string | null; // Added null option
+  createdAt: Date;
+  updatedAt: Date;
+  student?: {
+    user?: {
+      name?: string | null;
+    };
+  };
+  lesson?: {
+    startTime: Date;
+    duration: number;
+    type: LessonType;
+    rink?: {
+      name: string;
+    } | null;
+  };
+}
 
 interface PaymentDetailProps {
-  payment: any; // Use the proper type from your API
+  payment: Payment;
   onVerify: () => void;
   onAddNote: () => void;
   onSendReminder: () => void;
@@ -20,15 +48,15 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
   onVerify,
   onAddNote,
   onSendReminder,
-  isProcessing
+  isProcessing,
 }) => {
   const getStatusBadge = (status: PaymentStatus) => {
     switch (status) {
-      case 'COMPLETED':
+      case "COMPLETED":
         return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case 'PENDING':
+      case "PENDING":
         return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case 'FAILED':
+      case "FAILED":
         return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -40,7 +68,7 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h3 className="text-sm font-medium text-muted-foreground">Student</h3>
-          <p className="text-base">{payment.student?.user?.name || 'Unknown'}</p>
+          <p className="text-base">{payment.student?.user?.name || "Unknown"}</p>
         </div>
         <div>
           <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
@@ -75,7 +103,7 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Lesson Type</p>
-                <p className="text-sm">{payment.lesson.type.replace('_', ' ')}</p>
+                <p className="text-sm">{payment.lesson.type.replace("_", " ")}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Duration</p>
@@ -83,7 +111,7 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Location</p>
-                <p className="text-sm">{payment.lesson.rink?.name || 'Unknown'}</p>
+                <p className="text-sm">{payment.lesson.rink?.name || "Unknown"}</p>
               </div>
             </div>
           </div>
@@ -103,7 +131,8 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-1">Verification</h3>
           <p className="text-sm">
-            Verified by {payment.verifiedBy || 'Admin'} on {formatDateTime(new Date(payment.verifiedAt))}
+            Verified by {payment.verifiedBy || "Admin"} on{" "}
+            {formatDateTime(new Date(payment.verifiedAt))}
           </p>
         </div>
       )}
@@ -113,8 +142,8 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
           <FileText className="h-4 w-4 mr-2" />
           Add Note
         </Button>
-        
-        {payment.status === 'PENDING' && (
+
+        {payment.status === "PENDING" && (
           <>
             <Button variant="outline" onClick={onSendReminder} disabled={isProcessing}>
               <Send className="h-4 w-4 mr-2" />

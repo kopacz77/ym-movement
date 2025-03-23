@@ -1,19 +1,24 @@
 // src/lib/email.ts
-import { Resend } from 'resend';
-import { format } from 'date-fns';
+import { Resend } from "resend";
+import { format } from "date-fns";
 
 // Initialize Resend with API key
-const resendApiKey = process.env.RESEND_API_KEY || '';
+const resendApiKey = process.env.RESEND_API_KEY || "";
 const resend = new Resend(resendApiKey);
 
 // Get the base URL from environment variables with proper fallbacks for different hosting environments
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL || process.env.NETLIFY_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  process.env.VERCEL_URL ||
+  process.env.NETLIFY_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  "http://localhost:3000";
 
 // Fallback method if Resend isn't available or configured
 async function fallbackEmailMethod(to: string, subject: string, html: string) {
   console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
   console.log(`[MOCK EMAIL] Content: ${html.substring(0, 100)}...`);
-  return { id: 'mock-email-id' };
+  return { id: "mock-email-id" };
 }
 
 /**
@@ -41,28 +46,28 @@ export async function sendWelcomeEmail(email: string, name: string) {
     `;
 
     if (!resendApiKey) {
-      console.warn('RESEND_API_KEY not found, using fallback email method');
-      return await fallbackEmailMethod(email, 'Welcome to YM - Movement', emailContent);
+      console.warn("RESEND_API_KEY not found, using fallback email method");
+      return await fallbackEmailMethod(email, "Welcome to YM - Movement", emailContent);
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'YM - Movement <noreply@ym-movement.com>',
+      from: "YM - Movement <noreply@ym-movement.com>",
       to: email,
-      subject: 'Welcome to YM - Movement',
+      subject: "Welcome to YM - Movement",
       html: emailContent,
     });
 
     if (error) {
-      console.error('Error sending welcome email:', error);
+      console.error("Error sending welcome email:", error);
       throw new Error(`Failed to send welcome email: ${error.message}`);
     }
 
-    console.log('Welcome email sent successfully:', data);
+    console.log("Welcome email sent successfully:", data);
     return data;
   } catch (error) {
-    console.error('Exception sending welcome email:', error);
+    console.error("Exception sending welcome email:", error);
     // Return a mock result instead of throwing
-    return { id: 'error-fallback', error: error };
+    return { id: "error-fallback", error: error };
   }
 }
 
@@ -89,28 +94,32 @@ export async function sendApprovalEmail(email: string, name: string) {
     `;
 
     if (!resendApiKey) {
-      console.warn('RESEND_API_KEY not found, using fallback email method');
-      return await fallbackEmailMethod(email, 'Your YM - Movement Account Has Been Approved', emailContent);
+      console.warn("RESEND_API_KEY not found, using fallback email method");
+      return await fallbackEmailMethod(
+        email,
+        "Your YM - Movement Account Has Been Approved",
+        emailContent,
+      );
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'YM - Movement <noreply@ym-movement.com>',
+      from: "YM - Movement <noreply@ym-movement.com>",
       to: email,
-      subject: 'Your YM - Movement Account Has Been Approved',
+      subject: "Your YM - Movement Account Has Been Approved",
       html: emailContent,
     });
 
     if (error) {
-      console.error('Error sending approval email:', error);
+      console.error("Error sending approval email:", error);
       throw new Error(`Failed to send approval email: ${error.message}`);
     }
 
-    console.log('Approval email sent successfully:', data);
+    console.log("Approval email sent successfully:", data);
     return data;
   } catch (error) {
-    console.error('Exception sending approval email:', error);
+    console.error("Exception sending approval email:", error);
     // Return a mock result instead of throwing
-    return { id: 'error-fallback', error: error };
+    return { id: "error-fallback", error: error };
   }
 }
 
@@ -118,25 +127,26 @@ export async function sendApprovalEmail(email: string, name: string) {
  * Formats a date to a readable string (e.g., "Monday, January 1, 2025")
  */
 function formatDate(date: Date): string {
-  return format(date, 'EEEE, MMMM d, yyyy');
+  return format(date, "EEEE, MMMM d, yyyy");
 }
 
 /**
  * Formats time to a readable string (e.g., "3:30 PM")
  */
 function formatTime(date: Date): string {
-  return format(date, 'h:mm a');
+  return format(date, "h:mm a");
 }
 
 /**
  * Generates a reference code for the lesson
  */
 function generateReferenceCode(name: string, date: Date): string {
-  const nameInitials = name.split(' ')
-    .map(part => part.charAt(0))
-    .join('');
-  const dateStr = format(date, 'MMddyy');
-  const timeStr = format(date, 'HHmm');
+  const nameInitials = name
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("");
+  const dateStr = format(date, "MMddyy");
+  const timeStr = format(date, "HHmm");
   return `${nameInitials}${dateStr}-${timeStr}`;
 }
 
@@ -163,40 +173,46 @@ export async function sendLessonConfirmationEmail(
   },
   paymentMethod: string,
   referenceCode: string,
-  googleEventId?: string | null
+  googleEventId?: string | null,
 ) {
   try {
     console.log(`[EMAIL] Sending lesson confirmation to ${studentEmail}`);
-    
+
     const duration = Math.round(
-      (lessonData.endTime.getTime() - lessonData.startTime.getTime()) / (1000 * 60)
+      (lessonData.endTime.getTime() - lessonData.startTime.getTime()) / (1000 * 60),
     );
-    
+
     // Generate Google Calendar link - using the dates directly rather than from the event ID
-    const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&dates=${
-      lessonData.startTime.toISOString().replace(/[-:]/g, '')
-    }/${
-      lessonData.endTime.toISOString().replace(/[-:]/g, '')
-    }&text=${
-      encodeURIComponent(`Ice Dance Lesson: ${studentName}`)
-    }&location=${
-      encodeURIComponent(lessonData.rinkAddress)
-    }&details=${
-      encodeURIComponent(`Student: ${studentName} (${studentEmail})\nLocation: ${lessonData.rinkName}\nAddress: ${lessonData.rinkAddress}\nDuration: ${duration === 60 ? '1 hour' : '30 minutes'}`)
-    }`;
-    
+    const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&dates=${lessonData.startTime
+      .toISOString()
+      .replace(/[-:]/g, "")}/${lessonData.endTime
+      .toISOString()
+      .replace(/[-:]/g, "")}&text=${encodeURIComponent(
+      `Ice Dance Lesson: ${studentName}`,
+    )}&location=${encodeURIComponent(lessonData.rinkAddress)}&details=${encodeURIComponent(
+      `Student: ${studentName} (${studentEmail})\nLocation: ${lessonData.rinkName}\nAddress: ${
+        lessonData.rinkAddress
+      }\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}`,
+    )}`;
+
     const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #333;">Your ${duration === 60 ? '1-Hour' : '30-Minute'} Lesson is Confirmed!</h1>
+      <h1 style="color: #333;">Your ${duration === 60 ? "1-Hour" : "30-Minute"} Lesson is Confirmed!</h1>
       
       <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h2 style="color: #333; margin-top: 0;">Lesson Details</h2>
         <ul style="list-style: none; padding: 0;">
-          <li style="margin-bottom: 10px;">📅 <strong>Date:</strong> ${formatDate(lessonData.startTime)}</li>
-          <li style="margin-bottom: 10px;">⏰ <strong>Time:</strong> ${formatTime(lessonData.startTime)} - ${formatTime(lessonData.endTime)}</li>
+          <li style="margin-bottom: 10px;">📅 <strong>Date:</strong> ${formatDate(
+            lessonData.startTime,
+          )}</li>
+          <li style="margin-bottom: 10px;">⏰ <strong>Time:</strong> ${formatTime(
+            lessonData.startTime,
+          )} - ${formatTime(lessonData.endTime)}</li>
           <li style="margin-bottom: 10px;">📍 <strong>Location:</strong> ${lessonData.rinkName}</li>
           <li style="margin-bottom: 10px;">📝 <strong>Address:</strong> ${lessonData.rinkAddress}</li>
-          <li style="margin-bottom: 10px;">⏱️ <strong>Duration:</strong> ${duration === 60 ? '1 hour' : '30 minutes'}</li>
+          <li style="margin-bottom: 10px;">⏱️ <strong>Duration:</strong> ${
+            duration === 60 ? "1 hour" : "30 minutes"
+          }</li>
           <li style="margin-bottom: 10px;">🏆 <strong>Lesson Type:</strong> ${lessonData.type}</li>
         </ul>
       </div>
@@ -205,9 +221,10 @@ export async function sendLessonConfirmationEmail(
         <h2 style="color: #333; margin-top: 0;">Payment Information</h2>
         <p style="margin-bottom: 15px;">💳 <strong>Payment Method:</strong> ${paymentMethod.toUpperCase()}</p>
         
-        ${paymentMethod.toLowerCase() === 'venmo' 
-          ? `<p style="margin-bottom: 15px;"><strong>Venmo:</strong> @yura-min</p>`
-          : `<p style="margin-bottom: 15px;"><strong>Zelle:</strong> 714-743-7071</p>`
+        ${
+          paymentMethod.toLowerCase() === "venmo"
+            ? `<p style="margin-bottom: 15px;"><strong>Venmo:</strong> @yura-min</p>`
+            : `<p style="margin-bottom: 15px;"><strong>Zelle:</strong> 714-743-7071</p>`
         }
         
         <div style="background-color: #fff; padding: 15px; border-radius: 4px; margin-top: 10px;">
@@ -239,29 +256,33 @@ export async function sendLessonConfirmationEmail(
     `;
 
     if (!resendApiKey) {
-      console.warn('RESEND_API_KEY not found, using fallback email method');
-      return await fallbackEmailMethod(studentEmail, `Lesson Confirmation: Ice Dance Lesson with ${studentName}`, emailContent);
+      console.warn("RESEND_API_KEY not found, using fallback email method");
+      return await fallbackEmailMethod(
+        studentEmail,
+        `Lesson Confirmation: Ice Dance Lesson with ${studentName}`,
+        emailContent,
+      );
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'YM - Movement <noreply@ym-movement.com>',
+      from: "YM - Movement <noreply@ym-movement.com>",
       to: studentEmail,
-      replyTo: 'yuraxmin@gmail.com',
+      replyTo: "yuraxmin@gmail.com",
       subject: `Lesson Confirmation: Ice Dance Lesson with ${studentName}`,
       html: emailContent,
     });
 
     if (error) {
-      console.error('Error sending lesson confirmation email:', error);
+      console.error("Error sending lesson confirmation email:", error);
       throw new Error(`Failed to send lesson confirmation email: ${error.message}`);
     }
 
-    console.log('Lesson confirmation email sent successfully:', data);
+    console.log("Lesson confirmation email sent successfully:", data);
     return data;
   } catch (error) {
-    console.error('Exception sending lesson confirmation email:', error);
+    console.error("Exception sending lesson confirmation email:", error);
     // Return a mock result instead of throwing
-    return { id: 'error-fallback', error: error };
+    return { id: "error-fallback", error: error };
   }
 }
 
@@ -275,11 +296,11 @@ export async function sendLessonConfirmationEmail(
 export async function sendPasswordResetEmail(email: string, name: string, token: string) {
   try {
     const resetUrl = `${BASE_URL}/auth/reset-password?token=${token}`;
-    
+
     const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h1 style="color: #3b82f6;">Reset Your Password</h1>
-      <p>Hello ${name || 'there'},</p>
+      <p>Hello ${name || "there"},</p>
       <p>We received a request to reset your password for your YM Movement account.</p>
       <p>Please click the button below to set a new password:</p>
       <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Reset Password</a>
@@ -290,27 +311,27 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
     `;
 
     if (!resendApiKey) {
-      console.warn('RESEND_API_KEY not found, using fallback email method');
-      return await fallbackEmailMethod(email, 'Reset Your YM Movement Password', emailContent);
+      console.warn("RESEND_API_KEY not found, using fallback email method");
+      return await fallbackEmailMethod(email, "Reset Your YM Movement Password", emailContent);
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'YM Movement <noreply@ym-movement.com>',
+      from: "YM Movement <noreply@ym-movement.com>",
       to: email,
-      subject: 'Reset Your YM Movement Password',
+      subject: "Reset Your YM Movement Password",
       html: emailContent,
     });
 
     if (error) {
-      console.error('Error sending password reset email:', error);
+      console.error("Error sending password reset email:", error);
       throw new Error(`Failed to send password reset email: ${error.message}`);
     }
 
-    console.log('Password reset email sent successfully:', data);
+    console.log("Password reset email sent successfully:", data);
     return data;
   } catch (error) {
-    console.error('Exception sending password reset email:', error);
+    console.error("Exception sending password reset email:", error);
     // Return a mock result instead of throwing
-    return { id: 'error-fallback', error: error };
+    return { id: "error-fallback", error: error };
   }
 }

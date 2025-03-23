@@ -1,37 +1,81 @@
 // src/features/admin/components/students/profile/StudentProfile.tsx
 "use client";
-import React, { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { api } from '@/lib/api';
+import React, { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Pencil, Mail, Phone, Award } from 'lucide-react';
-import { format } from 'date-fns';
+import { Pencil, Mail, Phone, Award } from "lucide-react";
+import { format } from "date-fns";
+import type { LessonStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
+
+// Define types to replace 'any'
+interface User {
+  name: string | null;
+  email: string;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  status: PaymentStatus;
+  method: PaymentMethod;
+  referenceCode: string;
+  createdAt: string | Date;
+}
+
+interface Lesson {
+  id: string;
+  startTime: string | Date;
+  endTime: string | Date;
+  type: string;
+  status: LessonStatus;
+  payment: Payment | null;
+}
+
+interface EmergencyContact {
+  name: string;
+  phone: string;
+  relationship: string;
+}
+
+interface StudentData {
+  user: User;
+  phone: string | null;
+  level: string;
+  maxLessonsPerWeek: number;
+  createdAt: string | Date;
+  emergencyContact: EmergencyContact | null;
+  notes: string | null;
+  lessons: Lesson[];
+}
 
 interface StudentProfileProps {
   studentId: string;
   onEditAction: () => void;
 }
 
-export const StudentProfile: React.FC<StudentProfileProps> = ({
-  studentId,
-  onEditAction,
-}) => {
-  const [activeTab, setActiveTab] = React.useState('overview');
+export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEditAction }) => {
+  const [activeTab, setActiveTab] = React.useState("overview");
 
   // Use student namespace for this API call
-  const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery(
-    { studentId }
-  );
+  const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
 
   // Added: Handle errors with useEffect
   useEffect(() => {
     if (error) {
       toast.error("Error loading student profile", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
@@ -41,9 +85,9 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
       <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <div className="h-4 bg-gray-200 rounded w-1/3" />
           </div>
         </CardContent>
       </Card>
@@ -60,16 +104,18 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
     );
   }
 
+  const typedStudent = student as unknown as StudentData;
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-2xl">{(student as any).user?.name}</CardTitle>
+            <CardTitle className="text-2xl">{typedStudent.user?.name}</CardTitle>
             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4" />
-                {(student as any).user?.email}
+                {typedStudent.user?.email}
               </div>
               {student.phone && (
                 <div className="flex items-center gap-1">
@@ -88,7 +134,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium">Level</p>
-              <Badge className="mt-1">{student.level.replace('_', ' ')}</Badge>
+              <Badge className="mt-1">{student.level.replace("_", " ")}</Badge>
             </div>
             <div>
               <p className="text-sm font-medium">Status</p>
@@ -102,7 +148,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium">Member Since</p>
-              <p className="mt-1">{format(new Date(student.createdAt), 'PP')}</p>
+              <p className="mt-1">{format(new Date(student.createdAt), "PP")}</p>
             </div>
           </div>
         </CardContent>
@@ -123,16 +169,18 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
               <CardTitle>Emergency Contact</CardTitle>
             </CardHeader>
             <CardContent>
-              {typeof student.emergencyContact === 'object' && student.emergencyContact && (
+              {typeof student.emergencyContact === "object" && student.emergencyContact && (
                 <div className="space-y-2">
                   <p>
-                    <span className="font-medium">Name:</span> {(student.emergencyContact as any).name}
+                    <span className="font-medium">Name:</span> {typedStudent.emergencyContact?.name}
                   </p>
                   <p>
-                    <span className="font-medium">Phone:</span> {(student.emergencyContact as any).phone}
+                    <span className="font-medium">Phone:</span>{" "}
+                    {typedStudent.emergencyContact?.phone}
                   </p>
                   <p>
-                    <span className="font-medium">Relationship:</span> {(student.emergencyContact as any).relationship}
+                    <span className="font-medium">Relationship:</span>{" "}
+                    {typedStudent.emergencyContact?.relationship}
                   </p>
                 </div>
               )}
@@ -171,21 +219,22 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {student.lessons.map((lesson: any) => (
+                    {student.lessons.map((lesson) => (
                       <TableRow key={lesson.id}>
-                        <TableCell>{format(new Date(lesson.startTime), 'PP')}</TableCell>
+                        <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
                         <TableCell>
-                          {format(new Date(lesson.startTime), 'p')} - {format(new Date(lesson.endTime), 'p')}
+                          {format(new Date(lesson.startTime), "p")} -{" "}
+                          {format(new Date(lesson.endTime), "p")}
                         </TableCell>
-                        <TableCell>{lesson.type.replace('_', ' ')}</TableCell>
+                        <TableCell>{lesson.type.replace("_", " ")}</TableCell>
                         <TableCell>
-                          <Badge 
+                          <Badge
                             variant={
-                              lesson.status === 'COMPLETED' 
-                                ? 'default' 
-                                : lesson.status === 'CANCELLED' 
-                                  ? 'destructive' 
-                                  : 'secondary'
+                              lesson.status === "COMPLETED"
+                                ? "default"
+                                : lesson.status === "CANCELLED"
+                                  ? "destructive"
+                                  : "secondary"
                             }
                           >
                             {lesson.status}
@@ -193,8 +242,10 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                         </TableCell>
                         <TableCell>
                           {lesson.payment ? (
-                            <Badge 
-                              variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}
+                            <Badge
+                              variant={
+                                lesson.payment.status === "COMPLETED" ? "default" : "outline"
+                              }
                             >
                               {lesson.payment.status}
                             </Badge>
@@ -228,13 +279,12 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm font-medium">Current Level: {student.level.replace('_', ' ')}</span>
+                        <span className="text-sm font-medium">
+                          Current Level: {student.level.replace("_", " ")}
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div 
-                          className="bg-blue-600 h-2.5 rounded-full" 
-                          style={{ width: '70%' }}
-                        ></div>
+                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: "70%" }} />
                       </div>
                     </div>
                     <div>
@@ -243,10 +293,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                         <span className="text-sm font-medium">8/12</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div 
-                          className="bg-green-600 h-2.5 rounded-full" 
-                          style={{ width: '66%' }}
-                        ></div>
+                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: "66%" }} />
                       </div>
                     </div>
                   </div>
@@ -286,7 +333,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
               <CardTitle>Payment History</CardTitle>
             </CardHeader>
             <CardContent>
-              {student.lessons && student.lessons.some((lesson: any) => lesson.payment) ? (
+              {student.lessons?.some((lesson) => lesson.payment) ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -299,20 +346,24 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                   </TableHeader>
                   <TableBody>
                     {student.lessons
-                      .filter((lesson: any) => lesson.payment)
-                      .map((lesson: any) => (
-                        <TableRow key={lesson.payment.id}>
-                          <TableCell>{format(new Date(lesson.payment.createdAt || lesson.startTime), 'PP')}</TableCell>
-                          <TableCell>${lesson.payment.amount?.toFixed(2) || '0.00'}</TableCell>
-                          <TableCell>{lesson.payment.method || 'N/A'}</TableCell>
+                      .filter((lesson) => lesson.payment)
+                      .map((lesson) => (
+                        <TableRow key={lesson.payment?.id}>
                           <TableCell>
-                            <Badge 
-                              variant={lesson.payment.status === 'COMPLETED' ? 'default' : 'outline'}
+                            {format(new Date(lesson.payment?.createdAt || lesson.startTime), "PP")}
+                          </TableCell>
+                          <TableCell>${lesson.payment?.amount?.toFixed(2) || "0.00"}</TableCell>
+                          <TableCell>{lesson.payment?.method || "N/A"}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                lesson.payment?.status === "COMPLETED" ? "default" : "outline"
+                              }
                             >
-                              {lesson.payment.status}
+                              {lesson.payment?.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{lesson.payment.referenceCode || 'N/A'}</TableCell>
+                          <TableCell>{lesson.payment?.referenceCode || "N/A"}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>

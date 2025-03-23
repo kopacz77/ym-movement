@@ -1,7 +1,7 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import type React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TimeSlot {
   id: string;
@@ -12,7 +12,26 @@ interface TimeSlot {
   isRecurring: boolean;
 }
 
-export const TimeSlotList = () => {
+interface TimeSlotListProps {
+  timeSlots?: TimeSlot[];
+}
+
+export const TimeSlotList: React.FC<TimeSlotListProps> = ({ timeSlots = [] }) => {
+  // Sample time slot for demonstration
+  const sampleTimeSlots: TimeSlot[] =
+    timeSlots.length > 0
+      ? timeSlots
+      : [
+          {
+            id: "1",
+            startTime: new Date(2025, 2, 22, 15, 0), // 3:00 PM
+            endTime: new Date(2025, 2, 22, 16, 0), // 4:00 PM
+            maxStudents: 4,
+            bookedStudents: 2,
+            isRecurring: true,
+          },
+        ];
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -21,25 +40,38 @@ export const TimeSlotList = () => {
       <CardContent>
         <ScrollArea className="h-[500px]">
           <div className="space-y-4">
-            {/* Sample time slot */}
-            <div className="p-4 border rounded-lg">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="font-medium">3:00 PM - 4:00 PM</p>
-                  <p className="text-sm text-gray-500">Main Rink</p>
+            {sampleTimeSlots.map((slot) => {
+              const hasAvailability = slot.bookedStudents < slot.maxStudents;
+              return (
+                <div key={slot.id} className="p-4 border rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-medium">
+                        {slot.startTime.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        -
+                        {slot.endTime.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                      <p className="text-sm text-gray-500">Main Rink</p>
+                    </div>
+                    <Badge
+                      variant={hasAvailability ? "default" : "destructive"}
+                      className={
+                        hasAvailability ? "bg-green-100 text-green-800 hover:bg-green-200" : ""
+                      }
+                    >
+                      {slot.bookedStudents}/{slot.maxStudents} Students
+                    </Badge>
+                  </div>
+                  <div className="flex gap-2">{/* Add actions */}</div>
                 </div>
-                {/* Fixed: Changed variant="success" to variant="default" with custom className */}
-                <Badge 
-                  variant={true ? "default" : "destructive"}
-                  className={true ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
-                >
-                  {2}/4 Students
-                </Badge>
-              </div>
-              <div className="flex gap-2">
-                {/* Add actions */}
-              </div>
-            </div>
+              );
+            })}
           </div>
         </ScrollArea>
       </CardContent>

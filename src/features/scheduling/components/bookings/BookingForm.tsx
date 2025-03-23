@@ -1,16 +1,11 @@
 // src/features/scheduling/components/bookings/BookingForm.tsx
 "use client";
-import React from "react";
+import type React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarSlot } from "../../types";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import type { CalendarSlot } from "../../types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -58,11 +53,7 @@ interface BookingFormProps {
   onCloseAction: () => void;
 }
 
-export const BookingForm: React.FC<BookingFormProps> = ({
-  slot,
-  open,
-  onCloseAction,
-}) => {
+export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAction }) => {
   // Fetch students using the correct API namespace
   const { data: students } = api.admin.student.getStudents.useQuery();
   // Create lesson mutation using the proper namespace and onSuccess callback
@@ -89,20 +80,14 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           <DialogTitle>Book Lesson</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="studentId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Student</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select student" />
@@ -126,10 +111,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Lesson Type</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
@@ -153,10 +135,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Rink Area</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select area" />
@@ -186,9 +165,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                       min={0}
                       step={0.01}
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
+                      onChange={(e) => field.onChange(Number.parseFloat(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -209,11 +186,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               )}
             />
             <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCloseAction}
-              >
+              <Button type="button" variant="outline" onClick={onCloseAction}>
                 Cancel
               </Button>
               <Button type="submit" disabled={createLesson.isPending}>

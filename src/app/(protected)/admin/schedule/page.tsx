@@ -1,7 +1,7 @@
 // src/app/(protected)/admin/schedule/page.tsx
-import { Suspense } from 'react';
-import { ScheduleManager } from '@/features/admin/components/scheduling/ScheduleManager';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { Suspense } from "react";
+import { ScheduleManager } from "@/features/admin/components/scheduling/ScheduleManager";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 export default function AdminSchedulePage() {
   return (

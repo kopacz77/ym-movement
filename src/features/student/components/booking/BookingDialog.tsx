@@ -1,20 +1,36 @@
 // Updated src/features/student/components/booking/BookingDialog.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { format } from 'date-fns';
-import { Check, Clock, Calendar, MapPin } from 'lucide-react';
-import { api } from '@/lib/api';
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
+import { Check, Clock, Calendar, MapPin } from "lucide-react";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { LessonType, PaymentMethod } from '@prisma/client';
-import { useRouter } from 'next/navigation';
+import { LessonType, PaymentMethod } from "@prisma/client";
+import { useRouter } from "next/navigation";
+
+interface TimeSlot {
+  id: string;
+  startTime: string | Date;
+  endTime: string | Date;
+  rink: {
+    id: string;
+    name: string;
+  };
+}
 
 interface BookingDialogProps {
-  slot: any;
+  slot: TimeSlot;
   studentId: string;
   onCloseAction: () => void;
 }
@@ -25,30 +41,30 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  
+
   const bookLesson = api.student.booking.bookLesson.useMutation();
-  
+
   // Handle errors with useEffect
   useEffect(() => {
     if (bookLesson.error) {
       toast.error("Error booking lesson", {
-        description: bookLesson.error.message
+        description: bookLesson.error.message,
       });
       setIsSubmitting(false);
     }
   }, [bookLesson.error]);
-  
+
   // Handle success with useEffect
   useEffect(() => {
     if (bookLesson.isSuccess && bookLesson.data) {
       toast("Lesson booked successfully", {
-        description: "Your lesson has been scheduled."
+        description: "Your lesson has been scheduled.",
       });
       router.push(`/student/schedule/${bookLesson.data.lesson.id}`);
       onCloseAction();
     }
   }, [bookLesson.isSuccess, bookLesson.data, router, onCloseAction]);
-  
+
   const handleBooking = () => {
     setIsSubmitting(true);
     bookLesson.mutate({
@@ -59,7 +75,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
       notes: notes.trim() || undefined,
     });
   };
-  
+
   // Get lesson type price (in a real app, this would come from settings)
   const getLessonTypePrice = (type: LessonType) => {
     const prices = {
@@ -82,12 +98,13 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
           <div className="bg-gray-50 p-4 rounded-lg flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>{format(new Date(slot.startTime), 'EEEE, MMMM d, yyyy')}</span>
+              <span>{format(new Date(slot.startTime), "EEEE, MMMM d, yyyy")}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>
-                {format(new Date(slot.startTime), 'h:mm a')} - {format(new Date(slot.endTime), 'h:mm a')}
+                {format(new Date(slot.startTime), "h:mm a")} -{" "}
+                {format(new Date(slot.endTime), "h:mm a")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -95,17 +112,15 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
               <span>{slot.rink.name}</span>
             </div>
           </div>
-          
+
           {/* Booking options */}
           <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Lesson Type</label>
-              <Select 
-                value={lessonType} 
-                onValueChange={(val) => setLessonType(val as LessonType)}
-              >
-                
-                <SelectTrigger className="w-full">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="lesson-type-select" className="text-sm font-medium">
+                Lesson Type
+              </label>
+              <Select value={lessonType} onValueChange={(val) => setLessonType(val as LessonType)}>
+                <SelectTrigger id="lesson-type-select" className="w-full">
                   <SelectValue placeholder="Select lesson type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -124,14 +139,16 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Payment Method</label>
-              <Select 
-                value={paymentMethod} 
+              <label htmlFor="payment-method-select" className="text-sm font-medium">
+                Payment Method
+              </label>
+              <Select
+                value={paymentMethod}
                 onValueChange={(val) => setPaymentMethod(val as PaymentMethod)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="payment-method-select" className="w-full">
                   <SelectValue placeholder="Select payment method" />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,29 +157,25 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Additional Notes (Optional)</label>
-              <Textarea 
-                placeholder="Any special requirements or notes for the instructor" 
-                value={notes} 
-                onChange={(e) => setNotes(e.target.value)} 
+              <label htmlFor="booking-notes" className="text-sm font-medium">
+                Additional Notes (Optional)
+              </label>
+              <Textarea
+                id="booking-notes"
+                placeholder="Any special requirements or notes for the instructor"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
               />
             </div>
           </div>
-          
+
           <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={onCloseAction} 
-              disabled={isSubmitting}
-            >
+            <Button variant="outline" onClick={onCloseAction} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleBooking} 
-              disabled={isSubmitting || bookLesson.isPending}
-            >
+            <Button onClick={handleBooking} disabled={isSubmitting || bookLesson.isPending}>
               {isSubmitting || bookLesson.isPending ? "Booking..." : "Book Lesson"}
             </Button>
           </div>

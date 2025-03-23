@@ -1,17 +1,23 @@
 // src/features/admin/components/scheduling/CalendarEventsSystem.tsx
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { api } from '@/lib/api';
-import { toast } from 'sonner';
-import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { EventClickArg, EventDropArg } from '@fullcalendar/core';
-import type { EventResizeStopArg } from '@fullcalendar/interaction';
-import { Button } from '@/components/ui/button';
-import { TRPCClientErrorLike } from '@trpc/client';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import type { EventClickArg, EventDropArg } from "@fullcalendar/core";
+import type { EventResizeStopArg } from "@fullcalendar/interaction";
+import { Button } from "@/components/ui/button";
+import type { TRPCClientErrorLike } from "@trpc/client";
 
 interface CalendarEvent {
   id: string;
@@ -21,8 +27,8 @@ interface CalendarEvent {
   rinkId: string;
   maxStudents: number;
   currentStudents: number;
-  type: 'PRIVATE' | 'GROUP' | 'CHOREOGRAPHY' | 'COMPETITION_PREP';
-  extendedProps?: any;
+  type: "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP";
+  extendedProps?: Record<string, unknown>;
 }
 
 // Define TimeSlot interface based on your schema
@@ -33,26 +39,32 @@ interface TimeSlot {
   endTime: Date;
   maxStudents: number;
   isActive: boolean;
-  lessons?: any[];
+  lessons?: Record<string, unknown>[];
   rink?: {
     id: string;
     name: string;
   };
-  [key: string]: any;
+  title?: string | null; // Add title property with proper type
+  [key: string]: unknown;
 }
 
 export const CalendarEventsSystem = () => {
-  const [selectedRink, setSelectedRink] = useState<string>('MAIN_RINK');
-  const [viewMode, setViewMode] = useState<'timeGridDay' | 'timeGridWeek' | 'dayGridMonth'>('timeGridWeek');
+  const [selectedRink, setSelectedRink] = useState<string>("MAIN_RINK");
+  // Fix the useState syntax
+  const [viewMode, setViewMode] = useState<"timeGridDay" | "timeGridWeek" | "dayGridMonth">(
+    "timeGridWeek",
+  );
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const utils = api.useContext();
 
   // Get events from the API
-  const { data, isLoading: eventsLoading, error } = api.admin.schedule.getTimeSlots.useQuery(
-    { rinkId: selectedRink }
-  );
+  const {
+    data,
+    isLoading: eventsLoading,
+    error,
+  } = api.admin.schedule.getTimeSlots.useQuery({ rinkId: selectedRink });
 
   // Process data when it changes
   useEffect(() => {
@@ -60,17 +72,17 @@ export const CalendarEventsSystem = () => {
       // Convert time slots to calendar events format
       const calendarEvents = data.map((slot: TimeSlot) => ({
         id: slot.id,
-        title: slot.title || 'Available Time Slot',
+        title: (slot.title as string) || "Available Time Slot", // Cast title to string
         start: new Date(slot.startTime),
         end: new Date(slot.endTime),
         rinkId: slot.rinkId,
         maxStudents: slot.maxStudents,
         currentStudents: slot.lessons?.length || 0,
-        type: 'PRIVATE' as const,
-        extendedProps: slot
+        type: "PRIVATE" as const,
+        extendedProps: slot,
       }));
 
-      setEvents(calendarEvents);
+      setEvents(calendarEvents as CalendarEvent[]); // Add type assertion
     }
   }, [data]);
 
@@ -78,7 +90,7 @@ export const CalendarEventsSystem = () => {
   useEffect(() => {
     if (error) {
       toast.error("Failed to load events", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
@@ -87,45 +99,45 @@ export const CalendarEventsSystem = () => {
   const updateTimeSlot = api.admin.schedule.updateTimeSlot.useMutation({
     onSuccess: () => {
       toast("Event updated", {
-        description: "The event has been updated successfully."
+        description: "The event has been updated successfully.",
       });
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
     },
     onError: (err) => {
       toast.error("Update failed", {
-        description: err.message
+        description: err.message,
       });
-    }
+    },
   });
 
   // Create event mutation
   const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
     onSuccess: () => {
       toast("Event created", {
-        description: "New event has been scheduled successfully."
+        description: "New event has been scheduled successfully.",
       });
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
     },
     onError: (err) => {
       toast.error("Creation failed", {
-        description: err.message
+        description: err.message,
       });
-    }
+    },
   });
 
   // Delete event mutation
   const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
     onSuccess: () => {
       toast("Event deleted", {
-        description: "The event has been removed from the schedule."
+        description: "The event has been removed from the schedule.",
       });
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
     },
     onError: (err) => {
       toast.error("Deletion failed", {
-        description: err.message
+        description: err.message,
       });
-    }
+    },
   });
 
   // This method checks for business hours and minimum duration
@@ -160,21 +172,22 @@ export const CalendarEventsSystem = () => {
       rinkId: info.event.extendedProps?.rinkId || selectedRink,
       maxStudents: info.event.extendedProps?.maxStudents || 1,
       currentStudents: info.event.extendedProps?.currentStudents || 0,
-      type: info.event.extendedProps?.type || 'PRIVATE',
-      extendedProps: info.event.extendedProps
+      type: info.event.extendedProps?.type || "PRIVATE",
+      extendedProps: info.event.extendedProps,
     };
 
     // Check if the move is valid
     const isValidMove = validateEventMove(
-      droppedEvent,
+      droppedEvent as CalendarEvent,
       droppedEvent.start,
-      droppedEvent.end
+      droppedEvent.end,
     );
 
     if (!isValidMove) {
       info.revert();
       toast.error("Invalid move", {
-        description: "This event cannot be moved to the selected time slot. Check business hours and minimum duration."
+        description:
+          "This event cannot be moved to the selected time slot. Check business hours and minimum duration.",
       });
       return;
     }
@@ -184,7 +197,7 @@ export const CalendarEventsSystem = () => {
       await updateTimeSlot.mutateAsync({
         id: droppedEvent.id,
         startTime: droppedEvent.start,
-        endTime: droppedEvent.end
+        endTime: droppedEvent.end,
       });
     } catch (error) {
       info.revert();
@@ -206,21 +219,22 @@ export const CalendarEventsSystem = () => {
       rinkId: info.event.extendedProps?.rinkId || selectedRink,
       maxStudents: info.event.extendedProps?.maxStudents || 1,
       currentStudents: info.event.extendedProps?.currentStudents || 0,
-      type: info.event.extendedProps?.type || 'PRIVATE',
-      extendedProps: info.event.extendedProps
+      type: info.event.extendedProps?.type || "PRIVATE",
+      extendedProps: info.event.extendedProps,
     };
 
     // Check if the resize is valid
     const isValidResize = validateEventMove(
-      resizedEvent,
+      resizedEvent as CalendarEvent,
       resizedEvent.start,
-      resizedEvent.end
+      resizedEvent.end,
     );
 
     if (!isValidResize) {
       // Since we can't use revert(), refresh the calendar to undo the change
       toast.error("Invalid duration", {
-        description: "The event cannot be resized to this duration. Check business hours and minimum duration."
+        description:
+          "The event cannot be resized to this duration. Check business hours and minimum duration.",
       });
 
       // Refresh the events to revert the change
@@ -233,7 +247,7 @@ export const CalendarEventsSystem = () => {
       await updateTimeSlot.mutateAsync({
         id: resizedEvent.id,
         startTime: resizedEvent.start,
-        endTime: resizedEvent.end
+        endTime: resizedEvent.end,
       });
     } catch (error) {
       // Error is already handled by the mutation
@@ -242,8 +256,12 @@ export const CalendarEventsSystem = () => {
     }
   };
 
-  const handleDateSelect = async (selectInfo: any) => {
-    const title = prompt('Please enter a title for the new event:');
+  const handleDateSelect = async (selectInfo: {
+    start: Date;
+    end: Date;
+    view: { calendar: { unselect: () => void } };
+  }) => {
+    const title = prompt("Please enter a title for the new event:");
     if (!title) return; // User cancelled
 
     try {
@@ -252,7 +270,7 @@ export const CalendarEventsSystem = () => {
         startTime: selectInfo.start,
         endTime: selectInfo.end,
         maxStudents: 1,
-        isActive: true
+        isActive: true,
       });
 
       selectInfo.view.calendar.unselect(); // Clear selection
@@ -264,7 +282,7 @@ export const CalendarEventsSystem = () => {
   const handleEventClick = (info: EventClickArg) => {
     if (confirm(`Are you sure you want to delete '${info.event.title}'?`)) {
       deleteTimeSlot.mutate({
-        id: info.event.id
+        id: info.event.id,
       });
     }
   };
@@ -286,7 +304,9 @@ export const CalendarEventsSystem = () => {
 
           <Select
             value={viewMode}
-            onValueChange={(value: 'timeGridDay' | 'timeGridWeek' | 'dayGridMonth') => setViewMode(value)}
+            onValueChange={(value: "timeGridDay" | "timeGridWeek" | "dayGridMonth") =>
+              setViewMode(value)
+            }
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select view" />
@@ -299,7 +319,11 @@ export const CalendarEventsSystem = () => {
           </Select>
 
           <Button
-            onClick={() => utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink })}
+            onClick={() =>
+              utils.admin.schedule.getTimeSlots.invalidate({
+                rinkId: selectedRink,
+              })
+            }
             disabled={eventsLoading}
             variant="outline"
           >
@@ -309,16 +333,14 @@ export const CalendarEventsSystem = () => {
 
         <div className="h-[600px]">
           {eventsLoading ? (
-            <div className="flex items-center justify-center h-full">
-              Loading events...
-            </div>
+            <div className="flex items-center justify-center h-full">Loading events...</div>
           ) : (
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView={viewMode}
               events={events}
               timeZone="UTC"
-              now={new Date().toISOString()}  
+              now={new Date().toISOString()}
               editable={true}
               selectable={true}
               eventDrop={handleEventDrop}
@@ -327,13 +349,13 @@ export const CalendarEventsSystem = () => {
               select={handleDateSelect}
               businessHours={{
                 daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-                startTime: '05:00',
-                endTime: '18:00',
+                startTime: "05:00",
+                endTime: "18:00",
               }}
               headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'timeGridDay,timeGridWeek,dayGridMonth'
+                left: "prev,next today",
+                center: "title",
+                right: "timeGridDay,timeGridWeek,dayGridMonth",
               }}
               height="100%"
               slotDuration="00:15:00"
@@ -341,10 +363,10 @@ export const CalendarEventsSystem = () => {
               allDaySlot={false}
               nowIndicator={true}
               eventTimeFormat={{
-                hour: '2-digit',
-                minute: '2-digit',
+                hour: "2-digit",
+                minute: "2-digit",
                 meridiem: false,
-                hour12: false
+                hour12: false,
               }}
             />
           )}

@@ -1,5 +1,5 @@
 // src/components/ui/responsive-form.tsx
-import * as React from "react";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -10,14 +10,10 @@ interface FormRowProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function FormRow({ children, className, ...props }: FormRowProps) {
   const isMobile = useIsMobile();
-  
+
   return (
-    <div 
-      className={cn(
-        "grid gap-4",
-        isMobile ? "grid-cols-1" : "grid-cols-2", 
-        className
-      )} 
+    <div
+      className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2", className)}
       {...props}
     >
       {children}
@@ -56,12 +52,12 @@ interface FormSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function FormSection({ 
-  title, 
-  description, 
-  children, 
-  className, 
-  ...props 
+export function FormSection({
+  title,
+  description,
+  children,
+  className,
+  ...props
 }: FormSectionProps) {
   return (
     <div className={cn("space-y-4", className)} {...props}>
@@ -71,9 +67,7 @@ export function FormSection({
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
       )}
-      <div className="space-y-4">
-        {children}
-      </div>
+      <div className="space-y-4">{children}</div>
     </div>
   );
 }
@@ -84,14 +78,14 @@ interface FormActionsProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function FormActions({ children, className, ...props }: FormActionsProps) {
   const isMobile = useIsMobile();
-  
+
   return (
-    <div 
+    <div
       className={cn(
-        "flex items-center", 
+        "flex items-center",
         isMobile ? "flex-col-reverse space-y-reverse space-y-2" : "flex-row justify-end space-x-2",
-        className
-      )} 
+        className,
+      )}
       {...props}
     >
       {children}

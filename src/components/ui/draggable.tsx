@@ -1,7 +1,9 @@
 // src/components/ui/draggable.tsx
 "use client";
 
-import React, { ReactNode, useState } from 'react';
+import { useState } from "react";
+import type React from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface DraggableProps {
@@ -10,7 +12,7 @@ interface DraggableProps {
   isDraggable?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
-  dragData?: any;
+  dragData?: unknown;
 }
 
 export const Draggable = ({
@@ -19,20 +21,20 @@ export const Draggable = ({
   isDraggable = true,
   onDragStart,
   onDragEnd,
-  dragData
+  dragData,
 }: DraggableProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = (e: React.DragEvent) => {
     if (!isDraggable) return;
-    
+
     setIsDragging(true);
-    
+
     // Set the drag image and data
     if (dragData) {
-      e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+      e.dataTransfer.setData("application/json", JSON.stringify(dragData));
     }
-    
+
     // Allow custom drag start handler
     if (onDragStart) {
       onDragStart(e);
@@ -41,7 +43,7 @@ export const Draggable = ({
 
   const handleDragEnd = (e: React.DragEvent) => {
     setIsDragging(false);
-    
+
     // Allow custom drag end handler
     if (onDragEnd) {
       onDragEnd(e);
@@ -57,7 +59,7 @@ export const Draggable = ({
         "cursor-grab active:cursor-grabbing",
         isDragging && "opacity-50",
         !isDraggable && "cursor-default",
-        className
+        className,
       )}
     >
       {children}

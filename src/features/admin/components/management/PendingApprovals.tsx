@@ -1,13 +1,23 @@
 // src/features/admin/components/management/PendingApprovals.tsx
 "use client";
 
-import React, { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import React, { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/date';
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/date";
+
+// Define the Student type
+interface Student {
+  id: string;
+  createdAt: string | Date;
+  user?: {
+    name?: string;
+    email?: string;
+  };
+}
 
 export const PendingApprovals = () => {
   // Always call all hooks at the top level
@@ -15,13 +25,14 @@ export const PendingApprovals = () => {
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   // Use the student namespace for pending approvals
-  const { data: pendingStudents, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();
+  const { data, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();
+  const pendingStudents = Array.isArray(data) ? data : ([] as Student[]);
 
   // IMPORTANT: Always declare mutations at the top level, not conditionally
   const approveStudent = api.admin.student.approveStudent.useMutation({
     onSuccess: () => {
       toast("Success", {
-        description: "Student approved successfully"
+        description: "Student approved successfully",
       });
       // Invalidate the query to refresh the data
       utils.admin.student.getPendingApprovals.invalidate();
@@ -33,7 +44,7 @@ export const PendingApprovals = () => {
     },
     onError: (err) => {
       toast.error("Error", {
-        description: err.message
+        description: err.message,
       });
     },
   });
@@ -42,14 +53,14 @@ export const PendingApprovals = () => {
   useEffect(() => {
     if (error) {
       toast.error("Error loading pending approvals", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
 
   const handleApprove = (studentId: string, studentName: string) => {
     toast("Processing", {
-      description: `Approving student ${studentName}...`
+      description: `Approving student ${studentName}...`,
     });
     approveStudent.mutate({ studentId });
   };
@@ -62,9 +73,7 @@ export const PendingApprovals = () => {
           <CardTitle>Pending Approvals</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-24">
-            Loading...
-          </div>
+          <div className="flex items-center justify-center h-24">Loading...</div>
         </CardContent>
       </Card>
     );
@@ -94,8 +103,11 @@ export const PendingApprovals = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {pendingStudents.map((student) => (
-            <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg">
+          {pendingStudents.map((student: Student) => (
+            <div
+              key={student.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium">{student.user?.name || "Unnamed"}</p>
@@ -107,7 +119,7 @@ export const PendingApprovals = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={() => handleApprove(student.id, student.user?.name || "Student")}
                   disabled={approveStudent.isPending}
                 >

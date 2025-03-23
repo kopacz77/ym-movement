@@ -1,12 +1,28 @@
 // src/features/student/api/queries/bookingQueries.ts
-import { z } from 'zod';
-import { createTRPCRouter, publicProcedure } from '@/lib/trpc';
-import { TRPCError } from '@trpc/server';
-import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from '@prisma/client';
-import { googleCalendar } from '@/lib/google/calendar';
-import { sendLessonConfirmationEmail } from '@/lib/email'; // Import the new email function
-import { randomUUID } from 'crypto';
-import { startOfWeek as dateStartOfWeek, endOfWeek as dateEndOfWeek } from 'date-fns';
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { TRPCError } from "@trpc/server";
+import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
+import { googleCalendar } from "@/lib/google/calendar";
+import { sendLessonConfirmationEmail } from "@/lib/email";
+import { randomUUID } from "node:crypto";
+import { startOfWeek as dateStartOfWeek, endOfWeek as dateEndOfWeek } from "date-fns";
+
+// Define extended Student type with custom pricing fields
+interface ExtendedStudent {
+  id: string;
+  userId: string;
+  user: {
+    email: string;
+    name: string | null;
+  };
+  maxLessonsPerWeek: number;
+  customPricingEnabled: boolean;
+  privateLessonPrice: number | null;
+  groupLessonPrice: number | null;
+  choreographyPrice: number | null;
+  competitionPrepPrice: number | null;
+}
 
 export const bookingRouter = createTRPCRouter({
   bookLesson: publicProcedure
@@ -18,21 +34,21 @@ export const bookingRouter = createTRPCRouter({
         area: z.nativeEnum(RinkArea).optional(),
         paymentMethod: z.nativeEnum(PaymentMethod),
         notes: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
         console.log(`[BOOKING] Starting booking process for student ${input.studentId}`);
-        
+
         // 1. Get the time slot to check availability
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
           include: {
             rink: true,
             lessons: {
-              where: { 
-                status: LessonStatus.SCHEDULED // Only count active lessons toward capacity
-              }
+              where: {
+                status: LessonStatus.SCHEDULED, // Only count active lessons toward capacity
+              },
             },
           },
         });
@@ -40,35 +56,37 @@ export const bookingRouter = createTRPCRouter({
         if (!timeSlot) {
           console.log(`[BOOKING] Time slot ${input.timeSlotId} not found`);
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Time slot not found',
+            code: "NOT_FOUND",
+            message: "Time slot not found",
           });
         }
 
-        console.log(`[BOOKING] Time slot has ${timeSlot.lessons.length}/${timeSlot.maxStudents} lessons`);
-        
+        console.log(
+          `[BOOKING] Time slot has ${timeSlot.lessons.length}/${timeSlot.maxStudents} lessons`,
+        );
+
         // 2. Check if slot is available
         if (timeSlot.lessons.length >= timeSlot.maxStudents) {
           console.log(`[BOOKING] Time slot ${input.timeSlotId} is fully booked`);
           throw new TRPCError({
-            code: 'CONFLICT',
-            message: 'Time slot is fully booked',
+            code: "CONFLICT",
+            message: "Time slot is fully booked",
           });
         }
 
         // 3. Get student info and check weekly lesson limit
-        const student = await ctx.prisma.student.findUnique({
+        const student = (await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
             user: true,
           },
-        });
+        })) as unknown as ExtendedStudent; // Cast to our extended type
 
         if (!student) {
           console.log(`[BOOKING] Student ${input.studentId} not found`);
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Student not found',
+            code: "NOT_FOUND",
+            message: "Student not found",
           });
         }
 
@@ -76,91 +94,145 @@ export const bookingRouter = createTRPCRouter({
         const now = new Date();
         const startOfWeek = dateStartOfWeek(now, { weekStartsOn: 0 }); // 0 = Sunday
         const endOfWeek = dateEndOfWeek(now, { weekStartsOn: 0 });
-        
+
         // Reset the time to beginning/end of day
         startOfWeek.setHours(0, 0, 0, 0);
         endOfWeek.setHours(23, 59, 59, 999);
 
-        console.log(`[BOOKING] Checking weekly lessons for week ${startOfWeek.toISOString()} to ${endOfWeek.toISOString()}`);
+        console.log(
+          `[BOOKING] Checking weekly lessons for week ${startOfWeek.toISOString()} to ${endOfWeek.toISOString()}`,
+        );
 
         // Count lessons in current week - only count SCHEDULED lessons
         const weeklyLessonsCount = await ctx.prisma.lesson.count({
           where: {
             studentId: input.studentId,
-            startTime: { 
-              gte: startOfWeek, 
-              lte: endOfWeek 
+            startTime: {
+              gte: startOfWeek,
+              lte: endOfWeek,
             },
             status: LessonStatus.SCHEDULED, // Only count active scheduled lessons
           },
         });
 
-        console.log(`[BOOKING] Student has ${weeklyLessonsCount}/${student.maxLessonsPerWeek} lessons this week`);
+        console.log(
+          `[BOOKING] Student has ${weeklyLessonsCount}/${student.maxLessonsPerWeek} lessons this week`,
+        );
 
         if (weeklyLessonsCount >= student.maxLessonsPerWeek) {
-          console.log(`[BOOKING] Student ${input.studentId} has reached weekly limit of ${student.maxLessonsPerWeek} lessons`);
+          console.log(
+            `[BOOKING] Student ${input.studentId} has reached weekly limit of ${student.maxLessonsPerWeek} lessons`,
+          );
           throw new TRPCError({
-            code: 'FORBIDDEN',
+            code: "FORBIDDEN",
             message: `You have reached your weekly limit of ${student.maxLessonsPerWeek} lessons`,
           });
         }
 
-        // 4. Try to create Google Calendar event
+        // 4. Try to create Google Calendar event with fixed timezone
         let googleEventId = null;
-        
+
         try {
           // Only attempt calendar integration if name and email are available
           if (student.user?.name && student.user?.email) {
             console.log(`[BOOKING] Attempting to create calendar event for ${student.user.name}`);
-            
-            // Updated: Don't include price in the calendar event description
+
+            // FIXED: Pass the rink's timezone explicitly to ensure correct display
             googleEventId = await googleCalendar.createEvent({
               summary: `Ice Dance Lesson with ${student.user.name}`,
               description: ` 
                 Student: ${student.user.name}
                 Lesson Type: ${input.type}
-                Area: ${input.area || 'MAIN_RINK'}
-                ${input.notes ? `Notes: ${input.notes}` : ''}
+                Area: ${input.area || "MAIN_RINK"}
+                ${input.notes ? `Notes: ${input.notes}` : ""}
               `,
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               attendees: [
                 { email: student.user.email },
-                // No need to add Yura here as she'll be added directly in the calendar service
+                // Yura will be added directly in the calendar service
               ],
               location: timeSlot.rink.address,
+              timeZone: timeSlot.rink.timezone, // FIXED: Added explicit timezone
             });
 
             if (googleEventId) {
               console.log(`[BOOKING] Created Google Calendar event with ID: ${googleEventId}`);
             } else {
-              console.log('[BOOKING] Failed to create Google Calendar event, continuing without calendar integration');
+              console.log(
+                "[BOOKING] Failed to create Google Calendar event, continuing without calendar integration",
+              );
             }
           } else {
-            console.log('[BOOKING] Skipping calendar integration - missing student name or email');
+            console.log("[BOOKING] Skipping calendar integration - missing student name or email");
           }
         } catch (error) {
-          console.error('[BOOKING] Error creating Google Calendar event:', error);
+          console.error("[BOOKING] Error creating Google Calendar event:", error);
           // Continue with booking even if calendar fails
         }
 
-        // 5. Calculate price (unchanged, but needed for payment record)
+        // 5. Calculate price based on lesson type and student's custom pricing if available
+        // First, get the default pricing
+        const defaultPricing = await ctx.prisma.$queryRaw`
+          SELECT * FROM "DefaultPricing" LIMIT 1
+        `;
+
+        const defaultPricingRecord =
+          Array.isArray(defaultPricing) && defaultPricing.length > 0 ? defaultPricing[0] : null;
+
+        if (!defaultPricingRecord) {
+          console.log("[BOOKING] Default pricing not found, using hardcoded values");
+        }
+
+        // Define default prices (fallback if no DefaultPricing record exists)
         const defaultPrices = {
-          PRIVATE: 75,
-          GROUP: 45,
-          CHOREOGRAPHY: 90,
-          COMPETITION_PREP: 95,
+          PRIVATE: defaultPricingRecord?.privateLessonPrice || 75,
+          GROUP: defaultPricingRecord?.groupLessonPrice || 45,
+          CHOREOGRAPHY: defaultPricingRecord?.choreographyPrice || 90,
+          COMPETITION_PREP: defaultPricingRecord?.competitionPrice || 95,
         };
 
-        const price = defaultPrices[input.type];
-        console.log(`[BOOKING] Calculated price: $${price} for lesson type ${input.type}`);
+        // Use custom pricing if enabled for this student
+        let price = defaultPrices[input.type];
+
+        if (student.customPricingEnabled) {
+          // Apply custom pricing based on lesson type if available
+          switch (input.type) {
+            case "PRIVATE":
+              if (student.privateLessonPrice !== null) {
+                price = student.privateLessonPrice;
+              }
+              break;
+            case "GROUP":
+              if (student.groupLessonPrice !== null) {
+                price = student.groupLessonPrice;
+              }
+              break;
+            case "CHOREOGRAPHY":
+              if (student.choreographyPrice !== null) {
+                price = student.choreographyPrice;
+              }
+              break;
+            case "COMPETITION_PREP":
+              if (student.competitionPrepPrice !== null) {
+                price = student.competitionPrepPrice;
+              }
+              break;
+          }
+        }
+
+        console.log(
+          `[BOOKING] Calculated price: $${price} for lesson type ${input.type}${
+            student.customPricingEnabled ? " (custom pricing)" : " (default pricing)"
+          }`,
+        );
 
         // 6. Create the lesson and payment in a transaction
-        console.log('[BOOKING] Creating lesson and payment records');
+        console.log("[BOOKING] Creating lesson and payment records");
         // Generate payment reference code
         const paymentRef = `PAY-${randomUUID().substring(0, 8)}`;
         console.log(`[BOOKING] Generated payment reference: ${paymentRef}`);
-        
+
         const result = await ctx.prisma.$transaction(async (prisma) => {
           // Create the lesson
           const lesson = await prisma.lesson.create({
@@ -171,10 +243,10 @@ export const bookingRouter = createTRPCRouter({
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               duration: Math.round(
-                (timeSlot.endTime.getTime() - timeSlot.startTime.getTime()) / (1000 * 60)
+                (timeSlot.endTime.getTime() - timeSlot.startTime.getTime()) / (1000 * 60),
               ),
               type: input.type,
-              area: input.area || 'MAIN_RINK',
+              area: input.area || "MAIN_RINK",
               status: LessonStatus.SCHEDULED,
               price,
               notes: input.notes,
@@ -205,13 +277,15 @@ export const bookingRouter = createTRPCRouter({
           return { lesson, payment };
         });
 
-        console.log(`[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`);
-        
-        // 7. Send confirmation email to the student
+        console.log(
+          `[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`,
+        );
+
+        // 7. Send confirmation email to the student with fixed timezone information
         if (student.user?.email && student.user?.name) {
           try {
             console.log(`[BOOKING] Sending confirmation email to ${student.user.email}`);
-            
+
             await sendLessonConfirmationEmail(
               student.user.email,
               student.user.name,
@@ -221,33 +295,33 @@ export const bookingRouter = createTRPCRouter({
                 type: input.type,
                 rinkName: timeSlot.rink.name,
                 rinkAddress: timeSlot.rink.address,
-                rinkTimezone: timeSlot.rink.timezone,
+                rinkTimezone: timeSlot.rink.timezone, // FIXED: Ensure timezone is passed
               },
               input.paymentMethod,
               paymentRef,
-              googleEventId
+              googleEventId,
             );
-            
+
             console.log(`[BOOKING] Successfully sent confirmation email to ${student.user.email}`);
           } catch (emailError) {
-            console.error('[BOOKING] Error sending confirmation email:', emailError);
+            console.error("[BOOKING] Error sending confirmation email:", emailError);
             // Continue even if email fails - the booking itself was successful
           }
         } else {
-          console.log('[BOOKING] Skipping confirmation email - missing student name or email');
+          console.log("[BOOKING] Skipping confirmation email - missing student name or email");
         }
-        
+
         return result;
       } catch (error) {
-        console.error('[BOOKING] Error booking lesson:', error);
-        
+        console.error("[BOOKING] Error booking lesson:", error);
+
         if (error instanceof TRPCError) {
           throw error;
         }
-        
+
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to book lesson',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to book lesson",
           cause: error,
         });
       }
@@ -259,12 +333,12 @@ export const bookingRouter = createTRPCRouter({
       z.object({
         lessonId: z.string(),
         reason: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
         console.log(`[CANCEL] Starting cancellation process for lesson ${input.lessonId}`);
-        
+
         // 1. Find the lesson
         const lesson = await ctx.prisma.lesson.findUnique({
           where: {
@@ -278,8 +352,8 @@ export const bookingRouter = createTRPCRouter({
         if (!lesson) {
           console.log(`[CANCEL] Lesson ${input.lessonId} not found`);
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Lesson not found',
+            code: "NOT_FOUND",
+            message: "Lesson not found",
           });
         }
 
@@ -288,21 +362,29 @@ export const bookingRouter = createTRPCRouter({
         if (lesson.startTime < now) {
           console.log(`[CANCEL] Cannot cancel past lesson ${input.lessonId}`);
           throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'Cannot cancel past lessons',
+            code: "FORBIDDEN",
+            message: "Cannot cancel past lessons",
           });
         }
 
         // 3. Check cancellation policy - example: 24 hours notice
         const cancellationDeadline = 24; // hours
         const hoursUntilLesson = (lesson.startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-        
-        console.log(`[CANCEL] Lesson starts in ${hoursUntilLesson.toFixed(1)} hours, deadline is ${cancellationDeadline} hours`);
-        
+
+        console.log(
+          `[CANCEL] Lesson starts in ${hoursUntilLesson.toFixed(
+            1,
+          )} hours, deadline is ${cancellationDeadline} hours`,
+        );
+
         if (hoursUntilLesson < cancellationDeadline) {
-          console.log(`[CANCEL] Too late to cancel lesson ${input.lessonId} (${hoursUntilLesson.toFixed(1)}h < ${cancellationDeadline}h)`);
+          console.log(
+            `[CANCEL] Too late to cancel lesson ${input.lessonId} (${hoursUntilLesson.toFixed(
+              1,
+            )}h < ${cancellationDeadline}h)`,
+          );
           throw new TRPCError({
-            code: 'FORBIDDEN',
+            code: "FORBIDDEN",
             message: `Lessons must be cancelled at least ${cancellationDeadline} hours in advance`,
           });
         }
@@ -310,15 +392,21 @@ export const bookingRouter = createTRPCRouter({
         // 4. Delete Google Calendar event if it exists
         if (lesson.googleCalendarEventId) {
           try {
-            console.log(`[CANCEL] Attempting to delete Google Calendar event: ${lesson.googleCalendarEventId}`);
+            console.log(
+              `[CANCEL] Attempting to delete Google Calendar event: ${lesson.googleCalendarEventId}`,
+            );
             const deleted = await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
             if (deleted) {
-              console.log(`[CANCEL] Deleted Google Calendar event: ${lesson.googleCalendarEventId}`);
+              console.log(
+                `[CANCEL] Deleted Google Calendar event: ${lesson.googleCalendarEventId}`,
+              );
             } else {
-              console.log(`[CANCEL] Failed to delete Google Calendar event: ${lesson.googleCalendarEventId}`);
+              console.log(
+                `[CANCEL] Failed to delete Google Calendar event: ${lesson.googleCalendarEventId}`,
+              );
             }
           } catch (error) {
-            console.error('[CANCEL] Error deleting Google Calendar event:', error);
+            console.error("[CANCEL] Error deleting Google Calendar event:", error);
             // Continue with cancellation even if calendar deletion fails
           }
         }
@@ -340,15 +428,15 @@ export const bookingRouter = createTRPCRouter({
         console.log(`[CANCEL] Successfully cancelled lesson ${input.lessonId}`);
         return updatedLesson;
       } catch (error) {
-        console.error('[CANCEL] Error cancelling lesson:', error);
-        
+        console.error("[CANCEL] Error cancelling lesson:", error);
+
         if (error instanceof TRPCError) {
           throw error;
         }
-        
+
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to cancel lesson',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to cancel lesson",
           cause: error,
         });
       }

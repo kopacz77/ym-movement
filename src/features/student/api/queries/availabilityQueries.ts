@@ -1,7 +1,7 @@
 // src/features/student/api/queries/availabilityQueries.ts
-import { z } from 'zod';
-import { createTRPCRouter, publicProcedure } from '@/lib/trpc';
-import { TRPCError } from '@trpc/server';
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { TRPCError } from "@trpc/server";
 
 export const availabilityRouter = createTRPCRouter({
   getAvailableTimeSlots: publicProcedure
@@ -10,7 +10,7 @@ export const availabilityRouter = createTRPCRouter({
         startDate: z.date().optional(),
         endDate: z.date().optional(),
         rinkId: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       try {
@@ -36,21 +36,21 @@ export const availabilityRouter = createTRPCRouter({
             lessons: true,
           },
           orderBy: {
-            startTime: 'asc',
+            startTime: "asc",
           },
         });
 
         // Filter out time slots that are already fully booked
-        return timeSlots.map(slot => ({
+        return timeSlots.map((slot) => ({
           ...slot,
           currentStudents: slot.lessons.length,
           isAvailable: slot.lessons.length < slot.maxStudents,
         }));
       } catch (error) {
-        console.error('Error fetching available time slots:', error);
+        console.error("Error fetching available time slots:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch available time slots',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch available time slots",
           cause: error,
         });
       }
@@ -60,14 +60,14 @@ export const availabilityRouter = createTRPCRouter({
     try {
       return await ctx.prisma.rink.findMany({
         orderBy: {
-          name: 'asc',
+          name: "asc",
         },
       });
     } catch (error) {
-      console.error('Error fetching rinks:', error);
+      console.error("Error fetching rinks:", error);
       throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch rinks',
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch rinks",
         cause: error,
       });
     }

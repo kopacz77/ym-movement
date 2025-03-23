@@ -10,8 +10,8 @@ import { ChevronRight } from "lucide-react";
 export const AdminBreadcrumbs = () => {
   // Use a default empty string in case pathname is null.
   const pathname = usePathname() ?? "";
-  const paths = pathname.split('/').filter(Boolean);
-  
+  const paths = pathname.split("/").filter(Boolean);
+
   return (
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
       <Link href="/admin" className="hover:text-foreground">
@@ -21,7 +21,7 @@ export const AdminBreadcrumbs = () => {
         <div key={path} className="flex items-center">
           <ChevronRight className="h-4 w-4" />
           <Link
-            href={`/admin/${paths.slice(1, index + 2).join('/')}`}
+            href={`/admin/${paths.slice(1, index + 2).join("/")}`}
             className="capitalize ml-1 hover:text-foreground"
           >
             {path}

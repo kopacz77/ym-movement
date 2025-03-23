@@ -1,13 +1,20 @@
 // src/features/scheduling/components/slots/SlotCreator.tsx
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useTimeSlots } from '../../hooks/useTimeSlots';
+import type React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useTimeSlots } from "../../hooks/useTimeSlots";
 
 const slotSchema = z.object({
   startTime: z.string(),
@@ -34,8 +41,10 @@ export const SlotCreator: React.FC<SlotCreatorProps> = ({ open, onClose, default
       maxStudents: 1,
       rinkId,
       isActive: true,
-      startTime: defaultDate ? defaultDate.toISOString().slice(0, 16) : '',
-      endTime: defaultDate ? new Date(defaultDate.getTime() + 30 * 60000).toISOString().slice(0, 16) : '',
+      startTime: defaultDate ? defaultDate.toISOString().slice(0, 16) : "",
+      endTime: defaultDate
+        ? new Date(defaultDate.getTime() + 30 * 60000).toISOString().slice(0, 16)
+        : "",
     },
   });
 
@@ -44,7 +53,7 @@ export const SlotCreator: React.FC<SlotCreatorProps> = ({ open, onClose, default
     const endTime = new Date(values.endTime);
     const validationError = validateTimeRange({ startTime, endTime });
     if (validationError) {
-      form.setError('startTime', { message: validationError });
+      form.setError("startTime", { message: validationError });
       return;
     }
     await createTimeSlot.mutateAsync({ ...values, startTime, endTime });
@@ -92,14 +101,21 @@ export const SlotCreator: React.FC<SlotCreatorProps> = ({ open, onClose, default
                 <FormItem>
                   <FormLabel>Maximum Students</FormLabel>
                   <FormControl>
-                    <Input type="number" min={1} {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
+                    <Input
+                      type="number"
+                      min={1}
+                      {...field}
+                      onChange={(e) => field.onChange(Number.parseInt(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={createTimeSlot.isPending}>
                 {createTimeSlot.isPending ? "Creating..." : "Create"}
               </Button>

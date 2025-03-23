@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
-import { startOfWeek, endOfWeek } from 'date-fns';
-import { CalendarSlot } from '../../types';
-import { Level, LessonType } from '@prisma/client';
-import { validateTimeSlotBooking, StudentBookingConstraints } from '../../utils/ValidationUtils';
-import { ConflictDetector } from '../scheduling/ConflictDetector';
-import { api } from '@/lib/api';
+import React, { useEffect } from "react";
+import { startOfWeek, endOfWeek } from "date-fns";
+import type { CalendarSlot } from "../../types";
+import type { Level, LessonType } from "@prisma/client";
+import { validateTimeSlotBooking } from "../../utils/ValidationUtils";
+import type { StudentBookingConstraints } from "../../utils/ValidationUtils";
+import { ConflictDetector } from "../scheduling/ConflictDetector";
+import { api } from "@/lib/api";
 
 interface BookingValidatorProps {
   slot: CalendarSlot;
@@ -17,22 +18,22 @@ export const BookingValidator: React.FC<BookingValidatorProps> = ({
   slot,
   studentId,
   lessonType,
-  onValidationComplete
+  onValidationComplete,
 }) => {
   // Fetch student data - using correct API endpoint with namespacing
   const { data: student } = api.admin.student.getStudent.useQuery(
     { studentId },
-    { enabled: !!studentId }
+    { enabled: !!studentId },
   );
 
   // Fetch current week's lessons
   const startOfWeekDate = startOfWeek(new Date(slot.startTime));
   const endOfWeekDate = endOfWeek(new Date(slot.startTime));
-  
+
   // Updated API endpoint with correct namespace structure
   const { data: weekLessons } = api.student.profile.getStudentLessons.useQuery(
     { studentId, startDate: startOfWeekDate, endDate: endOfWeekDate },
-    { enabled: !!studentId }
+    { enabled: !!studentId },
   );
 
   const validations = React.useMemo(() => {
@@ -40,13 +41,13 @@ export const BookingValidator: React.FC<BookingValidatorProps> = ({
     const constraints: StudentBookingConstraints = {
       maxLessonsPerWeek: student.maxLessonsPerWeek,
       level: student.level,
-      currentWeekLessons: weekLessons.length
+      currentWeekLessons: weekLessons.length,
     };
     return validateTimeSlotBooking(slot, constraints, lessonType);
   }, [slot, student, weekLessons, lessonType]);
 
   useEffect(() => {
-    onValidationComplete?.(validations.every(v => v.passed));
+    onValidationComplete?.(validations.every((v) => v.passed));
   }, [validations, onValidationComplete]);
 
   return <ConflictDetector validations={validations} showAllValidations />;

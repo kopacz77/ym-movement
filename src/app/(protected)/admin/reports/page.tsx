@@ -1,48 +1,55 @@
 // src/app/(protected)/admin/reports/page.tsx
 "use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { api } from '@/lib/api';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { RevenueReport } from '@/features/admin/components/reports/RevenueReport';
-import { AttendanceReport } from '@/features/admin/components/reports/AttendanceReport';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
-import { Download } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
+import { AttendanceReport } from "@/features/admin/components/reports/AttendanceReport";
+import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { Download } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 export default function ReportsPage() {
-  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
-  
+  const [period, setPeriod] = useState<"week" | "month" | "year">("month");
+
   // Fetch overview data for summary
-  const { data: overviewData, isLoading: isLoadingOverview } = api.admin.analytics.getOverview.useQuery();
+  const { data: overviewData, isLoading: isLoadingOverview } =
+    api.admin.analytics.getOverview.useQuery();
 
   // Calculate date range based on period
   const getDateRange = () => {
     const now = new Date();
     switch (period) {
-      case 'week':
+      case "week":
         return {
           start: new Date(now.setDate(now.getDate() - 7)),
-          end: new Date()
+          end: new Date(),
         };
-      case 'month':
+      case "month":
         return {
           start: startOfMonth(new Date()),
-          end: endOfMonth(new Date())
+          end: endOfMonth(new Date()),
         };
-      case 'year':
+      case "year":
         return {
           start: subMonths(new Date(), 12),
-          end: new Date()
+          end: new Date(),
         };
       default:
         return {
           start: startOfMonth(new Date()),
-          end: endOfMonth(new Date())
+          end: endOfMonth(new Date()),
         };
     }
   };
@@ -51,7 +58,7 @@ export default function ReportsPage() {
     toast("Export started", {
       description: "Your report is being prepared for download.",
     });
-    
+
     // In a real implementation, this would trigger an export to CSV or PDF
     setTimeout(() => {
       toast("Export complete", {
@@ -72,9 +79,9 @@ export default function ReportsPage() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Period:</span>
-          <Select 
-            value={period} 
-            onValueChange={(value: 'week' | 'month' | 'year') => setPeriod(value)}
+          <Select
+            value={period}
+            onValueChange={(value: "week" | "month" | "year") => setPeriod(value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select period" />
@@ -128,14 +135,14 @@ export default function ReportsPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Report Period</p>
                 <p className="text-lg">
-                  {format(getDateRange().start, 'PP')} - {format(getDateRange().end, 'PP')}
+                  {format(getDateRange().start, "PP")} - {format(getDateRange().end, "PP")}
                 </p>
               </div>
-              
+
               {isLoadingOverview ? (
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
                 </div>
               ) : (
                 <>
@@ -143,12 +150,12 @@ export default function ReportsPage() {
                     <p className="text-sm font-medium text-muted-foreground">Total Students</p>
                     <p className="text-lg">{overviewData?.totalStudents || 0}</p>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Active Lessons</p>
                     <p className="text-lg">{overviewData?.activeLessons || 0}</p>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
                     <p className="text-lg">{formatCurrency(overviewData?.monthlyRevenue || 0)}</p>
@@ -166,15 +173,15 @@ export default function ReportsPage() {
           <CardContent>
             <p className="text-muted-foreground">
               This report provides an overview of revenue and attendance for the selected period.
-              Use the period selector to change the date range of the report.
-              You can export this report by clicking the Export button.
+              Use the period selector to change the date range of the report. You can export this
+              report by clicking the Export button.
             </p>
             <div className="mt-4 p-3 border rounded bg-amber-50 text-amber-800">
               <p className="text-sm font-medium">Pro Tip</p>
               <p className="text-xs mt-1">
-                For more detailed insights, try changing the report period to see trends over different 
-                timeframes. Weekly reports are great for immediate insights, while monthly and yearly 
-                reports help identify long-term patterns.
+                For more detailed insights, try changing the report period to see trends over
+                different timeframes. Weekly reports are great for immediate insights, while monthly
+                and yearly reports help identify long-term patterns.
               </p>
             </div>
           </CardContent>

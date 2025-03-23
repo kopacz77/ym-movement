@@ -1,67 +1,72 @@
 // src/features/admin/components/scheduling/RecurringPatternForm.tsx
-import React, { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Form, 
-  FormControl, 
+import React, { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
   FormDescription,
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { addDays, differenceInDays, isAfter, parse } from 'date-fns';
-import { toast } from 'sonner';
-import { api } from '@/lib/api';
-import { 
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays, differenceInDays, isAfter, parse } from "date-fns";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 const daysOfWeek = [
-  { id: 0, label: 'Sunday' },
-  { id: 1, label: 'Monday' },
-  { id: 2, label: 'Tuesday' },
-  { id: 3, label: 'Wednesday' },
-  { id: 4, label: 'Thursday' },
-  { id: 5, label: 'Friday' },
-  { id: 6, label: 'Saturday' },
+  { id: 0, label: "Sunday" },
+  { id: 1, label: "Monday" },
+  { id: 2, label: "Tuesday" },
+  { id: 3, label: "Wednesday" },
+  { id: 4, label: "Thursday" },
+  { id: 5, label: "Friday" },
+  { id: 6, label: "Saturday" },
 ];
 
 // Define form schema with validation but without 30-day limit
-const formSchema = z.object({
-  rinkId: z.string().min(1, "Please select a rink"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  startTime: z.string().min(1, "Start time is required"),
-  duration: z.coerce.number().min(30, "Minimum duration is 30 minutes"),
-  maxStudents: z.coerce.number().min(1, "At least 1 student required"),
-  daysOfWeek: z.array(z.number()).min(1, "Select at least one day")
-}).refine((data) => {
-  if (!data.startDate || !data.endDate) return true; // Let the required validation handle empty values
-  
-  try {
-    const start = parse(data.startDate, 'yyyy-MM-dd', new Date());
-    const end = parse(data.endDate, 'yyyy-MM-dd', new Date());
-    
-    // Ensure end date is not before start date
-    return !isAfter(start, end);
-  } catch (error) {
-    return false;
-  }
-}, {
-  message: "End date must be on or after start date",
-  path: ["endDate"],
-});
+const formSchema = z
+  .object({
+    rinkId: z.string().min(1, "Please select a rink"),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().min(1, "End date is required"),
+    startTime: z.string().min(1, "Start time is required"),
+    duration: z.coerce.number().min(30, "Minimum duration is 30 minutes"),
+    maxStudents: z.coerce.number().min(1, "At least 1 student required"),
+    daysOfWeek: z.array(z.number()).min(1, "Select at least one day"),
+  })
+  .refine(
+    (data) => {
+      if (!data.startDate || !data.endDate) return true; // Let the required validation handle empty values
+
+      try {
+        const start = parse(data.startDate, "yyyy-MM-dd", new Date());
+        const end = parse(data.endDate, "yyyy-MM-dd", new Date());
+
+        // Ensure end date is not before start date
+        return !isAfter(start, end);
+      } catch (error) {
+        return false;
+      }
+    },
+    {
+      message: "End date must be on or after start date",
+      path: ["endDate"],
+    },
+  );
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -77,43 +82,43 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rinkId: '',
-      startDate: '',
-      endDate: '',
-      startTime: '09:00',
+      rinkId: "",
+      startDate: "",
+      endDate: "",
+      startTime: "09:00",
       duration: 60,
       maxStudents: 1,
-      daysOfWeek: []
-    }
+      daysOfWeek: [],
+    },
   });
 
   // Create recurring pattern mutation
   const createRecurringPattern = api.admin.schedule.createRecurringPattern.useMutation({
     onSuccess: (data) => {
       toast.success("Recurring pattern created successfully", {
-        description: `Created ${data.slotsCreated} time slots`
+        description: `Created ${data.slotsCreated} time slots`,
       });
       utils.admin.schedule.getTimeSlots.invalidate();
       if (onSubmitAction) onSubmitAction();
     },
     onError: (error) => {
       toast.error("Failed to create recurring pattern", {
-        description: error.message
+        description: error.message,
       });
-    }
+    },
   });
 
   // Suggest end date for convenience but don't enforce any limit
-  const startDate = form.watch('startDate');
+  const startDate = form.watch("startDate");
   useEffect(() => {
-    if (startDate && !form.getValues('endDate')) {
+    if (startDate && !form.getValues("endDate")) {
       try {
-        const start = parse(startDate, 'yyyy-MM-dd', new Date());
+        const start = parse(startDate, "yyyy-MM-dd", new Date());
         // Suggest 4 weeks forward as a reasonable default
         const suggestedEndDate = addDays(start, 28);
         // Format the date back to yyyy-MM-dd string
-        const endDateString = suggestedEndDate.toISOString().split('T')[0];
-        form.setValue('endDate', endDateString);
+        const endDateString = suggestedEndDate.toISOString().split("T")[0];
+        form.setValue("endDate", endDateString);
       } catch (error) {
         // Ignore parse errors
       }
@@ -122,27 +127,27 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
 
   const onSubmit = (data: FormValues) => {
     // Log form data for debugging
-    console.log('Recurring pattern form submitted:', data);
-    
+    console.log("Recurring pattern form submitted:", data);
+
     // Parse dates properly
-    const startDate = parse(data.startDate, 'yyyy-MM-dd', new Date());
-    const endDate = parse(data.endDate, 'yyyy-MM-dd', new Date());
-    
+    const startDate = parse(data.startDate, "yyyy-MM-dd", new Date());
+    const endDate = parse(data.endDate, "yyyy-MM-dd", new Date());
+
     // Ensure dates are set to beginning/end of day to avoid timezone issues
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(23, 59, 59, 999);
-    
-    const formattedStartTime = data.startTime.split(':').slice(0, 2).join(':');
-    
+
+    const formattedStartTime = data.startTime.split(":").slice(0, 2).join(":");
+
     // Count how many days and slots will be created for user feedback
     const dayDifference = differenceInDays(endDate, startDate) + 1;
     const daysCount = data.daysOfWeek.length;
-    const estimatedSlots = Math.ceil(dayDifference / 7 * daysCount);
-    
+    const estimatedSlots = Math.ceil((dayDifference / 7) * daysCount);
+
     toast.info("Creating recurring pattern", {
-      description: `Creating approximately ${estimatedSlots} time slots across ${dayDifference} days`
+      description: `Creating approximately ${estimatedSlots} time slots across ${dayDifference} days`,
     });
-    
+
     // Submit to API
     createRecurringPattern.mutate({
       rinkId: data.rinkId,
@@ -152,7 +157,7 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
       startTime: formattedStartTime,
       duration: data.duration,
       maxStudents: data.maxStudents,
-      isActive: true
+      isActive: true,
     });
   };
 
@@ -188,7 +193,7 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                 </FormItem>
               )}
             />
-          
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -203,7 +208,7 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="endDate"
@@ -221,7 +226,7 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -232,14 +237,12 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                     <FormControl>
                       <Input type="time" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Time will be the same for all selected days
-                    </FormDescription>
+                    <FormDescription>Time will be the same for all selected days</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="duration"
@@ -247,11 +250,11 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                   <FormItem>
                     <FormLabel>Duration (minutes)</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min={30} 
-                        step={15} 
-                        {...field} 
+                      <Input
+                        type="number"
+                        min={30}
+                        step={15}
+                        {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
@@ -268,10 +271,10 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                 <FormItem>
                   <FormLabel>Maximum Students per Slot</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      min={1} 
-                      {...field} 
+                    <Input
+                      type="number"
+                      min={1}
+                      {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
@@ -279,7 +282,7 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="daysOfWeek"
@@ -316,19 +319,12 @@ export const RecurringPatternForm = ({ rinks, onSubmitAction }: RecurringPattern
                 </FormItem>
               )}
             />
-            
+
             <div className="flex justify-end gap-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onSubmitAction}
-              >
+              <Button type="button" variant="outline" onClick={onSubmitAction}>
                 Cancel
               </Button>
-              <Button 
-                type="submit"
-                disabled={createRecurringPattern.isPending}
-              >
+              <Button type="submit" disabled={createRecurringPattern.isPending}>
                 {createRecurringPattern.isPending ? "Creating..." : "Create Recurring Pattern"}
               </Button>
             </div>

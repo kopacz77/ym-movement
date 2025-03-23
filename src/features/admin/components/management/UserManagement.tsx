@@ -1,7 +1,7 @@
 "use client";
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 // If you have a DataTable component, update the import path. Otherwise, we'll remove it.
 // import { DataTable } from '@/components/ui/data-table';
@@ -17,7 +17,8 @@ export const UserManagement: React.FC = () => {
         {/* DataTable component not found. Replace with your own implementation or correct the path. */}
         <div>
           <p>
-            DataTable component is not available. Please implement a table or update the import path.
+            DataTable component is not available. Please implement a table or update the import
+            path.
           </p>
         </div>
       </CardContent>

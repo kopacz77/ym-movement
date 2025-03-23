@@ -1,7 +1,5 @@
 // src/app/(protected)/admin/skills/page.tsx
 
-
-
 "use client";
 
 const PlaceholderPage = () => {
@@ -317,4 +315,3 @@ export default function SkillsManagementPage() {
 }
 
 */
-

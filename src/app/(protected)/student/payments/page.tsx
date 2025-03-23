@@ -1,26 +1,33 @@
 // src/app/(protected)/student/payments/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { api } from '@/lib/api';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { format } from 'date-fns';
-import { Search, ExternalLink } from 'lucide-react';
-import Link from 'next/link';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { format } from "date-fns";
+import { Search, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function StudentPaymentsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
-  
+
   // Only fetch data when studentId is available
   useEffect(() => {
     if (studentId) {
@@ -29,12 +36,16 @@ export default function StudentPaymentsPage() {
   }, [studentId]);
 
   // Get student lessons with payments
-  const { data: lessons, isLoading, error } = api.student.profile.getStudentLessons.useQuery(
+  const {
+    data: lessons,
+    isLoading,
+    error,
+  } = api.student.profile.getStudentLessons.useQuery(
     { studentId },
-    { 
+    {
       enabled: isReady && !!studentId,
-      retry: false
-    }
+      retry: false,
+    },
   );
 
   // Handle errors with useEffect
@@ -47,33 +58,32 @@ export default function StudentPaymentsPage() {
   }, [error]);
 
   // Filter lessons to only include those with payments
-  const paymentsData = lessons ? lessons.filter(lesson => lesson.payment !== null) : [];
+  const paymentsData = lessons ? lessons.filter((lesson) => lesson.payment !== null) : [];
 
   // Convert to our expected type
-  const payments = paymentsData.map(lesson => ({
+  const payments = paymentsData.map((lesson) => ({
     ...lesson,
-    payment: lesson.payment
+    payment: lesson.payment,
   }));
 
   // Filter payments based on search query and tab
   const filteredPayments = payments.filter((lesson) => {
     const matchesSearch = searchQuery
-      ? (lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         format(new Date(lesson.startTime), 'PPP').toLowerCase().includes(searchQuery.toLowerCase()))
+      ? lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        format(new Date(lesson.startTime), "PPP").toLowerCase().includes(searchQuery.toLowerCase())
       : true;
-    const matchesTab = activeTab === 'all'
-      ? true
-      : lesson.payment?.status.toLowerCase() === activeTab.toLowerCase();
+    const matchesTab =
+      activeTab === "all" ? true : lesson.payment?.status.toLowerCase() === activeTab.toLowerCase();
     return matchesSearch && matchesTab;
   });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'COMPLETED':
+      case "COMPLETED":
         return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case 'PENDING':
+      case "PENDING":
         return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case 'FAILED':
+      case "FAILED":
         return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
       default:
         return <Badge>{status}</Badge>;
@@ -122,17 +132,17 @@ export default function StudentPaymentsPage() {
                   <TableHead>Amount</TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredPayments.map((lesson) => (
                   <TableRow key={lesson.id}>
-                    <TableCell>{format(new Date(lesson.startTime), 'PP')}</TableCell>
-                    <TableCell>{lesson.type.replace('_', ' ')} Lesson</TableCell>
+                    <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
+                    <TableCell>{lesson.type.replace("_", " ")} Lesson</TableCell>
                     <TableCell>${lesson.payment?.amount.toFixed(2)}</TableCell>
                     <TableCell>{lesson.payment?.referenceCode}</TableCell>
-                    <TableCell>{getStatusBadge(lesson.payment?.status || '')}</TableCell>
+                    <TableCell>{getStatusBadge(lesson.payment?.status || "")}</TableCell>
                     <TableCell>
                       <Link href={`/student/schedule/${lesson.id}`}>
                         <Button variant="ghost" size="sm">
@@ -154,7 +164,8 @@ export default function StudentPaymentsPage() {
         <CardContent>
           <div className="space-y-4">
             <p>
-              We accept payments via Venmo and Zelle. Please make payments within 24 hours of booking your lesson to avoid automatic cancellation.
+              We accept payments via Venmo and Zelle. Please make payments within 24 hours of
+              booking your lesson to avoid automatic cancellation.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="border rounded-lg p-4">
@@ -169,7 +180,8 @@ export default function StudentPaymentsPage() {
             <div className="bg-blue-50 border border-blue-100 rounded-md p-4">
               <h3 className="font-medium text-blue-800">Important</h3>
               <p className="text-sm text-blue-700 mt-1">
-                Always include your payment reference code in the payment notes to ensure your payment is properly tracked.
+                Always include your payment reference code in the payment notes to ensure your
+                payment is properly tracked.
               </p>
             </div>
           </div>

@@ -1,15 +1,15 @@
 // features/admin/components/students/profile/StudentNotes.tsx
 "use client";
 
-import React, { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { api } from '@/lib/api';
-import { format } from 'date-fns';
-import { Plus } from 'lucide-react';
-import { TRPCClientError, TRPCClientErrorLike } from '@trpc/client';
+import { api } from "@/lib/api";
+import { format } from "date-fns";
+import { Plus } from "lucide-react";
+import { TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
 
 interface StudentNotesProps {
   studentId: string;
@@ -22,11 +22,11 @@ interface Note {
   createdBy: {
     name: string;
   };
-  type: 'ADMIN' | 'INSTRUCTOR';
+  type: "ADMIN" | "INSTRUCTOR";
 }
 
 export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
-  const [newNote, setNewNote] = React.useState('');
+  const [newNote, setNewNote] = React.useState("");
 
   // Using useEffect to handle errors instead of onError in the query options
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
@@ -34,7 +34,7 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   useEffect(() => {
     if (error) {
       toast.error("Error loading notes", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
@@ -42,37 +42,39 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   // Access notes directly from student
   const notes = React.useMemo(() => {
     if (!student?.notes) return [];
-    
+
     // Convert the single notes field to an array of note objects
-    return [{
-      id: '1',
-      content: student.notes,
-      createdAt: student.createdAt,
-      createdBy: { name: 'System' },
-      type: 'ADMIN' as const
-    }];
+    return [
+      {
+        id: "1",
+        content: student.notes,
+        createdAt: student.createdAt,
+        createdBy: { name: "System" },
+        type: "ADMIN" as const,
+      },
+    ];
   }, [student]);
 
   const addNote = api.admin.student.addStudentNote.useMutation({
     onSuccess: () => {
       toast("Note added successfully");
-      setNewNote('');
+      setNewNote("");
     },
     // Fixed: Use the correct type for the error parameter
     onError: (error) => {
       toast.error("Error adding note", {
-        description: error.message
+        description: error.message,
       });
     },
   });
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
-    
+
     addNote.mutate({
       studentId,
       content: newNote,
-      type: 'ADMIN'
+      type: "ADMIN",
     });
   };
 
@@ -89,10 +91,7 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
             onChange={(e) => setNewNote(e.target.value)}
           />
           <div className="flex justify-end">
-            <Button
-              onClick={handleAddNote}
-              disabled={!newNote.trim() || addNote.isPending}
-            >
+            <Button onClick={handleAddNote} disabled={!newNote.trim() || addNote.isPending}>
               <Plus className="h-4 w-4 mr-2" /> Add Note
             </Button>
           </div>
@@ -109,7 +108,7 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
                   <div>
                     <p className="text-sm font-medium">{note.createdBy.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(note.createdAt), 'PPp')}
+                      {format(new Date(note.createdAt), "PPp")}
                     </p>
                   </div>
                   <span className="text-xs bg-muted px-2 py-1 rounded-full">{note.type}</span>

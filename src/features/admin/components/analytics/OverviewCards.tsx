@@ -1,37 +1,43 @@
 "use client";
 
-import { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, CreditCard } from 'lucide-react';
-import { api } from '@/lib/api';
+import { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Calendar, CreditCard } from "lucide-react";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 export const OverviewCards = () => {
-  
-  const { data, error, isLoading } = api.admin.analytics.getOverview.useQuery(
-    undefined, 
-    { refetchInterval: 30000, retry: 3 }
-  );
+  const { data, error, isLoading } = api.admin.analytics.getOverview.useQuery(undefined, {
+    refetchInterval: 30000,
+    retry: 3,
+  });
 
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
       toast.error("Error loading overview", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
 
   if (isLoading) {
+    // Define static placeholders without relying on array indices
+    const loadingPlaceholders = [
+      { id: "loading-students", title: "Students" },
+      { id: "loading-lessons", title: "Lessons" },
+      { id: "loading-payments", title: "Payments" },
+    ];
+
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
+        {loadingPlaceholders.map((placeholder) => (
+          <Card key={placeholder.id} className="animate-pulse">
             <CardHeader>
-              <div className="h-6 bg-gray-200 rounded w-24"></div>
+              <div className="h-6 bg-gray-200 rounded w-24" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-gray-200 rounded w-16"></div>
+              <div className="h-8 bg-gray-200 rounded w-16" />
             </CardContent>
           </Card>
         ))}

@@ -1,9 +1,9 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
 
 export const ScheduleExceptions = () => {
   // Add state for the selected date
@@ -19,9 +19,9 @@ export const ScheduleExceptions = () => {
           <div>
             <Label>Exception Date</Label>
             {/* Corrected to use proper Calendar props */}
-            <Calendar 
-              mode="single" 
-              selected={selectedDate} 
+            <Calendar
+              mode="single"
+              selected={selectedDate}
               onSelect={setSelectedDate}
               className="mt-1"
             />

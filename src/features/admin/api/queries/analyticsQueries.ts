@@ -54,7 +54,9 @@ export const analyticsRouter = createTRPCRouter({
         ctx.prisma.payment.aggregate({
           where: {
             status: PaymentStatus.COMPLETED,
-            createdAt: { gte: new Date(new Date().setMonth(new Date().getMonth() - 1)) },
+            createdAt: {
+              gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+            },
           },
           _sum: { amount: true },
         }),
@@ -80,7 +82,7 @@ export const analyticsRouter = createTRPCRouter({
     .input(
       z.object({
         period: z.enum(["week", "month", "year"]),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       try {
@@ -104,43 +106,44 @@ export const analyticsRouter = createTRPCRouter({
 
         // Group by date and calculate statistics
         const activityByDate: Record<string, ActivityData> = {};
-        
-        lessons.forEach(lesson => {
-          const date = lesson.startTime.toISOString().split('T')[0];
-          
+
+        // Replace forEach with for...of loop
+        for (const lesson of lessons) {
+          const date = lesson.startTime.toISOString().split("T")[0];
+
           if (!activityByDate[date]) {
-            activityByDate[date] = { 
-              date, 
-              totalLessons: 0, 
-              completedLessons: 0, 
-              cancelledLessons: 0, 
-              byType: {}, 
-              byArea: {} 
+            activityByDate[date] = {
+              date,
+              totalLessons: 0,
+              completedLessons: 0,
+              cancelledLessons: 0,
+              byType: {},
+              byArea: {},
             };
           }
-          
+
           activityByDate[date].totalLessons++;
-          
+
           if (lesson.status === LessonStatus.COMPLETED) {
             activityByDate[date].completedLessons++;
           } else if (lesson.status === LessonStatus.CANCELLED) {
             activityByDate[date].cancelledLessons++;
           }
-          
+
           // Track by lesson type
           const lessonType = lesson.type as string;
           if (!activityByDate[date].byType[lessonType]) {
             activityByDate[date].byType[lessonType] = 0;
           }
           activityByDate[date].byType[lessonType]++;
-          
+
           // Track by area
           const areaType = lesson.area as string;
           if (!activityByDate[date].byArea[areaType]) {
             activityByDate[date].byArea[areaType] = 0;
           }
           activityByDate[date].byArea[areaType]++;
-        });
+        }
 
         return Object.values(activityByDate);
       } catch (error) {
@@ -157,7 +160,7 @@ export const analyticsRouter = createTRPCRouter({
     .input(
       z.object({
         period: z.enum(["week", "month", "year"]),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       try {
@@ -191,10 +194,11 @@ export const analyticsRouter = createTRPCRouter({
 
         // Group by date
         const revenueByDate: Record<string, RevenueData> = {};
-        
-        payments.forEach(payment => {
-          const date = payment.createdAt.toISOString().split('T')[0];
-          
+
+        // Replace forEach with for...of loop
+        for (const payment of payments) {
+          const date = payment.createdAt.toISOString().split("T")[0];
+
           if (!revenueByDate[date]) {
             revenueByDate[date] = {
               date,
@@ -204,7 +208,7 @@ export const analyticsRouter = createTRPCRouter({
               byStudentLevel: {},
             };
           }
-          
+
           revenueByDate[date].totalRevenue += payment.amount;
 
           // Group by payment method
@@ -231,7 +235,7 @@ export const analyticsRouter = createTRPCRouter({
             }
             revenueByDate[date].byStudentLevel[studentLevel] += payment.amount;
           }
-        });
+        }
 
         return Object.values(revenueByDate);
       } catch (error) {
@@ -251,7 +255,7 @@ export const analyticsRouter = createTRPCRouter({
         studentId: z.string(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       try {
@@ -269,15 +273,21 @@ export const analyticsRouter = createTRPCRouter({
             },
           },
           orderBy: {
-            startTime: 'asc',
+            startTime: "asc",
           },
         });
 
         // Calculate attendance metrics
         const total = lessons.length;
-        const attended = lessons.filter(lesson => lesson.status === LessonStatus.COMPLETED).length;
-        const cancelled = lessons.filter(lesson => lesson.status === LessonStatus.CANCELLED).length;
-        const scheduled = lessons.filter(lesson => lesson.status === LessonStatus.SCHEDULED).length;
+        const attended = lessons.filter(
+          (lesson) => lesson.status === LessonStatus.COMPLETED,
+        ).length;
+        const cancelled = lessons.filter(
+          (lesson) => lesson.status === LessonStatus.CANCELLED,
+        ).length;
+        const scheduled = lessons.filter(
+          (lesson) => lesson.status === LessonStatus.SCHEDULED,
+        ).length;
 
         const attendanceData: AttendanceData = {
           total,
@@ -285,7 +295,7 @@ export const analyticsRouter = createTRPCRouter({
           cancelled,
           scheduled,
           attendanceRate: total > 0 ? (attended / total) * 100 : 0,
-          lessons: lessons.map(lesson => ({
+          lessons: lessons.map((lesson) => ({
             id: lesson.id,
             date: lesson.startTime,
             status: lesson.status,

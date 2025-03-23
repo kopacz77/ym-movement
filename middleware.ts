@@ -4,33 +4,38 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Add environment variable control without breaking development flow
-const bypassAuthInDev = process.env.NODE_ENV === 'development' && process.env.ENABLE_AUTH_BYPASS === 'true';
+const bypassAuthInDev =
+  process.env.NODE_ENV === "development" &&
+  process.env.ENABLE_AUTH_BYPASS === "true";
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Check if the path is a public route
-  const isPublicPath = path === "/" || 
-                      path === "/auth/login" || 
-                      path === "/auth/signup" || 
-                      path.startsWith("/api/auth");
+  const isPublicPath =
+    path === "/" ||
+    path === "/auth/login" ||
+    path === "/auth/signup" ||
+    path.startsWith("/api/auth");
 
   // Get the token and check if the user is authenticated
-  const token = await getToken({ 
-    req: request, 
+  const token = await getToken({
+    req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
-  
+
   const isAuthenticated = !!token;
 
   // Redirect unauthenticated users to login
   if (!isPublicPath && !isAuthenticated) {
     // Development bypass option for easier testing
     if (bypassAuthInDev) {
-      console.warn('⚠️ Authentication bypassed in development mode. Set ENABLE_AUTH_BYPASS=false to test auth flow.');
+      console.warn(
+        "⚠️ Authentication bypassed in development mode. Set ENABLE_AUTH_BYPASS=false to test auth flow.",
+      );
       return NextResponse.next();
     }
-    
+
     const loginUrl = new URL("/auth/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
@@ -39,7 +44,8 @@ export async function middleware(request: NextRequest) {
   if (isAuthenticated && isPublicPath && path !== "/") {
     // Redirect to the appropriate dashboard based on role
     const role = token.role as string;
-    const redirectPath = role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
+    const redirectPath =
+      role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
     const dashboardUrl = new URL(redirectPath, request.url);
     return NextResponse.redirect(dashboardUrl);
   }
@@ -47,13 +53,13 @@ export async function middleware(request: NextRequest) {
   // Handle role-based access for admin and student routes
   if (isAuthenticated) {
     const role = token.role as string;
-    
+
     // Prevent students from accessing admin routes
     if (path.startsWith("/admin") && role !== "ADMIN") {
       const studentDashboard = new URL("/student/dashboard", request.url);
       return NextResponse.redirect(studentDashboard);
     }
-    
+
     // Prevent admins from accessing student routes
     if (path.startsWith("/student") && role !== "STUDENT") {
       const adminDashboard = new URL("/admin/dashboard", request.url);

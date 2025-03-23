@@ -1,16 +1,16 @@
 // src/app/(protected)/student/profile/page.tsx
 "use client";
 
-import { useEffect, useState } from 'react';
-import { ProfileForm } from '@/features/student/components/profile/ProfileForm';
-import { api } from '@/lib/api';
+import { useEffect, useState } from "react";
+import { ProfileForm } from "@/features/student/components/profile/ProfileForm";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function StudentProfilePage() {
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
-  
+
   // Only fetch data when studentId is available
   useEffect(() => {
     if (studentId) {
@@ -19,19 +19,23 @@ export default function StudentProfilePage() {
   }, [studentId]);
 
   // Get student profile
-  const { data: student, isLoading, error } = api.student.profile.getStudentProfile.useQuery(
+  const {
+    data: student,
+    isLoading,
+    error,
+  } = api.student.profile.getStudentProfile.useQuery(
     { studentId },
-    { 
+    {
       enabled: isReady && !!studentId,
-      retry: false
-    }
+      retry: false,
+    },
   );
 
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
       toast.error("Error loading profile", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
@@ -59,10 +63,10 @@ export default function StudentProfilePage() {
       ...student.user,
       // Convert null to empty string to satisfy the StudentProfile type
       name: student.user.name || "",
-      email: student.user.email
+      email: student.user.email,
     },
     // Convert null to undefined for notes if needed
-    notes: student.notes === null ? undefined : student.notes
+    notes: student.notes === null ? undefined : student.notes,
   };
 
   return (

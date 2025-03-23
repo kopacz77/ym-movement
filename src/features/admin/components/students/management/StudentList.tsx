@@ -1,14 +1,26 @@
 // src/features/admin/components/students/management/StudentList.tsx
 "use client";
-import React, { useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Level } from '@prisma/client';
-import { MoreHorizontal, Search } from 'lucide-react';
-import { api } from '@/lib/api';
+import React, { useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import type { Level } from "@prisma/client";
+import { MoreHorizontal, Search } from "lucide-react";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 interface StudentListProps {
@@ -16,21 +28,20 @@ interface StudentListProps {
   onViewProfileAction: (studentId: string) => void;
 }
 
-export const StudentList: React.FC<StudentListProps> = ({
-  onEditAction,
-  onViewProfileAction
-}) => {
-  const [search, setSearch] = React.useState('');
+export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewProfileAction }) => {
+  const [search, setSearch] = React.useState("");
 
   // Add proper input object to fix the null/undefined issue
-  const { data: studentsData, isLoading, error } = api.admin.student.getStudents.useQuery(
-    { search: search || undefined }
-  );
+  const {
+    data: studentsData,
+    isLoading,
+    error,
+  } = api.admin.student.getStudents.useQuery({ search: search || undefined });
 
   useEffect(() => {
     if (error) {
       toast.error("Error loading students", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
@@ -39,14 +50,14 @@ export const StudentList: React.FC<StudentListProps> = ({
 
   const getLevelColor = (level: Level) => {
     const colors: Record<Level, string> = {
-      PRE_PRELIMINARY: 'bg-blue-100 text-blue-800',
-      PRELIMINARY: 'bg-green-100 text-green-800',
-      PRE_JUVENILE: 'bg-yellow-100 text-yellow-800',
-      JUVENILE: 'bg-orange-100 text-orange-800',
-      INTERMEDIATE: 'bg-purple-100 text-purple-800',
-      NOVICE: 'bg-pink-100 text-pink-800',
-      JUNIOR: 'bg-red-100 text-red-800',
-      SENIOR: 'bg-indigo-100 text-indigo-800',
+      PRE_PRELIMINARY: "bg-blue-100 text-blue-800",
+      PRELIMINARY: "bg-green-100 text-green-800",
+      PRE_JUVENILE: "bg-yellow-100 text-yellow-800",
+      JUVENILE: "bg-orange-100 text-orange-800",
+      INTERMEDIATE: "bg-purple-100 text-purple-800",
+      NOVICE: "bg-pink-100 text-pink-800",
+      JUNIOR: "bg-red-100 text-red-800",
+      SENIOR: "bg-indigo-100 text-indigo-800",
     };
     return colors[level];
   };
@@ -80,30 +91,25 @@ export const StudentList: React.FC<StudentListProps> = ({
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                <TableCell colSpan={6} className="text-center">
+                  Loading...
+                </TableCell>
               </TableRow>
-            ) : !students?.length ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">No students found</TableCell>
-              </TableRow>
-            ) : (
+            ) : students?.length ? (
               students.map((student) => {
                 // Fix: Add safe check for active property
-                const isActive = true; // Default to true as fallback
-                
+
                 return (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.user.name}</TableCell>
                     <TableCell>{student.user.email}</TableCell>
                     <TableCell>
                       <Badge className={getLevelColor(student.level)}>
-                        {student.level.replace('_', ' ')}
+                        {student.level.replace("_", " ")}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="default">
-                        Active
-                      </Badge>
+                      <Badge variant="default">Active</Badge>
                     </TableCell>
                     <TableCell>{student.lessons?.length || 0} lessons</TableCell>
                     <TableCell>
@@ -114,10 +120,16 @@ export const StudentList: React.FC<StudentListProps> = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onViewProfileAction(student.id)} className="w-full">
+                          <DropdownMenuItem
+                            onClick={() => onViewProfileAction(student.id)}
+                            className="w-full"
+                          >
                             View Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onEditAction(student.id)} className="w-full">
+                          <DropdownMenuItem
+                            onClick={() => onEditAction(student.id)}
+                            className="w-full"
+                          >
                             Edit
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -126,6 +138,12 @@ export const StudentList: React.FC<StudentListProps> = ({
                   </TableRow>
                 );
               })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">
+                  No students found
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

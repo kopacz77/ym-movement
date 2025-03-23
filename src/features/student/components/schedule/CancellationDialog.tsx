@@ -1,13 +1,13 @@
 // src/features/student/components/schedule/CancellationDialog.tsx
 "use client";
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { api } from '@/lib/api';
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { AlertTriangle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface CancellationDialogProps {
   lessonId: string;
@@ -27,7 +27,7 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
   useEffect(() => {
     if (cancelLesson.isSuccess) {
       toast("Lesson cancelled", {
-        description: "Your lesson has been cancelled successfully."
+        description: "Your lesson has been cancelled successfully.",
       });
       // Call the onCloseAction callback to trigger a refetch in the parent component
       onCloseAction();
@@ -39,7 +39,7 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
   useEffect(() => {
     if (cancelLesson.error) {
       toast.error("Error cancelling lesson", {
-        description: cancelLesson.error.message
+        description: cancelLesson.error.message,
       });
       setIsSubmitting(false);
     }
@@ -48,13 +48,13 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
   const handleCancellation = () => {
     if (reason.trim() === "") {
       toast.error("Cancellation reason required", {
-        description: "Please provide a reason for cancellation."
+        description: "Please provide a reason for cancellation.",
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     cancelLesson.mutate({
       lessonId,
       reason,
@@ -73,22 +73,24 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
             <div>
               <p className="font-medium text-yellow-800">Cancellation Policy</p>
               <p className="text-sm text-yellow-700 mt-1">
-                Lessons must be cancelled at least 24 hours in advance. 
-                Late cancellations may still be charged. 
-                Frequent cancellations may affect your booking privileges.
+                Lessons must be cancelled at least 24 hours in advance. Late cancellations may still
+                be charged. Frequent cancellations may affect your booking privileges.
               </p>
             </div>
           </div>
-          
+
           <div className="space-y-2">
-            <label className="text-sm font-medium">Reason for Cancellation</label>
+            <label htmlFor="cancellation-reason" className="text-sm font-medium">
+              Reason for Cancellation
+            </label>
             <Textarea
+              id="cancellation-reason"
               placeholder="Please provide a reason for cancelling this lesson"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </div>
-          
+
           <div className="flex justify-end gap-2 pt-2">
             <Button
               variant="outline"

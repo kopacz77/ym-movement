@@ -1,7 +1,7 @@
 // src/app/(protected)/student/book/page.tsx
 "use client";
 
-import { BookingCalendar } from '@/features/student/components/booking/BookingCalendar';
+import { BookingCalendar } from "@/features/student/components/booking/BookingCalendar";
 
 export default function BookLessonPage() {
   return (

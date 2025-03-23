@@ -1,8 +1,8 @@
 // src/server/api/trpc.ts
-import { initTRPC, TRPCError } from '@trpc/server';
-import superjson from 'superjson';
-import { ZodError } from 'zod';
-import { prisma } from '@/lib/prisma';
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
+import { ZodError } from "zod";
+import { prisma } from "@/lib/prisma";
 
 /**
  * DEVELOPMENT CONFIGURATION

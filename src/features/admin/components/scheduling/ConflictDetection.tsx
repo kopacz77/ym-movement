@@ -1,11 +1,11 @@
 // src/features/admin/components/scheduling/ConflictDetection.tsx
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Clock } from 'lucide-react';
+import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, Clock } from "lucide-react";
 
 interface Conflict {
-  type: 'OVERLAP' | 'CAPACITY' | 'INSTRUCTOR';
+  type: "OVERLAP" | "CAPACITY" | "INSTRUCTOR";
   description: string;
   timeRange: string;
   affectedBookings: number;

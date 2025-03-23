@@ -1,4 +1,4 @@
-    /* src/styles/globals.css */
+/* src/styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -95,8 +95,8 @@
   }
 
   /* Make form inputs more touch-friendly */
-  input, 
-  select, 
+  input,
+  select,
   button,
   .select-trigger,
   .btn {
@@ -107,14 +107,14 @@
   .p-4 {
     padding: 0.75rem !important;
   }
-  
+
   /* Ensure tables are responsive */
   table {
     display: block;
     overflow-x: auto;
     width: 100%;
   }
-  
+
   /* Fix z-index for mobile menu */
   .z-50 {
     z-index: 50 !important;
@@ -130,7 +130,7 @@
 @media (max-width: 768px) {
   .fc-toolbar.fc-header-toolbar {
     display: grid;
-    grid-template-areas: 
+    grid-template-areas:
       "left right"
       "center center";
   }
@@ -138,24 +138,24 @@
   .fc-toolbar-chunk:nth-child(1) {
     grid-area: left;
   }
-  
+
   .fc-toolbar-chunk:nth-child(2) {
     grid-area: center;
     margin-top: 0.5rem;
   }
-  
+
   .fc-toolbar-chunk:nth-child(3) {
     grid-area: right;
     display: flex;
     justify-content: flex-end;
   }
-  
+
   /* Make the timeGrid view more compact */
   .fc-timeGridWeek-view .fc-col-header-cell {
     font-size: 0.65rem !important;
     padding: 2px !important;
   }
-  
+
   /* Fixes for FullCalendar timeGridWeek on mobile */
   .fc-timeGridWeek-view .fc-scrollgrid-sync-table {
     min-width: 700px !important;
@@ -180,30 +180,30 @@
     overflow: auto !important;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Ensure time slot labels are visible */
   .fc-timegrid-slot-label-cushion {
     font-size: 0.65rem !important;
   }
-  
+
   /* Increase event text contrast */
   .fc-event-title {
     font-weight: bold !important;
   }
-  
+
   /* List view improvements */
   .fc-list-day-cushion {
     padding: 4px 8px !important;
   }
-  
+
   .fc-list-event td {
     padding: 4px 8px !important;
   }
-  
+
   .fc-list-event-title {
     font-size: 0.875rem !important;
   }
-  
+
   .fc-list-event-time {
     font-size: 0.75rem !important;
   }
@@ -220,7 +220,7 @@
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
-  
+
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -231,7 +231,7 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   .smooth-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;

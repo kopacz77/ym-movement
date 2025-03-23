@@ -1,25 +1,80 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { format, addDays, startOfDay, endOfDay, parseISO } from 'date-fns';
-import { api } from '@/lib/api';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import { format, addDays, startOfDay, endOfDay, parseISO } from "date-fns";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { BookingDialog } from './BookingDialog';
-import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useIsMobile } from '@/hooks/useMediaQuery';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookingDialog } from "./BookingDialog";
+import type { DateSelectArg, EventClickArg } from "@fullcalendar/core";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+// Define types for the rinks and time slots
+interface Rink {
+  id: string;
+  name: string;
+  address: string;
+  timezone: string;
+}
+
+// Define type for the partial rink data returned from the API
+interface ApiRink {
+  name: string;
+  address: string;
+}
+
+interface TimeSlot {
+  id: string;
+  startTime: string;
+  endTime: string;
+  maxStudents: number;
+  currentStudents?: number;
+  lessons?: Array<unknown>;
+  isActive: boolean;
+  rink: Rink; // Full rink for the normal view
+  interactive?: boolean;
+}
+
+// Define a type for the API response time slot data
+interface ApiTimeSlot {
+  id: string;
+  startTime: string | Date;
+  endTime: string | Date;
+  maxStudents: number;
+  currentStudents?: number;
+  lessons?: Array<unknown>;
+  isActive: boolean;
+  rink: ApiRink; // Partial rink from the API
+  isAvailable?: boolean;
+  [key: string]: unknown;
+}
+
+// Format a UTC date string to local time display format
+function formatTimeDisplay(dateStr: string) {
+  const date = new Date(dateStr);
+  return `${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(
+    2,
+    "0",
+  )}`;
+}
 
 export const BookingCalendar = () => {
   const [date, setDate] = useState(new Date());
   const [selectedRink, setSelectedRink] = useState<string>("all_rinks");
-  const [selectedSlot, setSelectedSlot] = useState<any>(null);
+  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
@@ -33,26 +88,29 @@ export const BookingCalendar = () => {
   }, [studentId]);
 
   // Fetch all available rinks
-  // @ts-ignore - Router exists but TypeScript hasn't caught up
   const { data: rinks } = api.student.availability.getRinks.useQuery();
 
   // Fetch available time slots
-  // @ts-ignore - Router exists but TypeScript hasn't caught up
-  const { data: availableSlots, isLoading, error } = api.student.availability.getAvailableTimeSlots.useQuery(
+  const {
+    data: availableSlots,
+    isLoading,
+    error,
+  } = api.student.availability.getAvailableTimeSlots.useQuery(
     {
       startDate: startOfDay(date),
       endDate: endOfDay(addDays(date, 6)),
       rinkId: selectedRink === "all_rinks" ? undefined : selectedRink,
     },
-    { enabled: isReady } // Only fetch when we're ready
+    { enabled: isReady }, // Only fetch when we're ready
   );
 
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
-      const errorMessage = error.message || "An unexpected error occurred while loading time slots.";
+      const errorMessage =
+        error.message || "An unexpected error occurred while loading time slots.";
       toast.error("Error loading time slots", {
-        description: errorMessage
+        description: errorMessage,
       });
     }
   }, [error]);
@@ -60,24 +118,30 @@ export const BookingCalendar = () => {
   // Format the date range for display (e.g., "Mar 16 - 22, 2025")
   const dateRangeText = () => {
     const endDate = addDays(date, 6);
-    const startMonth = format(date, 'MMM');
-    const endMonth = format(endDate, 'MMM');
-    
+    const startMonth = format(date, "MMM");
+    const endMonth = format(endDate, "MMM");
+
     if (startMonth === endMonth) {
-      return `${startMonth} ${format(date, 'd')} - ${format(endDate, 'd')}, ${format(date, 'yyyy')}`;
-    } else {
-      return `${startMonth} ${format(date, 'd')} - ${endMonth} ${format(endDate, 'd')}, ${format(date, 'yyyy')}`;
+      return `${startMonth} ${format(date, "d")} - ${format(endDate, "d")}, ${format(
+        date,
+        "yyyy",
+      )}`;
     }
+
+    return `${startMonth} ${format(date, "d")} - ${endMonth} ${format(endDate, "d")}, ${format(
+      date,
+      "yyyy",
+    )}`;
   };
 
   // Navigate to previous week
   const goToPrevWeek = () => {
-    setDate(prev => addDays(prev, -7));
+    setDate((prev) => addDays(prev, -7));
   };
 
   // Navigate to next week
   const goToNextWeek = () => {
-    setDate(prev => addDays(prev, 7));
+    setDate((prev) => addDays(prev, 7));
   };
 
   // Go to today
@@ -86,43 +150,51 @@ export const BookingCalendar = () => {
   };
 
   // Convert slots to FullCalendar events with an interactive flag
-  const events = availableSlots?.map((slot: any) => {
-    const studentCount = slot.currentStudents;
-    const isAvailable = studentCount < slot.maxStudents;
-    const isYuraSlot = slot.isActive;
+  const events =
+    availableSlots?.map((slot) => {
+      const studentCount = slot.currentStudents || slot.lessons?.length || 0;
+      const isAvailable = studentCount < slot.maxStudents;
+      const isYuraSlot = slot.isActive;
 
-    return {
-      id: slot.id,
-      title: `${studentCount}/${slot.maxStudents} students${isAvailable ? ' - Available' : ' - Full'}`,
-      start: slot.startTime,
-      end: slot.endTime,
-      color: isAvailable ? 'rgb(74 222 128)' : 'rgb(239 68 68)',
-      interactive: isYuraSlot && isAvailable,
-      className: !isYuraSlot ? 'non-interactive-slot' : '',
-      extendedProps: {
-        ...slot,
+      // Cleaned up title that won't display incorrectly
+      const title = `${studentCount}/${slot.maxStudents} students${
+        isAvailable ? " - Available" : " - Full"
+      }`;
+
+      return {
+        id: slot.id,
+        title: title,
+        start: slot.startTime,
+        end: slot.endTime,
+        color: isAvailable ? "rgb(74 222 128)" : "rgb(239 68 68)",
         interactive: isYuraSlot && isAvailable,
-      },
-    };
-  }) || [];
+        className: !isYuraSlot ? "non-interactive-slot" : "",
+        extendedProps: {
+          ...slot,
+          interactive: isYuraSlot && isAvailable,
+          rinkName: slot.rink?.name || "",
+        },
+      };
+    }) || [];
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setDate(selectInfo.start);
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
-    const slot = clickInfo.event.extendedProps;
+    const slot = clickInfo.event.extendedProps as TimeSlot;
 
     if (!slot.interactive) {
       toast("Non-bookable time slot", {
-        description: "This time slot is not available for booking."
+        description: "This time slot is not available for booking.",
       });
       return;
     }
 
-    if (slot.currentStudents >= slot.maxStudents) {
+    const currentStudents = slot.currentStudents || slot.lessons?.length || 0;
+    if (currentStudents >= slot.maxStudents) {
       toast.error("Time slot unavailable", {
-        description: "This time slot is already fully booked."
+        description: "This time slot is already fully booked.",
       });
       return;
     }
@@ -134,51 +206,77 @@ export const BookingCalendar = () => {
   // Process events for display in the custom list view
   const processEventsForCustomList = () => {
     if (!availableSlots) return [];
-    
-    // Group events by day
-    const groupedEvents = availableSlots.reduce((groups, slot) => {
-      const date = format(new Date(slot.startTime), 'yyyy-MM-dd');
-      
-      if (!groups[date]) {
-        groups[date] = {
-          date: new Date(slot.startTime),
-          slots: []
-        };
-      }
-      
-      groups[date].slots.push(slot);
-      return groups;
-    }, {} as Record<string, { date: Date; slots: any[] }>);
-    
-    // Convert to array and sort by date
-    return Object.values(groupedEvents)
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  };
 
-  // Format time for display (24h format, no timezone conversion)
-  const formatTimeDisplay = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return `${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
+    // Group events by day
+    const groupedEvents = availableSlots.reduce(
+      (groups, slot) => {
+        const date = format(new Date(slot.startTime), "yyyy-MM-dd");
+
+        if (!groups[date]) {
+          groups[date] = {
+            date: new Date(slot.startTime),
+            slots: [],
+          };
+        }
+
+        groups[date].slots.push(slot);
+        return groups;
+      },
+      {} as Record<string, { date: Date; slots: ApiTimeSlot[] }>,
+    );
+
+    // Convert to array and sort by date
+    return Object.values(groupedEvents).sort((a, b) => a.date.getTime() - b.date.getTime());
   };
 
   // Handle clicking a slot in the custom list view
-  const handleCustomSlotClick = (slot: any) => {
-    if (!slot.isActive) {
+  const handleCustomSlotClick = (rawSlot: ApiTimeSlot) => {
+    // Ensure startTime and endTime are strings
+    const stringifiedStartTime =
+      typeof rawSlot.startTime === "object"
+        ? format(rawSlot.startTime, "yyyy-MM-dd'T'HH:mm:ss")
+        : rawSlot.startTime;
+
+    const stringifiedEndTime =
+      typeof rawSlot.endTime === "object"
+        ? format(rawSlot.endTime, "yyyy-MM-dd'T'HH:mm:ss")
+        : rawSlot.endTime;
+
+    // Create a properly typed TimeSlot, filling in missing rink properties
+    const processedSlot: TimeSlot = {
+      id: rawSlot.id,
+      startTime: stringifiedStartTime,
+      endTime: stringifiedEndTime,
+      maxStudents: rawSlot.maxStudents,
+      currentStudents: rawSlot.currentStudents,
+      lessons: rawSlot.lessons,
+      isActive: rawSlot.isActive,
+      rink: {
+        // Use the ApiRink data but add missing properties
+        name: rawSlot.rink.name,
+        address: rawSlot.rink.address,
+        id: "unknown", // Placeholder for required id
+        timezone: "UTC", // Default timezone
+      },
+      interactive: rawSlot.isAvailable,
+    };
+
+    if (!processedSlot.isActive) {
       toast("Non-bookable time slot", {
-        description: "This time slot is not available for booking."
+        description: "This time slot is not available for booking.",
       });
       return;
     }
 
-    const currentStudents = slot.lessons?.length || 0;
-    if (currentStudents >= slot.maxStudents) {
+    const currentStudents = processedSlot.currentStudents || processedSlot.lessons?.length || 0;
+    if (currentStudents >= processedSlot.maxStudents) {
       toast.error("Time slot unavailable", {
-        description: "This time slot is already fully booked."
+        description: "This time slot is already fully booked.",
       });
       return;
     }
 
-    setSelectedSlot(slot);
+    setSelectedSlot(processedSlot);
     setIsBookingDialogOpen(true);
   };
 
@@ -193,7 +291,7 @@ export const BookingCalendar = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all_rinks">All Rinks</SelectItem>
-              {rinks?.map((rink: any) => (
+              {rinks?.map((rink: Rink) => (
                 <SelectItem key={rink.id} value={rink.id}>
                   {rink.name}
                 </SelectItem>
@@ -221,53 +319,62 @@ export const BookingCalendar = () => {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full mb-4"
-              onClick={goToToday}
-            >
+            <Button variant="outline" size="sm" className="w-full mb-4" onClick={goToToday}>
               Today
             </Button>
-            
+
             {processEventsForCustomList().map((day) => (
-              <div key={format(day.date, 'yyyy-MM-dd')} className="mb-4">
+              <div key={format(day.date, "yyyy-MM-dd")} className="mb-4">
                 {/* Day header */}
                 <div className="py-2 px-3 bg-slate-100 rounded-t-md">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold">{format(day.date, 'EEEE')}</span>
-                    <span>{format(day.date, 'MMMM d, yyyy')}</span>
+                    <span className="font-bold">{format(day.date, "EEEE")}</span>
+                    <span>{format(day.date, "MMMM d, yyyy")}</span>
                   </div>
                 </div>
-                
+
                 {/* Time slots for the day */}
                 <div className="border border-slate-200 rounded-b-md">
-                  {day.slots.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()).map((slot) => {
-                    const currentStudents = slot.lessons?.length || 0;
-                    const isAvailable = currentStudents < slot.maxStudents;
-                    
-                    return (
-                      <div 
-                        key={slot.id}
-                        className={`p-3 border-b last:border-0 cursor-pointer transition-colors ${
-                          isAvailable ? 'hover:bg-green-50' : 'hover:bg-red-50'
-                        }`}
-                        onClick={() => handleCustomSlotClick(slot)}
-                      >
-                        <div className="flex justify-between">
-                          <div className="font-medium">
-                            {`${formatTimeDisplay(slot.startTime)} - ${formatTimeDisplay(slot.endTime)}`}
+                  {day.slots
+                    .sort(
+                      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+                    )
+                    .map((slot) => {
+                      const currentStudents = slot.lessons?.length || 0;
+                      const isAvailable = currentStudents < slot.maxStudents;
+
+                      return (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          className={`p-3 border-b last:border-0 cursor-pointer transition-colors w-full text-left ${
+                            isAvailable ? "hover:bg-green-50" : "hover:bg-red-50"
+                          }`}
+                          onClick={() => handleCustomSlotClick(slot)}
+                          disabled={!isAvailable || !slot.isActive}
+                        >
+                          <div className="flex justify-between">
+                            <div className="font-medium">
+                              {`${formatTimeDisplay(
+                                typeof slot.startTime === "object"
+                                  ? format(slot.startTime, "yyyy-MM-dd'T'HH:mm:ss")
+                                  : slot.startTime,
+                              )} - ${formatTimeDisplay(
+                                typeof slot.endTime === "object"
+                                  ? format(slot.endTime, "yyyy-MM-dd'T'HH:mm:ss")
+                                  : slot.endTime,
+                              )}`}
+                            </div>
+                            <div className={isAvailable ? "text-green-600" : "text-red-600"}>
+                              {`${currentStudents}/${slot.maxStudents} students`}
+                            </div>
                           </div>
-                          <div className={isAvailable ? 'text-green-600' : 'text-red-600'}>
-                            {`${currentStudents}/${slot.maxStudents} students`}
+                          <div className="text-sm text-gray-600">
+                            {slot.rink.name} {isAvailable ? "- Available" : "- Full"}
                           </div>
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {slot.rink.name} {isAvailable ? '- Available' : '- Full'}
-                        </div>
-                      </div>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
                 </div>
               </div>
             ))}
@@ -279,46 +386,46 @@ export const BookingCalendar = () => {
               plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
               initialView="timeGridWeek"
               events={events}
-              timeZone="UTC" // Keep this as UTC to maintain exact times
+              timeZone="UTC" // Keep this as UTC since data is stored in UTC
               headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'timeGridWeek,dayGridMonth'
+                left: "prev,next today",
+                center: "title",
+                right: "timeGridWeek,dayGridMonth",
               }}
               selectable={true}
               select={handleDateSelect}
               eventClick={handleEventClick}
-              slotMinTime="05:00:00"  // Start at 5am
-              slotMaxTime="18:00:00"  // End at 6pm
+              slotMinTime="05:00:00" // Start at 5am
+              slotMaxTime="18:00:00" // End at 6pm
               businessHours={{
                 daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
                 startTime: "05:00",
                 endTime: "18:00",
               }}
-              allDaySlot={false} 
+              allDaySlot={false}
               height="100%"
               displayEventTime={true}
               eventTimeFormat={{
-                hour: '2-digit',
-                minute: '2-digit',
+                hour: "2-digit",
+                minute: "2-digit",
                 omitZeroMinute: false,
-                hour12: false
+                hour12: false,
               }}
               eventContent={(arg) => {
-                const start = new Date(arg.event.startStr);
-                const end = new Date(arg.event.endStr);
-                
-                // Use UTC hours to avoid timezone conversion
-                const startFormatted = `${start.getUTCHours()}:${String(start.getUTCMinutes()).padStart(2, '0')}`;
-                const endFormatted = `${end.getUTCHours()}:${String(end.getUTCMinutes()).padStart(2, '0')}`;
-                
+                // Create a clean event display with correct formatting
+                const startTime = formatTimeDisplay(arg.event.startStr);
+                const endTime = formatTimeDisplay(arg.event.endStr);
+                const title = arg.event.title;
+                const rinkName = arg.event.extendedProps.rinkName || "";
+
                 return {
                   html: `
                     <div class="fc-event-main-frame">
-                      <div class="fc-event-time">${startFormatted} - ${endFormatted}</div>
-                      <div class="fc-event-title">${arg.event.title}</div>
+                      <div class="fc-event-time">${startTime} - ${endTime}</div>
+                      <div class="fc-event-title">${title}</div>
+                      <div class="fc-event-subtitle">${rinkName}</div>
                     </div>
-                  `
+                  `,
                 };
               }}
             />

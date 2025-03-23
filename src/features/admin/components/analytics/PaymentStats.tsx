@@ -1,12 +1,12 @@
 // Create src/features/admin/components/analytics/PaymentStats.tsx
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { api } from '@/lib/api';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { formatCurrency } from '@/lib/utils';
-import { CreditCard, CheckCircle, Clock } from 'lucide-react';
+import { formatCurrency } from "@/lib/utils";
+import { CreditCard, CheckCircle, Clock } from "lucide-react";
 
 export const PaymentStats = () => {
   const { data, isLoading, error } = api.admin.payment.getPaymentStats.useQuery();
@@ -14,7 +14,7 @@ export const PaymentStats = () => {
   React.useEffect(() => {
     if (error) {
       toast.error("Error loading payment stats", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
@@ -50,7 +50,7 @@ export const PaymentStats = () => {
               <p className="text-2xl font-bold">{data?.totalPayments || 0}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-yellow-100 rounded-full">
               <Clock className="h-5 w-5 text-yellow-600" />
@@ -60,7 +60,7 @@ export const PaymentStats = () => {
               <p className="text-2xl font-bold">{formatCurrency(data?.pendingAmount || 0)}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-green-100 rounded-full">
               <CheckCircle className="h-5 w-5 text-green-600" />

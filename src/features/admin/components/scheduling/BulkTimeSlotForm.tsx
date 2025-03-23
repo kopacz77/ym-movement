@@ -1,7 +1,8 @@
 // src/features/admin/components/scheduling/BulkTimeSlotForm.tsx
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import type { FC } from "react"; // Change to type import
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,39 +31,42 @@ import { addDays, differenceInDays, isAfter, parse } from "date-fns";
 
 // Create a custom validator for start and end dates
 const dateRangeValidator = (startDate: string, endDate: string) => {
-  if (!startDate || !endDate) return true; // Let the required validation handle empty values
-  
+  if (!startDate || !endDate) { return true; // Let the required validation handle empty values
+}
+
   try {
-    const start = parse(startDate, 'yyyy-MM-dd', new Date());
-    const end = parse(endDate, 'yyyy-MM-dd', new Date());
-    
+    const start = parse(startDate, "yyyy-MM-dd", new Date());
+    const end = parse(endDate, "yyyy-MM-dd", new Date());
+
     // Ensure end date is not before start date
     if (isAfter(start, end)) {
       return false;
     }
-    
+
     // Check if date range exceeds 30 days
     const dayDifference = differenceInDays(end, start);
     return dayDifference <= 30;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 };
 
-const bulkTimeSlotSchema = z.object({
-  rinkId: z.string().min(1, "Please select a rink"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  dailyStartTime: z.string().min(1, "Daily start time is required"),
-  dailyEndTime: z.string().min(1, "Daily end time is required"),
-  slotDuration: z.coerce.number().min(15, "Minimum duration is 15 minutes"),
-  breakStartTime: z.string().optional(),
-  breakDuration: z.coerce.number().optional(),
-  maxStudents: z.coerce.number().min(1, "At least 1 student required"),
-  daysOfWeek: z.array(z.number()).min(1, "Select at least one day"),
-}).refine((data) => dateRangeValidator(data.startDate, data.endDate), {
-  path: ["endDate"], // Show the error on the end date field
-});
+const bulkTimeSlotSchema = z
+  .object({
+    rinkId: z.string().min(1, "Please select a rink"),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().min(1, "End date is required"),
+    dailyStartTime: z.string().min(1, "Daily start time is required"),
+    dailyEndTime: z.string().min(1, "Daily end time is required"),
+    slotDuration: z.coerce.number().min(15, "Minimum duration is 15 minutes"),
+    breakStartTime: z.string().optional(),
+    breakDuration: z.coerce.number().optional(),
+    maxStudents: z.coerce.number().min(1, "At least 1 student required"),
+    daysOfWeek: z.array(z.number()).min(1, "Select at least one day"),
+  })
+  .refine((data) => dateRangeValidator(data.startDate, data.endDate), {
+    path: ["endDate"], // Show the error on the end date field
+  });
 
 type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>;
 
@@ -71,25 +75,23 @@ interface BulkTimeSlotFormProps {
   onSubmitAction: () => void;
 }
 
-export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
-  rinks,
-  onSubmitAction,
-}) => {
+export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAction }) => {
   const utils = api.useUtils();
-  
+
   // Use the schedule namespace for bulk time slot creation.
   const createBulkSlots = api.admin.schedule.createBulkTimeSlots.useMutation({
     onSuccess: (data) => {
       toast("Success", {
-        description: `${data.count} time slots created successfully`
+        description: `${data.count} time slots created successfully`,
       });
       // Invalidate the getTimeSlots query.
       utils.admin.schedule.getTimeSlots.invalidate();
       onSubmitAction();
     },
-    onError: (error: any) => {
+    onError: (error) => {
+      // Remove the explicit type and let TypeScript infer it
       toast.error("Error", {
-        description: error.message
+        description: error.message,
       });
     },
   });
@@ -97,13 +99,13 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
   const form = useForm<BulkTimeSlotFormValues>({
     resolver: zodResolver(bulkTimeSlotSchema),
     defaultValues: {
-      rinkId: '',
-      startDate: '',
-      endDate: '',
-      dailyStartTime: '',
-      dailyEndTime: '',
+      rinkId: "",
+      startDate: "",
+      endDate: "",
+      dailyStartTime: "",
+      dailyEndTime: "",
       slotDuration: 60,
-      breakStartTime: '',
+      breakStartTime: "",
       breakDuration: 0,
       maxStudents: 1,
       daysOfWeek: [],
@@ -116,9 +118,9 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
     // Simply pass the raw form values to the API
     // Tell the user what times they'll see
     toast.info("Creating slots", {
-      description: `From ${values.dailyStartTime} to ${values.dailyEndTime} - EXACT times shown, no timezone conversion`
+      description: `From ${values.dailyStartTime} to ${values.dailyEndTime} - EXACT times shown, no timezone conversion`,
     });
-    
+
     createBulkSlots.mutate(values);
   };
 
@@ -172,7 +174,9 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date <span className="text-sm text-muted-foreground"></span></FormLabel>
+                <FormLabel>
+                  End Date <span className="text-sm text-muted-foreground" />
+                </FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -192,9 +196,7 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Exact time as shown - no timezone conversion
-                </FormDescription>
+                <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -208,9 +210,7 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Exact time as shown - no timezone conversion
-                </FormDescription>
+                <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -326,9 +326,7 @@ export const BulkTimeSlotForm: React.FC<BulkTimeSlotFormProps> = ({
                             }}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-normal">
-                          {day.label}
-                        </FormLabel>
+                        <FormLabel className="text-sm font-normal">{day.label}</FormLabel>
                       </FormItem>
                     )}
                   />

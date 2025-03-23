@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -36,21 +37,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Create an abort controller for cleanup
     const abortController = new AbortController();
     const signal = abortController.signal;
-    
+
     const fetchUser = async () => {
       if (session?.user) {
         try {
           const response = await fetch("/api/auth/me", { signal });
-          
+
           if (!response.ok) {
             // Handle failed fetch
             await signOut({ redirect: false });
             router.push("/auth/login");
             return;
           }
-          
+
           const userData = await response.json();
-          
+
           // Only update state if component is still mounted
           if (!signal.aborted) {
             setUser(userData);
@@ -71,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else if (status === "unauthenticated") {
       setUser(null);
     }
-    
+
     // Cleanup function
     return () => {
       abortController.abort();

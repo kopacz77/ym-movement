@@ -1,93 +1,115 @@
-// Updated src/app/api/auth/signup/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { hash } from "bcrypt";
-import { prisma } from "@/lib/prisma";
+// src/app/api/auth/signup/route.ts
 import { z } from "zod";
-import { Level } from "@prisma/client";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import bcrypt from "bcrypt";
+import { prisma } from "@/lib/prisma";
+import { sendWelcomeEmail } from "@/lib/email";
 
-// Validation schema
 const signupSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z.string().optional(),
-  level: z.nativeEnum(Level),
-  parentConsent: z.boolean().optional(), // Added properly inside the schema
+  level: z.enum([
+    "PRE_PRELIMINARY",
+    "PRELIMINARY",
+    "PRE_JUVENILE",
+    "JUVENILE",
+    "INTERMEDIATE",
+    "NOVICE",
+    "JUNIOR",
+    "SENIOR",
+  ]),
+  maxLessonsPerWeek: z.number().int().positive().default(3),
+  emergencyContact: z
+    .object({
+      name: z.string(),
+      phone: z.string(),
+      relationship: z.string(),
+    })
+    .optional(),
+  parentConsent: z.boolean().default(false),
 });
 
 export async function POST(req: NextRequest) {
   try {
+    // Parse request body
     const body = await req.json();
-    
-    // Validate request body
-    const validatedData = signupSchema.parse(body);
-    
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
-    });
-    
-    if (existingUser) {
+    const result = signupSchema.safeParse(body);
+
+    if (!result.success) {
+      // Return validation errors
       return NextResponse.json(
-        { message: "User already exists" }, 
-        { status: 409 }
+        { message: "Invalid data", errors: result.error.format() },
+        { status: 400 },
       );
     }
-    
+
+    const {
+      name,
+      email,
+      password,
+      phone,
+      level,
+      maxLessonsPerWeek,
+      emergencyContact,
+      // parentConsent removed from destructuring
+    } = result.data;
+
+    // Check if email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (existingUser) {
+      return NextResponse.json({ message: "Email already in use" }, { status: 400 });
+    }
+
     // Hash password
-    const hashedPassword = await hash(validatedData.password, 10);
-    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create user and student profile in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Create the user
-      const user = await tx.user.create({
+    const user = await prisma.$transaction(async (prisma) => {
+      // Create user
+      const newUser = await prisma.user.create({
         data: {
-          name: validatedData.name,
-          email: validatedData.email,
+          name,
+          email: email.toLowerCase(),
           password: hashedPassword,
           role: "STUDENT",
+          student: {
+            create: {
+              phone,
+              level,
+              maxLessonsPerWeek,
+              emergencyContact,
+              // parentConsent field removed - not in Prisma schema
+            },
+          },
+        },
+        include: {
+          student: true,
         },
       });
-      
-      // Create the student profile
-      const student = await tx.student.create({
-        data: {
-          userId: user.id,
-          phone: validatedData.phone,
-          level: validatedData.level,
-          maxLessonsPerWeek: 3, // Default value
-          isApproved: false,
-          parentConsent: validatedData.parentConsent || false, // Use the validated data
-        },
-      });
-      
-      return { user, student };
+
+      // Send welcome email
+      await sendWelcomeEmail(newUser.email, newUser.name || "");
+
+      return newUser;
     });
-    
-    // Remove password from result
-    const { password, ...user } = result.user;
-    
+
+    // Return success with user data (excluding password)
+    const { password: _, ...userData } = user;
     return NextResponse.json(
-      { 
-        message: "User created successfully", 
-        user, 
-        student: result.student 
-      }, 
-      { status: 201 }
+      {
+        message: "Account created successfully",
+        user: userData,
+      },
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating user:", error);
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Validation error", errors: error.errors },
-        { status: 400 }
-      );
-    }
-    
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Failed to create account" }, { status: 500 });
   }
 }

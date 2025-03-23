@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  name          String?
-  password      String?
-  role          Role          @default(STUDENT)
-  emailVerified DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  student       Student?
-  createdNotes  StudentNote[]
+  id                 String               @id @default(cuid())
+  email              String               @unique
+  name               String?
+  password           String?
+  role               Role                 @default(STUDENT)
+  emailVerified      DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  student            Student?
+  createdNotes       StudentNote[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model PasswordResetToken {
@@ -26,29 +27,35 @@ model PasswordResetToken {
   token     String   @unique
   expires   DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
 }
 
 model Student {
-  id                String        @id @default(cuid())
-  userId            String        @unique
-  phone             String?
-  maxLessonsPerWeek Int           @default(3)
-  notes             String?
-  level             Level         @default(PRELIMINARY)
-  emergencyContact  Json?
-  isApproved        Boolean       @default(false)
-  approvedAt        DateTime?
-  approvedById      String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  parentConsent     Boolean       @default(false)
-  lessons           Lesson[]
-  payments          Payment[]
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  studentNotes      StudentNote[]
+  id                   String        @id @default(cuid())
+  userId               String        @unique
+  phone                String?
+  maxLessonsPerWeek    Int           @default(3)
+  notes                String?
+  level                Level         @default(PRELIMINARY)
+  emergencyContact     Json?
+  isApproved           Boolean       @default(false)
+  approvedAt           DateTime?
+  approvedById         String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  parentConsent        Boolean       @default(false)
+  customPricingEnabled Boolean       @default(false)
+  privateLessonPrice   Float?
+  groupLessonPrice     Float?
+  choreographyPrice    Float?
+  competitionPrepPrice Float?
+  lessons              Lesson[]
+  payments             Payment[]
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentNotes         StudentNote[]
 }
 
 model StudentNote {
@@ -154,6 +161,16 @@ model Settings {
   value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model DefaultPricing {
+  id                 String   @id @default(cuid())
+  privateLessonPrice Float    @default(75)
+  groupLessonPrice   Float    @default(45)
+  choreographyPrice  Float    @default(90)
+  competitionPrice   Float    @default(95)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
 }
 
 model RecurringPattern {

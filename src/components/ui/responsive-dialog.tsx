@@ -1,7 +1,7 @@
 // src/components/ui/responsive-dialog.tsx
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -27,13 +27,10 @@ export function ResponsiveDialogContent({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogContent>) {
   const isMobile = useIsMobile();
-  
+
   return (
     <DialogContent
-      className={cn(
-        isMobile ? "w-[95%] max-w-lg p-4 rounded-lg" : "",
-        className
-      )}
+      className={cn(isMobile ? "w-[95%] max-w-lg p-4 rounded-lg" : "", className)}
       {...props}
     >
       {children}
@@ -46,13 +43,8 @@ export function ResponsiveDialogHeader({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogHeader>) {
   const isMobile = useIsMobile();
-  
-  return (
-    <DialogHeader
-      className={cn(isMobile ? "mb-4 space-y-1.5" : "", className)}
-      {...props}
-    />
-  );
+
+  return <DialogHeader className={cn(isMobile ? "mb-4 space-y-1.5" : "", className)} {...props} />;
 }
 
 export function ResponsiveDialogTitle({
@@ -60,13 +52,8 @@ export function ResponsiveDialogTitle({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogTitle>) {
   const isMobile = useIsMobile();
-  
-  return (
-    <DialogTitle
-      className={cn(isMobile ? "text-lg" : "", className)}
-      {...props}
-    />
-  );
+
+  return <DialogTitle className={cn(isMobile ? "text-lg" : "", className)} {...props} />;
 }
 
 export function ResponsiveDialogDescription({
@@ -74,13 +61,8 @@ export function ResponsiveDialogDescription({
   ...props
 }: React.ComponentPropsWithoutRef<typeof DialogDescription>) {
   const isMobile = useIsMobile();
-  
-  return (
-    <DialogDescription
-      className={cn(isMobile ? "text-sm" : "", className)}
-      {...props}
-    />
-  );
+
+  return <DialogDescription className={cn(isMobile ? "text-sm" : "", className)} {...props} />;
 }
 
 // Responsive dialog footer component
@@ -95,13 +77,13 @@ export function ResponsiveDialogFooter({
   ...props
 }: ResponsiveDialogFooterProps) {
   const isMobile = useIsMobile();
-  
+
   return (
     <div
       className={cn(
         "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
         isMobile ? "gap-3 mt-4" : "",
-        className
+        className,
       )}
       {...props}
     >

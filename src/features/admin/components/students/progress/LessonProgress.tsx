@@ -1,20 +1,27 @@
 // features/admin/components/students/progress/LessonProgress.tsx
 "use client";
 
-import React, { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { api } from '@/lib/api';
+import { useEffect, type FC } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { format } from 'date-fns';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { format } from "date-fns";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 interface LessonProgressProps {
   studentId: string;
 }
 
-type LessonStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+type LessonStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
 
 // Use type instead of interface to better match the API return type
 type APILesson = {
@@ -52,35 +59,38 @@ type APILesson = {
 };
 
 export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => {
-
-  const { data: lessons, isLoading, error } = api.admin.schedule.getLessonsByDate.useQuery({ 
+  const {
+    data: lessons,
+    isLoading,
+    error,
+  } = api.admin.schedule.getLessonsByDate.useQuery({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
-    endDate: new Date()
+    endDate: new Date(),
   });
 
   // Filter lessons for the specific student
-  const studentLessons = lessons?.filter(lesson => 
-    lesson.student?.user?.id === studentId && lesson.status !== 'CANCELLED'
+  const studentLessons = lessons?.filter(
+    (lesson) => lesson.student?.user?.id === studentId && lesson.status !== "CANCELLED",
   );
 
   useEffect(() => {
     if (error) {
       toast.error("Error loading lesson progress", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
 
   const getStatusColor = (status: LessonStatus) => {
     switch (status) {
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
-      case 'SCHEDULED':
-        return 'bg-blue-100 text-blue-800';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
+      case "COMPLETED":
+        return "bg-green-100 text-green-800";
+      case "SCHEDULED":
+        return "bg-blue-100 text-blue-800";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -93,7 +103,9 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
         {isLoading ? (
           <div className="text-center py-4">Loading progress...</div>
         ) : !studentLessons?.length ? (
-          <div className="text-center py-4 text-muted-foreground">No lesson progress recorded yet</div>
+          <div className="text-center py-4 text-muted-foreground">
+            No lesson progress recorded yet
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -109,31 +121,27 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
             <TableBody>
               {studentLessons.map((lesson: APILesson) => (
                 <TableRow key={lesson.id}>
-                  <TableCell>{format(new Date(lesson.startTime), 'PP')}</TableCell>
+                  <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
                   <TableCell>
-                    {format(new Date(lesson.startTime), 'p')} - {format(new Date(lesson.endTime), 'p')}
+                    {format(new Date(lesson.startTime), "p")} -{" "}
+                    {format(new Date(lesson.endTime), "p")}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {lesson.status === 'COMPLETED' ? (
+                      {lesson.status === "COMPLETED" ? (
                         <CheckCircle2 className="h-5 w-5 text-green-500" />
                       ) : (
                         <XCircle className="h-5 w-5 text-red-500" />
                       )}
-                      <Badge 
-                        variant="default"
-                        className={getStatusColor(lesson.status)}
-                      >
+                      <Badge variant="default" className={getStatusColor(lesson.status)}>
                         {lesson.status}
                       </Badge>
                     </div>
                   </TableCell>
-                  <TableCell>{lesson.type.replace('_', ' ')}</TableCell>
+                  <TableCell>{lesson.type.replace("_", " ")}</TableCell>
                   <TableCell>{lesson.rink.name}</TableCell>
                   <TableCell className="max-w-xs">
-                    <p className="text-sm text-muted-foreground truncate">
-                      {lesson.notes ?? '-'}
-                    </p>
+                    <p className="text-sm text-muted-foreground truncate">{lesson.notes ?? "-"}</p>
                   </TableCell>
                 </TableRow>
               ))}

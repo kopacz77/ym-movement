@@ -1,74 +1,71 @@
 // src/app/api/auth/forgot-password/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
-import crypto from 'crypto';
-import { sendPasswordResetEmail } from '@/lib/email';
-
-const requestSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-});
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { generateResetToken } from "@/lib/auth";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const result = requestSchema.safeParse(body);
+    const { email } = await req.json();
 
-    if (!result.success) {
-      return NextResponse.json(
-        { message: 'Invalid email format' },
-        { status: 400 }
-      );
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const { email } = result.data;
-
-    // Find the user
+    // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email },
     });
 
-    // We don't want to reveal if a user exists or not, so always return success
+    // We don't want to reveal if a user exists or not for security reasons
     if (!user) {
       return NextResponse.json(
-        { message: 'If an account with that email exists, we\'ve sent a password reset link' },
-        { status: 200 }
+        { message: "If your email exists in our system, you will receive a password reset link" },
+        { status: 200 },
       );
     }
 
-    // Delete any existing tokens for this user
-    await prisma.passwordResetToken.deleteMany({
-      where: { userId: user.id },
-    });
+    try {
+      // Delete any existing reset tokens for this user
+      await prisma.$executeRaw`DELETE FROM "PasswordResetToken" WHERE "userId" = ${user.id}`;
 
-    // Generate a random token
-    const token = crypto.randomBytes(32).toString('hex');
-    
-    // Set expiry to 1 hour from now
-    const expires = new Date();
-    expires.setHours(expires.getHours() + 1);
+      // Generate reset token
+      const token = generateResetToken();
 
-    // Save the token
-    await prisma.passwordResetToken.create({
-      data: {
-        userId: user.id,
-        token,
-        expires,
-      },
-    });
+      // Set token expiration (24 hours from now)
+      const expires = new Date();
+      expires.setHours(expires.getHours() + 24);
 
-    // Send the email
-    await sendPasswordResetEmail(user.email, user.name || '', token);
+      // Create password reset token in database
+      await prisma.$executeRaw`
+        INSERT INTO "PasswordResetToken" ("id", "userId", "token", "expires", "createdAt")
+        VALUES (gen_random_uuid(), ${user.id}, ${token}, ${expires}, NOW())
+      `;
 
-    return NextResponse.json(
-      { message: 'Password reset email sent' },
-      { status: 200 }
-    );
+      // Construct reset URL
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+
+      // Send reset email
+      await sendPasswordResetEmail(email, user.name || "User", token);
+
+      return NextResponse.json(
+        { message: "If your email exists in our system, you will receive a password reset link" },
+        { status: 200 },
+      );
+    } catch (emailError) {
+      console.error("Failed to send password reset email:", emailError);
+
+      // Delete the token if email sending fails
+      await prisma.$executeRaw`DELETE FROM "PasswordResetToken" WHERE "userId" = ${user.id}`;
+
+      return NextResponse.json({ error: "Failed to send password reset email" }, { status: 500 });
+    }
   } catch (error) {
-    console.error('Error in password reset request:', error);
+    console.error("Password reset request error:", error);
     return NextResponse.json(
-      { message: 'Something went wrong' },
-      { status: 500 }
+      { error: "An error occurred while processing your request" },
+      { status: 500 },
     );
   }
 }

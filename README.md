@@ -104,3 +104,4 @@ Acknowledgements
 
 Built with Next.js, TRPC, Prisma, and Tailwind CSS.
 Inspired by modern management systems and the need for efficient scheduling and student administration.
+```

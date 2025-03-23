@@ -1,5 +1,5 @@
 // src/features/admin/components/students/types/index.ts
-import { Level, User, Lesson } from '@prisma/client';
+import type { Level, User, Lesson } from "@prisma/client";
 
 export interface Student {
   id: string;
@@ -66,7 +66,7 @@ export interface AttendanceData {
 }
 
 // Omit the 'notes' property from Lesson before redefining it as LessonNote[]
-export interface LessonDetails extends Omit<Lesson, 'notes'> {
+export interface LessonDetails extends Omit<Lesson, "notes"> {
   notes: LessonNote[];
   duration: number;
 }

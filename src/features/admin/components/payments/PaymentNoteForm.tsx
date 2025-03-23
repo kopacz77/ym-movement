@@ -1,14 +1,21 @@
 // src/features/admin/components/payments/PaymentNoteForm.tsx
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const noteSchema = z.object({
-  content: z.string().min(3, 'Note must be at least 3 characters'),
+  content: z.string().min(3, "Note must be at least 3 characters"),
 });
 
 type NoteFormValues = z.infer<typeof noteSchema>;
@@ -22,12 +29,12 @@ interface PaymentNoteFormProps {
 export const PaymentNoteForm: React.FC<PaymentNoteFormProps> = ({
   onSubmit,
   isSubmitting,
-  onCancel
+  onCancel,
 }) => {
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(noteSchema),
     defaultValues: {
-      content: '',
+      content: "",
     },
   });
 
@@ -45,7 +52,7 @@ export const PaymentNoteForm: React.FC<PaymentNoteFormProps> = ({
             <FormItem>
               <FormLabel>Note</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Enter payment notes here..."
                   className="min-h-[100px]"
                   {...field}
@@ -61,7 +68,7 @@ export const PaymentNoteForm: React.FC<PaymentNoteFormProps> = ({
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save Note'}
+            {isSubmitting ? "Saving..." : "Save Note"}
           </Button>
         </div>
       </form>

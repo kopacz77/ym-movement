@@ -30,13 +30,13 @@ export const StudentHeader = () => {
     try {
       await signOut({ redirect: false });
       toast("Logged out", {
-        description: "You have been successfully logged out."
+        description: "You have been successfully logged out.",
       });
-      router.push('/auth/login');
+      router.push("/auth/login");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Error", {
-        description: "There was a problem logging out."
+        description: "There was a problem logging out.",
       });
     }
   };
@@ -46,39 +46,63 @@ export const StudentHeader = () => {
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2">
           <div className="rounded-lg bg-blue-500 p-1.5">
-            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="h-5 w-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              role="img"
+            >
+              <title>Skating Icon</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
           </div>
           <span className="text-xl font-semibold">YM Movement</span>
         </div>
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden md:flex items-center gap-2 mr-4">
-            <span className="text-sm font-medium">
-              {session?.user?.name || 'Student'}
-            </span>
+            <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
           </div>
-          <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-            <Bell className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 md:h-10 md:w-10"
+            aria-label="Notifications"
+          >
+            <Bell className="h-5 w-5" aria-hidden="true">
+              <title>Notifications</title>
+            </Bell>
           </Button>
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-                <LogOut className="h-5 w-5" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 md:h-10 md:w-10"
+                aria-label="Log out"
+              >
+                <LogOut className="h-5 w-5" aria-hidden="true">
+                  <title>Logout</title>
+                </LogOut>
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className={isMobile ? "w-[90%] max-w-md mx-auto" : ""}>
               <AlertDialogHeader>
                 <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to log out? You will need to log in again to access your account.
+                  Are you sure you want to log out? You will need to log in again to access your
+                  account.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout}>
-                  Log Out
-                </AlertDialogAction>
+                <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

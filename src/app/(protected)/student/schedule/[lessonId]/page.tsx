@@ -1,15 +1,15 @@
 // app/(protected)/student/schedule/[lessonId]/page.tsx
 
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: 'Lesson Details',
-  description: 'View details about your scheduled lesson',
+  title: "Lesson Details",
+  description: "View details about your scheduled lesson",
 };
 
 // The key change: params is a Promise that must be awaited
@@ -20,9 +20,9 @@ export default async function LessonDetailsPage({
 }) {
   // Await the params - this is critical for Next.js 15.2
   const { lessonId } = await params;
-  
+
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
     return notFound();
   }
@@ -50,7 +50,7 @@ export default async function LessonDetailsPage({
     }
 
     // Ensure the logged-in user can only see their own lessons
-    if (session.user.role !== 'ADMIN' && lesson.student.userId !== session.user.id) {
+    if (session.user.role !== "ADMIN" && lesson.student.userId !== session.user.id) {
       return notFound();
     }
 
@@ -65,9 +65,9 @@ export default async function LessonDetailsPage({
             &larr; Back to Schedule
           </Link>
         </div>
-        
+
         <h1 className="text-2xl font-bold">Lesson Details</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-lg border p-4">
             <h2 className="font-semibold text-lg mb-4">Lesson Information</h2>
@@ -75,10 +75,11 @@ export default async function LessonDetailsPage({
               <div>
                 <h3 className="font-medium">Date & Time</h3>
                 <p className="text-gray-600">
-                  {startTime.toLocaleDateString()}, {startTime.toLocaleTimeString()} - {endTime.toLocaleTimeString()} ({duration} minutes)
+                  {startTime.toLocaleDateString()}, {startTime.toLocaleTimeString()} -{" "}
+                  {endTime.toLocaleTimeString()} ({duration} minutes)
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium">Location</h3>
                 <p className="text-gray-600">
@@ -86,22 +87,20 @@ export default async function LessonDetailsPage({
                 </p>
                 <p className="text-gray-600 text-sm">{lesson.rink.address}</p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium">Lesson Type</h3>
                 <p className="text-gray-600">{lesson.type}</p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium">Status</h3>
                 <p className="text-gray-600">{lesson.status}</p>
                 {lesson.cancellationReason && (
-                  <p className="text-sm text-gray-600">
-                    Reason: {lesson.cancellationReason}
-                  </p>
+                  <p className="text-sm text-gray-600">Reason: {lesson.cancellationReason}</p>
                 )}
               </div>
-              
+
               {lesson.notes && (
                 <div>
                   <h3 className="font-medium">Notes</h3>
@@ -110,7 +109,7 @@ export default async function LessonDetailsPage({
               )}
             </div>
           </div>
-          
+
           <div className="rounded-lg border p-4">
             <h2 className="font-semibold text-lg mb-4">Payment Information</h2>
             <div className="space-y-3">
@@ -118,26 +117,26 @@ export default async function LessonDetailsPage({
                 <h3 className="font-medium">Amount</h3>
                 <p className="text-gray-600">${lesson.price.toFixed(2)}</p>
               </div>
-              
+
               {lesson.payment && (
                 <>
                   <div>
                     <h3 className="font-medium">Payment Status</h3>
                     <p className="text-gray-600">{lesson.payment.status}</p>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-medium">Payment Method</h3>
                     <p className="text-gray-600">{lesson.payment.method}</p>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-medium">Reference Code</h3>
                     <p className="text-gray-600 font-mono">{lesson.payment.referenceCode}</p>
                   </div>
                 </>
               )}
-              
+
               {!lesson.payment && (
                 <p className="text-gray-600">No payment information available.</p>
               )}

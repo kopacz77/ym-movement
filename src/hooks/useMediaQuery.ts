@@ -1,7 +1,7 @@
 // src/hooks/useMediaQuery.ts
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * Custom hook for responsive media queries
@@ -11,10 +11,10 @@ import { useState, useEffect } from 'react';
 export function useMediaQuery(query: string): boolean {
   // Initialize with a default value (false) to ensure SSR compatibility
   const [matches, setMatches] = useState(false);
-  
+
   useEffect(() => {
     // Check if window is available (client-side only)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const media = window.matchMedia(query);
 
       // Initial check
@@ -26,14 +26,14 @@ export function useMediaQuery(query: string): boolean {
       };
 
       // Add the listener
-      media.addEventListener('change', listener);
+      media.addEventListener("change", listener);
 
       // Clean up
       return () => {
-        media.removeEventListener('change', listener);
+        media.removeEventListener("change", listener);
       };
     }
-    
+
     // If window is not available (SSR), keep the default value
     return undefined;
   }, [query]);
@@ -42,7 +42,7 @@ export function useMediaQuery(query: string): boolean {
 }
 
 // Predefined media query hooks for common breakpoints
-export const useIsMobile = () => useMediaQuery('(max-width: 767px)');
-export const useIsTablet = () => useMediaQuery('(min-width: 768px) and (max-width: 1023px)');
-export const useIsDesktop = () => useMediaQuery('(min-width: 1024px)');
-export const useIsLargeDesktop = () => useMediaQuery('(min-width: 1280px)');
+export const useIsMobile = () => useMediaQuery("(max-width: 767px)");
+export const useIsTablet = () => useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+export const useIsDesktop = () => useMediaQuery("(min-width: 1024px)");
+export const useIsLargeDesktop = () => useMediaQuery("(min-width: 1280px)");

@@ -1,11 +1,12 @@
 import { toast } from "sonner";
-import { TRPCClientError } from "@trpc/client";
+import type { TRPCClientError } from "@trpc/client";
 import { useCallback } from "react";
+import type { AppRouter } from "@/server/api/roots";
 
 export function useErrorHandler() {
-  const onTRPCError = useCallback((error: TRPCClientError<any>) => {
+  const onTRPCError = useCallback((error: TRPCClientError<AppRouter>) => {
     toast.error("Error", {
-      description: error.message
+      description: error.message,
     });
   }, []);
 

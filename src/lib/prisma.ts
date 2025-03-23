@@ -1,5 +1,5 @@
 // src/lib/prisma.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 // Modify log levels to disable query logging
 const prismaClientSingleton = () => {
@@ -7,16 +7,16 @@ const prismaClientSingleton = () => {
     log: [
       // Remove 'query' from this array to stop SQL query logging
       // Use only errors and warnings
-     // {
-     //   emit: 'event',
-       // level: 'error',
-      //},
-     // {
-     //   emit: 'stdout',
-     //   level: 'warn',
-     // },
       // {
-      //   emit: 'stdout', 
+      //   emit: 'event',
+      // level: 'error',
+      //},
+      // {
+      //   emit: 'stdout',
+      //   level: 'warn',
+      // },
+      // {
+      //   emit: 'stdout',
       //   level: 'query',  // COMMENT OUT OR REMOVE THIS
       // },
     ],
@@ -24,9 +24,10 @@ const prismaClientSingleton = () => {
 };
 
 declare global {
-  var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
+  // Use a different name for the global variable to avoid conflicts
+  var globalPrisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-export const prisma = globalThis.prisma ?? prismaClientSingleton();
+export const prisma = globalThis.globalPrisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
+if (process.env.NODE_ENV !== "production") globalThis.globalPrisma = prisma;

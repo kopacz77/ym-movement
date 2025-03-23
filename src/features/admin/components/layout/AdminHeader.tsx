@@ -30,13 +30,13 @@ export const AdminHeader = () => {
     try {
       await signOut({ redirect: false });
       toast("Logged out", {
-        description: "You have been successfully logged out."
+        description: "You have been successfully logged out.",
       });
-      router.push('/auth/login');
+      router.push("/auth/login");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Error", {
-        description: "There was a problem logging out."
+        description: "There was a problem logging out.",
       });
     }
   };
@@ -52,28 +52,27 @@ export const AdminHeader = () => {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
+              <title>Scheduler Logo</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth="2"
                 d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
           </div>
           <span className="text-xl font-semibold">YM Movement</span>
         </div>
-        
+
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden md:flex items-center gap-2 mr-4">
-            <span className="text-sm font-medium">
-              {session?.user?.name || 'Admin'}
-            </span>
+            <span className="text-sm font-medium">{session?.user?.name || "Admin"}</span>
           </div>
-          
+
           <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
             <Bell className="h-5 w-5" />
           </Button>
-          
+
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
@@ -84,14 +83,13 @@ export const AdminHeader = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to log out? You will need to log in again to access your account.
+                  Are you sure you want to log out? You will need to log in again to access your
+                  account.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout}>
-                  Log Out
-                </AlertDialogAction>
+                <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

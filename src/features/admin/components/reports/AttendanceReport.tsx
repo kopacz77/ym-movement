@@ -1,48 +1,60 @@
 // src/features/admin/components/reports/AttendanceReport.tsx
-import React from 'react';
-import { Line, LineChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Card, CardContent } from '@/components/ui/card';
-import { api } from '@/lib/api';
+import React from "react";
+import {
+  Line,
+  LineChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { api } from "@/lib/api";
 
 interface AttendanceReportProps {
-  period: 'week' | 'month' | 'year';
+  period: "week" | "month" | "year";
 }
 
-// Define types for the API response data
-interface ActivityDataItem {
+// Define types based on the API response structure
+interface ActivityData {
   date: string;
-  attendanceRate: number;
   totalLessons: number;
   completedLessons: number;
   cancelledLessons: number;
+  byType: Record<string, number>;
+  byArea: Record<string, number>;
+}
+
+// Define the type for our chart data
+interface ActivityDataWithAttendanceRate extends ActivityData {
+  attendanceRate: number;
 }
 
 export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) => {
   // Fetch student activity data using your analytics endpoint
-  const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery({ 
-    period 
+  const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery({
+    period,
   });
 
   // Calculate averages with explicit type handling
   const averageAttendance = React.useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) return 0;
-    
-    const totalAttendance = data.reduce((sum: number, item: any) => {
-      const rate = typeof item.attendanceRate === 'number'
-        ? item.attendanceRate
-        : (item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0);
+
+    const totalAttendance = data.reduce((sum: number, item: ActivityData) => {
+      const rate = item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0;
       return sum + rate;
     }, 0);
-    
+
     return totalAttendance / data.length;
   }, [data]);
 
   const totalLessons = React.useMemo(() => {
     if (!data || !Array.isArray(data)) return 0;
-    
-    return data.reduce((sum: number, item: any) => {
-      const lessons = typeof item.totalLessons === 'number' ? item.totalLessons : 0;
-      return sum + lessons;
+
+    return data.reduce((sum: number, item: ActivityData) => {
+      return sum + item.totalLessons;
     }, 0);
   }, [data]);
 
@@ -71,11 +83,8 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) =>
   }
 
   // Map the API data to our ActivityDataItem format by computing attendanceRate
-  const safeData: ActivityDataItem[] = data.map((item: any) => ({
-    date: item.date,
-    totalLessons: item.totalLessons,
-    completedLessons: item.completedLessons,
-    cancelledLessons: item.cancelledLessons,
+  const safeData: ActivityDataWithAttendanceRate[] = data.map((item: ActivityData) => ({
+    ...item,
     attendanceRate:
       item.totalLessons > 0 ? Math.round((item.completedLessons / item.totalLessons) * 100) : 0,
   }));
@@ -85,48 +94,54 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) =>
       <ResponsiveContainer width="100%" height="80%">
         <LineChart data={safeData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis 
-            dataKey="date" 
+          <XAxis
+            dataKey="date"
             tickFormatter={(date) => {
-              return new Date(date).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
+              return new Date(date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
               });
-            }} 
+            }}
           />
           <YAxis tickFormatter={(value) => `${value}%`} />
-          <Tooltip 
+          <Tooltip
             formatter={(value, name) => [
-              `${Number(value).toFixed(1)}%`, 
-              name === 'completedLessons' ? 'Completed' : 
-              name === 'attendanceRate' ? 'Attendance Rate' :
-              name === 'cancelledLessons' ? 'Cancelled' : name
-            ]} 
-            labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
+              `${Number(value).toFixed(1)}%`,
+              name === "completedLessons"
+                ? "Completed"
+                : name === "attendanceRate"
+                  ? "Attendance Rate"
+                  : name === "cancelledLessons"
+                    ? "Cancelled"
+                    : name,
+            ]}
+            labelFormatter={(label) =>
+              new Date(label).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }
           />
           <Legend />
-          <Line 
-            type="monotone" 
-            dataKey="attendanceRate" 
-            name="Attendance Rate" 
-            stroke="#8884d8" 
+          <Line
+            type="monotone"
+            dataKey="attendanceRate"
+            name="Attendance Rate"
+            stroke="#8884d8"
             strokeWidth={2}
-            activeDot={{ r: 8 }} 
+            activeDot={{ r: 8 }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="cancelledLessons" 
-            name="Cancellations" 
-            stroke="#ff8042" 
+          <Line
+            type="monotone"
+            dataKey="cancelledLessons"
+            name="Cancellations"
+            stroke="#ff8042"
             strokeWidth={2}
           />
         </LineChart>
       </ResponsiveContainer>
-      
+
       <div className="mt-4 grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-4">

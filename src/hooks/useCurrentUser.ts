@@ -7,19 +7,19 @@ export function useCurrentUser() {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     // If we have a session and the user is a student, fetch their student profile ID
     if (session?.user && session.user.role === "STUDENT") {
       fetch("/api/auth/me")
-        .then(res => res.json())
-        .then(userData => {
+        .then((res) => res.json())
+        .then((userData) => {
           if (isMounted && userData.student?.id) {
             setStudentId(userData.student.id);
           }
         })
-        .catch(err => console.error("Error fetching user data:", err));
+        .catch((err) => console.error("Error fetching user data:", err));
     }
-    
+
     return () => {
       isMounted = false;
     };

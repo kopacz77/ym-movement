@@ -1,8 +1,8 @@
-import { Suspense } from 'react';
-import { OverviewCards } from '@/features/admin/components/analytics/OverviewCards';
-import { RevenueChart } from '@/features/admin/components/analytics/RevenueChart';
-import { StudentActivityChart } from '@/features/admin/components/analytics/StudentActivityChart';
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { Suspense } from "react";
+import { OverviewCards } from "@/features/admin/components/analytics/OverviewCards";
+import { RevenueChart } from "@/features/admin/components/analytics/RevenueChart";
+import { StudentActivityChart } from "@/features/admin/components/analytics/StudentActivityChart";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 export default function AdminDashboardPage() {
   return (

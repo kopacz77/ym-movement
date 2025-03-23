@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import { Toaster as Sonner, ToasterProps } from "sonner"
+import { Toaster as Sonner } from "sonner";
+import type { ToasterProps } from "sonner";
 
 const Toaster = (props: ToasterProps) => {
   return (
@@ -13,13 +14,12 @@ const Toaster = (props: ToasterProps) => {
           description: "group-[.toast]:text-muted-foreground",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground font-medium",
-          cancelButton:
-            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground font-medium",
+          cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground font-medium",
         },
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

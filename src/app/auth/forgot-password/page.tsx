@@ -1,15 +1,23 @@
 // src/app/auth/forgot-password/page.tsx
 "use client";
-import { useState, FormEvent } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import type { FormEvent } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -18,10 +26,10 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
@@ -29,13 +37,12 @@ export default function ForgotPasswordPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to process password reset request');
+        throw new Error(data.message || "Failed to process password reset request");
       }
 
       setSubmitted(true);
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
       toast.error("Error", {
         description: errorMessage,
       });
@@ -76,7 +83,8 @@ export default function ForgotPasswordPage() {
           ) : (
             <div className="text-center py-4">
               <p className="mb-4">
-                If an account exists with email <span className="font-medium">{email}</span>, we&apos;ve sent a password reset link.
+                If an account exists with email <span className="font-medium">{email}</span>,
+                we&apos;ve sent a password reset link.
               </p>
               <p className="text-sm text-gray-500">
                 Please check your email and follow the instructions to reset your password.

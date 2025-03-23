@@ -1,14 +1,14 @@
 // src/app/layout.tsx
-import '@/styles/globals.css';
-import { Inter } from 'next/font/google';
-import { Providers } from '@/providers';
-import { ThemeProvider } from 'next-themes';
+import "@/styles/globals.css";
+import { Inter } from "next/font/google";
+import { Providers } from "@/providers";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner"; // Add this import
 
 const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
 });
 
 export default function RootLayout({

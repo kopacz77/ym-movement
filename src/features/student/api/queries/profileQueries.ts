@@ -1,8 +1,18 @@
 // src/features/student/api/queries/profileQueries.ts
-import { z } from 'zod';
-import { createTRPCRouter, publicProcedure } from '@/lib/trpc';
-import { TRPCError } from '@trpc/server';
-import { LessonStatus } from '@prisma/client';
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { TRPCError } from "@trpc/server";
+import { LessonStatus } from "@prisma/client";
+
+// Define a proper type for the query filters
+interface LessonQueryFilters {
+  studentId: string;
+  status?: LessonStatus;
+  startTime?: {
+    gte?: Date;
+    lte?: Date;
+  };
+}
 
 export const profileRouter = createTRPCRouter({
   getStudentProfile: publicProcedure
@@ -24,18 +34,18 @@ export const profileRouter = createTRPCRouter({
 
         if (!student) {
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Student not found',
+            code: "NOT_FOUND",
+            message: "Student not found",
           });
         }
 
         return student;
       } catch (error) {
-        console.error('Error fetching student profile:', error);
+        console.error("Error fetching student profile:", error);
         if (error instanceof TRPCError) throw error;
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch student profile',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch student profile",
           cause: error,
         });
       }
@@ -53,7 +63,7 @@ export const profileRouter = createTRPCRouter({
             relationship: z.string().optional(),
           })
           .optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
@@ -75,10 +85,10 @@ export const profileRouter = createTRPCRouter({
 
         return updatedStudent;
       } catch (error) {
-        console.error('Error updating student profile:', error);
+        console.error("Error updating student profile:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update student profile',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update student profile",
           cause: error,
         });
       }
@@ -88,30 +98,30 @@ export const profileRouter = createTRPCRouter({
     .input(
       z.object({
         studentId: z.string(),
-        status: z.enum(['ALL', 'SCHEDULED', 'COMPLETED', 'CANCELLED']).optional(),
+        status: z.enum(["ALL", "SCHEDULED", "COMPLETED", "CANCELLED"]).optional(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       try {
-        const where: any = {
+        const where: LessonQueryFilters = {
           studentId: input.studentId,
         };
 
-        if (input.status && input.status !== 'ALL') {
-          where.status = input.status;
+        if (input.status && input.status !== "ALL") {
+          where.status = input.status as LessonStatus;
         }
 
         if (input.startDate || input.endDate) {
           where.startTime = {};
-        
+
           if (input.startDate) {
-            const minDate = new Date('1970-01-01'); 
+            const minDate = new Date("1970-01-01");
             where.startTime.gte = input.startDate < minDate ? minDate : input.startDate;
           }
           if (input.endDate) {
-            const maxDate = new Date('2100-01-01'); // Reasonable future limit
+            const maxDate = new Date("2100-01-01"); // Reasonable future limit
             where.startTime.lte = input.endDate > maxDate ? maxDate : input.endDate;
           }
         }
@@ -123,16 +133,16 @@ export const profileRouter = createTRPCRouter({
             payment: true,
           },
           orderBy: {
-            startTime: 'asc',
+            startTime: "asc",
           },
         });
 
         return lessons;
       } catch (error) {
-        console.error('Error fetching student lessons:', error);
+        console.error("Error fetching student lessons:", error);
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch student lessons',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch student lessons",
           cause: error,
         });
       }
@@ -155,8 +165,8 @@ export const profileRouter = createTRPCRouter({
 
         if (!student) {
           throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Student not found',
+            code: "NOT_FOUND",
+            message: "Student not found",
           });
         }
 
@@ -165,30 +175,26 @@ export const profileRouter = createTRPCRouter({
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
-        
+
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
 
         const thisWeekLessons = allLessons.filter(
-          lesson => 
+          (lesson) =>
             lesson.startTime >= startOfWeek &&
             lesson.startTime <= endOfWeek &&
-            lesson.status !== LessonStatus.CANCELLED
+            lesson.status !== LessonStatus.CANCELLED,
         );
 
         // Calculate stats
         const upcoming = allLessons.filter(
-          l => l.startTime > now && l.status === LessonStatus.SCHEDULED
+          (l) => l.startTime > now && l.status === LessonStatus.SCHEDULED,
         ).length;
-        
-        const completed = allLessons.filter(
-          l => l.status === LessonStatus.COMPLETED
-        ).length;
-        
-        const cancelled = allLessons.filter(
-          l => l.status === LessonStatus.CANCELLED
-        ).length;
+
+        const completed = allLessons.filter((l) => l.status === LessonStatus.COMPLETED).length;
+
+        const cancelled = allLessons.filter((l) => l.status === LessonStatus.CANCELLED).length;
 
         return {
           total: allLessons.length,
@@ -199,11 +205,11 @@ export const profileRouter = createTRPCRouter({
           maxAllowed: student.maxLessonsPerWeek,
         };
       } catch (error) {
-        console.error('Error calculating student lesson stats:', error);
+        console.error("Error calculating student lesson stats:", error);
         if (error instanceof TRPCError) throw error;
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to calculate student lesson stats',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to calculate student lesson stats",
           cause: error,
         });
       }

@@ -1,11 +1,11 @@
 // src/features/student/components/dashboard/LessonSummary.tsx
 "use client";
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { api } from '@/lib/api';
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Progress } from '@/components/ui/progress';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Progress } from "@/components/ui/progress";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export const LessonSummary = () => {
   const { id: studentId } = useCurrentUser();
@@ -18,26 +18,28 @@ export const LessonSummary = () => {
     }
   }, [studentId]);
 
-  const { data: stats, isLoading, error } = api.student.profile.getStudentLessonStats.useQuery(
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = api.student.profile.getStudentLessonStats.useQuery(
     { studentId },
-    { 
+    {
       enabled: isReady && !!studentId,
-      retry: false 
-    }
+      retry: false,
+    },
   );
 
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
       toast.error("Error loading lesson stats", {
-        description: error.message
+        description: error.message,
       });
     }
   }, [error]);
 
-  const weeklyProgressPercentage = stats 
-    ? (stats.thisWeekCount / stats.maxAllowed) * 100 
-    : 0;
+  const weeklyProgressPercentage = stats ? (stats.thisWeekCount / stats.maxAllowed) * 100 : 0;
 
   // Show loading state when either:
   // 1. We don't have a studentId yet
@@ -52,9 +54,9 @@ export const LessonSummary = () => {
       <CardContent>
         {showLoading ? (
           <div className="animate-pulse space-y-3">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-4 bg-gray-200 rounded" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
           </div>
         ) : (
           <div className="space-y-6">
@@ -72,15 +74,18 @@ export const LessonSummary = () => {
                 <span className="text-sm text-muted-foreground">Cancelled</span>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Weekly Lessons</span>
-                <span>{stats?.thisWeekCount || 0} / {stats?.maxAllowed || 0}</span>
+                <span>
+                  {stats?.thisWeekCount || 0} / {stats?.maxAllowed || 0}
+                </span>
               </div>
               <Progress value={weeklyProgressPercentage} className="h-2" />
               <p className="text-xs text-muted-foreground">
-                You have {Math.max(0, (stats?.maxAllowed || 0) - (stats?.thisWeekCount || 0))} lessons remaining this week
+                You have {Math.max(0, (stats?.maxAllowed || 0) - (stats?.thisWeekCount || 0))}{" "}
+                lessons remaining this week
               </p>
             </div>
           </div>

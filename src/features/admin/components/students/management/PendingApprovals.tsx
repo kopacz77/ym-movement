@@ -1,160 +1,195 @@
 // src/features/admin/components/students/management/PendingApprovals.tsx
 "use client";
-
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import type React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/date';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { StudentForm } from '@/features/admin/components/students/profile/StudentForm';
+import { format } from "date-fns";
+import { AlertCircle, Check, Clock } from "lucide-react";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import type { AppRouter } from "@/lib/root";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const PendingApprovals = () => {
-  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
-  const utils = api.useUtils(); // Get tRPC utils for invalidation
-  
-  // Use the student namespace for pending approvals
-  const { data: pendingStudents, isLoading, error } = api.admin.student.getPendingApprovals.useQuery(
-    undefined,
-  );
-  
-  // Handle errors with useEffect
-  useEffect(() => {
-    if (error) {
-      toast.error("Error loading pending approvals", {
-        description: error.message
-      });
-    }
-  }, [error]);
+// Define proper types
+type StudentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
-  // Approval mutation
-  const approveStudent = api.admin.student.approveStudent.useMutation({
-    onSuccess: (data) => {
-      toast("Success", {
-        description: `Student ${data?.user?.name || 'unknown'} approved successfully`
-      });
-      // Invalidate the query to refresh the data
-      utils.admin.student.getPendingApprovals.invalidate();
+interface User {
+  name: string | null;
+  email: string;
+}
+
+interface StudentData {
+  id: string;
+  user: User;
+  status: StudentStatus;
+  createdAt: string | Date;
+}
+
+export const PendingApprovals: React.FC = () => {
+  const queryClient = useQueryClient();
+  const pendingApprovalKey = ["admin", "student", "getPendingApprovals"];
+
+  // Fetch pending approvals from API
+  const { data: pendingStudents, isLoading } = api.admin.student.getPendingApprovals.useQuery();
+
+  // Define mutation for approving students
+  const approveStudentMutation = api.admin.student.approveStudent.useMutation({
+    onSuccess: () => {
+      toast.success("Student approved successfully");
+      // Invalidate query to refetch data
+      queryClient.invalidateQueries({ queryKey: pendingApprovalKey });
     },
-    onError: (err) => {
-      toast.error("Error", {
-        description: err.message
+    onError: (error: TRPCClientErrorLike<AppRouter>) => {
+      toast.error("Failed to approve student", {
+        description: error.message,
       });
     },
   });
 
-  const handleReview = (student: any) => {
-    setSelectedStudent(student);
-    setIsReviewDialogOpen(true);
+  // Define mutation for rejecting students
+  const rejectStudentMutation = api.admin.student.approveStudent.useMutation({
+    onSuccess: () => {
+      toast.success("Application rejected");
+      // Invalidate query to refetch data
+      queryClient.invalidateQueries({ queryKey: pendingApprovalKey });
+    },
+    onError: (error: TRPCClientErrorLike<AppRouter>) => {
+      toast.error("Failed to reject application", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Handlers
+  const handleApprove = (studentId: string) => {
+    approveStudentMutation.mutate({ studentId });
   };
 
-  const handleApprove = (studentId: string, studentName: string) => {
-    toast("Processing", {
-      description: `Approving student ${studentName}...`
-    });
-    
-    approveStudent.mutate(
-      { studentId },
-      {
-        onSuccess: () => {
-          toast("Success", {
-            description: `Student ${studentName} approved successfully`
-          });
-          
-          // Force a refresh
-          utils.admin.student.getPendingApprovals.invalidate();
-        }
-      }
-    );
+  const handleReject = (studentId: string) => {
+    if (window.confirm("Are you sure you want to reject this application?")) {
+      rejectStudentMutation.mutate({ studentId });
+    }
   };
 
+  // Format date for display
+  const formatDate = (dateString: string | Date) => {
+    return format(new Date(dateString), "MMM dd, yyyy");
+  };
+
+  // Status badge component
+  const getStatusBadge = (status: StudentStatus) => {
+    switch (status) {
+      case "PENDING":
+        return (
+          <div className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
+            <Clock className="h-3.5 w-3.5" />
+            <span>Pending</span>
+          </div>
+        );
+      case "APPROVED":
+        return (
+          <div className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+            <Check className="h-3.5 w-3.5" />
+            <span>Approved</span>
+          </div>
+        );
+      case "REJECTED":
+        return (
+          <div className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800">
+            <AlertCircle className="h-3.5 w-3.5" />
+            <span>Rejected</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Loading state
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pending Approvals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-24">
-            Loading...
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center p-4">
+        <p>Loading pending registrations...</p>
+      </div>
     );
   }
 
-  if (!pendingStudents || pendingStudents.length === 0) {
+  // Extract students array or create empty array if missing
+  interface StudentsResponse {
+    students: StudentData[];
+  }
+
+  function isStudentsResponse(data: unknown): data is StudentsResponse {
+    return data !== null && typeof data === "object" && "students" in data;
+  }
+
+  const students = Array.isArray(pendingStudents)
+    ? pendingStudents
+    : isStudentsResponse(pendingStudents)
+      ? pendingStudents.students
+      : [];
+
+  // No data state
+  if (!students.length) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pending Approvals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-24 text-muted-foreground">
-            No pending approvals
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center p-4 border rounded-md">
+        <p className="text-muted-foreground">No pending registrations at this time.</p>
+      </div>
     );
   }
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Pending Approvals</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {pendingStudents.map((student) => (
-              <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">{student.user?.name || "Unnamed"}</p>
-                    <Badge>New Registration</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{student.user?.email || "No email"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Registered on {formatDate(new Date(student.createdAt))}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => handleReview(student)}>
-                    Review
-                  </Button>
-                  <Button 
-                    onClick={() => handleApprove(student.id, student.user?.name || "Student")}
-                    disabled={approveStudent.isPending}
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Pending Student Registrations</h2>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Registered On</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {students.map((student: StudentData) => (
+            <TableRow key={student.id}>
+              <TableCell className="font-medium">{student.user.name}</TableCell>
+              <TableCell>{student.user.email}</TableCell>
+              <TableCell>{formatDate(student.createdAt)}</TableCell>
+              <TableCell>{getStatusBadge(student.status)}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleApprove(student.id)}
+                    disabled={student.status !== "PENDING" || approveStudentMutation.isPending}
                   >
-                    {approveStudent.isPending ? "Processing..." : "Approve"}
+                    Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleReject(student.id)}
+                    disabled={student.status !== "PENDING" || rejectStudentMutation.isPending}
+                  >
+                    Reject
                   </Button>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Review Student</DialogTitle>
-          </DialogHeader>
-          {selectedStudent && (
-            <StudentForm 
-              student={selectedStudent}
-              onSubmitAction={() => {
-                setIsReviewDialogOpen(false);
-                // Invalidate the query to refresh the data
-                utils.admin.student.getPendingApprovals.invalidate();
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };

@@ -1,50 +1,93 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { api } from '@/lib/api';
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Textarea } from '@/components/ui/textarea';
-import { Level } from '@prisma/client';
+import { Textarea } from "@/components/ui/textarea";
+import { Level } from "@prisma/client";
 
 // Updated schema to match the expected API types - making emergencyContact properties optional
 const studentSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   level: z.nativeEnum(Level),
-  maxLessonsPerWeek: z.coerce.number().min(1, 'Minimum 1 hour per week'),
-  emergencyContact: z.object({
-    name: z.string().optional().default(""),
-    phone: z.string().optional().default(""),
-    relationship: z.string().optional().default(""),
-  }).optional(),
+  maxLessonsPerWeek: z.coerce.number().min(1, "Minimum 1 hour per week"),
+  emergencyContact: z
+    .object({
+      name: z.string().optional().default(""),
+      phone: z.string().optional().default(""),
+      relationship: z.string().optional().default(""),
+    })
+    .optional(),
   notes: z.string().optional(),
   dateOfBirth: z.string().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
 
+// Define Student type with proper typing for emergencyContact
+interface Student {
+  id?: string;
+  user?: {
+    name?: string;
+    email?: string;
+  };
+  phone?: string;
+  maxLessonsPerWeek?: number;
+  level?: Level;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  } | null;
+  notes?: string;
+  dateOfBirth?: string;
+}
+
+// Type for API student data which might have a different structure
+type ApiStudentData = {
+  user: {
+    name: string | null;
+    email: string;
+  };
+  dateOfBirth?: string;
+  [key: string]: unknown;
+};
+
 interface StudentFormProps {
-  student?: any;
+  student?: Student;
   onSubmitAction?: () => void;
 }
 
-export const StudentForm: React.FC<StudentFormProps> = ({
-  student,
-  onSubmitAction = () => {},
-}) => {
+export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitAction = () => {} }) => {
   const [formInitialized, setFormInitialized] = useState(false);
 
   // Load student data by ID if needed
   const { data: studentData, isLoading } = api.admin.student.getStudent.useQuery(
     { studentId: student?.id || "" },
-    { enabled: !!student?.id && !student?.level }
+    { enabled: !!student?.id && !student?.level },
   );
 
   // Initialize form with default values first
@@ -55,7 +98,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
       email: "",
       phone: "",
       maxLessonsPerWeek: 1,
-      level: 'PRE_PRELIMINARY' as Level,
+      level: "PRE_PRELIMINARY" as Level,
       emergencyContact: {
         name: "",
         phone: "",
@@ -69,24 +112,28 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   // Update form values when data is loaded
   useEffect(() => {
     if ((student || studentData) && !formInitialized) {
-      const data = studentData || student;
+      const data = studentData ? (studentData as unknown as Student | ApiStudentData) : student;
       if (!data) return;
-      
+
       const values = {
         name: data?.user?.name || "",
         email: data?.user?.email || "",
-        phone: data?.phone || "",
-        maxLessonsPerWeek: data?.maxLessonsPerWeek || 1,
-        level: data?.level || 'PRE_PRELIMINARY' as Level,
-        emergencyContact: data?.emergencyContact ? {
-          name: data.emergencyContact.name || "",
-          phone: data.emergencyContact.phone || "",
-          relationship: data.emergencyContact.relationship || "",
-        } : undefined,
-        notes: data?.notes || "",
-        dateOfBirth: data?.dateOfBirth || "",
+        phone: (data as Student)?.phone || "",
+        maxLessonsPerWeek: (data as Student)?.maxLessonsPerWeek || 1,
+        level: (data as Student)?.level || ("PRE_PRELIMINARY" as Level),
+        emergencyContact: (data as Student)?.emergencyContact
+          ? {
+              name: ((data as Student).emergencyContact as { name?: string }).name || "",
+              phone: ((data as Student).emergencyContact as { phone?: string }).phone || "",
+              relationship:
+                ((data as Student).emergencyContact as { relationship?: string }).relationship ||
+                "",
+            }
+          : undefined,
+        notes: (data as Student)?.notes || "",
+        dateOfBirth: (data as ApiStudentData | Student)?.dateOfBirth || "",
       };
-      
+
       form.reset(values);
       setFormInitialized(true);
     }
@@ -95,13 +142,13 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   const updateStudent = api.admin.student.updateStudent.useMutation({
     onSuccess: () => {
       toast("Success", {
-        description: "Student updated successfully"
+        description: "Student updated successfully",
       });
       onSubmitAction();
     },
     onError: (error) => {
       toast.error("Error", {
-        description: error.message
+        description: error.message,
       });
     },
   });
@@ -109,13 +156,13 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   const createStudent = api.admin.student.createStudent.useMutation({
     onSuccess: () => {
       toast("Success", {
-        description: "Student created successfully"
+        description: "Student created successfully",
       });
       onSubmitAction();
     },
     onError: (error) => {
       toast.error("Error", {
-        description: error.message
+        description: error.message,
       });
     },
   });
@@ -124,11 +171,13 @@ export const StudentForm: React.FC<StudentFormProps> = ({
     // Ensure emergencyContact is properly formatted with non-optional fields
     const formattedValues = {
       ...values,
-      emergencyContact: values.emergencyContact ? {
-        name: values.emergencyContact.name || "",
-        phone: values.emergencyContact.phone || "",
-        relationship: values.emergencyContact.relationship || "",
-      } : undefined
+      emergencyContact: values.emergencyContact
+        ? {
+            name: values.emergencyContact.name || "",
+            phone: values.emergencyContact.phone || "",
+            relationship: values.emergencyContact.relationship || "",
+          }
+        : undefined,
     };
 
     if (student?.id) {
@@ -193,7 +242,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
                   <SelectContent>
                     {Object.values(Level).map((level) => (
                       <SelectItem key={level} value={level}>
-                        {level.replace('_', ' ')}
+                        {level.replace("_", " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -227,7 +276,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
                     min={1}
                     {...field}
                     value={field.value || 1}
-                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 1)}
+                    onChange={(e) => field.onChange(Number.parseInt(e.target.value, 10) || 1)}
                   />
                 </FormControl>
                 <FormMessage />
@@ -248,7 +297,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
             )}
           />
         </div>
-        
+
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Emergency Contact</h3>
           <FormField
@@ -291,7 +340,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
             )}
           />
         </div>
-        
+
         <FormField
           control={form.control}
           name="notes"
@@ -309,22 +358,17 @@ export const StudentForm: React.FC<StudentFormProps> = ({
             </FormItem>
           )}
         />
-        
+
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSubmitAction}
-          >
+          <Button type="button" variant="outline" onClick={onSubmitAction}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={updateStudent.isPending || createStudent.isPending}
-          >
+          <Button type="submit" disabled={updateStudent.isPending || createStudent.isPending}>
             {updateStudent.isPending || createStudent.isPending
               ? "Saving..."
-              : (student?.id ? "Update" : "Create")}
+              : student?.id
+                ? "Update"
+                : "Create"}
           </Button>
         </div>
       </form>

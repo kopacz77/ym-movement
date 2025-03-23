@@ -1,21 +1,35 @@
 // src/app/(protected)/admin/settings/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { api } from '@/lib/api';
+import React, { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, DollarSign, MapPin, Save, Lock } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Clock, DollarSign, MapPin, Save, Lock } from "lucide-react";
 import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
-import ChangePasswordForm from '@/features/auth/components/ChangePasswordForm';
+import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
+import { DefaultPricingSettings } from "@/features/admin/components/management/DefaultPricingSettings";
 
 // Define interfaces for the settings
 interface OperationalSettings {
@@ -24,7 +38,7 @@ interface OperationalSettings {
       active: boolean;
       startTime: string;
       endTime: string;
-    }
+    };
   };
   defaultLessonDuration: string;
   minBookingNotice: number;
@@ -58,7 +72,7 @@ interface PaymentSettings {
     adjustments: {
       level: string;
       amount: number;
-      type: 'percent' | 'fixed';
+      type: "percent" | "fixed";
     }[];
   };
 }
@@ -77,21 +91,25 @@ interface Rink {
   maxCapacity: number | null;
 }
 
+interface ApiError {
+  message: string;
+}
+
 export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   // State for settings
   const [operationalSettings, setOperationalSettings] = useState<OperationalSettings>({
     days: {
-      monday: { active: true, startTime: '09:00', endTime: '18:00' },
-      tuesday: { active: true, startTime: '09:00', endTime: '18:00' },
-      wednesday: { active: true, startTime: '09:00', endTime: '18:00' },
-      thursday: { active: true, startTime: '09:00', endTime: '18:00' },
-      friday: { active: true, startTime: '09:00', endTime: '18:00' },
-      saturday: { active: true, startTime: '09:00', endTime: '18:00' },
-      sunday: { active: false, startTime: '', endTime: '' },
+      monday: { active: true, startTime: "09:00", endTime: "18:00" },
+      tuesday: { active: true, startTime: "09:00", endTime: "18:00" },
+      wednesday: { active: true, startTime: "09:00", endTime: "18:00" },
+      thursday: { active: true, startTime: "09:00", endTime: "18:00" },
+      friday: { active: true, startTime: "09:00", endTime: "18:00" },
+      saturday: { active: true, startTime: "09:00", endTime: "18:00" },
+      sunday: { active: false, startTime: "", endTime: "" },
     },
-    defaultLessonDuration: '60',
+    defaultLessonDuration: "60",
     minBookingNotice: 24,
     cancellationDeadline: 48,
     allowOverlapping: false,
@@ -100,8 +118,8 @@ export default function SettingsPage() {
 
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
     methods: {
-      venmo: { enabled: true, username: '@yura-min' },
-      zelle: { enabled: true, phone: '+1 (714) 743-7071' },
+      venmo: { enabled: true, username: "@yura-min" },
+      zelle: { enabled: true, phone: "+1 (714) 743-7071" },
       cash: { enabled: false },
     },
     defaultPricing: {
@@ -113,17 +131,17 @@ export default function SettingsPage() {
     levelBasedPricing: {
       enabled: true,
       adjustments: [
-        { level: 'SENIOR', amount: 15, type: 'percent' },
-        { level: 'JUNIOR', amount: 10, type: 'percent' },
-        { level: 'NOVICE', amount: 5, type: 'percent' },
+        { level: "SENIOR", amount: 15, type: "percent" },
+        { level: "JUNIOR", amount: 10, type: "percent" },
+        { level: "NOVICE", amount: 5, type: "percent" },
       ],
     },
   });
 
   const [rinkAreas, setRinkAreas] = useState<RinkAreaSettings[]>([
-    { name: 'Main Rink', active: true, default: true },
-    { name: 'Practice Rink', active: true, default: false },
-    { name: 'Dance Studio', active: true, default: false },
+    { name: "Main Rink", active: true, default: true },
+    { name: "Practice Rink", active: true, default: false },
+    { name: "Dance Studio", active: true, default: false },
   ]);
 
   // Fetch rinks data
@@ -137,12 +155,12 @@ export default function SettingsPage() {
         description: "Your changes have been applied successfully.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       setIsSaving(false);
       toast.error("Error", {
-        description: "Failed to save settings: " + error.message,
+        description: `Failed to save settings: ${error.message}`,
       });
-    }
+    },
   });
 
   // Fetch settings from API
@@ -158,8 +176,12 @@ export default function SettingsPage() {
   }, [savedSettings]);
 
   // Handle changes for operational settings
-  const handleDaySettingChange = (day: string, field: 'active' | 'startTime' | 'endTime', value: boolean | string) => {
-    setOperationalSettings(prev => ({
+  const handleDaySettingChange = (
+    day: string,
+    field: "active" | "startTime" | "endTime",
+    value: boolean | string,
+  ) => {
+    setOperationalSettings((prev) => ({
       ...prev,
       days: {
         ...prev.days,
@@ -172,8 +194,12 @@ export default function SettingsPage() {
   };
 
   // Handle changes for payment settings
-  const handlePaymentMethodChange = (method: 'venmo' | 'zelle' | 'cash', field: string, value: boolean | string) => {
-    setPaymentSettings(prev => ({
+  const handlePaymentMethodChange = (
+    method: "venmo" | "zelle" | "cash",
+    field: string,
+    value: boolean | string,
+  ) => {
+    setPaymentSettings((prev) => ({
       ...prev,
       methods: {
         ...prev.methods,
@@ -185,8 +211,11 @@ export default function SettingsPage() {
     }));
   };
 
-  const handlePricingChange = (lessonType: keyof PaymentSettings['defaultPricing'], value: number) => {
-    setPaymentSettings(prev => ({
+  const handlePricingChange = (
+    lessonType: keyof PaymentSettings["defaultPricing"],
+    value: number,
+  ) => {
+    setPaymentSettings((prev) => ({
       ...prev,
       defaultPricing: {
         ...prev.defaultPricing,
@@ -195,12 +224,16 @@ export default function SettingsPage() {
     }));
   };
 
-  const handleLevelAdjustmentChange = (index: number, field: 'amount' | 'type', value: number | string) => {
-    setPaymentSettings(prev => {
+  const handleLevelAdjustmentChange = (
+    index: number,
+    field: "amount" | "type",
+    value: number | string,
+  ) => {
+    setPaymentSettings((prev) => {
       const newAdjustments = [...prev.levelBasedPricing.adjustments];
       newAdjustments[index] = {
         ...newAdjustments[index],
-        [field]: field === 'amount' ? Number(value) : value as 'percent' | 'fixed',
+        [field]: field === "amount" ? Number(value) : (value as "percent" | "fixed"),
       };
       return {
         ...prev,
@@ -213,11 +246,11 @@ export default function SettingsPage() {
   };
 
   // Handle changes for rink areas
-  const handleRinkAreaChange = (index: number, field: 'active' | 'default', value: boolean) => {
-    setRinkAreas(prev => {
+  const handleRinkAreaChange = (index: number, field: "active" | "default", value: boolean) => {
+    setRinkAreas((prev) => {
       const newAreas = [...prev];
       // If setting a new default, unset the old default
-      if (field === 'default' && value === true) {
+      if (field === "default" && value === true) {
         newAreas.forEach((area, i) => {
           if (i !== index) {
             area.default = false;
@@ -291,7 +324,9 @@ export default function SettingsPage() {
                         <Switch
                           id={`${day.toLowerCase()}-active`}
                           checked={settings.active}
-                          onCheckedChange={(checked) => handleDaySettingChange(day, 'active', checked)}
+                          onCheckedChange={(checked) =>
+                            handleDaySettingChange(day, "active", checked)
+                          }
                         />
                         <Label htmlFor={`${day.toLowerCase()}-active`}>
                           {day.charAt(0).toUpperCase() + day.slice(1)}
@@ -302,7 +337,7 @@ export default function SettingsPage() {
                           type="time"
                           className="w-32"
                           value={settings.startTime}
-                          onChange={(e) => handleDaySettingChange(day, 'startTime', e.target.value)}
+                          onChange={(e) => handleDaySettingChange(day, "startTime", e.target.value)}
                           disabled={!settings.active}
                         />
                         <span>-</span>
@@ -310,7 +345,7 @@ export default function SettingsPage() {
                           type="time"
                           className="w-32"
                           value={settings.endTime}
-                          onChange={(e) => handleDaySettingChange(day, 'endTime', e.target.value)}
+                          onChange={(e) => handleDaySettingChange(day, "endTime", e.target.value)}
                           disabled={!settings.active}
                         />
                       </div>
@@ -320,20 +355,37 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Scheduling Settings</h3>
                   <div className="space-y-2">
-                    <Label htmlFor="default-lesson-duration" className="w-full">Default Lesson Duration (minutes)</Label>
+                    <Label htmlFor="default-lesson-duration" className="w-full">
+                      Default Lesson Duration (minutes)
+                    </Label>
                     <Select
                       value={operationalSettings.defaultLessonDuration}
-                      onValueChange={(value) => setOperationalSettings(prev => ({ ...prev, defaultLessonDuration: value }))} 
+                      onValueChange={(value) =>
+                        setOperationalSettings((prev) => ({
+                          ...prev,
+                          defaultLessonDuration: value,
+                        }))
+                      }
                     >
                       <SelectTrigger id="default-lesson-duration" className="w-full">
                         <SelectValue placeholder="Select duration" />
-                      </SelectTrigger >
+                      </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="30" className="w-full">30 minutes</SelectItem>
-                        <SelectItem value="45" className="w-full">45 minutes</SelectItem>
-                        <SelectItem value="60" className="w-full">60 minutes</SelectItem>
-                        <SelectItem value="90" className="w-full">90 minutes</SelectItem>
-                        <SelectItem value="120" className="w-full">120 minutes</SelectItem>
+                        <SelectItem value="30" className="w-full">
+                          30 minutes
+                        </SelectItem>
+                        <SelectItem value="45" className="w-full">
+                          45 minutes
+                        </SelectItem>
+                        <SelectItem value="60" className="w-full">
+                          60 minutes
+                        </SelectItem>
+                        <SelectItem value="90" className="w-full">
+                          90 minutes
+                        </SelectItem>
+                        <SelectItem value="120" className="w-full">
+                          120 minutes
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -343,7 +395,12 @@ export default function SettingsPage() {
                       id="min-booking-notice"
                       type="number"
                       value={operationalSettings.minBookingNotice}
-                      onChange={(e) => setOperationalSettings(prev => ({ ...prev, minBookingNotice: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setOperationalSettings((prev) => ({
+                          ...prev,
+                          minBookingNotice: Number(e.target.value),
+                        }))
+                      }
                       min="0"
                     />
                   </div>
@@ -353,7 +410,12 @@ export default function SettingsPage() {
                       id="cancellation-deadline"
                       type="number"
                       value={operationalSettings.cancellationDeadline}
-                      onChange={(e) => setOperationalSettings(prev => ({ ...prev, cancellationDeadline: Number(e.target.value) }))}
+                      onChange={(e) =>
+                        setOperationalSettings((prev) => ({
+                          ...prev,
+                          cancellationDeadline: Number(e.target.value),
+                        }))
+                      }
                       min="0"
                     />
                   </div>
@@ -361,7 +423,12 @@ export default function SettingsPage() {
                     <Switch
                       id="allow-overlapping"
                       checked={operationalSettings.allowOverlapping}
-                      onCheckedChange={(checked) => setOperationalSettings(prev => ({ ...prev, allowOverlapping: checked }))}
+                      onCheckedChange={(checked) =>
+                        setOperationalSettings((prev) => ({
+                          ...prev,
+                          allowOverlapping: checked,
+                        }))
+                      }
                     />
                     <Label htmlFor="allow-overlapping">Allow overlapping lessons</Label>
                   </div>
@@ -369,7 +436,12 @@ export default function SettingsPage() {
                     <Switch
                       id="auto-approval"
                       checked={operationalSettings.autoApproval}
-                      onCheckedChange={(checked) => setOperationalSettings(prev => ({ ...prev, autoApproval: checked }))}
+                      onCheckedChange={(checked) =>
+                        setOperationalSettings((prev) => ({
+                          ...prev,
+                          autoApproval: checked,
+                        }))
+                      }
                     />
                     <Label htmlFor="auto-approval">Automatically approve bookings</Label>
                   </div>
@@ -381,23 +453,25 @@ export default function SettingsPage() {
 
         {/* Payment & Pricing Settings */}
         <TabsContent value="pricing">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment & Pricing</CardTitle>
-              <CardDescription>
-                Configure payment methods and default pricing for different lesson types
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            {/* New Global Default Pricing Component */}
+            <DefaultPricingSettings />
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Methods</CardTitle>
+                <CardDescription>Configure available payment methods for students</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Payment Methods</h3>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Switch
                         id="venmo-enabled"
                         checked={paymentSettings.methods.venmo.enabled}
-                        onCheckedChange={(checked) => handlePaymentMethodChange('venmo', 'enabled', checked)}
+                        onCheckedChange={(checked) =>
+                          handlePaymentMethodChange("venmo", "enabled", checked)
+                        }
                       />
                       <Label htmlFor="venmo-enabled">Venmo</Label>
                     </div>
@@ -405,7 +479,9 @@ export default function SettingsPage() {
                       className="w-48"
                       placeholder="@venmo-username"
                       value={paymentSettings.methods.venmo.username}
-                      onChange={(e) => handlePaymentMethodChange('venmo', 'username', e.target.value)}
+                      onChange={(e) =>
+                        handlePaymentMethodChange("venmo", "username", e.target.value)
+                      }
                       disabled={!paymentSettings.methods.venmo.enabled}
                     />
                   </div>
@@ -414,7 +490,9 @@ export default function SettingsPage() {
                       <Switch
                         id="zelle-enabled"
                         checked={paymentSettings.methods.zelle.enabled}
-                        onCheckedChange={(checked) => handlePaymentMethodChange('zelle', 'enabled', checked)}
+                        onCheckedChange={(checked) =>
+                          handlePaymentMethodChange("zelle", "enabled", checked)
+                        }
                       />
                       <Label htmlFor="zelle-enabled">Zelle</Label>
                     </div>
@@ -422,7 +500,7 @@ export default function SettingsPage() {
                       className="w-48"
                       placeholder="+1 (123) 456-7890"
                       value={paymentSettings.methods.zelle.phone}
-                      onChange={(e) => handlePaymentMethodChange('zelle', 'phone', e.target.value)}
+                      onChange={(e) => handlePaymentMethodChange("zelle", "phone", e.target.value)}
                       disabled={!paymentSettings.methods.zelle.enabled}
                     />
                   </div>
@@ -431,70 +509,40 @@ export default function SettingsPage() {
                       <Switch
                         id="cash-enabled"
                         checked={paymentSettings.methods.cash.enabled}
-                        onCheckedChange={(checked) => handlePaymentMethodChange('cash', 'enabled', checked)}
+                        onCheckedChange={(checked) =>
+                          handlePaymentMethodChange("cash", "enabled", checked)
+                        }
                       />
                       <Label htmlFor="cash-enabled">Cash</Label>
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Default Pricing</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="private-lesson-price">Private Lesson Price ($)</Label>
-                    <Input
-                      id="private-lesson-price"
-                      type="number"
-                      value={paymentSettings.defaultPricing.private}
-                      onChange={(e) => handlePricingChange('private', Number(e.target.value))}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="group-lesson-price">Group Lesson Price ($)</Label>
-                    <Input
-                      id="group-lesson-price"
-                      type="number"
-                      value={paymentSettings.defaultPricing.group}
-                      onChange={(e) => handlePricingChange('group', Number(e.target.value))}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="choreography-price">Choreography Lesson Price ($)</Label>
-                    <Input
-                      id="choreography-price"
-                      type="number"
-                      value={paymentSettings.defaultPricing.choreography}
-                      onChange={(e) => handlePricingChange('choreography', Number(e.target.value))}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="competition-price">Competition Prep Price ($)</Label>
-                    <Input
-                      id="competition-price"
-                      type="number"
-                      value={paymentSettings.defaultPricing.competition}
-                      onChange={(e) => handlePricingChange('competition', Number(e.target.value))}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-              </div>
-              <Separator />
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Pricing Rules</h3>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Level-Based Pricing</CardTitle>
+                <CardDescription>Configure price adjustments based on skater level</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="level-based-pricing"
                     checked={paymentSettings.levelBasedPricing.enabled}
-                    onCheckedChange={(checked) => setPaymentSettings(prev => ({ ...prev, levelBasedPricing: { ...prev.levelBasedPricing, enabled: checked } }))}
+                    onCheckedChange={(checked) =>
+                      setPaymentSettings((prev) => ({
+                        ...prev,
+                        levelBasedPricing: {
+                          ...prev.levelBasedPricing,
+                          enabled: checked,
+                        },
+                      }))
+                    }
                   />
-                  <Label htmlFor="level-based-pricing">Enable level-based pricing adjustments</Label>
+                  <Label htmlFor="level-based-pricing">
+                    Enable level-based pricing adjustments
+                  </Label>
                 </div>
                 <Table>
                   <TableHeader>
@@ -512,7 +560,9 @@ export default function SettingsPage() {
                           <Input
                             type="number"
                             value={adjustment.amount}
-                            onChange={(e) => handleLevelAdjustmentChange(index, 'amount', Number(e.target.value))}
+                            onChange={(e) =>
+                              handleLevelAdjustmentChange(index, "amount", Number(e.target.value))
+                            }
                             className="w-20"
                             disabled={!paymentSettings.levelBasedPricing.enabled}
                           />
@@ -520,7 +570,9 @@ export default function SettingsPage() {
                         <TableCell>
                           <Select
                             value={adjustment.type}
-                            onValueChange={(value: 'percent' | 'fixed') => handleLevelAdjustmentChange(index, 'type', value)}
+                            onValueChange={(value: "percent" | "fixed") =>
+                              handleLevelAdjustmentChange(index, "type", value)
+                            }
                             disabled={!paymentSettings.levelBasedPricing.enabled}
                           >
                             <SelectTrigger className="w-32">
@@ -536,9 +588,9 @@ export default function SettingsPage() {
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Rink Management Settings */}
@@ -580,7 +632,9 @@ export default function SettingsPage() {
                         <TableCell>{rink.timezone}</TableCell>
                         <TableCell>{rink.maxCapacity}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">Edit</Button>
+                          <Button variant="ghost" size="sm">
+                            Edit
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -601,14 +655,18 @@ export default function SettingsPage() {
                           <span className="text-sm text-muted-foreground">Active</span>
                           <Switch
                             checked={area.active}
-                            onCheckedChange={(checked) => handleRinkAreaChange(index, 'active', checked)}
+                            onCheckedChange={(checked) =>
+                              handleRinkAreaChange(index, "active", checked)
+                            }
                           />
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">Default</span>
                           <Switch
                             checked={area.default}
-                            onCheckedChange={(checked) => handleRinkAreaChange(index, 'default', checked)}
+                            onCheckedChange={(checked) =>
+                              handleRinkAreaChange(index, "default", checked)
+                            }
                           />
                         </div>
                       </div>
@@ -625,9 +683,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Account Security</CardTitle>
-              <CardDescription>
-                Manage your account security settings
-              </CardDescription>
+              <CardDescription>Manage your account security settings</CardDescription>
             </CardHeader>
             <CardContent>
               <ChangePasswordForm />

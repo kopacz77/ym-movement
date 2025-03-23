@@ -1,23 +1,36 @@
 // src/app/auth/signup/page.tsx
 "use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Level } from '@prisma/client';
-import { Checkbox } from '@/components/ui/checkbox'; // Added import for Checkbox
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Level } from "@prisma/client";
+import { Checkbox } from "@/components/ui/checkbox"; // Added import for Checkbox
 
 export default function SignupPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [level, setLevel] = useState<Level>(Level.PRE_PRELIMINARY);
   const [parentConsent, setParentConsent] = useState(false); // Added state for parent consent
   const [isLoading, setIsLoading] = useState(false);
@@ -28,23 +41,23 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name, 
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
           email,
           password,
           phone,
           level,
-          parentConsent
+          parentConsent,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
+        throw new Error(data.message || "Something went wrong");
       }
 
       toast("Account created", {
@@ -52,12 +65,10 @@ export default function SignupPage() {
       });
 
       // Redirect to login page after successful signup
-      router.push('/auth/login');
+      router.push("/auth/login");
     } catch (error) {
       toast.error("Error", {
-        description: error instanceof Error 
-          ? error.message 
-          : "An error occurred during sign up",
+        description: error instanceof Error ? error.message : "An error occurred during sign up",
       });
     } finally {
       setIsLoading(false);
@@ -75,8 +86,8 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input 
-                id="name" 
+              <Input
+                id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your full name"
@@ -85,9 +96,9 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
+              <Input
+                id="email"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
@@ -96,9 +107,9 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password" 
+              <Input
+                id="password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a password"
@@ -107,8 +118,8 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone (optional)</Label>
-              <Input 
-                id="phone" 
+              <Input
+                id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Enter your phone number"
@@ -123,30 +134,31 @@ export default function SignupPage() {
                 <SelectContent>
                   {Object.values(Level).map((lvl) => (
                     <SelectItem key={lvl} value={lvl}>
-                      {lvl.replace('_', ' ')}
+                      {lvl.replace("_", " ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             {/* Parental Consent Checkbox */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Checkbox 
+                <Checkbox
                   id="parentConsent"
                   checked={parentConsent}
                   onCheckedChange={(checked) => setParentConsent(checked === true)}
                 />
-                <Label 
-                  htmlFor="parentConsent" 
+                <Label
+                  htmlFor="parentConsent"
                   className="text-sm font-medium leading-none cursor-pointer"
                 >
                   I am a parent/legal guardian creating this account for my child
                 </Label>
               </div>
               <p className="text-xs text-muted-foreground">
-                For students under 13, accounts must be created and managed by a parent or legal guardian.
+                For students under 13, accounts must be created and managed by a parent or legal
+                guardian.
               </p>
             </div>
 

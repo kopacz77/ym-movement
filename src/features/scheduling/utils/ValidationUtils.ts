@@ -1,12 +1,13 @@
 // src/features/scheduling/utils/validationUtils.ts
-import { CalendarSlot, BookingConstraints, TimeRange } from '../types';
-import { LessonType, Level, RinkArea } from '@prisma/client';
-import { startOfWeek, endOfWeek } from 'date-fns';
+import type { CalendarSlot, TimeRange } from "../types";
+import { BookingConstraints } from "../types";
+import { type LessonType, Level, RinkArea } from "@prisma/client";
+import { startOfWeek, endOfWeek } from "date-fns";
 
 export interface ValidationResult {
   passed: boolean;
   message: string;
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
 }
 
 export interface StudentBookingConstraints {
@@ -18,7 +19,7 @@ export interface StudentBookingConstraints {
 export const validateTimeSlotBooking = (
   slot: CalendarSlot,
   studentConstraints: StudentBookingConstraints,
-  lessonType: LessonType
+  lessonType: LessonType,
 ): ValidationResult[] => {
   const validations: ValidationResult[] = [];
 
@@ -27,7 +28,7 @@ export const validateTimeSlotBooking = (
     validations.push({
       passed: false,
       message: "Time slot is at full capacity",
-      severity: 'error',
+      severity: "error",
     });
   }
 
@@ -36,7 +37,7 @@ export const validateTimeSlotBooking = (
     validations.push({
       passed: false,
       message: "Student has reached their weekly lesson limit",
-      severity: 'error',
+      severity: "error",
     });
   }
 
@@ -51,25 +52,14 @@ export const validateTimeSlotBooking = (
 
 export const validateLessonTypeForLevel = (
   lessonType: LessonType,
-  studentLevel: Level
+  studentLevel: Level,
 ): ValidationResult => {
   // Define level requirements for different lesson types
   const requirements: Record<LessonType, Level[]> = {
     PRIVATE: Object.values(Level), // All levels allowed
     GROUP: Object.values(Level), // All levels allowed
-    CHOREOGRAPHY: [
-      Level.JUVENILE,
-      Level.INTERMEDIATE,
-      Level.NOVICE,
-      Level.JUNIOR,
-      Level.SENIOR,
-    ],
-    COMPETITION_PREP: [
-      Level.INTERMEDIATE,
-      Level.NOVICE,
-      Level.JUNIOR,
-      Level.SENIOR,
-    ],
+    CHOREOGRAPHY: [Level.JUVENILE, Level.INTERMEDIATE, Level.NOVICE, Level.JUNIOR, Level.SENIOR],
+    COMPETITION_PREP: [Level.INTERMEDIATE, Level.NOVICE, Level.JUNIOR, Level.SENIOR],
   };
 
   const allowed = requirements[lessonType].includes(studentLevel);
@@ -79,18 +69,18 @@ export const validateLessonTypeForLevel = (
     message: allowed
       ? "Student level is appropriate for lesson type"
       : "Student level does not meet requirements for this lesson type",
-    severity: allowed ? 'info' : 'error',
+    severity: allowed ? "info" : "error",
   };
 };
 
 export const detectTimeSlotConflicts = (
   proposedSlot: TimeRange,
-  existingSlots: CalendarSlot[]
+  existingSlots: CalendarSlot[],
 ): ValidationResult[] => {
   const conflicts: ValidationResult[] = [];
 
   // Check for overlapping slots
-  const overlapping = existingSlots.filter(slot => {
+  const overlapping = existingSlots.filter((slot) => {
     const slotStart = new Date(slot.startTime);
     const slotEnd = new Date(slot.endTime);
     const newStart = new Date(proposedSlot.startTime);
@@ -107,7 +97,7 @@ export const detectTimeSlotConflicts = (
     conflicts.push({
       passed: false,
       message: `Conflicts with ${overlapping.length} existing time slot(s)`,
-      severity: 'error',
+      severity: "error",
     });
   }
 

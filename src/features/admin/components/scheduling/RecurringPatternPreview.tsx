@@ -1,15 +1,24 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export const RecurringPatternPreview = () => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Pattern Preview</CardTitle>
-        <Button variant="outline" size="sm">Modify Pattern</Button>
+        <Button variant="outline" size="sm">
+          Modify Pattern
+        </Button>
       </CardHeader>
       <CardContent>
         <Table>
@@ -29,7 +38,9 @@ export const RecurringPatternPreview = () => {
                 <Badge variant="outline">Available</Badge>
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="sm">Exclude</Button>
+                <Button variant="ghost" size="sm">
+                  Exclude
+                </Button>
               </TableCell>
             </TableRow>
             {/* More rows... */}
