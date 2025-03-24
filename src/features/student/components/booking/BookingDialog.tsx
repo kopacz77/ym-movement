@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { Check, Clock, Calendar, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { LessonType, PaymentMethod } from "@prisma/client";
+import { LessonType, Level, PaymentMethod } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 interface TimeSlot {
@@ -28,6 +28,9 @@ interface TimeSlot {
     name: string;
   };
 }
+
+// Type used in BookingDialog props remains unchanged - the custom pricing
+// is handled in the booking API, no need to reference it here
 
 interface BookingDialogProps {
   slot: TimeSlot;
