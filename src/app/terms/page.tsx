@@ -1,4 +1,4 @@
-// src/app/terms/page.tsx
+// Updated src/app/terms/page.tsx with revised payment terms
 import Link from "next/link";
 
 export default function TermsOfServicePage() {
@@ -7,7 +7,7 @@ export default function TermsOfServicePage() {
       <h1 className="mb-8 text-3xl font-bold">Terms of Service</h1>
 
       <div className="prose max-w-none">
-        <p className="text-muted-foreground">Last Updated: March 10, 2025</p>
+        <p className="text-muted-foreground">Last Updated: March 24, 2025</p>
 
         <h2 className="mt-8 text-xl font-semibold">1. Agreement to Terms</h2>
         <p>
@@ -54,8 +54,8 @@ export default function TermsOfServicePage() {
 
         <h2 className="mt-8 text-xl font-semibold">5. Payment Terms</h2>
         <p>
-          Payment is required at the time of booking. We accept major credit cards and electronic
-          payments. Prices are subject to change, but changes will not affect already booked
+          Payment is required after completion of the lesson. We accept cash and electronic payments such as
+          Venmo, Paypal, Zelle. Prices are subject to change, but changes will not affect already booked
           lessons. Refunds are available according to our cancellation policy.
         </p>
         <p>
@@ -135,9 +135,7 @@ export default function TermsOfServicePage() {
         <p>
           If you have questions about these Terms, please contact us at:
           <br />
-          Email: terms@ymicedance.com
-          <br />
-          Phone: (555) 123-4567
+          Email: info@ym-movement.com
         </p>
       </div>
 
