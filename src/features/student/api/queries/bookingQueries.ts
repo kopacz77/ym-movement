@@ -149,11 +149,10 @@ export const bookingRouter = createTRPCRouter({
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               attendees: [
-                { email: student.user.email },
-                // Yura will be added directly in the calendar service
+                { email: student.user.email, name: student.user.name }
               ],
               location: timeSlot.rink.address,
-              timeZone: timeSlot.rink.timezone, // FIXED: Added explicit timezone
+              timeZone: timeSlot.rink.timezone, // CRITICAL: Added explicit timezone
             });
 
             if (googleEventId) {
@@ -298,8 +297,7 @@ export const bookingRouter = createTRPCRouter({
                 rinkTimezone: timeSlot.rink.timezone, // FIXED: Ensure timezone is passed
               },
               input.paymentMethod,
-              paymentRef,
-              googleEventId,
+              paymentRef
             );
 
             console.log(`[BOOKING] Successfully sent confirmation email to ${student.user.email}`);

@@ -1,111 +1,233 @@
 // src/lib/google/calendar.ts
-import { google } from "googleapis";
-import { randomUUID } from "node:crypto";
+import { google } from 'googleapis';
+import { JWT } from 'google-auth-library';
 
-// Load the Google Calendar credentials from environment variables
-const CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
-const CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
-const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-const YURA_EMAIL = process.env.YURA_EMAIL || "yuraxming@gmail.com";
+// Initialize Google Auth client with service account credentials
+const getAuthClient = () => {
+  try {
+    const credentials = {
+      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    };
 
-// Create a Google Calendar client
-const calendar = google.calendar("v3");
-const auth = new google.auth.JWT({
-  email: CLIENT_EMAIL,
-  key: PRIVATE_KEY,
-  scopes: ["https://www.googleapis.com/auth/calendar"],
-});
+    if (!credentials.client_email || !credentials.private_key) {
+      console.error('Missing Google API credentials');
+      return null;
+    }
 
-interface EventOptions {
-  summary: string;
-  description: string;
-  startTime: Date;
-  endTime: Date;
-  attendees: { email: string }[];
-  location?: string;
-  timeZone?: string; // Add explicit timezone parameter
-}
+    const client = new JWT({
+      email: credentials.client_email,
+      key: credentials.private_key,
+      scopes: ['https://www.googleapis.com/auth/calendar'],
+      subject: process.env.GOOGLE_CALENDAR_OWNER_EMAIL || 'yuraxmin@gmail.com',
+    });
 
+    return client;
+  } catch (error) {
+    console.error('Error initializing Google Auth client:', error);
+    return null;
+  }
+};
+
+// Get Google Calendar API client
+const getCalendarApi = () => {
+  const auth = getAuthClient();
+  if (!auth) { return null; }
+  return google.calendar({ version: 'v3', auth });
+};
+
+// Format attendee for Google Calendar API
+const formatAttendee = (email: string, displayName?: string) => {
+  return {
+    email,
+    displayName: displayName || email,
+    responseStatus: 'needsAction',
+  };
+};
+
+// Google Calendar integration functions
 export const googleCalendar = {
   /**
-   * Create a new event in Google Calendar
+   * Creates a calendar event with proper timezone handling
    */
-  async createEvent(options: EventOptions): Promise<string | null> {
+  createEvent: async ({
+    summary,
+    description,
+    startTime,
+    endTime,
+    attendees = [],
+    location,
+    timeZone, // Required parameter for timezone handling
+  }: {
+    summary: string;
+    description?: string;
+    startTime: Date;
+    endTime: Date;
+    attendees?: Array<{ email: string; name?: string }>;
+    location?: string;
+    timeZone: string; // Rink's timezone
+  }): Promise<string | null> => {
     try {
-      if (!CALENDAR_ID) {
-        console.error("Google Calendar ID not set in environment variables");
+      //console.log(`[CALENDAR] Creating event: ${summary}`);
+      //console.log(`[CALENDAR] Using timezone: ${timeZone}`);
+
+      const calendar = getCalendarApi();
+      if (!calendar) {
+        console.error('[CALENDAR] Failed to initialize Google Calendar API');
         return null;
       }
 
-      // Use the rink's timezone or default to 'America/Los_Angeles'
-      const timeZone = options.timeZone || "America/Los_Angeles";
+      // Format attendees for Google Calendar API
+      const formattedAttendees = attendees.map((attendee) =>
+        formatAttendee(attendee.email, attendee.name)
+      );
 
-      // Convert times to RFC3339 format with the timezone
-      // This is critical - don't manipulate the date objects, just format them properly
+      // Always add Yura as an attendee
+      const ownerEmail = process.env.GOOGLE_CALENDAR_OWNER_EMAIL || 'yuraxmin@gmail.com';
+      formattedAttendees.push(formatAttendee(ownerEmail, 'Yura Min'));
+
+      // Create the event with explicit timezone handling
       const event = {
-        summary: options.summary,
-        description: options.description,
+        summary,
+        description,
         start: {
-          dateTime: options.startTime.toISOString(),
-          timeZone: timeZone,
+          dateTime: startTime.toISOString(),
+          timeZone: timeZone, // Use the rink's timezone for start time
         },
         end: {
-          dateTime: options.endTime.toISOString(),
-          timeZone: timeZone,
+          dateTime: endTime.toISOString(),
+          timeZone: timeZone, // Use the rink's timezone for end time
         },
-        attendees: [
-          ...options.attendees,
-          { email: YURA_EMAIL }, // Always add Yura as an attendee
-        ],
-        location: options.location,
-        conferenceData: {
-          createRequest: {
-            requestId: randomUUID(),
-            conferenceSolutionKey: { type: "hangoutsMeet" },
-          },
+        location,
+        attendees: formattedAttendees,
+        reminders: {
+          useDefault: false,
+          overrides: [
+            { method: 'email', minutes: 60 },
+            { method: 'popup', minutes: 30 },
+          ],
         },
       };
 
-      // Create the event
+      //console.log(`[CALENDAR] Creating event from ${startTime.toISOString()} to ${endTime.toISOString()}`);
+      //console.log(`[CALENDAR] Event timezone: ${timeZone}`);
+
       const response = await calendar.events.insert({
-        auth,
-        calendarId: CALENDAR_ID,
+        calendarId: 'primary',
         requestBody: event,
-        conferenceDataVersion: 1,
       });
 
       if (response.data.id) {
-        console.log(`Event created: ${response.data.htmlLink}`);
+        //console.log(`[CALENDAR] Event created with ID: ${response.data.id}`);
         return response.data.id;
       }
 
+      console.error('[CALENDAR] Event created but no ID returned');
       return null;
     } catch (error) {
-      console.error("Error creating Google Calendar event:", error);
+      console.error('[CALENDAR] Error creating event:', error);
       return null;
     }
   },
 
   /**
-   * Delete an event from Google Calendar
+   * Deletes a calendar event by ID
    */
-  async deleteEvent(eventId: string): Promise<boolean> {
+  deleteEvent: async (eventId: string): Promise<boolean> => {
     try {
-      if (!CALENDAR_ID) {
-        console.error("Google Calendar ID not set in environment variables");
+      //console.log(`[CALENDAR] Deleting event: ${eventId}`);
+
+      const calendar = getCalendarApi();
+      if (!calendar) {
+        console.error('[CALENDAR] Failed to initialize Google Calendar API');
         return false;
       }
 
       await calendar.events.delete({
-        auth,
-        calendarId: CALENDAR_ID,
+        calendarId: 'primary',
         eventId,
       });
 
+      //console.log(`[CALENDAR] Event deleted: ${eventId}`);
       return true;
     } catch (error) {
-      console.error("Error deleting Google Calendar event:", error);
+      console.error(`[CALENDAR] Error deleting event ${eventId}:`, error);
       return false;
+    }
+  },
+
+  /**
+   * Updates a calendar event
+   */
+  updateEvent: async ({
+    eventId,
+    summary,
+    description,
+    startTime,
+    endTime,
+    attendees = [],
+    location,
+    timeZone,
+  }: {
+    eventId: string;
+    summary: string;
+    description?: string;
+    startTime: Date;
+    endTime: Date;
+    attendees?: Array<{ email: string; name?: string }>;
+    location?: string;
+    timeZone: string;
+  }): Promise<string | null> => {
+    try {
+      //console.log(`[CALENDAR] Updating event: ${eventId}`);
+      
+      const calendar = getCalendarApi();
+      if (!calendar) {
+        console.error('[CALENDAR] Failed to initialize Google Calendar API');
+        return null;
+      }
+
+      // Format attendees for Google Calendar API
+      const formattedAttendees = attendees.map((attendee) =>
+        formatAttendee(attendee.email, attendee.name)
+      );
+
+      // Always add Yura as an attendee
+      const ownerEmail = process.env.GOOGLE_CALENDAR_OWNER_EMAIL || 'yuraxmin@gmail.com';
+      formattedAttendees.push(formatAttendee(ownerEmail, 'Yura Min'));
+
+      // Update the event
+      const event = {
+        summary,
+        description,
+        start: {
+          dateTime: startTime.toISOString(),
+          timeZone: timeZone, // Use the rink's timezone for start time
+        },
+        end: {
+          dateTime: endTime.toISOString(),
+          timeZone: timeZone, // Use the rink's timezone for end time
+        },
+        location,
+        attendees: formattedAttendees,
+      };
+
+      const response = await calendar.events.update({
+        calendarId: 'primary',
+        eventId,
+        requestBody: event,
+      });
+
+      if (response.data.id) {
+        //console.log(`[CALENDAR] Event updated: ${response.data.id}`);
+        return response.data.id;
+      }
+
+      console.error('[CALENDAR] Event updated but no ID returned');
+      return null;
+    } catch (error) {
+      console.error(`[CALENDAR] Error updating event ${eventId}:`, error);
+      return null;
     }
   },
 };
