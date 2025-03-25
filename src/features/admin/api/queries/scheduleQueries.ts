@@ -406,8 +406,12 @@ export const scheduleRouter = createTRPCRouter({
           } `,
           startTime: timeSlot.startTime,
           endTime: timeSlot.endTime,
-          attendees: [{ email: student.user.email }, { email: process.env.INSTRUCTOR_EMAIL || "" }],
+          attendees: [
+            { email: student.user.email }, 
+            { email: process.env.INSTRUCTOR_EMAIL || "" }
+          ],
           location: timeSlot.rink.address,
+          timeZone: timeSlot.rink.timezone, // Add the timezone parameter
         });
         // Create the lesson with the calendar event ID
         const lesson = await ctx.prisma.lesson.create({
@@ -603,7 +607,7 @@ export const scheduleRouter = createTRPCRouter({
           include: { student: { include: { user: true } } },
         });
       } catch (error) {
-        if (error instanceof TRPCError) throw error;
+        if (error instanceof TRPCError) { throw error; }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to assign student",
