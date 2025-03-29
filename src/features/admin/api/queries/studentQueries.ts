@@ -468,18 +468,18 @@ export const studentRouter = createTRPCRouter({
 
       if (!defaultPricing) {
         console.log("Default pricing not found, creating...");
-        const newPricing = await ctx.prisma.$executeRaw`
-          INSERT INTO "DefaultPricing" (
-            "privateLessonPrice", 
-            "groupLessonPrice", 
-            "choreographyPrice", 
-            "competitionPrice", 
-            "createdAt", 
-            "updatedAt"
-          ) 
-          VALUES (75, 45, 90, 95, NOW(), NOW())
-          RETURNING *
-        `;
+        await ctx.prisma.$executeRaw`
+  INSERT INTO "DefaultPricing" (
+    "privateLessonPrice", 
+    "groupLessonPrice", 
+    "choreographyPrice", 
+    "competitionPrice", 
+    "createdAt", 
+    "updatedAt"
+  ) 
+  VALUES (75, 45, 90, 95, NOW(), NOW())
+  RETURNING *
+`;
 
         // Fetch the newly created record
         const created = await ctx.prisma.$queryRaw`
