@@ -1,7 +1,7 @@
 // src/features/admin/components/scheduling/ScheduleManager.tsx
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FullCalendar from "@fullcalendar/react";
@@ -27,8 +27,6 @@ import { BulkTimeSlotForm } from "./BulkTimeSlotForm";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
-// Fix 1: Import lucide-react
-// Make sure lucide-react is installed with: pnpm add lucide-react
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -63,13 +61,6 @@ interface TimeSlot {
   lessons?: Lesson[];
 }
 
-interface Student {
-  id: string;
-  user: {
-    name: string | null; // Allow name to be null to fix type error
-  };
-}
-
 export function ScheduleManager() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -81,16 +72,14 @@ export function ScheduleManager() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const utils = api.useUtils();
 
-  // Get rinks data
-  const { data: rinks, isLoading: isLoadingRinks } = api.admin.schedule.getRinks.useQuery();
+  // Get rinks data - removed unused isLoadingRinks
+  const { data: rinks } = api.admin.schedule.getRinks.useQuery();
 
   // Get students data
   const { data: students } = api.admin.student.getStudents.useQuery();
 
-  // Get time slots data
-  const { data: timeSlots, isLoading: isLoadingSlots } = api.admin.schedule.getTimeSlots.useQuery(
-    {},
-  );
+  // Get time slots data - removed unused isLoadingSlots
+  const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery({});
 
   // Convert time slots to FullCalendar events
   const events =
@@ -193,7 +182,7 @@ export function ScheduleManager() {
           });
           utils.admin.schedule.getTimeSlots.invalidate();
         },
-        onError: (error) => {
+        onError: () => {
           toast.error("Error", {
             description: "Failed to update time slot",
           });
@@ -217,12 +206,6 @@ export function ScheduleManager() {
     },
     [utils.admin.schedule],
   );
-
-  // Format time to show without timezone conversion
-  const formatTime = (date: Date) => {
-    // Just use hours and minutes as displayed in UTC
-    return `${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, "0")}`;
-  };
 
   // Navigate to the previous week
   const goToPrevWeek = () => {
@@ -252,7 +235,6 @@ export function ScheduleManager() {
       )}`;
     }
 
-    // Fix 2: Remove useless else at line 230 by just returning the value directly
     return `${startMonth} ${format(currentDate, "d")} - ${endMonth} ${format(
       endDate,
       "d",
@@ -427,7 +409,6 @@ export function ScheduleManager() {
                       <SelectValue placeholder="Select student" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* Fix 3: Adjust student mapping to handle nullable name */}
                       {students?.students?.map((student) => (
                         <SelectItem key={student.id} value={student.id}>
                           {student.user.name || "Unnamed Student"}
@@ -565,10 +546,9 @@ export function ScheduleManager() {
                             .join(", ");
 
                           return (
-                            // Fix 4 & 5: Convert div to button for better semantics and accessibility
                             <button
                               key={slot.id}
-                              type="button" // Add this line to fix the error
+                              type="button"
                               className="p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50 w-full text-left"
                               onClick={() => handleMobileSlotClick(slot)}
                               aria-label={`Time slot from ${new Date(
@@ -652,11 +632,11 @@ export function ScheduleManager() {
 
                 return {
                   html: `
-      <div class="fc-event-main-frame p-1">
-        <div class="fc-event-time font-medium">${startFormatted} - ${endFormatted}</div>
-        <div class="fc-event-title text-sm whitespace-normal">${arg.event.title}</div>
-        <div class="fc-event-subtitle text-xs whitespace-normal">${arg.event.extendedProps.rinkName || ""}</div>
-      </div>
+                    <div class="fc-event-main-frame p-1">
+                      <div class="fc-event-time font-medium">${startFormatted} - ${endFormatted}</div>
+                      <div class="fc-event-title text-sm whitespace-normal">${arg.event.title}</div>
+                      <div class="fc-event-subtitle text-xs whitespace-normal">${arg.event.extendedProps.rinkName || ""}</div>
+                    </div>
                   `,
                 };
               }}

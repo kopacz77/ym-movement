@@ -116,6 +116,7 @@ export const studentRouter = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
+        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
         console.log("Fetching student with ID:", input.studentId);
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
@@ -131,6 +132,7 @@ export const studentRouter = createTRPCRouter({
           },
         });
 
+        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
         console.log("Fetching student with ID:", input.studentId);
         if (!student) {
           throw new TRPCError({

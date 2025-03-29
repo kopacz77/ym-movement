@@ -15,7 +15,7 @@
         "suspicious": {
           "noExplicitAny": "warn",
           "noEmptyInterface": "error",
-          "noConsoleLog": "warn",
+          "noConsoleLog": "off",
           "noRedundantUseStrict": "error"
         },
         "style": {

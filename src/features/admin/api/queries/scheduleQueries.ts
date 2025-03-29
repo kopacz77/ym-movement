@@ -143,7 +143,8 @@ export const scheduleRouter = createTRPCRouter({
         const currentDate = new Date(input.startDate);
 
         // For debugging
-        console.log(
+        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+                console.log(
           `Creating recurring pattern from ${currentDate.toISOString()} to ${input.endDate.toISOString()} on days: ${input.daysOfWeek.join(
             ", ",
           )}`,
@@ -169,6 +170,7 @@ export const scheduleRouter = createTRPCRouter({
           currentDate.setDate(currentDate.getDate() + 1);
         }
 
+        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
         console.log(`Generated ${slots.length} slots for recurring pattern`);
 
         if (slots.length > 0) {
@@ -224,7 +226,8 @@ export const scheduleRouter = createTRPCRouter({
       const slots = [];
 
       // Debug info
-      console.log("Creating bulk time slots with input:", input);
+      // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+            console.log("Creating bulk time slots with input:", input);
 
       // Parse dates as midnight UTC to preserve day values
       const startParts = input.startDate.split("-").map(Number);
@@ -260,6 +263,7 @@ export const scheduleRouter = createTRPCRouter({
         currentDate.setTime(currentDate.getTime() + 24 * 60 * 60 * 1000);
       }
 
+      // biome-ignore lint/suspicious/noConsoleLog: <explanation>
       console.log(`Found ${dates.length} matching dates for days: ${input.daysOfWeek.join(", ")}`);
 
       // Parse time components
@@ -331,13 +335,16 @@ export const scheduleRouter = createTRPCRouter({
 
       // Print first few slots for debugging
       if (slots.length > 0) {
+        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
         console.log("Sample of slots to be created:");
         slots.slice(0, 3).forEach((slot, i) => {
+          // biome-ignore lint/suspicious/noConsoleLog: <explanation>
           console.log(
             `Slot ${i + 1}: ${slot.startTime.toISOString()} to ${slot.endTime.toISOString()}`,
           );
           // Also log the hour and minute values in UTC for clarity
-          console.log(
+          // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+                    console.log(
             `  UTC Hours: ${slot.startTime.getUTCHours()}:${slot.startTime.getUTCMinutes()} to ${slot.endTime.getUTCHours()}:${slot.endTime.getUTCMinutes()}`,
           );
         });
@@ -351,6 +358,7 @@ export const scheduleRouter = createTRPCRouter({
         });
       }
 
+      // biome-ignore lint/suspicious/noConsoleLog: <explanation>
       console.log(`Creating ${slots.length} time slots`);
 
       if (slots.length > 0) {

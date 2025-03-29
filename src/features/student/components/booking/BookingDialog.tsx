@@ -1,4 +1,4 @@
-// Updated BookingDialog.tsx to use student-specific pricing
+// Updated BookingDialog.tsx with fixes for both errors
 
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
-import { Check, Clock, Calendar, MapPin } from "lucide-react";
+import { Clock, Calendar, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { LessonType, Level, PaymentMethod } from "@prisma/client";
+import { LessonType, PaymentMethod } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 interface TimeSlot {
@@ -41,8 +41,8 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  // Add query to get student profile with custom pricing
-  const { data: studentProfile } = api.student.profile.getProfile.useQuery(
+  // Fix Error 1: Use only the pricing endpoint and remove the unused studentProfile
+  const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
     { studentId },
     { enabled: !!studentId }
   );
@@ -91,26 +91,19 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
       COMPETITION_PREP: 95,
     };
 
-    // If we have student profile with custom pricing
-    if (studentProfile?.customPricingEnabled) {
+    // If we have student pricing data with custom pricing
+    if (studentPricing?.customPricingEnabled) {
       switch (type) {
         case LessonType.PRIVATE:
-          return studentProfile.privateLessonPrice ?? defaultPrices.PRIVATE;
+          return studentPricing.privateLessonPrice ?? defaultPrices.PRIVATE;
         case LessonType.CHOREOGRAPHY:
-          return studentProfile.choreographyPrice ?? defaultPrices.CHOREOGRAPHY;
+          return studentPricing.choreographyPrice ?? defaultPrices.CHOREOGRAPHY;
         default:
           return defaultPrices[type];
       }
     }
 
     return defaultPrices[type];
-  };
-
-  // Format time for display from UTC time
-  const formatTimeFromUTC = (dateStr: string | Date) => {
-    const date = new Date(dateStr);
-    // Use UTC hours/minutes directly without timezone conversion
-    return `${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
   };
 
   // Convert UTC time to AM/PM format
