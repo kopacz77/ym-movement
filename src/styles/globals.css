@@ -207,6 +207,35 @@
   .fc-list-event-time {
     font-size: 0.75rem !important;
   }
+
+  .fc-event-content {
+    height: auto !important;
+    white-space: normal !important;
+  }
+  
+  .fc-timegrid-event-harness {
+    height: auto !important;
+  }
+  
+  .fc-timegrid-event {
+    min-height: 100%;
+    height: auto !important;
+  }
+  
+  .fc-event-title, .fc-event-subtitle {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+  
+  /* Expand month view cells to fit content better */
+  .fc-daygrid-event {
+    white-space: normal !important;
+  }
+  
+  .fc-daygrid-event-harness {
+    min-height: auto !important;
+  }
 }
 
 /* Side Navigation Improvements */

@@ -261,7 +261,9 @@ export function ScheduleManager() {
 
   // Process events for display in the custom list view
   const processEventsForCustomList = () => {
-    if (!timeSlots) return [];
+    if (!timeSlots) {
+      return [];
+    }
 
     // Group events by day
     const groupedEvents = timeSlots.reduce(
@@ -650,10 +652,11 @@ export function ScheduleManager() {
 
                 return {
                   html: `
-                    <div class="fc-event-main-frame">
-                      <div class="fc-event-time">${startFormatted} - ${endFormatted}</div>
-                      <div class="fc-event-title">${arg.event.title}</div>
-                    </div>
+      <div class="fc-event-main-frame p-1">
+        <div class="fc-event-time font-medium">${startFormatted} - ${endFormatted}</div>
+        <div class="fc-event-title text-sm whitespace-normal">${arg.event.title}</div>
+        <div class="fc-event-subtitle text-xs whitespace-normal">${arg.event.extendedProps.rinkName || ""}</div>
+      </div>
                   `,
                 };
               }}

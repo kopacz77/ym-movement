@@ -270,6 +270,7 @@ export const bookingRouter = createTRPCRouter({
               method: input.paymentMethod,
               status: PaymentStatus.PENDING,
               referenceCode: paymentRef,
+              lesson_date: lesson.startTime, // Store the lesson date explicitly
             },
           });
 

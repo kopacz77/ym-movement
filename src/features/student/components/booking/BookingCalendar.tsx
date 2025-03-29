@@ -42,7 +42,7 @@ interface TimeSlot {
   endTime: string;
   maxStudents: number;
   currentStudents?: number;
-  lessons?: Array<unknown>;
+  lessons?: unknown[];
   isActive: boolean;
   rink: Rink; // Full rink for the normal view
   interactive?: boolean;
@@ -55,7 +55,7 @@ interface ApiTimeSlot {
   endTime: string | Date;
   maxStudents: number;
   currentStudents?: number;
-  lessons?: Array<unknown>;
+  lessons?: unknown[];
   isActive: boolean;
   rink: ApiRink; // Partial rink from the API
   isAvailable?: boolean;
@@ -168,7 +168,7 @@ export const BookingCalendar = () => {
         end: slot.endTime,
         color: isAvailable ? "rgb(74 222 128)" : "rgb(239 68 68)",
         interactive: isYuraSlot && isAvailable,
-        className: !isYuraSlot ? "non-interactive-slot" : "",
+        className: isYuraSlot ? "" : "non-interactive-slot",
         extendedProps: {
           ...slot,
           interactive: isYuraSlot && isAvailable,
@@ -205,7 +205,7 @@ export const BookingCalendar = () => {
 
   // Process events for display in the custom list view
   const processEventsForCustomList = () => {
-    if (!availableSlots) return [];
+    if (!availableSlots) { return []; }
 
     // Group events by day
     const groupedEvents = availableSlots.reduce(
@@ -420,11 +420,11 @@ export const BookingCalendar = () => {
 
                 return {
                   html: `
-                    <div class="fc-event-main-frame">
-                      <div class="fc-event-time">${startTime} - ${endTime}</div>
-                      <div class="fc-event-title">${title}</div>
-                      <div class="fc-event-subtitle">${rinkName}</div>
-                    </div>
+                  <div class="fc-event-main-frame p-1">
+                    <div class="fc-event-time font-medium">${startTime} - ${endTime}</div>
+                    <div class="fc-event-title text-sm whitespace-normal">${title}</div>
+                    <div class="fc-event-subtitle text-xs whitespace-normal">${rinkName}</div>
+                  </div>
                   `,
                 };
               }}

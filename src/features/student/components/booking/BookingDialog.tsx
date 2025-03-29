@@ -1,5 +1,4 @@
-// Updated src/features/student/components/booking/BookingDialog.tsx
-"use client";
+// Updated BookingDialog.tsx to use student-specific pricing
 
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -29,9 +28,6 @@ interface TimeSlot {
   };
 }
 
-// Type used in BookingDialog props remains unchanged - the custom pricing
-// is handled in the booking API, no need to reference it here
-
 interface BookingDialogProps {
   slot: TimeSlot;
   studentId: string;
@@ -44,6 +40,12 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  // Add query to get student profile with custom pricing
+  const { data: studentProfile } = api.student.profile.getProfile.useQuery(
+    { studentId },
+    { enabled: !!studentId }
+  );
 
   const bookLesson = api.student.booking.bookLesson.useMutation();
 
@@ -79,15 +81,48 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
     });
   };
 
-  // Get lesson type price (in a real app, this would come from settings)
+  // Get lesson type price based on student's custom pricing if available
   const getLessonTypePrice = (type: LessonType) => {
-    const prices = {
+    // Default prices if no student profile is loaded yet
+    const defaultPrices = {
       PRIVATE: 75,
       GROUP: 45,
       CHOREOGRAPHY: 90,
       COMPETITION_PREP: 95,
     };
-    return prices[type];
+
+    // If we have student profile with custom pricing
+    if (studentProfile?.customPricingEnabled) {
+      switch (type) {
+        case LessonType.PRIVATE:
+          return studentProfile.privateLessonPrice ?? defaultPrices.PRIVATE;
+        case LessonType.CHOREOGRAPHY:
+          return studentProfile.choreographyPrice ?? defaultPrices.CHOREOGRAPHY;
+        default:
+          return defaultPrices[type];
+      }
+    }
+
+    return defaultPrices[type];
+  };
+
+  // Format time for display from UTC time
+  const formatTimeFromUTC = (dateStr: string | Date) => {
+    const date = new Date(dateStr);
+    // Use UTC hours/minutes directly without timezone conversion
+    return `${date.getUTCHours()}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
+  };
+
+  // Convert UTC time to AM/PM format
+  const formatAMPM = (dateStr: string | Date) => {
+    const date = new Date(dateStr);
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const strMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${hours}:${strMinutes} ${ampm}`;
   };
 
   return (
@@ -106,8 +141,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>
-                {format(new Date(slot.startTime), "h:mm a")} -{" "}
-                {format(new Date(slot.endTime), "h:mm a")}
+                {formatAMPM(slot.startTime)} - {formatAMPM(slot.endTime)}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -130,14 +164,8 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                   <SelectItem value={LessonType.PRIVATE}>
                     Private Lesson - ${getLessonTypePrice(LessonType.PRIVATE)}
                   </SelectItem>
-                  <SelectItem value={LessonType.GROUP}>
-                    Group Lesson - ${getLessonTypePrice(LessonType.GROUP)}
-                  </SelectItem>
                   <SelectItem value={LessonType.CHOREOGRAPHY}>
                     Choreography - ${getLessonTypePrice(LessonType.CHOREOGRAPHY)}
-                  </SelectItem>
-                  <SelectItem value={LessonType.COMPETITION_PREP}>
-                    Competition Prep - ${getLessonTypePrice(LessonType.COMPETITION_PREP)}
                   </SelectItem>
                 </SelectContent>
               </Select>
