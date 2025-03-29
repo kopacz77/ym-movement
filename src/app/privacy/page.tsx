@@ -125,9 +125,8 @@ export default function PrivacyPolicyPage() {
           If you have questions about this Privacy Policy or your child&apos;s information, please
           contact us at:
           <br />
-          Email: privacy@ymicedance.com
+          Email: info@ym-movement.com
           <br />
-          Phone: (555) 123-4567
         </p>
       </div>
 

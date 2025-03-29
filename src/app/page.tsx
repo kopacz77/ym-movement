@@ -201,7 +201,7 @@ export default function LandingPage() {
             <div>
               <h4 className="mb-4 text-sm font-semibold">Contact</h4>
               <address className="not-italic text-sm text-muted-foreground">
-                <p>Email: yuraxmin@gmail.com</p>
+                <p>Email: info@ym-movement.com</p>
               </address>
             </div>
           </div>
