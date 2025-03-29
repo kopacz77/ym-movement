@@ -15,9 +15,10 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Pencil, Mail, Phone, Award } from "lucide-react";
+import { Pencil, Mail, Phone, Award, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import type { LessonStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
+import { StudentPricingForm } from "../StudentPricingForm";
 
 // Define types to replace 'any'
 interface User {
@@ -58,6 +59,11 @@ interface StudentData {
   emergencyContact: EmergencyContact | null;
   notes: string | null;
   lessons: Lesson[];
+  customPricingEnabled: boolean;
+  privateLessonPrice: number | null;
+  groupLessonPrice: number | null;
+  choreographyPrice: number | null;
+  competitionPrepPrice: number | null;
 }
 
 interface StudentProfileProps {
@@ -68,10 +74,17 @@ interface StudentProfileProps {
 export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEditAction }) => {
   const [activeTab, setActiveTab] = React.useState("overview");
 
-  // Use student namespace for this API call
+  // Get student data
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
 
-  // Added: Handle errors with useEffect
+  // Add queries for pricing data (only fetch when pricing tab is active)
+  const { data: defaultPricing, isLoading: isDefaultPricingLoading } = 
+    api.admin.student.getDefaultPricing.useQuery(
+      undefined,
+      { enabled: activeTab === "pricing" }
+    );
+  
+  // Handle errors with useEffect
   useEffect(() => {
     if (error) {
       toast.error("Error loading student profile", {
@@ -155,11 +168,12 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="lessons">Lessons</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="pricing">Pricing</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -371,6 +385,44 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
               ) : (
                 <div className="text-center py-4 text-muted-foreground">
                   No payment history available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Pricing Tab - Added */}
+        <TabsContent value="pricing">
+          <Card>
+            <CardHeader>
+              <CardTitle>Custom Pricing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activeTab === "pricing" && isDefaultPricingLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Loading pricing data...</span>
+                </div>
+              ) : defaultPricing ? (
+                <StudentPricingForm
+                  studentId={studentId}
+                  initialData={{
+                    customPricingEnabled: typedStudent.customPricingEnabled || false,
+                    privateLessonPrice: typedStudent.privateLessonPrice,
+                    groupLessonPrice: typedStudent.groupLessonPrice,
+                    choreographyPrice: typedStudent.choreographyPrice,
+                    competitionPrepPrice: typedStudent.competitionPrepPrice,
+                  }}
+                  defaultPrices={{
+                    privateLessonPrice: defaultPricing.privateLessonPrice || 75,
+                    groupLessonPrice: defaultPricing.groupLessonPrice || 45,
+                    choreographyPrice: defaultPricing.choreographyPrice || 90,
+                    competitionPrice: defaultPricing.competitionPrice || 95,
+                  }}
+                />
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  Failed to load pricing data
                 </div>
               )}
             </CardContent>
