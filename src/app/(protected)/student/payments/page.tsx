@@ -22,6 +22,31 @@ import { Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
+// Add this utility function to preserve local times
+function formatDateAsLocal(dateString: string | Date, formatPattern: string): string {
+  // If it's already a Date object, format it directly
+  if (dateString instanceof Date) {
+    return format(dateString, formatPattern);
+  }
+  
+  // For string dates, parse them preserving the time
+  const parsedDate = new Date(dateString);
+  
+  // Get UTC components to preserve the original time
+  const year = parsedDate.getUTCFullYear();
+  const month = parsedDate.getUTCMonth();
+  const day = parsedDate.getUTCDate();
+  const hours = parsedDate.getUTCHours();
+  const minutes = parsedDate.getUTCMinutes();
+  
+  // Create a local date with the same time values
+  const localDate = new Date();
+  localDate.setFullYear(year, month, day);
+  localDate.setHours(hours, minutes, 0, 0);
+  
+  return format(localDate, formatPattern);
+}
+
 export default function StudentPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -70,7 +95,7 @@ export default function StudentPaymentsPage() {
   const filteredPayments = payments.filter((lesson) => {
     const matchesSearch = searchQuery
       ? lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        format(new Date(lesson.startTime), "PPP").toLowerCase().includes(searchQuery.toLowerCase())
+        formatDateAsLocal(lesson.startTime, "PPP").toLowerCase().includes(searchQuery.toLowerCase())
       : true;
     const matchesTab =
       activeTab === "all" ? true : lesson.payment?.status.toLowerCase() === activeTab.toLowerCase();
@@ -138,7 +163,7 @@ export default function StudentPaymentsPage() {
               <TableBody>
                 {filteredPayments.map((lesson) => (
                   <TableRow key={lesson.id}>
-                    <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
+                    <TableCell>{formatDateAsLocal(lesson.startTime, "PP")}</TableCell>
                     <TableCell>{lesson.type.replace("_", " ")} Lesson</TableCell>
                     <TableCell>${lesson.payment?.amount.toFixed(2)}</TableCell>
                     <TableCell>{lesson.payment?.referenceCode}</TableCell>

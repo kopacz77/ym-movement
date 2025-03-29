@@ -1,4 +1,4 @@
-// src/features/student/components/schedule/LessonCard.tsx (fix for small typo)
+// src/features/student/components/schedule/LessonCard.tsx
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,31 @@ import type { LessonWithDetails } from "../../types";
 import { LessonStatus, PaymentStatus } from "@prisma/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+
+// Add this utility function to preserve local times
+function formatDateAsLocal(dateString: string | Date, formatPattern: string): string {
+  // If it's already a Date object, format it directly
+  if (dateString instanceof Date) {
+    return format(dateString, formatPattern);
+  }
+  
+  // For string dates, parse them preserving the time
+  const parsedDate = new Date(dateString);
+  
+  // Get UTC components to preserve the original time
+  const year = parsedDate.getUTCFullYear();
+  const month = parsedDate.getUTCMonth();
+  const day = parsedDate.getUTCDate();
+  const hours = parsedDate.getUTCHours();
+  const minutes = parsedDate.getUTCMinutes();
+  
+  // Create a local date with the same time values
+  const localDate = new Date();
+  localDate.setFullYear(year, month, day);
+  localDate.setHours(hours, minutes, 0, 0);
+  
+  return format(localDate, formatPattern);
+}
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -33,7 +58,7 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
   };
 
   const getPaymentBadge = () => {
-    if (!lesson.payment) return null;
+    if (!lesson.payment) { return null; }
 
     switch (lesson.payment.status as PaymentStatus) {
       case PaymentStatus.PENDING:
@@ -83,14 +108,14 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
         <div className="mt-4 space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{format(new Date(lesson.startTime), "EEEE, MMMM d, yyyy")}</span>
+            <span>{formatDateAsLocal(lesson.startTime, "EEEE, MMMM d, yyyy")}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>
-              {format(new Date(lesson.startTime), "h:mm a")} -
-              {format(new Date(lesson.endTime), "h:mm a")}
+              {formatDateAsLocal(lesson.startTime, "h:mm a")} -
+              {formatDateAsLocal(lesson.endTime, "h:mm a")}
             </span>
           </div>
 
