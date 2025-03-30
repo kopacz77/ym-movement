@@ -1,4 +1,4 @@
-// Enhanced src/features/admin/components/students/StudentPricingForm.tsx
+// src/features/admin/components/students/StudentPricingForm.tsx
 "use client";
 
 import { useState } from "react";
@@ -67,6 +67,26 @@ export function StudentPricingForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Form validation - check for empty values when enabled
+    if (isEnabled) {
+      // Check each field
+      if (!privatePrice.trim() || !groupPrice.trim() || 
+          !choreographyPrice.trim() || !competitionPrice.trim()) {
+        toast.error("Price fields cannot be empty when custom pricing is enabled");
+        return;
+      }
+      
+      // Check for valid numbers
+      const prices = [privatePrice, groupPrice, choreographyPrice, competitionPrice];
+      for (const price of prices) {
+        const parsed = Number.parseFloat(price);
+        if (Number.isNaN(parsed) || parsed < 0) {
+          toast.error("All prices must be valid positive numbers");
+          return;
+        }
+      }
+    }
+
     const data = {
       studentId,
       customPricingEnabled: isEnabled,
@@ -133,6 +153,7 @@ export function StudentPricingForm({
                         value={privatePrice}
                         onChange={(e) => setPrivatePrice(e.target.value)}
                         disabled={!isEnabled}
+                        required={isEnabled}
                       />
                     </div>
                     {!isEnabled && (
@@ -175,6 +196,7 @@ export function StudentPricingForm({
                         value={groupPrice}
                         onChange={(e) => setGroupPrice(e.target.value)}
                         disabled={!isEnabled}
+                        required={isEnabled}
                       />
                     </div>
                     {!isEnabled && (
@@ -217,6 +239,7 @@ export function StudentPricingForm({
                         value={choreographyPrice}
                         onChange={(e) => setChoreographyPrice(e.target.value)}
                         disabled={!isEnabled}
+                        required={isEnabled}
                       />
                     </div>
                     {!isEnabled && (
@@ -268,6 +291,7 @@ export function StudentPricingForm({
                         value={competitionPrice}
                         onChange={(e) => setCompetitionPrice(e.target.value)}
                         disabled={!isEnabled}
+                        required={isEnabled}
                       />
                     </div>
                     {!isEnabled && (
