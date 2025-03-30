@@ -56,6 +56,33 @@ interface LessonWithDetails {
   cancellationTime?: Date;
 }
 
+// Helper function to create dates without timezone conversion
+function createDateWithoutTimezoneConversion(dateStr: string | Date): Date {
+  if (dateStr instanceof Date) {
+    return dateStr;
+  }
+  
+  // Parse the date string
+  const [datePart, timePart] = dateStr.split('T');
+  if (!datePart) { return new Date(); }
+  
+  const [year, month, day] = datePart.split('-').map(Number);
+  let hours = 0;
+  let minutes = 0;
+  
+  if (timePart) {
+    const timeParts = timePart.split(':');
+    hours = Number(timeParts[0]);
+    minutes = Number(timeParts[1]);
+  }
+  
+  // Create a date object with these values
+  const date = new Date();
+  date.setFullYear(year, month - 1, day);
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+}
+
 export default function StudentScheduleClient() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const { id: studentId } = useCurrentUser();
@@ -101,9 +128,9 @@ export default function StudentScheduleClient() {
 
   // Convert the API Lesson to the expected LessonWithDetails format
   const transformToLessonWithDetails = (lesson: Lesson): LessonWithDetails => {
-    // Create proper Date objects
-    const startTime = new Date(lesson.startTime);
-    const endTime = new Date(lesson.endTime);
+    // Create Date objects without timezone conversion
+    const startTime = createDateWithoutTimezoneConversion(lesson.startTime);
+    const endTime = createDateWithoutTimezoneConversion(lesson.endTime);
     const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
 
     // Create a new object with the correct types, explicitly mapping each property
@@ -111,8 +138,8 @@ export default function StudentScheduleClient() {
       id: lesson.id,
       studentId: lesson.studentId,
       rinkId: lesson.rinkId,
-      startTime, // Date object
-      endTime, // Date object
+      startTime, // Our fixed Date object
+      endTime, // Our fixed Date object
       duration: durationInMinutes,
       type: lesson.type,
       area: lesson.area,
@@ -131,7 +158,7 @@ export default function StudentScheduleClient() {
     }
 
     if (lesson.cancellationTime) {
-      result.cancellationTime = new Date(lesson.cancellationTime);
+      result.cancellationTime = createDateWithoutTimezoneConversion(lesson.cancellationTime);
     }
 
     return result;
