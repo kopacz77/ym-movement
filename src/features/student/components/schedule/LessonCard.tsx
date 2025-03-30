@@ -4,10 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
-import type { LessonWithDetails } from "../../types";
+import { LessonWithDetails } from "@/features/student/types";
 import { LessonStatus, PaymentStatus } from "@prisma/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils"; // Import the UTC utility functions
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -15,29 +16,6 @@ interface LessonCardProps {
 }
 
 export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
-  // Create Date objects while preserving the original time values
-  // This ensures we use the times exactly as they are stored in the database
-  const parseDate = (dateString: string | Date) => {
-    if (dateString instanceof Date) { return dateString; }
-    
-    // Parse ISO date string components
-    const parts = dateString.split(/[T:.-]/);
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in JS
-    const day = parseInt(parts[2], 10);
-    const hour = parts.length > 3 ? parseInt(parts[3], 10) : 0;
-    const minute = parts.length > 4 ? parseInt(parts[4], 10) : 0;
-    
-    // Create date with specific components, avoiding timezone conversion
-    const date = new Date();
-    date.setFullYear(year, month, day);
-    date.setHours(hour, minute, 0, 0);
-    return date;
-  };
-  
-  const startTime = parseDate(lesson.startTime);
-  const endTime = parseDate(lesson.endTime);
-
   const getStatusBadge = () => {
     switch (lesson.status) {
       case LessonStatus.SCHEDULED:
@@ -54,7 +32,7 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
   const getPaymentBadge = () => {
     if (!lesson.payment) { return null; }
 
-    switch (lesson.payment.status as PaymentStatus) {
+    switch (lesson.payment.status) {
       case PaymentStatus.PENDING:
         return (
           <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
@@ -102,26 +80,13 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
         <div className="mt-4 space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{startTime.toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}</span>
+            <span>{formatUtcDate(lesson.startTime)}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>
-              {startTime.toLocaleTimeString('en-US', { 
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-              })} - {endTime.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-              })}
+              {formatUtcTime12h(lesson.startTime)} - {formatUtcTime12h(lesson.endTime)}
             </span>
           </div>
 

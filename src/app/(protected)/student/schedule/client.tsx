@@ -8,11 +8,8 @@ import { LessonCard } from "@/features/student/components/schedule/LessonCard";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
-// Define the type that exactly matches what LessonCard expects
-type LessonStatus = "SCHEDULED" | "CANCELLED" | "COMPLETED";
-type LessonType = "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP";
-type RinkArea = "MAIN_RINK" | "PRACTICE_RINK" | "DANCE_STUDIO";
+import { LessonWithDetails } from "@/features/student/types";
+import { LessonStatus, LessonType, PaymentStatus, RinkArea } from "@prisma/client";
 
 // This is the raw data shape from the API
 interface Lesson {
@@ -32,55 +29,14 @@ interface Lesson {
   };
   cancellationReason?: string;
   cancellationTime?: string | Date;
-  [key: string]: unknown;
-}
-
-// This is what LessonCard expects - note the Date objects and optional notes
-interface LessonWithDetails {
-  id: string;
-  studentId: string;
-  rinkId: string;
-  startTime: Date; // Must be Date object
-  endTime: Date; // Must be Date object
-  duration: number;
-  type: LessonType;
-  area: RinkArea;
-  status: LessonStatus;
-  notes?: string; // Optional string, not nullable
-  price: number;
-  rink: {
-    name: string;
-    address: string;
+  payment?: {
+    id: string;
+    status: PaymentStatus;
+    amount: number;
+    method: string;
+    referenceCode: string;
   };
-  cancellationReason?: string;
-  cancellationTime?: Date;
-}
-
-// Helper function to create dates without timezone conversion
-function createDateWithoutTimezoneConversion(dateStr: string | Date): Date {
-  if (dateStr instanceof Date) {
-    return dateStr;
-  }
-  
-  // Parse the date string
-  const [datePart, timePart] = dateStr.split('T');
-  if (!datePart) { return new Date(); }
-  
-  const [year, month, day] = datePart.split('-').map(Number);
-  let hours = 0;
-  let minutes = 0;
-  
-  if (timePart) {
-    const timeParts = timePart.split(':');
-    hours = Number(timeParts[0]);
-    minutes = Number(timeParts[1]);
-  }
-  
-  // Create a date object with these values
-  const date = new Date();
-  date.setFullYear(year, month - 1, day);
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+  [key: string]: unknown;
 }
 
 export default function StudentScheduleClient() {
@@ -129,23 +85,23 @@ export default function StudentScheduleClient() {
   // Convert the API Lesson to the expected LessonWithDetails format
   const transformToLessonWithDetails = (lesson: Lesson): LessonWithDetails => {
     // Create Date objects without timezone conversion
-    const startTime = createDateWithoutTimezoneConversion(lesson.startTime);
-    const endTime = createDateWithoutTimezoneConversion(lesson.endTime);
+    const startTime = lesson.startTime instanceof Date ? lesson.startTime : new Date(lesson.startTime);
+    const endTime = lesson.endTime instanceof Date ? lesson.endTime : new Date(lesson.endTime);
     const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
 
-    // Create a new object with the correct types, explicitly mapping each property
+    // Create a new object matching the LessonWithDetails interface
     const result: LessonWithDetails = {
       id: lesson.id,
-      studentId: lesson.studentId,
-      rinkId: lesson.rinkId,
-      startTime, // Our fixed Date object
-      endTime, // Our fixed Date object
+      startTime,
+      endTime,
       duration: durationInMinutes,
       type: lesson.type,
-      area: lesson.area,
       status: lesson.status,
       price: lesson.price,
-      rink: lesson.rink,
+      rink: {
+        name: lesson.rink.name,
+        address: lesson.rink.address,
+      }
     };
 
     // Add optional properties only if they exist and aren't null
@@ -153,12 +109,15 @@ export default function StudentScheduleClient() {
       result.notes = lesson.notes;
     }
 
-    if (lesson.cancellationReason) {
-      result.cancellationReason = lesson.cancellationReason;
-    }
-
-    if (lesson.cancellationTime) {
-      result.cancellationTime = createDateWithoutTimezoneConversion(lesson.cancellationTime);
+    // Add payment info if it exists
+    if (lesson.payment) {
+      result.payment = {
+        id: lesson.payment.id,
+        status: lesson.payment.status,
+        amount: lesson.payment.amount,
+        method: lesson.payment.method,
+        referenceCode: lesson.payment.referenceCode
+      };
     }
 
     return result;

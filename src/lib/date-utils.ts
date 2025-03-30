@@ -32,6 +32,29 @@ export function formatUtcTime12h(dateStr: string | Date): string {
 }
 
 /**
+ * Format a UTC date string to display date in a standardized format without timezone conversion
+ * Example: "Monday, March 16, 2025"
+ */
+export function formatUtcDate(dateStr: string | Date): string {
+  const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+  
+  // Create a new date using UTC components to avoid timezone shifts
+  const utcDate = new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate()
+  ));
+  
+  // Format using standard JS methods but on our UTC-preserved date
+  return utcDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/**
  * Format a date string to display date in a standardized format
  * Example: "Monday, March 16, 2025"
  */
@@ -115,7 +138,7 @@ export function formatDateTimeRange(
   endTime: string | Date,
   timezone: string,
 ): string {
-  const date = formatDate(startTime);
+  const date = formatUtcDate(startTime);
   const start = formatUtcTime12h(startTime);
   const end = formatUtcTime12h(endTime);
 
