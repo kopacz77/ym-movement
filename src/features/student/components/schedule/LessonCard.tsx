@@ -3,37 +3,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
 import type { LessonWithDetails } from "../../types";
 import { LessonStatus, PaymentStatus } from "@prisma/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-// Add this utility function to preserve local times
-function formatDateAsLocal(dateString: string | Date, formatPattern: string): string {
-  // If it's already a Date object, format it directly
-  if (dateString instanceof Date) {
-    return format(dateString, formatPattern);
-  }
-  
-  // For string dates, parse them preserving the time
-  const parsedDate = new Date(dateString);
-  
-  // Get UTC components to preserve the original time
-  const year = parsedDate.getUTCFullYear();
-  const month = parsedDate.getUTCMonth();
-  const day = parsedDate.getUTCDate();
-  const hours = parsedDate.getUTCHours();
-  const minutes = parsedDate.getUTCMinutes();
-  
-  // Create a local date with the same time values
-  const localDate = new Date();
-  localDate.setFullYear(year, month, day);
-  localDate.setHours(hours, minutes, 0, 0);
-  
-  return format(localDate, formatPattern);
-}
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -41,8 +15,10 @@ interface LessonCardProps {
 }
 
 export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
-  const isUpcoming =
-    new Date(lesson.startTime) > new Date() && lesson.status === LessonStatus.SCHEDULED;
+
+  // Create Date objects directly from the lesson times
+  const startTime = new Date(lesson.startTime);
+  const endTime = new Date(lesson.endTime);
 
   const getStatusBadge = () => {
     switch (lesson.status) {
@@ -84,6 +60,27 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
     }
   };
 
+  // Format the date as shown in the lesson details page
+  const formattedDate = startTime.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Format the time as shown in the lesson details page
+  const formattedStartTime = startTime.toLocaleTimeString('en-US', { 
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+  
+  const formattedEndTime = endTime.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
   return (
     <Card
       className={cn("overflow-hidden", lesson.status === LessonStatus.CANCELLED && "opacity-75")}
@@ -108,14 +105,13 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
         <div className="mt-4 space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{formatDateAsLocal(lesson.startTime, "EEEE, MMMM d, yyyy")}</span>
+            <span>{formattedDate}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>
-              {formatDateAsLocal(lesson.startTime, "h:mm a")} -
-              {formatDateAsLocal(lesson.endTime, "h:mm a")}
+              {formattedStartTime} - {formattedEndTime}
             </span>
           </div>
 

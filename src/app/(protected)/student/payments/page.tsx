@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,34 +17,18 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import { Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-// Add this utility function to preserve local times
-function formatDateAsLocal(dateString: string | Date, formatPattern: string): string {
-  // If it's already a Date object, format it directly
-  if (dateString instanceof Date) {
-    return format(dateString, formatPattern);
-  }
-  
-  // For string dates, parse them preserving the time
-  const parsedDate = new Date(dateString);
-  
-  // Get UTC components to preserve the original time
-  const year = parsedDate.getUTCFullYear();
-  const month = parsedDate.getUTCMonth();
-  const day = parsedDate.getUTCDate();
-  const hours = parsedDate.getUTCHours();
-  const minutes = parsedDate.getUTCMinutes();
-  
-  // Create a local date with the same time values
-  const localDate = new Date();
-  localDate.setFullYear(year, month, day);
-  localDate.setHours(hours, minutes, 0, 0);
-  
-  return format(localDate, formatPattern);
+// Use this function to format dates consistently
+function formatDateConsistently(dateString: string | Date): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 }
 
 export default function StudentPaymentsPage() {
@@ -93,9 +77,10 @@ export default function StudentPaymentsPage() {
 
   // Filter payments based on search query and tab
   const filteredPayments = payments.filter((lesson) => {
+    const formattedDate = formatDateConsistently(lesson.startTime);
     const matchesSearch = searchQuery
       ? lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        formatDateAsLocal(lesson.startTime, "PPP").toLowerCase().includes(searchQuery.toLowerCase())
+        formattedDate.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
     const matchesTab =
       activeTab === "all" ? true : lesson.payment?.status.toLowerCase() === activeTab.toLowerCase();
@@ -163,7 +148,7 @@ export default function StudentPaymentsPage() {
               <TableBody>
                 {filteredPayments.map((lesson) => (
                   <TableRow key={lesson.id}>
-                    <TableCell>{formatDateAsLocal(lesson.startTime, "PP")}</TableCell>
+                    <TableCell>{formatDateConsistently(lesson.startTime)}</TableCell>
                     <TableCell>{lesson.type.replace("_", " ")} Lesson</TableCell>
                     <TableCell>${lesson.payment?.amount.toFixed(2)}</TableCell>
                     <TableCell>{lesson.payment?.referenceCode}</TableCell>
