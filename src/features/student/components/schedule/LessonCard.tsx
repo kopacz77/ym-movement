@@ -3,12 +3,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, DollarSign } from "lucide-react";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import { LessonWithDetails } from "@/features/student/types";
-import { LessonStatus, PaymentStatus } from "@prisma/client";
+import { LessonStatus } from "@prisma/client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils"; // Import the UTC utility functions
+import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils";
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -29,33 +29,6 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
     }
   };
 
-  const getPaymentBadge = () => {
-    if (!lesson.payment) { return null; }
-
-    switch (lesson.payment.status) {
-      case PaymentStatus.PENDING:
-        return (
-          <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-            Payment Pending
-          </Badge>
-        );
-      case PaymentStatus.COMPLETED:
-        return (
-          <Badge variant="outline" className="bg-green-100 text-green-800">
-            Paid
-          </Badge>
-        );
-      case PaymentStatus.FAILED:
-        return (
-          <Badge variant="outline" className="bg-red-100 text-red-800">
-            Payment Failed
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{lesson.payment.status}</Badge>;
-    }
-  };
-
   return (
     <Card
       className={cn("overflow-hidden", lesson.status === LessonStatus.CANCELLED && "opacity-75")}
@@ -73,7 +46,6 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
           <h3 className="font-medium">{lesson.type.replace("_", " ")} Lesson</h3>
           <div className="flex flex-col gap-1 items-end">
             {getStatusBadge()}
-            {getPaymentBadge()}
           </div>
         </div>
 
@@ -94,15 +66,6 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
             <MapPin className="h-4 w-4 text-muted-foreground" />
             <span>{lesson.rink.name}</span>
           </div>
-
-          {lesson.payment && (
-            <div className="flex items-center gap-2 text-sm">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span>
-                ${lesson.payment.amount.toFixed(2)} ({lesson.payment.method})
-              </span>
-            </div>
-          )}
         </div>
 
         {showActions && (

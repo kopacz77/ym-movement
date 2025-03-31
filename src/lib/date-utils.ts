@@ -33,20 +33,26 @@ export function formatUtcTime12h(dateStr: string | Date): string {
 
 /**
  * Format a UTC date string to display date in a standardized format without timezone conversion
+ * This fixes the one day offset issue by setting the date directly.
  * Example: "Monday, March 16, 2025"
  */
 export function formatUtcDate(dateStr: string | Date): string {
   const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
   
-  // Create a new date using UTC components to avoid timezone shifts
-  const utcDate = new Date(Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate()
-  ));
+  // Extract UTC components
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
   
-  // Format using standard JS methods but on our UTC-preserved date
-  return utcDate.toLocaleDateString("en-US", {
+  // Create a new date using those components but in local time
+  // This avoids the timezone shift that can cause a day difference
+  const displayDate = new Date();
+  displayDate.setFullYear(year);
+  displayDate.setMonth(month);
+  displayDate.setDate(day);
+  
+  // Format the date
+  return displayDate.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -103,6 +109,47 @@ export function formatDateRange(startDate: Date, endDate: Date): string {
   }
 
   return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+}
+
+/**
+ * Format a UTC date range without timezone conversion
+ * Example: "Mar 16 - 22, 2025"
+ */
+export function formatUtcDateRange(startDate: Date, endDate: Date): string {
+  // Extract UTC components for start date
+  const startYear = startDate.getUTCFullYear();
+  const startMonthIdx = startDate.getUTCMonth();
+  const startDayNum = startDate.getUTCDate();
+  
+  // Extract UTC components for end date
+  const endYear = endDate.getUTCFullYear();
+  const endMonthIdx = endDate.getUTCMonth();
+  const endDayNum = endDate.getUTCDate();
+  
+  // Create display dates to format correctly
+  const displayStartDate = new Date();
+  displayStartDate.setFullYear(startYear);
+  displayStartDate.setMonth(startMonthIdx);
+  displayStartDate.setDate(startDayNum);
+  
+  const displayEndDate = new Date();
+  displayEndDate.setFullYear(endYear);
+  displayEndDate.setMonth(endMonthIdx);
+  displayEndDate.setDate(endDayNum);
+  
+  // Format month names
+  const startMonth = displayStartDate.toLocaleDateString("en-US", { month: "short" });
+  const endMonth = displayEndDate.toLocaleDateString("en-US", { month: "short" });
+  
+  if (startMonth === endMonth && startYear === endYear) {
+    return `${startMonth} ${startDayNum} - ${endDayNum}, ${startYear}`;
+  }
+  
+  if (startYear === endYear) {
+    return `${startMonth} ${startDayNum} - ${endMonth} ${endDayNum}, ${startYear}`;
+  }
+  
+  return `${startMonth} ${startDayNum}, ${startYear} - ${endMonth} ${endDayNum}, ${endYear}`;
 }
 
 /**
