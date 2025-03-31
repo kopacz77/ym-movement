@@ -26,7 +26,7 @@ export const PendingApprovals = () => {
 
   // Use the student namespace for pending approvals
   const { data, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();
-  const pendingStudents = Array.isArray(data) ? data : ([] as Student[]);
+  const pendingStudents = data?.students || [];
 
   // IMPORTANT: Always declare mutations at the top level, not conditionally
   const approveStudent = api.admin.student.approveStudent.useMutation({
