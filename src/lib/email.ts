@@ -11,7 +11,7 @@ const BASE_URL =
   process.env.VERCEL_URL ||
   process.env.NETLIFY_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  "http://localhost:3000";
+  "https://ym-movement.com";
 
 // Email configuration constants  
 const EMAIL_CONFIG = {

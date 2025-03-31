@@ -128,7 +128,7 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="level">Skating Level</Label>
               <Select value={level} onValueChange={(value: Level) => setLevel(value)}>
-                <SelectTrigger>
+              <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your level" />
                 </SelectTrigger>
                 <SelectContent>
