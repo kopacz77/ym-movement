@@ -159,20 +159,28 @@ export const studentRouter = createTRPCRouter({
   getPendingApprovals: protectedProcedure.query(async ({ ctx }) => {
     try {
       console.log("Fetching pending approvals");
-      // Use raw query to work around the type issue with isApproved
-      const pendingStudents = await ctx.prisma.$queryRaw`
-        SELECT s.*, u.*
-        FROM "Student" s
-        JOIN "User" u ON s."userId" = u.id
-        WHERE s."isApproved" = false
-        ORDER BY s."createdAt" DESC
-        LIMIT 5
-      `;
+      
+      // For clarity, let's use Prisma's built-in querying instead of raw SQL
+      const pendingStudents = await ctx.prisma.student.findMany({
+        where: { isApproved: false },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+        take: 5
+      });
 
-      console.log(
-        `Found ${Array.isArray(pendingStudents) ? pendingStudents.length : 0} pending approvals`,
-      );
-      return pendingStudents;
+      // Transform to match the expected format
+      const formattedStudents = pendingStudents.map(student => ({
+        id: student.id,
+        user: {
+          name: student.user.name || "Unnamed",
+          email: student.user.email
+        },
+        status: "PENDING" as const,
+        createdAt: student.createdAt
+      }));
+
+      console.log(`Found ${formattedStudents.length} pending approvals`);
+      return { students: formattedStudents };
     } catch (error) {
       console.error("Error fetching pending approvals:", error);
       throw new TRPCError({
