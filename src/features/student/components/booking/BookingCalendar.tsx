@@ -1,3 +1,4 @@
+// src/features/student/components/booking/BookingCalendar.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,11 +14,11 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { format, addDays, startOfDay, endOfDay, parseISO } from "date-fns";
+import { format, addDays, startOfDay, endOfDay } from "date-fns";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { BookingDialog } from "./BookingDialog";
-import type { DateSelectArg, EventClickArg } from "@fullcalendar/core";
+import type { EventClickArg } from "@fullcalendar/core";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -168,7 +169,7 @@ export const BookingCalendar = () => {
         end: slot.endTime,
         color: isAvailable ? "rgb(74 222 128)" : "rgb(239 68 68)",
         interactive: isYuraSlot && isAvailable,
-        className: isYuraSlot ? "" : "non-interactive-slot",
+        className: isYuraSlot && isAvailable ? "interactive-slot" : "non-interactive-slot",
         extendedProps: {
           ...slot,
           interactive: isYuraSlot && isAvailable,
@@ -176,10 +177,6 @@ export const BookingCalendar = () => {
         },
       };
     }) || [];
-
-  const handleDateSelect = (selectInfo: DateSelectArg) => {
-    setDate(selectInfo.start);
-  };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const slot = clickInfo.event.extendedProps as TimeSlot;
@@ -392,8 +389,7 @@ export const BookingCalendar = () => {
                 center: "title",
                 right: "timeGridWeek,dayGridMonth",
               }}
-              selectable={true}
-              select={handleDateSelect}
+              selectable={false} // Disable selection of blank spots
               eventClick={handleEventClick}
               slotMinTime="05:00:00" // Start at 5am
               slotMaxTime="18:00:00" // End at 6pm
@@ -417,10 +413,14 @@ export const BookingCalendar = () => {
                 const endTime = formatTimeDisplay(arg.event.endStr);
                 const title = arg.event.title;
                 const rinkName = arg.event.extendedProps.rinkName || "";
+                const isInteractive = arg.event.extendedProps.interactive;
+
+                // Add cursor styling based on interactive status
+                const cursorStyle = isInteractive ? "cursor-pointer" : "cursor-not-allowed";
 
                 return {
                   html: `
-                  <div class="fc-event-main-frame p-1">
+                  <div class="fc-event-main-frame p-1 ${cursorStyle}">
                     <div class="fc-event-time font-medium">${startTime} - ${endTime}</div>
                     <div class="fc-event-title text-sm whitespace-normal">${title}</div>
                     <div class="fc-event-subtitle text-xs whitespace-normal">${rinkName}</div>
