@@ -17,7 +17,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg, EventDropArg } from "@fullcalendar/core";
 import type { EventResizeStopArg } from "@fullcalendar/interaction";
 import { Button } from "@/components/ui/button";
-import type { TRPCClientErrorLike } from "@trpc/client";
 
 interface CalendarEvent {
   id: string;
@@ -27,6 +26,7 @@ interface CalendarEvent {
   rinkId: string;
   maxStudents: number;
   currentStudents: number;
+  color?: string;
   type: "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP";
   extendedProps?: Record<string, unknown>;
 }
@@ -44,18 +44,16 @@ interface TimeSlot {
     id: string;
     name: string;
   };
-  title?: string | null; // Add title property with proper type
+  title?: string | null;
   [key: string]: unknown;
 }
 
 export const CalendarEventsSystem = () => {
   const [selectedRink, setSelectedRink] = useState<string>("MAIN_RINK");
-  // Fix the useState syntax
   const [viewMode, setViewMode] = useState<"timeGridDay" | "timeGridWeek" | "dayGridMonth">(
     "timeGridWeek",
   );
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const utils = api.useContext();
 
@@ -70,19 +68,26 @@ export const CalendarEventsSystem = () => {
   useEffect(() => {
     if (data) {
       // Convert time slots to calendar events format
-      const calendarEvents = data.map((slot: TimeSlot) => ({
-        id: slot.id,
-        title: (slot.title as string) || "Available Time Slot", // Cast title to string
-        start: new Date(slot.startTime),
-        end: new Date(slot.endTime),
-        rinkId: slot.rinkId,
-        maxStudents: slot.maxStudents,
-        currentStudents: slot.lessons?.length || 0,
-        type: "PRIVATE" as const,
-        extendedProps: slot,
-      }));
+      const calendarEvents = data.map((slot: TimeSlot) => {
+        const bookedStudents = slot.lessons?.length || 0;
+        const isBooked = bookedStudents > 0;
+        
+        return {
+          id: slot.id,
+          title: (slot.title as string) || `${bookedStudents}/${slot.maxStudents} Students`,
+          start: new Date(slot.startTime),
+          end: new Date(slot.endTime),
+          rinkId: slot.rinkId,
+          maxStudents: slot.maxStudents,
+          currentStudents: bookedStudents,
+          // Set color to green if booked, blue if available
+          color: isBooked ? "rgb(74 222 128)" : "rgb(59 130 246)", // green : blue
+          type: "PRIVATE" as const,
+          extendedProps: slot,
+        };
+      });
 
-      setEvents(calendarEvents as CalendarEvent[]); // Add type assertion
+      setEvents(calendarEvents as CalendarEvent[]);
     }
   }, [data]);
 
@@ -199,17 +204,13 @@ export const CalendarEventsSystem = () => {
         startTime: droppedEvent.start,
         endTime: droppedEvent.end,
       });
-    } catch (error) {
+    } catch {
       info.revert();
       // Error is already handled by the mutation
     }
   };
 
   const handleEventResize = async (info: EventResizeStopArg) => {
-    // Store original event state
-    const originalStart = info.event.start;
-    const originalEnd = info.event.end;
-
     // Convert the FullCalendar event to our CalendarEvent type
     const resizedEvent = {
       id: info.event.id,
@@ -249,7 +250,7 @@ export const CalendarEventsSystem = () => {
         startTime: resizedEvent.start,
         endTime: resizedEvent.end,
       });
-    } catch (error) {
+    } catch {
       // Error is already handled by the mutation
       // Refresh the events to revert the change
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
@@ -262,7 +263,9 @@ export const CalendarEventsSystem = () => {
     view: { calendar: { unselect: () => void } };
   }) => {
     const title = prompt("Please enter a title for the new event:");
-    if (!title) return; // User cancelled
+    if (!title) {
+      return; // User cancelled
+    }
 
     try {
       await createTimeSlot.mutateAsync({
@@ -274,7 +277,7 @@ export const CalendarEventsSystem = () => {
       });
 
       selectInfo.view.calendar.unselect(); // Clear selection
-    } catch (error) {
+    } catch {
       // Error is already handled by the mutation
     }
   };
