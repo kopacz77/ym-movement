@@ -20,16 +20,7 @@ import { toast } from "sonner";
 import { Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
-// Use this function to format dates consistently
-function formatDateConsistently(dateString: string | Date): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-}
+import { formatUtcDate } from "@/lib/date-utils"; // Import our UTC-aware date formatting
 
 export default function StudentPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,7 +68,7 @@ export default function StudentPaymentsPage() {
 
   // Filter payments based on search query and tab
   const filteredPayments = payments.filter((lesson) => {
-    const formattedDate = formatDateConsistently(lesson.startTime);
+    const formattedDate = formatUtcDate(lesson.startTime);
     const matchesSearch = searchQuery
       ? lesson.payment?.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
         formattedDate.toLowerCase().includes(searchQuery.toLowerCase())
@@ -148,7 +139,7 @@ export default function StudentPaymentsPage() {
               <TableBody>
                 {filteredPayments.map((lesson) => (
                   <TableRow key={lesson.id}>
-                    <TableCell>{formatDateConsistently(lesson.startTime)}</TableCell>
+                    <TableCell>{formatUtcDate(lesson.startTime)}</TableCell>
                     <TableCell>{lesson.type.replace("_", " ")} Lesson</TableCell>
                     <TableCell>${lesson.payment?.amount.toFixed(2)}</TableCell>
                     <TableCell>{lesson.payment?.referenceCode}</TableCell>
