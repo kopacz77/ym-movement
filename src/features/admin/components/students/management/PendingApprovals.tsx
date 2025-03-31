@@ -54,8 +54,8 @@ export const PendingApprovals: React.FC = () => {
     },
   });
 
-  // Define mutation for rejecting students
-  const rejectStudentMutation = api.admin.student.approveStudent.useMutation({
+  // Define mutation for rejecting students - FIXED to use rejectStudent instead of approveStudent
+  const rejectStudentMutation = api.admin.student.rejectStudent.useMutation({
     onSuccess: () => {
       toast.success("Application rejected");
       // Invalidate query to refetch data
@@ -74,7 +74,7 @@ export const PendingApprovals: React.FC = () => {
   };
 
   const handleReject = (studentId: string) => {
-    if (window.confirm("Are you sure you want to reject this application?")) {
+    if (window.confirm("Are you sure you want to reject this application?\nThis will permanently delete the student record.")) {
       rejectStudentMutation.mutate({ studentId });
     }
   };

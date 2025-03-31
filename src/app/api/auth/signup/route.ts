@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       level,
       maxLessonsPerWeek,
       emergencyContact,
-      // parentConsent removed from destructuring
+      parentConsent, // Fixed: Include parentConsent in destructuring
     } = result.data;
 
     // Check if email already exists
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
               level,
               maxLessonsPerWeek,
               emergencyContact,
-              // parentConsent field removed - not in Prisma schema
+              parentConsent, // Fixed: Include parentConsent field
             },
           },
         },

@@ -434,6 +434,47 @@ export const studentRouter = createTRPCRouter({
       }
     }),
 
+  // Mutation: Reject student
+  rejectStudent: protectedProcedure
+    .input(z.object({ studentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(`Rejecting student with ID: ${input.studentId}`);
+        // Find the student first
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          include: {
+            user: true,
+          },
+        });
+
+        if (!student) {
+          console.log(`Student not found: ${input.studentId}`);
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Delete the student record (this will cascade to user via onDelete in schema)
+        await ctx.prisma.student.delete({
+          where: { id: input.studentId },
+        });
+
+        return { success: true, message: "Student registration rejected successfully" };
+      } catch (error) {
+        console.error("Error rejecting student:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to reject student",
+          cause: error,
+        });
+      }
+    }),
+
   // Mutation: Toggle student status
   toggleStatus: protectedProcedure
     .input(z.object({ studentId: z.string(), active: z.boolean() }))
