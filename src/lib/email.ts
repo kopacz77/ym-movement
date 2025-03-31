@@ -132,18 +132,20 @@ export async function sendLessonConfirmationEmail(
     (lessonData.endTime.getTime() - lessonData.startTime.getTime()) / (1000 * 60),
   );
 
-  // Generate Google Calendar link
-  const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&dates=${lessonData.startTime
-    .toISOString()
-    .replace(/[-:]/g, "")}/${lessonData.endTime
-    .toISOString()
-    .replace(/[-:]/g, "")}&text=${encodeURIComponent(
-    `Ice Dance Lesson: ${studentName}`,
-  )}&location=${encodeURIComponent(lessonData.rinkAddress)}&details=${encodeURIComponent(
-    `Student: ${studentName} (${studentEmail})\nLocation: ${lessonData.rinkName}\nAddress: ${
-      lessonData.rinkAddress
-    }\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}`,
-  )}`;
+  // Generate Google Calendar link with proper timezone support
+  const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&ctz=${encodeURIComponent(lessonData.rinkTimezone)}&dates=${lessonData.startTime
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d+/g, "")}/${lessonData.endTime
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d+/g, "")}&text=${encodeURIComponent(
+      `Ice Dance Lesson: ${studentName}`,
+    )}&location=${encodeURIComponent(lessonData.rinkAddress)}&details=${encodeURIComponent(
+      `Student: ${studentName} (${studentEmail})\\nLocation: ${lessonData.rinkName}\\nAddress: ${
+        lessonData.rinkAddress
+      }\\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}\\nTimezone: ${lessonData.rinkTimezone}`,
+    )}`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
