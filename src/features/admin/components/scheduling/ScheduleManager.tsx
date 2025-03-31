@@ -90,14 +90,21 @@ export function ScheduleManager() {
         studentNames ? ` (${studentNames})` : ""
       }
       } - ${slot.rink.name}`;
+      
+      // Determine if the slot is booked (has at least one student)
+      const isBooked = studentCount > 0;
+      
       return {
         id: slot.id,
         title,
         start: slot.startTime,
         end: slot.endTime,
+        backgroundColor: isBooked ? "#10b981" : undefined, // Green color for booked slots
+        borderColor: isBooked ? "#059669" : undefined,     // Slightly darker green border for booked slots
         extendedProps: {
           ...slot,
           currentStudents: studentCount,
+          isBooked,
         },
       };
     }) || [];
@@ -544,12 +551,17 @@ export function ScheduleManager() {
                           const studentNames = slot.lessons
                             ?.map((lesson: Lesson) => lesson.student.user.name || "Unnamed Student")
                             .join(", ");
+                          
+                          // Determine if the slot is booked
+                          const isBooked = studentCount > 0;
 
                           return (
                             <button
                               key={slot.id}
                               type="button"
-                              className="p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50 w-full text-left"
+                              className={`p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50 w-full text-left ${
+                                isBooked ? "bg-emerald-50 hover:bg-emerald-100" : ""
+                              }`}
                               onClick={() => handleMobileSlotClick(slot)}
                               aria-label={`Time slot from ${new Date(
                                 slot.startTime,
