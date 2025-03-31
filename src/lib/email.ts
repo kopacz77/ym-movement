@@ -1,6 +1,5 @@
 // Streamlined src/lib/email.ts
 import { Resend } from "resend";
-import { format } from "date-fns";
 
 // Initialize Resend with API key
 const resendApiKey = process.env.RESEND_API_KEY || "";
@@ -56,19 +55,49 @@ async function sendEmail(to: string, subject: string, html: string) {
  * Formats a date to a readable string (e.g., "Monday, January 1, 2025")
  */
 function formatDate(date: Date): string {
-  return format(date, "EEEE, MMMM d, yyyy");
+  // Get the date components directly from the UTC fields
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  const weekday = date.getUTCDay();
+  
+  // Create array for display
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  return `${days[weekday]}, ${months[month]} ${day}, ${year}`;
 }
 
 /**
- * Formats time to a readable string (e.g., "3:30 PM")
+ * Formats time to a readable string (e.g., "7:30 AM")
+ * Treats UTC time fields directly as local time (no conversion)
  */
 function formatTime(date: Date): string {
+  // Get UTC hours and minutes but treat them as local time
   const hours = date.getUTCHours();
   const minutes = date.getUTCMinutes();
+  
+  // Format in AM/PM
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const hour12 = hours % 12 || 12; // Convert 0 to 12
   
   return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+}
+
+/**
+ * Formats a raw UTC time for Google Calendar, treating UTC fields as local time
+ * This function ensures that 7:30 UTC becomes 7:30 in the calendar
+ */
+function formatRawTimeForCalendar(date: Date): string {
+  // Extract the UTC components
+  const year = date.getUTCFullYear();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  
+  // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
+  return `${year}${month}${day}T${hours}${minutes}00`;
 }
 
 /**
@@ -137,19 +166,17 @@ export async function sendLessonConfirmationEmail(
     (lessonData.endTime.getTime() - lessonData.startTime.getTime()) / (1000 * 60),
   );
 
-  // Generate Google Calendar link with proper timezone support
-  const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&ctz=${encodeURIComponent(lessonData.rinkTimezone)}&dates=${lessonData.startTime
-      .toISOString()
-      .replace(/[-:]/g, "")
-      .replace(/\.\d+/g, "")}/${lessonData.endTime
-      .toISOString()
-      .replace(/[-:]/g, "")
-      .replace(/\.\d+/g, "")}&text=${encodeURIComponent(
+  // Format raw calendar times without timezone conversion
+  const startTimeForCal = formatRawTimeForCalendar(lessonData.startTime);
+  const endTimeForCal = formatRawTimeForCalendar(lessonData.endTime);
+
+  // Generate Google Calendar link that treats the UTC value as the actual time
+  const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&ctz=${encodeURIComponent(lessonData.rinkTimezone)}&dates=${startTimeForCal}/${endTimeForCal}&text=${encodeURIComponent(
       `Ice Dance Lesson: ${studentName}`,
     )}&location=${encodeURIComponent(lessonData.rinkAddress)}&details=${encodeURIComponent(
       `Student: ${studentName} (${studentEmail})\\nLocation: ${lessonData.rinkName}\\nAddress: ${
         lessonData.rinkAddress
-      }\\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}\\nTimezone: ${lessonData.rinkTimezone}`,
+      }\\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}`,
     )}`;
 
   const emailContent = `
