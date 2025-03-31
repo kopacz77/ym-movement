@@ -130,17 +130,20 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 4. Try to create Google Calendar event with fixed timezone
+        // 4. Try to create Google Calendar event
         let googleEventId = null;
 
         try {
           // Only attempt calendar integration if name and email are available
           if (student.user?.name && student.user?.email) {
             console.log(`[BOOKING] Attempting to create calendar event for ${student.user.name}`);
+            console.log(`[BOOKING] Using timezone: ${timeSlot.rink.timezone}`);
 
-            // FIXED: Pass the rink's timezone explicitly to ensure correct display
+            // Make sure we have a valid timezone
+            const timezone = timeSlot.rink.timezone || "America/Los_Angeles"; // Fallback timezone
+
             googleEventId = await googleCalendar.createEvent({
-              summary: `Ice Dance Lesson with ${student.user.name}`,
+              summary: `${input.type} Lesson with ${student.user.name}`,
               description: ` 
                 Student: ${student.user.name}
                 Lesson Type: ${input.type}
@@ -150,10 +153,12 @@ export const bookingRouter = createTRPCRouter({
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               attendees: [
-                { email: student.user.email, name: student.user.name }
+                { email: student.user.email, name: student.user.name },
+                // Include instructor email as in the older version
+                { email: process.env.INSTRUCTOR_EMAIL || 'yuraxmin@gmail.com' }
               ],
               location: timeSlot.rink.address,
-              timeZone: timeSlot.rink.timezone, // CRITICAL: Added explicit timezone
+              timeZone: timezone, // Explicitly pass the timezone
             });
 
             if (googleEventId) {
