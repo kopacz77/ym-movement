@@ -15,11 +15,16 @@ const getAuthClient = () => {
       return null;
     }
 
+    // Log the first few characters of the credentials to check if they're correctly loaded
+    console.log(`Using Google credentials for: ${credentials.client_email}`);
+    console.log(`Private key starts with: ${credentials.private_key.substring(0, 20)}...`);
+
     const client = new JWT({
       email: credentials.client_email,
       key: credentials.private_key,
       scopes: ['https://www.googleapis.com/auth/calendar'],
-      subject: process.env.GOOGLE_CALENDAR_OWNER_EMAIL || 'yuraxmin@gmail.com',
+      // Use the calendar owner's email from env variable
+      subject: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
     });
 
     return client;
@@ -68,8 +73,8 @@ export const googleCalendar = {
     timeZone: string; // Rink's timezone
   }): Promise<string | null> => {
     try {
-      //console.log(`[CALENDAR] Creating event: ${summary}`);
-      //console.log(`[CALENDAR] Using timezone: ${timeZone}`);
+      console.log(`[CALENDAR] Creating event: ${summary}`);
+      console.log(`[CALENDAR] Using timezone: ${timeZone}`);
 
       const calendar = getCalendarApi();
       if (!calendar) {
@@ -81,10 +86,6 @@ export const googleCalendar = {
       const formattedAttendees = attendees.map((attendee) =>
         formatAttendee(attendee.email, attendee.name)
       );
-
-      // Always add Yura as an attendee
-      const ownerEmail = process.env.GOOGLE_CALENDAR_OWNER_EMAIL || 'yuraxmin@gmail.com';
-      formattedAttendees.push(formatAttendee(ownerEmail, 'Yura Min'));
 
       // Create the event with explicit timezone handling
       const event = {
@@ -109,16 +110,19 @@ export const googleCalendar = {
         },
       };
 
-      //console.log(`[CALENDAR] Creating event from ${startTime.toISOString()} to ${endTime.toISOString()}`);
-      //console.log(`[CALENDAR] Event timezone: ${timeZone}`);
+      console.log(`[CALENDAR] Creating event from ${startTime.toISOString()} to ${endTime.toISOString()}`);
+      console.log(`[CALENDAR] Event timezone: ${timeZone}`);
 
+      // Insert the event directly into Yura's calendar and send notifications
       const response = await calendar.events.insert({
-        calendarId: 'primary',
+        calendarId: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
         requestBody: event,
+        sendUpdates: 'all',  // Make sure to send email notifications
+        supportsAttachments: false
       });
 
       if (response.data.id) {
-        //console.log(`[CALENDAR] Event created with ID: ${response.data.id}`);
+        console.log(`[CALENDAR] Event created with ID: ${response.data.id}`);
         return response.data.id;
       }
 
@@ -135,7 +139,7 @@ export const googleCalendar = {
    */
   deleteEvent: async (eventId: string): Promise<boolean> => {
     try {
-      //console.log(`[CALENDAR] Deleting event: ${eventId}`);
+      console.log(`[CALENDAR] Deleting event: ${eventId}`);
 
       const calendar = getCalendarApi();
       if (!calendar) {
@@ -144,11 +148,11 @@ export const googleCalendar = {
       }
 
       await calendar.events.delete({
-        calendarId: 'primary',
+        calendarId: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
         eventId,
       });
 
-      //console.log(`[CALENDAR] Event deleted: ${eventId}`);
+      console.log(`[CALENDAR] Event deleted: ${eventId}`);
       return true;
     } catch (error) {
       console.error(`[CALENDAR] Error deleting event ${eventId}:`, error);
@@ -179,7 +183,7 @@ export const googleCalendar = {
     timeZone: string;
   }): Promise<string | null> => {
     try {
-      //console.log(`[CALENDAR] Updating event: ${eventId}`);
+      console.log(`[CALENDAR] Updating event: ${eventId}`);
       
       const calendar = getCalendarApi();
       if (!calendar) {
@@ -191,10 +195,6 @@ export const googleCalendar = {
       const formattedAttendees = attendees.map((attendee) =>
         formatAttendee(attendee.email, attendee.name)
       );
-
-      // Always add Yura as an attendee
-      const ownerEmail = process.env.GOOGLE_CALENDAR_OWNER_EMAIL || 'yuraxmin@gmail.com';
-      formattedAttendees.push(formatAttendee(ownerEmail, 'Yura Min'));
 
       // Update the event
       const event = {
@@ -213,13 +213,14 @@ export const googleCalendar = {
       };
 
       const response = await calendar.events.update({
-        calendarId: 'primary',
+        calendarId: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
         eventId,
         requestBody: event,
+        sendUpdates: 'all',  // Make sure to send email notifications
       });
 
       if (response.data.id) {
-        //console.log(`[CALENDAR] Event updated: ${response.data.id}`);
+        console.log(`[CALENDAR] Event updated: ${response.data.id}`);
         return response.data.id;
       }
 
