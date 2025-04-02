@@ -128,12 +128,16 @@ export default function SignupPage() {
             <div className="space-y-2">
               <Label htmlFor="level">Skating Level</Label>
               <Select value={level} onValueChange={(value: Level) => setLevel(value)}>
-              <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your level" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.values(Level).map((lvl) => (
-                    <SelectItem key={lvl} value={lvl}>
+                    <SelectItem
+                      key={lvl}
+                      value={lvl}
+                      style={{ whiteSpace: "nowrap", width: "100%", minWidth: "300px" }}
+                    >
                       {lvl.replace("_", " ")}
                     </SelectItem>
                   ))}

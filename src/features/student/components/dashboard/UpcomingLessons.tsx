@@ -4,11 +4,12 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { formatTime } from "@/lib/date";  // Import the consistent time formatter
 
 export const UpcomingLessons = () => {
   const { id: studentId } = useCurrentUser();
@@ -58,6 +59,21 @@ export const UpcomingLessons = () => {
   // 2. We're fetching the data
   const showLoading = !isReady || isLoading || !studentId;
 
+  // Helper function to format time in a UTC-aware way
+  const formatLessonTime = (dateStr: string | Date) => {
+    // Create a date that treats the UTC time as local time
+    const date = new Date(dateStr);
+    // Extract hours and minutes from UTC
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    
+    // Create a new date with those hours/minutes in local time
+    const localDate = new Date();
+    localDate.setHours(hours, minutes, 0, 0);
+    
+    return formatTime(localDate);
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -73,14 +89,7 @@ export const UpcomingLessons = () => {
           <div className="flex justify-center items-center h-48">
             <p>Loading lessons...</p>
           </div>
-        ) : !upcomingLessons?.length ? (
-          <div className="flex flex-col items-center justify-center h-48 text-center">
-            <p className="text-muted-foreground mb-4">You don&apos;t have any upcoming lessons</p>
-            <Link href="/student/book">
-              <Button>Book a Lesson</Button>
-            </Link>
-          </div>
-        ) : (
+        ) : upcomingLessons?.length ? (
           <div className="space-y-4">
             {upcomingLessons.map((lesson) => (
               <div key={lesson.id} className="border rounded-lg p-4">
@@ -94,8 +103,7 @@ export const UpcomingLessons = () => {
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>
-                      {format(new Date(lesson.startTime), "h:mm a")} -{" "}
-                      {format(new Date(lesson.endTime), "h:mm a")}
+                      {formatLessonTime(lesson.startTime)} - {formatLessonTime(lesson.endTime)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
@@ -112,6 +120,13 @@ export const UpcomingLessons = () => {
                 </div>
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-48 text-center">
+            <p className="text-muted-foreground mb-4">You don&apos;t have any upcoming lessons</p>
+            <Link href="/student/book">
+              <Button>Book a Lesson</Button>
+            </Link>
           </div>
         )}
       </CardContent>
