@@ -42,7 +42,7 @@ export default function StudentProfilePage() {
 
   if (!isReady || isLoading) {
     return (
-      <div className="flex justify-center items-center h-96">
+      <div className="container mx-auto py-6 flex justify-center items-center h-96">
         <p>Loading profile...</p>
       </div>
     );
@@ -50,29 +50,16 @@ export default function StudentProfilePage() {
 
   if (!student) {
     return (
-      <div className="flex justify-center items-center h-96">
+      <div className="container mx-auto py-6 flex justify-center items-center h-96">
         <p>Profile not found</p>
       </div>
     );
   }
 
-  // Type assertion to match StudentProfile interface exactly
-  const typedStudent = {
-    ...student,
-    user: {
-      ...student.user,
-      // Convert null to empty string to satisfy the StudentProfile type
-      name: student.user.name || "",
-      email: student.user.email,
-    },
-    // Convert null to undefined for notes if needed
-    notes: student.notes === null ? undefined : student.notes,
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Your Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Your Profile</h1>
       </div>
       <ProfileForm />
     </div>

@@ -38,7 +38,7 @@ export const bookingRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+
         console.log(`[BOOKING] Starting booking process for student ${input.studentId}`);
 
         // 1. Get the time slot to check availability

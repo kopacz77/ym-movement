@@ -12,6 +12,24 @@ export const metadata: Metadata = {
   description: "View details about your scheduled lesson",
 };
 
+// Function to format time without timezone conversion and without seconds
+function formatTime(date: Date): string {
+  // Use UTC hours and minutes
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  
+  // Format in AM/PM
+  const ampm = hours >= 12 ? 'AM' : 'AM';
+  const hour12 = hours % 12 || 12; // Convert 0 to 12
+  
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+}
+
+// Function to format date
+function formatDate(date: Date): string {
+  return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+}
+
 // The key change: params is a Promise that must be awaited
 export default async function LessonDetailsPage({
   params,
@@ -75,8 +93,7 @@ export default async function LessonDetailsPage({
               <div>
                 <h3 className="font-medium">Date & Time</h3>
                 <p className="text-gray-600">
-                  {startTime.toLocaleDateString()}, {startTime.toLocaleTimeString()} -{" "}
-                  {endTime.toLocaleTimeString()} ({duration} minutes)
+                  {formatDate(startTime)}, {formatTime(startTime)} - {formatTime(endTime)} ({duration} minutes)
                 </p>
               </div>
 

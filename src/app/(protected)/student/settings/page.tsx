@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { BellRing, Lock, PaintBucket } from "lucide-react";
+import { BellRing, Lock, PaintBucket, Save } from "lucide-react";
 import { toast } from "sonner";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 
@@ -14,22 +14,32 @@ export default function StudentSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [reminderNotifications, setReminderNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveSettings = () => {
+    // Simulate saving process
+    setIsSaving(true);
     // In a real app, this would save the settings to the backend
-    toast("Settings saved", {
-      description: "Your preferences have been updated.",
-    });
+    setTimeout(() => {
+      setIsSaving(false);
+      toast("Settings saved", {
+        description: "Your preferences have been updated.",
+      });
+    }, 500);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <Button onClick={handleSaveSettings} disabled={isSaving}>
+          <Save className="h-4 w-4 mr-2" />
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
 
       <Tabs defaultValue="notifications">
-        <TabsList className="mb-4">
+        <TabsList className="w-full border-b mb-4 pb-0">
           <TabsTrigger value="notifications" className="flex items-center">
             <BellRing className="h-4 w-4 mr-2" />
             Notifications
@@ -85,10 +95,6 @@ export default function StudentSettingsPage() {
                   disabled={!emailNotifications}
                 />
               </div>
-
-              <div className="flex justify-end mt-4">
-                <Button onClick={handleSaveSettings}>Save Notification Settings</Button>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -110,10 +116,6 @@ export default function StudentSettingsPage() {
                   </p>
                 </div>
                 <Switch id="dark-mode" checked={darkMode} onCheckedChange={setDarkMode} />
-              </div>
-
-              <div className="flex justify-end mt-4">
-                <Button onClick={handleSaveSettings}>Save Appearance Settings</Button>
               </div>
             </CardContent>
           </Card>

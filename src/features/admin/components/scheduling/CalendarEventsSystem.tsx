@@ -146,7 +146,7 @@ export const CalendarEventsSystem = () => {
   });
 
   // This method checks for business hours and minimum duration
-  const validateEventMove = (event: CalendarEvent, start: Date, end: Date): boolean => {
+  const validateEventMove = (start: Date, end: Date): boolean => {
     // Simple validation - check for business hours and minimum duration
     const businessStartHour = 5; // 5 AM
     const businessEndHour = 18; // 6 PM
@@ -182,8 +182,7 @@ export const CalendarEventsSystem = () => {
     };
 
     // Check if the move is valid
-    const isValidMove = validateEventMove(
-      droppedEvent as CalendarEvent,
+    const isValidMove = validateEventMove(     
       droppedEvent.start,
       droppedEvent.end,
     );
@@ -226,7 +225,6 @@ export const CalendarEventsSystem = () => {
 
     // Check if the resize is valid
     const isValidResize = validateEventMove(
-      resizedEvent as CalendarEvent,
       resizedEvent.start,
       resizedEvent.end,
     );

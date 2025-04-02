@@ -4,10 +4,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { LogOut, Bell, Menu } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,16 +70,10 @@ export const StudentHeader = () => {
           <div className="hidden md:flex items-center gap-2 mr-4">
             <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 md:h-10 md:w-10"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" aria-hidden="true">
-              <title>Notifications</title>
-            </Bell>
-          </Button>
+          
+          {/* Notifications Popover */}
+          <NotificationsPopover />
+          
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
               <Button

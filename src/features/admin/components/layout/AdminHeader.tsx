@@ -4,10 +4,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { LogOut, Bell } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,9 +70,8 @@ export const AdminHeader = () => {
             <span className="text-sm font-medium">{session?.user?.name || "Admin"}</span>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-            <Bell className="h-5 w-5" />
-          </Button>
+          {/* Notifications Popover */}
+          <NotificationsPopover />
 
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
