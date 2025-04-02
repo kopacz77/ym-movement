@@ -50,10 +50,19 @@ export default function LoginPage() {
       }
 
       const userData = await response.json();
+      console.log("User role:", userData.role); // Debug log
+
       if (userData.role === "ADMIN") {
         router.push("/admin/dashboard");
-      } else {
+      } else if (userData.role === "STUDENT") {
         router.push("/student/dashboard");
+      } else {
+        // Handle unexpected role
+        console.error("Unexpected user role:", userData.role);
+        toast.error("Login Error", {
+          description: "User role not recognized",
+        });
+        setIsLoading(false);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
@@ -103,7 +112,14 @@ export default function LoginPage() {
                 </Link>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+              onClick={(e) => {
+                if (isLoading) { e.preventDefault(); }
+              }}
+            >
               {isLoading ? "Loading..." : "Login"}
             </Button>
           </form>
