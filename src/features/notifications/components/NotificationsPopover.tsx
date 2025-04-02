@@ -7,72 +7,73 @@ import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  createdAt: Date;
-  isRead: boolean;
-}
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 export const NotificationsPopover = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const utils = api.useUtils();
   
-  // Mock data - in production you'd fetch this from your API
+  // Fetch notifications from API
+  const {
+    data: notifications = [],
+    isLoading,
+    error,
+  } = api.notifications.notifications.getNotifications.useQuery(undefined, {
+    // Refresh notifications every minute
+    refetchInterval: 60000,
+  });
+
+  // Mark as read mutation
+  const markAsRead = api.notifications.notifications.markAsRead.useMutation({
+    onSuccess: () => {
+      utils.notifications.notifications.getNotifications.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Mark all as read mutation
+  const markAllAsRead = api.notifications.notifications.markAllAsRead.useMutation({
+    onSuccess: () => {
+      utils.notifications.notifications.getNotifications.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Error", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Handle errors from query
   useEffect(() => {
-    // Simulate API call with mock data
-    const mockNotifications: Notification[] = [
-      {
-        id: "1",
-        title: "New Booking",
-        message: "You have a new booking request from John Doe.",
-        createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-        isRead: false,
-      },
-      {
-        id: "2",
-        title: "Lesson Reminder",
-        message: "Your lesson with Coach Yura is scheduled for tomorrow at 3:00 PM.",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
-        isRead: false,
-      },
-      {
-        id: "3",
-        title: "Payment Received",
-        message: "Payment of $75 has been successfully processed.",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-        isRead: true,
-      },
-    ];
-    
-    setNotifications(mockNotifications);
-  }, []);
+    if (error) {
+      toast.error("Failed to load notifications", {
+        description: error.message,
+      });
+    }
+  }, [error]);
 
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   // Handle marking a notification as read
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === id ? { ...notification, isRead: true } : notification
-      )
-    );
+  const handleMarkAsRead = (id: string) => {
+    markAsRead.mutate({ id });
   };
 
-  // Mark all as read
-  const markAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notification) => ({ ...notification, isRead: true }))
-    );
+  // Handle marking all notifications as read
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate();
   };
 
   // Format relative time
   const formatRelativeTime = (date: Date) => {
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInSeconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
     
     if (diffInSeconds < 60) { return 'just now'; }
     if (diffInSeconds < 3600) { return `${Math.floor(diffInSeconds / 60)}m ago`; }
@@ -82,7 +83,7 @@ export const NotificationsPopover = () => {
 
   const handleNotificationKeyDown = (event: React.KeyboardEvent, id: string) => {
     if (event.key === "Enter" || event.key === " ") {
-      markAsRead(id);
+      handleMarkAsRead(id);
     }
   };
 
@@ -105,12 +106,16 @@ export const NotificationsPopover = () => {
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-medium">Notifications</h3>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+            <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
               Mark all as read
             </Button>
           )}
         </div>
-        {notifications.length === 0 ? (
+        {isLoading ? (
+          <div className="p-4 text-center">
+            Loading notifications...
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             No notifications
           </div>
@@ -121,7 +126,7 @@ export const NotificationsPopover = () => {
                 <div 
                   key={notification.id} 
                   className={`p-4 cursor-pointer hover:bg-muted ${notification.isRead ? '' : 'bg-blue-50'}`}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleMarkAsRead(notification.id)}
                   onKeyDown={(e) => handleNotificationKeyDown(e, notification.id)}
                   tabIndex={0}
                   role="button"

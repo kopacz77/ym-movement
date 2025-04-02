@@ -1,3 +1,4 @@
+// src/features/admin/components/scheduling/TimeSlotForm.tsx
 "use client";
 
 import React, { useEffect } from "react";
@@ -6,7 +7,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
 import {
   Form,
   FormControl,
@@ -45,6 +45,20 @@ interface TimeSlotFormProps {
   onSubmit?: () => void; // Kept for compatibility
 }
 
+// Format the initial time preserving UTC - moved outside component
+const formatInitialStartTime = (date: Date | null) => {
+  if (!date) { return ""; }
+  
+  // Format using the date's UTC components to preserve the exact time
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export const TimeSlotForm = ({
   initialStartTime,
   initialEndTime,
@@ -62,7 +76,7 @@ export const TimeSlotForm = ({
     resolver: zodResolver(timeSlotSchema),
     defaultValues: {
       rinkId: initialRinkId || "",
-      startTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : "",
+      startTime: initialStartTime ? formatInitialStartTime(initialStartTime) : "",
       duration:
         initialEndTime && initialStartTime
           ? Math.max(
@@ -78,12 +92,14 @@ export const TimeSlotForm = ({
   useEffect(() => {
     console.log("TimeSlotForm initial values:", {
       startTime: initialStartTime ? initialStartTime.toISOString() : null,
-      formattedStartTime: initialStartTime ? format(initialStartTime, "yyyy-MM-dd'T'HH:mm") : null,
+      formattedStartTime: initialStartTime ? formatInitialStartTime(initialStartTime) : null,
       endTime: initialEndTime ? initialEndTime.toISOString() : null,
       duration:
         initialEndTime && initialStartTime
           ? Math.round((initialEndTime.getTime() - initialStartTime.getTime()) / (1000 * 60))
           : null,
+      rawHours: initialStartTime ? initialStartTime.getUTCHours() : null,
+      rawMinutes: initialStartTime ? initialStartTime.getUTCMinutes() : null,
     });
   }, [initialStartTime, initialEndTime]);
 
@@ -103,7 +119,7 @@ export const TimeSlotForm = ({
   });
 
   const handleSubmit = (values: TimeSlotFormValues) => {
-    // Parse the datetime string into parts - THIS IS THE CRITICAL FIX
+    // Parse the datetime string into parts WITHOUT timezone adjustment
     const [datePart, timePart] = values.startTime.split("T");
     const [year, month, day] = datePart.split("-").map(Number);
     const [hours, minutes] = timePart.split(":").map(Number);
@@ -121,6 +137,9 @@ export const TimeSlotForm = ({
       endTime: endTime.toISOString(),
       durationMinutes: values.duration,
       formInput: values.startTime,
+      rawHours: hours,
+      rawMinutes: minutes,
+      exactTimeDisplay: `${hours}:${minutes.toString().padStart(2, "0")}`
     });
 
     // Simplified data object without recurring pattern
@@ -136,7 +155,7 @@ export const TimeSlotForm = ({
     toast.info("Creating slot", {
       description: `${hours}:${minutes.toString().padStart(2, "0")} for ${
         values.duration
-      } minutes - EXACT time shown`,
+      } minutes - EXACT time as selected on calendar`,
     });
 
     createTimeSlot.mutate(timeSlotData);
@@ -180,7 +199,7 @@ export const TimeSlotForm = ({
                 <Input type="datetime-local" {...field} />
               </FormControl>
               <FormDescription>
-                Times will be displayed exactly as entered (no timezone conversion)
+                Times will be used exactly as entered (no timezone conversion)
               </FormDescription>
               <FormMessage />
             </FormItem>
