@@ -1,7 +1,7 @@
 // src/features/admin/components/scheduling/ScheduleManager.tsx
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FullCalendar from "@fullcalendar/react";
@@ -28,7 +28,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { format, addDays, startOfDay, endOfDay } from "date-fns";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 // Define proper types for our data
@@ -43,7 +43,7 @@ interface Lesson {
   student: {
     id: string;
     user: {
-      name: string | null; // Allow name to be null to fix type error
+      name: string | null;
     };
   };
 }
@@ -69,17 +69,52 @@ export function ScheduleManager() {
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const isMobile = useIsMobile();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const calendarRef = useRef(null);
+  
+  // Create a stable initial date
+  const initialDate = useMemo(() => {
+    const now = new Date();
+    return now;
+  }, []);
+  
+  // State initialization
+  const [date, setDate] = useState(initialDate);
+  const [calendarView, setCalendarView] = useState<"timeGridWeek" | "dayGridMonth">("timeGridWeek");
+  const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
+  
   const utils = api.useUtils();
 
-  // Get rinks data - removed unused isLoadingRinks
+  // Calculate date range based on view - month-based loading for efficiency
+  const dateRange = useMemo(() => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    
+    // First day of month
+    const firstDay = new Date(year, month, 1);
+    // Last day of month
+    const lastDay = new Date(year, month + 1, 0);
+    
+    return {
+      start: startOfDay(firstDay),
+      end: endOfDay(lastDay)
+    };
+  }, [date]);
+  
+  // Get rinks data
   const { data: rinks } = api.admin.schedule.getRinks.useQuery();
 
   // Get students data
   const { data: students } = api.admin.student.getStudents.useQuery();
 
-  // Get time slots data - removed unused isLoadingSlots
-  const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery({});
+  // Get time slots data - updated to use date range and cache key
+  const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery({
+    startDate: dateRange.start,
+    endDate: dateRange.end,
+    rinkId: selectedRink,
+  }, {
+    refetchOnWindowFocus: false,
+    staleTime: 30000,
+  });
 
   // Convert time slots to FullCalendar events
   const events =
@@ -215,41 +250,65 @@ export function ScheduleManager() {
   );
 
   // Navigate to the previous week
-  const goToPrevWeek = () => {
-    setCurrentDate((prev) => addDays(prev, -7));
+  const goToPrev = () => {
+    setDate((prev) => {
+      const newDate = calendarView === "dayGridMonth" 
+        ? new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
+        : addDays(prev, -7);
+      return newDate;
+    });
   };
 
   // Navigate to the next week
-  const goToNextWeek = () => {
-    setCurrentDate((prev) => addDays(prev, 7));
+  const goToNext = () => {
+    setDate((prev) => {
+      const newDate = calendarView === "dayGridMonth"
+        ? new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+        : addDays(prev, 7);
+      return newDate;
+    });
   };
 
   // Go to today
   const goToToday = () => {
-    setCurrentDate(new Date());
+    setDate(new Date());
   };
 
-  // Format the date range for display (e.g., "Mar 16 - 22, 2025")
-  const dateRangeText = () => {
-    const endDate = addDays(currentDate, 6);
-    const startMonth = format(currentDate, "MMM");
+  // Format the date range for display
+  const dateRangeText = useMemo(() => {
+    if (calendarView === "dayGridMonth") {
+      return format(date, "MMMM yyyy");
+    }
+    
+    const endDate = addDays(date, 6);
+    const startMonth = format(date, "MMM");
     const endMonth = format(endDate, "MMM");
 
     if (startMonth === endMonth) {
-      return `${startMonth} ${format(currentDate, "d")} - ${format(endDate, "d")}, ${format(
-        currentDate,
+      return `${startMonth} ${format(date, "d")} - ${format(endDate, "d")}, ${format(
+        date,
         "yyyy",
       )}`;
     }
+    
+    return `${startMonth} ${format(date, "d")} - ${endMonth} ${format(endDate, "d")}, ${format(
+      date,
+      "yyyy",
+    )}`;
+  }, [date, calendarView]);
 
-    return `${startMonth} ${format(currentDate, "d")} - ${endMonth} ${format(
-      endDate,
-      "d",
-    )}, ${format(currentDate, "yyyy")}`;
+  // Handle view change
+  const handleViewChange = (newView: "timeGridWeek" | "dayGridMonth") => {
+    setCalendarView(newView);
+    
+    // Adjust date if switching to month view to start at beginning of month
+    if (newView === "dayGridMonth") {
+      setDate(new Date(date.getFullYear(), date.getMonth(), 1));
+    }
   };
 
   // Process events for display in the custom list view
-  const processEventsForCustomList = () => {
+  const processEventsForCustomList = useMemo(() => {
     if (!timeSlots) {
       return [];
     }
@@ -274,7 +333,7 @@ export function ScheduleManager() {
 
     // Convert to array and sort by date
     return Object.values(groupedEvents).sort((a, b) => a.date.getTime() - b.date.getTime());
-  };
+  }, [timeSlots]);
 
   // Handle clicking a slot in the custom mobile list
   const handleMobileSlotClick = (slot: TimeSlot) => {
@@ -334,6 +393,24 @@ export function ScheduleManager() {
               />
             </DialogContent>
           </Dialog>
+          
+          {/* Rink Selector */}
+          <Select 
+            value={selectedRink} 
+            onValueChange={(value) => setSelectedRink(value === "all_rinks" ? undefined : value)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Rinks" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all_rinks">All Rinks</SelectItem>
+              {rinks?.map((rink) => (
+                <SelectItem key={rink.id} value={rink.id}>
+                  {rink.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -513,146 +590,206 @@ export function ScheduleManager() {
             // Custom mobile list view
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
-                <Button variant="outline" size="sm" onClick={goToPrevWeek}>
+                <Button variant="outline" size="sm" onClick={goToPrev}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="text-center">
-                  <span className="font-medium">{dateRangeText()}</span>
+                  <span className="font-medium">{dateRangeText}</span>
                 </div>
-                <Button variant="outline" size="sm" onClick={goToNextWeek}>
+                <Button variant="outline" size="sm" onClick={goToNext}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
               <Button variant="outline" size="sm" className="w-full mb-4" onClick={goToToday}>
                 Today
               </Button>
+              
+              <div className="flex gap-2 mb-4">
+                <Button 
+                  variant={calendarView === "timeGridWeek" ? "default" : "outline"} 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleViewChange("timeGridWeek")}
+                >
+                  Week
+                </Button>
+                <Button 
+                  variant={calendarView === "dayGridMonth" ? "default" : "outline"} 
+                  size="sm" 
+                  className="flex-1" 
+                  onClick={() => handleViewChange("dayGridMonth")}
+                >
+                  Month
+                </Button>
+              </div>
 
               {/* Custom list view for mobile */}
               <div className="space-y-4">
-                {processEventsForCustomList().map((day) => (
-                  <div key={format(day.date, "yyyy-MM-dd")} className="mb-4">
-                    {/* Day header */}
-                    <div className="py-2 px-3 bg-slate-100 rounded-t-md">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold">{format(day.date, "EEEE")}</span>
-                        <span>{format(day.date, "MMMM d, yyyy")}</span>
+                {processEventsForCustomList.length === 0 ? (
+                  <div className="flex justify-center items-center h-64">
+                    <p className="text-gray-500">No time slots available for this period.</p>
+                  </div>
+                ) : (
+                  processEventsForCustomList.map((day) => (
+                    <div key={format(day.date, "yyyy-MM-dd")} className="mb-4">
+                      {/* Day header */}
+                      <div className="py-2 px-3 bg-slate-100 rounded-t-md">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold">{format(day.date, "EEEE")}</span>
+                          <span>{format(day.date, "MMMM d, yyyy")}</span>
+                        </div>
+                      </div>
+
+                      {/* Time slots for this day */}
+                      <div className="border border-slate-200 rounded-b-md">
+                        {day.slots
+                          .sort(
+                            (a, b) =>
+                              new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+                          )
+                          .map((slot) => {
+                            const studentCount = slot.lessons?.length || 0;
+                            const studentNames = slot.lessons
+                              ?.map((lesson: Lesson) => lesson.student.user.name || "Unnamed Student")
+                              .join(", ");
+                            
+                            // Determine if the slot is booked
+                            const isBooked = studentCount > 0;
+
+                            return (
+                              <button
+                                key={slot.id}
+                                type="button"
+                                className={`p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50 w-full text-left ${
+                                  isBooked ? "bg-emerald-50 hover:bg-emerald-100" : ""
+                                }`}
+                                onClick={() => handleMobileSlotClick(slot)}
+                                aria-label={`Time slot from ${new Date(
+                                  slot.startTime,
+                                ).getUTCHours()}:${String(
+                                  new Date(slot.startTime).getUTCMinutes(),
+                                ).padStart(2, "0")} to ${new Date(
+                                  slot.endTime,
+                                ).getUTCHours()}:${String(
+                                  new Date(slot.endTime).getUTCMinutes(),
+                                ).padStart(2, "0")}`}
+                              >
+                                <div className="flex justify-between">
+                                  <div className="font-medium">
+                                    {`${new Date(slot.startTime).getUTCHours()}:${String(
+                                      new Date(slot.startTime).getUTCMinutes(),
+                                    ).padStart(2, "0")} - 
+                                    ${new Date(slot.endTime).getUTCHours()}:${String(
+                                      new Date(slot.endTime).getUTCMinutes(),
+                                    ).padStart(2, "0")}`}
+                                  </div>
+                                  <div>{`${studentCount}/${slot.maxStudents}`}</div>
+                                </div>
+                                <div className="text-sm text-gray-600 flex justify-between">
+                                  <div>{slot.rink.name}</div>
+                                  {studentNames && <div className="italic">{studentNames}</div>}
+                                </div>
+                              </button>
+                            );
+                          })}
                       </div>
                     </div>
-
-                    {/* Time slots for this day */}
-                    <div className="border border-slate-200 rounded-b-md">
-                      {day.slots
-                        .sort(
-                          (a, b) =>
-                            new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-                        )
-                        .map((slot) => {
-                          const studentCount = slot.lessons?.length || 0;
-                          const studentNames = slot.lessons
-                            ?.map((lesson: Lesson) => lesson.student.user.name || "Unnamed Student")
-                            .join(", ");
-                          
-                          // Determine if the slot is booked
-                          const isBooked = studentCount > 0;
-
-                          return (
-                            <button
-                              key={slot.id}
-                              type="button"
-                              className={`p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50 w-full text-left ${
-                                isBooked ? "bg-emerald-50 hover:bg-emerald-100" : ""
-                              }`}
-                              onClick={() => handleMobileSlotClick(slot)}
-                              aria-label={`Time slot from ${new Date(
-                                slot.startTime,
-                              ).getUTCHours()}:${String(
-                                new Date(slot.startTime).getUTCMinutes(),
-                              ).padStart(2, "0")} to ${new Date(
-                                slot.endTime,
-                              ).getUTCHours()}:${String(
-                                new Date(slot.endTime).getUTCMinutes(),
-                              ).padStart(2, "0")}`}
-                            >
-                              <div className="flex justify-between">
-                                <div className="font-medium">
-                                  {`${new Date(slot.startTime).getUTCHours()}:${String(
-                                    new Date(slot.startTime).getUTCMinutes(),
-                                  ).padStart(2, "0")} - 
-                                  ${new Date(slot.endTime).getUTCHours()}:${String(
-                                    new Date(slot.endTime).getUTCMinutes(),
-                                  ).padStart(2, "0")}`}
-                                </div>
-                                <div>{`${studentCount}/${slot.maxStudents}`}</div>
-                              </div>
-                              <div className="text-sm text-gray-600 flex justify-between">
-                                <div>{slot.rink.name}</div>
-                                {studentNames && <div className="italic">{studentNames}</div>}
-                              </div>
-                            </button>
-                          );
-                        })}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           ) : (
             // Desktop calendar view
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="timeGridWeek"
-              events={events}
-              timeZone="UTC"
-              headerToolbar={{
-                left: "prev,next today",
-                center: "title",
-                right: "timeGridWeek,dayGridMonth",
-              }}
-              slotDuration="00:30:00"
-              slotMinTime="05:00:00" // Start at 5am
-              slotMaxTime="18:00:00" // End at 6pm
-              defaultTimedEventDuration="01:00:00"
-              allDaySlot={false}
-              editable={true}
-              selectable={true}
-              selectMirror={true}
-              dayMaxEvents={true}
-              weekends={true}
-              select={handleDateSelect}
-              eventClick={handleEventClick}
-              eventDrop={handleEventDrop}
-              height="700px"
-              displayEventTime={true}
-              eventTimeFormat={{
-                hour: "2-digit",
-                minute: "2-digit",
-                omitZeroMinute: false,
-                hour12: false,
-              }}
-              eventContent={(arg) => {
-                const start = new Date(arg.event.startStr);
-                const end = new Date(arg.event.endStr);
+            <div>
+              <div className="p-4 flex justify-between items-center">
+                <div className="flex gap-2">
+                  <Button 
+                    variant={calendarView === "timeGridWeek" ? "default" : "outline"} 
+                    onClick={() => handleViewChange("timeGridWeek")}
+                  >
+                    Week
+                  </Button>
+                  <Button 
+                    variant={calendarView === "dayGridMonth" ? "default" : "outline"} 
+                    onClick={() => handleViewChange("dayGridMonth")}
+                  >
+                    Month
+                  </Button>
+                </div>
+              </div>
+              
+              <FullCalendar
+                ref={calendarRef}
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                initialView={calendarView}
+                initialDate={date}
+                events={events}
+                timeZone="UTC"
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "",
+                }}
+                slotDuration="00:30:00"
+                slotMinTime="05:00:00" // Start at 5am
+                slotMaxTime="18:00:00" // End at 6pm
+                defaultTimedEventDuration="01:00:00"
+                allDaySlot={false}
+                editable={true}
+                selectable={true}
+                selectMirror={true}
+                dayMaxEvents={true}
+                weekends={true}
+                select={handleDateSelect}
+                eventClick={handleEventClick}
+                eventDrop={handleEventDrop}
+                height="700px"
+                displayEventTime={true}
+                eventTimeFormat={{
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  omitZeroMinute: false,
+                  hour12: false,
+                }}
+                datesSet={(dateInfo) => {
+                  const newDate = new Date(dateInfo.start);
+                  
+                  // Only update if our date state is significantly different
+                  const currentDate = new Date(date);
+                  const daysDiff = Math.abs(
+                    (newDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)
+                  );
+                  
+                  // Only update if date changed by more than 1 day
+                  if (daysDiff > 1) {
+                    setDate(newDate);
+                  }
+                }}
+                eventContent={(arg) => {
+                  const start = new Date(arg.event.startStr);
+                  const end = new Date(arg.event.endStr);
 
-                // Use UTC hours to avoid timezone conversion
-                const startFormatted = `${start.getUTCHours()}:${String(
-                  start.getUTCMinutes(),
-                ).padStart(2, "0")}`;
-                const endFormatted = `${end.getUTCHours()}:${String(end.getUTCMinutes()).padStart(
-                  2,
-                  "0",
-                )}`;
+                  // Use UTC hours to avoid timezone conversion
+                  const startFormatted = `${start.getUTCHours()}:${String(
+                    start.getUTCMinutes(),
+                  ).padStart(2, "0")}`;
+                  const endFormatted = `${end.getUTCHours()}:${String(end.getUTCMinutes()).padStart(
+                    2,
+                    "0",
+                  )}`;
 
-                return {
-                  html: `
-                    <div class="fc-event-main-frame p-1">
-                      <div class="fc-event-time font-medium">${startFormatted} - ${endFormatted}</div>
-                      <div class="fc-event-title text-sm whitespace-normal">${arg.event.title}</div>
-                      <div class="fc-event-subtitle text-xs whitespace-normal">${arg.event.extendedProps.rinkName || ""}</div>
-                    </div>
-                  `,
-                };
-              }}
-            />
+                  return {
+                    html: `
+                      <div class="fc-event-main-frame p-1">
+                        <div class="fc-event-time font-medium">${startFormatted} - ${endFormatted}</div>
+                        <div class="fc-event-title text-sm whitespace-normal">${arg.event.title}</div>
+                        <div class="fc-event-subtitle text-xs whitespace-normal">${arg.event.extendedProps.rinkName || ""}</div>
+                      </div>
+                    `,
+                  };
+                }}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
