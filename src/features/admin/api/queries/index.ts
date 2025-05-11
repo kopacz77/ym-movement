@@ -1,17 +1,19 @@
+import { authRouter } from "@/features/auth/api/queries/authQueries";
 // src/features/admin/api/queries/index.ts
 import { createTRPCRouter } from "@/lib/trpc";
 import { analyticsRouter } from "./analyticsQueries";
-import { studentRouter } from "./studentQueries";
-import { scheduleRouter } from "./scheduleQueries";
 import { paymentRouter } from "./paymentQueries";
+//import { progressRouter } from "./progressQueries";
+import { scheduleRouter } from "./schedule"; // Updated import
 import { settingsRouter } from "./settingsQueries";
-import { authRouter } from "@/features/auth/api/queries/authQueries";
+import { studentRouter } from "./student"; // Updated import
 
 export const adminRouter = createTRPCRouter({
   analytics: analyticsRouter,
-  student: studentRouter,
-  schedule: scheduleRouter,
   payment: paymentRouter,
+  //progress: progressRouter,
+  schedule: scheduleRouter, // Using the refactored schedule router
   settings: settingsRouter,
-  auth: authRouter, // Add this line
+  student: studentRouter, // Using the refactored student router
+  auth: authRouter,
 });

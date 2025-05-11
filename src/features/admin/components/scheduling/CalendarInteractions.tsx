@@ -1,10 +1,9 @@
-import React from "react";
 import { Card } from "@/components/ui/card";
+import { Calendar, View, Views, SlotInfo } from "react-big-calendar";
+import { localizer } from "@/lib/calendar/calendarLocalizer";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import React from "react";
 import { BookingDialog } from "./BookingDialog";
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
 
 interface CalendarEvent {
   id: string;
@@ -31,9 +30,11 @@ interface CalendarInteractionsProps {
 export const CalendarInteractions = ({ selectedStudentId }: CalendarInteractionsProps) => {
   const [selectedSlot, setSelectedSlot] = React.useState<TimeSlot | null>(null);
   const [showBookingDialog, setShowBookingDialog] = React.useState(false);
+  const [calendarView, setCalendarView] = React.useState<View>(Views.WEEK);
+  const [events] = React.useState<CalendarEvent[]>([]);
 
-  const handleSelectSlot = (slotInfo: DateSelectArg) => {
-    // Convert DateSelectArg to TimeSlot format
+  const handleSelectSlot = (slotInfo: SlotInfo) => {
+    // Convert SlotInfo to TimeSlot format
     const timeSlot: TimeSlot = {
       id: `new-slot-${Date.now()}`, // Generate a temporary ID
       startTime: slotInfo.start.toISOString(),
@@ -47,33 +48,31 @@ export const CalendarInteractions = ({ selectedStudentId }: CalendarInteractions
     setShowBookingDialog(true);
   };
 
-  const handleEventClick = (event: EventClickArg) => {
+  const handleEventClick = (event: CalendarEvent) => {
     // Handle existing event click
+    console.log("Event clicked:", event);
   };
 
-  const handleDragEvent = (dropInfo: EventDropArg) => {
-    // Handle event drag and drop
-    console.log("Event dragged:", dropInfo);
-    // Access event info: dropInfo.event.id, dropInfo.event.start, dropInfo.event.end
-    // Access delta info: dropInfo.delta.days, dropInfo.delta.milliseconds
-    // Revert if needed: dropInfo.revert()
+  const handleViewChange = (view: string) => {
+    setCalendarView(view as View);
   };
 
   return (
     <Card className="p-4">
-      <FullCalendar
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
-        events={[]}
-        selectable={true}
-        select={handleSelectSlot}
-        eventClick={handleEventClick}
-        eventDrop={handleDragEvent}
-        businessHours={{
-          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-          startTime: "05:00",
-          endTime: "18:00",
-        }}
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 600 }}
+        view={calendarView}
+        onView={handleViewChange}
+        onSelectEvent={handleEventClick}
+        onSelectSlot={handleSelectSlot}
+        selectable
+        popup
+        min={new Date(0, 0, 0, 5, 0)} // 5 AM
+        max={new Date(0, 0, 0, 18, 0)} // 6 PM
       />
       {showBookingDialog && selectedSlot && (
         <BookingDialog

@@ -1,14 +1,14 @@
 // src/features/auth/components/ChangePasswordForm.tsx
 "use client";
-import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { api } from "@/lib/api";
 import { PasswordStrength } from "@/components/ui/password-strength";
+import { api } from "@/lib/api";
+import type { AppRouter } from "@/lib/root";
 import type { TRPCClientErrorLike } from "@trpc/client";
-import type { AppRouter } from "@/server/api/roots";
+import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 
 export default function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState("");

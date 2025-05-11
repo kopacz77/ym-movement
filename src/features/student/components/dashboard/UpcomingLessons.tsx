@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
+import { formatTime } from "@/lib/date"; // Import the consistent time formatter
 import { format } from "date-fns";
 import { Clock, MapPin } from "lucide-react";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
 import Link from "next/link";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { formatTime } from "@/lib/date";  // Import the consistent time formatter
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export const UpcomingLessons = () => {
   const { id: studentId } = useCurrentUser();
@@ -66,11 +66,11 @@ export const UpcomingLessons = () => {
     // Extract hours and minutes from UTC
     const hours = date.getUTCHours();
     const minutes = date.getUTCMinutes();
-    
+
     // Create a new date with those hours/minutes in local time
     const localDate = new Date();
     localDate.setHours(hours, minutes, 0, 0);
-    
+
     return formatTime(localDate);
   };
 

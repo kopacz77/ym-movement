@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 interface User {
   id: string;

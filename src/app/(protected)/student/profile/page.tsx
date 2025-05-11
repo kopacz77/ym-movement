@@ -1,11 +1,11 @@
 // src/app/(protected)/student/profile/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { ProfileForm } from "@/features/student/components/profile/ProfileForm";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function StudentProfilePage() {
   const { id: studentId } = useCurrentUser();

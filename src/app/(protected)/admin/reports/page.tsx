@@ -1,10 +1,8 @@
 // src/app/(protected)/admin/reports/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,13 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
-import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceReport } from "@/features/admin/components/reports/AttendanceReport";
-import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
-import { Download } from "lucide-react";
+import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
+import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");

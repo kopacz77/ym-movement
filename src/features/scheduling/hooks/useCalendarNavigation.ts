@@ -1,6 +1,6 @@
+import { addMonths, addWeeks, endOfWeek, startOfWeek, subMonths, subWeeks } from "date-fns";
 // src/features/scheduling/hooks/useCalendarNavigation.ts
-import { useState, useCallback } from "react";
-import { startOfWeek, endOfWeek, addWeeks, subWeeks, addMonths, subMonths } from "date-fns";
+import { useCallback, useState } from "react";
 import type { CalendarView } from "../types";
 
 export const useCalendarNavigation = (initialView: Partial<CalendarView> = {}) => {

@@ -1,10 +1,10 @@
 // src/app/(protected)/student/layout.tsx
 "use client";
 
+import { MobileNavigation } from "@/components/mobile-navigation";
 import { StudentHeader } from "@/features/student/components/layout/StudentHeader";
 import { StudentSidebar } from "@/features/student/components/layout/StudentSidebar";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { MobileNavigation } from "@/components/mobile-navigation";
 
 export default function StudentLayout({
   children,

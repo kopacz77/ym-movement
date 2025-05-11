@@ -1,8 +1,6 @@
 // src/features/scheduling/utils/validationUtils.ts
 import type { CalendarSlot, TimeRange } from "../types";
-import { BookingConstraints } from "../types";
-import { type LessonType, Level, RinkArea } from "@prisma/client";
-import { startOfWeek, endOfWeek } from "date-fns";
+import { type LessonType, Level } from "@prisma/client";
 
 export interface ValidationResult {
   passed: boolean;

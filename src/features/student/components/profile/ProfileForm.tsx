@@ -1,14 +1,14 @@
 // src/features/student/components/profile/ProfileForm.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export const ProfileForm = () => {
   const { id: studentId } = useCurrentUser();

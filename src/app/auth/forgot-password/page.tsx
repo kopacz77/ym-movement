@@ -1,10 +1,6 @@
 // src/app/auth/forgot-password/page.tsx
 "use client";
-import { useState } from "react";
-import type { FormEvent } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -13,7 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
@@ -57,13 +57,23 @@ export default function ForgotPasswordPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Forgot Password</CardTitle>
           <CardDescription>
-            {!submitted
-              ? "Enter your email to receive a password reset link"
-              : "Check your email for a password reset link"}
+            {submitted
+              ? "Check your email for a password reset link"
+              : "Enter your email to receive a password reset link"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!submitted ? (
+          {submitted ? (
+            <div className="text-center py-4">
+              <p className="mb-4">
+                If an account exists with email <span className="font-medium">{email}</span>,
+                we&apos;ve sent a password reset link.
+              </p>
+              <p className="text-sm text-gray-500">
+                Please check your email and follow the instructions to reset your password.
+              </p>
+            </div>
+          ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -80,16 +90,6 @@ export default function ForgotPasswordPage() {
                 {isLoading ? "Processing..." : "Reset Password"}
               </Button>
             </form>
-          ) : (
-            <div className="text-center py-4">
-              <p className="mb-4">
-                If an account exists with email <span className="font-medium">{email}</span>,
-                we&apos;ve sent a password reset link.
-              </p>
-              <p className="text-sm text-gray-500">
-                Please check your email and follow the instructions to reset your password.
-              </p>
-            </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-center">

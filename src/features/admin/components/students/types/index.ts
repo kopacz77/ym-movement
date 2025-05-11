@@ -1,5 +1,5 @@
 // src/features/admin/components/students/types/index.ts
-import type { Level, User, Lesson } from "@prisma/client";
+import type { Lesson, Level, User } from "@prisma/client";
 
 export interface Student {
   id: string;

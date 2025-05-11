@@ -38,19 +38,19 @@ export function formatUtcTime12h(dateStr: string | Date): string {
  */
 export function formatUtcDate(dateStr: string | Date): string {
   const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
-  
+
   // Extract UTC components
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
   const day = date.getUTCDate();
-  
+
   // Create a new date using those components but in local time
   // This avoids the timezone shift that can cause a day difference
   const displayDate = new Date();
   displayDate.setFullYear(year);
   displayDate.setMonth(month);
   displayDate.setDate(day);
-  
+
   // Format the date
   return displayDate.toLocaleDateString("en-US", {
     weekday: "long",
@@ -120,35 +120,35 @@ export function formatUtcDateRange(startDate: Date, endDate: Date): string {
   const startYear = startDate.getUTCFullYear();
   const startMonthIdx = startDate.getUTCMonth();
   const startDayNum = startDate.getUTCDate();
-  
+
   // Extract UTC components for end date
   const endYear = endDate.getUTCFullYear();
   const endMonthIdx = endDate.getUTCMonth();
   const endDayNum = endDate.getUTCDate();
-  
+
   // Create display dates to format correctly
   const displayStartDate = new Date();
   displayStartDate.setFullYear(startYear);
   displayStartDate.setMonth(startMonthIdx);
   displayStartDate.setDate(startDayNum);
-  
+
   const displayEndDate = new Date();
   displayEndDate.setFullYear(endYear);
   displayEndDate.setMonth(endMonthIdx);
   displayEndDate.setDate(endDayNum);
-  
+
   // Format month names
   const startMonth = displayStartDate.toLocaleDateString("en-US", { month: "short" });
   const endMonth = displayEndDate.toLocaleDateString("en-US", { month: "short" });
-  
+
   if (startMonth === endMonth && startYear === endYear) {
     return `${startMonth} ${startDayNum} - ${endDayNum}, ${startYear}`;
   }
-  
+
   if (startYear === endYear) {
     return `${startMonth} ${startDayNum} - ${endMonth} ${endDayNum}, ${startYear}`;
   }
-  
+
   return `${startMonth} ${startDayNum}, ${startYear} - ${endMonth} ${endDayNum}, ${endYear}`;
 }
 

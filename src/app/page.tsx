@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Medal, Calendar, TrendingUp, ChevronRight } from "lucide-react";
+import { Calendar, ChevronRight, Medal, TrendingUp } from "lucide-react";
+import Link from "next/link";
 
 export default function LandingPage() {
   return (

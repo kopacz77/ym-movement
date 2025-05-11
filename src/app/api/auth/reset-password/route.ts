@@ -1,7 +1,7 @@
+import { prisma } from "@/lib/prisma";
+import { hash } from "bcrypt";
 // src/app/api/auth/reset-password/route.ts
 import { type NextRequest, NextResponse } from "next/server";
-import { hash } from "bcrypt";
-import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {

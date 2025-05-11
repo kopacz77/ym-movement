@@ -1,10 +1,10 @@
-// src/app/api/auth/signup/route.ts
-import { z } from "zod";
+import { sendWelcomeEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import bcrypt from "bcrypt";
-import { prisma } from "@/lib/prisma";
-import { sendWelcomeEmail } from "@/lib/email";
+// src/app/api/auth/signup/route.ts
+import { z } from "zod";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),

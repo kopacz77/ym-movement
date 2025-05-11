@@ -1,16 +1,16 @@
 // Updated src/features/admin/components/students/shared/NewStudentDialog.tsx
 "use client";
 
-import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -19,13 +19,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Level } from "@prisma/client";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
-import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -34,7 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { api } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Level } from "@prisma/client";
+import { Plus } from "lucide-react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const newStudentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

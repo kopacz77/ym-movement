@@ -1,12 +1,12 @@
+import { randomUUID } from "node:crypto";
+import { sendLessonConfirmationEmail } from "@/lib/email";
+import { googleCalendar } from "@/lib/google/calendar";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek } from "date-fns";
 // src/features/student/api/queries/bookingQueries.ts
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
-import { TRPCError } from "@trpc/server";
-import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
-import { googleCalendar } from "@/lib/google/calendar";
-import { sendLessonConfirmationEmail } from "@/lib/email";
-import { randomUUID } from "node:crypto";
-import { startOfWeek as dateStartOfWeek, endOfWeek as dateEndOfWeek } from "date-fns";
 
 // Define extended Student type with custom pricing fields
 interface ExtendedStudent {
@@ -38,7 +38,6 @@ export const bookingRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-
         console.log(`[BOOKING] Starting booking process for student ${input.studentId}`);
 
         // 1. Get the time slot to check availability
@@ -155,7 +154,7 @@ export const bookingRouter = createTRPCRouter({
               attendees: [
                 { email: student.user.email, name: student.user.name },
                 // Include instructor email as in the older version
-                { email: process.env.INSTRUCTOR_EMAIL || 'yuraxmin@gmail.com' }
+                { email: process.env.INSTRUCTOR_EMAIL || "yuraxmin@gmail.com" },
               ],
               location: timeSlot.rink.address,
               timeZone: timezone, // Explicitly pass the timezone
@@ -304,7 +303,7 @@ export const bookingRouter = createTRPCRouter({
                 rinkTimezone: timeSlot.rink.timezone, // FIXED: Ensure timezone is passed
               },
               input.paymentMethod,
-              paymentRef
+              paymentRef,
             );
 
             console.log(`[BOOKING] Successfully sent confirmation email to ${student.user.email}`);

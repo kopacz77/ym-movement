@@ -1,8 +1,8 @@
-// src/components/ui/responsive-form.tsx
-import type * as React from "react";
-import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { cn } from "@/lib/utils";
+// src/components/ui/responsive-form.tsx
+import type * as React from "react";
 
 interface FormRowProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;

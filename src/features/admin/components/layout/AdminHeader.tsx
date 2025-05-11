@@ -1,14 +1,6 @@
 // src/features/admin/components/layout/AdminHeader.tsx
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/useMediaQuery";
-import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,20 +12,27 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const AdminHeader = () => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, logout } = useAuth(); // Use our custom Auth context
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirect: false });
+      await logout();
       toast("Logged out", {
         description: "You have been successfully logged out.",
       });
-      router.push("/auth/login");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Error", {
@@ -41,6 +40,9 @@ export const AdminHeader = () => {
       });
     }
   };
+
+  // For debugging
+  console.log("Current user from Auth context:", user);
 
   return (
     <header className="h-16 bg-white border-b shadow-sm safe-top">
@@ -67,7 +69,7 @@ export const AdminHeader = () => {
 
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden md:flex items-center gap-2 mr-4">
-            <span className="text-sm font-medium">{session?.user?.name || "Admin"}</span>
+            <span className="text-sm font-medium">{user?.name || "Yura Min"}</span>
           </div>
 
           {/* Notifications Popover */}

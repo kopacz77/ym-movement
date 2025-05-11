@@ -1,6 +1,5 @@
 // src/features/scheduling/types/index.ts
 import type { Lesson, LessonType, RinkArea } from "@prisma/client";
-import { RinkTimeSlot, LessonStatus } from "@prisma/client";
 
 export interface CalendarSlot {
   id: string;

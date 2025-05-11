@@ -1,10 +1,10 @@
-// src/app/(protected)/admin/dashboard/page.tsx
-import { Suspense } from "react";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { OverviewCards } from "@/features/admin/components/analytics/OverviewCards";
 import { RevenueChart } from "@/features/admin/components/analytics/RevenueChart";
 import { StudentActivityChart } from "@/features/admin/components/analytics/StudentActivityChart";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { PendingApprovals } from "@/features/admin/components/management/PendingApprovals";
+// src/app/(protected)/admin/dashboard/page.tsx
+import { Suspense } from "react";
 
 export default function AdminDashboardPage() {
   return (

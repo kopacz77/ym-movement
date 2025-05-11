@@ -1,17 +1,17 @@
+import { JWT } from "google-auth-library";
 // src/lib/google/calendar.ts
-import { google } from 'googleapis';
-import { JWT } from 'google-auth-library';
+import { google } from "googleapis";
 
 // Initialize Google Auth client with service account credentials
 const getAuthClient = () => {
   try {
     const credentials = {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     };
 
     if (!credentials.client_email || !credentials.private_key) {
-      console.error('Missing Google API credentials');
+      console.error("Missing Google API credentials");
       return null;
     }
 
@@ -22,14 +22,14 @@ const getAuthClient = () => {
     const client = new JWT({
       email: credentials.client_email,
       key: credentials.private_key,
-      scopes: ['https://www.googleapis.com/auth/calendar'],
+      scopes: ["https://www.googleapis.com/auth/calendar"],
       // Use the calendar owner's email from env variable
-      subject: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
+      subject: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
     });
 
     return client;
   } catch (error) {
-    console.error('Error initializing Google Auth client:', error);
+    console.error("Error initializing Google Auth client:", error);
     return null;
   }
 };
@@ -37,8 +37,10 @@ const getAuthClient = () => {
 // Get Google Calendar API client
 const getCalendarApi = () => {
   const auth = getAuthClient();
-  if (!auth) { return null; }
-  return google.calendar({ version: 'v3', auth });
+  if (!auth) {
+    return null;
+  }
+  return google.calendar({ version: "v3", auth });
 };
 
 // Format attendee for Google Calendar API
@@ -46,7 +48,7 @@ const formatAttendee = (email: string, displayName?: string) => {
   return {
     email,
     displayName: displayName || email,
-    responseStatus: 'needsAction',
+    responseStatus: "needsAction",
   };
 };
 
@@ -78,13 +80,13 @@ export const googleCalendar = {
 
       const calendar = getCalendarApi();
       if (!calendar) {
-        console.error('[CALENDAR] Failed to initialize Google Calendar API');
+        console.error("[CALENDAR] Failed to initialize Google Calendar API");
         return null;
       }
 
       // Format attendees for Google Calendar API
       const formattedAttendees = attendees.map((attendee) =>
-        formatAttendee(attendee.email, attendee.name)
+        formatAttendee(attendee.email, attendee.name),
       );
 
       // Create the event with explicit timezone handling
@@ -104,21 +106,23 @@ export const googleCalendar = {
         reminders: {
           useDefault: false,
           overrides: [
-            { method: 'email', minutes: 60 },
-            { method: 'popup', minutes: 30 },
+            { method: "email", minutes: 60 },
+            { method: "popup", minutes: 30 },
           ],
         },
       };
 
-      console.log(`[CALENDAR] Creating event from ${startTime.toISOString()} to ${endTime.toISOString()}`);
+      console.log(
+        `[CALENDAR] Creating event from ${startTime.toISOString()} to ${endTime.toISOString()}`,
+      );
       console.log(`[CALENDAR] Event timezone: ${timeZone}`);
 
       // Insert the event directly into Yura's calendar and send notifications
       const response = await calendar.events.insert({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
+        calendarId: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
         requestBody: event,
-        sendUpdates: 'all',  // Make sure to send email notifications
-        supportsAttachments: false
+        sendUpdates: "all", // Make sure to send email notifications
+        supportsAttachments: false,
       });
 
       if (response.data.id) {
@@ -126,10 +130,10 @@ export const googleCalendar = {
         return response.data.id;
       }
 
-      console.error('[CALENDAR] Event created but no ID returned');
+      console.error("[CALENDAR] Event created but no ID returned");
       return null;
     } catch (error) {
-      console.error('[CALENDAR] Error creating event:', error);
+      console.error("[CALENDAR] Error creating event:", error);
       return null;
     }
   },
@@ -143,12 +147,12 @@ export const googleCalendar = {
 
       const calendar = getCalendarApi();
       if (!calendar) {
-        console.error('[CALENDAR] Failed to initialize Google Calendar API');
+        console.error("[CALENDAR] Failed to initialize Google Calendar API");
         return false;
       }
 
       await calendar.events.delete({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
+        calendarId: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
         eventId,
       });
 
@@ -184,16 +188,16 @@ export const googleCalendar = {
   }): Promise<string | null> => {
     try {
       console.log(`[CALENDAR] Updating event: ${eventId}`);
-      
+
       const calendar = getCalendarApi();
       if (!calendar) {
-        console.error('[CALENDAR] Failed to initialize Google Calendar API');
+        console.error("[CALENDAR] Failed to initialize Google Calendar API");
         return null;
       }
 
       // Format attendees for Google Calendar API
       const formattedAttendees = attendees.map((attendee) =>
-        formatAttendee(attendee.email, attendee.name)
+        formatAttendee(attendee.email, attendee.name),
       );
 
       // Update the event
@@ -213,10 +217,10 @@ export const googleCalendar = {
       };
 
       const response = await calendar.events.update({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || 'yuraxmin@gmail.com',
+        calendarId: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
         eventId,
         requestBody: event,
-        sendUpdates: 'all',  // Make sure to send email notifications
+        sendUpdates: "all", // Make sure to send email notifications
       });
 
       if (response.data.id) {
@@ -224,7 +228,7 @@ export const googleCalendar = {
         return response.data.id;
       }
 
-      console.error('[CALENDAR] Event updated but no ID returned');
+      console.error("[CALENDAR] Event updated but no ID returned");
       return null;
     } catch (error) {
       console.error(`[CALENDAR] Error updating event ${eventId}:`, error);

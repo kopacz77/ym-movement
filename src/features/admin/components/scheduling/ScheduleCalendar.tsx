@@ -1,5 +1,4 @@
-import React from "react";
-import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -8,15 +7,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { ScheduleCalendarView } from "./ScheduleCalendarView";
 
 export const ScheduleCalendar = () => {
+  const [selectedRink, setSelectedRink] = React.useState("MAIN_RINK");
+  
+  const handleRinkChange = (value: string) => {
+    setSelectedRink(value);
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Schedule Management</CardTitle>
         <div className="flex gap-2">
-          <Select defaultValue="MAIN_RINK">
+          <Select value={selectedRink} onValueChange={handleRinkChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select Rink" />
             </SelectTrigger>
@@ -30,8 +36,8 @@ export const ScheduleCalendar = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex h-[600px]">
-          <Calendar />
+        <div className="h-[600px]">
+          <ScheduleCalendarView />
         </div>
       </CardContent>
     </Card>

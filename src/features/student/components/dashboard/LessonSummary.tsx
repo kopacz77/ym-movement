@@ -1,11 +1,11 @@
 // src/features/student/components/dashboard/LessonSummary.tsx
 "use client";
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export const LessonSummary = () => {
   const { id: studentId } = useCurrentUser();

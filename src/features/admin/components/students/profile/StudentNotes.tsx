@@ -1,15 +1,15 @@
 // features/admin/components/students/profile/StudentNotes.tsx
 "use client";
 
-import React, { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
-import { TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 
 interface StudentNotesProps {
   studentId: string;
@@ -99,9 +99,7 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
         <div className="space-y-4">
           {isLoading ? (
             <p className="text-center text-muted-foreground">Loading notes...</p>
-          ) : !notes?.length ? (
-            <p className="text-center text-muted-foreground">No notes yet</p>
-          ) : (
+          ) : notes?.length ? (
             notes.map((note: Note) => (
               <div key={note.id} className="border rounded-lg p-4 space-y-2">
                 <div className="flex justify-between items-start">
@@ -116,6 +114,8 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
                 <p className="text-sm whitespace-pre-wrap">{note.content}</p>
               </div>
             ))
+          ) : (
+            <p className="text-center text-muted-foreground">No notes yet</p>
           )}
         </div>
       </CardContent>

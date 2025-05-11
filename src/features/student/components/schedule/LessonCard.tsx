@@ -1,14 +1,14 @@
 // src/features/student/components/schedule/LessonCard.tsx
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { LessonWithDetails } from "@/features/student/types";
-import { LessonStatus } from "@prisma/client";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
+import { LessonStatus } from "@prisma/client";
+import { Calendar, Clock, MapPin } from "lucide-react";
+import Link from "next/link";
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -44,9 +44,7 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="font-medium">{lesson.type.replace("_", " ")} Lesson</h3>
-          <div className="flex flex-col gap-1 items-end">
-            {getStatusBadge()}
-          </div>
+          <div className="flex flex-col gap-1 items-end">{getStatusBadge()}</div>
         </div>
 
         <div className="mt-4 space-y-2">

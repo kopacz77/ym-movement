@@ -1,15 +1,15 @@
 // app/(protected)/student/schedule/client.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LessonCard } from "@/features/student/components/schedule/LessonCard";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { LessonWithDetails } from "@/features/student/types";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
 import { LessonStatus, LessonType, PaymentStatus, RinkArea } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // This is the raw data shape from the API
 interface Lesson {
@@ -85,7 +85,8 @@ export default function StudentScheduleClient() {
   // Convert the API Lesson to the expected LessonWithDetails format
   const transformToLessonWithDetails = (lesson: Lesson): LessonWithDetails => {
     // Create Date objects without timezone conversion
-    const startTime = lesson.startTime instanceof Date ? lesson.startTime : new Date(lesson.startTime);
+    const startTime =
+      lesson.startTime instanceof Date ? lesson.startTime : new Date(lesson.startTime);
     const endTime = lesson.endTime instanceof Date ? lesson.endTime : new Date(lesson.endTime);
     const durationInMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
 
@@ -101,7 +102,7 @@ export default function StudentScheduleClient() {
       rink: {
         name: lesson.rink.name,
         address: lesson.rink.address,
-      }
+      },
     };
 
     // Add optional properties only if they exist and aren't null
@@ -116,7 +117,7 @@ export default function StudentScheduleClient() {
         status: lesson.payment.status,
         amount: lesson.payment.amount,
         method: lesson.payment.method,
-        referenceCode: lesson.payment.referenceCode
+        referenceCode: lesson.payment.referenceCode,
       };
     }
 

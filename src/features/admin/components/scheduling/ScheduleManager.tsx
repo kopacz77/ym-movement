@@ -1,795 +1,353 @@
 // src/features/admin/components/scheduling/ScheduleManager.tsx
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { TimeSlotForm } from "./TimeSlotForm";
-import { BulkTimeSlotForm } from "./BulkTimeSlotForm";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
-import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
-import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
-import { format, addDays, startOfDay, endOfDay } from "date-fns";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { useScheduleActions } from "@/hooks/useScheduleActions";
+import { useTimeSlots } from "@/hooks/useTimeSlots";
+import { useCalendarEvents, ExtendedCalendarEvent } from "@/hooks/useCalendarEvents";
+import { endOfDay, startOfDay } from "date-fns";
+import { localizer } from "@/lib/calendar/calendarLocalizer";
+import { useCallback, useMemo, useState } from "react";
+import { useBulkOperations } from "@/contexts/BulkOperationsContext";
+import { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop';
 
-// Define proper types for our data
+// Import our components
+import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
+import { MobileCalendarView } from "./MobileCalendarView";
+import { DesktopCalendarView } from "./DesktopCalendarView";
+import { ScheduleHeader } from "./ScheduleHeader";
+import { CreateTimeSlotDialog, BulkCreateSlotsDialog } from "./DialogComponents";
+import { formatDateRange, type TimeSlot } from "./calendarUtils";
+import { SlotInfo } from 'react-big-calendar';
+
+// Define types for form data
 interface TimeSlotFormData {
   startTime: Date | null;
   endTime: Date | null;
   rinkId?: string;
 }
 
-interface Lesson {
-  id: string;
-  student: {
+// Calendar schedule event type
+interface ScheduleEvent {
+  schedule: {
     id: string;
-    user: {
-      name: string | null;
+    start: Date;
+    end: Date;
+    raw: {
+      rinkId: string;
+      rink: {
+        id: string;
+        name: string;
+        timezone: string;
+      };
+      maxStudents: number;
+      isActive: boolean;
+      lessons: unknown[];
+      timeDisplay: string;
+      timezone: string;
     };
   };
 }
 
-interface TimeSlot {
-  id: string;
-  startTime: string | Date;
-  endTime: string | Date;
-  maxStudents: number;
-  rinkId: string;
-  rink: {
-    id: string;
-    name: string;
-  };
-  lessons?: Lesson[];
-}
-
 export function ScheduleManager() {
+  // Dialog state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
+  
+  // Selected data state
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<EventClickArg | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  
+  // Media query hook
   const isMobile = useIsMobile();
-  const calendarRef = useRef(null);
   
-  // Create a stable initial date
-  const initialDate = useMemo(() => {
-    const now = new Date();
-    return now;
-  }, []);
-  
-  // State initialization
+  // Calendar state
+  const initialDate = useMemo(() => new Date(), []);
   const [date, setDate] = useState(initialDate);
-  const [calendarView, setCalendarView] = useState<"timeGridWeek" | "dayGridMonth">("timeGridWeek");
+  const [calendarView, setCalendarView] = useState("week");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
   
-  const utils = api.useUtils();
+  // Access bulk operations context
+  useBulkOperations();
 
-  // Calculate date range based on view - month-based loading for efficiency
+  // Use schedule actions hook for mutations
+  const { 
+    deleteTimeSlot,
+    assignStudent,
+    unassignStudent,
+    updateTimeSlot
+  } = useScheduleActions();
+
+  // Calculate date range for fetching data
   const dateRange = useMemo(() => {
     const year = date.getFullYear();
     const month = date.getMonth();
-    
+
     // First day of month
     const firstDay = new Date(year, month, 1);
     // Last day of month
     const lastDay = new Date(year, month + 1, 0);
-    
+
     return {
       start: startOfDay(firstDay),
-      end: endOfDay(lastDay)
+      end: endOfDay(lastDay),
     };
   }, [date]);
-  
-  // Get rinks data
-  const { data: rinks } = api.admin.schedule.getRinks.useQuery();
 
-  // Get students data
-  const { data: students } = api.admin.student.getStudents.useQuery();
+  // Use the timeSlots hook to fetch data
+  const { 
+    rinks, 
+    students, 
+    timeSlots 
+  } = useTimeSlots(dateRange, selectedRink);
 
-  // Get time slots data - updated to use date range and cache key
-  const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery({
-    startDate: dateRange.start,
-    endDate: dateRange.end,
-    rinkId: selectedRink,
-  }, {
-    refetchOnWindowFocus: false,
-    staleTime: 30000,
-  });
+  // Get current rink timezone
+  const rinkTimezone = useMemo(() => {
+    if (selectedRink && rinks) {
+      const selectedRinkData = rinks.find((rink: { id: string; timezone: string }) => rink.id === selectedRink);
+      return selectedRinkData?.timezone || 'America/Los_Angeles';
+    }
+    // Default timezone if no rink is selected
+    return 'America/Los_Angeles';
+  }, [selectedRink, rinks]);
 
-  // Convert time slots to FullCalendar events
-  const events =
-    timeSlots?.map((slot) => {
-      const studentCount = slot.lessons?.length || 0;
-      const studentNames = slot.lessons?.map((lesson) => lesson.student.user.name).join(", ");
-      const title = `${studentCount}/${slot.maxStudents} students${
-        studentNames ? ` (${studentNames})` : ""
-      }
-      } - ${slot.rink.name}`;
-      
-      // Determine if the slot is booked (has at least one student)
-      const isBooked = studentCount > 0;
-      
-      return {
-        id: slot.id,
-        title,
-        start: slot.startTime,
-        end: slot.endTime,
-        backgroundColor: isBooked ? "#10b981" : undefined, // Green color for booked slots
-        borderColor: isBooked ? "#059669" : undefined,     // Slightly darker green border for booked slots
-        extendedProps: {
-          ...slot,
-          currentStudents: studentCount,
-          isBooked,
-        },
-      };
-    }) || [];
+  // Use calendar events hook
+  const { events, processedEvents } = useCalendarEvents(timeSlots);
 
-  // Delete time slot mutation
-  const deleteTimeSlot = api.admin.schedule.deleteTimeSlot.useMutation({
-    onSuccess: () => {
-      toast("Success", {
-        description: "Time slot deleted successfully",
-      });
-      setIsManageDialogOpen(false);
-      setSelectedEvent(null);
-      setSelectedSlot(null);
-      utils.admin.schedule.getTimeSlots.invalidate();
-    },
-    onError: (err) => {
-      toast.error("Error", {
-        description: err.message,
-      });
-    },
-  });
-
-  // Assign student mutation
-  const assignStudent = api.admin.schedule.assignStudentToTimeSlot.useMutation({
-    onSuccess: () => {
-      toast("Success", {
-        description: "Student assigned successfully",
-      });
-      utils.admin.schedule.getTimeSlots.invalidate();
-    },
-    onError: (err) => {
-      toast.error("Error", {
-        description: err.message,
-      });
-    },
-  });
-
-  // Unassign student mutation
-  const unassignStudent = api.admin.schedule.unassignStudent.useMutation({
-    onSuccess: () => {
-      toast("Success", {
-        description: "Student unassigned successfully",
-      });
-      utils.admin.schedule.getTimeSlots.invalidate();
-    },
-    onError: (err) => {
-      toast.error("Error", {
-        description: err.message,
-      });
-    },
-  });
-
-  const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
+  // Handle user interactions
+  const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
     setTimeSlotFormData({
-      startTime: selectInfo.start,
-      endTime: selectInfo.end,
-      rinkId: undefined, // We'll need to select the rink manually in the form
+      startTime: slotInfo.start,
+      endTime: slotInfo.end,
+      rinkId: selectedRink,
     });
     setIsCreateDialogOpen(true);
-  }, []);
+  }, [selectedRink]);
 
   const handleCreateTimeSlotClick = useCallback(() => {
     setTimeSlotFormData({
       startTime: null,
       endTime: null,
+      rinkId: selectedRink,
     });
     setIsCreateDialogOpen(true);
+  }, [selectedRink]);
+
+  const handleSelectEvent = useCallback((event: object) => {
+    const typedEvent = event as ExtendedCalendarEvent;
+    if (typedEvent.slot) {
+      setSelectedSlot(typedEvent.slot);
+      setIsManageDialogOpen(true);
+    }
   }, []);
 
-  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
-    setSelectedEvent(clickInfo);
-    setIsManageDialogOpen(true);
-  }, []);
-
-  const handleEventDrop = useCallback(
-    (dropInfo: EventDropArg) => {
-      // For updateTimeSlot, we need to get the actual mutation function
-      const updateTimeSlot = api.admin.schedule.updateTimeSlot.useMutation({
-        onSuccess: () => {
-          toast("Success", {
-            description: "Time slot updated successfully",
-          });
-          utils.admin.schedule.getTimeSlots.invalidate();
-        },
-        onError: () => {
-          toast.error("Error", {
-            description: "Failed to update time slot",
-          });
-          dropInfo.revert();
-        },
+  const handleEventDrop = useCallback((eventData: EventInteractionArgs<ExtendedCalendarEvent>) => {
+    const {event, start, end} = eventData;
+    if (event.id && start && end) {
+      updateTimeSlot.mutate({
+        id: event.id.toString(),
+        startTime: new Date(start),
+        endTime: new Date(end),
       });
+    }
+  }, [updateTimeSlot]);
 
-      // Now call the mutation
-      if (dropInfo.event.start && dropInfo.event.end) {
-        updateTimeSlot.mutate({
-          id: dropInfo.event.id,
-          startTime: dropInfo.event.start,
-          endTime: dropInfo.event.end,
-        });
-      } else {
-        toast.error("Error", {
-          description: "Invalid event times",
-        });
-        dropInfo.revert();
+  // Navigation callbacks
+  const goToPrev = useCallback(() => {
+    setDate(prev => {
+      const newDate = new Date(prev);
+      if (calendarView === 'month') {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else if (calendarView === 'week') {
+        newDate.setDate(newDate.getDate() - 7);
+      } else if (calendarView === 'day') {
+        newDate.setDate(newDate.getDate() - 1);
       }
-    },
-    [utils.admin.schedule],
-  );
-
-  // Navigate to the previous week
-  const goToPrev = () => {
-    setDate((prev) => {
-      const newDate = calendarView === "dayGridMonth" 
-        ? new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
-        : addDays(prev, -7);
       return newDate;
     });
-  };
+  }, [calendarView]);
 
-  // Navigate to the next week
-  const goToNext = () => {
-    setDate((prev) => {
-      const newDate = calendarView === "dayGridMonth"
-        ? new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
-        : addDays(prev, 7);
+  const goToNext = useCallback(() => {
+    setDate(prev => {
+      const newDate = new Date(prev);
+      if (calendarView === 'month') {
+        newDate.setMonth(newDate.getMonth() + 1);
+      } else if (calendarView === 'week') {
+        newDate.setDate(newDate.getDate() + 7);
+      } else if (calendarView === 'day') {
+        newDate.setDate(newDate.getDate() + 1);
+      }
       return newDate;
     });
-  };
+  }, [calendarView]);
 
-  // Go to today
-  const goToToday = () => {
+  const goToToday = useCallback(() => {
     setDate(new Date());
-  };
+  }, []);
 
-  // Format the date range for display
+  // Format the date range text for display
   const dateRangeText = useMemo(() => {
-    if (calendarView === "dayGridMonth") {
-      return format(date, "MMMM yyyy");
-    }
-    
-    const endDate = addDays(date, 6);
-    const startMonth = format(date, "MMM");
-    const endMonth = format(endDate, "MMM");
-
-    if (startMonth === endMonth) {
-      return `${startMonth} ${format(date, "d")} - ${format(endDate, "d")}, ${format(
-        date,
-        "yyyy",
-      )}`;
-    }
-    
-    return `${startMonth} ${format(date, "d")} - ${endMonth} ${format(endDate, "d")}, ${format(
-      date,
-      "yyyy",
-    )}`;
+    return formatDateRange(date, calendarView);
   }, [date, calendarView]);
 
   // Handle view change
-  const handleViewChange = (newView: "timeGridWeek" | "dayGridMonth") => {
+  const handleViewChange = useCallback((newView: string) => {
     setCalendarView(newView);
-    
-    // Adjust date if switching to month view to start at beginning of month
-    if (newView === "dayGridMonth") {
-      setDate(new Date(date.getFullYear(), date.getMonth(), 1));
-    }
-  };
+  }, []);
 
-  // Process events for display in the custom list view
-  const processEventsForCustomList = useMemo(() => {
-    if (!timeSlots) {
-      return [];
-    }
-
-    // Group events by day
-    const groupedEvents = timeSlots.reduce(
-      (groups, slot) => {
-        const date = format(new Date(slot.startTime), "yyyy-MM-dd");
-
-        if (!groups[date]) {
-          groups[date] = {
-            date: new Date(slot.startTime),
-            slots: [],
-          };
-        }
-
-        groups[date].slots.push(slot);
-        return groups;
-      },
-      {} as Record<string, { date: Date; slots: TimeSlot[] }>,
-    );
-
-    // Convert to array and sort by date
-    return Object.values(groupedEvents).sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [timeSlots]);
-
-  // Handle clicking a slot in the custom mobile list
-  const handleMobileSlotClick = (slot: TimeSlot) => {
+  // Handle time slot click in mobile view
+  const handleMobileSlotClick = useCallback((slot: TimeSlot) => {
     setSelectedSlot(slot);
     setIsManageDialogOpen(true);
-  };
+  }, []);
+
+  // Prepare data for the edit dialog
+  const handleEditSlot = useCallback(() => {
+    const slotData = selectedEvent
+      ? {
+          startTime: selectedEvent.schedule.start || new Date(),
+          endTime: selectedEvent.schedule.end || new Date(),
+          rinkId: selectedEvent.schedule.raw.rinkId,
+        }
+      : {
+          startTime: selectedSlot ? 
+            (typeof selectedSlot.startTime === 'string' ? new Date(selectedSlot.startTime) : new Date()) 
+            : new Date(),
+          endTime: selectedSlot ? 
+            (typeof selectedSlot.endTime === 'string' ? new Date(selectedSlot.endTime) : new Date()) 
+            : new Date(),
+          rinkId: selectedSlot?.rink.id || "",
+        };
+
+    setTimeSlotFormData(slotData);
+    setIsCreateDialogOpen(true);
+    setIsManageDialogOpen(false);
+  }, [selectedEvent, selectedSlot]);
+
+  // Handle deleting a time slot
+  const handleDeleteSlot = useCallback(() => {
+    const slotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
+    
+    if (slotId) {
+      deleteTimeSlot.mutate({ id: slotId });
+    }
+  }, [deleteTimeSlot, selectedEvent, selectedSlot]);
+
+  // Handle assigning a student
+  const handleAssignStudent = useCallback((studentId: string) => {
+    const timeSlotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
+    
+    if (timeSlotId) {
+      assignStudent.mutate({
+        timeSlotId,
+        studentId,
+      });
+    }
+  }, [assignStudent, selectedEvent, selectedSlot]);
+
+  // Handle dialog close actions
+  const handleCreateDialogClose = useCallback(() => {
+    setIsCreateDialogOpen(false);
+    setTimeSlotFormData(null);
+  }, []);
+
+  const handleBulkCreateClose = useCallback(() => {
+    setIsBulkCreateOpen(false);
+  }, []);
+
+  const handleManageDialogClose = useCallback(() => {
+    setSelectedEvent(null);
+    setSelectedSlot(null);
+    setIsManageDialogOpen(false);
+  }, []);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl font-bold">Schedule Management</h1>
-        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-          {/* Create Time Slot Dialog */}
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={handleCreateTimeSlotClick} className="w-full md:w-auto">
-                <Plus className="mr-2 h-4 w-4" /> Create Time Slot
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {timeSlotFormData?.startTime
-                    ? "Create Time Slot for Selected Time"
-                    : "Create New Time Slot"}
-                </DialogTitle>
-              </DialogHeader>
-              {timeSlotFormData && (
-                <TimeSlotForm
-                  initialStartTime={timeSlotFormData.startTime}
-                  initialEndTime={timeSlotFormData.endTime}
-                  initialRinkId={timeSlotFormData.rinkId}
-                  rinks={rinks || []}
-                  onSubmitAction={() => {
-                    setIsCreateDialogOpen(false);
-                    setTimeSlotFormData(null);
-                  }}
-                />
-              )}
-            </DialogContent>
-          </Dialog>
+      {/* Header with controls */}
+      <ScheduleHeader
+        selectedRink={selectedRink}
+        onRinkSelect={setSelectedRink}
+        createTimeSlotButton={
+          <CreateTimeSlotDialog
+            isOpen={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+            timeSlotFormData={timeSlotFormData}
+            onCreateClick={handleCreateTimeSlotClick}
+            rinks={rinks || []}
+            onSubmitAction={handleCreateDialogClose}
+          />
+        }
+        bulkCreateButton={
+          <BulkCreateSlotsDialog
+            isOpen={isBulkCreateOpen}
+            onOpenChange={setIsBulkCreateOpen}
+            rinks={rinks || []}
+            onSubmitAction={handleBulkCreateClose}
+          />
+        }
+        rinks={rinks || []}
+      />
 
-          {/* Bulk Create Slots Dialog */}
-          <Dialog open={isBulkCreateOpen} onOpenChange={setIsBulkCreateOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="w-full md:w-auto">
-                <Plus className="mr-2 h-4 w-4" /> Bulk Create Slots
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Bulk Create Time Slots</DialogTitle>
-              </DialogHeader>
-              <BulkTimeSlotForm
-                rinks={rinks || []}
-                onSubmitAction={() => setIsBulkCreateOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-          
-          {/* Rink Selector */}
-          <Select 
-            value={selectedRink} 
-            onValueChange={(value) => setSelectedRink(value === "all_rinks" ? undefined : value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Rinks" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all_rinks">All Rinks</SelectItem>
-              {rinks?.map((rink) => (
-                <SelectItem key={rink.id} value={rink.id}>
-                  {rink.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Timezone Information Banner */}
+      {selectedRink && (
+        <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center text-amber-800">
+          <span className="mr-2">🌐</span>
+          <span>
+            All times shown in {rinkTimezone.split('/').pop()?.replace('_', ' ')} local time
+          </span>
         </div>
-      </div>
+      )}
 
-      {/* Manage Time Slot Dialog */}
-      <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Manage Time Slot</DialogTitle>
-          </DialogHeader>
-          {(selectedEvent || selectedSlot) && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="font-medium">Start Time</p>
-                  {selectedEvent ? (
-                    <p>
-                      {selectedEvent.event.start &&
-                        `${selectedEvent.event.start.getUTCHours()}:${String(
-                          selectedEvent.event.start.getUTCMinutes(),
-                        ).padStart(2, "0")}`}
-                    </p>
-                  ) : (
-                    <p>
-                      {selectedSlot &&
-                        `${new Date(selectedSlot.startTime).getUTCHours()}:${String(
-                          new Date(selectedSlot.startTime).getUTCMinutes(),
-                        ).padStart(2, "0")}`}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium">End Time</p>
-                  {selectedEvent ? (
-                    <p>
-                      {selectedEvent.event.end &&
-                        `${selectedEvent.event.end.getUTCHours()}:${String(
-                          selectedEvent.event.end.getUTCMinutes(),
-                        ).padStart(2, "0")}`}
-                    </p>
-                  ) : (
-                    <p>
-                      {selectedSlot &&
-                        `${new Date(selectedSlot.endTime).getUTCHours()}:${String(
-                          new Date(selectedSlot.endTime).getUTCMinutes(),
-                        ).padStart(2, "0")}`}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium">Students</p>
-                  <p>
-                    {selectedEvent
-                      ? `${selectedEvent.event.extendedProps.currentStudents} / ${selectedEvent.event.extendedProps.maxStudents}`
-                      : selectedSlot &&
-                        `${selectedSlot.lessons?.length || 0} / ${selectedSlot.maxStudents}`}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium">Rink</p>
-                  <p>
-                    {selectedEvent
-                      ? selectedEvent.event.extendedProps.rink?.name
-                      : selectedSlot?.rink?.name}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <p className="font-medium">Assign Student</p>
-                <div className="flex gap-2">
-                  <Select
-                    onValueChange={(studentId: string) => {
-                      assignStudent.mutate({
-                        timeSlotId: selectedEvent ? selectedEvent.event.id : selectedSlot?.id || "",
-                        studentId,
-                      });
-                    }}
-                  >
-                    <SelectTrigger className="w-full md:w-[200px]">
-                      <SelectValue placeholder="Select student" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {students?.students?.map((student) => (
-                        <SelectItem key={student.id} value={student.id}>
-                          {student.user.name || "Unnamed Student"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <p className="font-medium">Assigned Students</p>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {(selectedEvent
-                    ? selectedEvent.event.extendedProps.lessons
-                    : selectedSlot?.lessons
-                  )?.map((lesson: Lesson) => (
-                    <div
-                      key={lesson.id}
-                      className="flex items-center justify-between p-2 border rounded"
-                    >
-                      <span>{lesson.student.user.name || "Unnamed Student"}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm("Remove this student from the time slot?")) {
-                            unassignStudent.mutate({ lessonId: lesson.id });
-                          }
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-col md:flex-row justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  className="w-full md:w-auto"
-                  onClick={() => {
-                    setSelectedEvent(null);
-                    setSelectedSlot(null);
-                    setIsManageDialogOpen(false);
-                  }}
-                >
-                  Close
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full md:w-auto"
-                  onClick={() => {
-                    const slotData = selectedEvent
-                      ? {
-                          startTime: selectedEvent.event.start || new Date(),
-                          endTime: selectedEvent.event.end || new Date(),
-                          rinkId: selectedEvent.event.extendedProps.rinkId,
-                        }
-                      : {
-                          startTime: selectedSlot ? new Date(selectedSlot.startTime) : new Date(),
-                          endTime: selectedSlot ? new Date(selectedSlot.endTime) : new Date(),
-                          rinkId: selectedSlot?.rinkId,
-                        };
-
-                    setTimeSlotFormData(slotData);
-                    setIsCreateDialogOpen(true);
-                    setIsManageDialogOpen(false);
-                  }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="w-full md:w-auto"
-                  onClick={() => {
-                    const slotId = selectedEvent ? selectedEvent.event.id : selectedSlot?.id || "";
-                    if (confirm("Are you sure you want to delete this time slot?")) {
-                      deleteTimeSlot.mutate({ id: slotId });
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Time Slot Management Dialog - Using the adapter */}
+      <TimeSlotDialogAdapter
+        isOpen={isManageDialogOpen}
+        onClose={handleManageDialogClose}
+        onEdit={handleEditSlot}
+        onDelete={handleDeleteSlot}
+        selectedEvent={selectedEvent}
+        selectedSlot={selectedSlot}
+        students={students?.students || []}
+        onAssignStudent={handleAssignStudent}
+        onUnassignStudent={(lessonId: string) => {
+          if (lessonId) {
+            unassignStudent.mutate({ lessonId });
+          }
+        }}
+      />
 
       <Card className="shadow-sm">
         <CardContent className="p-0">
           {isMobile ? (
-            // Custom mobile list view
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <Button variant="outline" size="sm" onClick={goToPrev}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="text-center">
-                  <span className="font-medium">{dateRangeText}</span>
-                </div>
-                <Button variant="outline" size="sm" onClick={goToNext}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button variant="outline" size="sm" className="w-full mb-4" onClick={goToToday}>
-                Today
-              </Button>
-              
-              <div className="flex gap-2 mb-4">
-                <Button 
-                  variant={calendarView === "timeGridWeek" ? "default" : "outline"} 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => handleViewChange("timeGridWeek")}
-                >
-                  Week
-                </Button>
-                <Button 
-                  variant={calendarView === "dayGridMonth" ? "default" : "outline"} 
-                  size="sm" 
-                  className="flex-1" 
-                  onClick={() => handleViewChange("dayGridMonth")}
-                >
-                  Month
-                </Button>
-              </div>
-
-              {/* Custom list view for mobile */}
-              <div className="space-y-4">
-                {processEventsForCustomList.length === 0 ? (
-                  <div className="flex justify-center items-center h-64">
-                    <p className="text-gray-500">No time slots available for this period.</p>
-                  </div>
-                ) : (
-                  processEventsForCustomList.map((day) => (
-                    <div key={format(day.date, "yyyy-MM-dd")} className="mb-4">
-                      {/* Day header */}
-                      <div className="py-2 px-3 bg-slate-100 rounded-t-md">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold">{format(day.date, "EEEE")}</span>
-                          <span>{format(day.date, "MMMM d, yyyy")}</span>
-                        </div>
-                      </div>
-
-                      {/* Time slots for this day */}
-                      <div className="border border-slate-200 rounded-b-md">
-                        {day.slots
-                          .sort(
-                            (a, b) =>
-                              new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
-                          )
-                          .map((slot) => {
-                            const studentCount = slot.lessons?.length || 0;
-                            const studentNames = slot.lessons
-                              ?.map((lesson: Lesson) => lesson.student.user.name || "Unnamed Student")
-                              .join(", ");
-                            
-                            // Determine if the slot is booked
-                            const isBooked = studentCount > 0;
-
-                            return (
-                              <button
-                                key={slot.id}
-                                type="button"
-                                className={`p-3 border-b last:border-0 cursor-pointer hover:bg-slate-50 w-full text-left ${
-                                  isBooked ? "bg-emerald-50 hover:bg-emerald-100" : ""
-                                }`}
-                                onClick={() => handleMobileSlotClick(slot)}
-                                aria-label={`Time slot from ${new Date(
-                                  slot.startTime,
-                                ).getUTCHours()}:${String(
-                                  new Date(slot.startTime).getUTCMinutes(),
-                                ).padStart(2, "0")} to ${new Date(
-                                  slot.endTime,
-                                ).getUTCHours()}:${String(
-                                  new Date(slot.endTime).getUTCMinutes(),
-                                ).padStart(2, "0")}`}
-                              >
-                                <div className="flex justify-between">
-                                  <div className="font-medium">
-                                    {`${new Date(slot.startTime).getUTCHours()}:${String(
-                                      new Date(slot.startTime).getUTCMinutes(),
-                                    ).padStart(2, "0")} - 
-                                    ${new Date(slot.endTime).getUTCHours()}:${String(
-                                      new Date(slot.endTime).getUTCMinutes(),
-                                    ).padStart(2, "0")}`}
-                                  </div>
-                                  <div>{`${studentCount}/${slot.maxStudents}`}</div>
-                                </div>
-                                <div className="text-sm text-gray-600 flex justify-between">
-                                  <div>{slot.rink.name}</div>
-                                  {studentNames && <div className="italic">{studentNames}</div>}
-                                </div>
-                              </button>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            // Mobile calendar view
+            <MobileCalendarView
+              dateRangeText={dateRangeText}
+              calendarView={calendarView}
+              onViewChangeAction={handleViewChange}
+              onPrevAction={goToPrev}
+              onNextAction={goToNext}
+              onTodayAction={goToToday}
+              groupedSlots={processedEvents}
+              onSlotClickAction={handleMobileSlotClick}
+            />
           ) : (
-            // Desktop calendar view
-            <div>
-              <div className="p-4 flex justify-between items-center">
-                <div className="flex gap-2">
-                  <Button 
-                    variant={calendarView === "timeGridWeek" ? "default" : "outline"} 
-                    onClick={() => handleViewChange("timeGridWeek")}
-                  >
-                    Week
-                  </Button>
-                  <Button 
-                    variant={calendarView === "dayGridMonth" ? "default" : "outline"} 
-                    onClick={() => handleViewChange("dayGridMonth")}
-                  >
-                    Month
-                  </Button>
-                </div>
-              </div>
-              
-              <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView={calendarView}
-                initialDate={date}
-                events={events}
-                timeZone="UTC"
-                headerToolbar={{
-                  left: "prev,next today",
-                  center: "title",
-                  right: "",
-                }}
-                slotDuration="00:30:00"
-                slotMinTime="05:00:00" // Start at 5am
-                slotMaxTime="18:00:00" // End at 6pm
-                defaultTimedEventDuration="01:00:00"
-                allDaySlot={false}
-                editable={true}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={true}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                eventDrop={handleEventDrop}
-                height="700px"
-                displayEventTime={true}
-                eventTimeFormat={{
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  omitZeroMinute: false,
-                  hour12: false,
-                }}
-                datesSet={(dateInfo) => {
-                  const newDate = new Date(dateInfo.start);
-                  
-                  // Only update if our date state is significantly different
-                  const currentDate = new Date(date);
-                  const daysDiff = Math.abs(
-                    (newDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)
-                  );
-                  
-                  // Only update if date changed by more than 1 day
-                  if (daysDiff > 1) {
-                    setDate(newDate);
-                  }
-                }}
-                eventContent={(arg) => {
-                  const start = new Date(arg.event.startStr);
-                  const end = new Date(arg.event.endStr);
-
-                  // Use UTC hours to avoid timezone conversion
-                  const startFormatted = `${start.getUTCHours()}:${String(
-                    start.getUTCMinutes(),
-                  ).padStart(2, "0")}`;
-                  const endFormatted = `${end.getUTCHours()}:${String(end.getUTCMinutes()).padStart(
-                    2,
-                    "0",
-                  )}`;
-
-                  return {
-                    html: `
-                      <div class="fc-event-main-frame p-1">
-                        <div class="fc-event-time font-medium">${startFormatted} - ${endFormatted}</div>
-                        <div class="fc-event-title text-sm whitespace-normal">${arg.event.title}</div>
-                        <div class="fc-event-subtitle text-xs whitespace-normal">${arg.event.extendedProps.rinkName || ""}</div>
-                      </div>
-                    `,
-                  };
-                }}
-              />
-            </div>
+            // Desktop calendar view - now a separate component
+            <DesktopCalendarView
+              localizer={localizer}
+              events={events}
+              date={date}
+              calendarView={calendarView}
+              onSelectSlot={handleSelectSlot}
+              onSelectEvent={handleSelectEvent}
+              onEventDrop={handleEventDrop}
+              dateRangeText={dateRangeText}
+              onViewChange={handleViewChange}
+              onPrev={goToPrev}
+              onNext={goToNext}
+              onToday={goToToday}
+            />
           )}
         </CardContent>
       </Card>

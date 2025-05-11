@@ -1,14 +1,14 @@
 // src/app/(protected)/admin/students/page.tsx
 "use client";
 
-import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PendingApprovals } from "@/features/admin/components/students/management/PendingApprovals";
 import { StudentList } from "@/features/admin/components/students/management/StudentList";
+import { StudentForm } from "@/features/admin/components/students/profile/StudentForm";
 import { StudentProfile } from "@/features/admin/components/students/profile/StudentProfile";
 import { NewStudentDialog } from "@/features/admin/components/students/shared/NewStudentDialog";
-import { PendingApprovals } from "@/features/admin/components/students/management/PendingApprovals";
-import { StudentForm } from "@/features/admin/components/students/profile/StudentForm";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React from "react";
 
 export default function AdminStudentsPage() {
   const [selectedStudentId, setSelectedStudentId] = React.useState<string | null>(null);

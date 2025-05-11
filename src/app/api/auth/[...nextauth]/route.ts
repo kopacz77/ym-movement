@@ -1,8 +1,5 @@
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcrypt";
-import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import NextAuth from "next-auth";
 
 const handler = NextAuth(authOptions);
 

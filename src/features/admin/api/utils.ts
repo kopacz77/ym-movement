@@ -1,6 +1,6 @@
+import type { TRPCContext } from "@/lib/trpc";
 // src/features/admin/api/utils.ts
 import { TRPCError } from "@trpc/server";
-import type { TRPCContext } from "@/lib/trpc";
 
 export const validateTimeSlot = async (
   ctx: TRPCContext,
@@ -29,7 +29,7 @@ export const validateTimeSlot = async (
   }
 };
 
-export const validateBooking = async (ctx: TRPCContext, studentId: string, timeSlotId: string) => {
+export const validateBooking = async (ctx: TRPCContext, _studentId: string, timeSlotId: string) => {
   const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
     where: { id: timeSlotId },
     include: { lessons: true },

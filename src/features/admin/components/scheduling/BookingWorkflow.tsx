@@ -1,11 +1,9 @@
-import React from "react";
 import { Card } from "@/components/ui/card";
+import { localizer } from "@/lib/calendar/calendarLocalizer";
+import { Calendar } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import React from "react";
 import { BookingDialog } from "./BookingDialog";
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
-
 
 interface TimeSlot {
   id: string;
@@ -16,6 +14,12 @@ interface TimeSlot {
   };
 }
 
+interface SlotInfo {
+  start: Date;
+  end: Date;
+  slots: Date[];
+  action: "select" | "click" | "doubleClick";
+}
 
 export const CalendarInteractions = () => {
   const [selectedSlot, setSelectedSlot] = React.useState<TimeSlot | null>(null);
@@ -24,8 +28,8 @@ export const CalendarInteractions = () => {
   // Hardcoded student ID for this demo/admin flow
   const demoStudentId = "demo-student-1";
 
-  const handleSelectSlot = (slotInfo: DateSelectArg) => {
-    // Convert DateSelectArg to TimeSlot format
+  const handleSelectSlot = (slotInfo: SlotInfo) => {
+    // Convert SlotInfo to TimeSlot format
     const timeSlot: TimeSlot = {
       id: `new-slot-${Date.now()}`, // Generate a temporary ID
       startTime: slotInfo.start.toISOString(),
@@ -43,24 +47,21 @@ export const CalendarInteractions = () => {
     // Handle existing event click
   };
 
-  const handleDragEvent = () => {
-  };
-
   return (
     <Card className="p-4">
-      <FullCalendar
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
+      <Calendar
+        localizer={localizer}
         events={[]}
+        defaultView="week"
+        views={["week", "day"]}
         selectable={true}
-        select={handleSelectSlot}
-        eventClick={handleEventClick}
-        eventDrop={handleDragEvent}
-        businessHours={{
-          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-          startTime: "05:00",
-          endTime: "20:00",
-        }}
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleEventClick}
+        step={30}
+        timeslots={2}
+        min={new Date(0, 0, 0, 5, 0, 0)} // 5 AM
+        max={new Date(0, 0, 0, 20, 0, 0)} // 8 PM
+        style={{ height: 600 }}
       />
       {showBookingDialog && selectedSlot && (
         <BookingDialog

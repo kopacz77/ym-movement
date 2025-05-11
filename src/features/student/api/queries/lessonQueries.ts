@@ -1,7 +1,7 @@
-// src/features/student/api/queries/lessonQueries.ts
-import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
+// src/features/student/api/queries/lessonQueries.ts
+import { z } from "zod";
 
 export const lessonRouter = createTRPCRouter({
   getLesson: publicProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {

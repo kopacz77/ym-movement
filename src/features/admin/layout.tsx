@@ -2,7 +2,7 @@
 "use client";
 
 import { AdminSidebar } from "@/features/admin/components/layout/AdminSidebar";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * AdminLayout wraps all admin pages.

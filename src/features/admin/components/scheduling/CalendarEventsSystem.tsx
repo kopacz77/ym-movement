@@ -1,6 +1,15 @@
-// src/features/admin/components/scheduling/CalendarEventsSystem.tsx
-import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -9,14 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
+import { localizer } from "@/lib/calendar/calendarLocalizer";
+import { Calendar, Views } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { format, parse } from "date-fns";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import type { EventClickArg, EventDropArg } from "@fullcalendar/core";
-import type { EventResizeStopArg } from "@fullcalendar/interaction";
-import { Button } from "@/components/ui/button";
 
 interface CalendarEvent {
   id: string;
@@ -48,12 +55,45 @@ interface TimeSlot {
   [key: string]: unknown;
 }
 
+// React-Big-Calendar type for slot selection
+interface SelectSlotInfo {
+  start: Date;
+  end: Date;
+  slots: Date[] | string[];
+  action: "select" | "click" | "doubleClick";
+}
+
+type ViewType = "day" | "week" | "month";
+
+// Form state for the event edit modal
+interface EventFormState {
+  id: string;
+  title: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  maxStudents: number;
+}
+
 export const CalendarEventsSystem = () => {
   const [selectedRink, setSelectedRink] = useState<string>("MAIN_RINK");
-  const [viewMode, setViewMode] = useState<"timeGridDay" | "timeGridWeek" | "dayGridMonth">(
-    "timeGridWeek",
-  );
+  const [viewMode, setViewMode] = useState<ViewType>("week");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  
+  // State for modal dialog
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [eventForm, setEventForm] = useState<EventFormState>({
+    id: "",
+    title: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    maxStudents: 1,
+  });
 
   const utils = api.useContext();
 
@@ -71,7 +111,7 @@ export const CalendarEventsSystem = () => {
       const calendarEvents = data.map((slot: TimeSlot) => {
         const bookedStudents = slot.lessons?.length || 0;
         const isBooked = bookedStudents > 0;
-        
+
         return {
           id: slot.id,
           title: (slot.title as string) || `${bookedStudents}/${slot.maxStudents} Students`,
@@ -107,6 +147,7 @@ export const CalendarEventsSystem = () => {
         description: "The event has been updated successfully.",
       });
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+      setIsEditModalOpen(false);
     },
     onError: (err) => {
       toast.error("Update failed", {
@@ -137,6 +178,7 @@ export const CalendarEventsSystem = () => {
         description: "The event has been removed from the schedule.",
       });
       utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
+      setIsDeleteModalOpen(false);
     },
     onError: (err) => {
       toast.error("Deletion failed", {
@@ -146,7 +188,7 @@ export const CalendarEventsSystem = () => {
   });
 
   // This method checks for business hours and minimum duration
-  const validateEventMove = (start: Date, end: Date): boolean => {
+  const validateEventTimes = (start: Date, end: Date): { isValid: boolean; message?: string } => {
     // Simple validation - check for business hours and minimum duration
     const businessStartHour = 5; // 5 AM
     const businessEndHour = 18; // 6 PM
@@ -155,224 +197,371 @@ export const CalendarEventsSystem = () => {
     const endHour = end.getHours();
 
     if (startHour < businessStartHour || endHour > businessEndHour) {
-      return false;
+      return { 
+        isValid: false, 
+        message: "Events must be scheduled between 5 AM and 6 PM."
+      };
     }
 
     // Check minimum duration (15 minutes)
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
     if (durationMinutes < 15) {
-      return false;
+      return { 
+        isValid: false, 
+        message: "Events must be at least 15 minutes long."
+      };
     }
 
-    return true;
+    return { isValid: true };
   };
 
-  const handleEventDrop = async (info: EventDropArg) => {
-    // Convert the FullCalendar event to our CalendarEvent type
-    const droppedEvent = {
-      id: info.event.id,
-      title: info.event.title,
-      start: info.event.start as Date,
-      end: info.event.end as Date,
-      rinkId: info.event.extendedProps?.rinkId || selectedRink,
-      maxStudents: info.event.extendedProps?.maxStudents || 1,
-      currentStudents: info.event.extendedProps?.currentStudents || 0,
-      type: info.event.extendedProps?.type || "PRIVATE",
-      extendedProps: info.event.extendedProps,
-    };
+  // Handle event selection (click)
+  const handleEventSelect = useCallback((event: CalendarEvent) => {
+    setSelectedEvent(event);
+    
+    // Format dates for the form
+    const startDate = format(event.start, "yyyy-MM-dd");
+    const startTime = format(event.start, "HH:mm");
+    const endDate = format(event.end, "yyyy-MM-dd");
+    const endTime = format(event.end, "HH:mm");
+    
+    setEventForm({
+      id: event.id,
+      title: event.title,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      maxStudents: event.maxStudents,
+    });
+    
+    setIsEditModalOpen(true);
+  }, []);
 
-    // Check if the move is valid
-    const isValidMove = validateEventMove(     
-      droppedEvent.start,
-      droppedEvent.end,
+  // Handle slot selection (creating new events)
+  const handleSlotSelect = useCallback((slotInfo: SelectSlotInfo) => {
+    // Create a new event with default values
+    const startDate = format(slotInfo.start, "yyyy-MM-dd");
+    const startTime = format(slotInfo.start, "HH:mm");
+    const endDate = format(slotInfo.end, "yyyy-MM-dd");
+    const endTime = format(slotInfo.end, "HH:mm");
+    
+    setEventForm({
+      id: `new-${Date.now()}`,
+      title: "New Event",
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      maxStudents: 1,
+    });
+    
+    setSelectedEvent(null); // No existing event
+    setIsEditModalOpen(true);
+  }, []);
+
+  // Handle form updates
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEventForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmitForm = () => {
+    // Parse the form dates
+    const startDateTime = parse(
+      `${eventForm.startDate} ${eventForm.startTime}`,
+      "yyyy-MM-dd HH:mm",
+      new Date()
     );
-
-    if (!isValidMove) {
-      info.revert();
-      toast.error("Invalid move", {
-        description:
-          "This event cannot be moved to the selected time slot. Check business hours and minimum duration.",
+    
+    const endDateTime = parse(
+      `${eventForm.endDate} ${eventForm.endTime}`,
+      "yyyy-MM-dd HH:mm",
+      new Date()
+    );
+    
+    // Validate the times
+    const validation = validateEventTimes(startDateTime, endDateTime);
+    if (!validation.isValid) {
+      toast.error("Invalid event time", {
+        description: validation.message,
       });
       return;
     }
-
-    // Update event in database
-    try {
-      await updateTimeSlot.mutateAsync({
-        id: droppedEvent.id,
-        startTime: droppedEvent.start,
-        endTime: droppedEvent.end,
+    
+    if (selectedEvent) {
+      // Updating existing event
+      updateTimeSlot.mutate({
+        id: eventForm.id,
+        startTime: startDateTime,
+        endTime: endDateTime,
       });
-    } catch {
-      info.revert();
-      // Error is already handled by the mutation
-    }
-  };
-
-  const handleEventResize = async (info: EventResizeStopArg) => {
-    // Convert the FullCalendar event to our CalendarEvent type
-    const resizedEvent = {
-      id: info.event.id,
-      title: info.event.title,
-      start: info.event.start as Date,
-      end: info.event.end as Date,
-      rinkId: info.event.extendedProps?.rinkId || selectedRink,
-      maxStudents: info.event.extendedProps?.maxStudents || 1,
-      currentStudents: info.event.extendedProps?.currentStudents || 0,
-      type: info.event.extendedProps?.type || "PRIVATE",
-      extendedProps: info.event.extendedProps,
-    };
-
-    // Check if the resize is valid
-    const isValidResize = validateEventMove(
-      resizedEvent.start,
-      resizedEvent.end,
-    );
-
-    if (!isValidResize) {
-      // Since we can't use revert(), refresh the calendar to undo the change
-      toast.error("Invalid duration", {
-        description:
-          "The event cannot be resized to this duration. Check business hours and minimum duration.",
-      });
-
-      // Refresh the events to revert the change
-      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
-      return;
-    }
-
-    // Update event in database
-    try {
-      await updateTimeSlot.mutateAsync({
-        id: resizedEvent.id,
-        startTime: resizedEvent.start,
-        endTime: resizedEvent.end,
-      });
-    } catch {
-      // Error is already handled by the mutation
-      // Refresh the events to revert the change
-      utils.admin.schedule.getTimeSlots.invalidate({ rinkId: selectedRink });
-    }
-  };
-
-  const handleDateSelect = async (selectInfo: {
-    start: Date;
-    end: Date;
-    view: { calendar: { unselect: () => void } };
-  }) => {
-    const title = prompt("Please enter a title for the new event:");
-    if (!title) {
-      return; // User cancelled
-    }
-
-    try {
-      await createTimeSlot.mutateAsync({
+    } else {
+      // Creating new event
+      createTimeSlot.mutate({
         rinkId: selectedRink,
-        startTime: selectInfo.start,
-        endTime: selectInfo.end,
-        maxStudents: 1,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        maxStudents: eventForm.maxStudents,
         isActive: true,
       });
-
-      selectInfo.view.calendar.unselect(); // Clear selection
-    } catch {
-      // Error is already handled by the mutation
+      setIsEditModalOpen(false);
     }
   };
 
-  const handleEventClick = (info: EventClickArg) => {
-    if (confirm(`Are you sure you want to delete '${info.event.title}'?`)) {
+  // Handle delete confirmation
+  const handleDeleteClick = () => {
+    if (selectedEvent) {
+      setIsEditModalOpen(false);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  // Confirm delete
+  const confirmDelete = () => {
+    if (selectedEvent) {
       deleteTimeSlot.mutate({
-        id: info.event.id,
+        id: selectedEvent.id,
       });
     }
+  };
+
+  // Custom event styling
+  const eventPropGetter = useCallback((event: CalendarEvent) => {
+    return {
+      style: {
+        backgroundColor: event.color,
+        borderColor: event.color,
+      },
+    };
+  }, []);
+
+  // Map view types between FullCalendar and react-big-calendar
+  const mapViewType = (type: ViewType) => {
+    switch (type) {
+      case "day":
+        return Views.DAY;
+      case "month":
+        return Views.MONTH;
+      default:
+        return Views.WEEK;
+    }
+  };
+
+  // Handle view change
+  const handleViewChange = (newView: ViewType) => {
+    setViewMode(newView);
   };
 
   return (
-    <Card>
-      <CardContent>
-        <div className="flex gap-4 mb-4 items-center">
-          <Select value={selectedRink} onValueChange={setSelectedRink}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select rink" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="MAIN_RINK">Main Rink</SelectItem>
-              <SelectItem value="PRACTICE_RINK">Practice Rink</SelectItem>
-              <SelectItem value="DANCE_STUDIO">Dance Studio</SelectItem>
-            </SelectContent>
-          </Select>
+    <>
+      <Card>
+        <CardContent>
+          <div className="flex gap-4 mb-4 items-center">
+            <Select value={selectedRink} onValueChange={setSelectedRink}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select rink" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MAIN_RINK">Main Rink</SelectItem>
+                <SelectItem value="PRACTICE_RINK">Practice Rink</SelectItem>
+                <SelectItem value="DANCE_STUDIO">Dance Studio</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select
-            value={viewMode}
-            onValueChange={(value: "timeGridDay" | "timeGridWeek" | "dayGridMonth") =>
-              setViewMode(value)
-            }
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select view" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="timeGridDay">Day View</SelectItem>
-              <SelectItem value="timeGridWeek">Week View</SelectItem>
-              <SelectItem value="dayGridMonth">Month View</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select value={viewMode} onValueChange={(value: ViewType) => handleViewChange(value)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select view" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="day">Day View</SelectItem>
+                <SelectItem value="week">Week View</SelectItem>
+                <SelectItem value="month">Month View</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Button
-            onClick={() =>
-              utils.admin.schedule.getTimeSlots.invalidate({
-                rinkId: selectedRink,
-              })
-            }
-            disabled={eventsLoading}
-            variant="outline"
-          >
-            Refresh
-          </Button>
-        </div>
+            <Button
+              onClick={() =>
+                utils.admin.schedule.getTimeSlots.invalidate({
+                  rinkId: selectedRink,
+                })
+              }
+              disabled={eventsLoading}
+              variant="outline"
+            >
+              Refresh
+            </Button>
+          </div>
 
-        <div className="h-[600px]">
-          {eventsLoading ? (
-            <div className="flex items-center justify-center h-full">Loading events...</div>
-          ) : (
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView={viewMode}
-              events={events}
-              timeZone="UTC"
-              now={new Date().toISOString()}
-              editable={true}
-              selectable={true}
-              eventDrop={handleEventDrop}
-              eventResize={handleEventResize}
-              eventClick={handleEventClick}
-              select={handleDateSelect}
-              businessHours={{
-                daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-                startTime: "05:00",
-                endTime: "18:00",
-              }}
-              headerToolbar={{
-                left: "prev,next today",
-                center: "title",
-                right: "timeGridDay,timeGridWeek,dayGridMonth",
-              }}
-              height="100%"
-              slotDuration="00:15:00"
-              slotLabelInterval="01:00:00"
-              allDaySlot={false}
-              nowIndicator={true}
-              eventTimeFormat={{
-                hour: "2-digit",
-                minute: "2-digit",
-                meridiem: false,
-                hour12: false,
-              }}
-            />
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          <div className="h-[600px]">
+            {eventsLoading ? (
+              <div className="flex items-center justify-center h-full">Loading events...</div>
+            ) : (
+              <Calendar
+                localizer={localizer}
+                events={events}
+                view={mapViewType(viewMode)}
+                onView={(view) => setViewMode(view === Views.DAY ? "day" : view === Views.MONTH ? "month" : "week")}
+                views={[Views.DAY, Views.WEEK, Views.MONTH]}
+                selectable
+                onSelectEvent={handleEventSelect}
+                onSelectSlot={handleSlotSelect}
+                eventPropGetter={eventPropGetter}
+                step={15}
+                timeslots={4}
+                min={new Date(0, 0, 0, 5, 0, 0)} // 5 AM
+                max={new Date(0, 0, 0, 18, 0, 0)} // 6 PM
+                showMultiDayTimes
+                getNow={() => new Date()}
+                style={{ height: "100%" }}
+                popup
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Edit Event Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{selectedEvent ? "Edit Event" : "Create Event"}</DialogTitle>
+            <DialogDescription>
+              {selectedEvent 
+                ? "Update the event details below."
+                : "Fill in the details to create a new event."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                name="title"
+                value={eventForm.title}
+                onChange={handleFormChange}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="startDate" className="text-right">
+                Start Date
+              </Label>
+              <Input
+                id="startDate"
+                name="startDate"
+                type="date"
+                value={eventForm.startDate}
+                onChange={handleFormChange}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="startTime" className="text-right">
+                Start Time
+              </Label>
+              <Input
+                id="startTime"
+                name="startTime"
+                type="time"
+                value={eventForm.startTime}
+                onChange={handleFormChange}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="endDate" className="text-right">
+                End Date
+              </Label>
+              <Input
+                id="endDate"
+                name="endDate"
+                type="date"
+                value={eventForm.endDate}
+                onChange={handleFormChange}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="endTime" className="text-right">
+                End Time
+              </Label>
+              <Input
+                id="endTime"
+                name="endTime"
+                type="time"
+                value={eventForm.endTime}
+                onChange={handleFormChange}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="maxStudents" className="text-right">
+                Max Students
+              </Label>
+              <Input
+                id="maxStudents"
+                name="maxStudents"
+                type="number"
+                min="1"
+                max="10"
+                value={eventForm.maxStudents}
+                onChange={handleFormChange}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="flex justify-between">
+            {selectedEvent && (
+              <Button variant="destructive" onClick={handleDeleteClick}>
+                Delete
+              </Button>
+            )}
+            <div className="space-x-2">
+              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" onClick={handleSubmitForm}>
+                {selectedEvent ? "Save Changes" : "Create Event"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

@@ -1,14 +1,14 @@
 // src/app/(protected)/student/settings/page.tsx
 "use client";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { BellRing, Lock, PaintBucket, Save } from "lucide-react";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
+import { BellRing, Lock, PaintBucket, Save } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function StudentSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);

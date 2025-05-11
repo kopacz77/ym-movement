@@ -1,8 +1,8 @@
-// src/app/api/auth/forgot-password/route.ts
-import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { generateResetToken } from "@/lib/auth";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
+// src/app/api/auth/forgot-password/route.ts
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {

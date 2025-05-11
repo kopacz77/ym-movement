@@ -31,10 +31,10 @@ export async function createNotification({
 
 export async function createNotificationForMultipleUsers(
   userIds: string[],
-  { title, message, type = "INFO", link }: Omit<CreateNotificationParams, "userId">
+  { title, message, type = "INFO", link }: Omit<CreateNotificationParams, "userId">,
 ) {
   return await prisma.notification.createMany({
-    data: userIds.map(userId => ({
+    data: userIds.map((userId) => ({
       userId,
       title,
       message,

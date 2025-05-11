@@ -1,11 +1,11 @@
 // src/features/admin/components/payments/PaymentDetail.tsx
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, FileText, Send, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/date";
 import { formatCurrency } from "@/lib/utils";
-import type { PaymentStatus, PaymentMethod, LessonType } from "@prisma/client";
+import type { LessonType, PaymentMethod, PaymentStatus } from "@prisma/client";
+import { Check, ExternalLink, FileText, Send } from "lucide-react";
 
 // Updated type definition to handle null values from database
 interface Payment {

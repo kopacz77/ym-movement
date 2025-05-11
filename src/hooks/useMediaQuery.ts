@@ -1,7 +1,7 @@
 // src/hooks/useMediaQuery.ts
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Custom hook for responsive media queries

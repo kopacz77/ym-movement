@@ -1,6 +1,6 @@
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import React from "react";
 
 interface ValidationRule {
   id: string;

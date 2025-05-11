@@ -1,7 +1,7 @@
 "use client";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * AdminBreadcrumbs renders a breadcrumb navigation for admin pages.

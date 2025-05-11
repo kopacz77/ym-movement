@@ -1,10 +1,10 @@
 // src/features/admin/api/queries/settingsQueries.ts
 
-import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
-import { TRPCError } from "@trpc/server";
 import { Level, RinkArea } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 // Define zod schema for our settings
 const operationalSettingsSchema = z.object({

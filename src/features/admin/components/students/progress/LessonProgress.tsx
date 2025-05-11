@@ -1,9 +1,8 @@
 // features/admin/components/students/progress/LessonProgress.tsx
 "use client";
 
-import { useEffect, type FC } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,9 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { format } from "date-fns";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { type FC, useEffect } from "react";
+import { toast } from "sonner";
 
 interface LessonProgressProps {
   studentId: string;
@@ -102,11 +102,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
       <CardContent>
         {isLoading ? (
           <div className="text-center py-4">Loading progress...</div>
-        ) : !studentLessons?.length ? (
-          <div className="text-center py-4 text-muted-foreground">
-            No lesson progress recorded yet
-          </div>
-        ) : (
+        ) : studentLessons?.length ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -147,6 +143,10 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
               ))}
             </TableBody>
           </Table>
+        ) : (
+          <div className="text-center py-4 text-muted-foreground">
+            No lesson progress recorded yet
+          </div>
         )}
       </CardContent>
     </Card>

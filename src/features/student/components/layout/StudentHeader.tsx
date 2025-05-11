@@ -1,14 +1,6 @@
 // src/features/student/components/layout/StudentHeader.tsx
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/useMediaQuery";
-import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +12,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { LogOut } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const StudentHeader = () => {
   const router = useRouter();
@@ -70,10 +70,10 @@ export const StudentHeader = () => {
           <div className="hidden md:flex items-center gap-2 mr-4">
             <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
           </div>
-          
+
           {/* Notifications Popover */}
           <NotificationsPopover />
-          
+
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
               <Button

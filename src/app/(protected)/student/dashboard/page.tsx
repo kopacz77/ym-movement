@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UpcomingLessons } from "@/features/student/components/dashboard/UpcomingLessons";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LessonSummary } from "@/features/student/components/dashboard/LessonSummary";
-import Link from "next/link";
+import { UpcomingLessons } from "@/features/student/components/dashboard/UpcomingLessons";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import Link from "next/link";
 
 export default function StudentDashboardPage() {
   const user = useCurrentUser();

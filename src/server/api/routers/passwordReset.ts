@@ -1,0 +1,113 @@
+import {
+  consumePasswordResetToken,
+  createPasswordResetToken,
+  verifyPasswordResetToken,
+} from "@/lib/auth-tokens";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { TRPCError } from "@trpc/server";
+import { hash } from "bcrypt";
+// src/server/api/routers/passwordReset.ts
+import { z } from "zod";
+
+export const passwordResetRouter = createTRPCRouter({
+  // Verify a password reset token
+  verifyToken: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        const user = await verifyPasswordResetToken(input.token);
+
+        if (!user) {
+          return { valid: false, email: null };
+        }
+
+        return {
+          valid: true,
+          email: user.email,
+          userId: user.id,
+        };
+      } catch (error) {
+        console.error("Error verifying reset token:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to verify reset token",
+        });
+      }
+    }),
+
+  // Reset password with token
+  resetPassword: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { token, password } = input;
+
+      try {
+        // Verify and consume the token
+        const userId = await consumePasswordResetToken(token);
+
+        if (!userId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid or expired token",
+          });
+        }
+
+        // Hash the new password
+        const hashedPassword = await hash(password, 10);
+
+        // Update the user's password
+        await ctx.prisma.user.update({
+          where: { id: userId },
+          data: {
+            password: hashedPassword,
+            emailVerified: new Date(), // Mark email as verified since they accessed it
+          },
+        });
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error resetting password:", error);
+
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to reset password",
+        });
+      }
+    }),
+
+  // Request password reset email
+  requestReset: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Find the user by email
+        const user = await ctx.prisma.user.findUnique({
+          where: { email: input.email },
+        });
+
+        // Always return success, even if user doesn't exist (for security)
+        if (!user) {
+          return { success: true };
+        }
+
+        // Create a password reset token and send email
+        await createPasswordResetToken(user.id, user.email, user.name);
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error requesting password reset:", error);
+
+        // Still return success to not reveal if the user exists
+        return { success: true };
+      }
+    }),
+});

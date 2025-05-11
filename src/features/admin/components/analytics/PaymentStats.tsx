@@ -1,12 +1,12 @@
 // Create src/features/admin/components/analytics/PaymentStats.tsx
 "use client";
 
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
-import { CreditCard, CheckCircle, Clock } from "lucide-react";
+import { CheckCircle, Clock, CreditCard } from "lucide-react";
+import React from "react";
+import { toast } from "sonner";
 
 export const PaymentStats = () => {
   const { data, isLoading, error } = api.admin.payment.getPaymentStats.useQuery();

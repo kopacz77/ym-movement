@@ -54,9 +54,9 @@ export default function TermsOfServicePage() {
 
         <h2 className="mt-8 text-xl font-semibold">5. Payment Terms</h2>
         <p>
-          Payment is required after completion of the lesson. We accept cash and electronic payments such as
-          Venmo, Paypal, Zelle. Prices are subject to change, but changes will not affect already booked
-          lessons. Refunds are available according to our cancellation policy.
+          Payment is required after completion of the lesson. We accept cash and electronic payments
+          such as Venmo, Paypal, Zelle. Prices are subject to change, but changes will not affect
+          already booked lessons. Refunds are available according to our cancellation policy.
         </p>
         <p>
           For recurring lessons, parents/guardians will be notified before any automatic charges are

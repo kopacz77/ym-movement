@@ -1,10 +1,8 @@
 // src/features/admin/components/students/profile/StudentProfile.tsx
 "use client";
-import React, { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,11 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
-import { Pencil, Mail, Phone, Award, Loader2 } from "lucide-react";
-import { format } from "date-fns";
 import type { LessonStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
+import { format } from "date-fns";
+import { Award, Loader2, Mail, Pencil, Phone } from "lucide-react";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 import { StudentPricingForm } from "../StudentPricingForm";
 
 // Define types to replace 'any'
@@ -78,12 +78,9 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
 
   // Add queries for pricing data (only fetch when pricing tab is active)
-  const { data: defaultPricing, isLoading: isDefaultPricingLoading } = 
-    api.admin.student.getDefaultPricing.useQuery(
-      undefined,
-      { enabled: activeTab === "pricing" }
-    );
-  
+  const { data: defaultPricing, isLoading: isDefaultPricingLoading } =
+    api.admin.student.getDefaultPricing.useQuery(undefined, { enabled: activeTab === "pricing" });
+
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {

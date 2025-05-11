@@ -1,11 +1,7 @@
 // src/app/auth/signup/page.tsx
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -14,8 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox"; // Added import for Checkbox
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -24,7 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Level } from "@prisma/client";
-import { Checkbox } from "@/components/ui/checkbox"; // Added import for Checkbox
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const [name, setName] = useState("");

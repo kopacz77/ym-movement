@@ -1,0 +1,161 @@
+import { sendApprovalEmail } from "@/lib/email";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { TRPCError } from "@trpc/server";
+// src/features/admin/api/queries/student/approvalQueries.ts
+import { z } from "zod";
+
+export const approvalQueries = createTRPCRouter({
+  // Query: Get pending approvals
+  getPendingApprovals: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      console.log("Fetching pending approvals");
+
+      // For clarity, let's use Prisma's built-in querying instead of raw SQL
+      const pendingStudents = await ctx.prisma.student.findMany({
+        where: { isApproved: false },
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      });
+
+      // Transform to match the expected format
+      const formattedStudents = pendingStudents.map((student) => ({
+        id: student.id,
+        user: {
+          name: student.user.name || "Unnamed",
+          email: student.user.email,
+        },
+        status: "PENDING" as const,
+        createdAt: student.createdAt,
+      }));
+
+      console.log(`Found ${formattedStudents.length} pending approvals`);
+      return { students: formattedStudents };
+    } catch (error) {
+      console.error("Error fetching pending approvals:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch pending approvals",
+        cause: error,
+      });
+    }
+  }),
+
+  // Mutation: Approve student
+  approveStudent: protectedProcedure
+    .input(z.object({ studentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(`Approving student with ID: ${input.studentId}`);
+        // Find the student first
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          include: {
+            user: true,
+          },
+        });
+
+        if (!student) {
+          console.log(`Student not found: ${input.studentId}`);
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Update the student with approval details
+        await ctx.prisma.student.update({
+          where: { id: input.studentId },
+          data: {
+            isApproved: true,
+            approvedAt: new Date(),
+            approvedById: ctx.session?.user?.id || "admin001",
+          },
+        });
+
+        // Fetch the updated student with user info
+        const updatedStudent = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          include: {
+            user: true,
+          },
+        });
+
+        if (!updatedStudent) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found after update",
+          });
+        }
+
+        // Send approval email
+        try {
+          if (updatedStudent.user?.email) {
+            await sendApprovalEmail(
+              updatedStudent.user.email,
+              updatedStudent.user.name || "Student",
+            );
+            console.log(`Approval email sent to ${updatedStudent.user.email}`);
+          } else {
+            console.error("Cannot send approval email: user or email is missing");
+          }
+        } catch (emailError) {
+          console.error("Failed to send approval email:", emailError);
+          // We still return success even if email fails
+        }
+
+        return updatedStudent;
+      } catch (error) {
+        console.error("Error approving student:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to approve student",
+          cause: error,
+        });
+      }
+    }),
+
+  // Mutation: Reject student
+  rejectStudent: protectedProcedure
+    .input(z.object({ studentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(`Rejecting student with ID: ${input.studentId}`);
+        // Find the student first
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          include: {
+            user: true,
+          },
+        });
+
+        if (!student) {
+          console.log(`Student not found: ${input.studentId}`);
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Delete the student record (this will cascade to user via onDelete in schema)
+        await ctx.prisma.student.delete({
+          where: { id: input.studentId },
+        });
+
+        return { success: true, message: "Student registration rejected successfully" };
+      } catch (error) {
+        console.error("Error rejecting student:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to reject student",
+          cause: error,
+        });
+      }
+    }),
+});

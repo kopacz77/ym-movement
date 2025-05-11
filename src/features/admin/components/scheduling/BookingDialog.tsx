@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -11,12 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { format } from "date-fns";
-import { Check, Clock, Calendar, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { LessonType, PaymentMethod } from "@prisma/client";
+import { format } from "date-fns";
+import { Calendar, Check, Clock, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Format a UTC date string to display format
 function formatTimeDisplay(dateStr: string) {

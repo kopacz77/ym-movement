@@ -1,7 +1,6 @@
 // Updated src/features/admin/components/analytics/RevenueChart.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -10,18 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/lib/api";
+import { formatCurrency } from "@/lib/utils";
+import React, { useState, useEffect } from "react";
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
-import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { formatCurrency } from "@/lib/utils";
 
 type TimeRange = "week" | "month" | "year";
 

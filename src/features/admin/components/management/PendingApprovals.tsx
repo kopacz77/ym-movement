@@ -1,13 +1,13 @@
 // src/features/admin/components/management/PendingApprovals.tsx
 "use client";
 
-import React, { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
 import { formatDate } from "@/lib/date";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 
 // Define the Student type
 interface Student {

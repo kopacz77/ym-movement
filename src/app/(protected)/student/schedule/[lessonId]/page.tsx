@@ -1,11 +1,11 @@
 // app/(protected)/student/schedule/[lessonId]/page.tsx
 
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Lesson Details",
@@ -17,12 +17,12 @@ function formatTime(date: Date): string {
   // Use UTC hours and minutes
   const hours = date.getUTCHours();
   const minutes = date.getUTCMinutes();
-  
+
   // Format in AM/PM
-  const ampm = hours >= 12 ? 'AM' : 'AM';
+  const ampm = hours >= 12 ? "AM" : "AM";
   const hour12 = hours % 12 || 12; // Convert 0 to 12
-  
-  return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+  return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
 }
 
 // Function to format date
@@ -93,7 +93,8 @@ export default async function LessonDetailsPage({
               <div>
                 <h3 className="font-medium">Date & Time</h3>
                 <p className="text-gray-600">
-                  {formatDate(startTime)}, {formatTime(startTime)} - {formatTime(endTime)} ({duration} minutes)
+                  {formatDate(startTime)}, {formatTime(startTime)} - {formatTime(endTime)} (
+                  {duration} minutes)
                 </p>
               </div>
 

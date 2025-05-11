@@ -1,6 +1,14 @@
 // src/features/admin/components/students/management/StudentList.tsx
 "use client";
-import React, { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,18 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 import type { Level } from "@prisma/client";
 import { MoreHorizontal, Search } from "lucide-react";
-import { api } from "@/lib/api";
+import React, { useEffect } from "react";
 import { toast } from "sonner";
 
 interface StudentListProps {

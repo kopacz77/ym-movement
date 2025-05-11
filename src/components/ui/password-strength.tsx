@@ -1,7 +1,7 @@
 // src/components/ui/password-strength.tsx
 "use client";
-import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
 
 interface PasswordStrengthProps {
   password: string;

@@ -1,10 +1,8 @@
 // src/app/(protected)/admin/settings/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,10 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -26,10 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Clock, DollarSign, MapPin, Save, Lock } from "lucide-react";
-import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
-import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DefaultPricingSettings } from "@/features/admin/components/management/DefaultPricingSettings";
+import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
+import { api } from "@/lib/api";
+import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
+import { Clock, DollarSign, Lock, MapPin, Save } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 // Define interfaces for the settings
 interface OperationalSettings {

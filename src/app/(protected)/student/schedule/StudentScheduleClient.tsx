@@ -1,13 +1,13 @@
 // app/(protected)/student/schedule/StudentScheduleClient.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LessonCard } from "@/features/student/components/schedule/LessonCard";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Define the type that exactly matches what LessonCard expects
 type LessonStatus = "SCHEDULED" | "CANCELLED" | "COMPLETED";
@@ -91,20 +91,26 @@ export default function StudentSchedulePage() {
   useEffect(() => {
     if (lessons && lessons.length > 0) {
       console.log(`[CLIENT] Received ${lessons.length} total lessons from API`);
-      
-      const scheduled = lessons.filter(lesson => lesson.status === "SCHEDULED");
-      const completed = lessons.filter(lesson => lesson.status === "COMPLETED");
-      const cancelled = lessons.filter(lesson => lesson.status === "CANCELLED");
-      
-      console.log(`[CLIENT] Lessons breakdown - Scheduled: ${scheduled.length}, Completed: ${completed.length}, Cancelled: ${cancelled.length}`);
-      
+
+      const scheduled = lessons.filter((lesson) => lesson.status === "SCHEDULED");
+      const completed = lessons.filter((lesson) => lesson.status === "COMPLETED");
+      const cancelled = lessons.filter((lesson) => lesson.status === "CANCELLED");
+
+      console.log(
+        `[CLIENT] Lessons breakdown - Scheduled: ${scheduled.length}, Completed: ${completed.length}, Cancelled: ${cancelled.length}`,
+      );
+
       // Log each lesson's basic info for debugging
       lessons.forEach((lesson, idx) => {
         const lessonDate = new Date(lesson.startTime);
         const now = new Date();
         const isPastDate = lessonDate < now;
-        
-        console.log(`[CLIENT] Lesson ${idx + 1} (${lesson.id}): status=${lesson.status}, date=${lessonDate.toISOString()}, isPastDate=${isPastDate}`);
+
+        console.log(
+          `[CLIENT] Lesson ${idx + 1} (${lesson.id}): status=${
+            lesson.status
+          }, date=${lessonDate.toISOString()}, isPastDate=${isPastDate}`,
+        );
       });
     }
   }, [lessons]);
@@ -113,23 +119,25 @@ export default function StudentSchedulePage() {
   const typedLessons = (lessons || []) as Lesson[];
 
   // Fixed filter for upcoming lessons - only show SCHEDULED lessons with future dates
-  const upcomingLessons = typedLessons.filter(lesson => {
+  const upcomingLessons = typedLessons.filter((lesson) => {
     const lessonDate = new Date(lesson.startTime);
     const now = new Date();
     return lessonDate > now && lesson.status === "SCHEDULED";
   });
 
   // Fixed filter for past lessons - show completed, cancelled, or past-date lessons
-  const pastLessons = typedLessons.filter(lesson => {
+  const pastLessons = typedLessons.filter((lesson) => {
     const lessonDate = new Date(lesson.startTime);
     const now = new Date();
     const isPastDate = lessonDate <= now;
     const isNonScheduled = lesson.status === "COMPLETED" || lesson.status === "CANCELLED";
-    
+
     return isPastDate || isNonScheduled;
   });
 
-  console.log(`[CLIENT] Filtered ${upcomingLessons.length} upcoming lessons and ${pastLessons.length} past lessons`);
+  console.log(
+    `[CLIENT] Filtered ${upcomingLessons.length} upcoming lessons and ${pastLessons.length} past lessons`,
+  );
 
   // Convert the API Lesson to the expected LessonWithDetails format
   const transformToLessonWithDetails = (lesson: Lesson): LessonWithDetails => {

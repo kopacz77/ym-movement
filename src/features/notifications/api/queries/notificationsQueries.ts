@@ -1,7 +1,7 @@
-// src/features/notifications/api/queries/notificationsQueries.ts
-import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
+// src/features/notifications/api/queries/notificationsQueries.ts
+import { z } from "zod";
 
 export const notificationsRouter = createTRPCRouter({
   getNotifications: protectedProcedure.query(async ({ ctx }) => {
@@ -53,7 +53,9 @@ export const notificationsRouter = createTRPCRouter({
 
         return updatedNotification;
       } catch (error) {
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

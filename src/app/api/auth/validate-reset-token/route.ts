@@ -1,6 +1,6 @@
+import { prisma } from "@/lib/prisma";
 // src/app/api/auth/validate-reset-token/route.ts
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {

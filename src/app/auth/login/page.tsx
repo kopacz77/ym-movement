@@ -1,12 +1,6 @@
 // src/app/auth/login/page.tsx
 "use client";
-import { useState } from "react";
-import type { FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -15,7 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -112,12 +112,14 @@ export default function LoginPage() {
                 </Link>
               </div>
             </div>
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading}
               onClick={(e) => {
-                if (isLoading) { e.preventDefault(); }
+                if (isLoading) {
+                  e.preventDefault();
+                }
               }}
             >
               {isLoading ? "Loading..." : "Login"}

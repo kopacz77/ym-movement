@@ -1,8 +1,8 @@
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc"; // Added protectedProcedure
+import { LessonStatus } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/profileQueries.ts
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/lib/trpc"; // Added protectedProcedure
-import { TRPCError } from "@trpc/server";
-import { LessonStatus } from "@prisma/client";
 
 // Define a proper type for the query filters
 interface LessonQueryFilters {
@@ -42,7 +42,9 @@ export const profileRouter = createTRPCRouter({
         return student;
       } catch (error) {
         console.error("Error fetching student profile:", error);
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch student profile",
@@ -148,43 +150,46 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-    getStudentPricing: protectedProcedure
-  .input(z.object({ studentId: z.string() }))
-  .query(async ({ ctx, input }) => {
-    try {
-      const student = await ctx.prisma.student.findUnique({
-        where: { id: input.studentId },
-        select: {
-          customPricingEnabled: true,
-          privateLessonPrice: true,
-          choreographyPrice: true,
-        }
-      });
+  getStudentPricing: protectedProcedure
+    .input(z.object({ studentId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          select: {
+            customPricingEnabled: true,
+            privateLessonPrice: true,
+            choreographyPrice: true,
+          },
+        });
 
-      if (!student) {
+        if (!student) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Get default pricing for reference
+        const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
+
+        return {
+          customPricingEnabled: student.customPricingEnabled,
+          privateLessonPrice:
+            student.privateLessonPrice ?? defaultPricing?.privateLessonPrice ?? 75,
+          choreographyPrice: student.choreographyPrice ?? defaultPricing?.choreographyPrice ?? 90,
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Student not found"
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch student pricing",
+          cause: error,
         });
       }
-
-      // Get default pricing for reference
-      const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
-
-      return {
-        customPricingEnabled: student.customPricingEnabled,
-        privateLessonPrice: student.privateLessonPrice ?? defaultPricing?.privateLessonPrice ?? 75,
-        choreographyPrice: student.choreographyPrice ?? defaultPricing?.choreographyPrice ?? 90,
-      };
-    } catch (error) {
-      if (error instanceof TRPCError) { throw error; }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch student pricing",
-        cause: error,
-      });
-    }
-  }),
+    }),
 
   getStudentLessonStats: publicProcedure
     .input(z.object({ studentId: z.string() }))
@@ -244,7 +249,9 @@ export const profileRouter = createTRPCRouter({
         };
       } catch (error) {
         console.error("Error calculating student lesson stats:", error);
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to calculate student lesson stats",

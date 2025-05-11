@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/lib/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc";
+import { LessonStatus, LessonType, Level, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { PaymentStatus, LessonStatus, LessonType, RinkArea, Level } from "@prisma/client";
-import { startOfMonth, endOfMonth } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
+import { z } from "zod";
 
 // Define proper type interfaces for our data structures
 interface ActivityData {

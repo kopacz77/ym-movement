@@ -1,10 +1,10 @@
 // src/app/(protected)/admin/layout.tsx
 "use client";
 
+import { MobileNavigation } from "@/components/mobile-navigation";
 import { AdminHeader } from "@/features/admin/components/layout/AdminHeader";
 import { AdminSidebar } from "@/features/admin/components/layout/AdminSidebar";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { MobileNavigation } from "@/components/mobile-navigation";
 
 export default function AdminLayout({
   children,

@@ -1,19 +1,19 @@
 // src/features/notifications/components/NotificationsPopover.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
+import { Bell } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const NotificationsPopover = () => {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
-  
+
   // Fetch notifications from API
   const {
     data: notifications = [],
@@ -74,10 +74,16 @@ export const NotificationsPopover = () => {
   const formatRelativeTime = (date: Date) => {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
-    
-    if (diffInSeconds < 60) { return 'just now'; }
-    if (diffInSeconds < 3600) { return `${Math.floor(diffInSeconds / 60)}m ago`; }
-    if (diffInSeconds < 86400) { return `${Math.floor(diffInSeconds / 3600)}h ago`; }
+
+    if (diffInSeconds < 60) {
+      return "just now";
+    }
+    if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)}m ago`;
+    }
+    if (diffInSeconds < 86400) {
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    }
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 
@@ -93,7 +99,7 @@ export const NotificationsPopover = () => {
         <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge 
+            <Badge
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500"
               variant="destructive"
             >
@@ -106,26 +112,29 @@ export const NotificationsPopover = () => {
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-medium">Notifications</h3>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead} disabled={markAllAsRead.isPending}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              disabled={markAllAsRead.isPending}
+            >
               Mark all as read
             </Button>
           )}
         </div>
         {isLoading ? (
-          <div className="p-4 text-center">
-            Loading notifications...
-          </div>
+          <div className="p-4 text-center">Loading notifications...</div>
         ) : notifications.length === 0 ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            No notifications
-          </div>
+          <div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
         ) : (
           <ScrollArea className="h-[300px]">
             <div className="divide-y">
               {notifications.map((notification) => (
-                <div 
-                  key={notification.id} 
-                  className={`p-4 cursor-pointer hover:bg-muted ${notification.isRead ? '' : 'bg-blue-50'}`}
+                <div
+                  key={notification.id}
+                  className={`p-4 cursor-pointer hover:bg-muted ${
+                    notification.isRead ? "" : "bg-blue-50"
+                  }`}
                   onClick={() => handleMarkAsRead(notification.id)}
                   onKeyDown={(e) => handleNotificationKeyDown(e, notification.id)}
                   tabIndex={0}

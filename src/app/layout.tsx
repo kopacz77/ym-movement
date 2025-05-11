@@ -1,26 +1,27 @@
 // src/app/layout.tsx
 import "@/styles/globals.css";
-import { Inter } from "next/font/google";
+
 import { Providers } from "@/providers";
-import { ThemeProvider } from "next-themes";
-import { Toaster } from "@/components/ui/sonner"; // Add this import
+import { cn } from "@/lib/utils";
+import { Suspense } from "react";
+import { Toaster } from "sonner";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
+export const metadata = {
+  title: "YM Movement - Skating Coach Scheduling",
+  description: "A scheduling app for skating coach Yura Min",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
-        <Toaster /> {/* Add this component */}
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
+        <Providers>
+          <Suspense>
+            {children}
+          </Suspense>
+          <Toaster position="bottom-right" />
+        </Providers>
       </body>
     </html>
   );

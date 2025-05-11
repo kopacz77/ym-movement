@@ -1,8 +1,7 @@
 // Updated BookingDialog.tsx with fixes for both errors
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -11,12 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { format } from "date-fns";
-import { Clock, Calendar, MapPin } from "lucide-react";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
 import { LessonType, PaymentMethod } from "@prisma/client";
+import { format } from "date-fns";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface TimeSlot {
   id: string;
@@ -44,7 +44,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
   // Fix Error 1: Use only the pricing endpoint and remove the unused studentProfile
   const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
     { studentId },
-    { enabled: !!studentId }
+    { enabled: !!studentId },
   );
 
   const bookLesson = api.student.booking.bookLesson.useMutation();
@@ -111,7 +111,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
     const date = new Date(dateStr);
     let hours = date.getUTCHours();
     const minutes = date.getUTCMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
     const strMinutes = minutes < 10 ? `0${minutes}` : minutes;

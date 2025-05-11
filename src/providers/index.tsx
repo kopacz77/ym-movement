@@ -1,15 +1,14 @@
 // src/providers/index.tsx
 "use client";
-import type * as React from "react";
-import { useState } from "react";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext"; // Add this import
+import { api } from "@/lib/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { api } from "@/lib/api";
-import superjson from "superjson";
 import { SessionProvider } from "next-auth/react";
-import { AuthProvider } from "@/contexts/AuthContext";
-// Remove this: import { Toaster } from '@/components/ui/toaster';
-// The Toaster will now be in the layout file directly
+import type * as React from "react";
+import { useState } from "react";
+import superjson from "superjson";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -39,12 +38,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthProvider>
-        <api.Provider client={trpcClient} queryClient={queryClient}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-            {/* Remove this: <Toaster /> */}
-          </QueryClientProvider>
-        </api.Provider>
+        <BulkOperationsProvider> {/* Add this provider */}
+          <api.Provider client={trpcClient} queryClient={queryClient}>
+            <QueryClientProvider client={queryClient}>
+              {children}
+            </QueryClientProvider>
+          </api.Provider>
+        </BulkOperationsProvider>
       </AuthProvider>
     </SessionProvider>
   );

@@ -1,9 +1,10 @@
 // src/app/(protected)/admin/payments/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -13,18 +14,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PaymentDetail } from "@/features/admin/components/payments/PaymentDetail";
+import { PaymentFilter } from "@/features/admin/components/payments/PaymentFilter";
+import { PaymentNoteForm } from "@/features/admin/components/payments/PaymentNoteForm";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 import type { PaymentStatus } from "@prisma/client";
 import { format } from "date-fns";
-import { Search, Check, X, Send, FileText } from "lucide-react";
-import { PaymentFilter } from "@/features/admin/components/payments/PaymentFilter";
-import { PaymentDetail } from "@/features/admin/components/payments/PaymentDetail";
-import { PaymentNoteForm } from "@/features/admin/components/payments/PaymentNoteForm";
-import { formatCurrency } from "@/lib/utils";
+import { Check, FileText, Search, Send, X } from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 
 export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");

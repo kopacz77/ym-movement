@@ -13,10 +13,10 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   "https://ym-movement.com";
 
-// Email configuration constants  
+// Email configuration constants
 const EMAIL_CONFIG = {
   from: "YM Movement <info@ym-movement.com>",
-  replyTo: "info@ym-movement.com"
+  replyTo: "info@ym-movement.com",
 };
 
 /**
@@ -60,11 +60,24 @@ function formatDate(date: Date): string {
   const month = date.getUTCMonth();
   const day = date.getUTCDate();
   const weekday = date.getUTCDay();
-  
+
   // Create array for display
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
   return `${days[weekday]}, ${months[month]} ${day}, ${year}`;
 }
 
@@ -76,12 +89,12 @@ function formatTime(date: Date): string {
   // Get UTC hours and minutes but treat them as local time
   const hours = date.getUTCHours();
   const minutes = date.getUTCMinutes();
-  
+
   // Format in AM/PM
-  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const ampm = hours >= 12 ? "PM" : "AM";
   const hour12 = hours % 12 || 12; // Convert 0 to 12
-  
-  return `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+  return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
 }
 
 /**
@@ -91,11 +104,11 @@ function formatTime(date: Date): string {
 function formatRawTimeForCalendar(date: Date): string {
   // Extract the UTC components
   const year = date.getUTCFullYear();
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-  const day = date.getUTCDate().toString().padStart(2, '0');
-  const hours = date.getUTCHours().toString().padStart(2, '0');
-  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-  
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+  const day = date.getUTCDate().toString().padStart(2, "0");
+  const hours = date.getUTCHours().toString().padStart(2, "0");
+  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+
   // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
   return `${year}${month}${day}T${hours}${minutes}00`;
 }
@@ -158,7 +171,7 @@ export async function sendLessonConfirmationEmail(
     rinkTimezone: string;
   },
   paymentMethod: string,
-  referenceCode: string
+  referenceCode: string,
 ) {
   //console.log(`[EMAIL] Sending lesson confirmation to ${studentEmail}`);
 
@@ -171,13 +184,15 @@ export async function sendLessonConfirmationEmail(
   const endTimeForCal = formatRawTimeForCalendar(lessonData.endTime);
 
   // Generate Google Calendar link that treats the UTC value as the actual time
-  const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&ctz=${encodeURIComponent(lessonData.rinkTimezone)}&dates=${startTimeForCal}/${endTimeForCal}&text=${encodeURIComponent(
-      `Ice Dance Lesson: ${studentName}`,
-    )}&location=${encodeURIComponent(lessonData.rinkAddress)}&details=${encodeURIComponent(
-      `Student: ${studentName} (${studentEmail})\\nLocation: ${lessonData.rinkName}\\nAddress: ${
-        lessonData.rinkAddress
-      }\\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}`,
-    )}`;
+  const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&ctz=${encodeURIComponent(
+    lessonData.rinkTimezone,
+  )}&dates=${startTimeForCal}/${endTimeForCal}&text=${encodeURIComponent(
+    `Ice Dance Lesson: ${studentName}`,
+  )}&location=${encodeURIComponent(lessonData.rinkAddress)}&details=${encodeURIComponent(
+    `Student: ${studentName} (${studentEmail})\\nLocation: ${lessonData.rinkName}\\nAddress: ${
+      lessonData.rinkAddress
+    }\\nDuration: ${duration === 60 ? "1 hour" : "30 minutes"}`,
+  )}`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -242,7 +257,7 @@ export async function sendLessonConfirmationEmail(
   return sendEmail(
     studentEmail,
     `Lesson Confirmation: Ice Dance Lesson with ${studentName}`,
-    emailContent
+    emailContent,
   );
 }
 
@@ -266,4 +281,26 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
   `;
 
   return sendEmail(email, "Reset Your YM Movement Password", emailContent);
+}
+
+/**
+ * Sends an invitation email to a new user created by an admin
+ */
+export async function sendInvitationEmail(email: string, name: string, token: string) {
+  const resetUrl = `${BASE_URL}/auth/reset-password?token=${token}&invite=true`;
+
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">Welcome to YM Movement!</h1>
+      <p>Hello ${name || "there"},</p>
+      <p>An account has been created for you on the YM Movement platform.</p>
+      <p>Please click the button below to set your password and complete your registration:</p>
+      <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Complete Registration</a>
+      <p style="margin-top: 20px; color: #666;">This link will expire in 1 hour.</p>
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+    </div>
+  `;
+
+  return sendEmail(email, "Welcome to YM Movement - Complete Your Registration", emailContent);
 }

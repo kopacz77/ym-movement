@@ -1,6 +1,6 @@
 // src/features/admin/components/students/management/PendingApprovals.tsx
 "use client";
-import type React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,14 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { AlertCircle, Check, Clock } from "lucide-react";
-import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@/lib/root";
 import { useQueryClient } from "@tanstack/react-query";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import { format } from "date-fns";
+import { AlertCircle, Check, Clock } from "lucide-react";
+import type React from "react";
+import { toast } from "sonner";
 
 // Define proper types
 type StudentStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -74,7 +74,11 @@ export const PendingApprovals: React.FC = () => {
   };
 
   const handleReject = (studentId: string) => {
-    if (window.confirm("Are you sure you want to reject this application?\nThis will permanently delete the student record.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to reject this application?\nThis will permanently delete the student record.",
+      )
+    ) {
       rejectStudentMutation.mutate({ studentId });
     }
   };

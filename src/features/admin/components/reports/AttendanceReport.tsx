@@ -1,17 +1,17 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { api } from "@/lib/api";
 // src/features/admin/components/reports/AttendanceReport.tsx
 import React from "react";
 import {
-  Line,
-  LineChart,
   CartesianGrid,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent } from "@/components/ui/card";
-import { api } from "@/lib/api";
 
 interface AttendanceReportProps {
   period: "week" | "month" | "year";
