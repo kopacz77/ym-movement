@@ -38,11 +38,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthProvider>
-        <BulkOperationsProvider> {/* Add this provider */}
+        <BulkOperationsProvider>
+          {" "}
+          {/* Add this provider */}
           <api.Provider client={trpcClient} queryClient={queryClient}>
-            <QueryClientProvider client={queryClient}>
-              {children}
-            </QueryClientProvider>
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
           </api.Provider>
         </BulkOperationsProvider>
       </AuthProvider>

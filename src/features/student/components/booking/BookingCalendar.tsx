@@ -1,5 +1,6 @@
 // src/features/student/components/booking/BookingCalendar.tsx
 "use client";
+import { TimezoneNotice, formatTimeWithTimezone } from "@/components/TimezoneNotice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,17 +13,16 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { api } from "@/lib/api";
-import { displayInRinkLocalTime } from "@/lib/timezone";
-import { Calendar, Views } from "react-big-calendar";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import { displayInRinkLocalTime } from "@/lib/timezone";
 import { endOfDay, startOfDay } from "date-fns";
-import { DateTime } from "luxon";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DateTime } from "luxon";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Calendar, Views } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { toast } from "sonner";
 import { BookingDialog } from "./BookingDialog";
-import { TimezoneNotice, formatTimeWithTimezone } from "@/components/TimezoneNotice";
 
 // Define types for the rinks and time slots
 interface Rink {
@@ -138,7 +138,7 @@ export const BookingCalendar = () => {
   useEffect(() => {
     // Safely access the first rink ID within the effect body
     const firstRinkId = rinks?.[0]?.id;
-    
+
     if (firstRinkId && !selectedRink) {
       setSelectedRink(firstRinkId);
     }
@@ -148,10 +148,10 @@ export const BookingCalendar = () => {
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
       const selectedRinkData = rinks.find((rink: Rink) => rink.id === selectedRink);
-      return selectedRinkData?.timezone || 'America/Los_Angeles';
+      return selectedRinkData?.timezone || "America/Los_Angeles";
     }
     // Default timezone if no rink is selected
-    return 'America/Los_Angeles';
+    return "America/Los_Angeles";
   }, [selectedRink, rinks]);
 
   // Fetch time slots - only enable when a rink is selected
@@ -172,20 +172,26 @@ export const BookingCalendar = () => {
 
   // Format the date range for display
   const dateRangeText = useMemo(() => {
-    if (!selectedRink) { return ""; }
-    
+    if (!selectedRink) {
+      return "";
+    }
+
     // Use Luxon for proper timezone handling
     const startDate = DateTime.fromJSDate(date).setZone(rinkTimezone);
-    
+
     if (calendarView === Views.WEEK) {
       const endDate = startDate.plus({ days: 6 });
       if (startDate.month === endDate.month) {
-        return `${startDate.toFormat('MMM d')} - ${endDate.toFormat('d')}, ${startDate.toFormat('yyyy')}`;
+        return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("d")}, ${startDate.toFormat(
+          "yyyy",
+        )}`;
       }
-      return `${startDate.toFormat('MMM d')} - ${endDate.toFormat('MMM d')}, ${startDate.toFormat('yyyy')}`;
+      return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("MMM d")}, ${startDate.toFormat(
+        "yyyy",
+      )}`;
     }
-    
-    return startDate.toFormat('MMMM yyyy');
+
+    return startDate.toFormat("MMMM yyyy");
   }, [date, calendarView, rinkTimezone, selectedRink]);
 
   // Convert slots to calendar events
@@ -199,13 +205,13 @@ export const BookingCalendar = () => {
       const isYuraSlot = slot.isActive === true;
       const studentCount = slot.currentStudents || 0;
       const timezone = slot.rink.timezone || rinkTimezone;
-      
+
       // Format times in the rink's timezone
       const startTimeInfo = displayInRinkLocalTime(slot.startTime, timezone);
       const endTimeInfo = displayInRinkLocalTime(slot.endTime, timezone);
-      
+
       const timeDisplay = `${startTimeInfo.formattedTime} - ${endTimeInfo.formattedTime}`;
-      
+
       const title = `${studentCount}/${slot.maxStudents} students${
         isAvailable ? " - Available" : " - Full"
       }`;
@@ -221,7 +227,7 @@ export const BookingCalendar = () => {
         timeDisplay,
         status: isAvailable && isYuraSlot ? "available" : "unavailable",
         maxStudents: slot.maxStudents,
-        currentStudents: studentCount
+        currentStudents: studentCount,
       };
     });
   }, [availableSlots, selectedRink, rinkTimezone]);
@@ -237,7 +243,7 @@ export const BookingCalendar = () => {
       (groups, slot) => {
         // Get the date in the rink's timezone
         const slotDateTime = DateTime.fromISO(slot.startTime.toString()).setZone(rinkTimezone);
-        const dateKey = slotDateTime.toFormat('yyyy-MM-dd');
+        const dateKey = slotDateTime.toFormat("yyyy-MM-dd");
 
         if (!groups[dateKey]) {
           groups[dateKey] = {
@@ -257,165 +263,180 @@ export const BookingCalendar = () => {
   }, [availableSlots, selectedRink, rinkTimezone]);
 
   // Format time in the rink's timezone
-  const formatTimeInRinkTimezone = useCallback((timeStr: string | Date) => {
-    const dateTime = DateTime.fromISO(timeStr.toString()).setZone(rinkTimezone);
-    return dateTime.toFormat('h:mm a');
-  }, [rinkTimezone]);
+  const formatTimeInRinkTimezone = useCallback(
+    (timeStr: string | Date) => {
+      const dateTime = DateTime.fromISO(timeStr.toString()).setZone(rinkTimezone);
+      return dateTime.toFormat("h:mm a");
+    },
+    [rinkTimezone],
+  );
 
   // Handle events
-  const handleEventClick = useCallback((event: CalendarEvent) => {
-    if (!event.interactive) {
-      toast("Non-bookable time slot", {
-        description: "This time slot is not available for booking.",
-      });
-      return;
-    }
+  const handleEventClick = useCallback(
+    (event: CalendarEvent) => {
+      if (!event.interactive) {
+        toast("Non-bookable time slot", {
+          description: "This time slot is not available for booking.",
+        });
+        return;
+      }
 
-    const currentStudents = event.currentStudents || 0;
-    if (currentStudents >= (event.maxStudents || 0)) {
-      toast.error("Time slot unavailable", {
-        description: "This time slot is already fully booked.",
-      });
-      return;
-    }
+      const currentStudents = event.currentStudents || 0;
+      if (currentStudents >= (event.maxStudents || 0)) {
+        toast.error("Time slot unavailable", {
+          description: "This time slot is already fully booked.",
+        });
+        return;
+      }
 
-    // Convert event to TimeSlot format
-    const slot: TimeSlot = {
-      id: event.id,
-      startTime: event.start.toISOString(),
-      endTime: event.end.toISOString(),
-      maxStudents: event.maxStudents || 0,
-      currentStudents: event.currentStudents,
-      isActive: true,
-      rink: {
-        id: selectedRink,
-        name: event.rinkName || "",
-        address: "",
-        timezone: event.timezone || rinkTimezone
-      },
-      interactive: event.interactive
-    };
+      // Convert event to TimeSlot format
+      const slot: TimeSlot = {
+        id: event.id,
+        startTime: event.start.toISOString(),
+        endTime: event.end.toISOString(),
+        maxStudents: event.maxStudents || 0,
+        currentStudents: event.currentStudents,
+        isActive: true,
+        rink: {
+          id: selectedRink,
+          name: event.rinkName || "",
+          address: "",
+          timezone: event.timezone || rinkTimezone,
+        },
+        interactive: event.interactive,
+      };
 
-    setSelectedSlot(slot);
-    setIsBookingDialogOpen(true);
-  }, [selectedRink, rinkTimezone]);
+      setSelectedSlot(slot);
+      setIsBookingDialogOpen(true);
+    },
+    [selectedRink, rinkTimezone],
+  );
 
   // Handle clicking a slot in the custom list view
-  const handleCustomSlotClick = useCallback((rawSlot: ApiTimeSlot) => {
-    // Ensure startTime and endTime are strings
-    const stringifiedStartTime = rawSlot.startTime.toString();
-    const stringifiedEndTime = rawSlot.endTime.toString();
+  const handleCustomSlotClick = useCallback(
+    (rawSlot: ApiTimeSlot) => {
+      // Ensure startTime and endTime are strings
+      const stringifiedStartTime = rawSlot.startTime.toString();
+      const stringifiedEndTime = rawSlot.endTime.toString();
 
-    // Create a properly typed TimeSlot
-    const processedSlot: TimeSlot = {
-      id: rawSlot.id,
-      startTime: stringifiedStartTime,
-      endTime: stringifiedEndTime,
-      maxStudents: rawSlot.maxStudents,
-      currentStudents: rawSlot.currentStudents,
-      lessons: rawSlot.lessons,
-      isActive: rawSlot.isActive,
-      rink: {
-        name: rawSlot.rink.name,
-        address: rawSlot.rink.address,
-        id: rawSlot.rink.id || "unknown",
-        timezone: rawSlot.rink.timezone || rinkTimezone,
-      },
-      interactive: rawSlot.isAvailable,
-    };
+      // Create a properly typed TimeSlot
+      const processedSlot: TimeSlot = {
+        id: rawSlot.id,
+        startTime: stringifiedStartTime,
+        endTime: stringifiedEndTime,
+        maxStudents: rawSlot.maxStudents,
+        currentStudents: rawSlot.currentStudents,
+        lessons: rawSlot.lessons,
+        isActive: rawSlot.isActive,
+        rink: {
+          name: rawSlot.rink.name,
+          address: rawSlot.rink.address,
+          id: rawSlot.rink.id || "unknown",
+          timezone: rawSlot.rink.timezone || rinkTimezone,
+        },
+        interactive: rawSlot.isAvailable,
+      };
 
-    if (!processedSlot.isActive) {
-      toast("Non-bookable time slot", {
-        description: "This time slot is not available for booking.",
-      });
-      return;
-    }
+      if (!processedSlot.isActive) {
+        toast("Non-bookable time slot", {
+          description: "This time slot is not available for booking.",
+        });
+        return;
+      }
 
-    const currentStudents = processedSlot.currentStudents || processedSlot.lessons?.length || 0;
-    if (currentStudents >= processedSlot.maxStudents) {
-      toast.error("Time slot unavailable", {
-        description: "This time slot is already fully booked.",
-      });
-      return;
-    }
+      const currentStudents = processedSlot.currentStudents || processedSlot.lessons?.length || 0;
+      if (currentStudents >= processedSlot.maxStudents) {
+        toast.error("Time slot unavailable", {
+          description: "This time slot is already fully booked.",
+        });
+        return;
+      }
 
-    setSelectedSlot(processedSlot);
-    setIsBookingDialogOpen(true);
-  }, [rinkTimezone]);
+      setSelectedSlot(processedSlot);
+      setIsBookingDialogOpen(true);
+    },
+    [rinkTimezone],
+  );
 
   // Navigation handlers
-  const handleNavigate = useCallback((action: 'PREV' | 'NEXT' | 'TODAY' | Date) => {
-    if (action === 'PREV') {
-      const newDate = new Date(date);
-      if (calendarView === Views.MONTH) {
-        newDate.setMonth(date.getMonth() - 1);
-      } else {
-        newDate.setDate(date.getDate() - 7);
+  const handleNavigate = useCallback(
+    (action: "PREV" | "NEXT" | "TODAY" | Date) => {
+      if (action === "PREV") {
+        const newDate = new Date(date);
+        if (calendarView === Views.MONTH) {
+          newDate.setMonth(date.getMonth() - 1);
+        } else {
+          newDate.setDate(date.getDate() - 7);
+        }
+        setDate(newDate);
+      } else if (action === "NEXT") {
+        const newDate = new Date(date);
+        if (calendarView === Views.MONTH) {
+          newDate.setMonth(date.getMonth() + 1);
+        } else {
+          newDate.setDate(date.getDate() + 7);
+        }
+        setDate(newDate);
+      } else if (action === "TODAY") {
+        setDate(new Date());
+      } else if (action instanceof Date) {
+        setDate(action);
       }
-      setDate(newDate);
-    } else if (action === 'NEXT') {
-      const newDate = new Date(date);
-      if (calendarView === Views.MONTH) {
-        newDate.setMonth(date.getMonth() + 1);
-      } else {
-        newDate.setDate(date.getDate() + 7);
-      }
-      setDate(newDate);
-    } else if (action === 'TODAY') {
-      setDate(new Date());
-    } else if (action instanceof Date) {
-      setDate(action);
-    }
-  }, [date, calendarView]);
+    },
+    [date, calendarView],
+  );
 
   // Event styling based on status
   const eventPropGetter = useCallback((event: CalendarEvent) => {
     const isAvailable = event.status === "available";
     const backgroundColor = isAvailable ? "#22c55e" : "#ef4444";
-    
+
     return {
       style: {
         backgroundColor,
         borderColor: isAvailable ? "#16a34a" : "#dc2626",
-        color: "#ffffff"
-      }
+        color: "#ffffff",
+      },
     };
   }, []);
 
   // Custom slot styling
   const slotPropGetter = useCallback(() => {
     return {
-      className: 'rbc-time-slot'
+      className: "rbc-time-slot",
     };
   }, []);
 
   // Custom event component
-  const EventComponent = useCallback(({ event }: { event: CalendarEvent }) => {
-    const timezone = event.timezone || rinkTimezone;
-    
-    // Get both local and rink formatted times
-    const startTimeObj = formatTimeWithTimezone(event.start, timezone, "h:mm a");
-    const endTimeObj = formatTimeWithTimezone(event.end, timezone, "h:mm a");
-    
-    // Format the times for display
-    const localTimeStr = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
-    const rinkTimeStr = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
-    
-    const showBothTimes = timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
-    return (
-      <div className="p-1">
-        <div className="font-medium text-sm whitespace-normal">{event.title}</div>
-        <div className="text-xs whitespace-normal">{localTimeStr}</div>
-        {showBothTimes && (
-          <div className="text-xs whitespace-normal opacity-80">
-            ({rinkTimeStr} rink time)
+  const EventComponent = useCallback(
+    ({ event }: { event: CalendarEvent }) => {
+      const timezone = event.timezone || rinkTimezone;
+
+      // Get both local and rink formatted times
+      const startTimeObj = formatTimeWithTimezone(event.start, timezone, "h:mm a");
+      const endTimeObj = formatTimeWithTimezone(event.end, timezone, "h:mm a");
+
+      // Format the times for display
+      const localTimeStr = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
+      const rinkTimeStr = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
+
+      const showBothTimes = timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      return (
+        <div className="p-1">
+          <div className="font-medium text-sm whitespace-normal">{event.title}</div>
+          <div className="text-xs whitespace-normal">{localTimeStr}</div>
+          {showBothTimes && (
+            <div className="text-xs whitespace-normal opacity-80">({rinkTimeStr} rink time)</div>
+          )}
+          <div className="text-xs whitespace-normal">
+            {event.rinkName} ({event.timezone?.split("/").pop()?.replace("_", " ")})
           </div>
-        )}
-        <div className="text-xs whitespace-normal">{event.rinkName} ({event.timezone?.split('/').pop()?.replace('_', ' ')})</div>
-      </div>
-    );
-  }, [rinkTimezone]);
+        </div>
+      );
+    },
+    [rinkTimezone],
+  );
 
   // When no rink is selected yet
   if (!selectedRink && rinks && rinks.length > 0) {
@@ -426,7 +447,9 @@ export const BookingCalendar = () => {
         </CardHeader>
         <CardContent>
           <div className="text-center p-6">
-            <h3 className="text-lg font-medium mb-4">Please select a rink to view available times</h3>
+            <h3 className="text-lg font-medium mb-4">
+              Please select a rink to view available times
+            </h3>
             <Select value={selectedRink} onValueChange={setSelectedRink}>
               <SelectTrigger className="w-[280px] mx-auto">
                 <SelectValue placeholder="Select a Rink" />
@@ -434,7 +457,7 @@ export const BookingCalendar = () => {
               <SelectContent>
                 {rinks.map((rink: Rink) => (
                   <SelectItem key={rink.id} value={rink.id}>
-                    {rink.name} ({rink.timezone.split('/').pop()?.replace('_', ' ')})
+                    {rink.name} ({rink.timezone.split("/").pop()?.replace("_", " ")})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -456,23 +479,23 @@ export const BookingCalendar = () => {
           <SelectContent>
             {rinks?.map((rink: Rink) => (
               <SelectItem key={rink.id} value={rink.id}>
-                {rink.name} ({rink.timezone.split('/').pop()?.replace('_', ' ')})
+                {rink.name} ({rink.timezone.split("/").pop()?.replace("_", " ")})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </CardHeader>
-      
+
       <CardContent>
         {/* Timezone Notice Banner */}
         {selectedRink && (
-          <TimezoneNotice 
+          <TimezoneNotice
             rinkTimezone={rinkTimezone}
             rinkName={rinks?.find((rink: Rink) => rink.id === selectedRink)?.name || "the rink"}
             className="mb-4"
           />
         )}
-        
+
         {isLoading || !isReady ? (
           <div className="flex justify-center items-center h-[600px]">
             <p>Loading calendar...</p>
@@ -481,21 +504,13 @@ export const BookingCalendar = () => {
           // Custom mobile list view
           <div className="h-[600px] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleNavigate('PREV')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleNavigate("PREV")}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="text-center">
                 <span className="font-medium">{dateRangeText}</span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleNavigate('NEXT')}
-              >
+              <Button variant="outline" size="sm" onClick={() => handleNavigate("NEXT")}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -503,7 +518,7 @@ export const BookingCalendar = () => {
               variant="outline"
               size="sm"
               className="w-full mb-4"
-              onClick={() => handleNavigate('TODAY')}
+              onClick={() => handleNavigate("TODAY")}
             >
               Today
             </Button>
@@ -512,12 +527,12 @@ export const BookingCalendar = () => {
               // Format the date in the rink's timezone
               const dayDate = DateTime.fromJSDate(day.date).setZone(rinkTimezone);
               return (
-                <div key={dayDate.toFormat('yyyy-MM-dd')} className="mb-4">
+                <div key={dayDate.toFormat("yyyy-MM-dd")} className="mb-4">
                   {/* Day header */}
                   <div className="py-2 px-3 bg-slate-100 rounded-t-md">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold">{dayDate.toFormat('EEEE')}</span>
-                      <span>{dayDate.toFormat('MMMM d, yyyy')}</span>
+                      <span className="font-bold">{dayDate.toFormat("EEEE")}</span>
+                      <span>{dayDate.toFormat("MMMM d, yyyy")}</span>
                     </div>
                   </div>
 
@@ -532,7 +547,7 @@ export const BookingCalendar = () => {
                         const isAvailable = slot.isAvailable === true;
                         const isSlotActive = slot.isActive === true;
                         const isSlotBookable = isSlotActive && isAvailable;
-                        
+
                         // Format time in rink's timezone
                         const startTime = formatTimeInRinkTimezone(slot.startTime);
                         const endTime = formatTimeInRinkTimezone(slot.endTime);
@@ -541,10 +556,10 @@ export const BookingCalendar = () => {
                         const timezone = slot.rink.timezone || rinkTimezone;
                         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                         const showLocalTime = timezone !== userTimezone;
-                        
+
                         let localStartTime = "";
                         let localEndTime = "";
-                        
+
                         if (showLocalTime) {
                           const startTimeObj = formatTimeWithTimezone(slot.startTime, timezone);
                           const endTimeObj = formatTimeWithTimezone(slot.endTime, timezone);
@@ -563,9 +578,7 @@ export const BookingCalendar = () => {
                             disabled={!isSlotBookable}
                           >
                             <div className="flex justify-between">
-                              <div className="font-medium">
-                                {`${startTime} - ${endTime}`}
-                              </div>
+                              <div className="font-medium">{`${startTime} - ${endTime}`}</div>
                               <div className={isSlotBookable ? "text-green-600" : "text-red-600"}>
                                 {`${currentStudents}/${slot.maxStudents} students`}
                               </div>
@@ -591,13 +604,13 @@ export const BookingCalendar = () => {
           <div>
             <div className="flex justify-between items-center mb-4">
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => handleNavigate('PREV')}>
+                <Button variant="outline" size="sm" onClick={() => handleNavigate("PREV")}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleNavigate('TODAY')}>
+                <Button variant="outline" size="sm" onClick={() => handleNavigate("TODAY")}>
                   Today
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleNavigate('NEXT')}>
+                <Button variant="outline" size="sm" onClick={() => handleNavigate("NEXT")}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -605,14 +618,14 @@ export const BookingCalendar = () => {
                 <span className="font-medium">{dateRangeText}</span>
               </div>
               <div className="flex space-x-2">
-                <Button 
+                <Button
                   variant={calendarView === Views.WEEK ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCalendarView(Views.WEEK)}
                 >
                   Week
                 </Button>
-                <Button 
+                <Button
                   variant={calendarView === Views.MONTH ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCalendarView(Views.MONTH)}
@@ -634,7 +647,7 @@ export const BookingCalendar = () => {
               onNavigate={handleNavigate}
               components={{
                 event: EventComponent,
-                toolbar: () => null // Disable the default toolbar
+                toolbar: () => null, // Disable the default toolbar
               }}
               eventPropGetter={eventPropGetter}
               slotPropGetter={slotPropGetter}

@@ -12,10 +12,11 @@ import { DateTime } from "luxon";
 export function formatRinkTime(utcDate: Date | string, tz: string, fmt = "h:mm a"): string {
   try {
     // Convert to Luxon DateTime and set to the specified timezone
-    const dt = typeof utcDate === "string" 
-      ? DateTime.fromISO(utcDate, { zone: "utc" }).setZone(tz)
-      : DateTime.fromJSDate(utcDate, { zone: "utc" }).setZone(tz);
-    
+    const dt =
+      typeof utcDate === "string"
+        ? DateTime.fromISO(utcDate, { zone: "utc" }).setZone(tz)
+        : DateTime.fromJSDate(utcDate, { zone: "utc" }).setZone(tz);
+
     if (!dt.isValid) {
       console.error("Invalid date provided to formatRinkTime:", utcDate);
       return "Invalid date";
@@ -55,7 +56,7 @@ export function formatRinkTime24h(utcDate: Date | string, tz: string): string {
 /**
  * Converts a local time (in a specific timezone) to UTC
  * Useful when saving times to the database
- * 
+ *
  * @param localDate - The local date to convert (can be Date object or ISO string)
  * @param tz - The IANA timezone string of the local date (e.g., 'America/New_York')
  * @returns A new Date object in UTC
@@ -63,15 +64,16 @@ export function formatRinkTime24h(utcDate: Date | string, tz: string): string {
 export function convertToUTC(localDate: Date | string, tz: string): Date {
   try {
     // Create a DateTime in the specified timezone
-    const dt = typeof localDate === "string"
-      ? DateTime.fromISO(localDate, { zone: tz })
-      : DateTime.fromJSDate(localDate, { zone: tz });
-    
+    const dt =
+      typeof localDate === "string"
+        ? DateTime.fromISO(localDate, { zone: tz })
+        : DateTime.fromJSDate(localDate, { zone: tz });
+
     if (!dt.isValid) {
       console.error("Invalid date for conversion to UTC:", localDate);
       return new Date();
     }
-    
+
     // Convert to UTC and return as JS Date
     return dt.toUTC().toJSDate();
   } catch (error) {
@@ -82,8 +84,8 @@ export function convertToUTC(localDate: Date | string, tz: string): Date {
 
 /**
  * Parse a time string in a specific timezone
- * 
- * @param timeStr - Time string in format HH:mm 
+ *
+ * @param timeStr - Time string in format HH:mm
  * @param date - Reference date
  * @param tz - The timezone to parse in
  * @returns Date object representing that time
@@ -92,13 +94,13 @@ export function parseTimeInTimezone(timeStr: string, date: Date, tz: string): Da
   try {
     // Create a DateTime from the reference date in the target timezone
     const refDate = DateTime.fromJSDate(date).setZone(tz);
-    
+
     // Parse the time components
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    
+    const [hours, minutes] = timeStr.split(":").map(Number);
+
     // Set the time while keeping the date the same
     const dateTime = refDate.set({ hour: hours, minute: minutes });
-    
+
     // Convert back to UTC and return as JS Date
     return dateTime.toUTC().toJSDate();
   } catch (error) {
@@ -111,40 +113,47 @@ export function parseTimeInTimezone(timeStr: string, date: Date, tz: string): Da
  * Determines if two dates are on the same day in a specific timezone
  */
 export function isSameDay(date1: Date | string, date2: Date | string, tz: string): boolean {
-  const d1 = typeof date1 === "string" 
-    ? DateTime.fromISO(date1, { zone: "utc" }).setZone(tz)
-    : DateTime.fromJSDate(date1, { zone: "utc" }).setZone(tz);
-    
-  const d2 = typeof date2 === "string"
-    ? DateTime.fromISO(date2, { zone: "utc" }).setZone(tz)
-    : DateTime.fromJSDate(date2, { zone: "utc" }).setZone(tz);
-  
-  return d1.hasSame(d2, 'day');
+  const d1 =
+    typeof date1 === "string"
+      ? DateTime.fromISO(date1, { zone: "utc" }).setZone(tz)
+      : DateTime.fromJSDate(date1, { zone: "utc" }).setZone(tz);
+
+  const d2 =
+    typeof date2 === "string"
+      ? DateTime.fromISO(date2, { zone: "utc" }).setZone(tz)
+      : DateTime.fromJSDate(date2, { zone: "utc" }).setZone(tz);
+
+  return d1.hasSame(d2, "day");
 }
 
 /**
  * This function adds metadata to explain timezone context
  * Useful for UI displays to make it clear to users which timezone is being used
  */
-export function formatTimeWithContext(date: Date | string, tz: string, fmt = "h:mm a"): { 
-  time: string; 
+export function formatTimeWithContext(
+  date: Date | string,
+  tz: string,
+  fmt = "h:mm a",
+): {
+  time: string;
   timezone: string;
   tzAbbr: string;
 } {
-  const dt = typeof date === "string"
-    ? DateTime.fromISO(date, { zone: "utc" }).setZone(tz)
-    : DateTime.fromJSDate(date, { zone: "utc" }).setZone(tz);
-  
+  const dt =
+    typeof date === "string"
+      ? DateTime.fromISO(date, { zone: "utc" }).setZone(tz)
+      : DateTime.fromJSDate(date, { zone: "utc" }).setZone(tz);
+
   const time = dt.toFormat(fmt);
   const tzAbbr = dt.toFormat("ZZZZ");
-  
+
   // Extract just the timezone name (e.g., America/New_York -> New York)
-  const tzName = tz.split('/').pop()?.replace(/_/g, ' ') || tz;
-  
-  return { 
-    time, 
+  const tzName = tz.split("/").pop()?.replace(/_/g, " ") || tz;
+
+  return {
+    time,
     timezone: tzName,
-    tzAbbr
+    tzAbbr,
   };
 }
 
@@ -152,37 +161,41 @@ export function formatTimeWithContext(date: Date | string, tz: string, fmt = "h:
  * Helper function to debug timezone issues by showing both UTC and local time
  */
 export function debugTimeConversion(date: Date | string, tz: string): string {
-  const dt = typeof date === "string"
-    ? DateTime.fromISO(date)
-    : DateTime.fromJSDate(date);
-    
+  const dt = typeof date === "string" ? DateTime.fromISO(date) : DateTime.fromJSDate(date);
+
   const utcString = dt.toUTC().toISO();
   const localString = dt.setZone(tz).toFormat("yyyy-MM-dd HH:mm:ss ZZZZ");
-  
+
   return `UTC: ${utcString} → Local (${tz}): ${localString}`;
 }
 
 /**
  * Critical function for rink scheduling: Keeps the same local time regardless of timezone
  * Use this when displaying times for physical location events like rink sessions
- * 
+ *
  * @param utcTime - The UTC time to convert (can be Date object or ISO string)
  * @param rinkTimezone - The IANA timezone of the rink (e.g., 'America/Los_Angeles')
  * @param userTimezone - Optional: the user's timezone if different from the rink
  * @param fmt - Format string for time display (default: 'h:mm a')
  */
-export function displayInRinkLocalTime(utcTime: Date | string, rinkTimezone: string, userTimezone?: string, fmt = "h:mm a") {
+export function displayInRinkLocalTime(
+  utcTime: Date | string,
+  rinkTimezone: string,
+  userTimezone?: string,
+  fmt = "h:mm a",
+) {
   try {
     // First, get the time in the rink's timezone
-    const rinkTime = typeof utcTime === "string"
-      ? DateTime.fromISO(utcTime, { zone: "utc" }).setZone(rinkTimezone)
-      : DateTime.fromJSDate(utcTime, { zone: "utc" }).setZone(rinkTimezone);
-    
+    const rinkTime =
+      typeof utcTime === "string"
+        ? DateTime.fromISO(utcTime, { zone: "utc" }).setZone(rinkTimezone)
+        : DateTime.fromJSDate(utcTime, { zone: "utc" }).setZone(rinkTimezone);
+
     if (!rinkTime.isValid) {
       console.error("Invalid date for displayInRinkLocalTime:", utcTime);
       throw new Error("Invalid date");
     }
-    
+
     // Build the return object
     const result: {
       formattedTime: string;
@@ -198,9 +211,9 @@ export function displayInRinkLocalTime(utcTime: Date | string, rinkTimezone: str
       timezone: rinkTime.toFormat("ZZZZ"),
       hour: rinkTime.hour,
       minute: rinkTime.minute,
-      dateTime: rinkTime
+      dateTime: rinkTime,
     };
-    
+
     // Add user timezone info if provided
     if (userTimezone) {
       const userTime = rinkTime.setZone(userTimezone, { keepLocalTime: true });
@@ -208,7 +221,7 @@ export function displayInRinkLocalTime(utcTime: Date | string, rinkTimezone: str
       result.userTimezone = userTime.toFormat("ZZZZ");
       result.userDateTime = userTime;
     }
-    
+
     return result;
   } catch (error) {
     console.error("Error in displayInRinkLocalTime:", error);
@@ -216,7 +229,7 @@ export function displayInRinkLocalTime(utcTime: Date | string, rinkTimezone: str
     return {
       formattedTime: "Invalid time",
       timezone: rinkTimezone,
-      dateTime: DateTime.now().setZone(rinkTimezone)
+      dateTime: DateTime.now().setZone(rinkTimezone),
     };
   }
 }
@@ -228,19 +241,20 @@ export function displayInRinkLocalTime(utcTime: Date | string, rinkTimezone: str
 export function formatRinkLocalTime(utcTime: Date | string, rinkTimezone: string, fmt = "h:mm a") {
   try {
     // Convert to Luxon DateTime and set to the rink's timezone
-    const dt = typeof utcTime === "string" 
-      ? DateTime.fromISO(utcTime, { zone: "utc" }).setZone(rinkTimezone)
-      : DateTime.fromJSDate(utcTime, { zone: "utc" }).setZone(rinkTimezone);
-    
+    const dt =
+      typeof utcTime === "string"
+        ? DateTime.fromISO(utcTime, { zone: "utc" }).setZone(rinkTimezone)
+        : DateTime.fromJSDate(utcTime, { zone: "utc" }).setZone(rinkTimezone);
+
     return {
       formatted: dt.toFormat(fmt),
-      dateTime: dt
+      dateTime: dt,
     };
   } catch (error) {
     console.error("Error formatting time in rink timezone:", error);
     return {
       formatted: "Invalid time",
-      dateTime: DateTime.now()
+      dateTime: DateTime.now(),
     };
   }
 }

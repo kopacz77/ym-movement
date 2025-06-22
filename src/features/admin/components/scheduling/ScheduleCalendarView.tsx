@@ -6,12 +6,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, Views, View, SlotInfo } from "react-big-calendar";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { Plus } from "lucide-react";
 import React, { useState } from "react";
-import { TimeSlotList } from "./TimeSlotList";
+import { Calendar, SlotInfo, View, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { TimeSlotList } from "./TimeSlotList";
 
 // Define interface for calendar events
 interface CalendarEvent {
@@ -22,7 +22,10 @@ interface CalendarEvent {
 }
 
 // Create ViewOptions component inline since it's missing
-const ViewOptions = ({ view, onViewChange }: { view: string; onViewChange: (view: string) => void }) => {
+const ViewOptions = ({
+  view,
+  onViewChange,
+}: { view: string; onViewChange: (view: string) => void }) => {
   return (
     <Select value={view} onValueChange={onViewChange}>
       <SelectTrigger className="w-40">
@@ -50,13 +53,13 @@ export const ScheduleCalendarView = () => {
         id: 1,
         title: "Sample Event",
         start: new Date(2025, 4, 10, 10, 0), // May 10, 2025, 10:00 AM
-        end: new Date(2025, 4, 10, 12, 0),   // May 10, 2025, 12:00 PM
+        end: new Date(2025, 4, 10, 12, 0), // May 10, 2025, 12:00 PM
       },
       {
         id: 2,
         title: "Another Event",
         start: new Date(2025, 4, 11, 14, 0), // May 11, 2025, 2:00 PM
-        end: new Date(2025, 4, 11, 16, 0),   // May 11, 2025, 4:00 PM
+        end: new Date(2025, 4, 11, 16, 0), // May 11, 2025, 4:00 PM
       },
     ];
     setEvents(sampleEvents);

@@ -1,28 +1,17 @@
 // src/app/(protected)/admin/payments/page.tsx
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaymentDetail } from "@/features/admin/components/payments/PaymentDetail";
 import { PaymentFilter } from "@/features/admin/components/payments/PaymentFilter";
 import { PaymentNoteForm } from "@/features/admin/components/payments/PaymentNoteForm";
+import { PaymentTable } from "@/features/admin/components/payments/PaymentTable";
 import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
 import type { PaymentStatus } from "@prisma/client";
-import { format } from "date-fns";
-import { Check, FileText, Search, Send, X } from "lucide-react";
+import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -112,18 +101,6 @@ export default function PaymentsPage() {
     addNote.mutate({ paymentId: selectedPaymentId, notes: note });
   };
 
-  const getStatusBadge = (status: PaymentStatus) => {
-    switch (status) {
-      case "COMPLETED":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case "PENDING":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case "FAILED":
-        return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -131,7 +108,7 @@ export default function PaymentsPage() {
         <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
       </div>
 
-      <div className="flex justify-between items-center space-x-4">
+      <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -141,7 +118,9 @@ export default function PaymentsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <PaymentFilter currentFilter={statusFilter} onFilterChange={setStatusFilter} />
+        <div className="flex-shrink-0">
+          <PaymentFilter currentFilter={statusFilter} onFilterChange={setStatusFilter} />
+        </div>
       </div>
 
       <Tabs defaultValue="all">
@@ -154,72 +133,15 @@ export default function PaymentsPage() {
         <TabsContent value="all" className="space-y-4">
           <Card>
             <CardContent className="p-0">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <p>Loading payments...</p>
-                </div>
-              ) : !payments || payments.length === 0 ? (
-                <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">No payments found</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Reference</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>{payment.student?.user?.name || "Unknown"}</TableCell>
-                        <TableCell>{format(new Date(payment.createdAt), "PP")}</TableCell>
-                        <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                        <TableCell>{payment.method}</TableCell>
-                        <TableCell>{payment.referenceCode}</TableCell>
-                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedPaymentId(payment.id)}
-                            >
-                              View
-                            </Button>
-                            {payment.status === "PENDING" && (
-                              <>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleVerifyPayment(payment.id)}
-                                  disabled={verifyPayment.isPending}
-                                >
-                                  <Check className="h-4 w-4 mr-1" /> Verify
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleSendReminder(payment.id)}
-                                  disabled={sendReminder.isPending}
-                                >
-                                  <Send className="h-4 w-4 mr-1" /> Remind
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <PaymentTable
+                payments={payments || []}
+                isLoading={isLoading}
+                onViewPayment={setSelectedPaymentId}
+                onVerifyPayment={handleVerifyPayment}
+                onSendReminder={handleSendReminder}
+                isVerifying={verifyPayment.isPending}
+                isSendingReminder={sendReminder.isPending}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -227,71 +149,16 @@ export default function PaymentsPage() {
         <TabsContent value="pending">
           <Card>
             <CardContent className="p-0">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <p>Loading payments...</p>
-                </div>
-              ) : !payments ||
-                payments.filter((payment) => payment.status === "PENDING").length === 0 ? (
-                <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">No pending payments found</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Reference</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments
-                      .filter((payment) => payment.status === "PENDING")
-                      .map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>{payment.student?.user?.name || "Unknown"}</TableCell>
-                          <TableCell>{format(new Date(payment.createdAt), "PP")}</TableCell>
-                          <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                          <TableCell>{payment.method}</TableCell>
-                          <TableCell>{payment.referenceCode}</TableCell>
-                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedPaymentId(payment.id)}
-                              >
-                                View
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleVerifyPayment(payment.id)}
-                                disabled={verifyPayment.isPending}
-                              >
-                                <Check className="h-4 w-4 mr-1" /> Verify
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleSendReminder(payment.id)}
-                                disabled={sendReminder.isPending}
-                              >
-                                <Send className="h-4 w-4 mr-1" /> Remind
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              )}
+              <PaymentTable
+                payments={payments || []}
+                isLoading={isLoading}
+                onViewPayment={setSelectedPaymentId}
+                onVerifyPayment={handleVerifyPayment}
+                onSendReminder={handleSendReminder}
+                isVerifying={verifyPayment.isPending}
+                isSendingReminder={sendReminder.isPending}
+                filterStatus="PENDING"
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -299,55 +166,16 @@ export default function PaymentsPage() {
         <TabsContent value="completed">
           <Card>
             <CardContent className="p-0">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <p>Loading payments...</p>
-                </div>
-              ) : !payments ||
-                payments.filter((payment) => payment.status === "COMPLETED").length === 0 ? (
-                <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">No completed payments found</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Reference</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments
-                      .filter((payment) => payment.status === "COMPLETED")
-                      .map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>{payment.student?.user?.name || "Unknown"}</TableCell>
-                          <TableCell>{format(new Date(payment.createdAt), "PP")}</TableCell>
-                          <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                          <TableCell>{payment.method}</TableCell>
-                          <TableCell>{payment.referenceCode}</TableCell>
-                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedPaymentId(payment.id)}
-                              >
-                                View
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              )}
+              <PaymentTable
+                payments={payments || []}
+                isLoading={isLoading}
+                onViewPayment={setSelectedPaymentId}
+                onVerifyPayment={handleVerifyPayment}
+                onSendReminder={handleSendReminder}
+                isVerifying={verifyPayment.isPending}
+                isSendingReminder={sendReminder.isPending}
+                filterStatus="COMPLETED"
+              />
             </CardContent>
           </Card>
         </TabsContent>

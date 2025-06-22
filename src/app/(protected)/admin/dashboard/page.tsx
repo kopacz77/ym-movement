@@ -1,10 +1,31 @@
+// src/app/(protected)/admin/dashboard/page.tsx
+import { ErrorBoundary } from "@/components/error-boundary";
+import { ChartSkeleton, LineChartSkeleton } from "@/components/ui/chart-skeleton";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { OverviewCards } from "@/features/admin/components/analytics/OverviewCards";
-import { RevenueChart } from "@/features/admin/components/analytics/RevenueChart";
-import { StudentActivityChart } from "@/features/admin/components/analytics/StudentActivityChart";
 import { PendingApprovals } from "@/features/admin/components/management/PendingApprovals";
-// src/app/(protected)/admin/dashboard/page.tsx
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
+
+const RevenueChart = dynamic(
+  () =>
+    import("@/features/admin/components/analytics/RevenueChart").then((mod) => ({
+      default: mod.RevenueChart,
+    })),
+  {
+    loading: () => <LineChartSkeleton />,
+  },
+);
+
+const StudentActivityChart = dynamic(
+  () =>
+    import("@/features/admin/components/analytics/StudentActivityChart").then((mod) => ({
+      default: mod.StudentActivityChart,
+    })),
+  {
+    loading: () => <ChartSkeleton />,
+  },
+);
 
 export default function AdminDashboardPage() {
   return (
@@ -15,29 +36,33 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-8">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <OverviewCards />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSkeleton />}>
+              <OverviewCards />
+            </Suspense>
+          </ErrorBoundary>
         </div>
 
         <div className="md:col-span-4">
-          <Suspense fallback={<LoadingSkeleton />}>
-            <PendingApprovals />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSkeleton />}>
+              <PendingApprovals />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div className="md:col-span-8">
-          <Suspense fallback={<LoadingSkeleton />}>
+          <ErrorBoundary>
             <RevenueChart />
-          </Suspense>
+          </ErrorBoundary>
         </div>
 
         <div className="md:col-span-4">
-          <Suspense fallback={<LoadingSkeleton />}>
+          <ErrorBoundary>
             <StudentActivityChart />
-          </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
     </div>

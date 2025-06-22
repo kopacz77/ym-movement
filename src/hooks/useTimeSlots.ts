@@ -27,9 +27,9 @@ interface ProcessedEventsList {
 }
 
 interface UseTimeSlotsResult {
-   // biome-ignore lint/suspicious/noExplicitAny: API response type is complex
+  // biome-ignore lint/suspicious/noExplicitAny: API response type is complex
   rinks: any;
-   // biome-ignore lint/suspicious/noExplicitAny: API response type is complex
+  // biome-ignore lint/suspicious/noExplicitAny: API response type is complex
   students: any;
   timeSlots: TimeSlot[] | undefined;
   events: Event[];

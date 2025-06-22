@@ -1,9 +1,5 @@
-// src/features/scheduling/components/forms/RecurringPatternForm.tsx
-import type React from "react";
-import { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -14,12 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { addDays, differenceInDays, isAfter, parse } from "date-fns";
-import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -27,6 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays, differenceInDays, isAfter, parse } from "date-fns";
+// src/features/scheduling/components/forms/RecurringPatternForm.tsx
+import type React from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 // Define a constant for days of week
 const daysOfWeek = [
@@ -52,8 +52,9 @@ const formSchema = z
   })
   .refine(
     (data) => {
-      if (!data.startDate || !data.endDate) { return true; // Let the required validation handle empty values
-}
+      if (!data.startDate || !data.endDate) {
+        return true; // Let the required validation handle empty values
+      }
 
       try {
         const start = parse(data.startDate, "yyyy-MM-dd", new Date());
@@ -78,9 +79,9 @@ interface RecurringPatternFormProps {
   onSubmitAction?: () => void;
 }
 
-export const RecurringPatternForm: React.FC<RecurringPatternFormProps> = ({ 
-  rinks, 
-  onSubmitAction 
+export const RecurringPatternForm: React.FC<RecurringPatternFormProps> = ({
+  rinks,
+  onSubmitAction,
 }) => {
   const utils = api.useUtils();
 
@@ -105,7 +106,9 @@ export const RecurringPatternForm: React.FC<RecurringPatternFormProps> = ({
         description: `Created ${data.slotsCreated} time slots`,
       });
       utils.admin.schedule.getTimeSlots.invalidate();
-      if (onSubmitAction) { onSubmitAction(); }
+      if (onSubmitAction) {
+        onSubmitAction();
+      }
     },
     onError: (error) => {
       toast.error("Failed to create recurring pattern", {

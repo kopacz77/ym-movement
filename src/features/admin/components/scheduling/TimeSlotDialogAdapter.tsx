@@ -54,19 +54,24 @@ interface TimeSlotDialogAdapterProps {
 
 // Helper function to safely cast unknown lessons to Lesson[]
 function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
-  if (!unknownLessons) { return []; }
-  
-  return unknownLessons.map(item => {
+  if (!unknownLessons) {
+    return [];
+  }
+
+  return unknownLessons.map((item) => {
     // Safely access the properties we need
-    const unknownLesson = item as { id?: string; student?: { id?: string; user?: { name?: string | null } } };
+    const unknownLesson = item as {
+      id?: string;
+      student?: { id?: string; user?: { name?: string | null } };
+    };
     return {
-      id: unknownLesson.id || 'unknown',
+      id: unknownLesson.id || "unknown",
       student: {
-        id: unknownLesson.student?.id || 'unknown',
+        id: unknownLesson.student?.id || "unknown",
         user: {
-          name: unknownLesson.student?.user?.name || null
-        }
-      }
+          name: unknownLesson.student?.user?.name || null,
+        },
+      },
     };
   });
 }
@@ -77,31 +82,31 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
   ...props
 }) => {
   // Convert ScheduleEvent to EventClickInfo format
-  const adaptedEvent = selectedEvent ? {
-    event: {
-      id: selectedEvent.schedule.id,
-      title: '',
-      start: selectedEvent.schedule.start,
-      end: selectedEvent.schedule.end,
-      extendedProps: {
-        rink: selectedEvent.schedule.raw.rink,
-        currentStudents: selectedEvent.schedule.raw.lessons?.length || 0,
-        maxStudents: selectedEvent.schedule.raw.maxStudents,
-        // Use our helper function to safely cast
-        lessons: castToLessons(selectedEvent.schedule.raw.lessons)
+  const adaptedEvent = selectedEvent
+    ? {
+        event: {
+          id: selectedEvent.schedule.id,
+          title: "",
+          start: selectedEvent.schedule.start,
+          end: selectedEvent.schedule.end,
+          extendedProps: {
+            rink: selectedEvent.schedule.raw.rink,
+            currentStudents: selectedEvent.schedule.raw.lessons?.length || 0,
+            maxStudents: selectedEvent.schedule.raw.maxStudents,
+            // Use our helper function to safely cast
+            lessons: castToLessons(selectedEvent.schedule.raw.lessons),
+          },
+        },
       }
-    }
-  } : null;
+    : null;
 
   // Convert slot for compatibility
-  const adaptedSlot = selectedSlot ? {
-    ...selectedSlot,
-    lessons: castToLessons(selectedSlot.lessons)
-  } : null;
+  const adaptedSlot = selectedSlot
+    ? {
+        ...selectedSlot,
+        lessons: castToLessons(selectedSlot.lessons),
+      }
+    : null;
 
-  return <TimeSlotDialog 
-    {...props} 
-    selectedEvent={adaptedEvent}
-    selectedSlot={adaptedSlot}
-  />;
+  return <TimeSlotDialog {...props} selectedEvent={adaptedEvent} selectedSlot={adaptedSlot} />;
 };

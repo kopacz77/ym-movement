@@ -8,9 +8,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TimeSlotForm } from "@/features/scheduling/components/forms/TimeSlotForm";
-import { BulkTimeSlotForm } from "../../../scheduling/components/forms/BulkTimeSlotForm";
 import { Plus } from "lucide-react";
 import { FC } from "react";
+import { BulkTimeSlotForm } from "../../../scheduling/components/forms/BulkTimeSlotForm";
 
 // Define a proper interface for the Rink type
 interface Rink {
@@ -96,10 +96,7 @@ export const BulkCreateSlotsDialog: FC<BulkCreateSlotsDialogProps> = ({
         <DialogHeader>
           <DialogTitle>Bulk Create Time Slots</DialogTitle>
         </DialogHeader>
-        <BulkTimeSlotForm
-          rinks={rinks || []}
-          onSubmitAction={onSubmitAction}
-        />
+        <BulkTimeSlotForm rinks={rinks || []} onSubmitAction={onSubmitAction} />
       </DialogContent>
     </Dialog>
   );

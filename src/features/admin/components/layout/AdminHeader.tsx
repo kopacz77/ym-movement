@@ -41,8 +41,6 @@ export const AdminHeader = () => {
     }
   };
 
-  // For debugging
-  console.log("Current user from Auth context:", user);
 
   return (
     <header className="h-16 bg-white border-b shadow-sm safe-top">

@@ -17,12 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DateTime } from "luxon";
 // src/features/scheduling/components/forms/TimeSlotForm.tsx
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useTimeSlots } from "../../hooks/useTimeSlots";
-import { DateTime } from "luxon";
 
 // Simplified schema for time slot creation
 const timeSlotSchema = z.object({
@@ -101,7 +101,7 @@ export const TimeSlotForm = ({
 
   const handleSubmit = (values: TimeSlotFormValues) => {
     // Find the selected rink to get its timezone
-    const selectedRink = rinks.find(rink => rink.id === values.rinkId);
+    const selectedRink = rinks.find((rink) => rink.id === values.rinkId);
     const rinkTimezone = selectedRink?.timezone || "America/Los_Angeles";
 
     // Parse the datetime string into parts to work with
@@ -110,13 +110,16 @@ export const TimeSlotForm = ({
     const [hours, minutes] = timePart.split(":").map(Number);
 
     // Create a DateTime object in the rink's timezone
-    const localRinkTime = DateTime.fromObject({
-      year,
-      month,
-      day,
-      hour: hours,
-      minute: minutes
-    }, { zone: rinkTimezone });
+    const localRinkTime = DateTime.fromObject(
+      {
+        year,
+        month,
+        day,
+        hour: hours,
+        minute: minutes,
+      },
+      { zone: rinkTimezone },
+    );
 
     // Convert to UTC for storage
     const utcStartTime = localRinkTime.toUTC().toJSDate();
@@ -175,7 +178,10 @@ export const TimeSlotForm = ({
                 <SelectContent className="w-full min-w-[200px]">
                   {rinks.map((rink) => (
                     <SelectItem key={rink.id} value={rink.id} className="w-full">
-                      {rink.name} {rink.timezone ? `(${rink.timezone.split('/').pop()?.replace('_', ' ')})` : ''}
+                      {rink.name}{" "}
+                      {rink.timezone
+                        ? `(${rink.timezone.split("/").pop()?.replace("_", " ")})`
+                        : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -194,9 +200,7 @@ export const TimeSlotForm = ({
               <FormControl>
                 <Input type="datetime-local" {...field} />
               </FormControl>
-              <FormDescription>
-                Times will be interpreted as the rink's local time
-              </FormDescription>
+              <FormDescription>Times will be interpreted as the rink's local time</FormDescription>
               <FormMessage />
             </FormItem>
           )}

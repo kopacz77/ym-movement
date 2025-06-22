@@ -28,37 +28,22 @@ export function CalendarHeader({
       "px-3 py-1.5 text-sm",
       calendarView === view
         ? "bg-gray-900 text-white dark:bg-gray-50 dark:text-gray-900"
-        : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+        : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800",
     );
   };
 
   return (
     <div className="flex flex-wrap items-center justify-between p-4 border-b">
       <div className="flex items-center space-x-1 mb-2 md:mb-0">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onPrevAction}
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="outline" size="sm" onClick={onPrevAction} className="h-8 w-8 p-0">
           <span className="sr-only">Previous</span>
           <ChevronLeftIcon className="h-4 w-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onNextAction}
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="outline" size="sm" onClick={onNextAction} className="h-8 w-8 p-0">
           <span className="sr-only">Next</span>
           <ChevronRightIcon className="h-4 w-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onTodayAction}
-          className="ml-2 h-8"
-        >
+        <Button variant="outline" size="sm" onClick={onTodayAction} className="ml-2 h-8">
           Today
         </Button>
         <h2 className="text-lg font-semibold ml-2">{dateRangeText}</h2>

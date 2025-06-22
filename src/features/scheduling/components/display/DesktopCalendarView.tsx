@@ -1,10 +1,10 @@
 // src/features/scheduling/components/display/DesktopCalendarView.tsx
 import { Button } from "@/components/ui/button";
-import { formatRinkTime } from "@/lib/timezone";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import { Calendar, Event, Views, SlotInfo, View } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import { formatRinkTime } from "@/lib/timezone";
 import { useCallback } from "react";
+import { Calendar, Event, SlotInfo, View, Views } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
 interface CalendarEvent extends Event {
   id: string;
@@ -45,25 +45,22 @@ export function DesktopCalendarView({
   onDateChange,
 }: DesktopCalendarViewProps) {
   // Custom event component
-  const EventComponent = useCallback(
-    ({ event }: { event: CalendarEvent }) => {
-      const rink = event.extendedProps?.rink || {};
-      const timezone = rink.timezone || "UTC";
+  const EventComponent = useCallback(({ event }: { event: CalendarEvent }) => {
+    const rink = event.extendedProps?.rink || {};
+    const timezone = rink.timezone || "UTC";
 
-      // Format times with the rink's timezone
-      const startFormatted = formatRinkTime(event.start || new Date(), timezone, "HH:mm");
-      const endFormatted = formatRinkTime(event.end || new Date(), timezone, "HH:mm");
+    // Format times with the rink's timezone
+    const startFormatted = formatRinkTime(event.start || new Date(), timezone, "HH:mm");
+    const endFormatted = formatRinkTime(event.end || new Date(), timezone, "HH:mm");
 
-      return (
-        <div className="p-1 h-full">
-          <div className="font-medium">{`${startFormatted} - ${endFormatted}`}</div>
-          <div className="text-sm whitespace-normal">{event.title}</div>
-          <div className="text-xs whitespace-normal">{rink.name || ""}</div>
-        </div>
-      );
-    },
-    []
-  );
+    return (
+      <div className="p-1 h-full">
+        <div className="font-medium">{`${startFormatted} - ${endFormatted}`}</div>
+        <div className="text-sm whitespace-normal">{event.title}</div>
+        <div className="text-xs whitespace-normal">{rink.name || ""}</div>
+      </div>
+    );
+  }, []);
 
   // Map FullCalendar view types to React Big Calendar view types
   const getViewType = (view: typeof Views.WEEK | typeof Views.MONTH): View => {

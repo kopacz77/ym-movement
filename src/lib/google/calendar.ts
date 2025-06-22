@@ -15,9 +15,8 @@ const getAuthClient = () => {
       return null;
     }
 
-    // Log the first few characters of the credentials to check if they're correctly loaded
-    console.log(`Using Google credentials for: ${credentials.client_email}`);
-    console.log(`Private key starts with: ${credentials.private_key.substring(0, 20)}...`);
+    // Log only non-sensitive information for debugging
+    console.log(`Google Calendar API initialized for: ${credentials.client_email}`);
 
     const client = new JWT({
       email: credentials.client_email,

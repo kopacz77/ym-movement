@@ -1,12 +1,7 @@
+import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -111,7 +106,10 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                         )}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {selectedEvent.event.extendedProps.rink.timezone.split('/').pop()?.replace('_', ' ')}
+                      {selectedEvent.event.extendedProps.rink.timezone
+                        .split("/")
+                        .pop()
+                        ?.replace("_", " ")}
                     </Badge>
                   </div>
                 ) : (
@@ -121,7 +119,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                         formatRinkTime(selectedSlot.startTime, selectedSlot.rink.timezone)}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {selectedSlot?.rink.timezone.split('/').pop()?.replace('_', ' ')}
+                      {selectedSlot?.rink.timezone.split("/").pop()?.replace("_", " ")}
                     </Badge>
                   </div>
                 )}
@@ -214,18 +212,10 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
             </div>
 
             <div className="flex flex-col md:flex-row justify-end gap-2 pt-4">
-              <Button
-                variant="outline"
-                className="w-full md:w-auto"
-                onClick={onClose}
-              >
+              <Button variant="outline" className="w-full md:w-auto" onClick={onClose}>
                 Close
               </Button>
-              <Button
-                variant="outline"
-                className="w-full md:w-auto"
-                onClick={onEdit}
-              >
+              <Button variant="outline" className="w-full md:w-auto" onClick={onEdit}>
                 Edit
               </Button>
               <Button

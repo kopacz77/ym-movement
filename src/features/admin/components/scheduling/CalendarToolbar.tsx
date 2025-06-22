@@ -1,7 +1,7 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
+import { addDays, format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { format, addDays } from "date-fns";
+import React from "react";
 
 interface ToolbarProps {
   date: Date;
@@ -44,25 +44,13 @@ export const CalendarToolbar: React.FC<ToolbarProps> = ({
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onNavigate("TODAY")}
-        >
+        <Button variant="outline" size="sm" onClick={() => onNavigate("TODAY")}>
           Today
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onNavigate("PREV")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => onNavigate("PREV")}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onNavigate("NEXT")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => onNavigate("NEXT")}>
           <ChevronRight className="h-4 w-4" />
         </Button>
         <h2 className="text-lg font-semibold ml-2">{getViewTitle()}</h2>

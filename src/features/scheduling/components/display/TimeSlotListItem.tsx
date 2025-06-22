@@ -40,8 +40,8 @@ export function TimeSlotListItem({ slot, onClick }: TimeSlotListItemProps) {
         <div>{`${studentCount}/${slot.maxStudents}`}</div>
       </div>
       <div className="text-sm text-gray-600 flex justify-between">
-        <div>{slot.rink.name}</div>
-        {studentNames && <div className="italic">{studentNames}</div>}
+        <div className="break-words pr-2">{slot.rink.name}</div>
+        {studentNames && <div className="italic break-words">{studentNames}</div>}
       </div>
     </button>
   );

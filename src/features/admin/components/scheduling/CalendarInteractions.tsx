@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { Calendar, View, Views, SlotInfo } from "react-big-calendar";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import React from "react";
+import { Calendar, SlotInfo, View, Views } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { BookingDialog } from "./BookingDialog";
 
 interface CalendarEvent {

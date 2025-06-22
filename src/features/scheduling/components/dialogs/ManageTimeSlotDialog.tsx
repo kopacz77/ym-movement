@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/select";
 import { formatRinkTime } from "@/lib/timezone";
 import type { TimeSlot } from "@/types/scheduling";
-import { Event } from "react-big-calendar";
 import { X } from "lucide-react";
+import { Event } from "react-big-calendar";
 
 interface Student {
   id: string;

@@ -82,9 +82,7 @@ export const StudentHeader = () => {
                 className="h-9 w-9 md:h-10 md:w-10"
                 aria-label="Log out"
               >
-                <LogOut className="h-5 w-5" aria-hidden="true">
-                  <title>Logout</title>
-                </LogOut>
+                <LogOut className="h-5 w-5" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className={isMobile ? "w-[90%] max-w-md mx-auto" : ""}>

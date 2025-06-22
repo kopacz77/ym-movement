@@ -1,6 +1,6 @@
-import React from "react";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import React from "react";
 
 interface CalendarEventProps {
   event: {
@@ -15,15 +15,15 @@ interface CalendarEventProps {
 export const CalendarEvent: React.FC<CalendarEventProps> = ({ event, style }) => {
   const duration = Math.round((event.end.getTime() - event.start.getTime()) / (1000 * 60));
   const isShort = duration < 30;
-  
+
   const statusClassName = event.status ? getStatusClass(event.status) : "";
-  
+
   return (
-    <div 
+    <div
       className={cn(
-        "overflow-hidden text-sm border-l-4 rounded-sm px-2 py-1", 
+        "overflow-hidden text-sm border-l-4 rounded-sm px-2 py-1",
         statusClassName,
-        isShort ? "truncate" : ""
+        isShort ? "truncate" : "",
       )}
       style={style}
     >

@@ -61,13 +61,14 @@ export const groupTimeSlotsByDay = (slots?: TimeSlot[]): GroupedTimeSlot[] => {
   // Process each slot
   for (const slot of slots) {
     // Convert to DateTime using proper timezone
-    const slotDateTime = typeof slot.startTime === 'string' 
-      ? DateTime.fromISO(slot.startTime).setZone(slot.rink.timezone)
-      : DateTime.fromJSDate(slot.startTime).setZone(slot.rink.timezone);
-    
+    const slotDateTime =
+      typeof slot.startTime === "string"
+        ? DateTime.fromISO(slot.startTime).setZone(slot.rink.timezone)
+        : DateTime.fromJSDate(slot.startTime).setZone(slot.rink.timezone);
+
     // Create a key for the date (YYYY-MM-DD)
-    const dateKey = slotDateTime.toFormat('yyyy-MM-dd');
-    
+    const dateKey = slotDateTime.toFormat("yyyy-MM-dd");
+
     // Add to the corresponding group
     if (!groupedMap.has(dateKey)) {
       groupedMap.set(dateKey, []);
@@ -79,31 +80,29 @@ export const groupTimeSlotsByDay = (slots?: TimeSlot[]): GroupedTimeSlot[] => {
   return Array.from(groupedMap.entries())
     .map(([dateKey, slots]) => {
       // Get date object from the key
-      const date = DateTime.fromFormat(dateKey, 'yyyy-MM-dd');
-      
+      const date = DateTime.fromFormat(dateKey, "yyyy-MM-dd");
+
       // Format the date for display
-      const formattedDate = date.toFormat('EEEE, MMMM d, yyyy');
-      
+      const formattedDate = date.toFormat("EEEE, MMMM d, yyyy");
+
       // Sort slots by start time
       const sortedSlots = [...slots].sort((a, b) => {
-        const startA = typeof a.startTime === 'string' 
-          ? new Date(a.startTime).getTime() 
-          : a.startTime.getTime();
-        const startB = typeof b.startTime === 'string' 
-          ? new Date(b.startTime).getTime() 
-          : b.startTime.getTime();
+        const startA =
+          typeof a.startTime === "string" ? new Date(a.startTime).getTime() : a.startTime.getTime();
+        const startB =
+          typeof b.startTime === "string" ? new Date(b.startTime).getTime() : b.startTime.getTime();
         return startA - startB;
       });
-      
+
       return {
         formattedDate,
-        slots: sortedSlots
+        slots: sortedSlots,
       };
     })
     .sort((a, b) => {
       // Extract dates from formatted strings for comparison
-      const dateA = DateTime.fromFormat(a.formattedDate, 'EEEE, MMMM d, yyyy');
-      const dateB = DateTime.fromFormat(b.formattedDate, 'EEEE, MMMM d, yyyy');
+      const dateA = DateTime.fromFormat(a.formattedDate, "EEEE, MMMM d, yyyy");
+      const dateB = DateTime.fromFormat(b.formattedDate, "EEEE, MMMM d, yyyy");
       return dateA < dateB ? -1 : 1;
     });
 };
@@ -139,10 +138,10 @@ export const getEventClassName = (status?: string): string => {
 // Format date range for display
 export const formatDateRange = (date: Date, view: string): string => {
   const dateTime = DateTime.fromJSDate(date);
-  
+
   switch (view) {
     case "month": {
-      return dateTime.toFormat('MMMM yyyy');
+      return dateTime.toFormat("MMMM yyyy");
     }
     case "week": {
       // Explicitly get the Monday of the current week
@@ -151,21 +150,25 @@ export const formatDateRange = (date: Date, view: string): string => {
       // Calculate how many days to go back to reach Monday
       const daysToSubtract = currentWeekday === 1 ? 0 : currentWeekday - 1;
       const startOfWeek = dateTime.minus({ days: daysToSubtract });
-      
+
       // End of week is 6 days later (Sunday)
       const endOfWeek = startOfWeek.plus({ days: 6 });
-      
+
       // Format differently if same month or different months
       if (startOfWeek.month === endOfWeek.month) {
-        return `${startOfWeek.toFormat('MMM d')} - ${endOfWeek.toFormat('d')}, ${startOfWeek.toFormat('yyyy')}`;
+        return `${startOfWeek.toFormat("MMM d")} - ${endOfWeek.toFormat(
+          "d",
+        )}, ${startOfWeek.toFormat("yyyy")}`;
       }
-      return `${startOfWeek.toFormat('MMM d')} - ${endOfWeek.toFormat('MMM d')}, ${startOfWeek.toFormat('yyyy')}`;
+      return `${startOfWeek.toFormat("MMM d")} - ${endOfWeek.toFormat(
+        "MMM d",
+      )}, ${startOfWeek.toFormat("yyyy")}`;
     }
     case "day": {
-      return dateTime.toFormat('EEEE, MMMM d, yyyy');
+      return dateTime.toFormat("EEEE, MMMM d, yyyy");
     }
     default: {
-      return dateTime.toFormat('MMMM yyyy');
+      return dateTime.toFormat("MMMM yyyy");
     }
   }
 };
@@ -174,16 +177,16 @@ export const formatDateRange = (date: Date, view: string): string => {
 export const getDayTimeSlots = (date: Date, interval = 30): Date[] => {
   const slots: Date[] = [];
   const day = new Date(date);
-  
+
   // Reset to start of day
   day.setHours(0, 0, 0, 0);
-  
+
   // Generate slots for the entire day
   for (let minutes = 0; minutes < 24 * 60; minutes += interval) {
     const slot = new Date(day);
     slot.setMinutes(minutes);
     slots.push(slot);
   }
-  
+
   return slots;
 };

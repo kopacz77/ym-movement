@@ -4,9 +4,6 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Add environment variable control without breaking development flow
-const bypassAuthInDev =
-  process.env.NODE_ENV === "development" &&
-  process.env.ENABLE_AUTH_BYPASS === "true";
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -19,23 +16,25 @@ export async function middleware(request: NextRequest) {
     path.startsWith("/api/auth");
 
   // Get the token and check if the user is authenticated
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  let token;
+  try {
+    token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+  } catch (error) {
+    // Log token verification errors for security monitoring
+    console.error("Token verification failed:", error instanceof Error ? error.message : "Unknown error");
+    token = null;
+  }
 
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!token && token.id && token.role;
 
   // Redirect unauthenticated users to login
   if (!isPublicPath && !isAuthenticated) {
-    // Development bypass option for easier testing
-    if (bypassAuthInDev) {
-      console.warn(
-        "⚠️ Authentication bypassed in development mode. Set ENABLE_AUTH_BYPASS=false to test auth flow.",
-      );
-      return NextResponse.next();
-    }
-
+    // REMOVED: Development bypass for security
+    // All environments must properly authenticate
+    
     const loginUrl = new URL("/auth/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
@@ -51,17 +50,26 @@ export async function middleware(request: NextRequest) {
   }
 
   // Handle role-based access for admin and student routes
-  if (isAuthenticated) {
+  if (isAuthenticated && token) {
     const role = token.role as string;
+
+    // Validate role is one of expected values
+    if (!["ADMIN", "STUDENT"].includes(role)) {
+      console.error(`Invalid role detected: ${role} for user ${token.id}`);
+      const loginUrl = new URL("/auth/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
 
     // Prevent students from accessing admin routes
     if (path.startsWith("/admin") && role !== "ADMIN") {
+      console.warn(`Student ${token.id} attempted to access admin route: ${path}`);
       const studentDashboard = new URL("/student/dashboard", request.url);
       return NextResponse.redirect(studentDashboard);
     }
 
     // Prevent admins from accessing student routes
     if (path.startsWith("/student") && role !== "STUDENT") {
+      console.warn(`Admin ${token.id} attempted to access student route: ${path}`);
       const adminDashboard = new URL("/admin/dashboard", request.url);
       return NextResponse.redirect(adminDashboard);
     }

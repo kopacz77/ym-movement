@@ -50,7 +50,6 @@ export default function LoginPage() {
       }
 
       const userData = await response.json();
-      console.log("User role:", userData.role); // Debug log
 
       if (userData.role === "ADMIN") {
         router.push("/admin/dashboard");

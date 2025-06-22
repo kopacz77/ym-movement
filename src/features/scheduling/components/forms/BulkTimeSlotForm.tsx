@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBulkOperations } from "@/contexts/BulkOperationsContext";
 import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, isAfter, parse } from "date-fns";
@@ -28,7 +29,6 @@ import { FC } from "react"; // Change to type import
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useBulkOperations } from "@/contexts/BulkOperationsContext";
 
 // Create a custom validator for start and end dates
 const dateRangeValidator = (startDate: string, endDate: string) => {
@@ -99,7 +99,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
           timestamp: Date.now(),
           count: data.created || data.count,
           slotIds: data.createdSlotIds,
-          operation: "create"
+          operation: "create",
         });
       }
       // Invalidate the getTimeSlots query.

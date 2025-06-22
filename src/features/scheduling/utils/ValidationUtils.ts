@@ -1,6 +1,6 @@
+import { type LessonType, Level } from "@prisma/client";
 // src/features/scheduling/utils/validationUtils.ts
 import type { CalendarSlot, TimeRange } from "../types";
-import { type LessonType, Level } from "@prisma/client";
 
 export interface ValidationResult {
   passed: boolean;

@@ -23,12 +23,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   onSlotHoverAction,
 }) => {
   // Convert dates to Luxon DateTime objects in the rink's timezone
-  const startDate = DateTime.fromJSDate(view.startDate).setZone(rinkTimezone).startOf('week');
+  const startDate = DateTime.fromJSDate(view.startDate).setZone(rinkTimezone).startOf("week");
 
   const getSlotForTime = (date: DateTime): CalendarSlot | undefined => {
     return slots.find((slot) => {
       const slotTime = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
-      return slotTime.hasSame(date, 'minute');
+      return slotTime.hasSame(date, "minute");
     });
   };
 

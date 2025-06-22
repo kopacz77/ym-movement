@@ -42,10 +42,10 @@ export const lessonRouter = createTRPCRouter({
             message: "Time slot is full",
           });
         }
-        
+
         // Check if the student already has a lesson in this time slot
         const existingLesson = timeSlot.lessons.find(
-          (lesson) => lesson.studentId === input.studentId
+          (lesson) => lesson.studentId === input.studentId,
         );
         if (existingLesson) {
           throw new TRPCError({
@@ -53,10 +53,10 @@ export const lessonRouter = createTRPCRouter({
             message: "Student already has a lesson in this time slot",
           });
         }
-        
+
         // Default to a safe timezone if not specified
         const timezone = timeSlot.rink.timezone || "America/Toronto";
-        
+
         // Create Google Calendar event with improved error handling
         let eventId: string | null = null;
         try {
@@ -78,11 +78,11 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           console.error("Google Calendar Error:", calendarError);
           // We'll continue and create the lesson without calendar event
         }
-        
+
         // Calculate duration properly
         const durationMs = timeSlot.endTime.getTime() - timeSlot.startTime.getTime();
         const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1); // Ensure at least 1 minute
-        
+
         // Create the lesson with the calendar event ID (if available)
         const lesson = await ctx.prisma.lesson.create({
           data: {
@@ -99,13 +99,13 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             rink: true,
           },
         });
-        
+
         // If we couldn't create the calendar event, still return success but with a note
         if (!eventId) {
           console.warn(`Lesson created without Google Calendar event: ${lesson.id}`);
           // Could add a flag to the response indicating calendar event was not created
         }
-        
+
         return lesson;
       } catch (error) {
         console.error("Error creating lesson:", error);
@@ -135,7 +135,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             message: "Lesson not found",
           });
         }
-        
+
         // Delete Google Calendar event if it exists
         if (lesson.googleCalendarEventId) {
           try {
@@ -145,7 +145,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             // Continue with lesson cancellation even if calendar deletion fails
           }
         }
-        
+
         return await ctx.prisma.lesson.update({
           where: { id: input.lessonId },
           data: {
@@ -182,7 +182,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             message: "End date must be after start date",
           });
         }
-        
+
         return await ctx.prisma.lesson.findMany({
           where: {
             startTime: { gte: input.startDate, lte: input.endDate },
@@ -237,7 +237,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             // If active flag is provided, filter by it
             ...(input?.active !== undefined ? { isActive: input.active } : {}),
           },
-          include: { 
+          include: {
             user: true,
             // Include recent lessons for context
             lessons: {
@@ -251,7 +251,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           },
           orderBy: { user: { name: "asc" } },
         });
-        
+
         return { students };
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -275,54 +275,54 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // First check if the slot is full and get timezone info
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
-          include: { 
+          include: {
             lessons: true,
-            rink: true 
+            rink: true,
           },
         });
-        
+
         if (!timeSlot) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Time slot not found",
           });
         }
-        
+
         if (timeSlot.lessons.length >= timeSlot.maxStudents) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Time slot is at maximum capacity",
           });
         }
-        
+
         // Check if student is already assigned
         const existingLesson = timeSlot.lessons.find(
           (lesson) => lesson.studentId === input.studentId,
         );
-        
+
         if (existingLesson) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Student is already assigned to this time slot",
           });
         }
-        
+
         // Get student information for calendar event
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: { user: true },
         });
-        
+
         if (!student) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",
           });
         }
-        
+
         // Default to a safe timezone if not specified
         const timezone = timeSlot.rink.timezone || "America/Toronto";
-        
+
         // Create Google Calendar event
         let eventId: string | null = null;
         try {
@@ -342,11 +342,11 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           console.error("Google Calendar Error:", calendarError);
           // Continue without calendar event
         }
-        
+
         // Calculate duration properly
         const durationMs = timeSlot.endTime.getTime() - timeSlot.startTime.getTime();
         const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1); // Ensure at least 1 minute
-        
+
         // Create the lesson
         return await ctx.prisma.lesson.create({
           data: {
@@ -385,14 +385,14 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         const lesson = await ctx.prisma.lesson.findUnique({
           where: { id: input.lessonId },
         });
-        
+
         if (!lesson) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Lesson not found",
           });
         }
-        
+
         // Delete Google Calendar event if it exists
         if (lesson.googleCalendarEventId) {
           try {
@@ -402,11 +402,11 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             // Continue with lesson deletion even if calendar deletion fails
           }
         }
-        
+
         await ctx.prisma.lesson.delete({
           where: { id: input.lessonId },
         });
-        
+
         return { success: true };
       } catch (error) {
         console.error("Error unassigning student:", error);

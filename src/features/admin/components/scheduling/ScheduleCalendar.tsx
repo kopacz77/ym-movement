@@ -12,7 +12,7 @@ import { ScheduleCalendarView } from "./ScheduleCalendarView";
 
 export const ScheduleCalendar = () => {
   const [selectedRink, setSelectedRink] = React.useState("MAIN_RINK");
-  
+
   const handleRinkChange = (value: string) => {
     setSelectedRink(value);
   };

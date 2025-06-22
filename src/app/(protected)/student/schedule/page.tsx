@@ -22,7 +22,7 @@ export default async function Page() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/auth/login");
   }
 
   // Get the student profile
@@ -34,7 +34,7 @@ export default async function Page() {
 
   if (!student) {
     // Redirect if user doesn't have a student profile
-    redirect("/profile/setup");
+    redirect("/student/profile");
   }
 
   // Render the client component without passing any problematic props

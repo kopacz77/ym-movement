@@ -2,24 +2,24 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { useBulkOperations } from "@/contexts/BulkOperationsContext";
+import { ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
-import { useCalendarEvents, ExtendedCalendarEvent } from "@/hooks/useCalendarEvents";
-import { endOfDay, startOfDay } from "date-fns";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
+import { endOfDay, startOfDay } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
-import { useBulkOperations } from "@/contexts/BulkOperationsContext";
-import { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop';
+import { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
 
+import { SlotInfo } from "react-big-calendar";
+import { DesktopCalendarView } from "./DesktopCalendarView";
+import { BulkCreateSlotsDialog, CreateTimeSlotDialog } from "./DialogComponents";
+import { MobileCalendarView } from "./MobileCalendarView";
+import { ScheduleHeader } from "./ScheduleHeader";
 // Import our components
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
-import { MobileCalendarView } from "./MobileCalendarView";
-import { DesktopCalendarView } from "./DesktopCalendarView";
-import { ScheduleHeader } from "./ScheduleHeader";
-import { CreateTimeSlotDialog, BulkCreateSlotsDialog } from "./DialogComponents";
-import { formatDateRange, type TimeSlot } from "./calendarUtils";
-import { SlotInfo } from 'react-big-calendar';
+import { type TimeSlot, formatDateRange } from "./calendarUtils";
 
 // Define types for form data
 interface TimeSlotFormData {
@@ -55,31 +55,26 @@ export function ScheduleManager() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
-  
+
   // Selected data state
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
-  
+
   // Media query hook
   const isMobile = useIsMobile();
-  
+
   // Calendar state
   const initialDate = useMemo(() => new Date(), []);
   const [date, setDate] = useState(initialDate);
   const [calendarView, setCalendarView] = useState("week");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
-  
+
   // Access bulk operations context
   useBulkOperations();
 
   // Use schedule actions hook for mutations
-  const { 
-    deleteTimeSlot,
-    assignStudent,
-    unassignStudent,
-    updateTimeSlot
-  } = useScheduleActions();
+  const { deleteTimeSlot, assignStudent, unassignStudent, updateTimeSlot } = useScheduleActions();
 
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
@@ -98,34 +93,35 @@ export function ScheduleManager() {
   }, [date]);
 
   // Use the timeSlots hook to fetch data
-  const { 
-    rinks, 
-    students, 
-    timeSlots 
-  } = useTimeSlots(dateRange, selectedRink);
+  const { rinks, students, timeSlots } = useTimeSlots(dateRange, selectedRink);
 
   // Get current rink timezone
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
-      const selectedRinkData = rinks.find((rink: { id: string; timezone: string }) => rink.id === selectedRink);
-      return selectedRinkData?.timezone || 'America/Los_Angeles';
+      const selectedRinkData = rinks.find(
+        (rink: { id: string; timezone: string }) => rink.id === selectedRink,
+      );
+      return selectedRinkData?.timezone || "America/Los_Angeles";
     }
     // Default timezone if no rink is selected
-    return 'America/Los_Angeles';
+    return "America/Los_Angeles";
   }, [selectedRink, rinks]);
 
   // Use calendar events hook
   const { events, processedEvents } = useCalendarEvents(timeSlots);
 
   // Handle user interactions
-  const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
-    setTimeSlotFormData({
-      startTime: slotInfo.start,
-      endTime: slotInfo.end,
-      rinkId: selectedRink,
-    });
-    setIsCreateDialogOpen(true);
-  }, [selectedRink]);
+  const handleSelectSlot = useCallback(
+    (slotInfo: SlotInfo) => {
+      setTimeSlotFormData({
+        startTime: slotInfo.start,
+        endTime: slotInfo.end,
+        rinkId: selectedRink,
+      });
+      setIsCreateDialogOpen(true);
+    },
+    [selectedRink],
+  );
 
   const handleCreateTimeSlotClick = useCallback(() => {
     setTimeSlotFormData({
@@ -144,26 +140,29 @@ export function ScheduleManager() {
     }
   }, []);
 
-  const handleEventDrop = useCallback((eventData: EventInteractionArgs<ExtendedCalendarEvent>) => {
-    const {event, start, end} = eventData;
-    if (event.id && start && end) {
-      updateTimeSlot.mutate({
-        id: event.id.toString(),
-        startTime: new Date(start),
-        endTime: new Date(end),
-      });
-    }
-  }, [updateTimeSlot]);
+  const handleEventDrop = useCallback(
+    (eventData: EventInteractionArgs<ExtendedCalendarEvent>) => {
+      const { event, start, end } = eventData;
+      if (event.id && start && end) {
+        updateTimeSlot.mutate({
+          id: event.id.toString(),
+          startTime: new Date(start),
+          endTime: new Date(end),
+        });
+      }
+    },
+    [updateTimeSlot],
+  );
 
   // Navigation callbacks
   const goToPrev = useCallback(() => {
-    setDate(prev => {
+    setDate((prev) => {
       const newDate = new Date(prev);
-      if (calendarView === 'month') {
+      if (calendarView === "month") {
         newDate.setMonth(newDate.getMonth() - 1);
-      } else if (calendarView === 'week') {
+      } else if (calendarView === "week") {
         newDate.setDate(newDate.getDate() - 7);
-      } else if (calendarView === 'day') {
+      } else if (calendarView === "day") {
         newDate.setDate(newDate.getDate() - 1);
       }
       return newDate;
@@ -171,13 +170,13 @@ export function ScheduleManager() {
   }, [calendarView]);
 
   const goToNext = useCallback(() => {
-    setDate(prev => {
+    setDate((prev) => {
       const newDate = new Date(prev);
-      if (calendarView === 'month') {
+      if (calendarView === "month") {
         newDate.setMonth(newDate.getMonth() + 1);
-      } else if (calendarView === 'week') {
+      } else if (calendarView === "week") {
         newDate.setDate(newDate.getDate() + 7);
-      } else if (calendarView === 'day') {
+      } else if (calendarView === "day") {
         newDate.setDate(newDate.getDate() + 1);
       }
       return newDate;
@@ -213,11 +212,15 @@ export function ScheduleManager() {
           rinkId: selectedEvent.schedule.raw.rinkId,
         }
       : {
-          startTime: selectedSlot ? 
-            (typeof selectedSlot.startTime === 'string' ? new Date(selectedSlot.startTime) : new Date()) 
+          startTime: selectedSlot
+            ? typeof selectedSlot.startTime === "string"
+              ? new Date(selectedSlot.startTime)
+              : new Date()
             : new Date(),
-          endTime: selectedSlot ? 
-            (typeof selectedSlot.endTime === 'string' ? new Date(selectedSlot.endTime) : new Date()) 
+          endTime: selectedSlot
+            ? typeof selectedSlot.endTime === "string"
+              ? new Date(selectedSlot.endTime)
+              : new Date()
             : new Date(),
           rinkId: selectedSlot?.rink.id || "",
         };
@@ -230,23 +233,26 @@ export function ScheduleManager() {
   // Handle deleting a time slot
   const handleDeleteSlot = useCallback(() => {
     const slotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
-    
+
     if (slotId) {
       deleteTimeSlot.mutate({ id: slotId });
     }
   }, [deleteTimeSlot, selectedEvent, selectedSlot]);
 
   // Handle assigning a student
-  const handleAssignStudent = useCallback((studentId: string) => {
-    const timeSlotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
-    
-    if (timeSlotId) {
-      assignStudent.mutate({
-        timeSlotId,
-        studentId,
-      });
-    }
-  }, [assignStudent, selectedEvent, selectedSlot]);
+  const handleAssignStudent = useCallback(
+    (studentId: string) => {
+      const timeSlotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
+
+      if (timeSlotId) {
+        assignStudent.mutate({
+          timeSlotId,
+          studentId,
+        });
+      }
+    },
+    [assignStudent, selectedEvent, selectedSlot],
+  );
 
   // Handle dialog close actions
   const handleCreateDialogClose = useCallback(() => {
@@ -296,7 +302,7 @@ export function ScheduleManager() {
         <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center text-amber-800">
           <span className="mr-2">🌐</span>
           <span>
-            All times shown in {rinkTimezone.split('/').pop()?.replace('_', ' ')} local time
+            All times shown in {rinkTimezone.split("/").pop()?.replace("_", " ")} local time
           </span>
         </div>
       )}

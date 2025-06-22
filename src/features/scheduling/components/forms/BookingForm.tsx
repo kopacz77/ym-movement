@@ -18,15 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api } from "@/lib/api";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LessonType, RinkArea } from "@prisma/client";
 import type React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import type { CalendarSlot } from "../../types";
-import { toast } from "sonner";
 
 // Define a proper type for the student data from the API
 interface StudentData {
@@ -60,15 +60,12 @@ interface BookingFormProps {
 
 export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAction }) => {
   const { onError } = useErrorHandler();
-  
+
   // Fetch students using the correct API namespace with enabled option only
-  const { data: studentsData, isLoading } = api.admin.student.getStudents.useQuery(
-    undefined,
-    { 
-      enabled: open 
-    }
-  );
-  
+  const { data: studentsData, isLoading } = api.admin.student.getStudents.useQuery(undefined, {
+    enabled: open,
+  });
+
   // Create lesson mutation using the proper namespace and callbacks
   const createLesson = api.admin.schedule.createLesson.useMutation({
     onSuccess: () => {
@@ -78,16 +75,16 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
     onError: (error) => {
       // Use the more generic onError handler instead of the specific tRPC one
       onError(new Error(error.message));
-    }
+    },
   });
-  
+
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
       type: LessonType.PRIVATE,
       area: slot.rinkArea,
       price: 0,
-      notes: ""
+      notes: "",
     },
   });
 
@@ -115,14 +112,20 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={isLoading ? "Loading students..." : "Select student"} />
+                        <SelectValue
+                          placeholder={isLoading ? "Loading students..." : "Select student"}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {isLoading ? (
-                        <SelectItem value="loading" disabled>Loading students...</SelectItem>
+                        <SelectItem value="loading" disabled>
+                          Loading students...
+                        </SelectItem>
                       ) : students.length === 0 ? (
-                        <SelectItem value="none" disabled>No students found</SelectItem>
+                        <SelectItem value="none" disabled>
+                          No students found
+                        </SelectItem>
                       ) : (
                         students.map((student) => (
                           <SelectItem key={student.id} value={student.id}>

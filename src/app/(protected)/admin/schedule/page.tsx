@@ -1,7 +1,17 @@
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { ScheduleManager } from "@/features/admin/components/scheduling/ScheduleManager";
 // src/app/(protected)/admin/schedule/page.tsx
-import { Suspense } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { CalendarSkeleton } from "@/components/ui/calendar-skeleton";
+import dynamic from "next/dynamic";
+
+const ScheduleManager = dynamic(
+  () =>
+    import("@/features/admin/components/scheduling/ScheduleManager").then((mod) => ({
+      default: mod.ScheduleManager,
+    })),
+  {
+    loading: () => <CalendarSkeleton />,
+  },
+);
 
 export default function AdminSchedulePage() {
   return (
@@ -9,9 +19,9 @@ export default function AdminSchedulePage() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
       </div>
-      <Suspense fallback={<LoadingSkeleton />}>
+      <ErrorBoundary>
         <ScheduleManager />
-      </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

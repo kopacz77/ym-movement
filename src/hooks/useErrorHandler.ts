@@ -15,11 +15,11 @@ export function useErrorHandler() {
     const statusCode = error.data?.httpStatus;
     const errorCode = error.data?.code;
     const message = error.message;
-    
+
     // Create a user-friendly error message
     let title = "Error";
     let description = message;
-    
+
     // Handle specific error types
     if (errorCode === "CONFLICT") {
       title = "Scheduling Conflict";
@@ -37,13 +37,13 @@ export function useErrorHandler() {
       title = "Server Error";
       description = "A server error occurred. Please try again later.";
     }
-    
+
     // Show toast with appropriate styling
     toast.error(title, {
       description,
       duration: 5000, // Show for 5 seconds
     });
-    
+
     // Log error to console for debugging
     console.error("TRPC Error:", {
       message,
@@ -53,7 +53,7 @@ export function useErrorHandler() {
       stack: error.stack,
     });
   }, []);
-  
+
   /**
    * Handle generic errors (non-TRPC)
    */
@@ -65,8 +65,8 @@ export function useErrorHandler() {
     console.error("General Error:", error);
   }, []);
 
-  return { 
+  return {
     onTRPCError,
-    onError
+    onError,
   };
 }

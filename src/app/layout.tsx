@@ -1,8 +1,8 @@
 // src/app/layout.tsx
 import "@/styles/globals.css";
 
-import { Providers } from "@/providers";
 import { cn } from "@/lib/utils";
+import { Providers } from "@/providers";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 
@@ -17,9 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <Providers>
-          <Suspense>
-            {children}
-          </Suspense>
+          <Suspense>{children}</Suspense>
           <Toaster position="bottom-right" />
         </Providers>
       </body>

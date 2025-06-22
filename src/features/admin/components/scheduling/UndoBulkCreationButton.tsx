@@ -1,12 +1,6 @@
 // src/features/admin/components/scheduling/UndoBulkCreationButton.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useBulkOperations } from "@/contexts/BulkOperationsContext";
-import { api } from "@/lib/api";
-import { Undo2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +11,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useBulkOperations } from "@/contexts/BulkOperationsContext";
+import { api } from "@/lib/api";
+import { Undo2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface BulkDeleteResult {
   success: boolean;
@@ -31,7 +31,7 @@ export function UndoBulkCreationButton() {
 
   // Check if operation is relevant (less than 1 hour old)
   const isRelevant = lastBulkCreation && Date.now() - lastBulkCreation.timestamp < 60 * 60 * 1000;
-  
+
   // If no relevant bulk operation exists, show a disabled button as a fallback
   if (!lastBulkCreation || !isRelevant || lastBulkCreation.operation !== "create") {
     // Clear outdated operations
@@ -41,12 +41,7 @@ export function UndoBulkCreationButton() {
 
     // Return a disabled button instead of null, so it's always visible
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-1"
-        disabled={true}
-      >
+      <Button variant="outline" size="sm" className="flex items-center gap-1" disabled={true}>
         <Undo2 className="h-4 w-4" />
         Undo Bulk Creation
       </Button>
@@ -59,7 +54,7 @@ export function UndoBulkCreationButton() {
         description: `Successfully deleted ${result.count} time slots.`,
       });
       clearLastBulkCreation();
-      
+
       // Invalidate queries to refresh the UI
       utils.admin.schedule.getTimeSlots.invalidate();
     },
@@ -75,8 +70,10 @@ export function UndoBulkCreationButton() {
   });
 
   const handleUndo = () => {
-    if (!lastBulkCreation) { return; }
-    
+    if (!lastBulkCreation) {
+      return;
+    }
+
     deleteBulkMutation.mutate({
       ids: lastBulkCreation.slotIds,
     });
@@ -102,9 +99,8 @@ export function UndoBulkCreationButton() {
           <AlertDialogHeader>
             <AlertDialogTitle>Undo Bulk Creation?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will delete all {lastBulkCreation.count} time slots created {timeAgo}.
-              Only empty time slots without scheduled lessons will be removed.
-              This action cannot be undone.
+              This will delete all {lastBulkCreation.count} time slots created {timeAgo}. Only empty
+              time slots without scheduled lessons will be removed. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -122,12 +118,16 @@ export function UndoBulkCreationButton() {
 // Helper function to format time ago
 function getTimeAgo(timestamp: number): string {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
-  
-  if (seconds < 60) { return `${seconds} seconds ago`; }
-  
+
+  if (seconds < 60) {
+    return `${seconds} seconds ago`;
+  }
+
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) { return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`; }
-  
+  if (minutes < 60) {
+    return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  }
+
   const hours = Math.floor(minutes / 60);
-  return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+  return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
 }

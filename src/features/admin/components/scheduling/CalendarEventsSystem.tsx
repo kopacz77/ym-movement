@@ -19,10 +19,10 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import { Calendar, Views } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse } from "date-fns";
 import React, { useState, useEffect, useCallback } from "react";
+import { Calendar, Views } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { toast } from "sonner";
 
 interface CalendarEvent {
@@ -80,7 +80,7 @@ export const CalendarEventsSystem = () => {
   const [selectedRink, setSelectedRink] = useState<string>("MAIN_RINK");
   const [viewMode, setViewMode] = useState<ViewType>("week");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  
+
   // State for modal dialog
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -197,18 +197,18 @@ export const CalendarEventsSystem = () => {
     const endHour = end.getHours();
 
     if (startHour < businessStartHour || endHour > businessEndHour) {
-      return { 
-        isValid: false, 
-        message: "Events must be scheduled between 5 AM and 6 PM."
+      return {
+        isValid: false,
+        message: "Events must be scheduled between 5 AM and 6 PM.",
       };
     }
 
     // Check minimum duration (15 minutes)
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
     if (durationMinutes < 15) {
-      return { 
-        isValid: false, 
-        message: "Events must be at least 15 minutes long."
+      return {
+        isValid: false,
+        message: "Events must be at least 15 minutes long.",
       };
     }
 
@@ -218,13 +218,13 @@ export const CalendarEventsSystem = () => {
   // Handle event selection (click)
   const handleEventSelect = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
-    
+
     // Format dates for the form
     const startDate = format(event.start, "yyyy-MM-dd");
     const startTime = format(event.start, "HH:mm");
     const endDate = format(event.end, "yyyy-MM-dd");
     const endTime = format(event.end, "HH:mm");
-    
+
     setEventForm({
       id: event.id,
       title: event.title,
@@ -234,7 +234,7 @@ export const CalendarEventsSystem = () => {
       endTime,
       maxStudents: event.maxStudents,
     });
-    
+
     setIsEditModalOpen(true);
   }, []);
 
@@ -245,7 +245,7 @@ export const CalendarEventsSystem = () => {
     const startTime = format(slotInfo.start, "HH:mm");
     const endDate = format(slotInfo.end, "yyyy-MM-dd");
     const endTime = format(slotInfo.end, "HH:mm");
-    
+
     setEventForm({
       id: `new-${Date.now()}`,
       title: "New Event",
@@ -255,7 +255,7 @@ export const CalendarEventsSystem = () => {
       endTime,
       maxStudents: 1,
     });
-    
+
     setSelectedEvent(null); // No existing event
     setIsEditModalOpen(true);
   }, []);
@@ -275,15 +275,15 @@ export const CalendarEventsSystem = () => {
     const startDateTime = parse(
       `${eventForm.startDate} ${eventForm.startTime}`,
       "yyyy-MM-dd HH:mm",
-      new Date()
+      new Date(),
     );
-    
+
     const endDateTime = parse(
       `${eventForm.endDate} ${eventForm.endTime}`,
       "yyyy-MM-dd HH:mm",
-      new Date()
+      new Date(),
     );
-    
+
     // Validate the times
     const validation = validateEventTimes(startDateTime, endDateTime);
     if (!validation.isValid) {
@@ -292,7 +292,7 @@ export const CalendarEventsSystem = () => {
       });
       return;
     }
-    
+
     if (selectedEvent) {
       // Updating existing event
       updateTimeSlot.mutate({
@@ -405,7 +405,9 @@ export const CalendarEventsSystem = () => {
                 localizer={localizer}
                 events={events}
                 view={mapViewType(viewMode)}
-                onView={(view) => setViewMode(view === Views.DAY ? "day" : view === Views.MONTH ? "month" : "week")}
+                onView={(view) =>
+                  setViewMode(view === Views.DAY ? "day" : view === Views.MONTH ? "month" : "week")
+                }
                 views={[Views.DAY, Views.WEEK, Views.MONTH]}
                 selectable
                 onSelectEvent={handleEventSelect}
@@ -431,12 +433,12 @@ export const CalendarEventsSystem = () => {
           <DialogHeader>
             <DialogTitle>{selectedEvent ? "Edit Event" : "Create Event"}</DialogTitle>
             <DialogDescription>
-              {selectedEvent 
+              {selectedEvent
                 ? "Update the event details below."
                 : "Fill in the details to create a new event."}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">
@@ -450,7 +452,7 @@ export const CalendarEventsSystem = () => {
                 className="col-span-3"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="startDate" className="text-right">
                 Start Date
@@ -464,7 +466,7 @@ export const CalendarEventsSystem = () => {
                 className="col-span-3"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="startTime" className="text-right">
                 Start Time
@@ -478,7 +480,7 @@ export const CalendarEventsSystem = () => {
                 className="col-span-3"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="endDate" className="text-right">
                 End Date
@@ -492,7 +494,7 @@ export const CalendarEventsSystem = () => {
                 className="col-span-3"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="endTime" className="text-right">
                 End Time
@@ -506,7 +508,7 @@ export const CalendarEventsSystem = () => {
                 className="col-span-3"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="maxStudents" className="text-right">
                 Max Students
@@ -523,7 +525,7 @@ export const CalendarEventsSystem = () => {
               />
             </div>
           </div>
-          
+
           <DialogFooter className="flex justify-between">
             {selectedEvent && (
               <Button variant="destructive" onClick={handleDeleteClick}>
@@ -551,7 +553,7 @@ export const CalendarEventsSystem = () => {
               Are you sure you want to delete this event? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
               Cancel

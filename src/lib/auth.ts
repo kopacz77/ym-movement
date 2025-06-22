@@ -10,7 +10,22 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 7 * 24 * 60 * 60, // 7 days (reduced from 30 for better security)
+    updateAge: 24 * 60 * 60, // Update session every 24 hours
+  },
+  jwt: {
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  },
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      }
+    },
   },
   pages: {
     signIn: "/auth/login",
@@ -74,15 +89,15 @@ export const authOptions: NextAuthOptions = {
  * @returns A random string token
  */
 export function generateResetToken(): string {
-  // Generate a random string of 32 characters
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let token = "";
-
-  // Create a random string by selecting random characters
-  for (let i = 0; i < 32; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    token += characters.charAt(randomIndex);
+  // Use crypto.randomBytes for cryptographically secure random generation
+  if (typeof window !== "undefined") {
+    // Browser environment
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  } else {
+    // Node.js environment
+    const crypto = require('crypto');
+    return crypto.randomBytes(32).toString('hex');
   }
-
-  return token;
 }

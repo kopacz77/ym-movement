@@ -1,10 +1,10 @@
 // src/features/admin/api/queries/paymentQueries.ts
 
-import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
-import { TRPCError } from "@trpc/server";
 import { PaymentStatus } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 // Import email functions if you have them
 // import { sendPaymentReminderEmail } from '@/lib/email';
 
@@ -106,7 +106,9 @@ export const paymentRouter = createTRPCRouter({
 
         return payment;
       } catch (error) {
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error("Error fetching payment:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -161,7 +163,9 @@ export const paymentRouter = createTRPCRouter({
 
         return updatedPayment;
       } catch (error) {
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error("Error verifying payment:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -196,7 +200,9 @@ export const paymentRouter = createTRPCRouter({
           data: { notes: updatedNotes },
         });
       } catch (error) {
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error("Error adding payment note:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -255,7 +261,9 @@ export const paymentRouter = createTRPCRouter({
           data: { reminderSentAt: new Date() },
         });
       } catch (error) {
-        if (error instanceof TRPCError) { throw error; }
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error("Error sending payment reminder:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
