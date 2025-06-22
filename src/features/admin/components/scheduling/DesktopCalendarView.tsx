@@ -66,7 +66,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   const EventComponent = useCallback(
     (props: EventProps<object>) => {
       const event = props.event as ExtendedCalendarEvent;
-      const timezone = event.slot?.rink?.timezone || defaultRinkTimezone;
+      const timezone = event.slot?.rink?.timezone || "America/New_York";
 
       // Get both local and rink formatted times
       const start = new Date(event.start);

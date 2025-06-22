@@ -7,6 +7,8 @@ import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+export const dynamic = 'force-dynamic';
+
 export default function StudentProfilePage() {
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);

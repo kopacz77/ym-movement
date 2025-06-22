@@ -99,7 +99,7 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(({
       limit: 100, // Increase limit for better virtualization performance
     },
     {
-      keepPreviousData: true, // Keep previous data while loading new search results
+      placeholderData: (previousData) => previousData, // Keep previous data while loading new search results
       staleTime: 1000 * 60 * 2, // 2 minutes cache
     }
   );

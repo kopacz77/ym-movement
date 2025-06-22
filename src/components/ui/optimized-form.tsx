@@ -148,7 +148,7 @@ export const OptimizedInput = memo(<
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(props: OptimizedInputProps<TFieldValues, TName>) => React.ReactElement;
 
-OptimizedInput.displayName = "OptimizedInput";
+(OptimizedInput as any).displayName = "OptimizedInput";
 
 interface OptimizedTextareaProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -266,7 +266,7 @@ export const OptimizedTextarea = memo(<
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >(props: OptimizedTextareaProps<TFieldValues, TName>) => React.ReactElement;
 
-OptimizedTextarea.displayName = "OptimizedTextarea";
+(OptimizedTextarea as any).displayName = "OptimizedTextarea";
 
 /**
  * Form field performance tracker for development

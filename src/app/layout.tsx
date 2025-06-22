@@ -1,7 +1,7 @@
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
-import { TRPCReactProvider } from "@/lib/trpc/react";
+import { Providers } from "@/providers";
 
 import "@/styles/globals.css";
 
@@ -19,13 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>
+        <Providers>
           {children}
           {/* Development performance monitor */}
           {process.env.NODE_ENV === 'development' && (
             <div id="performance-monitor-root" />
           )}
-        </TRPCReactProvider>
+        </Providers>
       </body>
     </html>
   );

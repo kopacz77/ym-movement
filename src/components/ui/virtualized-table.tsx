@@ -154,7 +154,7 @@ function VirtualizedTableComponent<T>({
 
 export const VirtualizedTable = memo(VirtualizedTableComponent) as <T>(
   props: VirtualizedTableProps<T>
-) => JSX.Element;
+) => React.ReactElement;
 
 /**
  * Hook for creating memoized table columns
@@ -231,4 +231,4 @@ function VirtualizedListComponent<T>({
 
 export const VirtualizedList = memo(VirtualizedListComponent) as <T>(
   props: VirtualizedListProps<T>
-) => JSX.Element;
+) => React.ReactElement;

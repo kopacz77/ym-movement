@@ -1,29 +1,13 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import dynamic from "next/dynamic";
+import { LessonSummary } from "@/features/student/components/dashboard/LessonSummary";
+import { UpcomingLessons } from "@/features/student/components/dashboard/UpcomingLessons";
 import Link from "next/link";
-
-const LessonSummary = dynamic(
-  () => import("@/features/student/components/dashboard/LessonSummary").then((mod) => ({
-    default: mod.LessonSummary,
-  })),
-  {
-    loading: () => <LoadingSkeleton />,
-  },
-);
-
-const UpcomingLessons = dynamic(
-  () => import("@/features/student/components/dashboard/UpcomingLessons").then((mod) => ({
-    default: mod.UpcomingLessons,
-  })),
-  {
-    loading: () => <LoadingSkeleton />,
-  },
-);
 
 export default function StudentDashboardPage() {
   const user = useCurrentUser();
