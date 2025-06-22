@@ -236,329 +236,339 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-          {/* Header with Templates */}
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Create Time Slots</h3>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {/* Quick Templates */}
+          <div className="flex justify-end">
             <BulkCreateTemplates onSelectTemplate={handleTemplateSelect} />
           </div>
 
-          {/* Real-time Validation Alerts */}
-          {validation.errors.length > 0 && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <ul className="space-y-1">
-                  {validation.errors.map((error, i) => (
-                    <li key={i}>• {error}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Form Fields */}
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="rinkId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rink</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a rink" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {rinks.map((rink) => (
+                        <SelectItem key={rink.id} value={rink.id} className="w-full">
+                          {rink.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {validation.warnings.length > 0 && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <ul className="space-y-1">
-                  {validation.warnings.map((warning, i) => (
-                    <li key={i}>• {warning}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column: Form Fields */}
-            <div className="space-y-6">
-        <FormField
-          control={form.control}
-          name="rinkId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rink</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a rink" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {rinks.map((rink) => (
-                    <SelectItem key={rink.id} value={rink.id} className="w-full">
-                      {rink.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="dailyStartTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Daily Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dailyEndTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Daily End Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Date</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  End Date <span className="text-sm text-muted-foreground" />
-                </FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="slotDuration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slot Duration (minutes)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={15}
+                      step={15}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormDescription>Minimum duration is 15 minutes</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="dailyStartTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Daily Start Time</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="dailyEndTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Daily End Time</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="daysOfWeek"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Days of Week</FormLabel>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { value: 0, label: "Sun" },
+                      { value: 1, label: "Mon" },
+                      { value: 2, label: "Tue" },
+                      { value: 3, label: "Wed" },
+                      { value: 4, label: "Thu" },
+                      { value: 5, label: "Fri" },
+                      { value: 6, label: "Sat" },
+                    ].map((day) => (
+                      <FormField
+                        key={day.value}
+                        control={form.control}
+                        name="daysOfWeek"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(day.value)}
+                                onCheckedChange={(checked) => {
+                                  const currentValue = field.value || [];
+                                  const newValue = checked
+                                    ? [...currentValue, day.value]
+                                    : currentValue.filter((d) => d !== day.value);
+                                  field.onChange(newValue);
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="text-sm font-normal">{day.label}</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="slotDuration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slot Duration (minutes)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={15}
-                  step={15}
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+            {/* Calendar Preview */}
+            {formValues.startDate && formValues.endDate && formValues.daysOfWeek.length > 0 && (
+              <div className="border rounded-lg p-4 bg-muted/20">
+                <h3 className="font-medium mb-3">Preview</h3>
+                <CalendarPreview
+                  startDate={formValues.startDate}
+                  endDate={formValues.endDate}
+                  selectedDays={formValues.daysOfWeek}
+                  startTime={formValues.dailyStartTime}
+                  endTime={formValues.dailyEndTime}
+                  slotDuration={formValues.slotDuration}
+                  breaks={formValues.breaks}
                 />
-              </FormControl>
-              <FormDescription>Minimum duration is 15 minutes</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              </div>
+            )}
 
-              {/* Advanced Options - Progressive Disclosure */}
-              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-between p-3 h-auto">
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      <span>Advanced Options</span>
-                    </div>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-6 pt-4">
-                  {/* Multiple Breaks Section */}
-                  <div className="space-y-3 border rounded-md p-4">
-                    <div className="flex justify-between items-center">
-                      <FormLabel className="text-base">Breaks (Optional)</FormLabel>
-                      {breaks.length < 3 && (
+            {/* Advanced Options */}
+            <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between p-3 h-auto">
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    <span>Advanced Options</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-4">
+                {/* Multiple Breaks Section */}
+                <div className="space-y-3 border rounded-md p-4">
+                  <div className="flex justify-between items-center">
+                    <FormLabel className="text-base">Breaks (Optional)</FormLabel>
+                    {breaks.length < 3 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addBreak}
+                        disabled={breaks.length >= 3}
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> Add Break
+                      </Button>
+                    )}
+                  </div>
+
+                  {breaks.map((breakItem, index) => (
+                    <div
+                      key={`break-${index}-${breakItem.startTime || ""}-${breakItem.duration}`}
+                      className="grid grid-cols-[1fr,1fr,auto] gap-3 items-end"
+                    >
+                      <FormField
+                        control={form.control}
+                        name={`breaks.${index}.startTime`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Break {index + 1} Start Time</FormLabel>
+                            <FormControl>
+                              <Input type="time" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`breaks.${index}.duration`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={1}
+                                step={5}
+                                {...field}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value);
+                                  field.onChange(Number.isNaN(value) ? 0 : value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {breaks.length > 1 && (
                         <Button
                           type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={addBreak}
-                          disabled={breaks.length >= 3}
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeBreak(index)}
+                          className="mb-2"
                         >
-                          <Plus className="h-4 w-4 mr-1" /> Add Break
+                          <X className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
+                  ))}
+                </div>
 
-                    {breaks.map((breakItem, index) => (
-                      <div
-                        key={`break-${index}-${breakItem.startTime || ""}-${breakItem.duration}`}
-                        className="grid grid-cols-[1fr,1fr,auto] gap-3 items-end"
-                      >
-                        <FormField
-                          control={form.control}
-                          name={`breaks.${index}.startTime`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Break {index + 1} Start Time</FormLabel>
-                              <FormControl>
-                                <Input type="time" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                <FormField
+                  control={form.control}
+                  name="maxStudents"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Maximum Students per Slot</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
                         />
-                        <FormField
-                          control={form.control}
-                          name={`breaks.${index}.duration`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Duration (minutes)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  step={5}
-                                  {...field}
-                                  onChange={(e) => {
-                                    const value = parseInt(e.target.value);
-                                    field.onChange(Number.isNaN(value) ? 0 : value);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        {breaks.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeBreak(index)}
-                            className="mb-2"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CollapsibleContent>
+            </Collapsible>
 
-                  <FormField
-                    control={form.control}
-                    name="maxStudents"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Maximum Students per Slot</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={1}
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-
-            {/* Right Column: Preview */}
-            <div className="space-y-4">
-              <CalendarPreview
-                startDate={formValues.startDate}
-                endDate={formValues.endDate}
-                selectedDays={formValues.daysOfWeek}
-                startTime={formValues.dailyStartTime}
-                endTime={formValues.dailyEndTime}
-                slotDuration={formValues.slotDuration}
-                breaks={formValues.breaks}
-              />
-            </div>
-          </div>
-
-        <FormField
-          control={form.control}
-          name="daysOfWeek"
-          render={() => (
-            <FormItem>
-              <FormLabel>Days of Week</FormLabel>
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { value: 0, label: "Sun" },
-                  { value: 1, label: "Mon" },
-                  { value: 2, label: "Tue" },
-                  { value: 3, label: "Wed" },
-                  { value: 4, label: "Thu" },
-                  { value: 5, label: "Fri" },
-                  { value: 6, label: "Sat" },
-                ].map((day) => (
-                  <FormField
-                    key={day.value}
-                    control={form.control}
-                    name="daysOfWeek"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-2">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(day.value)}
-                            onCheckedChange={(checked) => {
-                              const currentValue = field.value || [];
-                              const newValue = checked
-                                ? [...currentValue, day.value]
-                                : currentValue.filter((d) => d !== day.value);
-                              field.onChange(newValue);
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="text-sm font-normal">{day.label}</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
+            {/* Real-time validation feedback */}
+            {validation.errors.length > 0 && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  {validation.errors[0]} {validation.errors.length > 1 && `(+${validation.errors.length - 1} more required)`}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {validation.warnings.length > 0 && validation.errors.length === 0 && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  {validation.warnings[0]} {validation.warnings.length > 1 && `(+${validation.warnings.length - 1} more)`}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {validation.estimatedSlots > 0 && (
+              <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
+                <strong>Estimated:</strong> {validation.estimatedSlots} time slots will be created
+                {validation.conflicts && validation.conflicts.length > 0 && (
+                  <span className="text-destructive ml-2">({validation.conflicts.length} conflicts detected)</span>
+                )}
               </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            )}
 
-          <Separator />
-          
-          <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onSubmitAction}>
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isPending || !validation.isValid}
-              className="min-w-[120px]"
-            >
-              {isPending ? "Creating..." : validation.estimatedSlots > 0 ? `Preview ${validation.estimatedSlots} Slots` : "Create Slots"}
-            </Button>
+            <Separator />
+            
+            <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={onSubmitAction}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isPending || !validation.isValid}
+                className="min-w-[120px]"
+                onClick={(e) => {
+                  if (!validation.isValid) {
+                    e.preventDefault();
+                    // Show first validation error as toast
+                    if (validation.errors.length > 0) {
+                      toast.error("Form Validation Error", {
+                        description: validation.errors[0],
+                      });
+                    }
+                  }
+                }}
+              >
+                {isPending ? "Creating..." : validation.estimatedSlots > 0 ? `Preview ${validation.estimatedSlots} Slots` : "Create Slots"}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

@@ -1,12 +1,12 @@
-# Yura Scheduler v3 - Enterprise Figure Skating Management Platform
+# Yura Scheduler v3 - Figure Skating Management Platform
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.3.4-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.2.1-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue?logo=react)](https://reactjs.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.5.0-darkblue?logo=prisma)](https://www.prisma.io/)
 [![TRPC](https://img.shields.io/badge/TRPC-11.0.0-398CCB?logo=trpc)](https://trpc.io/)
 
-> **Enterprise-grade figure skating lesson scheduling platform with advanced performance optimizations, real-time analytics, and comprehensive student management.**
+> **Modern figure skating lesson scheduling platform with optimized performance and comprehensive management tools.**
 
 ## 🌟 Overview
 
@@ -29,7 +29,7 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 
 ### 📅 **Advanced Scheduling System**
 - Dynamic time slot management with conflict detection
-- Bulk operations for efficient schedule management
+- **Optimized bulk operations** with templates and real-time validation
 - Recurring pattern support for regular lessons
 - Google Calendar integration with automatic event sync
 - Timezone-aware scheduling for multiple rinks
@@ -57,13 +57,12 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 ## 🛠️ Tech Stack
 
 ### **Frontend**
-- **Next.js 15.3.4** - App Router with React 19
+- **Next.js 15.2.1** - App Router with React 19
 - **TypeScript 5.8.2** - Strict mode enabled
 - **Tailwind CSS** - Utility-first styling
 - **Radix UI** - Accessible component primitives
 - **React Hook Form** - Optimized form handling
 - **TanStack Query** - Data fetching and caching
-- **React Virtual** - List virtualization for performance
 
 ### **Backend**
 - **TRPC v11** - End-to-end typesafe APIs

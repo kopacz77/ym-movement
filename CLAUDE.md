@@ -12,51 +12,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Auto-fix lint issues**: `pnpm lint:fix` or `npm run lint:fix`
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
 
-## Code Style & Standards
+## Tech Stack & Architecture
 
-- Uses **Biome** for linting and formatting (not ESLint/Prettier)
-- Configured for 2-space indentation, 100 character line width
-- Double quotes, semicolons required
-- TypeScript strict mode enabled
-- React 19 with Next.js 15.2.1
+**Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS, Radix UI
+**Backend**: TRPC v11, Prisma ORM, PostgreSQL
+**Auth**: NextAuth.js with ADMIN/STUDENT roles
+**External**: Google Calendar API integration
 
-## Architecture Overview
+**Core Database Entities**: User, Student, Lesson, Payment, Rink, RinkTimeSlot, RecurringPattern
 
-### Tech Stack
-- **Frontend**: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS
-- **Backend**: TRPC v11, Prisma ORM, PostgreSQL
-- **Auth**: NextAuth.js with role-based access (ADMIN/STUDENT)
-- **UI**: Radix UI components, custom design system
-- **External**: Google Calendar API integration
-
-### Database Schema (Prisma)
-Core entities: User, Student, Lesson, Payment, Rink, RinkTimeSlot, RecurringPattern
-- Users have roles (ADMIN/STUDENT) with role-based route protection
-- Students require approval before accessing the system
-- Lessons connect students to time slots at specific rinks
-- Payment tracking with Venmo/Zelle integration
-- Google Calendar sync for lesson events
-
-### TRPC API Structure
-**Root router** (`src/lib/root.ts`) combines:
-- `admin`: Administrative functions (analytics, scheduling, student management)  
-- `student`: Student-facing functionality (booking, profile, lessons)
-- `notifications`: Notification system
-- `passwordReset`: Password reset workflows
-
-**Key admin sub-routers**:
-- `schedule`: Complex scheduling system (time slots, lessons, rinks, recurring patterns)
-- `student`: Student CRUD, approvals, notes, custom pricing
-- `analytics`: Dashboard metrics and reporting
-- `payment`: Payment processing and verification
-
-### Authentication & Authorization
-- NextAuth.js with custom JWT tokens
-- Middleware enforces role-based route access (`middleware.ts`)
-- TRPC procedures use `protectedProcedure` for authenticated routes
-- Development auth bypass available via `ENABLE_AUTH_BYPASS=true`
-
-### Project Structure
+**Project Structure**:
 - `src/app/`: Next.js App Router pages and layouts
 - `src/features/`: Feature-based organization (admin, student, auth, notifications, scheduling)
 - `src/components/ui/`: Reusable UI components (Radix-based)
@@ -64,39 +29,27 @@ Core entities: User, Student, Lesson, Payment, Rink, RinkTimeSlot, RecurringPatt
 - `src/hooks/`: Custom React hooks
 - `prisma/`: Database schema and migrations
 
-### Scheduling System
-Complex multi-layer system:
-- **Rinks**: Physical locations with timezone support
-- **RinkTimeSlots**: Available time periods at specific rinks
-- **RecurringPatterns**: Template for creating bulk time slots
-- **Lessons**: Student bookings assigned to time slots
-- **Google Calendar**: Automatic event creation/updates
+## Key Features
 
-### Key Features
-- Role-based dashboards (admin vs student views)
-- Advanced scheduling with conflict detection
-- Student approval workflow
-- Payment tracking with manual verification
-- Google Calendar integration
-- Notification system
-- Custom pricing per student
-- Bulk operations for time slot management
+- **Role-based dashboards**: Separate admin and student interfaces
+- **Advanced scheduling**: Time slot management with conflict detection
+- **Bulk operations**: Optimized bulk time slot creation with templates and real-time validation
+- **Student management**: Approval workflow, custom pricing, lesson tracking
+- **Payment tracking**: Venmo/Zelle integration with manual verification
+- **Google Calendar sync**: Automatic event creation/updates
+- **Notification system**: Real-time updates and alerts
+
+## Code Standards
+
+- **Biome** for linting/formatting (not ESLint/Prettier)
+- 2-space indentation, 100 character line width, double quotes
+- TypeScript strict mode, React Hook Form + Zod validation
+- Feature-based organization, custom UI components follow Radix patterns
+- Date handling with date-fns library
 
 ## Development Notes
 
-### Running Tests
-No test framework is currently configured. Check if tests are added before running any test commands.
-
-### Database Changes
-Always run `pnpm prisma:migrate` after schema changes in `prisma/schema.prisma`.
-
-### Environment Variables
-Required for Google Calendar, database, and NextAuth configuration. See README.md for complete list.
-
-### Code Conventions
-- Feature-based file organization 
-- TRPC procedures grouped by domain
-- Consistent error handling with TRPC error codes
-- Custom UI components follow Radix patterns
-- Date handling uses date-fns library
-- Form validation with React Hook Form + Zod
+- No test framework configured
+- Always run `pnpm prisma:migrate` after schema changes
+- Development auth bypass: `ENABLE_AUTH_BYPASS=true`
+- Environment variables required for Google Calendar, database, NextAuth

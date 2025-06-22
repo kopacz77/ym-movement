@@ -5,11 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2025-01-22
+
+### 🎨 UX Improvements & Bug Fixes
+
+#### Fixed
+- **Bulk Time Slot Creation UX**: Complete redesign of bulk create form with improved layout, real-time validation, and better user flow
+- **JSX Syntax Error**: Resolved critical build error preventing development server startup
+- **Dialog Sizing**: Fixed date picker clipping and oversized dialog issues
+- **Form Validation**: Enhanced real-time feedback and better error messaging
+
+#### Added
+- **Enhanced Bulk Creation Flow**: Templates, calendar preview, progressive disclosure for advanced options
+- **Real-time Conflict Detection**: Live validation during form completion
+- **Improved Button States**: Better disabled state handling and validation feedback
+
 ## [3.0.0] - 2025-01-22
 
-### 🚀 Major Release - Enterprise Performance Optimization
+### 🚀 Major Release - Performance Optimization
 
-This major release transforms Yura Scheduler into an enterprise-grade application with significant performance improvements, security enhancements, and advanced React patterns.
+This major release transforms Yura Scheduler with significant performance improvements, security enhancements, and advanced React patterns.
 
 ## Phase 2 - Priority 2 Optimizations ✨
 
