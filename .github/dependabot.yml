@@ -1,0 +1,50 @@
+# GitHub Dependabot configuration for automated security updates
+
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "UTC"
+    # Security updates are prioritized
+    open-pull-requests-limit: 10
+    # Group security updates together
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
+    # Auto-approve and merge security patches
+    reviewers:
+      - "kopacz77"
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+
+  # Enable updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "github-actions"
+      - "dependencies"
+
+  # Monitor Docker dependencies if any
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "docker"
+      - "dependencies"

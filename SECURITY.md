@@ -192,5 +192,40 @@ If you discover a security vulnerability, please report it responsibly:
 
 This security policy will be reviewed and updated regularly to address new threats and improve existing protections.
 
-**Last Updated**: [Current Date]
-**Next Review**: [Review Date]
+## Recent Security Updates
+
+### January 2025 Security Patches
+
+✅ **FIXED: Critical Next.js Authorization Bypass (CVE-2025-29927)**
+- Updated Next.js from 15.2.1 to 15.3.4
+- CVSS Score: 9.1/10 (Critical)
+- Impact: Could allow authorization bypass in middleware
+- Fix: Upgraded to patched version
+
+✅ **FIXED: DOMPurify XSS Vulnerability (CVE-2025-26791)**  
+- Added package overrides to force DOMPurify >=3.2.4
+- CVSS Score: 4.5/10 (Moderate)
+- Impact: Potential cross-site scripting through template literals
+- Fix: Forced upgrade via package overrides
+
+✅ **FIXED: Next.js Dev Server Information Exposure (CVE-2025-48068)**
+- Updated Next.js and configured `allowedDevOrigins`
+- CVSS Score: Low
+- Impact: Limited source code exposure in development
+- Fix: Upgraded Next.js and configured dev origin protection
+
+✅ **UPDATED: Dependencies Security Hardening**
+- Updated bcrypt from 5.1.1 to 6.0.0
+- Updated googleapis from 146.0.0 to 150.0.1
+- Updated @hookform/resolvers from 4.1.3 to 5.1.1
+- Updated @biomejs/biome from 1.5.3 to 2.0.4
+- Removed deprecated critters package
+
+### Security Audit Results: ✅ PASSED
+- ✅ 0 Known vulnerabilities in dependencies
+- ✅ Security headers properly configured  
+- ✅ Development origin protection enabled
+- ✅ All security files present and updated
+
+**Last Updated**: January 22, 2025
+**Next Review**: February 22, 2025

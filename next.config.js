@@ -12,6 +12,8 @@ const withBundleAnalyzer = BundleAnalyzer({
 
 const nextConfig = {
   reactStrictMode: true,
+  // Security configuration for CVE-2025-48068
+  allowedDevOrigins: process.env.NODE_ENV === 'development' ? ['localhost'] : [],
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ["@/components/ui"],
