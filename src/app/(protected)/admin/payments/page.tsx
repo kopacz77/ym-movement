@@ -4,16 +4,50 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaymentDetail } from "@/features/admin/components/payments/PaymentDetail";
-import { PaymentFilter } from "@/features/admin/components/payments/PaymentFilter";
-import { PaymentNoteForm } from "@/features/admin/components/payments/PaymentNoteForm";
-import { PaymentTable } from "@/features/admin/components/payments/PaymentTable";
 import { api } from "@/lib/api";
 import type { PaymentStatus } from "@prisma/client";
+import dynamic from "next/dynamic";
 import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
+
+const PaymentDetail = dynamic(
+  () => import("@/features/admin/components/payments/PaymentDetail").then((mod) => ({
+    default: mod.PaymentDetail,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const PaymentFilter = dynamic(
+  () => import("@/features/admin/components/payments/PaymentFilter").then((mod) => ({
+    default: mod.PaymentFilter,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const PaymentNoteForm = dynamic(
+  () => import("@/features/admin/components/payments/PaymentNoteForm").then((mod) => ({
+    default: mod.PaymentNoteForm,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const PaymentTable = dynamic(
+  () => import("@/features/admin/components/payments/PaymentTable").then((mod) => ({
+    default: mod.PaymentTable,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
 
 export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -134,7 +168,7 @@ export default function PaymentsPage() {
           <Card>
             <CardContent className="p-0">
               <PaymentTable
-                payments={payments || []}
+                payments={payments?.payments || []}
                 isLoading={isLoading}
                 onViewPayment={setSelectedPaymentId}
                 onVerifyPayment={handleVerifyPayment}
@@ -150,7 +184,7 @@ export default function PaymentsPage() {
           <Card>
             <CardContent className="p-0">
               <PaymentTable
-                payments={payments || []}
+                payments={payments?.payments || []}
                 isLoading={isLoading}
                 onViewPayment={setSelectedPaymentId}
                 onVerifyPayment={handleVerifyPayment}
@@ -167,7 +201,7 @@ export default function PaymentsPage() {
           <Card>
             <CardContent className="p-0">
               <PaymentTable
-                payments={payments || []}
+                payments={payments?.payments || []}
                 isLoading={isLoading}
                 onViewPayment={setSelectedPaymentId}
                 onVerifyPayment={handleVerifyPayment}

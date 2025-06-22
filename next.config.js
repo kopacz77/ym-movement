@@ -16,17 +16,71 @@ const nextConfig = {
   allowedDevOrigins: process.env.NODE_ENV === 'development' ? ['localhost'] : [],
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ["@/components/ui"],
+    optimizePackageImports: [
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-tabs", 
+      "@radix-ui/react-select",
+      "@radix-ui/react-tooltip",
+      "lucide-react",
+      "@/components/ui"
+    ],
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error']
+    } : false,
   },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
   },
-  webpack: (config) => {
+  webpack: (config, { isServer, dev }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": path.join(__dirname, "src"),
     };
+    
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk for large libraries
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /[\\/]node_modules[\\/]/,
+            priority: 20,
+          },
+          // Common chunk for shared components
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+          // UI components chunk
+          ui: {
+            name: 'ui',
+            test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
+            chunks: 'all',
+            priority: 30,
+          },
+          // Features chunk
+          features: {
+            name: 'features',
+            test: /[\\/]src[\\/]features[\\/]/,
+            chunks: 'all',
+            priority: 25,
+          },
+        },
+      };
+    }
+    
     return config;
   },
   async headers() {

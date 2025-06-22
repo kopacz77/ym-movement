@@ -2,13 +2,55 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PendingApprovals } from "@/features/admin/components/students/management/PendingApprovals";
-import { StudentList } from "@/features/admin/components/students/management/StudentList";
-import { StudentForm } from "@/features/admin/components/students/profile/StudentForm";
-import { StudentProfile } from "@/features/admin/components/students/profile/StudentProfile";
-import { NewStudentDialog } from "@/features/admin/components/students/shared/NewStudentDialog";
+import dynamic from "next/dynamic";
 import React from "react";
+
+const PendingApprovals = dynamic(
+  () => import("@/features/admin/components/students/management/PendingApprovals").then((mod) => ({
+    default: mod.PendingApprovals,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const StudentList = dynamic(
+  () => import("@/features/admin/components/students/management/StudentList").then((mod) => ({
+    default: mod.StudentList,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const StudentForm = dynamic(
+  () => import("@/features/admin/components/students/profile/StudentForm").then((mod) => ({
+    default: mod.StudentForm,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const StudentProfile = dynamic(
+  () => import("@/features/admin/components/students/profile/StudentProfile").then((mod) => ({
+    default: mod.StudentProfile,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const NewStudentDialog = dynamic(
+  () => import("@/features/admin/components/students/shared/NewStudentDialog").then((mod) => ({
+    default: mod.NewStudentDialog,
+  })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
 
 export default function AdminStudentsPage() {
   const [selectedStudentId, setSelectedStudentId] = React.useState<string | null>(null);

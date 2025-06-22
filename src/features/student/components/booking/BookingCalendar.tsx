@@ -18,7 +18,7 @@ import { displayInRinkLocalTime } from "@/lib/timezone";
 import { endOfDay, startOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DateTime } from "luxon";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, memo } from "react";
 import { Calendar, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { toast } from "sonner";
@@ -83,7 +83,7 @@ interface CalendarEvent {
 // Define a type for view
 type View = typeof Views.WEEK | typeof Views.MONTH;
 
-export const BookingCalendar = () => {
+const BookingCalendarComponent = () => {
   const { id: studentId } = useCurrentUser();
   const isMobile = useIsMobile();
 
@@ -674,3 +674,5 @@ export const BookingCalendar = () => {
     </Card>
   );
 };
+
+export const BookingCalendar = memo(BookingCalendarComponent);

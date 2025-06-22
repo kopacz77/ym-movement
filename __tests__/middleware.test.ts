@@ -20,7 +20,7 @@ describe("Middleware", () => {
     vi.clearAllMocks();
     // Reset environment variables
     delete process.env.ENABLE_AUTH_BYPASS;
-    process.env.NODE_ENV = "test";
+    (process.env as any).NODE_ENV = "test";
   });
 
   describe("Public routes", () => {
@@ -89,7 +89,7 @@ describe("Middleware", () => {
 
   describe("Development auth bypass", () => {
     it("bypasses auth in development when enabled", async () => {
-      process.env.NODE_ENV = "development";
+      (process.env as any).NODE_ENV = "development";
       process.env.ENABLE_AUTH_BYPASS = "true";
       (getToken as any).mockResolvedValue(null);
       
@@ -101,7 +101,7 @@ describe("Middleware", () => {
     });
 
     it("does not bypass auth in production", async () => {
-      process.env.NODE_ENV = "production";
+      (process.env as any).NODE_ENV = "production";
       process.env.ENABLE_AUTH_BYPASS = "true";
       (getToken as any).mockResolvedValue(null);
       

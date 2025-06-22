@@ -12,7 +12,6 @@ const BookingCalendar = dynamic(
     })),
   {
     loading: () => <CalendarSkeleton />,
-    ssr: false,
   },
 );
 

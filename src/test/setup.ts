@@ -53,10 +53,14 @@ vi.mock("next/dynamic", () => ({
 global.fetch = vi.fn();
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn(() => ({
+global.IntersectionObserver = vi.fn().mockImplementation((callback) => ({
   disconnect: vi.fn(),
   observe: vi.fn(),
   unobserve: vi.fn(),
+  root: null,
+  rootMargin: '',
+  thresholds: [],
+  takeRecords: vi.fn(() => []),
 }));
 
 // Mock ResizeObserver

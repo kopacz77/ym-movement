@@ -20,6 +20,10 @@ model User {
   createdNotes        StudentNote[]
   passwordResetTokens PasswordResetToken[]
   notifications       Notification[]       // New relation for notifications
+
+  @@index([role])
+  @@index([createdAt])
+  @@index([emailVerified])
 }
 
 model PasswordResetToken {
@@ -57,6 +61,10 @@ model Student {
   payments             Payment[]
   user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   studentNotes         StudentNote[]
+
+  @@index([isApproved])
+  @@index([createdAt])
+  @@index([level])
 }
 
 model StudentNote {
@@ -117,6 +125,10 @@ model Lesson {
   @@index([studentId])
   @@index([rinkId])
   @@index([timeSlotId])
+  @@index([status])
+  @@index([endTime])
+  @@index([studentId, startTime])
+  @@index([rinkId, startTime])
 }
 
 model Payment {
@@ -140,6 +152,10 @@ model Payment {
   @@index([studentId])
   @@index([status])
   @@index([referenceCode])
+  @@index([lesson_date])
+  @@index([createdAt])
+  @@index([studentId, status])
+  @@index([status, lesson_date])
 }
 
 model Rink {
@@ -171,6 +187,9 @@ model RinkTimeSlot {
   @@index([rinkId])
   @@index([startTime])
   @@index([recurringId])
+  @@index([isActive])
+  @@index([rinkId, startTime])
+  @@index([rinkId, isActive])
 }
 
 model Settings {

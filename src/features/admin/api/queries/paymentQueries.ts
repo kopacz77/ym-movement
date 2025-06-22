@@ -49,24 +49,54 @@ export const paymentRouter = createTRPCRouter({
           }
         }
 
-        const payments = await ctx.prisma.payment.findMany({
-          where,
-          include: {
-            student: {
-              include: {
-                user: true,
+        const [payments, total] = await Promise.all([
+          ctx.prisma.payment.findMany({
+            where,
+            include: {
+              student: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+              lesson: {
+                select: {
+                  id: true,
+                  startTime: true,
+                  endTime: true,
+                  type: true,
+                  area: true,
+                  rink: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
               },
             },
-            lesson: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-          skip: input?.page ? (input.page - 1) * (input.limit ?? 10) : undefined,
-          take: input?.limit ?? 100,
-        });
+            orderBy: {
+              createdAt: "desc",
+            },
+            skip: input?.page ? (input.page - 1) * (input.limit ?? 10) : undefined,
+            take: input?.limit ?? 100,
+          }),
+          ctx.prisma.payment.count({ where }),
+        ]);
 
-        return payments;
+        return {
+          payments,
+          pagination: {
+            total,
+            pages: Math.ceil(total / (input?.limit ?? 100)),
+            current: input?.page ?? 1,
+          },
+        };
       } catch (error) {
         console.error("Error fetching payments:", error);
         throw new TRPCError({

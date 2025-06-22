@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import dynamic from "next/dynamic";
+import React from "react";
 
 // Mock next/dynamic
 vi.mock("next/dynamic", () => ({

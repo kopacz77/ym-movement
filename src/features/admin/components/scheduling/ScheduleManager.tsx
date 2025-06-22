@@ -9,7 +9,7 @@ import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { endOfDay, startOfDay } from "date-fns";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, memo } from "react";
 import { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
 
 import { SlotInfo } from "react-big-calendar";
@@ -50,7 +50,7 @@ interface ScheduleEvent {
   };
 }
 
-export function ScheduleManager() {
+const ScheduleManagerComponent = () => {
   // Dialog state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -359,4 +359,6 @@ export function ScheduleManager() {
       </Card>
     </div>
   );
-}
+};
+
+export const ScheduleManager = memo(ScheduleManagerComponent);

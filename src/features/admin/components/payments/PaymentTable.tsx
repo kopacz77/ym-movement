@@ -22,7 +22,7 @@ interface Payment {
   createdAt: string | Date;
   student?: {
     user?: {
-      name?: string;
+      name?: string | null;
     };
   };
 }

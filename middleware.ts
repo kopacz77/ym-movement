@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
   // Redirect authenticated users away from login/signup pages
   if (isAuthenticated && isPublicPath && path !== "/") {
     // Redirect to the appropriate dashboard based on role
-    const role = token.role as string;
+    const role = token?.role as string;
     const redirectPath =
       role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
     const dashboardUrl = new URL(redirectPath, request.url);
@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
 
   // Handle role-based access for admin and student routes
   if (isAuthenticated && token) {
-    const role = token.role as string;
+    const role = token?.role as string;
 
     // Validate role is one of expected values
     if (!["ADMIN", "STUDENT"].includes(role)) {

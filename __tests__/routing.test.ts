@@ -57,14 +57,14 @@ describe("Routing Tests", () => {
     });
 
     it("should redirect student users to student dashboard", () => {
-      const userRole = "STUDENT";
+      const userRole: "STUDENT" | "ADMIN" = "STUDENT";
       const dashboardPath = userRole === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
       
       expect(dashboardPath).toBe("/student/dashboard");
     });
 
     it("should handle coach role appropriately", () => {
-      const userRole = "COACH";
+      const userRole = "COACH" as string;
       // Assuming coaches get redirected to student dashboard as fallback
       const dashboardPath = userRole === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
       

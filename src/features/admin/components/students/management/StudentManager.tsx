@@ -65,7 +65,7 @@ const studentFormSchema = z.object({
     .optional(),
   notes: z.string().optional(),
   // Add sendInvite field to control invitation email
-  sendInvite: z.boolean().default(true),
+  sendInvite: z.boolean(),
 });
 
 type StudentFormValues = z.infer<typeof studentFormSchema>;
