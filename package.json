@@ -163,8 +163,7 @@
   "type": "module",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "biome check --apply",
-      "biome format --write"
+      "biome check --write"
     ],
     "*.{json,md,yml,yaml}": [
       "biome format --write"
