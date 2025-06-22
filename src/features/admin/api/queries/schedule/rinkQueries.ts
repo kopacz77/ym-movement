@@ -6,6 +6,15 @@ export const rinkRouter = createTRPCRouter({
   getRinks: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.prisma.rink.findMany({
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          timezone: true,
+          maxCapacity: true,
+          createdAt: true,
+          updatedAt: true,
+        },
         orderBy: { name: "asc" },
       });
     } catch (error) {

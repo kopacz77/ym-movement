@@ -146,7 +146,7 @@ export const OptimizedInput = memo(<
 }) as <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->(props: OptimizedInputProps<TFieldValues, TName>) => JSX.Element;
+>(props: OptimizedInputProps<TFieldValues, TName>) => React.ReactElement;
 
 OptimizedInput.displayName = "OptimizedInput";
 
@@ -264,7 +264,7 @@ export const OptimizedTextarea = memo(<
 }) as <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->(props: OptimizedTextareaProps<TFieldValues, TName>) => JSX.Element;
+>(props: OptimizedTextareaProps<TFieldValues, TName>) => React.ReactElement;
 
 OptimizedTextarea.displayName = "OptimizedTextarea";
 

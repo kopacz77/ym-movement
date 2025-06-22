@@ -116,7 +116,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
     return {
       renderTime,
       memoryUsage,
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack || '',
       userAgent: navigator.userAgent,
       url: window.location.href,
       timestamp: this.state.timestamp,

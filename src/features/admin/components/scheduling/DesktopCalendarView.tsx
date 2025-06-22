@@ -36,6 +36,8 @@ interface DesktopCalendarViewProps {
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
+  rinkTimezone: string;
+  rinkName?: string;
 }
 
 const DnDCalendar = withDragAndDrop(Calendar);
@@ -53,21 +55,12 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   onPrev,
   onNext,
   onToday,
+  rinkTimezone,
+  rinkName,
 }) => {
   const calendarRef = useRef(null);
 
-  // We'll use a default timezone if the events don't have one specified
-  const defaultRinkTimezone = "America/Los_Angeles";
-
-  // Get the rink timezone from the first event, or use default
-  const rinkTimezone =
-    events.length > 0 && events[0].slot?.rink?.timezone
-      ? events[0].slot.rink.timezone
-      : defaultRinkTimezone;
-
-  // Get the rink name from the first event, or use default
-  const rinkName =
-    events.length > 0 && events[0].slot?.rink?.name ? events[0].slot.rink.name : "the rink";
+  // rinkTimezone and rinkName are now passed as props
 
   // Custom event component for React Big Calendar
   const EventComponent = useCallback(

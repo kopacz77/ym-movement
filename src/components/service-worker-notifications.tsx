@@ -19,7 +19,7 @@ import {
   Wifi, 
   WifiOff, 
   Download, 
-  CloudSync, 
+  CloudDrizzle, 
   AlertCircle,
   CheckCircle,
   Clock,
@@ -107,7 +107,7 @@ export function NetworkStatusIndicator() {
             
             {pendingActions > 0 && (
               <Badge variant="secondary" className="text-xs">
-                <CloudSync className="mr-1 h-3 w-3" />
+                <CloudDrizzle className="mr-1 h-3 w-3" />
                 {pendingActions} pending
               </Badge>
             )}
@@ -162,7 +162,7 @@ function NotificationCard({ notification, onRemove }: NotificationCardProps) {
       case 'offline':
         return <WifiOff className="h-4 w-4" />;
       case 'sync':
-        return <CloudSync className="h-4 w-4" />;
+        return <CloudDrizzle className="h-4 w-4" />;
       case 'error':
         return <AlertCircle className="h-4 w-4" />;
       default:
@@ -325,7 +325,7 @@ export function OfflineActionQueue() {
     <Card className="w-full max-w-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <CloudSync className="h-4 w-4" />
+          <CloudDrizzle className="h-4 w-4" />
           Offline Actions
         </CardTitle>
         <CardDescription>

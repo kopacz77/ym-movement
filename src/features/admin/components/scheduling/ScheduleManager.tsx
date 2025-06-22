@@ -337,6 +337,8 @@ const ScheduleManagerComponent = () => {
               onTodayAction={goToToday}
               groupedSlots={processedEvents}
               onSlotClickAction={handleMobileSlotClick}
+              rinkTimezone={rinkTimezone}
+              rinkName={selectedRink ? rinks?.find(r => r.id === selectedRink)?.name : undefined}
             />
           ) : (
             // Desktop calendar view - now a separate component
@@ -353,6 +355,8 @@ const ScheduleManagerComponent = () => {
               onPrev={goToPrev}
               onNext={goToNext}
               onToday={goToToday}
+              rinkTimezone={rinkTimezone}
+              rinkName={selectedRink ? rinks?.find(r => r.id === selectedRink)?.name : undefined}
             />
           )}
         </CardContent>

@@ -9,7 +9,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -108,7 +108,9 @@ class ImagePreloader {
         return;
       }
 
-      const img = new Image();
+      if (typeof window === 'undefined') return;
+      
+      const img = new (window as any).Image();
       const startTime = performance.now();
 
       img.onload = () => {

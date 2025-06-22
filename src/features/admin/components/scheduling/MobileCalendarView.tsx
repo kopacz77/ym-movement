@@ -18,6 +18,8 @@ interface MobileCalendarViewProps {
   onTodayAction: () => void;
   groupedSlots: GroupedTimeSlot[];
   onSlotClickAction: (slot: TimeSlot) => void;
+  rinkTimezone: string;
+  rinkName?: string;
 }
 
 export function MobileCalendarView({
@@ -29,6 +31,8 @@ export function MobileCalendarView({
   onTodayAction,
   groupedSlots,
   onSlotClickAction,
+  rinkTimezone,
+  rinkName,
 }: MobileCalendarViewProps) {
   // View switch buttons styling
   const getViewButtonClass = (view: string) => {
@@ -60,16 +64,9 @@ export function MobileCalendarView({
   };
 
   // Determine if we should show the timezone banner
-  const showTimezoneBanner =
-    groupedSlots.length > 0 && groupedSlots[0].slots.length > 0 && groupedSlots[0].slots[0].rink;
+  const showTimezoneBanner = rinkTimezone && rinkName;
 
-  // Get rink timezone from the first slot if available, default otherwise
-  const rinkTimezone = showTimezoneBanner
-    ? groupedSlots[0].slots[0].rink.timezone
-    : "America/Los_Angeles";
-
-  // Get rink name from the first slot if available, default otherwise
-  const rinkName = showTimezoneBanner ? groupedSlots[0].slots[0].rink.name : "the rink";
+  // rinkTimezone and rinkName are now passed as props
 
   return (
     <div className="p-4">
