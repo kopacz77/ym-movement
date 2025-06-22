@@ -1,7 +1,35 @@
 {
   "name": "yura-scheduler-v3",
-  "version": "1.0.0",
+  "version": "3.0.0",
+  "description": "Enterprise-grade figure skating lesson scheduling platform with advanced performance optimizations, real-time analytics, and comprehensive student management",
   "private": true,
+  "author": {
+    "name": "Yura Scheduler Team",
+    "email": "contact@yurascheduler.com"
+  },
+  "keywords": [
+    "figure-skating",
+    "scheduling",
+    "lesson-management",
+    "student-management",
+    "calendar",
+    "payments",
+    "nextjs",
+    "react",
+    "typescript",
+    "trpc",
+    "prisma",
+    "performance-optimized",
+    "enterprise"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/yura-scheduler-v3.git"
+  },
+  "homepage": "https://github.com/your-username/yura-scheduler-v3#readme",
+  "bugs": {
+    "url": "https://github.com/your-username/yura-scheduler-v3/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -40,6 +68,7 @@
     "@radix-ui/react-tabs": "^1.1.3",
     "@radix-ui/react-toast": "^1.2.6",
     "@tanstack/react-query": "^5.67.2",
+    "@tanstack/react-virtual": "^3.13.10",
     "@toast-ui/react-calendar": "^2.1.3",
     "@trpc/client": "^11.0.0-rc.824",
     "@trpc/next": "^11.0.0-rc.824",

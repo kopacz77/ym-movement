@@ -1,9 +1,11 @@
+// src/contexts/OptimizedAuthContext.tsx
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import type { ReactNode } from "react";
+import { AuthContextSelector, type AuthState } from "@/lib/context-utils";
 
 interface User {
   id: string;
@@ -12,23 +14,7 @@ interface User {
   role: "ADMIN" | "COACH" | "STUDENT";
 }
 
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isLoading: true,
-  isAuthenticated: false,
-  logout: async () => {},
-});
-
-export const useAuth = () => useContext(AuthContext);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const OptimizedAuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
@@ -84,22 +70,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/auth/login");
   }, [router]);
 
-  const isLoading = useMemo(() => status === "loading", [status]);
-  const isAuthenticated = useMemo(() => !!user, [user]);
-
-  const contextValue = useMemo(
+  const authState: AuthState = useMemo(
     () => ({
       user,
-      isLoading,
-      isAuthenticated,
+      isLoading: status === "loading",
+      isAuthenticated: !!user,
       logout,
     }),
-    [user, isLoading, isAuthenticated, logout],
+    [user, status, logout],
   );
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContextSelector.Provider value={authState}>
       {children}
-    </AuthContext.Provider>
+    </AuthContextSelector.Provider>
   );
 };
+
+// Export optimized selectors
+export { useAuthUser, useAuthStatus, useAuthActions } from "@/lib/context-utils";

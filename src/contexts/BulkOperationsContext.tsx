@@ -1,7 +1,7 @@
 // src/contexts/BulkOperationsContext.tsx
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo, useCallback } from "react";
 
 type BulkOperation = {
   timestamp: number;
@@ -21,18 +21,21 @@ const BulkOperationsContext = createContext<BulkOperationsContextType | undefine
 export function BulkOperationsProvider({ children }: { children: React.ReactNode }) {
   const [lastBulkCreation, setLastBulkCreation] = useState<BulkOperation | null>(null);
 
-  const clearLastBulkCreation = () => {
+  const clearLastBulkCreation = useCallback(() => {
     setLastBulkCreation(null);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      lastBulkCreation,
+      setLastBulkCreation,
+      clearLastBulkCreation,
+    }),
+    [lastBulkCreation, clearLastBulkCreation],
+  );
 
   return (
-    <BulkOperationsContext.Provider
-      value={{
-        lastBulkCreation,
-        setLastBulkCreation,
-        clearLastBulkCreation,
-      }}
-    >
+    <BulkOperationsContext.Provider value={contextValue}>
       {children}
     </BulkOperationsContext.Provider>
   );
