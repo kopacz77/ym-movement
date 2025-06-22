@@ -11,7 +11,7 @@ interface BulkCreateDialogProps {
 export function BulkCreateDialog({ isOpen, onOpenChange, rinks }: BulkCreateDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Bulk Create Time Slots</DialogTitle>
         </DialogHeader>

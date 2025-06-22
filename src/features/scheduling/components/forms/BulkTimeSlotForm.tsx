@@ -1,8 +1,13 @@
 // src/features/admin/components/scheduling/BulkTimeSlotForm.tsx
 "use client";
 
+import { BulkCreateConfirmation, type BulkCreateConfirmationData } from "@/components/bulk-create-confirmation";
+import { BulkCreateTemplates, type ScheduleTemplate } from "@/components/bulk-create-templates";
+import { CalendarPreview } from "@/components/calendar-preview";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -20,12 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useBulkOperations } from "@/contexts/BulkOperationsContext";
+import { useBulkCreateValidation } from "@/hooks/useBulkCreateValidation";
 import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, isAfter, parse } from "date-fns";
-import { Plus, X } from "lucide-react";
-import { FC } from "react"; // Change to type import
+import { AlertTriangle, ChevronDown, Plus, Settings, X } from "lucide-react";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -86,6 +93,9 @@ interface BulkTimeSlotFormProps {
 export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAction }) => {
   const utils = api.useUtils();
   const { setLastBulkCreation } = useBulkOperations();
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmationData, setConfirmationData] = useState<BulkCreateConfirmationData | null>(null);
 
   // Use the schedule namespace for bulk time slot creation.
   const createBulkSlots = api.admin.schedule.createBulkTimeSlots.useMutation({
@@ -129,6 +139,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
     },
   });
 
+  // Real-time validation
+  const formValues = form.watch();
+  const validation = useBulkCreateValidation(formValues);
+  const selectedRink = rinks.find(r => r.id === formValues.rinkId);
+
   // Get the breaks array value
   const breaks = form.watch("breaks") || [];
 
@@ -150,29 +165,114 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   };
 
   const handleSubmit = (values: BulkTimeSlotFormValues) => {
-    // Show a summary of what will be created
-    const selectedDays = values.daysOfWeek.length;
-    const dateRangeInDays =
-      differenceInDays(
-        parse(values.endDate, "yyyy-MM-dd", new Date()),
-        parse(values.startDate, "yyyy-MM-dd", new Date()),
-      ) + 1;
+    // Prepare confirmation data
+    const confirmData: BulkCreateConfirmationData = {
+      rinkName: selectedRink?.name || "Unknown Rink",
+      startDate: values.startDate,
+      endDate: values.endDate,
+      dailyStartTime: values.dailyStartTime,
+      dailyEndTime: values.dailyEndTime,
+      slotDuration: values.slotDuration,
+      breaks: values.breaks,
+      maxStudents: values.maxStudents,
+      daysOfWeek: values.daysOfWeek,
+      estimatedSlots: validation.estimatedSlots,
+      conflicts: validation.conflicts,
+      warnings: validation.warnings,
+    };
 
-    const estimatedSlots = Math.ceil(dateRangeInDays / 7) * selectedDays;
+    setConfirmationData(confirmData);
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmedSubmit = () => {
+    if (!confirmationData) return;
+    
+    const values = {
+      rinkId: formValues.rinkId,
+      startDate: confirmationData.startDate,
+      endDate: confirmationData.endDate,
+      dailyStartTime: confirmationData.dailyStartTime,
+      dailyEndTime: confirmationData.dailyEndTime,
+      slotDuration: confirmationData.slotDuration,
+      breaks: confirmationData.breaks,
+      maxStudents: confirmationData.maxStudents,
+      daysOfWeek: confirmationData.daysOfWeek,
+    };
 
     toast.info("Creating slots", {
-      description: `Creating ~${estimatedSlots} slots from ${values.dailyStartTime} to ${values.dailyEndTime} - EXACT times shown, no timezone conversion`,
+      description: `Creating ${confirmationData.estimatedSlots} slots from ${confirmationData.dailyStartTime} to ${confirmationData.dailyEndTime}`,
     });
 
     createBulkSlots.mutate(values);
+    setShowConfirmation(false);
+  };
+
+  const handleTemplateSelect = (template: ScheduleTemplate) => {
+    // Apply template values to form
+    form.setValue("dailyStartTime", template.preset.dailyStartTime);
+    form.setValue("dailyEndTime", template.preset.dailyEndTime);
+    form.setValue("slotDuration", template.preset.slotDuration);
+    form.setValue("daysOfWeek", template.preset.daysOfWeek);
+    form.setValue("maxStudents", template.preset.maxStudents);
+    form.setValue("breaks", template.preset.breaks);
+    
+    // Apply dates if available
+    if ((template as any).preset.startDate) {
+      form.setValue("startDate", (template as any).preset.startDate);
+    }
+    if ((template as any).preset.endDate) {
+      form.setValue("endDate", (template as any).preset.endDate);
+    }
+
+    toast.success("Template Applied", {
+      description: `"${template.name}" settings have been applied to the form.`,
+    });
   };
 
   // Get the state of the mutation
   const isPending = createBulkSlots.isPending;
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          {/* Header with Templates */}
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Create Time Slots</h3>
+            <BulkCreateTemplates onSelectTemplate={handleTemplateSelect} />
+          </div>
+
+          {/* Real-time Validation Alerts */}
+          {validation.errors.length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <ul className="space-y-1">
+                  {validation.errors.map((error, i) => (
+                    <li key={i}>• {error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {validation.warnings.length > 0 && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <ul className="space-y-1">
+                  {validation.warnings.map((warning, i) => (
+                    <li key={i}>• {warning}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column: Form Fields */}
+            <div className="space-y-6">
         <FormField
           control={form.control}
           name="rinkId"
@@ -281,96 +381,125 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
           )}
         />
 
-        {/* Multiple Breaks Section */}
-        <div className="space-y-3 border rounded-md p-4">
-          <div className="flex justify-between items-center">
-            <FormLabel className="text-base">Breaks (Optional)</FormLabel>
-            {breaks.length < 3 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addBreak}
-                disabled={breaks.length >= 3}
-              >
-                <Plus className="h-4 w-4 mr-1" /> Add Break
-              </Button>
-            )}
-          </div>
+              {/* Advanced Options - Progressive Disclosure */}
+              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="w-full justify-between p-3 h-auto">
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      <span>Advanced Options</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-6 pt-4">
+                  {/* Multiple Breaks Section */}
+                  <div className="space-y-3 border rounded-md p-4">
+                    <div className="flex justify-between items-center">
+                      <FormLabel className="text-base">Breaks (Optional)</FormLabel>
+                      {breaks.length < 3 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addBreak}
+                          disabled={breaks.length >= 3}
+                        >
+                          <Plus className="h-4 w-4 mr-1" /> Add Break
+                        </Button>
+                      )}
+                    </div>
 
-          {breaks.map((breakItem, index) => (
-            <div
-              key={`break-${index}-${breakItem.startTime || ""}-${breakItem.duration}`}
-              className="grid grid-cols-[1fr,1fr,auto] gap-3 items-end"
-            >
-              <FormField
-                control={form.control}
-                name={`breaks.${index}.startTime`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Break {index + 1} Start Time</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`breaks.${index}.duration`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration (minutes)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        step={5}
-                        {...field}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          field.onChange(Number.isNaN(value) ? 0 : value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {breaks.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeBreak(index)}
-                  className="mb-2"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
+                    {breaks.map((breakItem, index) => (
+                      <div
+                        key={`break-${index}-${breakItem.startTime || ""}-${breakItem.duration}`}
+                        className="grid grid-cols-[1fr,1fr,auto] gap-3 items-end"
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`breaks.${index}.startTime`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Break {index + 1} Start Time</FormLabel>
+                              <FormControl>
+                                <Input type="time" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`breaks.${index}.duration`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Duration (minutes)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  step={5}
+                                  {...field}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value);
+                                    field.onChange(Number.isNaN(value) ? 0 : value);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {breaks.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeBreak(index)}
+                            className="mb-2"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="maxStudents"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Maximum Students per Slot</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={1}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-          ))}
-        </div>
 
-        <FormField
-          control={form.control}
-          name="maxStudents"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Maximum Students per Slot</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            {/* Right Column: Preview */}
+            <div className="space-y-4">
+              <CalendarPreview
+                startDate={formValues.startDate}
+                endDate={formValues.endDate}
+                selectedDays={formValues.daysOfWeek}
+                startTime={formValues.dailyStartTime}
+                endTime={formValues.dailyEndTime}
+                slotDuration={formValues.slotDuration}
+                breaks={formValues.breaks}
+              />
+            </div>
+          </div>
 
         <FormField
           control={form.control}
@@ -417,15 +546,33 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
           )}
         />
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onSubmitAction}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Creating..." : "Create Slots"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <Separator />
+          
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={onSubmitAction}>
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isPending || !validation.isValid}
+              className="min-w-[120px]"
+            >
+              {isPending ? "Creating..." : validation.estimatedSlots > 0 ? `Preview ${validation.estimatedSlots} Slots` : "Create Slots"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+
+      {/* Enhanced Confirmation Dialog */}
+      {confirmationData && (
+        <BulkCreateConfirmation
+          isOpen={showConfirmation}
+          onOpenChange={setShowConfirmation}
+          data={confirmationData}
+          onConfirm={handleConfirmedSubmit}
+          isLoading={isPending}
+        />
+      )}
+    </>
   );
 };
