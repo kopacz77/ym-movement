@@ -233,10 +233,12 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   // Get the state of the mutation
   const isPending = createBulkSlots.isPending;
 
+  // Rinks are now loading successfully
+
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pb-4">
           {/* Quick Templates */}
           <div className="flex justify-end">
             <BulkCreateTemplates onSelectTemplate={handleTemplateSelect} />
@@ -244,6 +246,12 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
 
           {/* Form Fields */}
           <div className="space-y-4">
+            {/* Debug: Show rinks data (development only) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                Debug: {rinks?.length || 0} rinks available: {rinks?.map(r => r.name).join(', ') || 'None'}
+              </div>
+            )}
             <FormField
               control={form.control}
               name="rinkId"
@@ -257,11 +265,17 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {rinks.map((rink) => (
-                        <SelectItem key={rink.id} value={rink.id} className="w-full">
-                          {rink.name}
+                      {rinks.length === 0 ? (
+                        <SelectItem value="" disabled>
+                          No rinks available - Please add a rink first
                         </SelectItem>
-                      ))}
+                      ) : (
+                        rinks.map((rink) => (
+                          <SelectItem key={rink.id} value={rink.id} className="w-full">
+                            {rink.name}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -396,7 +410,12 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
             />
 
             {/* Calendar Preview */}
-            {formValues.startDate && formValues.endDate && formValues.daysOfWeek.length > 0 && (
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-muted-foreground bg-yellow-50 p-2 rounded">
+                Preview Debug: startDate={formValues.startDate || 'empty'}, endDate={formValues.endDate || 'empty'}, daysOfWeek=[{formValues.daysOfWeek?.join(',') || 'none'}] ({formValues.daysOfWeek?.length || 0} selected)
+              </div>
+            )}
+            {formValues.startDate && formValues.endDate && formValues.daysOfWeek && formValues.daysOfWeek.length > 0 ? (
               <div className="border rounded-lg p-4 bg-muted/20">
                 <h3 className="font-medium mb-3">Preview</h3>
                 <CalendarPreview
@@ -408,6 +427,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                   slotDuration={formValues.slotDuration}
                   breaks={formValues.breaks}
                 />
+              </div>
+            ) : (
+              <div className="border rounded-lg p-4 bg-muted/10 text-center text-muted-foreground">
+                <h3 className="font-medium mb-2">Calendar Preview</h3>
+                <p className="text-sm">Fill in dates and select days of the week to see preview</p>
               </div>
             )}
 

@@ -92,11 +92,13 @@ export const BulkCreateSlotsDialog: FC<BulkCreateSlotsDialogProps> = ({
           <Plus className="mr-2 h-4 w-4" /> Bulk Create Slots
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px] h-[90vh] max-h-[900px] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Bulk Create Time Slots</DialogTitle>
         </DialogHeader>
-        <BulkTimeSlotForm rinks={rinks || []} onSubmitAction={onSubmitAction} />
+        <div className="flex-1 overflow-y-auto">
+          <BulkTimeSlotForm rinks={rinks || []} onSubmitAction={onSubmitAction} />
+        </div>
       </DialogContent>
     </Dialog>
   );
