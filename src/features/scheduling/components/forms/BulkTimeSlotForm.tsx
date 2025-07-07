@@ -497,7 +497,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                             <FormControl>
                               <Input
                                 type="number"
-                                min={1}
+                                min={5}
                                 step={5}
                                 {...field}
                                 onChange={(e) => {

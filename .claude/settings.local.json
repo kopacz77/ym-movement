@@ -8,7 +8,8 @@
       "Bash(npm run lint:*)",
       "Bash(pnpm test:run:*)",
       "Bash(pnpm add:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

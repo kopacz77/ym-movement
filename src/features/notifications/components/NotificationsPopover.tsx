@@ -7,12 +7,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
 import { Bell } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const NotificationsPopover = () => {
   const [open, setOpen] = useState(false);
   const utils = api.useUtils();
+  const { data: session, status } = useSession();
+
+  // Only fetch notifications if user is authenticated
+  const isAuthenticated = status === "authenticated" && session?.user;
 
   // Fetch notifications from API
   const {
@@ -22,6 +27,14 @@ export const NotificationsPopover = () => {
   } = api.notifications.notifications.getNotifications.useQuery(undefined, {
     // Refresh notifications every minute
     refetchInterval: 60000,
+    enabled: isAuthenticated, // Only fetch when authenticated
+    retry: false, // Don't retry 401s
+    onError: (error) => {
+      // Don't show toast for auth errors
+      if (error.data?.httpStatus !== 401) {
+        console.error('Notifications error:', error.message);
+      }
+    }
   });
 
   // Mark as read mutation
@@ -48,14 +61,19 @@ export const NotificationsPopover = () => {
     },
   });
 
-  // Handle errors from query
+  // Handle errors from query (but not auth errors)
   useEffect(() => {
-    if (error) {
+    if (error && error.data?.httpStatus !== 401) {
       toast.error("Failed to load notifications", {
         description: error.message,
       });
     }
   }, [error]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -70,8 +88,18 @@ export const NotificationsPopover = () => {
     markAllAsRead.mutate();
   };
 
-  // Format relative time
+  // Format relative time (client-side only to prevent hydration mismatch)
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const formatRelativeTime = (date: Date) => {
+    if (!isClient) {
+      return ''; // Return empty string on server
+    }
+    
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
 

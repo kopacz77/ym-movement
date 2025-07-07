@@ -38,7 +38,7 @@ export function BreakInput({ index, form, onRemove, canRemove }: BreakInputProps
             <FormControl>
               <Input
                 type="number"
-                min={1}
+                min={5}
                 step={5}
                 {...field}
                 onChange={(e) => {
