@@ -99,14 +99,14 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                   <div className="flex items-center gap-1">
                     <span>
                       {selectedEvent.event.start &&
-                        selectedEvent.event.extendedProps.rink.timezone &&
+                        selectedEvent.event.extendedProps.Rink.timezone &&
                         formatRinkTime(
                           selectedEvent.event.start,
-                          selectedEvent.event.extendedProps.rink.timezone,
+                          selectedEvent.event.extendedProps.Rink.timezone,
                         )}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {selectedEvent.event.extendedProps.rink.timezone
+                      {selectedEvent.event.extendedProps.Rink.timezone
                         .split("/")
                         .pop()
                         ?.replace("_", " ")}
@@ -115,11 +115,11 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                 ) : (
                   <div className="flex items-center gap-1">
                     <span>
-                      {selectedSlot?.rink.timezone &&
-                        formatRinkTime(selectedSlot.startTime, selectedSlot.rink.timezone)}
+                      {selectedSlot?.Rink.timezone &&
+                        formatRinkTime(selectedSlot.startTime, selectedSlot.Rink.timezone)}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {selectedSlot?.rink.timezone.split("/").pop()?.replace("_", " ")}
+                      {selectedSlot?.Rink.timezone.split("/").pop()?.replace("_", " ")}
                     </Badge>
                   </div>
                 )}
@@ -129,16 +129,16 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                 {selectedEvent ? (
                   <p>
                     {selectedEvent.event.end &&
-                      selectedEvent.event.extendedProps.rink.timezone &&
+                      selectedEvent.event.extendedProps.Rink.timezone &&
                       formatRinkTime(
                         selectedEvent.event.end,
-                        selectedEvent.event.extendedProps.rink.timezone,
+                        selectedEvent.event.extendedProps.Rink.timezone,
                       )}
                   </p>
                 ) : (
                   <p>
-                    {selectedSlot?.rink.timezone &&
-                      formatRinkTime(selectedSlot.endTime, selectedSlot.rink.timezone)}
+                    {selectedSlot?.Rink.timezone &&
+                      formatRinkTime(selectedSlot.endTime, selectedSlot.Rink.timezone)}
                   </p>
                 )}
               </div>
@@ -194,7 +194,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     key={lesson.id}
                     className="flex items-center justify-between p-2 border rounded"
                   >
-                    <span>{lesson.student.user.name || "Unnamed Student"}</span>
+                    <span>{lesson.Student.User.name || "Unnamed Student"}</span>
                     <Button
                       variant="ghost"
                       size="sm"

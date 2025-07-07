@@ -44,8 +44,8 @@ export const bookingRouter = createTRPCRouter({
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
           include: {
-            rink: true,
-            lessons: {
+            Rink: true,
+            Lesson: {
               where: {
                 status: LessonStatus.SCHEDULED, // Only count active lessons toward capacity
               },
@@ -62,11 +62,11 @@ export const bookingRouter = createTRPCRouter({
         }
 
         console.log(
-          `[BOOKING] Time slot has ${timeSlot.lessons.length}/${timeSlot.maxStudents} lessons`,
+          `[BOOKING] Time slot has ${timeSlot.Lesson.length}/${timeSlot.maxStudents} lessons`,
         );
 
         // 2. Check if slot is available
-        if (timeSlot.lessons.length >= timeSlot.maxStudents) {
+        if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
           console.log(`[BOOKING] Time slot ${input.timeSlotId} is fully booked`);
           throw new TRPCError({
             code: "CONFLICT",
@@ -78,7 +78,7 @@ export const bookingRouter = createTRPCRouter({
         const student = (await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            user: true,
+            User: true,
           },
         })) as unknown as ExtendedStudent; // Cast to our extended type
 
@@ -134,17 +134,17 @@ export const bookingRouter = createTRPCRouter({
 
         try {
           // Only attempt calendar integration if name and email are available
-          if (student.user?.name && student.user?.email) {
-            console.log(`[BOOKING] Attempting to create calendar event for ${student.user.name}`);
-            console.log(`[BOOKING] Using timezone: ${timeSlot.rink.timezone}`);
+          if (student.User?.name && student.User?.email) {
+            console.log(`[BOOKING] Attempting to create calendar event for ${student.User.name}`);
+            console.log(`[BOOKING] Using timezone: ${timeSlot.Rink.timezone}`);
 
             // Make sure we have a valid timezone
-            const timezone = timeSlot.rink.timezone || "America/Los_Angeles"; // Fallback timezone
+            const timezone = timeSlot.Rink.timezone || "America/Los_Angeles"; // Fallback timezone
 
             googleEventId = await googleCalendar.createEvent({
-              summary: `${input.type} Lesson with ${student.user.name}`,
+              summary: `${input.type} Lesson with ${student.User.name}`,
               description: ` 
-                Student: ${student.user.name}
+                Student: ${student.User.name}
                 Lesson Type: ${input.type}
                 Area: ${input.area || "MAIN_RINK"}
                 ${input.notes ? `Notes: ${input.notes}` : ""}
@@ -152,11 +152,11 @@ export const bookingRouter = createTRPCRouter({
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               attendees: [
-                { email: student.user.email, name: student.user.name },
+                { email: student.User.email, name: student.User.name },
                 // Include instructor email as in the older version
                 { email: process.env.INSTRUCTOR_EMAIL || "yuraxmin@gmail.com" },
               ],
-              location: timeSlot.rink.address,
+              location: timeSlot.Rink.address,
               timeZone: timezone, // Explicitly pass the timezone
             });
 
@@ -287,26 +287,26 @@ export const bookingRouter = createTRPCRouter({
         );
 
         // 7. Send confirmation email to the student with fixed timezone information
-        if (student.user?.email && student.user?.name) {
+        if (student.User?.email && student.User?.name) {
           try {
-            console.log(`[BOOKING] Sending confirmation email to ${student.user.email}`);
+            console.log(`[BOOKING] Sending confirmation email to ${student.User.email}`);
 
             await sendLessonConfirmationEmail(
-              student.user.email,
-              student.user.name,
+              student.User.email,
+              student.User.name,
               {
                 startTime: timeSlot.startTime,
                 endTime: timeSlot.endTime,
                 type: input.type,
-                rinkName: timeSlot.rink.name,
-                rinkAddress: timeSlot.rink.address,
-                rinkTimezone: timeSlot.rink.timezone, // FIXED: Ensure timezone is passed
+                rinkName: timeSlot.Rink.name,
+                rinkAddress: timeSlot.Rink.address,
+                rinkTimezone: timeSlot.Rink.timezone, // FIXED: Ensure timezone is passed
               },
               input.paymentMethod,
               paymentRef,
             );
 
-            console.log(`[BOOKING] Successfully sent confirmation email to ${student.user.email}`);
+            console.log(`[BOOKING] Successfully sent confirmation email to ${student.User.email}`);
           } catch (emailError) {
             console.error("[BOOKING] Error sending confirmation email:", emailError);
             // Continue even if email fails - the booking itself was successful

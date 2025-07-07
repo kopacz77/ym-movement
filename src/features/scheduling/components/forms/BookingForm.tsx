@@ -129,7 +129,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
                       ) : (
                         students.map((student) => (
                           <SelectItem key={student.id} value={student.id}>
-                            {student.user.name || student.user.email}
+                            {student.User.name || student.User.email}
                           </SelectItem>
                         ))
                       )}

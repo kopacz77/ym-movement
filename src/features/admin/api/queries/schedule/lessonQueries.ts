@@ -22,11 +22,11 @@ export const lessonRouter = createTRPCRouter({
         const [timeSlot, student] = await Promise.all([
           ctx.prisma.rinkTimeSlot.findUnique({
             where: { id: input.timeSlotId },
-            include: { rink: true, lessons: true },
+            include: { Rink: true, Lesson: true },
           }),
           ctx.prisma.student.findUnique({
             where: { id: input.studentId },
-            include: { user: true },
+            include: { User: true },
           }),
         ]);
         if (!timeSlot || !student) {
@@ -36,7 +36,7 @@ export const lessonRouter = createTRPCRouter({
           });
         }
         // Check slot capacity
-        if (timeSlot.lessons.length >= timeSlot.maxStudents) {
+        if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
           throw new TRPCError({
             code: "CONFLICT",
             message: "Time slot is full",
@@ -44,7 +44,7 @@ export const lessonRouter = createTRPCRouter({
         }
 
         // Check if the student already has a lesson in this time slot
-        const existingLesson = timeSlot.lessons.find(
+        const existingLesson = timeSlot.Lesson.find(
           (lesson) => lesson.studentId === input.studentId,
         );
         if (existingLesson) {
@@ -55,23 +55,23 @@ export const lessonRouter = createTRPCRouter({
         }
 
         // Default to a safe timezone if not specified
-        const timezone = timeSlot.rink.timezone || "America/Toronto";
+        const timezone = timeSlot.Rink.timezone || "America/Toronto";
 
         // Create Google Calendar event with improved error handling
         let eventId: string | null = null;
         try {
           eventId = await googleCalendar.createEvent({
-            summary: `${input.type} Lesson with ${student.user.name || "Student"}`,
+            summary: `${input.type} Lesson with ${student.User.name || "Student"}`,
             description: `Lesson Type: ${input.type}
 Area: ${input.area}
 ${input.notes ? `Notes: ${input.notes}` : ""}`,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             attendees: [
-              { email: student.user.email, name: student.user.name || undefined },
+              { email: student.User.email, name: student.User.name || undefined },
               { email: process.env.INSTRUCTOR_EMAIL || "" },
             ],
-            location: timeSlot.rink.address || "",
+            location: timeSlot.Rink.address || "",
             timeZone: timezone,
           });
         } catch (calendarError) {
@@ -95,8 +95,8 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             googleCalendarEventId: eventId, // May be null if calendar creation failed
           },
           include: {
-            student: { include: { user: true } },
-            rink: true,
+            Student: { include: { User: true } },
+            Rink: true,
           },
         });
 
@@ -189,10 +189,10 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             rinkId: input.rinkId,
           },
           include: {
-            student: { include: { user: true } },
-            rink: true,
-            payment: true,
-            timeSlot: true, // Include time slot for more context
+            Student: { include: { User: true } },
+            Rink: true,
+            Payment: true,
+            RinkTimeSlot: true, // Include time slot for more context
           },
           orderBy: { startTime: "asc" },
         });
@@ -222,25 +222,25 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             OR: input?.search
               ? [
                   {
-                    user: {
+                    User: {
                       name: { contains: input.search, mode: "insensitive" },
                     },
                   },
                   {
-                    user: {
+                    User: {
                       email: { contains: input.search, mode: "insensitive" },
                     },
                   },
                 ]
               : undefined,
-            user: { role: "STUDENT" },
+            User: { role: "STUDENT" },
             // If active flag is provided, filter by it
             ...(input?.active !== undefined ? { isActive: input.active } : {}),
           },
           include: {
-            user: true,
+            User: true,
             // Include recent lessons for context
-            lessons: {
+            Lesson: {
               where: {
                 startTime: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
                 status: { not: LessonStatus.CANCELLED },
@@ -249,7 +249,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
               take: 5,
             },
           },
-          orderBy: { user: { name: "asc" } },
+          orderBy: { User: { name: "asc" } },
         });
 
         return { students };
@@ -276,8 +276,8 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
           include: {
-            lessons: true,
-            rink: true,
+            Lesson: true,
+            Rink: true,
           },
         });
 
@@ -288,7 +288,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           });
         }
 
-        if (timeSlot.lessons.length >= timeSlot.maxStudents) {
+        if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Time slot is at maximum capacity",
@@ -296,7 +296,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         }
 
         // Check if student is already assigned
-        const existingLesson = timeSlot.lessons.find(
+        const existingLesson = timeSlot.Lesson.find(
           (lesson) => lesson.studentId === input.studentId,
         );
 
@@ -310,7 +310,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // Get student information for calendar event
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
-          include: { user: true },
+          include: { User: true },
         });
 
         if (!student) {
@@ -321,21 +321,21 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         }
 
         // Default to a safe timezone if not specified
-        const timezone = timeSlot.rink.timezone || "America/Toronto";
+        const timezone = timeSlot.Rink.timezone || "America/Toronto";
 
         // Create Google Calendar event
         let eventId: string | null = null;
         try {
           eventId = await googleCalendar.createEvent({
-            summary: `Lesson with ${student.user.name || "Student"}`,
+            summary: `Lesson with ${student.User.name || "Student"}`,
             description: "Quick assignment from scheduler",
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             attendees: [
-              { email: student.user.email, name: student.user.name || undefined },
+              { email: student.User.email, name: student.User.name || undefined },
               { email: process.env.INSTRUCTOR_EMAIL || "" },
             ],
-            location: timeSlot.rink.address || "",
+            location: timeSlot.Rink.address || "",
             timeZone: timezone,
           });
         } catch (calendarError) {
@@ -362,7 +362,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
             duration: durationMinutes,
             googleCalendarEventId: eventId,
           },
-          include: { student: { include: { user: true } } },
+          include: { Student: { include: { User: true } } },
         });
       } catch (error) {
         if (error instanceof TRPCError) {

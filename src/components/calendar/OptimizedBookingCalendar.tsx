@@ -175,7 +175,7 @@ const MobileSlotItem = memo<{
     const startTime = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone).toFormat("h:mm a");
     const endTime = DateTime.fromJSDate(slot.endTime).setZone(rinkTimezone).toFormat("h:mm a");
     
-    const timezone = slot.rink.timezone || rinkTimezone;
+    const timezone = slot.Rink.timezone || rinkTimezone;
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const showLocalTime = timezone !== userTimezone;
 
@@ -191,7 +191,7 @@ const MobileSlotItem = memo<{
       localTime: localTimeDisplay,
       showLocalTime,
     };
-  }, [slot.startTime, slot.endTime, slot.rink.timezone, rinkTimezone]);
+  }, [slot.startTime, slot.endTime, slot.Rink.timezone, rinkTimezone]);
 
   const isBookable = slot.isActive && slot.isAvailable && slot.currentStudents < slot.maxStudents;
 
@@ -225,7 +225,7 @@ const MobileSlotItem = memo<{
       
       <div className="text-sm text-gray-600 flex items-center gap-1">
         <CalendarIcon className="h-4 w-4" />
-        {slot.rink.name}
+        {slot.Rink.name}
       </div>
     </button>
   );
@@ -343,7 +343,7 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
 
     const convertedEvents: OptimizedCalendarEvent[] = availableSlots.map((slot): OptimizedCalendarEvent => {
       const isAvailable = slot.isAvailable && slot.currentStudents < slot.maxStudents;
-      const timezone = slot.rink.timezone || rinkTimezone;
+      const timezone = slot.Rink.timezone || rinkTimezone;
 
       const startTimeInfo = displayInRinkLocalTime(slot.startTime.toISOString(), timezone);
       const endTimeInfo = displayInRinkLocalTime(slot.endTime.toISOString(), timezone);
@@ -360,7 +360,7 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
         end: endTimeInfo.dateTime.toJSDate(),
         status,
         interactive: slot.isActive && isAvailable,
-        rinkName: slot.rink.name,
+        rinkName: slot.Rink.name,
         timezone,
         maxStudents: slot.maxStudents,
         currentStudents: slot.currentStudents,

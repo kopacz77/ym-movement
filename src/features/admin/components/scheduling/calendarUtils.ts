@@ -63,8 +63,8 @@ export const groupTimeSlotsByDay = (slots?: TimeSlot[]): GroupedTimeSlot[] => {
     // Convert to DateTime using proper timezone
     const slotDateTime =
       typeof slot.startTime === "string"
-        ? DateTime.fromISO(slot.startTime).setZone(slot.rink.timezone)
-        : DateTime.fromJSDate(slot.startTime).setZone(slot.rink.timezone);
+        ? DateTime.fromISO(slot.startTime).setZone(slot.Rink.timezone)
+        : DateTime.fromJSDate(slot.startTime).setZone(slot.Rink.timezone);
 
     // Create a key for the date (YYYY-MM-DD)
     const dateKey = slotDateTime.toFormat("yyyy-MM-dd");

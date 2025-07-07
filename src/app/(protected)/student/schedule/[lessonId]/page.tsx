@@ -68,7 +68,7 @@ export default async function LessonDetailsPage({
     }
 
     // Ensure the logged-in user can only see their own lessons
-    if (session.user.role !== "ADMIN" && lesson.student.userId !== session.user.id) {
+    if (session.user.role !== "ADMIN" && lesson.Student.userId !== session.user.id) {
       return notFound();
     }
 
@@ -101,9 +101,9 @@ export default async function LessonDetailsPage({
               <div>
                 <h3 className="font-medium">Location</h3>
                 <p className="text-gray-600">
-                  {lesson.rink.name}, {lesson.area}
+                  {lesson.Rink.name}, {lesson.area}
                 </p>
-                <p className="text-gray-600 text-sm">{lesson.rink.address}</p>
+                <p className="text-gray-600 text-sm">{lesson.Rink.address}</p>
               </div>
 
               <div>
@@ -140,17 +140,17 @@ export default async function LessonDetailsPage({
                 <>
                   <div>
                     <h3 className="font-medium">Payment Status</h3>
-                    <p className="text-gray-600">{lesson.payment.status}</p>
+                    <p className="text-gray-600">{lesson.Payment.status}</p>
                   </div>
 
                   <div>
                     <h3 className="font-medium">Payment Method</h3>
-                    <p className="text-gray-600">{lesson.payment.method}</p>
+                    <p className="text-gray-600">{lesson.Payment.method}</p>
                   </div>
 
                   <div>
                     <h3 className="font-medium">Reference Code</h3>
-                    <p className="text-gray-600 font-mono">{lesson.payment.referenceCode}</p>
+                    <p className="text-gray-600 font-mono">{lesson.Payment.referenceCode}</p>
                   </div>
                 </>
               )}

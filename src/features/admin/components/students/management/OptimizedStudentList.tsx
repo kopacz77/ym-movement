@@ -121,7 +121,7 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(({
       header: "Name",
       minWidth: 150,
       render: (student) => (
-        <div className="font-medium">{student.user.name}</div>
+        <div className="font-medium">{student.User.name}</div>
       ),
     },
     {
@@ -129,7 +129,7 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(({
       header: "Email",
       minWidth: 200,
       render: (student) => (
-        <div className="text-sm text-muted-foreground">{student.user.email}</div>
+        <div className="text-sm text-muted-foreground">{student.User.email}</div>
       ),
     },
     {

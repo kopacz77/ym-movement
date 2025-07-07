@@ -101,8 +101,8 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
 
                 return (
                   <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.user.name}</TableCell>
-                    <TableCell>{student.user.email}</TableCell>
+                    <TableCell className="font-medium">{student.User.name}</TableCell>
+                    <TableCell>{student.User.email}</TableCell>
                     <TableCell>
                       <Badge className={getLevelColor(student.level)}>
                         {student.level.replace("_", " ")}

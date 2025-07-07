@@ -27,12 +27,12 @@ export const studentQueries = createTRPCRouter({
           OR: input?.search
             ? [
                 {
-                  user: {
+                  User: {
                     name: { contains: input.search, mode: "insensitive" },
                   },
                 },
                 {
-                  user: {
+                  User: {
                     email: { contains: input.search, mode: "insensitive" },
                   },
                 },
@@ -45,14 +45,14 @@ export const studentQueries = createTRPCRouter({
           ctx.prisma.student.findMany({
             where,
             include: {
-              user: true,
-              lessons: {
+              User: true,
+              Lesson: {
                 orderBy: { startTime: "desc" },
                 take: 1,
               },
             },
             orderBy: {
-              user: { name: "asc" },
+              User: { name: "asc" },
             },
             skip: input?.page ? (input.page - 1) * (input.limit ?? 10) : undefined,
             take: input?.limit ?? 10,
@@ -87,12 +87,12 @@ export const studentQueries = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            user: true,
-            lessons: {
+            User: true,
+            Lesson: {
               take: 5,
               orderBy: { startTime: "desc" },
               include: {
-                payment: true,
+                Payment: true,
               },
             },
           },
@@ -258,7 +258,7 @@ export const studentQueries = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id },
           include: {
-            user: true,
+            User: true,
           },
         });
 
@@ -335,7 +335,7 @@ export const studentQueries = createTRPCRouter({
         // Find the student with user details
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
-          include: { user: true },
+          include: { User: true },
         });
 
         if (!student) {
@@ -347,15 +347,15 @@ export const studentQueries = createTRPCRouter({
 
         // Create a new password reset token and send invitation
         await createPasswordResetToken(
-          student.user.id,
-          student.user.email,
-          student.user.name,
+          student.User.id,
+          student.User.email,
+          student.User.name,
           true, // Mark as invitation
         );
 
         return {
           success: true,
-          email: student.user.email,
+          email: student.User.email,
         };
       } catch (error) {
         console.error("Error resending invitation:", error);

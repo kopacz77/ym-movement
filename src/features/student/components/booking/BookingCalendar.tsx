@@ -204,7 +204,7 @@ const BookingCalendarComponent = () => {
       const isAvailable = slot.isAvailable === true;
       const isYuraSlot = slot.isActive === true;
       const studentCount = slot.currentStudents || 0;
-      const timezone = slot.rink.timezone || rinkTimezone;
+      const timezone = slot.Rink.timezone || rinkTimezone;
 
       // Format times in the rink's timezone
       const startTimeInfo = displayInRinkLocalTime(slot.startTime, timezone);
@@ -329,10 +329,10 @@ const BookingCalendarComponent = () => {
         lessons: rawSlot.lessons,
         isActive: rawSlot.isActive,
         rink: {
-          name: rawSlot.rink.name,
-          address: rawSlot.rink.address,
-          id: rawSlot.rink.id || "unknown",
-          timezone: rawSlot.rink.timezone || rinkTimezone,
+          name: rawSlot.Rink.name,
+          address: rawSlot.Rink.address,
+          id: rawSlot.Rink.id || "unknown",
+          timezone: rawSlot.Rink.timezone || rinkTimezone,
         },
         interactive: rawSlot.isAvailable,
       };
@@ -553,7 +553,7 @@ const BookingCalendarComponent = () => {
                         const endTime = formatTimeInRinkTimezone(slot.endTime);
 
                         // Add local time if timezone differs from user's timezone
-                        const timezone = slot.rink.timezone || rinkTimezone;
+                        const timezone = slot.Rink.timezone || rinkTimezone;
                         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                         const showLocalTime = timezone !== userTimezone;
 
@@ -589,7 +589,7 @@ const BookingCalendarComponent = () => {
                               </div>
                             )}
                             <div className="text-sm text-gray-600">
-                              {slot.rink.name} {isSlotBookable ? "- Available" : "- Not Available"}
+                              {slot.Rink.name} {isSlotBookable ? "- Available" : "- Not Available"}
                             </div>
                           </button>
                         );

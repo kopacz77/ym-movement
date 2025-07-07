@@ -37,7 +37,7 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
       const associatedLessons = slot.lessons || [];
 
       // Build event title
-      const title = `${slot.rink.name} (${associatedLessons.length}/${slot.maxStudents})`;
+      const title = `${slot.Rink.name} (${associatedLessons.length}/${slot.maxStudents})`;
 
       // Determine color based on slot status
       let backgroundColor = "#22c55e"; // green-500 (default/available)
@@ -56,7 +56,7 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
         title,
         start,
         end,
-        resourceId: slot.rink.id,
+        resourceId: slot.Rink.id,
         allDay: false,
         backgroundColor,
         slot, // Store the original slot for reference
@@ -78,8 +78,8 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
       // Convert to DateTime using proper timezone
       const slotDateTime =
         typeof slot.startTime === "string"
-          ? DateTime.fromISO(slot.startTime).setZone(slot.rink.timezone)
-          : DateTime.fromJSDate(slot.startTime).setZone(slot.rink.timezone);
+          ? DateTime.fromISO(slot.startTime).setZone(slot.Rink.timezone)
+          : DateTime.fromJSDate(slot.startTime).setZone(slot.Rink.timezone);
 
       // Create a key for the date (YYYY-MM-DD)
       const dateKey = slotDateTime.toFormat("yyyy-MM-dd");

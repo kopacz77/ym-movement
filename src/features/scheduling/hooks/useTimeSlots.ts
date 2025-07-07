@@ -207,11 +207,11 @@ export function useTimeSlots(dateRange?: DateRange, selectedRink?: string) {
   const events =
     dateRange && timeSlotsData
       ? timeSlotsData.map((slot: TimeSlot) => {
-          const studentCount = slot.lessons?.length || 0;
-          const studentNames = slot.lessons?.map((lesson) => lesson.student.user.name).join(", ");
+          const studentCount = slot.Lesson?.length || 0;
+          const studentNames = slot.Lesson?.map((lesson) => lesson.Student.User.name).join(", ");
           const title = `${studentCount}/${slot.maxStudents} students${
             studentNames ? ` (${studentNames})` : ""
-          } - ${slot.rink.name}`;
+          } - ${slot.Rink.name}`;
 
           // Determine if the slot is booked (has at least one student)
           const isBooked = studentCount > 0;

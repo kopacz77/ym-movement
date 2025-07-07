@@ -43,9 +43,9 @@ export const timeSlotRouter = createTRPCRouter({
             isActive: true,
           },
           include: {
-            rink: true,
-            lessons: {
-              include: { student: { include: { user: true } } },
+            Rink: true,
+            Lesson: {
+              include: { Student: { include: { User: true } } },
             },
           },
           orderBy: { startTime: "asc" },
@@ -124,7 +124,7 @@ export const timeSlotRouter = createTRPCRouter({
         }
         return await ctx.prisma.rinkTimeSlot.create({
           data: input,
-          include: { rink: true },
+          include: { Rink: true },
         });
       } catch (error) {
         console.error("Error creating time slot:", error);
@@ -143,7 +143,7 @@ export const timeSlotRouter = createTRPCRouter({
         // Check if time slot has any lessons
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.id },
-          include: { lessons: true },
+          include: { Lesson: true },
         });
 
         if (!timeSlot) {
@@ -154,7 +154,7 @@ export const timeSlotRouter = createTRPCRouter({
         }
 
         // If there are scheduled lessons, prevent deletion or handle appropriately
-        if (timeSlot.lessons.length > 0) {
+        if (timeSlot.Lesson.length > 0) {
           throw new TRPCError({
             code: "CONFLICT",
             message: "Cannot delete time slot with existing lessons",
@@ -277,7 +277,7 @@ export const timeSlotRouter = createTRPCRouter({
         const slotsWithLessons = await ctx.prisma.rinkTimeSlot.count({
           where: {
             id: { in: input.ids },
-            lessons: { some: {} },
+            Lesson: { some: {} },
           },
         });
 
@@ -292,7 +292,7 @@ export const timeSlotRouter = createTRPCRouter({
         const result = await ctx.prisma.rinkTimeSlot.deleteMany({
           where: {
             id: { in: input.ids },
-            lessons: { none: {} }, // Extra safety check
+            Lesson: { none: {} }, // Extra safety check
           },
         });
 

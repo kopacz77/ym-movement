@@ -227,7 +227,7 @@ const ScheduleManagerComponent = () => {
               ? new Date(selectedSlot.endTime)
               : new Date()
             : new Date(),
-          rinkId: selectedSlot?.rink.id || "",
+          rinkId: selectedSlot?.Rink.id || "",
         };
 
     setTimeSlotFormData(slotData);

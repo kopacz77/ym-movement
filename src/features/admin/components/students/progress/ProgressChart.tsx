@@ -141,7 +141,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
                     </div>
                   </TableCell>
                   <TableCell>{lesson.type.replace("_", " ")}</TableCell>
-                  <TableCell>{lesson.rink.name}</TableCell>
+                  <TableCell>{lesson.Rink.name}</TableCell>
                   <TableCell className="max-w-xs">
                     <p className="text-sm text-muted-foreground truncate">{lesson.notes ?? "-"}</p>
                   </TableCell>

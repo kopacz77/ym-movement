@@ -129,7 +129,7 @@ export function MobileCalendarView({
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
                 {group.slots.map((slot: TimeSlot) => {
                   // Format time in rink's timezone
-                  const timezone = slot.rink.timezone;
+                  const timezone = slot.Rink.timezone;
                   const formattedStart = displayInRinkLocalTime(slot.startTime, timezone);
                   const formattedEnd = displayInRinkLocalTime(slot.endTime, timezone);
                   const timeDisplay = `${formattedStart.formattedTime} - ${formattedEnd.formattedTime}`;
@@ -167,7 +167,7 @@ export function MobileCalendarView({
                           <div className="text-xs text-gray-500">Your time: {localTimeDisplay}</div>
                         )}
                         <div className="text-sm text-gray-500 dark:text-gray-400 break-words">
-                          {slot.rink.name} ({slot.rink.timezone.split("/").pop()?.replace("_", " ")}
+                          {slot.Rink.name} ({slot.Rink.timezone.split("/").pop()?.replace("_", " ")}
                           )
                         </div>
                         <div className="text-sm">

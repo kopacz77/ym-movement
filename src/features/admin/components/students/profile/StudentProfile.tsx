@@ -218,7 +218,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
               <CardTitle>Lesson History</CardTitle>
             </CardHeader>
             <CardContent>
-              {student.lessons && student.lessons.length > 0 ? (
+              {student.Lesson && student.Lesson.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -230,7 +230,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {student.lessons.map((lesson) => (
+                    {student.Lesson.map((lesson) => (
                       <TableRow key={lesson.id}>
                         <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
                         <TableCell>
@@ -252,13 +252,13 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {lesson.payment ? (
+                          {lesson.Payment ? (
                             <Badge
                               variant={
-                                lesson.payment.status === "COMPLETED" ? "default" : "outline"
+                                lesson.Payment.status === "COMPLETED" ? "default" : "outline"
                               }
                             >
-                              {lesson.payment.status}
+                              {lesson.Payment.status}
                             </Badge>
                           ) : (
                             <span className="text-muted-foreground">No payment</span>
@@ -344,7 +344,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
               <CardTitle>Payment History</CardTitle>
             </CardHeader>
             <CardContent>
-              {student.lessons?.some((lesson) => lesson.payment) ? (
+              {student.Lesson?.some((lesson) => lesson.Payment) ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -356,25 +356,25 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {student.lessons
-                      .filter((lesson) => lesson.payment)
+                    {student.Lesson
+                      .filter((lesson) => lesson.Payment)
                       .map((lesson) => (
-                        <TableRow key={lesson.payment?.id}>
+                        <TableRow key={lesson.Payment?.id}>
                           <TableCell>
-                            {format(new Date(lesson.payment?.createdAt || lesson.startTime), "PP")}
+                            {format(new Date(lesson.Payment?.createdAt || lesson.startTime), "PP")}
                           </TableCell>
-                          <TableCell>${lesson.payment?.amount?.toFixed(2) || "0.00"}</TableCell>
-                          <TableCell>{lesson.payment?.method || "N/A"}</TableCell>
+                          <TableCell>${lesson.Payment?.amount?.toFixed(2) || "0.00"}</TableCell>
+                          <TableCell>{lesson.Payment?.method || "N/A"}</TableCell>
                           <TableCell>
                             <Badge
                               variant={
-                                lesson.payment?.status === "COMPLETED" ? "default" : "outline"
+                                lesson.Payment?.status === "COMPLETED" ? "default" : "outline"
                               }
                             >
-                              {lesson.payment?.status}
+                              {lesson.Payment?.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{lesson.payment?.referenceCode || "N/A"}</TableCell>
+                          <TableCell>{lesson.Payment?.referenceCode || "N/A"}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>

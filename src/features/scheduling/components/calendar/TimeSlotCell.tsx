@@ -46,9 +46,9 @@ export const TimeSlotCell: React.FC<TimeSlotCellProps> = ({ slot, onClick, onHov
           <div className="text-xs">
             {slot.currentStudents}/{slot.maxStudents}
           </div>
-          {slot.lessons && slot.lessons.length > 0 && (
+          {slot.Lesson && slot.Lesson.length > 0 && (
             <div className="text-xs truncate">
-              {slot.lessons.length} lesson{slot.lessons.length !== 1 ? "s" : ""}
+              {slot.Lesson.length} lesson{slot.Lesson.length !== 1 ? "s" : ""}
             </div>
           )}
         </div>

@@ -32,7 +32,7 @@ export const validateTimeSlot = async (
 export const validateBooking = async (ctx: TRPCContext, _studentId: string, timeSlotId: string) => {
   const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
     where: { id: timeSlotId },
-    include: { lessons: true },
+    include: { Lesson: true },
   });
   if (!timeSlot) {
     throw new TRPCError({
@@ -40,7 +40,7 @@ export const validateBooking = async (ctx: TRPCContext, _studentId: string, time
       message: "Time slot not found",
     });
   }
-  if (timeSlot.lessons.length >= timeSlot.maxStudents) {
+  if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
     throw new TRPCError({
       code: "CONFLICT",
       message: "Time slot is full",

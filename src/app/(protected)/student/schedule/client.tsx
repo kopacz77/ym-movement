@@ -100,8 +100,8 @@ export default function StudentScheduleClient() {
       status: lesson.status,
       price: lesson.price,
       rink: {
-        name: lesson.rink.name,
-        address: lesson.rink.address,
+        name: lesson.Rink.name,
+        address: lesson.Rink.address,
       },
     };
 
@@ -111,13 +111,13 @@ export default function StudentScheduleClient() {
     }
 
     // Add payment info if it exists
-    if (lesson.payment) {
+    if (lesson.Payment) {
       result.payment = {
-        id: lesson.payment.id,
-        status: lesson.payment.status,
-        amount: lesson.payment.amount,
-        method: lesson.payment.method,
-        referenceCode: lesson.payment.referenceCode,
+        id: lesson.Payment.id,
+        status: lesson.Payment.status,
+        amount: lesson.Payment.amount,
+        method: lesson.Payment.method,
+        referenceCode: lesson.Payment.referenceCode,
       };
     }
 

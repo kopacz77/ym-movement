@@ -58,7 +58,7 @@ export const availabilityRouter = createTRPCRouter({
         const timeSlots = await ctx.prisma.rinkTimeSlot.findMany({
           where: whereClause,
           include: {
-            rink: {
+            Rink: {
               select: {
                 id: true,
                 name: true,
@@ -66,7 +66,7 @@ export const availabilityRouter = createTRPCRouter({
                 timezone: true,
               },
             },
-            lessons: true, // Include ALL lessons to properly calculate availability
+            Lesson: true, // Include ALL lessons to properly calculate availability
           },
           orderBy: {
             startTime: "asc",
@@ -96,7 +96,7 @@ export const availabilityRouter = createTRPCRouter({
         // Process slots to include availability information
         const enhancedTimeSlots = timeSlots.map((slot) => {
           // Count only non-canceled lessons for availability calculation
-          const activeLesson = slot.lessons.filter((lesson) => lesson.status !== "CANCELLED");
+          const activeLesson = slot.Lesson.filter((lesson) => lesson.status !== "CANCELLED");
 
           const studentCount = activeLesson.length;
           // A slot is available if it's active and not fully booked

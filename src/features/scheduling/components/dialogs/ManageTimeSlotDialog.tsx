@@ -85,16 +85,16 @@ export function ManageTimeSlotDialog({
                 {selectedEvent ? (
                   <p>
                     {selectedEvent.event.start &&
-                      selectedEvent.event.extendedProps.rink.timezone &&
+                      selectedEvent.event.extendedProps.Rink.timezone &&
                       formatRinkTime(
                         selectedEvent.event.start,
-                        selectedEvent.event.extendedProps.rink.timezone,
+                        selectedEvent.event.extendedProps.Rink.timezone,
                       )}
                   </p>
                 ) : (
                   <p>
-                    {selectedSlot?.rink.timezone &&
-                      formatRinkTime(selectedSlot.startTime, selectedSlot.rink.timezone)}
+                    {selectedSlot?.Rink.timezone &&
+                      formatRinkTime(selectedSlot.startTime, selectedSlot.Rink.timezone)}
                   </p>
                 )}
               </div>
@@ -103,16 +103,16 @@ export function ManageTimeSlotDialog({
                 {selectedEvent ? (
                   <p>
                     {selectedEvent.event.end &&
-                      selectedEvent.event.extendedProps.rink.timezone &&
+                      selectedEvent.event.extendedProps.Rink.timezone &&
                       formatRinkTime(
                         selectedEvent.event.end,
-                        selectedEvent.event.extendedProps.rink.timezone,
+                        selectedEvent.event.extendedProps.Rink.timezone,
                       )}
                   </p>
                 ) : (
                   <p>
-                    {selectedSlot?.rink.timezone &&
-                      formatRinkTime(selectedSlot.endTime, selectedSlot.rink.timezone)}
+                    {selectedSlot?.Rink.timezone &&
+                      formatRinkTime(selectedSlot.endTime, selectedSlot.Rink.timezone)}
                   </p>
                 )}
               </div>
@@ -152,7 +152,7 @@ export function ManageTimeSlotDialog({
                   <SelectContent>
                     {students?.map((student) => (
                       <SelectItem key={student.id} value={student.id}>
-                        {student.user.name || "Unnamed Student"}
+                        {student.User.name || "Unnamed Student"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -171,7 +171,7 @@ export function ManageTimeSlotDialog({
                     key={lesson.id}
                     className="flex items-center justify-between p-2 border rounded"
                   >
-                    <span>{lesson.student.user.name || "Unnamed Student"}</span>
+                    <span>{lesson.Student.User.name || "Unnamed Student"}</span>
                     <Button
                       variant="ghost"
                       size="sm"

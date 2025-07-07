@@ -108,7 +108,7 @@ export const UpcomingLessons = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="break-words">{lesson.rink.name}</span>
+                    <span className="break-words">{lesson.Rink.name}</span>
                   </div>
                 </div>
                 <div className="mt-4 flex justify-end">

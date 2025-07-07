@@ -276,8 +276,8 @@ export const paymentRouter = createTRPCRouter({
         // This would be implemented in your email service
         // For example:
         // await sendPaymentReminderEmail(
-        //   payment.student.user.email,
-        //   payment.student.user.name || 'Student',
+        //   payment.Student.User.email,
+        //   payment.Student.User.name || 'Student',
         //   {
         //     amount: payment.amount,
         //     referenceCode: payment.referenceCode,
