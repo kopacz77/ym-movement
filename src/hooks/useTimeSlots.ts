@@ -37,13 +37,25 @@ interface UseTimeSlotsResult {
 }
 
 export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTimeSlotsResult {
-  // Get rinks data
-  const { data: rinks } = api.admin.schedule.getRinks.useQuery();
+  // Get rinks data with error handling
+  const { data: rinks, error: rinksError } = api.admin.schedule.getRinks.useQuery(undefined, {
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Failed to fetch rinks:', error.message);
+    }
+  });
 
-  // Get students data
-  const { data: students } = api.admin.student.getStudents.useQuery();
+  // Get students data with error handling
+  const { data: students } = api.admin.student.getStudents.useQuery(undefined, {
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.error('Failed to fetch students:', error.message);
+    }
+  });
 
-  // Get time slots data - using date range and cache key
+  // Get time slots data with error handling
   const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery(
     {
       startDate: dateRange.start,
@@ -53,6 +65,11 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     {
       refetchOnWindowFocus: false,
       staleTime: 30000,
+      retry: 2,
+      retryDelay: 1000,
+      onError: (error) => {
+        console.error('Failed to fetch time slots:', error.message);
+      }
     },
   );
 

@@ -2,8 +2,12 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { Providers } from "@/providers";
+import { validateEnvironment } from "@/lib/env-check";
 
 import "@/styles/globals.css";
+
+// Validate environment on app startup
+validateEnvironment();
 
 export const metadata: Metadata = {
   title: "Yura Scheduler",

@@ -1,6 +1,7 @@
 // src/features/scheduling/components/BulkCreateDialog.tsx
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BulkTimeSlotForm } from "@/features/scheduling/components/forms/BulkTimeSlotForm";
+import { ProductionErrorBoundary } from "@/components/production-error-boundary";
 
 interface BulkCreateDialogProps {
   isOpen: boolean;
@@ -16,7 +17,9 @@ export function BulkCreateDialog({ isOpen, onOpenChange, rinks }: BulkCreateDial
           <DialogTitle>Bulk Create Time Slots</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
-          <BulkTimeSlotForm rinks={rinks} onSubmitAction={() => onOpenChange(false)} />
+          <ProductionErrorBoundary>
+            <BulkTimeSlotForm rinks={rinks} onSubmitAction={() => onOpenChange(false)} />
+          </ProductionErrorBoundary>
         </div>
       </DialogContent>
     </Dialog>

@@ -32,7 +32,7 @@ import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, isAfter, parse } from "date-fns";
 import { AlertTriangle, ChevronDown, Plus, Settings, X } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -96,6 +96,12 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationData, setConfirmationData] = useState<BulkCreateConfirmationData | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Use the schedule namespace for bulk time slot creation.
   const createBulkSlots = api.admin.schedule.createBulkTimeSlots.useMutation({
@@ -247,7 +253,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
           {/* Form Fields */}
           <div className="space-y-4">
             {/* Debug: Show rinks data (development only) */}
-            {process.env.NODE_ENV === 'development' && (
+            {process.env.NODE_ENV === 'development' && isClient && (
               <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
                 Debug: {rinks?.length || 0} rinks available: {rinks?.map(r => r.name).join(', ') || 'None'}
               </div>
@@ -266,7 +272,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                     </FormControl>
                     <SelectContent>
                       {rinks.length === 0 ? (
-                        <SelectItem value="" disabled>
+                        <SelectItem value="no-rinks" disabled>
                           No rinks available - Please add a rink first
                         </SelectItem>
                       ) : (
@@ -410,7 +416,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
             />
 
             {/* Calendar Preview */}
-            {process.env.NODE_ENV === 'development' && (
+            {process.env.NODE_ENV === 'development' && isClient && (
               <div className="text-xs text-muted-foreground bg-yellow-50 p-2 rounded">
                 Preview Debug: startDate={formValues.startDate || 'empty'}, endDate={formValues.endDate || 'empty'}, daysOfWeek=[{formValues.daysOfWeek?.join(',') || 'none'}] ({formValues.daysOfWeek?.length || 0} selected)
               </div>
