@@ -17,7 +17,7 @@ export const NotificationsPopover = () => {
   const { data: session, status } = useSession();
 
   // Only fetch notifications if user is authenticated
-  const isAuthenticated = status === "authenticated" && session?.user;
+  const isAuthenticated = Boolean(status === "authenticated" && session?.user);
 
   // Fetch notifications from API
   const {
