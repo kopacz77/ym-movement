@@ -42,20 +42,17 @@ interface TimeSlotFormProps {
   onSubmitAction?: () => void;
 }
 
-// Format the initial time preserving UTC - moved outside component
-const formatInitialStartTime = (date: Date | null) => {
+// Format the initial time in the rink's timezone for datetime-local input
+const formatInitialStartTime = (date: Date | null, timezone: string = "America/New_York") => {
   if (!date) {
     return "";
   }
 
-  // Format using the date's UTC components to preserve the exact time
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const hours = String(date.getUTCHours()).padStart(2, "0");
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
+  // Convert UTC time to rink's local timezone
+  const localDateTime = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
+  
+  // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+  return localDateTime.toFormat("yyyy-MM-dd'T'HH:mm");
 };
 
 export const TimeSlotForm = ({
@@ -81,7 +78,10 @@ export const TimeSlotForm = ({
     resolver: zodResolver(timeSlotSchema),
     defaultValues: {
       rinkId: initialRinkId || "",
-      startTime: initialStartTime ? formatInitialStartTime(initialStartTime) : "",
+      startTime: initialStartTime ? formatInitialStartTime(
+        initialStartTime, 
+        rinks.find(r => r.id === initialRinkId)?.timezone || "America/New_York"
+      ) : "",
       duration: initialDuration,
       maxStudents: 1,
     },

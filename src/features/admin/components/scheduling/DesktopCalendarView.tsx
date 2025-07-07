@@ -38,6 +38,9 @@ interface DesktopCalendarViewProps {
   onToday: () => void;
   rinkTimezone: string;
   rinkName?: string;
+  isSelectionMode?: boolean;
+  selectedSlotIds?: Set<string>;
+  onSlotSelection?: (slotId: string, isSelected: boolean) => void;
 }
 
 const DnDCalendar = withDragAndDrop(Calendar);
@@ -57,6 +60,9 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   onToday,
   rinkTimezone,
   rinkName,
+  isSelectionMode = false,
+  selectedSlotIds = new Set(),
+  onSlotSelection,
 }) => {
   const calendarRef = useRef(null);
 
@@ -67,6 +73,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
     (props: EventProps<object>) => {
       const event = props.event as ExtendedCalendarEvent;
       const timezone = event.slot?.rink?.timezone || "America/New_York";
+      const isSelected = selectedSlotIds.has(event.slot.id);
 
       // Get both local and rink formatted times
       const start = new Date(event.start);
@@ -88,8 +95,15 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
             padding: "2px 4px",
             height: "100%",
             overflow: "hidden",
+            border: isSelectionMode && isSelected ? "3px solid #3b82f6" : "none",
+            boxSizing: "border-box",
           }}
         >
+          {isSelectionMode && (
+            <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-white">
+              {isSelected && <div className="w-full h-full rounded-full bg-blue-500"></div>}
+            </div>
+          )}
           <div className="font-medium">{event.title}</div>
           <div className="text-xs whitespace-normal">
             {localTimeStr}
@@ -102,7 +116,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         </div>
       );
     },
-    [rinkName],
+    [rinkName, isSelectionMode, selectedSlotIds],
   ); // Removed defaultRinkTimezone as it's a constant and doesn't need to be in the dependency array
 
   // Accessor functions for calendar
@@ -127,9 +141,19 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   // Wrapper function to handle event selection with correct types
   const handleSelectEvent = useCallback(
     (event: object, _e: SyntheticEvent<HTMLElement, Event>) => {
-      onSelectEvent(event as ExtendedCalendarEvent);
+      const typedEvent = event as ExtendedCalendarEvent;
+      
+      if (isSelectionMode && onSlotSelection) {
+        // In selection mode, toggle the slot selection
+        const slotId = typedEvent.slot.id;
+        const isSelected = selectedSlotIds.has(slotId);
+        onSlotSelection(slotId, !isSelected);
+      } else {
+        // Normal mode, open the management dialog
+        onSelectEvent(typedEvent);
+      }
     },
-    [onSelectEvent],
+    [onSelectEvent, isSelectionMode, onSlotSelection, selectedSlotIds],
   );
 
   // Wrapper function to handle event dropping with correct types

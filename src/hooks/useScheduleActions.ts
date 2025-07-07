@@ -19,6 +19,21 @@ export function useScheduleActions() {
     },
   });
 
+  // Bulk delete time slots mutation
+  const deleteBulkTimeSlots = api.admin.schedule.deleteBulkTimeSlots.useMutation({
+    onSuccess: (result) => {
+      toast("Success", {
+        description: `Successfully deleted ${result.count} time slots`,
+      });
+      utils.admin.schedule.getTimeSlots.invalidate();
+    },
+    onError: (err) => {
+      toast.error("Error", {
+        description: err.message,
+      });
+    },
+  });
+
   // Assign student mutation
   const assignStudent = api.admin.schedule.assignStudentToTimeSlot.useMutation({
     onSuccess: () => {
@@ -66,6 +81,7 @@ export function useScheduleActions() {
 
   return {
     deleteTimeSlot,
+    deleteBulkTimeSlots,
     assignStudent,
     unassignStudent,
     updateTimeSlot,

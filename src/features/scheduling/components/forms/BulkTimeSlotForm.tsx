@@ -32,7 +32,7 @@ import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInDays, isAfter, parse } from "date-fns";
 import { AlertTriangle, ChevronDown, Plus, Settings, X } from "lucide-react";
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -145,8 +145,18 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
     },
   });
 
-  // Real-time validation
-  const formValues = form.watch();
+  // Real-time validation - watch specific fields to prevent infinite re-renders
+  const watchedFields = form.watch(['rinkId', 'startDate', 'endDate', 'daysOfWeek', 'startTime', 'endTime', 'duration']);
+  const formValues = useMemo(() => ({
+    rinkId: watchedFields[0],
+    startDate: watchedFields[1],
+    endDate: watchedFields[2],
+    daysOfWeek: watchedFields[3],
+    startTime: watchedFields[4],
+    endTime: watchedFields[5],
+    duration: watchedFields[6]
+  }), [watchedFields]);
+  
   const validation = useBulkCreateValidation(formValues);
   const selectedRink = rinks.find(r => r.id === formValues.rinkId);
 

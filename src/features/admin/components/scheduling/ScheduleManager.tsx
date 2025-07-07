@@ -17,6 +17,7 @@ import { DesktopCalendarView } from "./DesktopCalendarView";
 import { BulkCreateSlotsDialog, CreateTimeSlotDialog } from "./DialogComponents";
 import { MobileCalendarView } from "./MobileCalendarView";
 import { ScheduleHeader } from "./ScheduleHeader";
+import { BulkActionsToolbar } from "./BulkActionsToolbar";
 // Import our components
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
 import { type TimeSlot, formatDateRange } from "./calendarUtils";
@@ -60,6 +61,10 @@ const ScheduleManagerComponent = () => {
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  
+  // Bulk selection state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedSlotIds, setSelectedSlotIds] = useState<Set<string>>(new Set());
 
   // Media query hook
   const isMobile = useIsMobile();
@@ -74,7 +79,7 @@ const ScheduleManagerComponent = () => {
   useBulkOperations();
 
   // Use schedule actions hook for mutations
-  const { deleteTimeSlot, assignStudent, unassignStudent, updateTimeSlot } = useScheduleActions();
+  const { deleteTimeSlot, deleteBulkTimeSlots, assignStudent, unassignStudent, updateTimeSlot } = useScheduleActions();
 
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
@@ -270,6 +275,45 @@ const ScheduleManagerComponent = () => {
     setIsManageDialogOpen(false);
   }, []);
 
+  // Bulk selection handlers
+  const handleToggleSelectionMode = useCallback(() => {
+    setIsSelectionMode(prev => !prev);
+    setSelectedSlotIds(new Set());
+  }, []);
+
+  const handleSlotSelection = useCallback((slotId: string, isSelected: boolean) => {
+    setSelectedSlotIds(prev => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(slotId);
+      } else {
+        newSet.delete(slotId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (timeSlots) {
+      const allSlotIds = timeSlots.map(slot => slot.id);
+      setSelectedSlotIds(new Set(allSlotIds));
+    }
+  }, [timeSlots]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedSlotIds(new Set());
+  }, []);
+
+  const handleBulkDelete = useCallback(() => {
+    if (selectedSlotIds.size > 0) {
+      deleteBulkTimeSlots.mutate({ 
+        ids: Array.from(selectedSlotIds) 
+      });
+      setSelectedSlotIds(new Set());
+      setIsSelectionMode(false);
+    }
+  }, [selectedSlotIds, deleteBulkTimeSlots]);
+
   return (
     <div className="space-y-6">
       {/* Header with controls */}
@@ -307,6 +351,17 @@ const ScheduleManagerComponent = () => {
         </div>
       )}
 
+      {/* Bulk Actions Toolbar */}
+      <BulkActionsToolbar
+        isSelectionMode={isSelectionMode}
+        selectedCount={selectedSlotIds.size}
+        onToggleSelectionMode={handleToggleSelectionMode}
+        onSelectAll={handleSelectAll}
+        onClearSelection={handleClearSelection}
+        onBulkDelete={handleBulkDelete}
+        isDeleting={deleteBulkTimeSlots.isPending}
+      />
+
       {/* Time Slot Management Dialog - Using the adapter */}
       <TimeSlotDialogAdapter
         isOpen={isManageDialogOpen}
@@ -339,6 +394,9 @@ const ScheduleManagerComponent = () => {
               onSlotClickAction={handleMobileSlotClick}
               rinkTimezone={rinkTimezone}
               rinkName={selectedRink ? rinks?.find((r: any) => r.id === selectedRink)?.name : undefined}
+              isSelectionMode={isSelectionMode}
+              selectedSlotIds={selectedSlotIds}
+              onSlotSelection={handleSlotSelection}
             />
           ) : (
             // Desktop calendar view - now a separate component
@@ -357,6 +415,9 @@ const ScheduleManagerComponent = () => {
               onToday={goToToday}
               rinkTimezone={rinkTimezone}
               rinkName={selectedRink ? rinks?.find((r: any) => r.id === selectedRink)?.name : undefined}
+              isSelectionMode={isSelectionMode}
+              selectedSlotIds={selectedSlotIds}
+              onSlotSelection={handleSlotSelection}
             />
           )}
         </CardContent>
