@@ -182,10 +182,10 @@ export const analyticsRouter = createTRPCRouter({
             status: PaymentStatus.COMPLETED,
           },
           include: {
-            lesson: {
+            Lesson: {
               select: {
                 type: true,
-                student: { select: { level: true } },
+                Student: { select: { level: true } },
               },
             },
           },
@@ -219,8 +219,8 @@ export const analyticsRouter = createTRPCRouter({
           revenueByDate[date].byMethod[paymentMethod] += payment.amount;
 
           // Group by lesson type
-          if (payment.lesson?.type) {
-            const lessonType = payment.lesson.type as string;
+          if (payment.Lesson?.type) {
+            const lessonType = payment.Lesson.type as string;
             if (!revenueByDate[date].byLessonType[lessonType]) {
               revenueByDate[date].byLessonType[lessonType] = 0;
             }
@@ -228,8 +228,8 @@ export const analyticsRouter = createTRPCRouter({
           }
 
           // Group by student level
-          if (payment.lesson?.student?.level) {
-            const studentLevel = payment.lesson.student.level as string;
+          if (payment.Lesson?.Student?.level) {
+            const studentLevel = payment.Lesson.Student.level as string;
             if (!revenueByDate[date].byStudentLevel[studentLevel]) {
               revenueByDate[date].byStudentLevel[studentLevel] = 0;
             }
