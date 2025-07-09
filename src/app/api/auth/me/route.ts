@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         name: true,
         email: true,
         role: true,
-        student:
+        Student:
           session.user.role === "STUDENT"
             ? {
                 select: {

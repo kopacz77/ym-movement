@@ -13,8 +13,8 @@ export function useCurrentUser() {
       fetch("/api/auth/me")
         .then((res) => res.json())
         .then((userData) => {
-          if (isMounted && userData.student?.id) {
-            setStudentId(userData.student.id);
+          if (isMounted && userData.Student?.id) {
+            setStudentId(userData.Student.id);
           }
         })
         .catch((err) => console.error("Error fetching user data:", err));
