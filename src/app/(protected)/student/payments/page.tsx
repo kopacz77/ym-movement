@@ -60,12 +60,12 @@ export default function StudentPaymentsPage() {
   }, [error]);
 
   // Filter lessons to only include those with payments
-  const paymentsData = lessons ? lessons.filter((lesson) => lesson.payment !== null) : [];
+  const paymentsData = lessons ? lessons.filter((lesson) => lesson.Payment !== null) : [];
 
   // Convert to our expected type
   const payments = paymentsData.map((lesson) => ({
     ...lesson,
-    payment: lesson.payment,
+    payment: lesson.Payment,
   }));
 
   // Filter payments based on search query and tab

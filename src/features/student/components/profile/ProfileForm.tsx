@@ -135,10 +135,10 @@ export const ProfileForm = () => {
                   <Input
                     id="name"
                     value={
-                      (studentData.user &&
-                        typeof studentData.user === "object" &&
-                        "name" in studentData.user &&
-                        studentData.user.name) ||
+                      (studentData.User &&
+                        typeof studentData.User === "object" &&
+                        "name" in studentData.User &&
+                        studentData.User.name) ||
                       ""
                     }
                     disabled
@@ -149,10 +149,10 @@ export const ProfileForm = () => {
                   <Input
                     id="email"
                     value={
-                      (studentData.user &&
-                        typeof studentData.user === "object" &&
-                        "email" in studentData.user &&
-                        studentData.user.email) ||
+                      (studentData.User &&
+                        typeof studentData.User === "object" &&
+                        "email" in studentData.User &&
+                        studentData.User.email) ||
                       ""
                     }
                     disabled

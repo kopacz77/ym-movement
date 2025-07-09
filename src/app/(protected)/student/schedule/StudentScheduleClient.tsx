@@ -26,7 +26,7 @@ interface Lesson {
   status: LessonStatus;
   notes: string | null;
   price: number;
-  rink: {
+  Rink: {
     name: string;
     address: string;
   };
@@ -48,7 +48,7 @@ interface LessonWithDetails {
   status: LessonStatus;
   notes?: string; // Optional string, not nullable
   price: number;
-  rink: {
+  Rink: {
     name: string;
     address: string;
   };

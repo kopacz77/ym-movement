@@ -34,6 +34,30 @@ export function MobileCalendarView({
   rinkTimezone,
   rinkName,
 }: MobileCalendarViewProps) {
+  // Add error handling for mobile-specific issues
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    // Clear any previous errors when props change
+    setError(null);
+  }, [groupedSlots, rinkTimezone]);
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center">
+          <p className="text-red-800 font-medium">Error loading schedule</p>
+          <p className="text-red-600 text-sm mt-1">{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="mt-2 px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
   // View switch buttons styling
   const getViewButtonClass = (view: string) => {
     return cn(
@@ -128,62 +152,72 @@ export function MobileCalendarView({
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
                 {group.slots.map((slot: TimeSlot) => {
-                  // Format time in rink's timezone
-                  const timezone = slot.Rink.timezone;
-                  const formattedStart = displayInRinkLocalTime(slot.startTime, timezone);
-                  const formattedEnd = displayInRinkLocalTime(slot.endTime, timezone);
-                  const timeDisplay = `${formattedStart.formattedTime} - ${formattedEnd.formattedTime}`;
+                  try {
+                    // Format time in rink's timezone
+                    const timezone = slot.Rink.timezone;
+                    const formattedStart = displayInRinkLocalTime(slot.startTime, timezone);
+                    const formattedEnd = displayInRinkLocalTime(slot.endTime, timezone);
+                    const timeDisplay = `${formattedStart.formattedTime} - ${formattedEnd.formattedTime}`;
 
-                  // Get user's timezone and check if we need to show local time
-                  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                  const showLocalTime = timezone !== userTimezone;
+                    // Get user's timezone and check if we need to show local time
+                    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const showLocalTime = timezone !== userTimezone;
 
-                  // Format time in user's local timezone if needed
-                  let localTimeDisplay = "";
-                  if (showLocalTime) {
-                    const startTimeObj = formatTimeWithTimezone(slot.startTime, timezone);
-                    const endTimeObj = formatTimeWithTimezone(slot.endTime, timezone);
-                    localTimeDisplay = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
-                  }
+                    // Format time in user's local timezone if needed
+                    let localTimeDisplay = "";
+                    if (showLocalTime) {
+                      const startTimeObj = formatTimeWithTimezone(slot.startTime, timezone);
+                      const endTimeObj = formatTimeWithTimezone(slot.endTime, timezone);
+                      localTimeDisplay = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
+                    }
 
-                  // Count lessons
-                  const lessonsCount = slot.lessons?.length || 0;
+                    // Count lessons
+                    const lessonsCount = slot.lessons?.length || 0;
 
-                  return (
-                    <button
-                      type="button"
-                      key={slot.id}
-                      className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left flex items-start"
-                      onClick={() => onSlotClickAction(slot)}
-                    >
-                      <div
-                        className={`${getSlotColor(
-                          slot,
-                        )} w-2 h-2 mt-1.5 rounded-full mr-3 flex-shrink-0`}
-                      />
-                      <div className="flex-grow">
-                        <div className="font-medium">{timeDisplay}</div>
-                        {showLocalTime && (
-                          <div className="text-xs text-gray-500">Your time: {localTimeDisplay}</div>
-                        )}
-                        <div className="text-sm text-gray-500 dark:text-gray-400 break-words">
-                          {slot.Rink.name} ({slot.Rink.timezone.split("/").pop()?.replace("_", " ")}
-                          )
-                        </div>
-                        <div className="text-sm">
-                          {lessonsCount > 0 ? (
-                            <span>
-                              {lessonsCount}/{slot.maxStudents} students
-                            </span>
-                          ) : (
-                            <span className="text-gray-500 dark:text-gray-400">
-                              No students assigned
-                            </span>
+                    return (
+                      <button
+                        type="button"
+                        key={slot.id}
+                        className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left flex items-start"
+                        onClick={() => onSlotClickAction(slot)}
+                      >
+                        <div
+                          className={`${getSlotColor(
+                            slot,
+                          )} w-2 h-2 mt-1.5 rounded-full mr-3 flex-shrink-0`}
+                        />
+                        <div className="flex-grow">
+                          <div className="font-medium">{timeDisplay}</div>
+                          {showLocalTime && (
+                            <div className="text-xs text-gray-500">Your time: {localTimeDisplay}</div>
                           )}
+                          <div className="text-sm text-gray-500 dark:text-gray-400 break-words">
+                            {slot.Rink.name} ({slot.Rink.timezone.split("/").pop()?.replace("_", " ")}
+                            )
+                          </div>
+                          <div className="text-sm">
+                            {lessonsCount > 0 ? (
+                              <span>
+                                {lessonsCount}/{slot.maxStudents} students
+                              </span>
+                            ) : (
+                              <span className="text-gray-500 dark:text-gray-400">
+                                No students assigned
+                              </span>
+                            )}
+                          </div>
                         </div>
+                      </button>
+                    );
+                  } catch (slotError) {
+                    // Handle individual slot errors gracefully
+                    console.error(`Error rendering slot ${slot.id}:`, slotError);
+                    return (
+                      <div key={slot.id} className="px-4 py-3 text-sm text-red-600">
+                        Error loading time slot
                       </div>
-                    </button>
-                  );
+                    );
+                  }
                 })}
               </div>
             </div>

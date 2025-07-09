@@ -53,13 +53,13 @@ export default async function LessonDetailsPage({
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
       include: {
-        student: {
+        Student: {
           include: {
-            user: true,
+            User: true,
           },
         },
-        rink: true,
-        payment: true,
+        Rink: true,
+        Payment: true,
       },
     });
 
@@ -136,7 +136,7 @@ export default async function LessonDetailsPage({
                 <p className="text-gray-600">${lesson.price.toFixed(2)}</p>
               </div>
 
-              {lesson.payment && (
+              {lesson.Payment && (
                 <>
                   <div>
                     <h3 className="font-medium">Payment Status</h3>
@@ -155,7 +155,7 @@ export default async function LessonDetailsPage({
                 </>
               )}
 
-              {!lesson.payment && (
+              {!lesson.Payment && (
                 <p className="text-gray-600">No payment information available.</p>
               )}
             </div>

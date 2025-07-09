@@ -59,19 +59,24 @@ export const UpcomingLessons = () => {
   // 2. We're fetching the data
   const showLoading = !isReady || isLoading || !studentId;
 
-  // Helper function to format time in a UTC-aware way
+  // Helper function to format time in a UTC-aware way with error handling
   const formatLessonTime = (dateStr: string | Date) => {
-    // Create a date that treats the UTC time as local time
-    const date = new Date(dateStr);
-    // Extract hours and minutes from UTC
-    const hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
+    try {
+      // Create a date that treats the UTC time as local time
+      const date = new Date(dateStr);
+      // Extract hours and minutes from UTC
+      const hours = date.getUTCHours();
+      const minutes = date.getUTCMinutes();
 
-    // Create a new date with those hours/minutes in local time
-    const localDate = new Date();
-    localDate.setHours(hours, minutes, 0, 0);
+      // Create a new date with those hours/minutes in local time
+      const localDate = new Date();
+      localDate.setHours(hours, minutes, 0, 0);
 
-    return formatTime(localDate);
+      return formatTime(localDate);
+    } catch (error) {
+      console.error("Error formatting lesson time:", error);
+      return "Invalid time";
+    }
   };
 
   return (

@@ -12,8 +12,8 @@ export const lessonRouter = createTRPCRouter({
           id: input.id,
         },
         include: {
-          payment: true,
-          rink: true,
+          Payment: true,
+          Rink: true,
         },
       });
 

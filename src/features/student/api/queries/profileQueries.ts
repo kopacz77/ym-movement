@@ -22,7 +22,7 @@ export const profileRouter = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            user: {
+            User: {
               select: {
                 name: true,
                 email: true,
@@ -76,7 +76,7 @@ export const profileRouter = createTRPCRouter({
             emergencyContact: input.emergencyContact,
           },
           include: {
-            user: {
+            User: {
               select: {
                 name: true,
                 email: true,
@@ -131,8 +131,8 @@ export const profileRouter = createTRPCRouter({
         const lessons = await ctx.prisma.lesson.findMany({
           where,
           include: {
-            rink: true,
-            payment: true,
+            Rink: true,
+            Payment: true,
           },
           orderBy: {
             startTime: "asc",

@@ -23,13 +23,13 @@ interface Lesson {
   status: LessonStatus;
   notes: string | null;
   price: number;
-  rink: {
+  Rink: {
     name: string;
     address: string;
   };
   cancellationReason?: string;
   cancellationTime?: string | Date;
-  payment?: {
+  Payment?: {
     id: string;
     status: PaymentStatus;
     amount: number;

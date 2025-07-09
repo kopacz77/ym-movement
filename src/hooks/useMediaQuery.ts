@@ -11,8 +11,11 @@ import { useEffect, useState } from "react";
 export function useMediaQuery(query: string): boolean {
   // Initialize with a default value (false) to ensure SSR compatibility
   const [matches, setMatches] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    
     // Check if window is available (client-side only)
     if (typeof window !== "undefined") {
       const media = window.matchMedia(query);
@@ -37,6 +40,11 @@ export function useMediaQuery(query: string): boolean {
     // If window is not available (SSR), keep the default value
     return undefined;
   }, [query]);
+
+  // Return false during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return false;
+  }
 
   return matches;
 }

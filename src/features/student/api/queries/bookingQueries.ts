@@ -12,7 +12,7 @@ import { z } from "zod";
 interface ExtendedStudent {
   id: string;
   userId: string;
-  user: {
+  User: {
     email: string;
     name: string | null;
   };
@@ -257,12 +257,12 @@ export const bookingRouter = createTRPCRouter({
               googleCalendarEventId: googleEventId,
             },
             include: {
-              student: {
+              Student: {
                 include: {
-                  user: true,
+                  User: true,
                 },
               },
-              rink: true,
+              Rink: true,
             },
           });
 
