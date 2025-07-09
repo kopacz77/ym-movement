@@ -13,7 +13,7 @@ export const approvalQueries = createTRPCRouter({
       // For clarity, let's use Prisma's built-in querying instead of raw SQL
       const pendingStudents = await ctx.prisma.student.findMany({
         where: { isApproved: false },
-        include: { user: true },
+        include: { User: true },
         orderBy: { createdAt: "desc" },
         take: 5,
       });
@@ -22,8 +22,8 @@ export const approvalQueries = createTRPCRouter({
       const formattedStudents = pendingStudents.map((student) => ({
         id: student.id,
         user: {
-          name: student.user.name || "Unnamed",
-          email: student.user.email,
+          name: student.User.name || "Unnamed",
+          email: student.User.email,
         },
         status: "PENDING" as const,
         createdAt: student.createdAt,
@@ -51,7 +51,7 @@ export const approvalQueries = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            user: true,
+            User: true,
           },
         });
 
@@ -77,7 +77,7 @@ export const approvalQueries = createTRPCRouter({
         const updatedStudent = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            user: true,
+            User: true,
           },
         });
 
@@ -90,12 +90,12 @@ export const approvalQueries = createTRPCRouter({
 
         // Send approval email
         try {
-          if (updatedStudent.user?.email) {
+          if (updatedStudent.User?.email) {
             await sendApprovalEmail(
-              updatedStudent.user.email,
-              updatedStudent.user.name || "Student",
+              updatedStudent.User.email,
+              updatedStudent.User.name || "Student",
             );
-            console.log(`Approval email sent to ${updatedStudent.user.email}`);
+            console.log(`Approval email sent to ${updatedStudent.User.email}`);
           } else {
             console.error("Cannot send approval email: user or email is missing");
           }
@@ -128,7 +128,7 @@ export const approvalQueries = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            user: true,
+            User: true,
           },
         });
 

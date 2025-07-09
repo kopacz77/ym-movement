@@ -228,8 +228,8 @@ export const analyticsRouter = createTRPCRouter({
           }
 
           // Group by student level
-          if (payment.Lesson?.Student?.level) {
-            const studentLevel = payment.Lesson.Student.level as string;
+          if (payment.lesson?.student?.level) {
+            const studentLevel = payment.lesson.student.level as string;
             if (!revenueByDate[date].byStudentLevel[studentLevel]) {
               revenueByDate[date].byStudentLevel[studentLevel] = 0;
             }
