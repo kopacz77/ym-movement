@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { DateTime } from "luxon"; // Import DateTime for timezone handling
 // src/features/admin/api/queries/schedule/timeSlotQueries.ts
 import { z } from "zod";
+import { randomUUID } from "crypto";
 
 // Define the TimeSlot interface to fix the implicit any[] errors
 interface TimeSlot {
@@ -123,7 +124,11 @@ export const timeSlotRouter = createTRPCRouter({
           });
         }
         return await ctx.prisma.rinkTimeSlot.create({
-          data: input,
+          data: {
+            ...input,
+            id: randomUUID(),
+            updatedAt: new Date(),
+          },
           include: { Rink: true },
         });
       } catch (error) {
@@ -627,7 +632,11 @@ export const timeSlotRouter = createTRPCRouter({
 
                 // Create slot if no overlap
                 const createdSlot = await tx.rinkTimeSlot.create({
-                  data: slot,
+                  data: {
+                    ...slot,
+                    id: randomUUID(),
+                    updatedAt: new Date(),
+                  },
                   select: { id: true },
                 });
                 createdSlotIds.push(createdSlot.id);
@@ -645,7 +654,11 @@ export const timeSlotRouter = createTRPCRouter({
           // Create all slots at once for efficiency
           try {
             await ctx.prisma.rinkTimeSlot.createMany({
-              data: slots,
+              data: slots.map(slot => ({
+                ...slot,
+                id: randomUUID(),
+                updatedAt: new Date(),
+              })),
               skipDuplicates: true, // Skip exact duplicates
             });
 

@@ -4,6 +4,7 @@ import { LessonStatus, LessonType, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
+import { randomUUID } from "crypto";
 
 export const lessonRouter = createTRPCRouter({
   createLesson: protectedProcedure
@@ -87,12 +88,14 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         const lesson = await ctx.prisma.lesson.create({
           data: {
             ...input,
+            id: randomUUID(),
             status: LessonStatus.SCHEDULED,
             rinkId: timeSlot.rinkId,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             duration: durationMinutes,
             googleCalendarEventId: eventId, // May be null if calendar creation failed
+            updatedAt: new Date(),
           },
           include: {
             Student: { include: { User: true } },
@@ -350,17 +353,19 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // Create the lesson
         return await ctx.prisma.lesson.create({
           data: {
+            id: randomUUID(),
             studentId: input.studentId,
             timeSlotId: input.timeSlotId,
             rinkId: timeSlot.rinkId,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             status: "SCHEDULED",
-            type: "PRIVATE", // or whatever default you want
-            area: "MAIN_RINK", // Use a default value instead of timeSlot.rink.defaultArea
-            price: 0, // Set your default price
+            type: "PRIVATE",
+            area: "MAIN_RINK",
+            price: 0,
             duration: durationMinutes,
             googleCalendarEventId: eventId,
+            updatedAt: new Date(),
           },
           include: { Student: { include: { User: true } } },
         });
