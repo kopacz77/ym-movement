@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { formatRinkTime } from "@/lib/timezone";
 import { X } from "lucide-react";
-import { type FC } from "react";
+import { type FC, useState, useEffect } from "react";
 
 // Define interfaces for the data structures
 interface Rink {
@@ -71,6 +71,8 @@ interface TimeSlotDialogProps {
   students: Student[];
   onAssignStudent: (studentId: string) => void;
   onUnassignStudent: (lessonId: string) => void;
+  isAssigning?: boolean;
+  isUnassigning?: boolean;
 }
 
 export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
@@ -83,7 +85,24 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
   students,
   onAssignStudent,
   onUnassignStudent,
+  isAssigning = false,
+  isUnassigning = false,
 }) => {
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+
+  // Reset selection when dialog opens/closes or when assignment completes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedStudentId("");
+    }
+  }, [isOpen]);
+
+  // Reset selection after successful assignment
+  useEffect(() => {
+    if (!isAssigning && selectedStudentId) {
+      setSelectedStudentId("");
+    }
+  }, [isAssigning, selectedStudentId]);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -165,12 +184,15 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
               <p className="font-medium">Assign Student</p>
               <div className="flex gap-2">
                 <Select
+                  value={selectedStudentId}
                   onValueChange={(studentId: string) => {
+                    setSelectedStudentId(studentId);
                     onAssignStudent(studentId);
                   }}
+                  disabled={isAssigning}
                 >
                   <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder="Select student" />
+                    <SelectValue placeholder={isAssigning ? "Assigning..." : "Select student"} />
                   </SelectTrigger>
                   <SelectContent>
                     {students?.filter(student => student?.id).map((student) => (
@@ -201,6 +223,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
+                      disabled={isUnassigning}
                       onClick={() => {
                         if (confirm("Remove this student from the time slot?")) {
                           onUnassignStudent(lesson.id);

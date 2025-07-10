@@ -377,6 +377,8 @@ const ScheduleManagerComponent = () => {
             unassignStudent.mutate({ lessonId });
           }
         }}
+        isAssigning={assignStudent.isPending}
+        isUnassigning={unassignStudent.isPending}
       />
 
       <Card className="shadow-sm">

@@ -50,6 +50,8 @@ interface TimeSlotDialogAdapterProps {
   students: Student[];
   onAssignStudent: (studentId: string) => void;
   onUnassignStudent: (lessonId: string) => void;
+  isAssigning?: boolean;
+  isUnassigning?: boolean;
 }
 
 // Helper function to safely cast unknown lessons to Lesson[]
@@ -80,6 +82,8 @@ function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
 export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
   selectedEvent,
   selectedSlot,
+  isAssigning,
+  isUnassigning,
   ...props
 }) => {
   // Convert ScheduleEvent to EventClickInfo format
@@ -110,5 +114,5 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
       }
     : null;
 
-  return <TimeSlotDialog {...props} selectedEvent={adaptedEvent} selectedSlot={adaptedSlot} />;
+  return <TimeSlotDialog {...props} selectedEvent={adaptedEvent} selectedSlot={adaptedSlot} isAssigning={isAssigning} isUnassigning={isUnassigning} />;
 };
