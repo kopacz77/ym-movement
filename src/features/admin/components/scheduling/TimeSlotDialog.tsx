@@ -22,14 +22,14 @@ interface Rink {
 
 interface Student {
   id: string;
-  user: {
+  User: {
     name: string | null;
   };
 }
 
 interface Lesson {
   id: string;
-  student: Student;
+  Student: Student;
   // Add other properties if needed
 }
 
@@ -38,8 +38,8 @@ interface TimeSlot {
   startTime: string | Date;
   endTime: string | Date;
   maxStudents: number;
-  lessons?: Lesson[];
-  rink: Rink;
+  Lesson?: Lesson[];
+  Rink: Rink;
 }
 
 // Define our own event interface based on React Big Calendar's Event type
@@ -49,10 +49,10 @@ interface CalendarEvent {
   start: Date;
   end: Date;
   extendedProps: {
-    rink: Rink;
+    Rink: Rink;
     currentStudents: number;
     maxStudents: number;
-    lessons: Lesson[];
+    Lesson: Lesson[];
   };
 }
 
@@ -106,7 +106,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                         )}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {selectedEvent.event.extendedProps.Rink.timezone
+                      {selectedEvent.event.extendedProps.rink.timezone
                         .split("/")
                         .pop()
                         ?.replace("_", " ")}
@@ -115,11 +115,11 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                 ) : (
                   <div className="flex items-center gap-1">
                     <span>
-                      {selectedSlot?.Rink.timezone &&
-                        formatRinkTime(selectedSlot.startTime, selectedSlot.Rink.timezone)}
+                      {selectedSlot?.rink.timezone &&
+                        formatRinkTime(selectedSlot.startTime, selectedSlot.rink.timezone)}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {selectedSlot?.Rink.timezone.split("/").pop()?.replace("_", " ")}
+                      {selectedSlot?.rink.timezone.split("/").pop()?.replace("_", " ")}
                     </Badge>
                   </div>
                 )}
@@ -129,16 +129,16 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                 {selectedEvent ? (
                   <p>
                     {selectedEvent.event.end &&
-                      selectedEvent.event.extendedProps.Rink.timezone &&
+                      selectedEvent.event.extendedProps.rink.timezone &&
                       formatRinkTime(
                         selectedEvent.event.end,
-                        selectedEvent.event.extendedProps.Rink.timezone,
+                        selectedEvent.event.extendedProps.rink.timezone,
                       )}
                   </p>
                 ) : (
                   <p>
-                    {selectedSlot?.Rink.timezone &&
-                      formatRinkTime(selectedSlot.endTime, selectedSlot.Rink.timezone)}
+                    {selectedSlot?.rink.timezone &&
+                      formatRinkTime(selectedSlot.endTime, selectedSlot.rink.timezone)}
                   </p>
                 )}
               </div>
@@ -194,7 +194,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     key={lesson.id}
                     className="flex items-center justify-between p-2 border rounded"
                   >
-                    <span>{lesson.Student.User.name || "Unnamed Student"}</span>
+                    <span>{lesson.student.user.name || "Unnamed Student"}</span>
                     <Button
                       variant="ghost"
                       size="sm"

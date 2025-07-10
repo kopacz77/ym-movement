@@ -11,15 +11,15 @@ interface TimeSlotListItemProps {
 export function TimeSlotListItem({ slot, onClick }: TimeSlotListItemProps) {
   const studentCount = slot.Lesson?.length || 0;
   const studentNames = slot.Lesson
-    ?.map((lesson) => lesson.Student.User.name || "Unnamed Student")
+    ?.map((lesson) => lesson.student.user.name || "Unnamed Student")
     .join(", ");
 
   // Determine if the slot is booked
   const isBooked = studentCount > 0;
 
   // Use formatRinkTime to display time in rink's timezone
-  const startTimeFormatted = formatRinkTime(slot.startTime, slot.Rink.timezone);
-  const endTimeFormatted = formatRinkTime(slot.endTime, slot.Rink.timezone);
+  const startTimeFormatted = formatRinkTime(slot.startTime, slot.rink.timezone);
+  const endTimeFormatted = formatRinkTime(slot.endTime, slot.rink.timezone);
 
   // Format the date for accessibility
   const dateFormatted = format(new Date(slot.startTime), "EEEE, MMMM d");
@@ -40,7 +40,7 @@ export function TimeSlotListItem({ slot, onClick }: TimeSlotListItemProps) {
         <div>{`${studentCount}/${slot.maxStudents}`}</div>
       </div>
       <div className="text-sm text-gray-600 flex justify-between">
-        <div className="break-words pr-2">{slot.Rink.name}</div>
+        <div className="break-words pr-2">{slot.rink.name}</div>
         {studentNames && <div className="italic break-words">{studentNames}</div>}
       </div>
     </button>
