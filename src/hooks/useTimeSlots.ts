@@ -78,7 +78,10 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     () =>
       timeSlots?.map((slot) => {
         const studentCount = slot.Lesson?.length || 0;
-        const studentNames = slot.Lesson?.map((lesson) => lesson.Student.User.name).join(", ");
+        const studentNames = slot.Lesson
+          ?.filter(lesson => lesson?.Student?.User)
+          ?.map((lesson) => lesson.Student.User.name || "Unnamed Student")
+          .join(", ");
         const title = `${studentCount}/${slot.maxStudents} students${
           studentNames ? ` (${studentNames})` : ""
         } - ${slot.Rink.name}`;

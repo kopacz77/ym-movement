@@ -15,7 +15,7 @@ import { useState } from "react";
 // Define a type for the student object
 interface Student {
   id: string;
-  user: {
+  User: {
     name: string | null;
     email?: string;
   };
@@ -44,7 +44,7 @@ export const StudentSelector: React.FC = () => {
         <SelectContent>
           {students?.students?.map((student: Student) => (
             <SelectItem key={student.id} value={student.id}>
-              {student.user.name || "Unnamed Student"}
+              {student.User?.name || "Unnamed Student"}
             </SelectItem>
           ))}
         </SelectContent>

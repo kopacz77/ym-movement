@@ -11,6 +11,7 @@ interface TimeSlotListItemProps {
 export function TimeSlotListItem({ slot, onClick }: TimeSlotListItemProps) {
   const studentCount = slot.Lesson?.length || 0;
   const studentNames = slot.Lesson
+    ?.filter(lesson => lesson?.Student?.User)
     ?.map((lesson) => lesson.Student.User.name || "Unnamed Student")
     .join(", ");
 
