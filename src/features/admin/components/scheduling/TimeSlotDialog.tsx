@@ -173,11 +173,11 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     <SelectValue placeholder="Select student" />
                   </SelectTrigger>
                   <SelectContent>
-                    {students?.map((student) => (
+                    {students?.filter(student => student?.id).map((student) => (
                       <SelectItem key={student.id} value={student.id}>
-                        {student.user.name || "Unnamed Student"}
+                        {student.User?.name || "Unnamed Student"}
                       </SelectItem>
-                    ))}
+                    )) || []}
                   </SelectContent>
                 </Select>
               </div>
@@ -186,15 +186,18 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
             <div className="space-y-2">
               <p className="font-medium">Assigned Students</p>
               <div className="space-y-1 max-h-40 overflow-y-auto">
-                {(selectedEvent
-                  ? selectedEvent.event.extendedProps.lessons
-                  : selectedSlot?.lessons
-                )?.map((lesson) => (
+                {(() => {
+                  const lessons = (selectedEvent
+                    ? selectedEvent.event.extendedProps.Lesson
+                    : selectedSlot?.Lesson
+                  )?.filter(lesson => lesson?.id && lesson?.Student) || [];
+                  
+                  return lessons.length > 0 ? lessons.map((lesson) => (
                   <div
                     key={lesson.id}
                     className="flex items-center justify-between p-2 border rounded"
                   >
-                    <span>{lesson.student.user.name || "Unnamed Student"}</span>
+                    <span>{lesson.Student?.User?.name || "Unnamed Student"}</span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -207,7 +210,12 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    No students assigned to this time slot
+                  </div>
+                );
+                })()}
               </div>
             </div>
 

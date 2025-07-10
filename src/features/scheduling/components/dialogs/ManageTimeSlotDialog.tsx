@@ -15,14 +15,14 @@ import { Event } from "react-big-calendar";
 
 interface Student {
   id: string;
-  user: {
+  User: {
     name: string | null;
   };
 }
 
 interface Lesson {
   id: string;
-  student: Student;
+  Student: Student;
 }
 
 interface SlotData {
@@ -93,8 +93,8 @@ export function ManageTimeSlotDialog({
                   </p>
                 ) : (
                   <p>
-                    {selectedSlot?.rink.timezone &&
-                      formatRinkTime(selectedSlot.startTime, selectedSlot.rink.timezone)}
+                    {selectedSlot?.Rink.timezone &&
+                      formatRinkTime(selectedSlot.startTime, selectedSlot.Rink.timezone)}
                   </p>
                 )}
               </div>
@@ -111,8 +111,8 @@ export function ManageTimeSlotDialog({
                   </p>
                 ) : (
                   <p>
-                    {selectedSlot?.rink.timezone &&
-                      formatRinkTime(selectedSlot.endTime, selectedSlot.rink.timezone)}
+                    {selectedSlot?.Rink.timezone &&
+                      formatRinkTime(selectedSlot.endTime, selectedSlot.Rink.timezone)}
                   </p>
                 )}
               </div>
@@ -122,7 +122,7 @@ export function ManageTimeSlotDialog({
                   {selectedEvent
                     ? `${selectedEvent.event.extendedProps.currentStudents} / ${selectedEvent.event.extendedProps.maxStudents}`
                     : selectedSlot &&
-                      `${selectedSlot.lessons?.length || 0} / ${selectedSlot.maxStudents}`}
+                      `${selectedSlot.Lesson?.length || 0} / ${selectedSlot.maxStudents}`}
                 </p>
               </div>
               <div>
@@ -130,7 +130,7 @@ export function ManageTimeSlotDialog({
                 <p>
                   {selectedEvent
                     ? selectedEvent.event.extendedProps.rink?.name
-                    : selectedSlot?.rink?.name}
+                    : selectedSlot?.Rink?.name}
                 </p>
               </div>
             </div>
@@ -152,7 +152,7 @@ export function ManageTimeSlotDialog({
                   <SelectContent>
                     {students?.map((student) => (
                       <SelectItem key={student.id} value={student.id}>
-                        {student.user.name || "Unnamed Student"}
+                        {student.User.name || "Unnamed Student"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -165,13 +165,13 @@ export function ManageTimeSlotDialog({
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {(selectedEvent
                   ? selectedEvent.event.extendedProps.lessons
-                  : selectedSlot?.lessons
+                  : selectedSlot?.Lesson
                 )?.map((lesson: Lesson) => (
                   <div
                     key={lesson.id}
                     className="flex items-center justify-between p-2 border rounded"
                   >
-                    <span>{lesson.student.user.name || "Unnamed Student"}</span>
+                    <span>{lesson.Student.User.name || "Unnamed Student"}</span>
                     <Button
                       variant="ghost"
                       size="sm"

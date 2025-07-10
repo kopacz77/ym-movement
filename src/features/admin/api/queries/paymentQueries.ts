@@ -34,8 +34,8 @@ export const paymentRouter = createTRPCRouter({
         if (input?.search) {
           where.OR = [
             {
-              student: {
-                user: { name: { contains: input.search, mode: "insensitive" } },
+              Student: {
+                User: { name: { contains: input.search, mode: "insensitive" } },
               },
             },
             { referenceCode: { contains: input.search, mode: "insensitive" } },
@@ -53,9 +53,9 @@ export const paymentRouter = createTRPCRouter({
           ctx.prisma.payment.findMany({
             where,
             include: {
-              student: {
+              Student: {
                 include: {
-                  user: {
+                  User: {
                     select: {
                       id: true,
                       name: true,
@@ -64,14 +64,14 @@ export const paymentRouter = createTRPCRouter({
                   },
                 },
               },
-              lesson: {
+              Lesson: {
                 select: {
                   id: true,
                   startTime: true,
                   endTime: true,
                   type: true,
                   area: true,
-                  rink: {
+                  Rink: {
                     select: {
                       id: true,
                       name: true,
@@ -114,14 +114,14 @@ export const paymentRouter = createTRPCRouter({
         const payment = await ctx.prisma.payment.findUnique({
           where: { id: input.paymentId },
           include: {
-            student: {
+            Student: {
               include: {
-                user: true,
+                User: true,
               },
             },
-            lesson: {
+            Lesson: {
               include: {
-                rink: true,
+                Rink: true,
               },
             },
           },
@@ -155,10 +155,10 @@ export const paymentRouter = createTRPCRouter({
         const payment = await ctx.prisma.payment.findUnique({
           where: { id: input.paymentId },
           include: {
-            lesson: true,
-            student: {
+            Lesson: true,
+            Student: {
               include: {
-                user: true,
+                User: true,
               },
             },
           },
@@ -249,12 +249,12 @@ export const paymentRouter = createTRPCRouter({
         const payment = await ctx.prisma.payment.findUnique({
           where: { id: input.paymentId },
           include: {
-            student: {
+            Student: {
               include: {
-                user: true,
+                User: true,
               },
             },
-            lesson: true,
+            Lesson: true,
           },
         });
 

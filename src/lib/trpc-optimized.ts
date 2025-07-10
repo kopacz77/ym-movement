@@ -476,8 +476,8 @@ export class TRPCBatchOperations {
       const students = await ctx.prisma.student.findMany({
         where: { id: { in: missingIds } },
         include: {
-          user: true,
-          _count: { select: { lessons: true, payments: true } },
+          User: true,
+          _count: { select: { Lesson: true, Payment: true } },
         },
       });
       

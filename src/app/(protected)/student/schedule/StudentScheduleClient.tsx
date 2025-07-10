@@ -158,7 +158,7 @@ export default function StudentSchedulePage() {
       area: lesson.area,
       status: lesson.status,
       price: lesson.price,
-      rink: lesson.rink,
+      Rink: lesson.Rink,
     };
 
     // Add optional properties only if they exist and aren't null

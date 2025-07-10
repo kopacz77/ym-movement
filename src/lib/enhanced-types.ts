@@ -539,16 +539,4 @@ export {
   assertNever,
 };
 
-// Re-export common types for convenience
-export type {
-  StrictUser,
-  StrictStudent,
-  StrictLesson,
-  StrictPayment,
-  StrictRink,
-  StrictTimeSlot,
-  ApiResponse,
-  PaginatedResponse,
-  SystemEvent,
-  EnvironmentConfig,
-};
+// Types are already exported above - no need for re-export

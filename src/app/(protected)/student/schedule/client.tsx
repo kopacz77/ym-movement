@@ -99,7 +99,7 @@ export default function StudentScheduleClient() {
       type: lesson.type,
       status: lesson.status,
       price: lesson.price,
-      rink: {
+      Rink: {
         name: lesson.Rink.name,
         address: lesson.Rink.address,
       },
@@ -112,7 +112,7 @@ export default function StudentScheduleClient() {
 
     // Add payment info if it exists
     if (lesson.Payment) {
-      result.payment = {
+      result.Payment = {
         id: lesson.Payment.id,
         status: lesson.Payment.status,
         amount: lesson.Payment.amount,

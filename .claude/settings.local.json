@@ -9,7 +9,8 @@
       "Bash(pnpm test:run:*)",
       "Bash(pnpm add:*)",
       "Bash(grep:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

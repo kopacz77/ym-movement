@@ -56,7 +56,7 @@ interface OptimizedTimeSlot {
   readonly currentStudents: number;
   readonly isActive: boolean;
   readonly isAvailable: boolean;
-  readonly rink: OptimizedRink;
+  readonly Rink: OptimizedRink;
 }
 
 interface OptimizedCalendarEvent {

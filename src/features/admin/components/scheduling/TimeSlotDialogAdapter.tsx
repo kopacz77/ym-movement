@@ -6,7 +6,7 @@ import { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
 // Define the Student interface matching Prisma schema
 interface Student {
   id: string;
-  user: {
+  User: {
     name: string | null;
   };
 }
@@ -14,7 +14,7 @@ interface Student {
 // Define the Lesson interface matching Prisma schema
 interface Lesson {
   id: string;
-  student: Student;
+  Student: Student;
   // Other fields can be added if needed
 }
 
@@ -63,13 +63,14 @@ function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
     const unknownLesson = item as {
       id?: string;
       student?: { id?: string; user?: { name?: string | null } };
+      Student?: { id?: string; User?: { name?: string | null } };
     };
     return {
       id: unknownLesson.id || "unknown",
-      student: {
-        id: unknownLesson.student?.id || "unknown",
-        user: {
-          name: unknownLesson.student?.user?.name || null,
+      Student: {
+        id: unknownLesson.Student?.id || unknownLesson.student?.id || "unknown",
+        User: {
+          name: unknownLesson.Student?.User?.name || unknownLesson.student?.user?.name || null,
         },
       },
     };

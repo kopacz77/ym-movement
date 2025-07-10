@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
           email: email.toLowerCase(),
           password: hashedPassword,
           role: "STUDENT",
-          student: {
+          Student: {
             create: {
               phone,
               level,
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
           },
         },
         include: {
-          student: true,
+          Student: true,
         },
       });
 

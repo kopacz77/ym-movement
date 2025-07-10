@@ -9,9 +9,9 @@ export interface TimeSlot {
   endTime: string | Date;
   maxStudents: number;
   currentStudents?: number;
-  lessons?: unknown[];
+  Lesson?: unknown[];
   isActive: boolean;
-  rink: {
+  Rink: {
     id: string;
     name: string;
     address?: string;

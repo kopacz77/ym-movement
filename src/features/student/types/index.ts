@@ -10,7 +10,7 @@ export interface TimeSlot {
   currentStudents: number;
   isActive: boolean;
   rinkId: string;
-  rink: {
+  Rink: {
     name: string;
     address: string;
   };
@@ -28,11 +28,11 @@ export interface LessonWithDetails {
   timeSlot?: {
     id: string;
   };
-  rink: {
+  Rink: {
     name: string;
     address: string;
   };
-  payment?: {
+  Payment?: {
     id: string;
     status: PaymentStatus;
     amount: number;
@@ -44,7 +44,7 @@ export interface LessonWithDetails {
 export interface StudentProfile {
   id: string;
   userId: string;
-  user: {
+  User: {
     name: string;
     email: string;
   };

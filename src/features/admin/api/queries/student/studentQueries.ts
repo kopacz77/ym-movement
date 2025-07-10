@@ -166,7 +166,7 @@ export const studentQueries = createTRPCRouter({
               userId: existingUser.id,
             },
             include: {
-              user: true,
+              User: true,
             },
           });
         } else {
@@ -183,7 +183,7 @@ export const studentQueries = createTRPCRouter({
               },
             },
             include: {
-              user: true,
+              User: true,
             },
           });
         }

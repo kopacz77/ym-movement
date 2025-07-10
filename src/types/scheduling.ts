@@ -5,9 +5,9 @@
  */
 export interface Lesson {
   id: string;
-  student: {
+  Student: {
     id: string;
-    user: {
+    User: {
       name: string | null;
     };
   };
@@ -28,13 +28,13 @@ export interface TimeSlot {
   endTime: string | Date;
   maxStudents: number;
   rinkId: string;
-  rink: {
+  Rink: {
     id: string;
     name: string;
     timezone: string;
     address?: string;
   };
-  lessons?: Lesson[];
+  Lesson?: Lesson[];
   isActive: boolean;
 }
 
