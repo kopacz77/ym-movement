@@ -275,6 +275,16 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log("Assigning student to time slot:", input);
+        
+        // Validate input
+        if (!input.timeSlotId || !input.studentId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "timeSlotId and studentId are required",
+          });
+        }
+
         // First check if the slot is full and get timezone info
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },

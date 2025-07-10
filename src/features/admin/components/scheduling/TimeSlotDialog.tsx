@@ -185,14 +185,11 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
               <div className="flex gap-2">
                 <Select
                   value={selectedStudentId}
-                  onValueChange={(studentId: string) => {
-                    setSelectedStudentId(studentId);
-                    onAssignStudent(studentId);
-                  }}
+                  onValueChange={setSelectedStudentId}
                   disabled={isAssigning}
                 >
                   <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder={isAssigning ? "Assigning..." : "Select student"} />
+                    <SelectValue placeholder="Select student" />
                   </SelectTrigger>
                   <SelectContent>
                     {students?.filter(student => student?.id).map((student) => (
@@ -202,6 +199,17 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     )) || []}
                   </SelectContent>
                 </Select>
+                <Button
+                  onClick={() => {
+                    if (selectedStudentId) {
+                      onAssignStudent(selectedStudentId);
+                    }
+                  }}
+                  disabled={!selectedStudentId || isAssigning}
+                  size="sm"
+                >
+                  {isAssigning ? "Assigning..." : "Assign"}
+                </Button>
               </div>
             </div>
 

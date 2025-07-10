@@ -249,12 +249,22 @@ const ScheduleManagerComponent = () => {
     (studentId: string) => {
       const timeSlotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
 
-      if (timeSlotId) {
-        assignStudent.mutate({
-          timeSlotId,
-          studentId,
-        });
+      console.log("Frontend assignment:", { timeSlotId, studentId, selectedEvent, selectedSlot });
+
+      if (!timeSlotId) {
+        console.error("No timeSlotId available for assignment");
+        return;
       }
+
+      if (!studentId) {
+        console.error("No studentId provided for assignment");
+        return;
+      }
+
+      assignStudent.mutate({
+        timeSlotId,
+        studentId,
+      });
     },
     [assignStudent, selectedEvent, selectedSlot],
   );
