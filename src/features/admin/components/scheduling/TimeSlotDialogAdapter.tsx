@@ -90,11 +90,11 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
           start: selectedEvent.schedule.start,
           end: selectedEvent.schedule.end,
           extendedProps: {
-            rink: selectedEvent.schedule.raw.rink,
+            Rink: selectedEvent.schedule.raw.rink,
             currentStudents: selectedEvent.schedule.raw.lessons?.length || 0,
             maxStudents: selectedEvent.schedule.raw.maxStudents,
             // Use our helper function to safely cast
-            lessons: castToLessons(selectedEvent.schedule.raw.lessons),
+            Lesson: castToLessons(selectedEvent.schedule.raw.lessons),
           },
         },
       }
@@ -104,7 +104,8 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
   const adaptedSlot = selectedSlot
     ? {
         ...selectedSlot,
-        lessons: castToLessons(selectedSlot.lessons),
+        Lesson: castToLessons(selectedSlot.Lesson || selectedSlot.lessons),
+        Rink: selectedSlot.Rink || selectedSlot.rink,
       }
     : null;
 
