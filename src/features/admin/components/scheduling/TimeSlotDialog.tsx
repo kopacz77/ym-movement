@@ -192,7 +192,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     <SelectValue placeholder="Select student" />
                   </SelectTrigger>
                   <SelectContent>
-                    {students?.filter(student => student?.id).map((student) => (
+                    {students?.filter(student => student?.id && student?.User?.name).map((student) => (
                       <SelectItem key={student.id} value={student.id}>
                         {student.User?.name || "Unnamed Student"}
                       </SelectItem>

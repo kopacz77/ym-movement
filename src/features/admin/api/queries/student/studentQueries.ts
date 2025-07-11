@@ -24,6 +24,8 @@ export const studentQueries = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         const where: Prisma.StudentWhereInput = {
+          // Only show approved students
+          isApproved: true,
           OR: input?.search
             ? [
                 {

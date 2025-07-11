@@ -47,13 +47,16 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
   });
 
   // Get students data with error handling
-  const { data: students } = api.admin.student.getStudents.useQuery(undefined, {
+  const { data: studentsResponse } = api.admin.student.getStudents.useQuery(undefined, {
     retry: 2,
     retryDelay: 1000,
     onError: (error) => {
       console.error('Failed to fetch students:', error.message);
     }
   });
+
+  // Extract students array from paginated response
+  const students = studentsResponse?.students;
 
   // Get time slots data with error handling
   const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery(
