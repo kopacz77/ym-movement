@@ -8,6 +8,26 @@ import { z } from "zod";
 import { StudentWithInviteStatus, studentFormSchema } from "./schemas";
 
 export const studentQueries = createTRPCRouter({
+  // Debug query: Get student count and approval status
+  getStudentStats: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const [total, approved, unapproved] = await Promise.all([
+        ctx.prisma.student.count(),
+        ctx.prisma.student.count({ where: { isApproved: true } }),
+        ctx.prisma.student.count({ where: { isApproved: false } }),
+      ]);
+
+      return {
+        total,
+        approved,
+        unapproved,
+      };
+    } catch (error) {
+      console.error("Error fetching student stats:", error);
+      return { total: 0, approved: 0, unapproved: 0 };
+    }
+  }),
+
   // Query: Get all students with filters
   getStudents: protectedProcedure
     .input(
@@ -16,6 +36,7 @@ export const studentQueries = createTRPCRouter({
           search: z.string().optional(),
           level: z.nativeEnum(Level).optional(),
           active: z.boolean().optional(),
+          approved: z.boolean().optional(), // Add approved filter
           page: z.number().min(1).optional(),
           limit: z.number().min(1).max(100).optional(),
         })
@@ -24,8 +45,8 @@ export const studentQueries = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         const where: Prisma.StudentWhereInput = {
-          // Only show approved students
-          isApproved: true,
+          // Apply approved filter if specified, default to approved students for assignment purposes
+          ...(input?.approved !== undefined ? { isApproved: input.approved } : { isApproved: true }),
           OR: input?.search
             ? [
                 {
@@ -56,8 +77,8 @@ export const studentQueries = createTRPCRouter({
             orderBy: {
               User: { name: "asc" },
             },
-            skip: input?.page ? (input.page - 1) * (input.limit ?? 10) : undefined,
-            take: input?.limit ?? 10,
+            skip: input?.page ? (input.page - 1) * (input.limit ?? 100) : undefined,
+            take: input?.limit ?? 100,
           }),
           ctx.prisma.student.count({ where }),
         ]);
@@ -66,7 +87,7 @@ export const studentQueries = createTRPCRouter({
           students,
           pagination: {
             total,
-            pages: Math.ceil(total / (input?.limit ?? 10)),
+            pages: Math.ceil(total / (input?.limit ?? 100)),
             current: input?.page ?? 1,
           },
         };

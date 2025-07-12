@@ -46,14 +46,20 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     }
   });
 
-  // Get students data with error handling
-  const { data: studentsResponse } = api.admin.student.getStudents.useQuery(undefined, {
-    retry: 2,
-    retryDelay: 1000,
-    onError: (error) => {
-      console.error('Failed to fetch students:', error.message);
+  // Get students data with error handling - fetch approved students for assignment
+  const { data: studentsResponse } = api.admin.student.getStudents.useQuery(
+    { 
+      limit: 100, // Get up to 100 students
+      approved: true // Only approved students can be assigned
+    },
+    {
+      retry: 2,
+      retryDelay: 1000,
+      onError: (error) => {
+        console.error('Failed to fetch students:', error.message);
+      }
     }
-  });
+  );
 
   // Extract students array from paginated response
   const students = studentsResponse?.students;

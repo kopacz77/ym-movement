@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatRinkTime } from "@/lib/timezone";
+import { api } from "@/lib/api";
 import { X } from "lucide-react";
 import { type FC, useState, useEffect } from "react";
 
@@ -89,6 +90,11 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
   isUnassigning = false,
 }) => {
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+
+  // Debug: Get student stats
+  const { data: studentStats } = api.admin.student.getStudentStats.useQuery(undefined, {
+    enabled: isOpen, // Only fetch when dialog is open
+  });
 
   // Reset selection when dialog opens/closes or when assignment completes
   useEffect(() => {
@@ -181,7 +187,14 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <p className="font-medium">Assign Student</p>
+              <div className="flex items-center justify-between">
+                <p className="font-medium">Assign Student</p>
+                {studentStats && (
+                  <p className="text-xs text-gray-500">
+                    {studentStats.approved} approved / {studentStats.total} total students
+                  </p>
+                )}
+              </div>
               <div className="flex gap-2">
                 <Select
                   value={selectedStudentId}
@@ -192,11 +205,19 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     <SelectValue placeholder="Select student" />
                   </SelectTrigger>
                   <SelectContent>
-                    {students?.filter(student => student?.id && student?.User?.name).map((student) => (
-                      <SelectItem key={student.id} value={student.id}>
-                        {student.User?.name || "Unnamed Student"}
-                      </SelectItem>
-                    )) || []}
+                    {students && students.length > 0 ? (
+                      students
+                        .filter(student => student?.id && student?.User?.name)
+                        .map((student) => (
+                          <SelectItem key={student.id} value={student.id}>
+                            {student.User.name}
+                          </SelectItem>
+                        ))
+                    ) : (
+                      <div className="px-2 py-1 text-sm text-gray-500">
+                        No approved students available
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
                 <Button
