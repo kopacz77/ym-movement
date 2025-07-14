@@ -104,12 +104,16 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
     }
   }, [isOpen]);
 
-  // Reset selection after successful assignment
+  // Reset selection after successful assignment (when isAssigning changes from true to false)
+  const [wasAssigning, setWasAssigning] = useState(false);
+  
   useEffect(() => {
-    if (!isAssigning && selectedStudentId) {
+    if (wasAssigning && !isAssigning) {
+      // Assignment just completed, reset selection
       setSelectedStudentId("");
     }
-  }, [isAssigning, selectedStudentId]);
+    setWasAssigning(isAssigning);
+  }, [isAssigning, wasAssigning]);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
