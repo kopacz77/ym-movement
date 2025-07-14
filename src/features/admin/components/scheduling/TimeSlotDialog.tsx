@@ -96,14 +96,6 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
     enabled: isOpen, // Only fetch when dialog is open
   });
 
-  // Debug: Log students prop
-  useEffect(() => {
-    if (isOpen) {
-      console.log('TimeSlotDialog students prop:', students?.length || 0, 'students');
-      console.log('Students data:', students);
-      console.log('StudentStats:', studentStats);
-    }
-  }, [isOpen, students, studentStats]);
 
   // Reset selection when dialog opens/closes or when assignment completes
   useEffect(() => {

@@ -17,6 +17,7 @@ export const studentQueries = createTRPCRouter({
         ctx.prisma.student.count({ where: { isApproved: false } }),
       ]);
 
+
       return {
         total,
         approved,

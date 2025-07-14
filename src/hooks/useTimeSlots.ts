@@ -57,10 +57,6 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
       retryDelay: 1000,
       onError: (error) => {
         console.error('Failed to fetch students:', error.message);
-      },
-      onSuccess: (data) => {
-        console.log('Students fetched for assignment:', data.students?.length || 0, 'students');
-        console.log('First student example:', data.students?.[0]);
       }
     }
   );

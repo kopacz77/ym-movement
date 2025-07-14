@@ -380,7 +380,7 @@ const ScheduleManagerComponent = () => {
         onDelete={handleDeleteSlot}
         selectedEvent={selectedEvent}
         selectedSlot={selectedSlot}
-        students={students?.students || []}
+        students={students || []}
         onAssignStudent={handleAssignStudent}
         onUnassignStudent={(lessonId: string) => {
           if (lessonId) {
