@@ -19,6 +19,7 @@ export const studentRouter = createTRPCRouter({
   // Approval operations
   getPendingApprovals: approvalQueries.getPendingApprovals,
   approveStudent: approvalQueries.approveStudent,
+  approveAllStudents: approvalQueries.approveAllStudents,
   rejectStudent: approvalQueries.rejectStudent,
 
   // Note operations
