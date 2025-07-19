@@ -12,12 +12,19 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const NotificationsPopover = () => {
-  const [open, setOpen] = useState(false);
-  const utils = api.useUtils();
   const { data: session, status } = useSession();
 
   // Only fetch notifications if user is authenticated
   const isAuthenticated = Boolean(status === "authenticated" && session?.user);
+
+  // Initialize hooks first (before any early returns)
+  const [open, setOpen] = useState(false);
+  const utils = api.useUtils();
+
+  // Don't render if not authenticated - check AFTER calling all hooks
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Fetch notifications from API
   const {
@@ -69,11 +76,6 @@ export const NotificationsPopover = () => {
       });
     }
   }, [error]);
-
-  // Don't render if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
 
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.isRead).length;
