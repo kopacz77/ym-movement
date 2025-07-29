@@ -65,12 +65,20 @@ export function safeCompare(a: string, b: string): boolean {
  * @returns Sanitized string
  */
 export function sanitizeInput(input: string): string {
+  if (!input) return "";
+  
   return input
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#x27;")
-    .replace(/\//g, "&#x2F;");
+    .replace(/\//g, "&#x2F;")
+    // Additional protection against script injections
+    .replace(/javascript:/gi, "")
+    .replace(/vbscript:/gi, "")
+    .replace(/on\w+=/gi, "")
+    // Limit length to prevent buffer overflow attacks
+    .substring(0, 10000);
 }
 
 /**

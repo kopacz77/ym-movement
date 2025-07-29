@@ -19,7 +19,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Stop containers**: `pnpm docker:down`
 - **View logs**: `pnpm docker:logs`
 - **Clean up**: `pnpm docker:clean`
-- **Documentation**: `pnpm docs:dev` (serves at localhost:3001)
+
+## Documentation Commands
+
+- **Documentation server**: `pnpm docs:dev` (serves at localhost:3001)
+- **Documentation with auto-open**: `pnpm docs:serve`
+- **Documentation preview**: `pnpm docs:preview`
 
 ## Tech Stack & Architecture
 

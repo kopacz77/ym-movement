@@ -12,32 +12,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
 
 export const NotificationsPopover = () => {
-<<<<<<< HEAD
+  // ALL HOOKS MUST BE CALLED AT THE TOP - NEVER AFTER CONDITIONAL RETURNS
   const [open, setOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const utils = api.useUtils();
-=======
->>>>>>> 7b2261bfa4deb10e6d5d600a4fa422d2472c6c86
   const { data: session, status } = useSession();
-
-  // Client-side hydration effect (must be at top level)
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   // Only fetch notifications if user is authenticated
   const isAuthenticated = Boolean(status === "authenticated" && session?.user);
 
-  // Initialize hooks first (before any early returns)
-  const [open, setOpen] = useState(false);
-  const utils = api.useUtils();
-
-  // Don't render if not authenticated - check AFTER calling all hooks
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // Fetch notifications from API
+  // Fetch notifications from API - ALWAYS call this hook, use enabled to control fetching
   const {
     data: notifications = [],
     isLoading,
@@ -78,6 +62,16 @@ export const NotificationsPopover = () => {
       });
     },
   });
+
+  // Client-side hydration effect (must be at top level)
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Don't render if not authenticated - check AFTER calling all hooks
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Handle errors from query (but not auth errors)
   useEffect(() => {

@@ -1,0 +1,555 @@
+# Deployment Guide - Yura Scheduler v3
+
+## Overview
+
+This guide covers deployment options for Yura Scheduler v3, from development to production environments. The application supports multiple deployment strategies including Vercel, Docker, and traditional VPS hosting.
+
+## 🚀 Quick Deploy to Vercel (Recommended)
+
+### Prerequisites
+- GitHub account with repository access
+- Vercel account (free tier available)
+- PostgreSQL database (Neon, Supabase, or other provider)
+
+### Steps
+
+1. **Prepare Environment Variables**
+   ```bash
+   # Required for production
+   DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
+   NEXTAUTH_SECRET="your-32-character-secret-key"
+   NEXTAUTH_URL="https://your-app.vercel.app"
+   
+   # Optional but recommended
+   GOOGLE_CLIENT_EMAIL="service-account@project.iam.gserviceaccount.com"
+   GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour-Key\n-----END PRIVATE KEY-----"
+   GOOGLE_CALENDAR_ID="calendar-id@group.calendar.google.com"
+   INSTRUCTOR_EMAIL="instructor@example.com"
+   RESEND_API_KEY="your-email-api-key"
+   ```
+
+2. **Deploy to Vercel**
+   ```bash
+   # Option 1: Using Vercel CLI
+   npm i -g vercel
+   vercel --prod
+   
+   # Option 2: GitHub Integration
+   # Push to GitHub, connect repo in Vercel dashboard
+   ```
+
+3. **Configure Database**
+   ```bash
+   # Run migrations after deployment
+   pnpm prisma migrate deploy
+   
+   # Optional: Seed with initial data
+   pnpm prisma db seed
+   ```
+
+### Vercel Configuration
+
+Create `vercel.json` in project root:
+```json
+{
+  "functions": {
+    "src/app/api/**": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 🐳 Docker Deployment
+
+### Development Environment
+
+```bash
+# Quick start with Docker Compose
+git clone <repository>
+cd yura-scheduler-v3
+cp .env.docker .env
+pnpm docker:dev
+
+# Services will be available at:
+# App: http://localhost:3000
+# Database: localhost:5432
+# Docs: http://localhost:3001
+```
+
+### Production Docker
+
+1. **Build Production Image**
+   ```dockerfile
+   # Dockerfile
+   FROM node:20-alpine AS base
+   
+   # Install dependencies only when needed
+   FROM base AS deps
+   RUN apk add --no-cache libc6-compat
+   WORKDIR /app
+   
+   COPY package.json pnpm-lock.yaml* ./
+   RUN corepack enable pnpm && pnpm i --frozen-lockfile
+   
+   # Rebuild the source code only when needed
+   FROM base AS builder
+   WORKDIR /app
+   COPY --from=deps /app/node_modules ./node_modules
+   COPY . .
+   
+   ENV NEXT_TELEMETRY_DISABLED 1
+   RUN corepack enable pnpm && pnpm build
+   
+   # Production image, copy all the files and run next
+   FROM base AS runner
+   WORKDIR /app
+   
+   ENV NODE_ENV production
+   ENV NEXT_TELEMETRY_DISABLED 1
+   
+   RUN addgroup --system --gid 1001 nodejs
+   RUN adduser --system --uid 1001 nextjs
+   
+   COPY --from=builder /app/public ./public
+   COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+   COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+   
+   USER nextjs
+   
+   EXPOSE 3000
+   ENV PORT 3000
+   
+   CMD ["node", "server.js"]
+   ```
+
+2. **Docker Compose for Production**
+   ```yaml
+   # docker-compose.prod.yml
+   version: '3.8'
+   services:
+     app:
+       build: .
+       ports:
+         - "3000:3000"
+       environment:
+         - DATABASE_URL=${DATABASE_URL}
+         - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+         - NEXTAUTH_URL=${NEXTAUTH_URL}
+       depends_on:
+         - postgres
+   
+     postgres:
+       image: postgres:14-alpine
+       environment:
+         POSTGRES_DB: yura_scheduler
+         POSTGRES_USER: ${DB_USER}
+         POSTGRES_PASSWORD: ${DB_PASSWORD}
+       volumes:
+         - postgres_data:/var/lib/postgresql/data
+         - ./backups:/backups
+       ports:
+         - "5432:5432"
+   
+     nginx:
+       image: nginx:alpine
+       ports:
+         - "80:80"
+         - "443:443"
+       volumes:
+         - ./nginx.conf:/etc/nginx/nginx.conf
+         - ./ssl:/etc/ssl
+       depends_on:
+         - app
+   
+   volumes:
+     postgres_data:
+   ```
+
+3. **Deploy with Docker Compose**
+   ```bash
+   # Build and start
+   docker-compose -f docker-compose.prod.yml up -d --build
+   
+   # Run migrations
+   docker-compose exec app pnpm prisma migrate deploy
+   
+   # View logs
+   docker-compose logs -f app
+   ```
+
+## 🖥️ VPS Deployment (Ubuntu/CentOS)
+
+### Prerequisites
+- Ubuntu 20.04+ or CentOS 8+
+- Root or sudo access
+- Domain name pointed to server IP
+
+### Step 1: Server Setup
+
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js 20
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install pnpm
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+source ~/.bashrc
+
+# Install PostgreSQL
+sudo apt install postgresql postgresql-contrib -y
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Install Nginx
+sudo apt install nginx -y
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# Install PM2 for process management
+npm install -g pm2
+```
+
+### Step 2: Database Setup
+
+```bash
+# Configure PostgreSQL
+sudo -u postgres psql
+
+# In PostgreSQL prompt:
+CREATE DATABASE yura_scheduler;
+CREATE USER your_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE yura_scheduler TO your_user;
+\q
+
+# Configure PostgreSQL for remote connections (if needed)
+sudo nano /etc/postgresql/14/main/postgresql.conf
+# Uncomment and modify: listen_addresses = '*'
+
+sudo nano /etc/postgresql/14/main/pg_hba.conf
+# Add: host all all 0.0.0.0/0 md5
+
+sudo systemctl restart postgresql
+```
+
+### Step 3: Application Deployment
+
+```bash
+# Create application directory
+sudo mkdir -p /var/www/yura-scheduler
+sudo chown $USER:$USER /var/www/yura-scheduler
+
+# Clone and setup application
+cd /var/www/yura-scheduler
+git clone <repository> .
+pnpm install
+
+# Create production environment file
+cat > .env.production << EOF
+NODE_ENV=production
+DATABASE_URL="postgresql://your_user:your_password@localhost:5432/yura_scheduler"
+NEXTAUTH_SECRET="$(openssl rand -base64 32)"
+NEXTAUTH_URL="https://yourdomain.com"
+# Add other environment variables...
+EOF
+
+# Build application
+pnpm build
+
+# Run database migrations
+pnpm prisma migrate deploy
+
+# Optional: Seed database
+pnpm prisma db seed
+```
+
+### Step 4: Process Management with PM2
+
+```bash
+# Create PM2 ecosystem file
+cat > ecosystem.config.js << EOF
+module.exports = {
+  apps: [{
+    name: 'yura-scheduler',
+    script: 'pnpm',
+    args: 'start',
+    cwd: '/var/www/yura-scheduler',
+    instances: 'max',
+    exec_mode: 'cluster',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    env_file: '.env.production',
+    max_memory_restart: '1G',
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true
+  }]
+};
+EOF
+
+# Create logs directory
+mkdir -p logs
+
+# Start application with PM2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+### Step 5: Nginx Configuration
+
+```bash
+# Create Nginx configuration
+sudo nano /etc/nginx/sites-available/yura-scheduler
+
+# Add configuration:
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    
+    # Security headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
+    
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+    
+    location /api/ {
+        limit_req zone=api burst=20 nodelay;
+        proxy_pass http://localhost:3000;
+        # Same proxy settings as above...
+    }
+    
+    location /api/auth/ {
+        limit_req zone=login burst=5 nodelay;
+        proxy_pass http://localhost:3000;
+        # Same proxy settings as above...
+    }
+}
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/yura-scheduler /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Step 6: SSL Certificate (Let's Encrypt)
+
+```bash
+# Install Certbot
+sudo apt install snapd
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Obtain SSL certificate
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Test auto-renewal
+sudo certbot renew --dry-run
+```
+
+## 🔒 Production Security Checklist
+
+### Environment Security
+- [ ] Use strong, random secrets (NEXTAUTH_SECRET)
+- [ ] Enable SSL/TLS (HTTPS only)
+- [ ] Configure security headers
+- [ ] Set up rate limiting
+- [ ] Enable database SSL connections
+- [ ] Use environment variables for secrets (never commit to git)
+
+### Database Security
+- [ ] Use strong database passwords
+- [ ] Restrict database access to application server only
+- [ ] Enable SSL for database connections
+- [ ] Regular database backups
+- [ ] Monitor database performance and access logs
+
+### Application Security
+- [ ] Keep dependencies updated (`pnpm audit`)
+- [ ] Enable CSRF protection (built into Next.js)
+- [ ] Configure Content Security Policy
+- [ ] Set up monitoring and logging
+- [ ] Regular security audits
+
+### Infrastructure Security
+- [ ] Keep server OS updated
+- [ ] Configure firewall (UFW on Ubuntu)
+- [ ] Disable unnecessary services
+- [ ] Use SSH keys (disable password auth)
+- [ ] Regular security updates
+
+## 📊 Monitoring and Maintenance
+
+### Health Checks
+```bash
+# Application health
+curl https://yourdomain.com/api/health
+
+# Database connectivity
+curl https://yourdomain.com/api/health/database
+
+# Detailed system status
+curl https://yourdomain.com/api/health/detailed
+```
+
+### Log Monitoring
+```bash
+# PM2 logs
+pm2 logs yura-scheduler
+
+# Nginx logs
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+
+# System logs
+sudo journalctl -f -u nginx
+```
+
+### Database Backup
+```bash
+# Create backup script
+cat > /home/ubuntu/backup-db.sh << EOF
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+pg_dump -h localhost -U your_user yura_scheduler > /backups/yura_scheduler_$DATE.sql
+find /backups -name "yura_scheduler_*.sql" -mtime +7 -delete
+EOF
+
+chmod +x /home/ubuntu/backup-db.sh
+
+# Add to crontab for daily backups
+crontab -e
+# Add: 0 2 * * * /home/ubuntu/backup-db.sh
+```
+
+### Updates and Maintenance
+```bash
+# Update application
+cd /var/www/yura-scheduler
+git pull origin main
+pnpm install
+pnpm build
+pnpm prisma migrate deploy
+pm2 restart yura-scheduler
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+sudo systemctl restart nginx
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Application won't start**
+```bash
+# Check PM2 status
+pm2 status
+
+# Check logs
+pm2 logs yura-scheduler
+
+# Check environment variables
+pm2 env 0
+```
+
+**Database connection issues**
+```bash
+# Test database connection
+psql -h localhost -U your_user -d yura_scheduler
+
+# Check PostgreSQL status
+sudo systemctl status postgresql
+
+# Check database logs
+sudo tail -f /var/log/postgresql/postgresql-14-main.log
+```
+
+**Nginx configuration issues**
+```bash
+# Test configuration
+sudo nginx -t
+
+# Check Nginx status
+sudo systemctl status nginx
+
+# Check error logs
+sudo tail -f /var/log/nginx/error.log
+```
+
+### Performance Optimization
+
+**Enable Nginx caching**
+```nginx
+# Add to server block
+location /_next/static/ {
+    alias /var/www/yura-scheduler/.next/static/;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}
+
+location /images/ {
+    expires 30d;
+    add_header Cache-Control "public, no-transform";
+}
+```
+
+**Database optimization**
+```sql
+-- Add indexes for frequently queried columns
+CREATE INDEX idx_lessons_start_time ON "Lesson"("startTime");
+CREATE INDEX idx_users_email ON "User"("email");
+CREATE INDEX idx_time_slots_date_rink ON "RinkTimeSlot"("date", "rinkId");
+```
+
+## 📞 Support
+
+For deployment support:
+- **Documentation**: This guide and README.md
+- **Issues**: GitHub repository issues
+- **Community**: Project discussions
+- **Emergency**: Contact system administrator
