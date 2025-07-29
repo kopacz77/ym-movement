@@ -12,9 +12,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
 
 export const NotificationsPopover = () => {
+<<<<<<< HEAD
   const [open, setOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const utils = api.useUtils();
+=======
+>>>>>>> 7b2261bfa4deb10e6d5d600a4fa422d2472c6c86
   const { data: session, status } = useSession();
 
   // Client-side hydration effect (must be at top level)
@@ -24,6 +27,15 @@ export const NotificationsPopover = () => {
 
   // Only fetch notifications if user is authenticated
   const isAuthenticated = Boolean(status === "authenticated" && session?.user);
+
+  // Initialize hooks first (before any early returns)
+  const [open, setOpen] = useState(false);
+  const utils = api.useUtils();
+
+  // Don't render if not authenticated - check AFTER calling all hooks
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Fetch notifications from API
   const {
@@ -75,11 +87,6 @@ export const NotificationsPopover = () => {
       });
     }
   }, [error]);
-
-  // Don't render if not authenticated
-  if (!isAuthenticated) {
-    return null;
-  }
 
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.isRead).length;
