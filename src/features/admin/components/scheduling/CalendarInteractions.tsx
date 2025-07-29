@@ -1,7 +1,7 @@
+import React from "react";
+import { Calendar, type SlotInfo, type View, Views } from "react-big-calendar";
 import { Card } from "@/components/ui/card";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import React from "react";
-import { Calendar, SlotInfo, View, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { BookingDialog } from "./BookingDialog";
 

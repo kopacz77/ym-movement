@@ -1,11 +1,11 @@
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
+import { getServerSession } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export type TRPCContext = {
   prisma: typeof prisma;

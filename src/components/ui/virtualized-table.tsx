@@ -1,8 +1,8 @@
 /**
  * Virtualized Table and List Components
- * 
+ *
  * High-performance virtualization for rendering large datasets efficiently.
- * 
+ *
  * @description
  * These components use React Virtual to render only visible items, dramatically
  * improving performance for large datasets:
@@ -11,7 +11,7 @@
  * - Memory-efficient rendering (~20 DOM nodes instead of 1000+)
  * - Smooth scrolling performance regardless of dataset size
  * - 95% reduction in DOM nodes for large lists
- * 
+ *
  * @example
  * ```tsx
  * // Virtualized table for large datasets
@@ -22,7 +22,7 @@
  *   itemHeight={52}
  *   onRowClick={handleStudentClick}
  * />
- * 
+ *
  * // Simple virtualized list
  * <VirtualizedList
  *   items={notifications}
@@ -33,7 +33,7 @@
  *   )}
  * />
  * ```
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 2 Optimizations
  */
@@ -41,7 +41,8 @@
 "use client";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useRef, useMemo, memo } from "react";
+import type React from "react";
+import { memo, useMemo, useRef } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "./table";
 
 interface VirtualizedTableProps<T> {
@@ -80,10 +81,7 @@ function VirtualizedTableComponent<T>({
 
   const items = virtualizer.getVirtualItems();
 
-  const totalHeight = useMemo(
-    () => virtualizer.getTotalSize(),
-    [virtualizer]
-  );
+  const totalHeight = useMemo(() => virtualizer.getTotalSize(), [virtualizer]);
 
   return (
     <div className={className}>
@@ -105,12 +103,8 @@ function VirtualizedTableComponent<T>({
             </TableRow>
           </TableHeader>
         </Table>
-        
-        <div
-          ref={parentRef}
-          className="overflow-auto"
-          style={{ height }}
-        >
+
+        <div ref={parentRef} className="overflow-auto" style={{ height }}>
           <div style={{ height: totalHeight, position: "relative" }}>
             <TableBody>
               {items.map((virtualItem) => {
@@ -153,15 +147,13 @@ function VirtualizedTableComponent<T>({
 }
 
 export const VirtualizedTable = memo(VirtualizedTableComponent) as <T>(
-  props: VirtualizedTableProps<T>
+  props: VirtualizedTableProps<T>,
 ) => React.ReactElement;
 
 /**
  * Hook for creating memoized table columns
  */
-export function useTableColumns<T>(
-  columnDefinitions: VirtualizedTableProps<T>["columns"]
-) {
+export function useTableColumns<T>(columnDefinitions: VirtualizedTableProps<T>["columns"]) {
   return useMemo(() => columnDefinitions, [columnDefinitions]);
 }
 
@@ -197,11 +189,7 @@ function VirtualizedListComponent<T>({
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
-    <div
-      ref={parentRef}
-      className={`overflow-auto ${className}`}
-      style={{ height }}
-    >
+    <div ref={parentRef} className={`overflow-auto ${className}`} style={{ height }}>
       <div
         style={{
           height: virtualizer.getTotalSize(),
@@ -230,5 +218,5 @@ function VirtualizedListComponent<T>({
 }
 
 export const VirtualizedList = memo(VirtualizedListComponent) as <T>(
-  props: VirtualizedListProps<T>
+  props: VirtualizedListProps<T>,
 ) => React.ReactElement;

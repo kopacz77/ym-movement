@@ -1,12 +1,12 @@
 // src/features/admin/components/scheduling/MobileCalendarView.tsx
 "use client";
 
-import { TimezoneNotice, formatTimeWithTimezone } from "@/components/TimezoneNotice";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import React from "react";
+import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
 import { Button } from "@/components/ui/button";
 import { displayInRinkLocalTime } from "@/lib/timezone";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
 import type { GroupedTimeSlot, TimeSlot } from "./calendarUtils";
 
 interface MobileCalendarViewProps {
@@ -189,11 +189,13 @@ export function MobileCalendarView({
                         <div className="flex-grow">
                           <div className="font-medium">{timeDisplay}</div>
                           {showLocalTime && (
-                            <div className="text-xs text-gray-500">Your time: {localTimeDisplay}</div>
+                            <div className="text-xs text-gray-500">
+                              Your time: {localTimeDisplay}
+                            </div>
                           )}
                           <div className="text-sm text-gray-500 dark:text-gray-400 break-words">
-                            {slot.Rink.name} ({slot.Rink.timezone.split("/").pop()?.replace("_", " ")}
-                            )
+                            {slot.Rink.name} (
+                            {slot.Rink.timezone.split("/").pop()?.replace("_", " ")})
                           </div>
                           <div className="text-sm">
                             {lessonsCount > 0 ? (

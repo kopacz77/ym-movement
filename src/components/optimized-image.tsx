@@ -1,17 +1,17 @@
 /**
  * Optimized Image Component
- * 
+ *
  * Advanced image optimization with lazy loading, preloading, and performance monitoring
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 3 Optimizations
  */
 
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import Image from "next/image";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface OptimizedImageProps {
   src: string;
@@ -21,7 +21,7 @@ interface OptimizedImageProps {
   className?: string;
   priority?: boolean;
   quality?: number;
-  placeholder?: 'blur' | 'empty';
+  placeholder?: "blur" | "empty";
   blurDataURL?: string;
   onLoadingComplete?: () => void;
   onError?: () => void;
@@ -47,47 +47,52 @@ class ImagePerformanceMonitor {
   private static observers: ((data: ImagePerformanceData) => void)[] = [];
 
   static addMetric(data: ImagePerformanceData) {
-    this.metrics.push(data);
-    
+    ImagePerformanceMonitor.metrics.push(data);
+
     // Keep only last 100 entries
-    if (this.metrics.length > 100) {
-      this.metrics.shift();
+    if (ImagePerformanceMonitor.metrics.length > 100) {
+      ImagePerformanceMonitor.metrics.shift();
     }
 
     // Notify observers
-    this.observers.forEach(observer => observer(data));
+    ImagePerformanceMonitor.observers.forEach((observer) => observer(data));
 
     // Log slow loading images in development
-    if (process.env.NODE_ENV === 'development' && data.loadTime > 2000) {
+    if (process.env.NODE_ENV === "development" && data.loadTime > 2000) {
       console.warn(`[Image] Slow loading image: ${data.src} took ${data.loadTime}ms`);
     }
   }
 
   static subscribe(callback: (data: ImagePerformanceData) => void) {
-    this.observers.push(callback);
+    ImagePerformanceMonitor.observers.push(callback);
     return () => {
-      this.observers = this.observers.filter(obs => obs !== callback);
+      ImagePerformanceMonitor.observers = ImagePerformanceMonitor.observers.filter(
+        (obs) => obs !== callback,
+      );
     };
   }
 
   static getMetrics() {
-    return this.metrics;
+    return ImagePerformanceMonitor.metrics;
   }
 
   static getAverageLoadTime() {
-    if (this.metrics.length === 0) return 0;
-    const totalTime = this.metrics.reduce((sum, metric) => sum + metric.loadTime, 0);
-    return totalTime / this.metrics.length;
+    if (ImagePerformanceMonitor.metrics.length === 0) return 0;
+    const totalTime = ImagePerformanceMonitor.metrics.reduce(
+      (sum, metric) => sum + metric.loadTime,
+      0,
+    );
+    return totalTime / ImagePerformanceMonitor.metrics.length;
   }
 
   static getCacheHitRate() {
-    if (this.metrics.length === 0) return 0;
-    const cachedImages = this.metrics.filter(metric => metric.cached).length;
-    return (cachedImages / this.metrics.length) * 100;
+    if (ImagePerformanceMonitor.metrics.length === 0) return 0;
+    const cachedImages = ImagePerformanceMonitor.metrics.filter((metric) => metric.cached).length;
+    return (cachedImages / ImagePerformanceMonitor.metrics.length) * 100;
   }
 
   static getSlowestImages(limit = 10) {
-    return [...this.metrics]
+    return [...ImagePerformanceMonitor.metrics]
       .sort((a, b) => b.loadTime - a.loadTime)
       .slice(0, limit);
   }
@@ -103,26 +108,26 @@ class ImagePreloader {
 
   static preload(src: string, priority = false): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.preloadedImages.has(src)) {
+      if (ImagePreloader.preloadedImages.has(src)) {
         resolve();
         return;
       }
 
-      if (typeof window === 'undefined') return;
-      
+      if (typeof window === "undefined") return;
+
       const img = new (window as any).Image();
       const startTime = performance.now();
 
       img.onload = () => {
         const loadTime = performance.now() - startTime;
-        this.preloadedImages.add(src);
-        
+        ImagePreloader.preloadedImages.add(src);
+
         // Monitor performance
         ImagePerformanceMonitor.addMetric({
           src,
           loadTime,
           size: 0, // We can't easily get size from Image object
-          format: this.getImageFormat(src),
+          format: ImagePreloader.getImageFormat(src),
           cached: loadTime < 50, // Assume cached if very fast
           timestamp: Date.now(),
         });
@@ -145,48 +150,46 @@ class ImagePreloader {
     }
 
     for (const batch of batches) {
-      await Promise.allSettled(
-        batch.map(src => this.preload(src))
-      );
+      await Promise.allSettled(batch.map((src) => ImagePreloader.preload(src)));
     }
   }
 
   static queue(src: string) {
-    if (!this.preloadedImages.has(src) && !this.preloadQueue.includes(src)) {
-      this.preloadQueue.push(src);
-      this.processQueue();
+    if (!ImagePreloader.preloadedImages.has(src) && !ImagePreloader.preloadQueue.includes(src)) {
+      ImagePreloader.preloadQueue.push(src);
+      ImagePreloader.processQueue();
     }
   }
 
   private static async processQueue() {
-    if (this.isProcessing || this.preloadQueue.length === 0) return;
+    if (ImagePreloader.isProcessing || ImagePreloader.preloadQueue.length === 0) return;
 
-    this.isProcessing = true;
+    ImagePreloader.isProcessing = true;
 
-    while (this.preloadQueue.length > 0) {
-      const src = this.preloadQueue.shift()!;
+    while (ImagePreloader.preloadQueue.length > 0) {
+      const src = ImagePreloader.preloadQueue.shift()!;
       try {
-        await this.preload(src);
+        await ImagePreloader.preload(src);
       } catch (error) {
-        console.warn('[Image Preloader] Failed to preload:', src, error);
+        console.warn("[Image Preloader] Failed to preload:", src, error);
       }
     }
 
-    this.isProcessing = false;
+    ImagePreloader.isProcessing = false;
   }
 
   private static getImageFormat(src: string): string {
-    const extension = src.split('.').pop()?.toLowerCase();
-    return extension || 'unknown';
+    const extension = src.split(".").pop()?.toLowerCase();
+    return extension || "unknown";
   }
 
   static isPreloaded(src: string) {
-    return this.preloadedImages.has(src);
+    return ImagePreloader.preloadedImages.has(src);
   }
 
   static clearCache() {
-    this.preloadedImages.clear();
-    this.preloadQueue.length = 0;
+    ImagePreloader.preloadedImages.clear();
+    ImagePreloader.preloadQueue.length = 0;
   }
 }
 
@@ -201,7 +204,7 @@ export function OptimizedImage({
   className,
   priority = false,
   quality = 75,
-  placeholder = 'empty',
+  placeholder = "empty",
   blurDataURL,
   onLoadingComplete,
   onError,
@@ -239,7 +242,7 @@ export function OptimizedImage({
           }
         });
       },
-      { rootMargin: '50px' } // Start loading 50px before visible
+      { rootMargin: "50px" }, // Start loading 50px before visible
     );
 
     observer.observe(imageRef.current);
@@ -256,17 +259,17 @@ export function OptimizedImage({
   const handleLoadComplete = useCallback(() => {
     const endTime = performance.now();
     const duration = endTime - loadStartTime.current;
-    
+
     setLoadTime(duration);
     setIsLoading(false);
-    
+
     // Monitor performance if enabled
     if (monitor) {
       ImagePerformanceMonitor.addMetric({
         src,
         loadTime: duration,
         size: 0, // Would need additional logic to determine size
-        format: src.split('.').pop()?.toLowerCase() || 'unknown',
+        format: src.split(".").pop()?.toLowerCase() || "unknown",
         cached: duration < 50, // Assume cached if very fast
         timestamp: Date.now(),
       });
@@ -283,19 +286,19 @@ export function OptimizedImage({
 
   // Generate optimized src with format detection
   const optimizedSrc = useMemo(() => {
-    if (typeof window === 'undefined') return src;
+    if (typeof window === "undefined") return src;
 
     // Check WebP support
     const supportsWebP = (() => {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 1;
       canvas.height = 1;
-      return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+      return canvas.toDataURL("image/webp").indexOf("data:image/webp") === 0;
     })();
 
     // Return WebP version if supported and fallback enabled
-    if (webpFallback && supportsWebP && !src.endsWith('.webp')) {
-      return src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+    if (webpFallback && supportsWebP && !src.endsWith(".webp")) {
+      return src.replace(/\.(jpg|jpeg|png)$/i, ".webp");
     }
 
     return src;
@@ -304,10 +307,10 @@ export function OptimizedImage({
   // Error fallback component
   if (hasError) {
     return (
-      <div 
+      <div
         className={cn(
           "flex items-center justify-center bg-gray-100 text-gray-400 text-sm",
-          className
+          className,
         )}
         style={{ width, height }}
       >
@@ -318,11 +321,8 @@ export function OptimizedImage({
 
   // Loading placeholder
   const LoadingPlaceholder = () => (
-    <div 
-      className={cn(
-        "animate-pulse bg-gray-200 flex items-center justify-center",
-        className
-      )}
+    <div
+      className={cn("animate-pulse bg-gray-200 flex items-center justify-center", className)}
       style={{ width, height }}
     >
       <div className="text-gray-400 text-sm">Loading...</div>
@@ -331,8 +331,8 @@ export function OptimizedImage({
 
   return (
     <div className="relative">
-      {isLoading && placeholder === 'empty' && <LoadingPlaceholder />}
-      
+      {isLoading && placeholder === "empty" && <LoadingPlaceholder />}
+
       <Image
         ref={imageRef}
         src={optimizedSrc}
@@ -348,7 +348,7 @@ export function OptimizedImage({
         className={cn(
           "transition-opacity duration-300",
           isLoading ? "opacity-0" : "opacity-100",
-          className
+          className,
         )}
         onLoadStart={handleLoadStart}
         onLoad={handleLoadComplete}
@@ -357,7 +357,7 @@ export function OptimizedImage({
       />
 
       {/* Performance indicator in development */}
-      {process.env.NODE_ENV === 'development' && monitor && loadTime > 0 && (
+      {process.env.NODE_ENV === "development" && monitor && loadTime > 0 && (
         <div className="absolute top-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-bl">
           {loadTime.toFixed(0)}ms
         </div>
@@ -393,7 +393,7 @@ export function OptimizedImageGallery({
   useEffect(() => {
     const nextImages = images
       .slice(currentIndex + 1, currentIndex + 1 + preloadNext)
-      .map(img => img.src);
+      .map((img) => img.src);
 
     ImagePreloader.preloadBatch(nextImages);
   }, [currentIndex, images, preloadNext]);
@@ -425,7 +425,7 @@ export function useImagePerformance() {
 
   useEffect(() => {
     const unsubscribe = ImagePerformanceMonitor.subscribe((data) => {
-      setMetrics(current => [...current, data]);
+      setMetrics((current) => [...current, data]);
     });
 
     // Initial data
@@ -434,12 +434,15 @@ export function useImagePerformance() {
     return unsubscribe;
   }, []);
 
-  const stats = useMemo(() => ({
-    totalImages: metrics.length,
-    averageLoadTime: ImagePerformanceMonitor.getAverageLoadTime(),
-    cacheHitRate: ImagePerformanceMonitor.getCacheHitRate(),
-    slowestImages: ImagePerformanceMonitor.getSlowestImages(5),
-  }), [metrics]);
+  const stats = useMemo(
+    () => ({
+      totalImages: metrics.length,
+      averageLoadTime: ImagePerformanceMonitor.getAverageLoadTime(),
+      cacheHitRate: ImagePerformanceMonitor.getCacheHitRate(),
+      slowestImages: ImagePerformanceMonitor.getSlowestImages(5),
+    }),
+    [metrics],
+  );
 
   return { metrics, stats };
 }

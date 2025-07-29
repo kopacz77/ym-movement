@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { sendLessonConfirmationEmail } from "@/lib/email";
-import { googleCalendar } from "@/lib/google/calendar";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek } from "date-fns";
 // src/features/student/api/queries/bookingQueries.ts
 import { z } from "zod";
+import { sendLessonConfirmationEmail } from "@/lib/email";
+import { googleCalendar } from "@/lib/google/calendar";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
 
 // Define extended Student type with custom pricing fields
 interface ExtendedStudent {

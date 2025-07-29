@@ -1,6 +1,11 @@
 // src/features/student/components/booking/BookingCalendar.tsx
 "use client";
-import { TimezoneNotice, formatTimeWithTimezone } from "@/components/TimezoneNotice";
+import { endOfDay, startOfDay } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DateTime } from "luxon";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { Calendar, Views } from "react-big-calendar";
+import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,11 +20,6 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { displayInRinkLocalTime } from "@/lib/timezone";
-import { endOfDay, startOfDay } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DateTime } from "luxon";
-import { useCallback, useEffect, useMemo, useState, memo } from "react";
-import { Calendar, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { toast } from "sonner";
 import { BookingDialog } from "./BookingDialog";
@@ -529,7 +529,7 @@ const BookingCalendarComponent = () => {
               return (
                 <div key={dayDate.toFormat("yyyy-MM-dd")} className="mb-4">
                   {/* Day header */}
-                  <div className="py-2 px-3 bg-slate-100 rounded-t-md">
+                  <div className="py-2 px-3 bg-muted rounded-t-md">
                     <div className="flex justify-between items-center">
                       <span className="font-bold">{dayDate.toFormat("EEEE")}</span>
                       <span>{dayDate.toFormat("MMMM d, yyyy")}</span>
@@ -537,7 +537,7 @@ const BookingCalendarComponent = () => {
                   </div>
 
                   {/* Time slots for the day */}
-                  <div className="border border-slate-200 rounded-b-md">
+                  <div className="border border-border rounded-b-md">
                     {day.slots
                       .sort(
                         (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
@@ -572,23 +572,25 @@ const BookingCalendarComponent = () => {
                             key={slot.id}
                             type="button"
                             className={`p-3 border-b last:border-0 cursor-pointer transition-colors w-full text-left ${
-                              isSlotBookable ? "hover:bg-green-50" : "hover:bg-red-50"
+                              isSlotBookable
+                                ? "hover:bg-green-50 hover:text-green-900"
+                                : "hover:bg-red-50 hover:text-red-900"
                             }`}
                             onClick={() => handleCustomSlotClick(slot)}
                             disabled={!isSlotBookable}
                           >
                             <div className="flex justify-between">
                               <div className="font-medium">{`${startTime} - ${endTime}`}</div>
-                              <div className={isSlotBookable ? "text-green-600" : "text-red-600"}>
+                              <div className={isSlotBookable ? "text-green-700" : "text-red-700"}>
                                 {`${currentStudents}/${slot.maxStudents} students`}
                               </div>
                             </div>
                             {showLocalTime && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 Your time: {localStartTime} - {localEndTime}
                               </div>
                             )}
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-muted-foreground">
                               {slot.Rink.name} {isSlotBookable ? "- Available" : "- Not Available"}
                             </div>
                           </button>

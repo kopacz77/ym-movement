@@ -1,12 +1,12 @@
 // src/components/mobile-navigation.tsx
 "use client";
 
-import { useIsMobile } from "@/hooks/useMediaQuery";
-import { cn } from "@/lib/utils";
 import { Calendar, Clock, CreditCard, Home, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { cn } from "@/lib/utils";
 
 type NavigationType = "student" | "admin" | null;
 

@@ -4,13 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Dev server**: `pnpm dev` or `npm run dev`
+- **Dev server**: `pnpm dev` or `npm run dev` 
 - **Build**: `pnpm build` or `npm run build`
 - **Type checking**: `pnpm type-check` or `npm run type-check`
 - **Linting**: `pnpm lint` or `npm run lint`
 - **Format code**: `pnpm format` or `npm run format`
 - **Auto-fix lint issues**: `pnpm lint:fix` or `npm run lint:fix`
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
+
+## Docker Commands (Recommended)
+
+- **Docker dev environment**: `pnpm docker:dev` (includes hot reload)
+- **Docker production**: `pnpm docker:up` 
+- **Stop containers**: `pnpm docker:down`
+- **View logs**: `pnpm docker:logs`
+- **Clean up**: `pnpm docker:clean`
+- **Documentation**: `pnpm docs:dev` (serves at localhost:3001)
 
 ## Tech Stack & Architecture
 
@@ -86,3 +95,85 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Fixed**: React hydration errors and 401 unauthorized notifications
 - **Enhanced**: Client-side rendering guards and session checks
 - **Improved**: Error boundaries and production environment handling
+
+### ✅ **Mobile Responsiveness & Layout** (2025-01-29)
+- **Enhanced**: Mobile responsive design across all major components
+- **Improved**: Table responsive patterns with sticky columns and progressive disclosure
+- **Updated**: Header layouts, tab systems, and form layouts for mobile
+- **Maintained**: Beautiful desktop styling while adding mobile support
+
+## 🚨 CRITICAL: SIDEBAR & LAYOUT ARCHITECTURE (IMMUTABLE)
+
+**⚠️ THE FOLLOWING LAYOUT STANDARDS ARE FINAL AND MUST NEVER BE MODIFIED ⚠️**
+
+### Desktop Layout Structure (DO NOT CHANGE)
+```tsx
+// AppLayout.tsx - LOCKED ARCHITECTURE
+<div className="min-h-screen flex bg-background">
+  {/* Sidebar - Fixed width, always visible on desktop */}
+  <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
+    <AppSidebar role={role} />
+  </div>
+
+  {/* Main content area - offset by sidebar width on desktop */}
+  <div className="flex-1 lg:pl-64">
+    <header className="sticky top-0 z-10 border-b bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 px-4 lg:px-6 py-4">
+      <HeaderComponent />
+    </header>
+    
+    <main className="flex-1 p-4 lg:p-6">
+      <div className="mx-auto w-full max-w-7xl">
+        {children}
+      </div>
+    </main>
+  </div>
+</div>
+```
+
+### Sidebar Design Standards (IMMUTABLE)
+```tsx
+// AppSidebar.tsx - LOCKED DESIGN
+<div className="w-full h-full bg-white border-r border-gray-200 flex flex-col">
+  {/* Header - EXACT height: h-24 for perfect alignment */}
+  <div className="h-24 px-6 border-b flex items-center bg-white">
+    <div className="flex items-center gap-3">
+      <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-3 shadow-lg">
+        {/* YM Movement Logo SVG */}
+      </div>
+      <div className="flex flex-col">
+        <span className="font-bold text-xl text-foreground">YM Movement</span>
+        <span className="text-xs text-muted-foreground">Admin Dashboard</span>
+      </div>
+    </div>
+  </div>
+
+  {/* Navigation with locked active state styling */}
+  <div className="flex-1 px-4 py-4 bg-white">
+    <nav className="space-y-2">
+      {/* Active: bg-blue-50 text-blue-700 border-r-2 border-blue-700 */}
+      {/* Hover: hover:bg-gray-50 hover:text-gray-900 */}
+    </nav>
+  </div>
+</div>
+```
+
+### ABSOLUTE REQUIREMENTS
+1. **Sidebar Width**: EXACTLY `w-64` (256px) - NEVER CHANGE
+2. **Main Content Offset**: EXACTLY `lg:pl-64` (256px) - NEVER CHANGE  
+3. **Header Heights**: Sidebar `h-24`, Main header `py-4` with content - NEVER CHANGE
+4. **Header Gradients**: `bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50` - NEVER CHANGE
+5. **Border Alignment**: Headers must align perfectly - NEVER CHANGE
+6. **Colors**: White sidebar, blue logo gradient, gray borders - NEVER CHANGE
+7. **Typography**: Exact font sizes and weights as specified - NEVER CHANGE
+8. **Active Navigation**: Blue background with right border - NEVER CHANGE
+
+### FORBIDDEN ACTIONS
+- ❌ NEVER use Radix Sidebar system for desktop layout
+- ❌ NEVER make sidebar collapsible on desktop  
+- ❌ NEVER change sidebar width or main content offset
+- ❌ NEVER modify header heights or alignment
+- ❌ NEVER change the color scheme or gradients
+- ❌ NEVER alter the navigation active state styling
+- ❌ NEVER remove fixed positioning for desktop sidebar
+
+**This layout is the final, beautiful design that took significant effort to perfect. It must be preserved exactly as documented.**

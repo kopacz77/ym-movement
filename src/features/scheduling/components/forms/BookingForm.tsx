@@ -1,5 +1,11 @@
 // src/features/scheduling/components/bookings/BookingForm.tsx
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LessonType, RinkArea } from "@prisma/client";
+import type React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -19,13 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useSanitizedInput } from "@/hooks/useSanitizedInput";
 import { api } from "@/lib/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LessonType, RinkArea } from "@prisma/client";
-import type React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 import type { CalendarSlot } from "../../types";
 
 // Define a proper type for the student data from the API
@@ -60,6 +61,7 @@ interface BookingFormProps {
 
 export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAction }) => {
   const { onError } = useErrorHandler();
+  const { sanitizeInput } = useSanitizedInput();
 
   // Fetch students using the correct API namespace with enabled option only
   const { data: studentsData, isLoading } = api.admin.student.getStudents.useQuery(undefined, {
@@ -89,7 +91,12 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
   });
 
   const onSubmit = (values: BookingFormValues) => {
-    createLesson.mutate({ ...values, timeSlotId: slot.id });
+    // Sanitize notes before submission
+    const sanitizedValues = {
+      ...values,
+      notes: values.notes ? sanitizeInput(values.notes) : undefined,
+    };
+    createLesson.mutate({ ...sanitizedValues, timeSlotId: slot.id });
   };
 
   // Check if we have students data to display
@@ -213,7 +220,11 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      {...field}
+                      onChange={(e) => field.onChange(sanitizeInput(e.target.value))}
+                      maxLength={1000}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,6 +1,11 @@
 // src/features/admin/components/layout/AdminHeader.tsx
 "use client";
 
+import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,20 +17,27 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { WarmGreeting } from "@/components/ui/warm-greeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export const AdminHeader = () => {
   const router = useRouter();
   const { user, logout } = useAuth(); // Use our custom Auth context
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
+  const breadcrumbs = useBreadcrumbs();
 
   const handleLogout = async () => {
     try {
@@ -41,42 +53,49 @@ export const AdminHeader = () => {
     }
   };
 
-
   return (
-    <header className="h-16 bg-white border-b shadow-sm safe-top">
-      <div className="flex h-full items-center justify-between px-4 md:px-6">
-        <div className="flex items-center space-x-2">
-          <div className="rounded-lg bg-blue-500 p-1.5">
-            <svg
-              className="h-5 w-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <title>Scheduler Logo</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <span className="text-xl font-semibold">YM Movement</span>
+    <div className="w-full h-full flex flex-col justify-center">
+      {/* Breadcrumb Navigation */}
+      <div className="mb-1 lg:mb-1">
+        <Breadcrumb>
+          <BreadcrumbList>
+            {breadcrumbs.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <BreadcrumbItem>
+                  {item.href ? (
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href={item.href}
+                        className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage className="text-xs sm:text-sm font-medium">{item.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+              </div>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      {/* Header Actions */}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
+          <WarmGreeting name={user?.name || "Beautiful"} role="admin" />
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="hidden md:flex items-center gap-2 mr-4">
-            <span className="text-sm font-medium">{user?.name || "Yura Min"}</span>
-          </div>
-
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Notifications Popover */}
           <NotificationsPopover />
 
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-                <LogOut className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className={isMobile ? "w-[90%] max-w-md mx-auto" : ""}>
@@ -95,6 +114,6 @@ export const AdminHeader = () => {
           </AlertDialog>
         </div>
       </div>
-    </header>
+    </div>
   );
 };

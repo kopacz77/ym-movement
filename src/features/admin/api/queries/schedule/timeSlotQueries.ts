@@ -1,9 +1,10 @@
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
+import { randomUUID } from "crypto";
 import { DateTime } from "luxon"; // Import DateTime for timezone handling
 // src/features/admin/api/queries/schedule/timeSlotQueries.ts
 import { z } from "zod";
-import { randomUUID } from "crypto";
+import { logSecurityEvent } from "@/lib/security";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define the TimeSlot interface to fix the implicit any[] errors
 interface TimeSlot {
@@ -77,6 +78,15 @@ export const timeSlotRouter = createTRPCRouter({
         }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Log security event
+      logSecurityEvent("TIME_SLOT_CREATED", {
+        userId: ctx.session?.user?.id,
+        rinkId: input.rinkId,
+        startTime: input.startTime.toISOString(),
+        endTime: input.endTime.toISOString(),
+        maxStudents: input.maxStudents,
+      });
+
       try {
         // Get the rink timezone
         const rink = await ctx.prisma.rink.findUnique({
@@ -144,6 +154,12 @@ export const timeSlotRouter = createTRPCRouter({
   deleteTimeSlot: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Log security event
+      logSecurityEvent("TIME_SLOT_DELETED", {
+        userId: ctx.session?.user?.id,
+        timeSlotId: input.id,
+      });
+
       try {
         // Check if time slot has any lessons
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
@@ -654,7 +670,7 @@ export const timeSlotRouter = createTRPCRouter({
           // Create all slots at once for efficiency
           try {
             await ctx.prisma.rinkTimeSlot.createMany({
-              data: slots.map(slot => ({
+              data: slots.map((slot) => ({
                 ...slot,
                 id: randomUUID(),
                 updatedAt: new Date(),

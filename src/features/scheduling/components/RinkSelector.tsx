@@ -1,5 +1,8 @@
 // src/features/scheduling/components/RinkSelector.tsx
 "use client";
+import type { Rink } from "@prisma/client";
+import type React from "react";
+import { useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -7,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Rink } from "@prisma/client";
-import React, { useMemo } from "react";
 
 interface RinkSelectorProps {
   rinks: Rink[];

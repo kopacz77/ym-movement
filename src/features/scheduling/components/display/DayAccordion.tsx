@@ -1,6 +1,6 @@
-import { type TimeSlot } from "@/types/scheduling";
 // src/features/scheduling/components/DayAccordion.tsx
 import { format } from "date-fns";
+import type { TimeSlot } from "@/types/scheduling";
 import { TimeSlotListItem } from "../display/TimeSlotListItem";
 
 interface DayWithSlots {

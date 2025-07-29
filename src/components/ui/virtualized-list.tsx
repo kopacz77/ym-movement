@@ -1,12 +1,13 @@
 /**
  * Simple Virtualized List Component
- * 
+ *
  * Basic virtualization for large lists
  */
 
 "use client";
 
-import React, { memo } from 'react';
+import type React from "react";
+import { memo } from "react";
 
 interface VirtualizedListProps<T> {
   items: T[];
@@ -21,7 +22,7 @@ function VirtualizedListComponent<T>({
   height,
   itemHeight,
   renderItem,
-  className = '',
+  className = "",
 }: VirtualizedListProps<T>) {
   // Simple implementation - for complex virtualization, use @tanstack/react-virtual
   return (

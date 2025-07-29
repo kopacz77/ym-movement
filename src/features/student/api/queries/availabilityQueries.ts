@@ -1,7 +1,7 @@
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/availabilityQueries.ts
 import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
 
 // Define a proper type for the where clause
 interface WhereClause {

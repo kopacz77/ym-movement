@@ -1,15 +1,17 @@
-import { TimezoneNotice, formatTimeWithTimezone } from "@/components/TimezoneNotice";
-import { FC, SyntheticEvent, useCallback, useRef } from "react";
-import { Calendar, EventProps, SlotInfo, Views } from "react-big-calendar";
-import withDragAndDrop, { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
+import { type FC, type SyntheticEvent, useCallback, useRef } from "react";
+import { Calendar, type EventProps, type SlotInfo, Views } from "react-big-calendar";
+import withDragAndDrop, {
+  type EventInteractionArgs,
+} from "react-big-calendar/lib/addons/dragAndDrop";
+import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-// src/features/admin/components/scheduling/DesktopCalendarView.tsx
-import { CalendarHeader } from "./CalendarHeader";
-import { TimeSlot } from "./calendarUtils";
 
 // Add a type for the localizer
-import { DateLocalizer } from "react-big-calendar";
+import type { DateLocalizer } from "react-big-calendar";
+// src/features/admin/components/scheduling/DesktopCalendarView.tsx
+import { CalendarHeader } from "./CalendarHeader";
+import type { TimeSlot } from "./calendarUtils";
 
 // Extended calendar event type for our specific needs
 interface ExtendedCalendarEvent {
@@ -101,7 +103,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         >
           {isSelectionMode && (
             <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-white">
-              {isSelected && <div className="w-full h-full rounded-full bg-blue-500"></div>}
+              {isSelected && <div className="w-full h-full rounded-full bg-blue-500" />}
             </div>
           )}
           <div className="font-medium">{event.title}</div>
@@ -142,7 +144,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   const handleSelectEvent = useCallback(
     (event: object, _e: SyntheticEvent<HTMLElement, Event>) => {
       const typedEvent = event as ExtendedCalendarEvent;
-      
+
       if (isSelectionMode && onSlotSelection) {
         // In selection mode, toggle the slot selection
         const slotId = typedEvent.slot.id;

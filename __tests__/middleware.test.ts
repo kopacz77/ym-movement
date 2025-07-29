@@ -87,8 +87,8 @@ describe("Middleware", () => {
     });
   });
 
-  describe("Development auth bypass", () => {
-    it("bypasses auth in development when enabled", async () => {
+  describe("Security enforcement", () => {
+    it("always requires authentication regardless of environment", async () => {
       (process.env as any).NODE_ENV = "development";
       process.env.ENABLE_AUTH_BYPASS = "true";
       (getToken as any).mockResolvedValue(null);
@@ -96,8 +96,8 @@ describe("Middleware", () => {
       const request = createMockRequest("/admin/dashboard");
       const response = await middleware(request);
       
-      expect(response).toBeInstanceOf(NextResponse);
-      expect(response.status).not.toBe(307);
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("http://localhost:3000/auth/login");
     });
 
     it("does not bypass auth in production", async () => {
@@ -115,7 +115,7 @@ describe("Middleware", () => {
 
   describe("Authenticated users", () => {
     it("redirects authenticated user from login to appropriate dashboard", async () => {
-      (getToken as any).mockResolvedValue({ role: "ADMIN" });
+      (getToken as any).mockResolvedValue({ id: "test-admin", role: "ADMIN" });
       
       const request = createMockRequest("/auth/login");
       const response = await middleware(request);
@@ -125,7 +125,7 @@ describe("Middleware", () => {
     });
 
     it("redirects authenticated student from login to student dashboard", async () => {
-      (getToken as any).mockResolvedValue({ role: "STUDENT" });
+      (getToken as any).mockResolvedValue({ id: "test-student", role: "STUDENT" });
       
       const request = createMockRequest("/auth/login");
       const response = await middleware(request);
@@ -135,7 +135,7 @@ describe("Middleware", () => {
     });
 
     it("allows admin access to admin routes", async () => {
-      (getToken as any).mockResolvedValue({ role: "ADMIN" });
+      (getToken as any).mockResolvedValue({ id: "test-admin", role: "ADMIN" });
       
       const request = createMockRequest("/admin/dashboard");
       const response = await middleware(request);
@@ -145,7 +145,7 @@ describe("Middleware", () => {
     });
 
     it("allows student access to student routes", async () => {
-      (getToken as any).mockResolvedValue({ role: "STUDENT" });
+      (getToken as any).mockResolvedValue({ id: "test-student", role: "STUDENT" });
       
       const request = createMockRequest("/student/dashboard");
       const response = await middleware(request);
@@ -157,7 +157,7 @@ describe("Middleware", () => {
 
   describe("Role-based access control", () => {
     it("prevents student from accessing admin routes", async () => {
-      (getToken as any).mockResolvedValue({ role: "STUDENT" });
+      (getToken as any).mockResolvedValue({ id: "test-student", role: "STUDENT" });
       
       const request = createMockRequest("/admin/dashboard");
       const response = await middleware(request);
@@ -167,7 +167,7 @@ describe("Middleware", () => {
     });
 
     it("prevents admin from accessing student routes", async () => {
-      (getToken as any).mockResolvedValue({ role: "ADMIN" });
+      (getToken as any).mockResolvedValue({ id: "test-admin", role: "ADMIN" });
       
       const request = createMockRequest("/student/dashboard");
       const response = await middleware(request);
@@ -177,14 +177,14 @@ describe("Middleware", () => {
     });
 
     it("handles coach role appropriately", async () => {
-      (getToken as any).mockResolvedValue({ role: "COACH" });
+      (getToken as any).mockResolvedValue({ id: "test-coach", role: "COACH" });
       
       const request = createMockRequest("/admin/dashboard");
       const response = await middleware(request);
       
-      // Assuming coaches don't have admin access
+      // Invalid roles should redirect to login
       expect(response.status).toBe(307);
-      expect(response.headers.get("location")).toBe("http://localhost:3000/student/dashboard");
+      expect(response.headers.get("location")).toBe("http://localhost:3000/auth/login");
     });
   });
 
@@ -206,9 +206,8 @@ describe("Middleware", () => {
       const response = await middleware(request);
       
       expect(response.status).toBe(307);
-      // When token is malformed (string instead of object), middleware treats it as authenticated
-      // but without proper role, so it redirects to student dashboard
-      expect(response.headers.get("location")).toBe("http://localhost:3000/student/dashboard");
+      // Malformed token (string without id/role properties) should redirect to login
+      expect(response.headers.get("location")).toBe("http://localhost:3000/auth/login");
     });
 
     it("handles token verification error", async () => {

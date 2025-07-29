@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { addDays, format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
+import type React from "react";
+import { Button } from "@/components/ui/button";
 
 interface ToolbarProps {
   date: Date;

@@ -1,20 +1,23 @@
+import bcrypt from "bcrypt";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+// src/app/api/auth/signup/route.ts
+import { z } from "zod";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { authRateLimiter, logSecurityEvent, validatePasswordStrength } from "@/lib/security";
-import bcrypt from "bcrypt";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-// src/app/api/auth/signup/route.ts
-import { z } from "zod";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
   email: z.string().email("Invalid email format").max(255, "Email too long"),
-  password: z.string()
+  password: z
+    .string()
     .min(8, "Password must be at least 8 characters")
     .max(128, "Password too long")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"),
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+    ),
   phone: z.string().optional(),
   level: z.enum([
     "PRE_PRELIMINARY",
@@ -40,15 +43,16 @@ const signupSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const clientIP =
+      req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     if (!authRateLimiter.isAllowed(clientIP)) {
-      logSecurityEvent('RATE_LIMIT_EXCEEDED', { 
-        endpoint: '/api/auth/signup',
-        ip: clientIP 
+      logSecurityEvent("RATE_LIMIT_EXCEEDED", {
+        endpoint: "/api/auth/signup",
+        ip: clientIP,
       });
       return NextResponse.json(
         { message: "Too many signup attempts. Please try again later." },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -57,9 +61,9 @@ export async function POST(req: NextRequest) {
     const result = signupSchema.safeParse(body);
 
     if (!result.success) {
-      logSecurityEvent('INVALID_SIGNUP_DATA', { 
+      logSecurityEvent("INVALID_SIGNUP_DATA", {
         ip: clientIP,
-        errors: result.error.format() 
+        errors: result.error.format(),
       });
       return NextResponse.json(
         { message: "Invalid data", errors: result.error.format() },
@@ -81,13 +85,16 @@ export async function POST(req: NextRequest) {
     // Additional password validation using security utility
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.isValid) {
-      logSecurityEvent('WEAK_PASSWORD_ATTEMPT', { 
+      logSecurityEvent("WEAK_PASSWORD_ATTEMPT", {
         ip: clientIP,
         email: email.toLowerCase(),
-        errors: passwordValidation.errors 
+        errors: passwordValidation.errors,
       });
       return NextResponse.json(
-        { message: "Password does not meet security requirements", errors: passwordValidation.errors },
+        {
+          message: "Password does not meet security requirements",
+          errors: passwordValidation.errors,
+        },
         { status: 400 },
       );
     }
@@ -98,9 +105,9 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
-      logSecurityEvent('DUPLICATE_EMAIL_SIGNUP', { 
+      logSecurityEvent("DUPLICATE_EMAIL_SIGNUP", {
         ip: clientIP,
-        email: email.toLowerCase() 
+        email: email.toLowerCase(),
       });
       return NextResponse.json({ message: "Email already in use" }, { status: 400 });
     }

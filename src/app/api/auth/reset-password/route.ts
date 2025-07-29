@@ -1,19 +1,44 @@
-import { prisma } from "@/lib/prisma";
 import { hash } from "bcrypt";
 // src/app/api/auth/reset-password/route.ts
 import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { authRateLimiter, logSecurityEvent, validatePasswordStrength } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting
+    const clientIP =
+      req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    if (!authRateLimiter.isAllowed(clientIP)) {
+      logSecurityEvent("RATE_LIMIT_EXCEEDED", {
+        endpoint: "/api/auth/reset-password",
+        ip: clientIP,
+      });
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const { token, password } = await req.json();
 
     if (!token || !password) {
       return NextResponse.json({ error: "Token and password are required" }, { status: 400 });
     }
 
-    if (password.length < 8) {
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      logSecurityEvent("WEAK_PASSWORD_ATTEMPT", {
+        endpoint: "/api/auth/reset-password",
+        ip: clientIP,
+        errors: passwordValidation.errors,
+      });
       return NextResponse.json(
-        { error: "Password must be at least 8 characters long" },
+        {
+          error: "Password does not meet security requirements",
+          details: passwordValidation.errors,
+        },
         { status: 400 },
       );
     }

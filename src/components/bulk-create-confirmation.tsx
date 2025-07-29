@@ -1,8 +1,8 @@
 /**
  * Bulk Create Confirmation Dialog
- * 
+ *
  * Enhanced confirmation with detailed preview before creation
- * 
+ *
  * @version 1.0.0
  */
 
@@ -59,23 +59,23 @@ export function BulkCreateConfirmation({
   isLoading = false,
 }: BulkCreateConfirmationProps) {
   const dayAbbrevs = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const validBreaks = data.breaks.filter(b => b.startTime && b.duration > 0);
+  const validBreaks = data.breaks.filter((b) => b.startTime && b.duration > 0);
 
   // Calculate total hours per week
   const calculateWeeklyHours = () => {
     if (!data.dailyStartTime || !data.dailyEndTime) {
       return 0;
     }
-    
+
     try {
       const start = parse(data.dailyStartTime, "HH:mm", new Date());
       const end = parse(data.dailyEndTime, "HH:mm", new Date());
       const dailyMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-      
+
       // Subtract break time
       const breakMinutes = validBreaks.reduce((total, b) => total + b.duration, 0);
       const netDailyMinutes = dailyMinutes - breakMinutes;
-      
+
       return (netDailyMinutes * data.daysOfWeek.length) / 60;
     } catch {
       return 0;
@@ -111,20 +111,27 @@ export function BulkCreateConfirmation({
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(parse(data.startDate, "yyyy-MM-dd", new Date()), "MMM d")} - {format(parse(data.endDate, "yyyy-MM-dd", new Date()), "MMM d, yyyy")}</span>
+                  <span>
+                    {format(parse(data.startDate, "yyyy-MM-dd", new Date()), "MMM d")} -{" "}
+                    {format(parse(data.endDate, "yyyy-MM-dd", new Date()), "MMM d, yyyy")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{data.dailyStartTime} - {data.dailyEndTime}</span>
+                  <span>
+                    {data.dailyStartTime} - {data.dailyEndTime}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span>{data.maxStudents} student{data.maxStudents !== 1 ? "s" : ""} max</span>
+                  <span>
+                    {data.maxStudents} student{data.maxStudents !== 1 ? "s" : ""} max
+                  </span>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {data.daysOfWeek.map(dayNum => (
+                {data.daysOfWeek.map((dayNum) => (
                   <Badge key={dayNum} variant="secondary">
                     {dayAbbrevs[dayNum]}
                   </Badge>
@@ -159,7 +166,9 @@ export function BulkCreateConfirmation({
                   {validBreaks.map((breakItem, index) => (
                     <div key={index} className="flex justify-between items-center text-sm">
                       <span>Break {index + 1}</span>
-                      <span className="font-medium">{breakItem.startTime} ({breakItem.duration} minutes)</span>
+                      <span className="font-medium">
+                        {breakItem.startTime} ({breakItem.duration} minutes)
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -203,18 +212,19 @@ export function BulkCreateConfirmation({
                   {data.conflicts.map((conflict, index) => (
                     <div key={index} className="flex justify-between items-start gap-4">
                       <div>
-                        <div className="font-medium">{format(parse(conflict.date, "yyyy-MM-dd", new Date()), "MMM d, yyyy")}</div>
+                        <div className="font-medium">
+                          {format(parse(conflict.date, "yyyy-MM-dd", new Date()), "MMM d, yyyy")}
+                        </div>
                         <div className="text-xs text-red-600">{conflict.time}</div>
                       </div>
-                      <div className="text-xs text-right">
-                        {conflict.reason}
-                      </div>
+                      <div className="text-xs text-right">{conflict.reason}</div>
                     </div>
                   ))}
                 </div>
                 <Separator className="my-3" />
                 <p className="text-xs text-red-600">
-                  ⚠️ These conflicts will prevent some slots from being created. Consider adjusting your time range or removing conflicting slots first.
+                  ⚠️ These conflicts will prevent some slots from being created. Consider adjusting
+                  your time range or removing conflicting slots first.
                 </p>
               </CardContent>
             </Card>
@@ -252,10 +262,8 @@ export function BulkCreateConfirmation({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
             className="bg-blue-600 hover:bg-blue-700"

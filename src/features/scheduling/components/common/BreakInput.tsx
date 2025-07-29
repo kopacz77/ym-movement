@@ -1,10 +1,10 @@
+import { X } from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/BreakInput.tsx
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { BulkTimeSlotFormValues } from "@/types/scheduling";
-import { X } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import type { BulkTimeSlotFormValues } from "@/types/scheduling";
 
 interface BreakInputProps {
   index: number;
@@ -42,7 +42,7 @@ export function BreakInput({ index, form, onRemove, canRemove }: BreakInputProps
                 step={5}
                 {...field}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value);
+                  const value = Number.parseInt(e.target.value);
                   field.onChange(Number.isNaN(value) ? 0 : value);
                 }}
               />

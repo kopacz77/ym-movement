@@ -1,6 +1,10 @@
 // src/app/(protected)/admin/settings/page.tsx
 "use client";
 
+import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
+import { Clock, DollarSign, Lock, MapPin, Save } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,10 +30,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DefaultPricingSettings } from "@/features/admin/components/management/DefaultPricingSettings";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 import { api } from "@/lib/api";
-import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
-import { Clock, DollarSign, Lock, MapPin, Save } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
 
 // Define interfaces for the settings
 interface OperationalSettings {
@@ -276,32 +276,36 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <Button onClick={handleSave} disabled={isSaving}>
+    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
+        <Button onClick={handleSave} disabled={isSaving} className="self-start sm:self-auto">
           <Save className="h-4 w-4 mr-2" />
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 
       <Tabs defaultValue="operational">
-        <TabsList className="w-full border-b mb-4 pb-0">
-          <TabsTrigger value="operational" className="flex items-center">
-            <Clock className="h-4 w-4 mr-2" />
-            Operational Hours
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-b mb-4 pb-0">
+          <TabsTrigger value="operational" className="flex items-center text-xs sm:text-sm">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Operational Hours</span>
+            <span className="sm:hidden">Hours</span>
           </TabsTrigger>
-          <TabsTrigger value="pricing" className="flex items-center">
-            <DollarSign className="h-4 w-4 mr-2" />
-            Payment & Pricing
+          <TabsTrigger value="pricing" className="flex items-center text-xs sm:text-sm">
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Payment & Pricing</span>
+            <span className="sm:hidden">Pricing</span>
           </TabsTrigger>
-          <TabsTrigger value="locations" className="flex items-center">
-            <MapPin className="h-4 w-4 mr-2" />
-            Rink Management
+          <TabsTrigger value="locations" className="flex items-center text-xs sm:text-sm">
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Rink Management</span>
+            <span className="sm:hidden">Rinks</span>
           </TabsTrigger>
-          <TabsTrigger value="account" className="flex items-center">
-            <Lock className="h-4 w-4 mr-2" />
-            Account Security
+          <TabsTrigger value="account" className="flex items-center text-xs sm:text-sm">
+            <Lock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Account Security</span>
+            <span className="sm:hidden">Account</span>
           </TabsTrigger>
         </TabsList>
 
@@ -315,11 +319,11 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Business Hours</h3>
                   {Object.entries(operationalSettings.days).map(([day, settings]) => (
-                    <div key={day} className="flex items-center justify-between">
+                    <div key={day} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                       <div className="flex items-center space-x-2">
                         <Switch
                           id={`${day.toLowerCase()}-active`}
@@ -328,22 +332,22 @@ export default function SettingsPage() {
                             handleDaySettingChange(day, "active", checked)
                           }
                         />
-                        <Label htmlFor={`${day.toLowerCase()}-active`}>
+                        <Label htmlFor={`${day.toLowerCase()}-active`} className="min-w-[80px]">
                           {day.charAt(0).toUpperCase() + day.slice(1)}
                         </Label>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 ml-8 sm:ml-0">
                         <Input
                           type="time"
-                          className="w-32"
+                          className="w-28 sm:w-32"
                           value={settings.startTime}
                           onChange={(e) => handleDaySettingChange(day, "startTime", e.target.value)}
                           disabled={!settings.active}
                         />
-                        <span>-</span>
+                        <span className="text-muted-foreground">-</span>
                         <Input
                           type="time"
-                          className="w-32"
+                          className="w-28 sm:w-32"
                           value={settings.endTime}
                           onChange={(e) => handleDaySettingChange(day, "endTime", e.target.value)}
                           disabled={!settings.active}

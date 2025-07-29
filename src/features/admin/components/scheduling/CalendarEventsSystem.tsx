@@ -1,3 +1,7 @@
+import { format, parse } from "date-fns";
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Calendar, Views } from "react-big-calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,9 +23,6 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import { format, parse } from "date-fns";
-import React, { useState, useEffect, useCallback } from "react";
-import { Calendar, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { toast } from "sonner";
 

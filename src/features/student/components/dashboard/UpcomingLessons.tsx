@@ -1,15 +1,18 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { api } from "@/lib/api";
-import { formatTime } from "@/lib/date"; // Import the consistent time formatter
 import { format } from "date-fns";
-import { Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DelightfulLoading } from "@/components/ui/delightful-loading";
+import { EncouragingEmptyState } from "@/components/ui/encouraging-empty-state";
+import { LessonStatusBadge } from "@/components/ui/lesson-status";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { api } from "@/lib/api";
+import { formatTime } from "@/lib/date"; // Import the consistent time formatter
 
 export const UpcomingLessons = () => {
   const { id: studentId } = useCurrentUser();
@@ -80,59 +83,64 @@ export const UpcomingLessons = () => {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xl">Upcoming Lessons</CardTitle>
-        <Link href="/student/schedule">
-          <Button variant="ghost" size="sm">
-            View All
+    <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30">
+      <CardHeader className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border-b border-blue-100/50">
+        <CardTitle className="text-xl flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-blue-500" />
+          Your Upcoming Adventures ✨
+        </CardTitle>
+        <CardAction>
+          <Button variant="ghost" size="sm" asChild className="hover:bg-blue-50">
+            <Link href="/student/schedule">View All</Link>
           </Button>
-        </Link>
+        </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         {showLoading ? (
-          <div className="flex justify-center items-center h-48">
-            <p>Loading lessons...</p>
-          </div>
+          <DelightfulLoading variant="warm" message="Loading your exciting lessons..." size="md" />
         ) : upcomingLessons?.length ? (
           <div className="space-y-4">
             {upcomingLessons.map((lesson) => (
-              <div key={lesson.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium">{lesson.type.replace("_", " ")} Lesson</h3>
-                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {format(new Date(lesson.startTime), "EEE, MMM d")}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>
-                      {formatLessonTime(lesson.startTime)} - {formatLessonTime(lesson.endTime)}
-                    </span>
+              <Card key={lesson.id} className="border rounded-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">
+                    {lesson.type.replace("_", " ")} Lesson
+                  </CardTitle>
+                  <CardAction>
+                    <LessonStatusBadge status={lesson.status} />
+                  </CardAction>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-2 mb-4">
+                    <div className="text-sm text-muted-foreground">
+                      {format(new Date(lesson.startTime), "EEE, MMM d")}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        {formatLessonTime(lesson.startTime)} - {formatLessonTime(lesson.endTime)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="break-words">{lesson.Rink.name}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="break-words">{lesson.Rink.name}</span>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Link href={`/student/schedule/${lesson.id}`}>
-                    <Button variant="outline" size="sm">
-                      View Details
+                  <div className="flex justify-end">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/student/schedule/${lesson.id}`}>View Details</Link>
                     </Button>
-                  </Link>
-                </div>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-48 text-center">
-            <p className="text-muted-foreground mb-4">You don&apos;t have any upcoming lessons</p>
-            <Link href="/student/book">
-              <Button>Book a Lesson</Button>
-            </Link>
-          </div>
+          <EncouragingEmptyState
+            type="lessons"
+            userRole="student"
+            onAction={() => (window.location.href = "/student/book")}
+          />
         )}
       </CardContent>
     </Card>

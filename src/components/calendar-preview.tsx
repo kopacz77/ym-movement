@@ -1,8 +1,8 @@
 /**
  * Calendar Preview Component
- * 
+ *
  * Visual calendar showing selected dates and time slots for bulk creation
- * 
+ *
  * @version 1.0.0
  */
 
@@ -56,8 +56,8 @@ export function CalendarPreview({
 
   try {
     // Parse dates at noon to avoid timezone issues
-    parsedStartDate = parse(startDate + ' 12:00', "yyyy-MM-dd HH:mm", new Date());
-    parsedEndDate = parse(endDate + ' 12:00', "yyyy-MM-dd HH:mm", new Date());
+    parsedStartDate = parse(startDate + " 12:00", "yyyy-MM-dd HH:mm", new Date());
+    parsedEndDate = parse(endDate + " 12:00", "yyyy-MM-dd HH:mm", new Date());
   } catch {
     return (
       <Card className="bg-red-50 border-red-200">
@@ -81,7 +81,7 @@ export function CalendarPreview({
 
       // Calculate break time
       const breakTime = breaks
-        .filter(b => b.startTime && b.duration > 0)
+        .filter((b) => b.startTime && b.duration > 0)
         .reduce((total, b) => total + b.duration, 0);
 
       const availableMinutes = totalMinutes - breakTime;
@@ -101,12 +101,14 @@ export function CalendarPreview({
     while (currentDate <= parsedEndDate) {
       const dayOfWeek = currentDate.getDay(); // JavaScript: 0=Sunday, 1=Monday, etc.
       const isSelected = selectedDays.includes(dayOfWeek);
-      
+
       // Debug: log the first few days
-      if (days.length < 3 && process.env.NODE_ENV === 'development') {
-        console.log(`Date: ${currentDate.toISOString().split('T')[0]}, getDay(): ${dayOfWeek}, isSelected: ${isSelected}, selectedDays: ${selectedDays}`);
+      if (days.length < 3 && process.env.NODE_ENV === "development") {
+        console.log(
+          `Date: ${currentDate.toISOString().split("T")[0]}, getDay(): ${dayOfWeek}, isSelected: ${isSelected}, selectedDays: ${selectedDays}`,
+        );
       }
-      
+
       days.push({
         date: new Date(currentDate),
         isSelected,
@@ -121,18 +123,21 @@ export function CalendarPreview({
   };
 
   const previewDays = generatePreviewDays();
-  const selectedDaysData = previewDays.filter(day => day.isSelected);
+  const selectedDaysData = previewDays.filter((day) => day.isSelected);
   const totalSlots = selectedDaysData.reduce((sum, day) => sum + day.slotCount, 0);
 
   // Group days by month for better organization
-  const daysByMonth = previewDays.reduce((acc, day) => {
-    const monthKey = format(day.date, "yyyy-MM");
-    if (!acc[monthKey]) {
-      acc[monthKey] = [];
-    }
-    acc[monthKey].push(day);
-    return acc;
-  }, {} as Record<string, PreviewDay[]>);
+  const daysByMonth = previewDays.reduce(
+    (acc, day) => {
+      const monthKey = format(day.date, "yyyy-MM");
+      if (!acc[monthKey]) {
+        acc[monthKey] = [];
+      }
+      acc[monthKey].push(day);
+      return acc;
+    },
+    {} as Record<string, PreviewDay[]>,
+  );
 
   const getDayLabel = (dayOfWeek: number) => {
     const labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -150,14 +155,14 @@ export function CalendarPreview({
       <CardContent className="space-y-4">
         {/* Summary */}
         <div className="flex flex-wrap gap-2">
-          {selectedDays.map(dayNum => (
+          {selectedDays.map((dayNum) => (
             <Badge key={dayNum} variant="secondary" className="text-xs">
               {getDayLabel(dayNum)}s: {slotsPerDay} slots
             </Badge>
           ))}
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <Badge variant="outline" className="text-xs">
-              Debug: Days {selectedDays.join(',')} Selected
+              Debug: Days {selectedDays.join(",")} Selected
             </Badge>
           )}
         </div>
@@ -180,11 +185,14 @@ export function CalendarPreview({
               <div className="grid grid-cols-7 gap-1">
                 {/* Day headers - Start with Monday */}
                 {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
-                  <div key={`day-header-${day}-${i}`} className="text-xs text-center text-muted-foreground p-1">
+                  <div
+                    key={`day-header-${day}-${i}`}
+                    className="text-xs text-center text-muted-foreground p-1"
+                  >
                     {day}
                   </div>
                 ))}
-                
+
                 {/* Calendar days with Monday-first layout */}
                 {(() => {
                   // Create a proper calendar grid starting with Monday
@@ -195,15 +203,13 @@ export function CalendarPreview({
                     const firstDayOfWeek = firstDay.date.getDay();
                     // Convert to Monday-first (0=Monday, 1=Tuesday, etc.)
                     const mondayFirstOffset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
-                    
+
                     // Add empty cells for offset
                     for (let i = 0; i < mondayFirstOffset; i++) {
-                      calendarDays.push(
-                        <div key={`empty-${i}`} className="text-xs p-1"></div>
-                      );
+                      calendarDays.push(<div key={`empty-${i}`} className="text-xs p-1" />);
                     }
                   }
-                  
+
                   // Add actual days
                   monthDays.forEach((day) => {
                     calendarDays.push(
@@ -211,24 +217,23 @@ export function CalendarPreview({
                         key={`${monthKey}-${format(day.date, "yyyy-MM-dd")}`}
                         className={`
                           relative text-xs p-1 rounded text-center transition-colors
-                          ${day.isSelected 
-                            ? "bg-blue-100 text-blue-800 border border-blue-200" 
-                            : "bg-gray-50 text-gray-400"
+                          ${
+                            day.isSelected
+                              ? "bg-blue-100 text-blue-800 border border-blue-200"
+                              : "bg-gray-50 text-gray-400"
                           }
                         `}
                       >
-                        <div className="font-medium">
-                          {format(day.date, "d")}
-                        </div>
+                        <div className="font-medium">{format(day.date, "d")}</div>
                         {day.isSelected && day.slotCount > 0 && (
                           <div className="text-[10px] text-blue-600 font-medium">
                             {day.slotCount}
                           </div>
                         )}
-                      </div>
+                      </div>,
                     );
                   });
-                  
+
                   return calendarDays;
                 })()}
               </div>
@@ -237,13 +242,15 @@ export function CalendarPreview({
         </div>
 
         {/* Breaks Summary */}
-        {breaks.some(b => b.startTime && b.duration > 0) && (
+        {breaks.some((b) => b.startTime && b.duration > 0) && (
           <div className="text-xs text-muted-foreground">
             <div className="font-medium mb-1">Breaks:</div>
             {breaks
-              .filter(b => b.startTime && b.duration > 0)
+              .filter((b) => b.startTime && b.duration > 0)
               .map((b, i) => (
-                <div key={`break-${b.startTime}-${b.duration}-${i}`}>• {b.startTime} ({b.duration}min)</div>
+                <div key={`break-${b.startTime}-${b.duration}-${i}`}>
+                  • {b.startTime} ({b.duration}min)
+                </div>
               ))}
           </div>
         )}

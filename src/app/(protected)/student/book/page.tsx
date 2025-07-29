@@ -1,9 +1,9 @@
 // src/app/(protected)/student/book/page.tsx
 "use client";
 
+import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { CalendarSkeleton } from "@/components/ui/calendar-skeleton";
-import dynamic from "next/dynamic";
 
 const BookingCalendar = dynamic(
   () =>

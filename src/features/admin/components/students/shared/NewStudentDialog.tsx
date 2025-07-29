@@ -1,6 +1,13 @@
 // Updated src/features/admin/components/students/shared/NewStudentDialog.tsx
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Level } from "@prisma/client";
+import { Plus } from "lucide-react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -28,13 +35,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Level } from "@prisma/client";
-import { Plus } from "lucide-react";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 
 const newStudentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

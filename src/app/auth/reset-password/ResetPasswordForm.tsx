@@ -1,14 +1,14 @@
 // src/app/auth/reset-password/ResetPasswordForm.tsx
 "use client";
 
-import { api } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,9 +27,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AppRouter } from "@/lib/root";
-import { TRPCClientErrorLike } from "@trpc/client";
-import { Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
+import type { AppRouter } from "@/lib/root";
 
 // Schema for password reset form
 const resetPasswordSchema = z

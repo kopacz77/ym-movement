@@ -1,6 +1,10 @@
 // src/app/(protected)/admin/reports/page.tsx
 "use client";
 
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,10 +19,6 @@ import { AttendanceReport } from "@/features/admin/components/reports/Attendance
 import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import { Download } from "lucide-react";
-import React, { useState } from "react";
-import { toast } from "sonner";
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");
@@ -68,22 +68,24 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-        <Button onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" /> Export Report
+    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reports</h1>
+        <Button onClick={handleExport} className="self-start sm:self-auto">
+          <Download className="mr-2 h-4 w-4" /> 
+          <span className="hidden sm:inline">Export Report</span>
+          <span className="sm:hidden">Export</span>
         </Button>
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           <span className="text-sm text-muted-foreground">Period:</span>
           <Select
             value={period}
             onValueChange={(value: "week" | "month" | "year") => setPeriod(value)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
             <SelectContent>
@@ -97,9 +99,9 @@ export default function ReportsPage() {
 
       {/* Properly nested Tabs structure */}
       <Tabs defaultValue="revenue">
-        <TabsList className="grid w-[400px] grid-cols-2">
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-[400px] lg:grid-cols-auto">
+          <TabsTrigger value="revenue" className="text-sm">Revenue</TabsTrigger>
+          <TabsTrigger value="attendance" className="text-sm">Attendance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue">

@@ -1,6 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
 // src/features/admin/components/reports/RevenueReport.tsx
 import React from "react";
 import {
@@ -13,6 +10,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import { api } from "@/lib/api";
+import { formatCurrency } from "@/lib/utils";
 
 interface RevenueReportProps {
   period: "week" | "month" | "year";

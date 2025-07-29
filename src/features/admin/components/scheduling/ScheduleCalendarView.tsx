@@ -1,3 +1,6 @@
+import { Plus } from "lucide-react";
+import React, { useState } from "react";
+import { Calendar, type SlotInfo, type View, Views } from "react-big-calendar";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -7,9 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import { Plus } from "lucide-react";
-import React, { useState } from "react";
-import { Calendar, SlotInfo, View, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { TimeSlotList } from "./TimeSlotList";
 
@@ -25,7 +25,10 @@ interface CalendarEvent {
 const ViewOptions = ({
   view,
   onViewChange,
-}: { view: string; onViewChange: (view: string) => void }) => {
+}: {
+  view: string;
+  onViewChange: (view: string) => void;
+}) => {
   return (
     <Select value={view} onValueChange={onViewChange}>
       <SelectTrigger className="w-40">

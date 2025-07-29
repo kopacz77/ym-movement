@@ -8,6 +8,15 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+  // Immediately skip processing for static assets and API routes
+  if (
+    path.startsWith('/_next/') ||
+    path.startsWith('/api/') ||
+    path.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
   // Check if the path is a public route
   const isPublicPath =
     path === "/" ||
@@ -80,7 +89,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except static files, api routes that are not auth
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    // Only match specific routes, completely avoiding static assets
+    "/",
+    "/admin/:path*",
+    "/student/:path*", 
+    "/auth/:path*",
+    "/terms",
+    "/privacy"
   ],
 };

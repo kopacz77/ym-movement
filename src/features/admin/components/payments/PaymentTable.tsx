@@ -1,3 +1,6 @@
+import type { PaymentStatus } from "@prisma/client";
+import { format } from "date-fns";
+import { Check, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
-import type { PaymentStatus } from "@prisma/client";
-import { format } from "date-fns";
-import { Check, Send } from "lucide-react";
 
 interface Payment {
   id: string;
@@ -70,7 +70,7 @@ export const PaymentTable = ({
       <div className="flex justify-center items-center h-64">
         <div className="space-y-2">
           <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto" />
           </div>
           <p className="text-sm text-muted-foreground">Loading payments...</p>
         </div>
@@ -82,7 +82,7 @@ export const PaymentTable = ({
     const emptyMessage = filterStatus
       ? `No ${filterStatus.toLowerCase()} payments found`
       : "No payments found";
-    
+
     return (
       <div className="flex justify-center items-center h-64">
         <p className="text-muted-foreground">{emptyMessage}</p>
@@ -111,9 +111,7 @@ export const PaymentTable = ({
                 {payment.student?.user?.name || "Unknown"}
               </TableCell>
               <TableCell>{format(new Date(payment.createdAt), "PP")}</TableCell>
-              <TableCell className="font-medium">
-                {formatCurrency(payment.amount)}
-              </TableCell>
+              <TableCell className="font-medium">{formatCurrency(payment.amount)}</TableCell>
               <TableCell>{payment.method}</TableCell>
               <TableCell>
                 <code className="bg-gray-100 px-2 py-1 rounded text-xs">

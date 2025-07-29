@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { signIn } from "next-auth/react";
-import LoginPage from "../page";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders, resetMocks } from "@/test/utils";
+import LoginPage from "../page";
 
 // Mock next-auth
 vi.mock("next-auth/react", () => ({
@@ -63,9 +63,10 @@ describe("LoginPage", () => {
     (signIn as any).mockResolvedValue({ error: null });
     (global.fetch as any).mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        role: "STUDENT"
-      }),
+      json: () =>
+        Promise.resolve({
+          role: "STUDENT",
+        }),
     });
 
     // Fill form
@@ -88,8 +89,8 @@ describe("LoginPage", () => {
     renderWithProviders(<LoginPage />);
 
     // Mock failed sign in
-    (signIn as any).mockResolvedValue({ 
-      error: "Invalid credentials" 
+    (signIn as any).mockResolvedValue({
+      error: "Invalid credentials",
     });
 
     // Fill form
@@ -113,9 +114,10 @@ describe("LoginPage", () => {
     (signIn as any).mockResolvedValue({ error: null });
     (global.fetch as any).mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        role: "ADMIN"
-      }),
+      json: () =>
+        Promise.resolve({
+          role: "ADMIN",
+        }),
     });
 
     // Fill and submit form
@@ -136,9 +138,10 @@ describe("LoginPage", () => {
     (signIn as any).mockResolvedValue({ error: null });
     (global.fetch as any).mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        role: "STUDENT"
-      }),
+      json: () =>
+        Promise.resolve({
+          role: "STUDENT",
+        }),
     });
 
     // Fill and submit form

@@ -1,6 +1,7 @@
 // src/components/ui/responsive-dialog.tsx
 "use client";
 
+import type * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
-import type * as React from "react";
 
 // Re-export the original DialogTrigger
 export { DialogTrigger };

@@ -1,5 +1,11 @@
 // src/features/admin/components/students/management/PendingApprovals.tsx
 "use client";
+import { useQueryClient } from "@tanstack/react-query";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import { format } from "date-fns";
+import { AlertCircle, Check, Clock } from "lucide-react";
+import type React from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,12 +17,6 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import type { AppRouter } from "@/lib/root";
-import { useQueryClient } from "@tanstack/react-query";
-import type { TRPCClientErrorLike } from "@trpc/client";
-import { format } from "date-fns";
-import { AlertCircle, Check, Clock } from "lucide-react";
-import type React from "react";
-import { toast } from "sonner";
 
 // Define proper types
 type StudentStatus = "PENDING" | "APPROVED" | "REJECTED";

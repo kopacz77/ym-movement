@@ -1,5 +1,6 @@
 // src/features/admin/components/payments/PaymentFilter.tsx
 
+import type { PaymentStatus } from "@prisma/client";
 import {
   Select,
   SelectContent,
@@ -7,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { PaymentStatus } from "@prisma/client";
 
 interface PaymentFilterProps {
   currentFilter: PaymentStatus | "ALL";

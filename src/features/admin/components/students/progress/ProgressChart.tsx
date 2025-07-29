@@ -1,6 +1,10 @@
 // features/admin/components/students/progress/LessonProgress.tsx
 "use client";
 
+import { format } from "date-fns";
+import { CheckCircle2, XCircle } from "lucide-react";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,10 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import { format } from "date-fns";
-import { CheckCircle2, XCircle } from "lucide-react";
-import React, { useEffect } from "react";
-import { toast } from "sonner";
 
 interface LessonProgressProps {
   studentId: string;

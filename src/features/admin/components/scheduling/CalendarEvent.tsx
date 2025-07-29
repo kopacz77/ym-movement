@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import React from "react";
+import type React from "react";
+import { cn } from "@/lib/utils";
 
 interface CalendarEventProps {
   event: {
@@ -37,16 +37,16 @@ export const CalendarEvent: React.FC<CalendarEventProps> = ({ event, style }) =>
   );
 };
 
-// Helper function to determine CSS class based on status
+// Helper function to determine CSS class based on status using semantic design tokens
 const getStatusClass = (status: string): string => {
   switch (status.toUpperCase()) {
     case "CONFIRMED":
-      return "bg-green-100 border-l-green-500 text-green-800";
+      return "bg-green-50 border-l-green-500 text-green-700 hover:bg-green-100";
     case "TENTATIVE":
-      return "bg-yellow-100 border-l-yellow-500 text-yellow-800";
+      return "bg-yellow-50 border-l-yellow-500 text-yellow-700 hover:bg-yellow-100";
     case "CANCELLED":
-      return "bg-red-100 border-l-red-500 text-red-800 line-through";
+      return "bg-red-50 border-l-red-500 text-red-700 hover:bg-red-100 line-through opacity-75";
     default:
-      return "bg-blue-100 border-l-blue-500 text-blue-800";
+      return "bg-blue-50 border-l-blue-500 text-blue-700 hover:bg-blue-100";
   }
 };

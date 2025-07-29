@@ -1,7 +1,17 @@
 // src/features/admin/components/scheduling/BulkTimeSlotForm.tsx
 "use client";
 
-import { BulkCreateConfirmation, type BulkCreateConfirmationData } from "@/components/bulk-create-confirmation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { differenceInDays, isAfter, parse } from "date-fns";
+import { AlertTriangle, ChevronDown, Plus, Settings, X } from "lucide-react";
+import { type FC, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import {
+  BulkCreateConfirmation,
+  type BulkCreateConfirmationData,
+} from "@/components/bulk-create-confirmation";
 import { BulkCreateTemplates, type ScheduleTemplate } from "@/components/bulk-create-templates";
 import { CalendarPreview } from "@/components/calendar-preview";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,13 +39,6 @@ import { Separator } from "@/components/ui/separator";
 import { useBulkOperations } from "@/contexts/BulkOperationsContext";
 import { useBulkCreateValidation } from "@/hooks/useBulkCreateValidation";
 import { api } from "@/lib/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { differenceInDays, isAfter, parse } from "date-fns";
-import { AlertTriangle, ChevronDown, Plus, Settings, X } from "lucide-react";
-import { FC, useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 
 // Create a custom validator for start and end dates
 const dateRangeValidator = (startDate: string, endDate: string) => {
@@ -146,19 +149,30 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   });
 
   // Real-time validation - watch specific fields to prevent infinite re-renders
-  const watchedFields = form.watch(['rinkId', 'startDate', 'endDate', 'daysOfWeek', 'startTime', 'endTime', 'duration']);
-  const formValues = useMemo(() => ({
-    rinkId: watchedFields[0],
-    startDate: watchedFields[1],
-    endDate: watchedFields[2],
-    daysOfWeek: watchedFields[3],
-    startTime: watchedFields[4],
-    endTime: watchedFields[5],
-    duration: watchedFields[6]
-  }), [watchedFields]);
-  
+  const watchedFields = form.watch([
+    "rinkId",
+    "startDate",
+    "endDate",
+    "daysOfWeek",
+    "startTime",
+    "endTime",
+    "duration",
+  ]);
+  const formValues = useMemo(
+    () => ({
+      rinkId: watchedFields[0],
+      startDate: watchedFields[1],
+      endDate: watchedFields[2],
+      daysOfWeek: watchedFields[3],
+      startTime: watchedFields[4],
+      endTime: watchedFields[5],
+      duration: watchedFields[6],
+    }),
+    [watchedFields],
+  );
+
   const validation = useBulkCreateValidation(formValues);
-  const selectedRink = rinks.find(r => r.id === formValues.rinkId);
+  const selectedRink = rinks.find((r) => r.id === formValues.rinkId);
 
   // Get the breaks array value
   const breaks = form.watch("breaks") || [];
@@ -203,7 +217,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
 
   const handleConfirmedSubmit = () => {
     if (!confirmationData) return;
-    
+
     const values = {
       rinkId: formValues.rinkId,
       startDate: confirmationData.startDate,
@@ -232,7 +246,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
     form.setValue("daysOfWeek", template.preset.daysOfWeek);
     form.setValue("maxStudents", template.preset.maxStudents);
     form.setValue("breaks", template.preset.breaks);
-    
+
     // Apply dates if available
     if ((template as any).preset.startDate) {
       form.setValue("startDate", (template as any).preset.startDate);
@@ -263,9 +277,10 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
           {/* Form Fields */}
           <div className="space-y-4">
             {/* Debug: Show rinks data (development only) */}
-            {process.env.NODE_ENV === 'development' && isClient && (
+            {process.env.NODE_ENV === "development" && isClient && (
               <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-                Debug: {rinks?.length || 0} rinks available: {rinks?.map(r => r.name).join(', ') || 'None'}
+                Debug: {rinks?.length || 0} rinks available:{" "}
+                {rinks?.map((r) => r.name).join(", ") || "None"}
               </div>
             )}
             <FormField
@@ -426,12 +441,18 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
             />
 
             {/* Calendar Preview */}
-            {process.env.NODE_ENV === 'development' && isClient && (
+            {process.env.NODE_ENV === "development" && isClient && (
               <div className="text-xs text-muted-foreground bg-yellow-50 p-2 rounded">
-                Preview Debug: startDate={formValues.startDate || 'empty'}, endDate={formValues.endDate || 'empty'}, daysOfWeek=[{formValues.daysOfWeek?.join(',') || 'none'}] ({formValues.daysOfWeek?.length || 0} selected)
+                Preview Debug: startDate={formValues.startDate || "empty"}, endDate=
+                {formValues.endDate || "empty"}, daysOfWeek=[
+                {formValues.daysOfWeek?.join(",") || "none"}] ({formValues.daysOfWeek?.length || 0}{" "}
+                selected)
               </div>
             )}
-            {formValues.startDate && formValues.endDate && formValues.daysOfWeek && formValues.daysOfWeek.length > 0 ? (
+            {formValues.startDate &&
+            formValues.endDate &&
+            formValues.daysOfWeek &&
+            formValues.daysOfWeek.length > 0 ? (
               <div className="border rounded-lg p-4 bg-muted/20">
                 <h3 className="font-medium mb-3">Preview</h3>
                 <CalendarPreview
@@ -459,7 +480,9 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                     <Settings className="h-4 w-4" />
                     <span>Advanced Options</span>
                   </div>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`}
+                  />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-4 pt-4">
@@ -511,7 +534,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                                 step={5}
                                 {...field}
                                 onChange={(e) => {
-                                  const value = parseInt(e.target.value);
+                                  const value = Number.parseInt(e.target.value);
                                   field.onChange(Number.isNaN(value) ? 0 : value);
                                 }}
                               />
@@ -561,37 +584,42 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  {validation.errors[0]} {validation.errors.length > 1 && `(+${validation.errors.length - 1} more required)`}
+                  {validation.errors[0]}{" "}
+                  {validation.errors.length > 1 &&
+                    `(+${validation.errors.length - 1} more required)`}
                 </AlertDescription>
               </Alert>
             )}
-            
+
             {validation.warnings.length > 0 && validation.errors.length === 0 && (
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  {validation.warnings[0]} {validation.warnings.length > 1 && `(+${validation.warnings.length - 1} more)`}
+                  {validation.warnings[0]}{" "}
+                  {validation.warnings.length > 1 && `(+${validation.warnings.length - 1} more)`}
                 </AlertDescription>
               </Alert>
             )}
-            
+
             {validation.estimatedSlots > 0 && (
               <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
                 <strong>Estimated:</strong> {validation.estimatedSlots} time slots will be created
                 {validation.conflicts && validation.conflicts.length > 0 && (
-                  <span className="text-destructive ml-2">({validation.conflicts.length} conflicts detected)</span>
+                  <span className="text-destructive ml-2">
+                    ({validation.conflicts.length} conflicts detected)
+                  </span>
                 )}
               </div>
             )}
 
             <Separator />
-            
+
             <div className="flex justify-end gap-4">
               <Button type="button" variant="outline" onClick={onSubmitAction}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isPending || !validation.isValid}
                 className="min-w-[120px]"
                 onClick={(e) => {
@@ -606,7 +634,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                   }
                 }}
               >
-                {isPending ? "Creating..." : validation.estimatedSlots > 0 ? `Preview ${validation.estimatedSlots} Slots` : "Create Slots"}
+                {isPending
+                  ? "Creating..."
+                  : validation.estimatedSlots > 0
+                    ? `Preview ${validation.estimatedSlots} Slots`
+                    : "Create Slots"}
               </Button>
             </div>
           </div>

@@ -1,13 +1,13 @@
 // app/(protected)/student/schedule/StudentScheduleClient.tsx
 "use client";
 
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LessonCard } from "@/features/student/components/schedule/LessonCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 // Define the type that exactly matches what LessonCard expects
 type LessonStatus = "SCHEDULED" | "CANCELLED" | "COMPLETED";

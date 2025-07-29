@@ -1,20 +1,26 @@
 // src/features/notifications/components/NotificationsPopover.tsx
 "use client";
 
+import { Bell } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/lib/api";
-import { Bell } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export const NotificationsPopover = () => {
   const [open, setOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const utils = api.useUtils();
   const { data: session, status } = useSession();
+
+  // Client-side hydration effect (must be at top level)
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Only fetch notifications if user is authenticated
   const isAuthenticated = Boolean(status === "authenticated" && session?.user);
@@ -32,9 +38,9 @@ export const NotificationsPopover = () => {
     onError: (error) => {
       // Don't show toast for auth errors
       if (error.data?.httpStatus !== 401) {
-        console.error('Notifications error:', error.message);
+        console.error("Notifications error:", error.message);
       }
-    }
+    },
   });
 
   // Mark as read mutation
@@ -89,17 +95,11 @@ export const NotificationsPopover = () => {
   };
 
   // Format relative time (client-side only to prevent hydration mismatch)
-  const [isClient, setIsClient] = useState(false);
-  
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
   const formatRelativeTime = (date: Date) => {
     if (!isClient) {
-      return ''; // Return empty string on server
+      return ""; // Return empty string on server
     }
-    
+
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
 

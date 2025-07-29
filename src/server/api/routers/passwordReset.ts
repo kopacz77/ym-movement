@@ -1,13 +1,13 @@
+import { TRPCError } from "@trpc/server";
+import { hash } from "bcrypt";
+// src/server/api/routers/passwordReset.ts
+import { z } from "zod";
 import {
   consumePasswordResetToken,
   createPasswordResetToken,
   verifyPasswordResetToken,
 } from "@/lib/auth-tokens";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
-import { TRPCError } from "@trpc/server";
-import { hash } from "bcrypt";
-// src/server/api/routers/passwordReset.ts
-import { z } from "zod";
 
 export const passwordResetRouter = createTRPCRouter({
   // Verify a password reset token

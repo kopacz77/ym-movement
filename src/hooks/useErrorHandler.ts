@@ -1,7 +1,7 @@
-import type { AppRouter } from "@/lib/root";
 import type { TRPCClientError } from "@trpc/client";
 import { useCallback } from "react";
 import { toast } from "sonner";
+import type { AppRouter } from "@/lib/root";
 
 /**
  * Custom hook to handle errors in a consistent way across the application

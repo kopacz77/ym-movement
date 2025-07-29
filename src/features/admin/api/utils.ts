@@ -1,6 +1,6 @@
-import type { TRPCContext } from "@/lib/trpc";
 // src/features/admin/api/utils.ts
 import { TRPCError } from "@trpc/server";
+import type { TRPCContext } from "@/lib/trpc";
 
 export const validateTimeSlot = async (
   ctx: TRPCContext,

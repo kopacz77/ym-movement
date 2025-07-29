@@ -1,5 +1,10 @@
 // src/features/admin/components/students/profile/StudentProfile.tsx
 "use client";
+import type { LessonStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
+import { format } from "date-fns";
+import { Award, Loader2, Mail, Pencil, Phone } from "lucide-react";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,11 +18,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
-import type { LessonStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
-import { format } from "date-fns";
-import { Award, Loader2, Mail, Pencil, Phone } from "lucide-react";
-import React, { useEffect } from "react";
-import { toast } from "sonner";
 import { StudentPricingForm } from "../StudentPricingForm";
 
 // Define types to replace 'any'
@@ -356,27 +356,23 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {student.Lesson
-                      .filter((lesson) => lesson.Payment)
-                      .map((lesson) => (
-                        <TableRow key={lesson.Payment?.id}>
-                          <TableCell>
-                            {format(new Date(lesson.Payment?.createdAt || lesson.startTime), "PP")}
-                          </TableCell>
-                          <TableCell>${lesson.Payment?.amount?.toFixed(2) || "0.00"}</TableCell>
-                          <TableCell>{lesson.Payment?.method || "N/A"}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                lesson.Payment?.status === "COMPLETED" ? "default" : "outline"
-                              }
-                            >
-                              {lesson.Payment?.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{lesson.Payment?.referenceCode || "N/A"}</TableCell>
-                        </TableRow>
-                      ))}
+                    {student.Lesson.filter((lesson) => lesson.Payment).map((lesson) => (
+                      <TableRow key={lesson.Payment?.id}>
+                        <TableCell>
+                          {format(new Date(lesson.Payment?.createdAt || lesson.startTime), "PP")}
+                        </TableCell>
+                        <TableCell>${lesson.Payment?.amount?.toFixed(2) || "0.00"}</TableCell>
+                        <TableCell>{lesson.Payment?.method || "N/A"}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={lesson.Payment?.status === "COMPLETED" ? "default" : "outline"}
+                          >
+                            {lesson.Payment?.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{lesson.Payment?.referenceCode || "N/A"}</TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               ) : (

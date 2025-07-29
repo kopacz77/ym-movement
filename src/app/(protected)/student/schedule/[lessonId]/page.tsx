@@ -1,11 +1,11 @@
 // app/(protected)/student/schedule/[lessonId]/page.tsx
 
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Lesson Details",

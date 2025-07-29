@@ -1,44 +1,49 @@
 /**
  * Optimized Booking Calendar Component
- * 
+ *
  * Enterprise-grade calendar with advanced performance optimizations and intelligent caching
- * 
+ *
  * @version 3.0.0
  * @since Phase 3 Architecture Optimizations
  */
 
 "use client";
 
-import React, { 
-  useState, 
-  useCallback, 
-  useMemo, 
-  useRef, 
-  useEffect,
+import { endOfDay, startOfDay } from "date-fns";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Users } from "lucide-react";
+import { DateTime } from "luxon";
+import React, {
   memo,
   startTransition,
+  useCallback,
   useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { Calendar, Views, type View } from "react-big-calendar";
-import { DateTime } from "luxon";
+import { Calendar, type View, Views } from "react-big-calendar";
+import { toast } from "sonner";
+import { EnhancedErrorBoundary } from "@/components/enhanced-error-boundary";
+import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Users } from "lucide-react";
-import { toast } from "sonner";
-
-import { TimezoneNotice, formatTimeWithTimezone } from "@/components/TimezoneNotice";
-import { EnhancedErrorBoundary } from "@/components/enhanced-error-boundary";
 import { VirtualizedList } from "@/components/ui/virtualized-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { usePerformanceMonitor } from "@/lib/performance-monitor";
 import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
+import { usePerformanceMonitor } from "@/lib/performance-monitor";
 import { displayInRinkLocalTime } from "@/lib/timezone";
-import { startOfDay, endOfDay } from "date-fns";
 
 // Optimized type definitions
 interface OptimizedRink {
@@ -64,7 +69,7 @@ interface OptimizedCalendarEvent {
   readonly title: string;
   readonly start: Date;
   readonly end: Date;
-  readonly status: 'available' | 'unavailable' | 'full';
+  readonly status: "available" | "unavailable" | "full";
   readonly interactive: boolean;
   readonly rinkName: string;
   readonly timezone: string;
@@ -92,7 +97,7 @@ const CALENDAR_CONFIG = {
 // Performance monitoring wrapper
 const withCalendarPerformance = <P extends object>(
   Component: React.ComponentType<P>,
-  componentName: string
+  componentName: string,
 ) => {
   return memo((props: P) => {
     usePerformanceMonitor(componentName);
@@ -108,7 +113,7 @@ const OptimizedEventComponent = memo<{ event: OptimizedCalendarEvent; rinkTimezo
     const timeDisplay = useMemo(() => {
       const startTimeObj = formatTimeWithTimezone(event.start, event.timezone, "h:mm a");
       const endTimeObj = formatTimeWithTimezone(event.end, event.timezone, "h:mm a");
-      
+
       const localTime = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
       const rinkTime = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
       const showBothTimes = event.timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -118,9 +123,12 @@ const OptimizedEventComponent = memo<{ event: OptimizedCalendarEvent; rinkTimezo
 
     const statusColor = useMemo(() => {
       switch (event.status) {
-        case 'available': return 'text-green-100';
-        case 'full': return 'text-red-100';
-        default: return 'text-gray-100';
+        case "available":
+          return "text-green-100";
+        case "full":
+          return "text-red-100";
+        default:
+          return "text-gray-100";
       }
     }, [event.status]);
 
@@ -129,15 +137,17 @@ const OptimizedEventComponent = memo<{ event: OptimizedCalendarEvent; rinkTimezo
         <div className="space-y-1">
           <div className="font-medium text-sm leading-tight flex items-center gap-1">
             <Users className="h-3 w-3" />
-            <span>{event.currentStudents}/{event.maxStudents}</span>
-            <Badge 
-              variant={event.status === 'available' ? 'default' : 'destructive'} 
+            <span>
+              {event.currentStudents}/{event.maxStudents}
+            </span>
+            <Badge
+              variant={event.status === "available" ? "default" : "destructive"}
               className="text-xs px-1 py-0"
             >
-              {event.status === 'available' ? 'Open' : 'Full'}
+              {event.status === "available" ? "Open" : "Full"}
             </Badge>
           </div>
-          
+
           <div className={`text-xs leading-tight ${statusColor}`}>
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
@@ -148,16 +158,14 @@ const OptimizedEventComponent = memo<{ event: OptimizedCalendarEvent; rinkTimezo
             )}
           </div>
         </div>
-        
-        <div className="text-xs opacity-90 truncate">
-          {event.rinkName}
-        </div>
+
+        <div className="text-xs opacity-90 truncate">{event.rinkName}</div>
       </div>
     );
-  }
+  },
 );
 
-OptimizedEventComponent.displayName = 'OptimizedEventComponent';
+OptimizedEventComponent.displayName = "OptimizedEventComponent";
 
 /**
  * Virtualized mobile list item component
@@ -174,12 +182,12 @@ const MobileSlotItem = memo<{
   const timeDisplay = useMemo(() => {
     const startTime = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone).toFormat("h:mm a");
     const endTime = DateTime.fromJSDate(slot.endTime).setZone(rinkTimezone).toFormat("h:mm a");
-    
+
     const timezone = slot.Rink.timezone || rinkTimezone;
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const showLocalTime = timezone !== userTimezone;
 
-    let localTimeDisplay = '';
+    let localTimeDisplay = "";
     if (showLocalTime) {
       const startTimeObj = formatTimeWithTimezone(slot.startTime.toISOString(), timezone);
       const endTimeObj = formatTimeWithTimezone(slot.endTime.toISOString(), timezone);
@@ -200,7 +208,7 @@ const MobileSlotItem = memo<{
       type="button"
       className={`
         w-full p-4 border-b border-gray-200 text-left transition-colors
-        ${isBookable ? 'hover:bg-green-50 cursor-pointer' : 'hover:bg-red-50 cursor-not-allowed opacity-75'}
+        ${isBookable ? "hover:bg-green-50 cursor-pointer" : "hover:bg-red-50 cursor-not-allowed opacity-75"}
       `}
       onClick={handleClick}
       disabled={!isBookable}
@@ -212,17 +220,15 @@ const MobileSlotItem = memo<{
             <div className="text-sm text-gray-500">Your time: {timeDisplay.localTime}</div>
           )}
         </div>
-        
+
         <div className="text-right space-y-1">
-          <Badge variant={isBookable ? 'default' : 'destructive'} className="text-xs">
+          <Badge variant={isBookable ? "default" : "destructive"} className="text-xs">
             {slot.currentStudents}/{slot.maxStudents} students
           </Badge>
-          <div className="text-xs text-gray-500">
-            {isBookable ? 'Available' : 'Full'}
-          </div>
+          <div className="text-xs text-gray-500">{isBookable ? "Available" : "Full"}</div>
         </div>
       </div>
-      
+
       <div className="text-sm text-gray-600 flex items-center gap-1">
         <CalendarIcon className="h-4 w-4" />
         {slot.Rink.name}
@@ -231,7 +237,7 @@ const MobileSlotItem = memo<{
   );
 });
 
-MobileSlotItem.displayName = 'MobileSlotItem';
+MobileSlotItem.displayName = "MobileSlotItem";
 
 /**
  * Main optimized booking calendar component
@@ -241,13 +247,13 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
   const isMobile = useIsMobile();
 
   // Performance monitoring
-  usePerformanceMonitor('OptimizedBookingCalendar');
+  usePerformanceMonitor("OptimizedBookingCalendar");
 
   // Optimized state management
   const [calendarState, setCalendarState] = useState<CalendarState>(() => ({
     date: new Date(),
     view: Views.WEEK as View,
-    selectedRink: '',
+    selectedRink: "",
     isReady: false,
   }));
 
@@ -260,12 +266,12 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
 
   // Refs for performance optimization
   const eventCacheRef = useRef<Map<string, OptimizedCalendarEvent[]>>(new Map());
-  const lastFetchParamsRef = useRef<string>('');
+  const lastFetchParamsRef = useRef<string>("");
 
   // Initialize ready state
   useEffect(() => {
     if (studentId) {
-      setCalendarState(prev => ({ ...prev, isReady: true }));
+      setCalendarState((prev) => ({ ...prev, isReady: true }));
     }
   }, [studentId]);
 
@@ -289,14 +295,14 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
       enabled: calendarState.isReady,
       staleTime: CALENDAR_CONFIG.CACHE_TTL * 10, // Rinks change infrequently
       gcTime: CALENDAR_CONFIG.CACHE_TTL * 20,
-    }
+    },
   );
 
   // Auto-select first rink with transition
   useEffect(() => {
     if (rinks?.[0]?.id && !calendarState.selectedRink) {
       startTransition(() => {
-        setCalendarState(prev => ({
+        setCalendarState((prev) => ({
           ...prev,
           selectedRink: rinks[0].id,
         }));
@@ -307,27 +313,27 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
   // Get rink timezone with memoization
   const rinkTimezone = useMemo(() => {
     if (deferredSelectedRink && rinks) {
-      const selectedRinkData = rinks.find(rink => rink.id === deferredSelectedRink);
+      const selectedRinkData = rinks.find((rink) => rink.id === deferredSelectedRink);
       return selectedRinkData?.timezone || "America/Los_Angeles";
     }
     return "America/Los_Angeles";
   }, [deferredSelectedRink, rinks]);
 
   // Optimized time slots fetching with intelligent caching
-  const { data: availableSlots, isLoading: slotsLoading } = 
+  const { data: availableSlots, isLoading: slotsLoading } =
     api.student.availability.getAvailableTimeSlots.useQuery(
       {
         startDate: dateRange.start,
         endDate: dateRange.end,
         rinkId: deferredSelectedRink,
-        _cache: parseInt(cacheKey, 16),
+        _cache: Number.parseInt(cacheKey, 16),
       },
       {
         enabled: calendarState.isReady && !!deferredSelectedRink,
         staleTime: CALENDAR_CONFIG.CACHE_TTL,
         gcTime: CALENDAR_CONFIG.CACHE_TTL * 2,
         refetchOnWindowFocus: false,
-      }
+      },
     );
 
   // Optimized events conversion with caching
@@ -335,38 +341,43 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
     if (!availableSlots || !deferredSelectedRink) return [];
 
     const currentParams = `${availableSlots.length}-${deferredSelectedRink}-${cacheKey}`;
-    
+
     // Return cached events if parameters haven't changed
     if (lastFetchParamsRef.current === currentParams && eventCacheRef.current.has(currentParams)) {
       return eventCacheRef.current.get(currentParams)!;
     }
 
-    const convertedEvents: OptimizedCalendarEvent[] = availableSlots.map((slot): OptimizedCalendarEvent => {
-      const isAvailable = slot.isAvailable && slot.currentStudents < slot.maxStudents;
-      const timezone = slot.Rink.timezone || rinkTimezone;
+    const convertedEvents: OptimizedCalendarEvent[] = availableSlots.map(
+      (slot): OptimizedCalendarEvent => {
+        const isAvailable = slot.isAvailable && slot.currentStudents < slot.maxStudents;
+        const timezone = slot.Rink.timezone || rinkTimezone;
 
-      const startTimeInfo = displayInRinkLocalTime(slot.startTime.toISOString(), timezone);
-      const endTimeInfo = displayInRinkLocalTime(slot.endTime.toISOString(), timezone);
+        const startTimeInfo = displayInRinkLocalTime(slot.startTime.toISOString(), timezone);
+        const endTimeInfo = displayInRinkLocalTime(slot.endTime.toISOString(), timezone);
 
-      const status: OptimizedCalendarEvent['status'] = 
-        !slot.isActive ? 'unavailable' :
-        slot.currentStudents >= slot.maxStudents ? 'full' :
-        isAvailable ? 'available' : 'unavailable';
+        const status: OptimizedCalendarEvent["status"] = slot.isActive
+          ? slot.currentStudents >= slot.maxStudents
+            ? "full"
+            : isAvailable
+              ? "available"
+              : "unavailable"
+          : "unavailable";
 
-      return {
-        id: slot.id,
-        title: `${slot.currentStudents}/${slot.maxStudents} students`,
-        start: startTimeInfo.dateTime.toJSDate(),
-        end: endTimeInfo.dateTime.toJSDate(),
-        status,
-        interactive: slot.isActive && isAvailable,
-        rinkName: slot.Rink.name,
-        timezone,
-        maxStudents: slot.maxStudents,
-        currentStudents: slot.currentStudents,
-        resource: slot,
-      } as const;
-    });
+        return {
+          id: slot.id,
+          title: `${slot.currentStudents}/${slot.maxStudents} students`,
+          start: startTimeInfo.dateTime.toJSDate(),
+          end: endTimeInfo.dateTime.toJSDate(),
+          status,
+          interactive: slot.isActive && isAvailable,
+          rinkName: slot.Rink.name,
+          timezone,
+          maxStudents: slot.maxStudents,
+          currentStudents: slot.currentStudents,
+          resource: slot,
+        } as const;
+      },
+    );
 
     // Cache the converted events
     eventCacheRef.current.set(currentParams, convertedEvents);
@@ -380,35 +391,38 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
     if (!availableSlots || !deferredSelectedRink) return [];
 
     // Group by day and sort
-    const groupedByDay = availableSlots.reduce((groups, slot) => {
-      const slotDate = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
-      const dateKey = slotDate.toFormat('yyyy-MM-dd');
+    const groupedByDay = availableSlots.reduce(
+      (groups, slot) => {
+        const slotDate = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
+        const dateKey = slotDate.toFormat("yyyy-MM-dd");
 
-      if (!groups[dateKey]) {
-        groups[dateKey] = {
-          date: slotDate.toJSDate(),
-          slots: [],
-        };
-      }
+        if (!groups[dateKey]) {
+          groups[dateKey] = {
+            date: slotDate.toJSDate(),
+            slots: [],
+          };
+        }
 
-      groups[dateKey].slots.push(slot);
-      return groups;
-    }, {} as Record<string, { date: Date; slots: OptimizedTimeSlot[] }>);
+        groups[dateKey].slots.push(slot);
+        return groups;
+      },
+      {} as Record<string, { date: Date; slots: OptimizedTimeSlot[] }>,
+    );
 
     return Object.values(groupedByDay)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .flatMap(day => [
-        { type: 'header', date: day.date },
+      .flatMap((day) => [
+        { type: "header", date: day.date },
         ...day.slots
           .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
-          .map(slot => ({ type: 'slot', slot }))
+          .map((slot) => ({ type: "slot", slot })),
       ]);
   }, [availableSlots, deferredSelectedRink, rinkTimezone]);
 
   // Optimized navigation handlers with transitions
   const handleNavigate = useCallback((action: "PREV" | "NEXT" | "TODAY" | Date) => {
     startTransition(() => {
-      setCalendarState(prev => {
+      setCalendarState((prev) => {
         let newDate = prev.date;
 
         if (action === "PREV") {
@@ -443,7 +457,7 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
       return;
     }
 
-    if (event.status === 'full') {
+    if (event.status === "full") {
       toast.error("This time slot is fully booked");
       return;
     }
@@ -471,17 +485,17 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
   // Optimized event prop getter
   const eventPropGetter = useCallback((event: OptimizedCalendarEvent) => {
     const colors = {
-      available: { backgroundColor: '#22c55e', borderColor: '#16a34a' },
-      full: { backgroundColor: '#ef4444', borderColor: '#dc2626' },
-      unavailable: { backgroundColor: '#6b7280', borderColor: '#4b5563' },
+      available: { backgroundColor: "#22c55e", borderColor: "#16a34a" },
+      full: { backgroundColor: "#ef4444", borderColor: "#dc2626" },
+      unavailable: { backgroundColor: "#6b7280", borderColor: "#4b5563" },
     };
 
     return {
       style: {
         ...colors[event.status],
-        color: '#ffffff',
-        fontSize: '12px',
-        padding: '2px',
+        color: "#ffffff",
+        fontSize: "12px",
+        padding: "2px",
       },
     };
   }, []);
@@ -516,10 +530,10 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
         <CardContent>
           <div className="text-center p-6 space-y-4">
             <h3 className="text-lg font-medium">Select a rink to view available times</h3>
-            <Select 
-              value={calendarState.selectedRink} 
-              onValueChange={(value) => 
-                setCalendarState(prev => ({ ...prev, selectedRink: value }))
+            <Select
+              value={calendarState.selectedRink}
+              onValueChange={(value) =>
+                setCalendarState((prev) => ({ ...prev, selectedRink: value }))
               }
             >
               <SelectTrigger className="w-[280px] mx-auto">
@@ -544,10 +558,10 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
       <Card className="h-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Book a Lesson</CardTitle>
-          <Select 
-            value={calendarState.selectedRink} 
-            onValueChange={(value) => 
-              setCalendarState(prev => ({ ...prev, selectedRink: value }))
+          <Select
+            value={calendarState.selectedRink}
+            onValueChange={(value) =>
+              setCalendarState((prev) => ({ ...prev, selectedRink: value }))
             }
           >
             <SelectTrigger className="w-[180px]">
@@ -568,7 +582,9 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
           {calendarState.selectedRink && (
             <TimezoneNotice
               rinkTimezone={rinkTimezone}
-              rinkName={rinks?.find(rink => rink.id === calendarState.selectedRink)?.name || "the rink"}
+              rinkName={
+                rinks?.find((rink) => rink.id === calendarState.selectedRink)?.name || "the rink"
+              }
               className="mb-4"
             />
           )}
@@ -592,7 +608,7 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -605,9 +621,9 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
               <VirtualizedList
                 items={mobileListData}
                 height={500}
-                itemHeight={(index: number) => mobileListData[index].type === 'header' ? 60 : 120}
+                itemHeight={(index: number) => (mobileListData[index].type === "header" ? 60 : 120)}
                 renderItem={(item: any, index: number) => {
-                  if (item.type === 'header') {
+                  if (item.type === "header") {
                     const dayDate = DateTime.fromJSDate(item.date).setZone(rinkTimezone);
                     return (
                       <div key={`header-${index}`} className="py-3 px-4 bg-slate-100 border-b">
@@ -646,23 +662,23 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-                
+
                 <div className="text-center">
                   <span className="font-medium">{dateRangeText}</span>
                 </div>
-                
+
                 <div className="flex space-x-2">
                   <Button
                     variant={calendarState.view === Views.WEEK ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCalendarState(prev => ({ ...prev, view: Views.WEEK }))}
+                    onClick={() => setCalendarState((prev) => ({ ...prev, view: Views.WEEK }))}
                   >
                     Week
                   </Button>
                   <Button
                     variant={calendarState.view === Views.MONTH ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCalendarState(prev => ({ ...prev, view: Views.MONTH }))}
+                    onClick={() => setCalendarState((prev) => ({ ...prev, view: Views.MONTH }))}
                   >
                     Month
                   </Button>
@@ -675,15 +691,12 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
                 step={CALENDAR_CONFIG.STEP_MINUTES}
                 views={[Views.WEEK, Views.MONTH]}
                 view={calendarState.view}
-                onView={(view) => setCalendarState(prev => ({ ...prev, view }))}
+                onView={(view) => setCalendarState((prev) => ({ ...prev, view }))}
                 date={calendarState.date}
                 onNavigate={handleNavigate}
                 components={{
                   event: (props) => (
-                    <OptimizedEventComponent 
-                      event={props.event} 
-                      rinkTimezone={rinkTimezone} 
-                    />
+                    <OptimizedEventComponent event={props.event} rinkTimezone={rinkTimezone} />
                   ),
                   toolbar: () => null, // Custom toolbar
                 }}
@@ -713,5 +726,5 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
 // Export with performance monitoring
 export const OptimizedBookingCalendar = withCalendarPerformance(
   OptimizedBookingCalendarComponent,
-  'OptimizedBookingCalendar'
+  "OptimizedBookingCalendar",
 );

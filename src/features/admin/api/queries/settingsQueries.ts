@@ -1,10 +1,10 @@
 // src/features/admin/api/queries/settingsQueries.ts
 
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
-import { Level, RinkArea } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
+import { Level, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define zod schema for our settings
 const operationalSettingsSchema = z.object({
@@ -78,12 +78,8 @@ type PrismaWithSettings = PrismaClient & {
       update: { value: string; updatedAt?: Date };
       create: { key: string; value: string };
     }) => Promise<SettingsModel>;
-    findUnique: (args: {
-      where: { key: string };
-    }) => Promise<SettingsModel | null>;
-    deleteMany: (args: {
-      where: { key: { in: string[] } };
-    }) => Promise<{ count: number }>;
+    findUnique: (args: { where: { key: string } }) => Promise<SettingsModel | null>;
+    deleteMany: (args: { where: { key: { in: string[] } } }) => Promise<{ count: number }>;
   };
 };
 

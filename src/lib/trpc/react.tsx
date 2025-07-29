@@ -1,6 +1,6 @@
 /**
  * TRPC React Provider
- * 
+ *
  * Client-side TRPC configuration for React Query integration
  */
 
@@ -9,11 +9,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
-import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
 import superjson from "superjson";
 
-import { type AppRouter } from "@/lib/root";
+import type { AppRouter } from "@/lib/root";
 
 const createQueryClient = () =>
   new QueryClient({
@@ -24,7 +24,7 @@ const createQueryClient = () =>
     },
   });
 
-let clientQueryClientSingleton: QueryClient | undefined = undefined;
+let clientQueryClientSingleton: QueryClient | undefined;
 
 const getQueryClient = () => {
   if (typeof window === "undefined") {

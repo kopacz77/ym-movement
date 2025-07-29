@@ -1,9 +1,9 @@
+import { AlertTriangle } from "lucide-react";
+import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
-import React from "react";
 
 interface Conflict {
   id: string; // Added id property for key usage
@@ -56,14 +56,14 @@ export const ConflictResolution = () => {
                   <button
                     key={resolution.id}
                     type="button"
-                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer w-full text-left"
+                    className="p-4 border rounded-lg hover:bg-muted cursor-pointer w-full text-left"
                     onClick={() => setSelectedResolution(resolution.id)}
                     aria-pressed={selectedResolution === resolution.id}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{resolution.description}</p>
-                        <p className="text-sm text-gray-500">{resolution.impact}</p>
+                        <p className="text-sm text-muted-foreground">{resolution.impact}</p>
                       </div>
                       <Badge variant={selectedResolution === resolution.id ? "default" : "outline"}>
                         {selectedResolution === resolution.id ? "Selected" : "Select"}

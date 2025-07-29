@@ -1,17 +1,17 @@
 // src/app/(protected)/student/settings/page.tsx
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
+import { BellRing, Lock, PaintBucket, Save } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
-import { BellRing, Lock, PaintBucket, Save } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export default function StudentSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);

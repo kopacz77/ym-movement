@@ -1,8 +1,8 @@
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import type React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import type React from "react";
 import type { ValidationResult } from "../../utils/ValidationUtils";
 
 interface ConflictDetectorProps {

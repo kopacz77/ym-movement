@@ -3,7 +3,7 @@ import { Resend } from "resend";
 
 // Initialize Resend with API key
 const resendApiKey = process.env.RESEND_API_KEY || "";
-const resend = new Resend(resendApiKey);
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 // Get the base URL with fallbacks for different hosting environments
 const BASE_URL =
@@ -24,7 +24,7 @@ const EMAIL_CONFIG = {
  */
 async function sendEmail(to: string, subject: string, html: string) {
   try {
-    if (!resendApiKey) {
+    if (!resendApiKey || !resend) {
       //console.warn("RESEND_API_KEY not found, using fallback email method");
       //console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
       //console.log(`[MOCK EMAIL] Content: ${html}`);

@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+import { type FC, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
@@ -9,10 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatRinkTime } from "@/lib/timezone";
 import { api } from "@/lib/api";
-import { X } from "lucide-react";
-import { type FC, useState, useEffect } from "react";
+import { formatRinkTime } from "@/lib/timezone";
 
 // Define interfaces for the data structures
 interface Rink {
@@ -96,7 +96,6 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
     enabled: isOpen, // Only fetch when dialog is open
   });
 
-
   // Reset selection when dialog opens/closes or when assignment completes
   useEffect(() => {
     if (!isOpen) {
@@ -106,7 +105,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
 
   // Reset selection after successful assignment (when isAssigning changes from true to false)
   const [wasAssigning, setWasAssigning] = useState(false);
-  
+
   useEffect(() => {
     if (wasAssigning && !isAssigning) {
       // Assignment just completed, reset selection
@@ -212,7 +211,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                   <SelectContent>
                     {students && students.length > 0 ? (
                       students
-                        .filter(student => student?.id && student?.User?.name)
+                        .filter((student) => student?.id && student?.User?.name)
                         .map((student) => (
                           <SelectItem key={student.id} value={student.id}>
                             {student.User.name}
@@ -248,35 +247,38 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
               <p className="font-medium">Assigned Students</p>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {(() => {
-                  const lessons = (selectedEvent
-                    ? selectedEvent.event.extendedProps.Lesson
-                    : selectedSlot?.Lesson
-                  )?.filter(lesson => lesson?.id && lesson?.Student) || [];
-                  
-                  return lessons.length > 0 ? lessons.map((lesson) => (
-                  <div
-                    key={lesson.id}
-                    className="flex items-center justify-between p-2 border rounded"
-                  >
-                    <span>{lesson.Student?.User?.name || "Unnamed Student"}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={isUnassigning}
-                      onClick={() => {
-                        if (confirm("Remove this student from the time slot?")) {
-                          onUnassignStudent(lesson.id);
-                        }
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )) : (
-                  <div className="text-sm text-gray-500 text-center py-4">
-                    No students assigned to this time slot
-                  </div>
-                );
+                  const lessons =
+                    (selectedEvent
+                      ? selectedEvent.event.extendedProps.Lesson
+                      : selectedSlot?.Lesson
+                    )?.filter((lesson) => lesson?.id && lesson?.Student) || [];
+
+                  return lessons.length > 0 ? (
+                    lessons.map((lesson) => (
+                      <div
+                        key={lesson.id}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
+                        <span>{lesson.Student?.User?.name || "Unnamed Student"}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={isUnassigning}
+                          onClick={() => {
+                            if (confirm("Remove this student from the time slot?")) {
+                              onUnassignStudent(lesson.id);
+                            }
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      No students assigned to this time slot
+                    </div>
+                  );
                 })()}
               </div>
             </div>

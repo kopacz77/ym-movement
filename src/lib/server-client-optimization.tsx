@@ -1,32 +1,33 @@
 /**
  * Server/Client Component Optimization Strategy
- * 
+ *
  * Intelligent optimization for Next.js App Router server and client components
- * 
+ *
  * @version 3.0.0
  * @since Phase 3 Architecture Optimizations
  */
 
-import React, { memo, cache } from 'react';
-import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import type React from "react";
+import { cache, memo } from "react";
 
 // Component classification system
 export const ComponentTypes = {
-  SERVER: 'server',
-  CLIENT: 'client',
-  HYBRID: 'hybrid',
-  STATIC: 'static',
+  SERVER: "server",
+  CLIENT: "client",
+  HYBRID: "hybrid",
+  STATIC: "static",
 } as const;
 
-type ComponentType = typeof ComponentTypes[keyof typeof ComponentTypes];
+type ComponentType = (typeof ComponentTypes)[keyof typeof ComponentTypes];
 
 interface ComponentOptimizationRule {
   type: ComponentType;
   reasoning: string;
   optimizations: string[];
-  cacheStrategy?: 'static' | 'dynamic' | 'revalidate' | 'force-dynamic';
+  cacheStrategy?: "static" | "dynamic" | "revalidate" | "force-dynamic";
   revalidateTime?: number;
 }
 
@@ -51,38 +52,38 @@ export class ComponentOptimizer {
       usesThirdPartyScripts: boolean;
       isFrequentlyUpdated: boolean;
       hasRealTimeData: boolean;
-    }
+    },
   ): ComponentOptimizationRule {
-    const { 
-      hasInteractivity, 
-      usesClientState, 
+    const {
+      hasInteractivity,
+      usesClientState,
       hasUserSpecificData,
       isDataHeavy,
       requiresSEO,
       hasFormHandling,
       usesThirdPartyScripts,
       isFrequentlyUpdated,
-      hasRealTimeData
+      hasRealTimeData,
     } = characteristics;
 
     // Determine optimal component type
     let type: ComponentType;
     let reasoning: string;
     let optimizations: string[] = [];
-    let cacheStrategy: ComponentOptimizationRule['cacheStrategy'];
+    let cacheStrategy: ComponentOptimizationRule["cacheStrategy"];
     let revalidateTime: number | undefined;
 
     if (!hasInteractivity && !usesClientState && !hasUserSpecificData && !hasRealTimeData) {
       // Pure server component
       type = ComponentTypes.SERVER;
       reasoning = "No client-side interactivity or state, perfect for server rendering";
-      cacheStrategy = isFrequentlyUpdated ? 'revalidate' : 'static';
+      cacheStrategy = isFrequentlyUpdated ? "revalidate" : "static";
       revalidateTime = isFrequentlyUpdated ? 300 : undefined; // 5 minutes
       optimizations = [
         "Use server component for faster initial load",
         "Implement data fetching at component level",
         "Cache data with appropriate revalidation strategy",
-        "Optimize for SEO if required"
+        "Optimize for SEO if required",
       ];
     } else if (hasInteractivity && !isDataHeavy && !requiresSEO) {
       // Pure client component
@@ -92,7 +93,7 @@ export class ComponentOptimizer {
         "Use 'use client' directive",
         "Implement React.memo for re-render optimization",
         "Use useCallback and useMemo for expensive operations",
-        "Consider code splitting for large interactive components"
+        "Consider code splitting for large interactive components",
       ];
     } else if ((hasInteractivity || usesClientState) && (isDataHeavy || requiresSEO)) {
       // Hybrid approach
@@ -102,17 +103,17 @@ export class ComponentOptimizer {
         "Split into server wrapper + client interactive parts",
         "Server component handles data fetching and SEO",
         "Client component handles interactivity",
-        "Use React Server Components composition pattern"
+        "Use React Server Components composition pattern",
       ];
     } else {
       // Static component
       type = ComponentTypes.STATIC;
       reasoning = "Minimal interactivity, suitable for static generation";
-      cacheStrategy = 'static';
+      cacheStrategy = "static";
       optimizations = [
         "Generate statically at build time",
         "Use Next.js static optimization",
-        "Implement proper caching headers"
+        "Implement proper caching headers",
       ];
     }
 
@@ -130,13 +131,13 @@ export class ComponentOptimizer {
     if (hasUserSpecificData) {
       optimizations.push("Implement proper authentication checks");
       optimizations.push("Use dynamic rendering for user-specific content");
-      cacheStrategy = 'force-dynamic';
+      cacheStrategy = "force-dynamic";
     }
 
     if (hasRealTimeData) {
       optimizations.push("Consider WebSocket or Server-Sent Events for real-time updates");
       optimizations.push("Implement data polling with SWR or React Query");
-      cacheStrategy = 'force-dynamic';
+      cacheStrategy = "force-dynamic";
     }
 
     const rule: ComponentOptimizationRule = {
@@ -147,7 +148,7 @@ export class ComponentOptimizer {
       revalidateTime,
     };
 
-    this.rules.set(componentName, rule);
+    ComponentOptimizer.rules.set(componentName, rule);
     return rule;
   }
 
@@ -155,33 +156,30 @@ export class ComponentOptimizer {
    * Get optimization recommendations for existing component
    */
   static getRecommendations(componentName: string): ComponentOptimizationRule | null {
-    return this.rules.get(componentName) || null;
+    return ComponentOptimizer.rules.get(componentName) || null;
   }
 
   /**
    * Generate component template based on optimization rules
    */
-  static generateTemplate(
-    componentName: string,
-    rule: ComponentOptimizationRule
-  ): string {
+  static generateTemplate(componentName: string, rule: ComponentOptimizationRule): string {
     switch (rule.type) {
       case ComponentTypes.SERVER:
-        return this.generateServerTemplate(componentName, rule);
+        return ComponentOptimizer.generateServerTemplate(componentName, rule);
       case ComponentTypes.CLIENT:
-        return this.generateClientTemplate(componentName, rule);
+        return ComponentOptimizer.generateClientTemplate(componentName, rule);
       case ComponentTypes.HYBRID:
-        return this.generateHybridTemplate(componentName, rule);
+        return ComponentOptimizer.generateHybridTemplate(componentName, rule);
       case ComponentTypes.STATIC:
-        return this.generateStaticTemplate(componentName, rule);
+        return ComponentOptimizer.generateStaticTemplate(componentName, rule);
       default:
-        return this.generateServerTemplate(componentName, rule);
+        return ComponentOptimizer.generateServerTemplate(componentName, rule);
     }
   }
 
   private static generateServerTemplate(
     componentName: string,
-    rule: ComponentOptimizationRule
+    rule: ComponentOptimizationRule,
   ): string {
     return `/**
  * ${componentName} - Server Component
@@ -189,13 +187,13 @@ export class ComponentOptimizer {
  * ${rule.reasoning}
  * 
  * Optimizations applied:
- * ${rule.optimizations.map(opt => ` * - ${opt}`).join('\n')}
+ * ${rule.optimizations.map((opt) => ` * - ${opt}`).join("\n")}
  */
 
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
-${rule.cacheStrategy === 'revalidate' ? `\n// Revalidate every ${rule.revalidateTime} seconds\nexport const revalidate = ${rule.revalidateTime};` : ''}
-${rule.cacheStrategy === 'force-dynamic' ? '\nexport const dynamic = "force-dynamic";' : ''}
+${rule.cacheStrategy === "revalidate" ? `\n// Revalidate every ${rule.revalidateTime} seconds\nexport const revalidate = ${rule.revalidateTime};` : ""}
+${rule.cacheStrategy === "force-dynamic" ? '\nexport const dynamic = "force-dynamic";' : ""}
 
 // Cached data fetching function
 const get${componentName}Data = cache(async (params: any) => {
@@ -242,7 +240,7 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
 
   private static generateClientTemplate(
     componentName: string,
-    rule: ComponentOptimizationRule
+    rule: ComponentOptimizationRule,
   ): string {
     return `/**
  * ${componentName} - Client Component
@@ -250,7 +248,7 @@ export async function generateMetadata({ params }: any): Promise<Metadata> {
  * ${rule.reasoning}
  * 
  * Optimizations applied:
- * ${rule.optimizations.map(opt => ` * - ${opt}`).join('\n')}
+ * ${rule.optimizations.map((opt) => ` * - ${opt}`).join("\n")}
  */
 
 "use client";
@@ -293,7 +291,7 @@ export const ${componentName} = memo(${componentName}Component);`;
 
   private static generateHybridTemplate(
     componentName: string,
-    rule: ComponentOptimizationRule
+    rule: ComponentOptimizationRule,
   ): string {
     return `/**
  * ${componentName} - Hybrid Component (Server + Client)
@@ -301,7 +299,7 @@ export const ${componentName} = memo(${componentName}Component);`;
  * ${rule.reasoning}
  * 
  * Optimizations applied:
- * ${rule.optimizations.map(opt => ` * - ${opt}`).join('\n')}
+ * ${rule.optimizations.map((opt) => ` * - ${opt}`).join("\n")}
  */
 
 import { cache } from 'react';
@@ -365,7 +363,7 @@ export const ${componentName}Client = memo(${componentName}ClientComponent);
 
   private static generateStaticTemplate(
     componentName: string,
-    rule: ComponentOptimizationRule
+    rule: ComponentOptimizationRule,
   ): string {
     return `/**
  * ${componentName} - Static Component
@@ -373,7 +371,7 @@ export const ${componentName}Client = memo(${componentName}ClientComponent);
  * ${rule.reasoning}
  * 
  * Optimizations applied:
- * ${rule.optimizations.map(opt => ` * - ${opt}`).join('\n')}
+ * ${rule.optimizations.map((opt) => ` * - ${opt}`).join("\n")}
  */
 
 // Force static generation
@@ -411,13 +409,13 @@ export class ServerClientPerformanceUtils {
     options: {
       revalidate?: number;
       tags?: string[];
-    } = {}
+    } = {},
   ) {
     return cache(async (...args: T): Promise<R> => {
       try {
         return await fn(...args);
       } catch (error) {
-        console.error('Cached function error:', error);
+        console.error("Cached function error:", error);
         throw error;
       }
     });
@@ -428,7 +426,7 @@ export class ServerClientPerformanceUtils {
    */
   static withClientPerformance<P extends object>(
     Component: React.ComponentType<P>,
-    componentName: string
+    componentName: string,
   ) {
     return memo((props: P) => {
       // This would be implemented in the actual component
@@ -440,14 +438,12 @@ export class ServerClientPerformanceUtils {
   /**
    * Server component wrapper with error handling
    */
-  static withServerErrorHandling<P extends object>(
-    Component: React.ComponentType<P>
-  ) {
+  static withServerErrorHandling<P extends object>(Component: React.ComponentType<P>) {
     return async (props: P) => {
       try {
         return await Component(props);
       } catch (error) {
-        console.error('Server component error:', error);
+        console.error("Server component error:", error);
         return <div>Error loading component</div>;
       }
     };
@@ -458,9 +454,9 @@ export class ServerClientPerformanceUtils {
    */
   static createPreloadStrategy(routes: string[]) {
     return {
-      prefetchOnHover: routes.filter(route => route.includes('/dashboard')),
-      prefetchOnVisible: routes.filter(route => route.includes('/profile')),
-      prefetchOnIdle: routes.filter(route => route.includes('/settings')),
+      prefetchOnHover: routes.filter((route) => route.includes("/dashboard")),
+      prefetchOnVisible: routes.filter((route) => route.includes("/profile")),
+      prefetchOnIdle: routes.filter((route) => route.includes("/settings")),
     };
   }
 }
@@ -478,23 +474,21 @@ export class ComponentMigrationUtils {
     recommendations: string[];
   } {
     const clientFeatures = [
-      'useState',
-      'useEffect',
-      'useCallback',
-      'useMemo',
-      'useRef',
-      'onClick',
-      'onChange',
-      'addEventListener',
-      'document.',
-      'window.',
-      'localStorage',
-      'sessionStorage',
+      "useState",
+      "useEffect",
+      "useCallback",
+      "useMemo",
+      "useRef",
+      "onClick",
+      "onChange",
+      "addEventListener",
+      "document.",
+      "window.",
+      "localStorage",
+      "sessionStorage",
     ];
 
-    const usedClientFeatures = clientFeatures.filter(feature => 
-      componentCode.includes(feature)
-    );
+    const usedClientFeatures = clientFeatures.filter((feature) => componentCode.includes(feature));
 
     const canBeServerComponent = usedClientFeatures.length === 0;
 
@@ -510,11 +504,11 @@ export class ComponentMigrationUtils {
       recommendations.push("⚡ Apply client optimization patterns");
     }
 
-    if (componentCode.includes('fetch') || componentCode.includes('api.')) {
+    if (componentCode.includes("fetch") || componentCode.includes("api.")) {
       recommendations.push("💡 Consider moving API calls to server");
     }
 
-    if (componentCode.includes('SEO') || componentCode.includes('metadata')) {
+    if (componentCode.includes("SEO") || componentCode.includes("metadata")) {
       recommendations.push("🔍 Implement metadata generation");
     }
 
@@ -530,41 +524,43 @@ export class ComponentMigrationUtils {
    */
   static generateMigrationPlan(
     componentName: string,
-    analysis: ReturnType<typeof ComponentMigrationUtils.analyzeForMigration>
+    analysis: ReturnType<typeof ComponentMigrationUtils.analyzeForMigration>,
   ): string[] {
     const plan: string[] = [];
 
     plan.push(`## Migration Plan for ${componentName}`);
-    plan.push('');
+    plan.push("");
 
     if (analysis.canBeServerComponent) {
-      plan.push('### Convert to Server Component');
+      plan.push("### Convert to Server Component");
       plan.push('1. Remove "use client" directive');
-      plan.push('2. Convert to async function');
-      plan.push('3. Move data fetching to component level');
-      plan.push('4. Add proper error handling');
-      plan.push('5. Implement metadata generation if needed');
+      plan.push("2. Convert to async function");
+      plan.push("3. Move data fetching to component level");
+      plan.push("4. Add proper error handling");
+      plan.push("5. Implement metadata generation if needed");
     } else {
-      plan.push('### Optimize as Client Component');
-      plan.push('1. Apply React.memo for re-render optimization');
-      plan.push('2. Use useCallback for event handlers');
-      plan.push('3. Use useMemo for expensive computations');
-      plan.push('4. Consider code splitting if large');
-      
-      if (analysis.usesClientFeatures.includes('fetch') || 
-          analysis.usesClientFeatures.includes('api.')) {
-        plan.push('5. Consider Server/Client hybrid approach');
-        plan.push('   - Server component for data + SEO');
-        plan.push('   - Client component for interactivity');
+      plan.push("### Optimize as Client Component");
+      plan.push("1. Apply React.memo for re-render optimization");
+      plan.push("2. Use useCallback for event handlers");
+      plan.push("3. Use useMemo for expensive computations");
+      plan.push("4. Consider code splitting if large");
+
+      if (
+        analysis.usesClientFeatures.includes("fetch") ||
+        analysis.usesClientFeatures.includes("api.")
+      ) {
+        plan.push("5. Consider Server/Client hybrid approach");
+        plan.push("   - Server component for data + SEO");
+        plan.push("   - Client component for interactivity");
       }
     }
 
-    plan.push('');
-    plan.push('### Performance Improvements');
-    plan.push('- Add performance monitoring');
-    plan.push('- Implement error boundaries');
-    plan.push('- Optimize bundle size');
-    plan.push('- Add proper loading states');
+    plan.push("");
+    plan.push("### Performance Improvements");
+    plan.push("- Add performance monitoring");
+    plan.push("- Implement error boundaries");
+    plan.push("- Optimize bundle size");
+    plan.push("- Add proper loading states");
 
     return plan;
   }
@@ -572,7 +568,7 @@ export class ComponentMigrationUtils {
 
 // Pre-configured optimization rules for common components
 export const CommonComponentRules = {
-  Dashboard: ComponentOptimizer.analyzeComponent('Dashboard', {
+  Dashboard: ComponentOptimizer.analyzeComponent("Dashboard", {
     hasInteractivity: true,
     usesClientState: true,
     hasUserSpecificData: true,
@@ -584,7 +580,7 @@ export const CommonComponentRules = {
     hasRealTimeData: true,
   }),
 
-  ProductList: ComponentOptimizer.analyzeComponent('ProductList', {
+  ProductList: ComponentOptimizer.analyzeComponent("ProductList", {
     hasInteractivity: false,
     usesClientState: false,
     hasUserSpecificData: false,
@@ -596,7 +592,7 @@ export const CommonComponentRules = {
     hasRealTimeData: false,
   }),
 
-  ContactForm: ComponentOptimizer.analyzeComponent('ContactForm', {
+  ContactForm: ComponentOptimizer.analyzeComponent("ContactForm", {
     hasInteractivity: true,
     usesClientState: true,
     hasUserSpecificData: false,
@@ -608,7 +604,7 @@ export const CommonComponentRules = {
     hasRealTimeData: false,
   }),
 
-  Calendar: ComponentOptimizer.analyzeComponent('Calendar', {
+  Calendar: ComponentOptimizer.analyzeComponent("Calendar", {
     hasInteractivity: true,
     usesClientState: true,
     hasUserSpecificData: true,

@@ -1,9 +1,9 @@
 // src/features/admin/components/scheduling/CalendarHeader.tsx
 "use client";
 
+import type React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import React from "react";
 
 interface CalendarHeaderProps {
   dateRangeText: string;
@@ -24,10 +24,10 @@ export function CalendarHeader({
 }: CalendarHeaderProps) {
   const getViewButtonClass = (view: string) => {
     return cn(
-      "px-3 py-1.5 text-sm",
+      "px-3 py-1.5 text-sm rounded-sm transition-colors",
       calendarView === view
-        ? "bg-gray-900 text-white dark:bg-gray-50 dark:text-gray-900"
-        : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800",
+        ? "bg-primary text-primary-foreground"
+        : "text-muted-foreground hover:bg-muted hover:text-foreground",
     );
   };
 
@@ -47,7 +47,7 @@ export function CalendarHeader({
         </Button>
         <h2 className="text-lg font-semibold ml-2">{dateRangeText}</h2>
       </div>
-      <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-md p-0.5">
+      <div className="inline-flex bg-muted rounded-md p-0.5">
         <button
           type="button"
           onClick={() => onViewChangeAction("month")}

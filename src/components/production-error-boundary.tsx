@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, ReactNode } from "react";
+import { Component, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -25,10 +25,10 @@ export class ProductionErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('Production Error Boundary caught an error:', error, errorInfo);
-    
+    console.error("Production Error Boundary caught an error:", error, errorInfo);
+
     // In production, you might want to send this to an error reporting service
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       // Example: Send to error reporting service
       // errorReportingService.captureException(error, { extra: errorInfo });
     }
@@ -49,18 +49,17 @@ export class ProductionErrorBoundary extends Component<Props, State> {
             <p className="text-muted-foreground">
               We encountered an error while loading this component. Please try refreshing the page.
             </p>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {process.env.NODE_ENV === "development" && this.state.error && (
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm font-medium">Error Details (Development Only)</summary>
+                <summary className="cursor-pointer text-sm font-medium">
+                  Error Details (Development Only)
+                </summary>
                 <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
                   {this.state.error.stack}
                 </pre>
               </details>
             )}
-            <Button 
-              onClick={() => window.location.reload()} 
-              variant="outline"
-            >
+            <Button onClick={() => window.location.reload()} variant="outline">
               Refresh Page
             </Button>
           </CardContent>

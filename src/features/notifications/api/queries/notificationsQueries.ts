@@ -1,7 +1,7 @@
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
 // src/features/notifications/api/queries/notificationsQueries.ts
 import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const notificationsRouter = createTRPCRouter({
   getNotifications: protectedProcedure.query(async ({ ctx }) => {

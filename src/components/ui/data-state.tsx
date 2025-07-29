@@ -1,7 +1,10 @@
 // src/components/ui/data-state.tsx
 
-import { Spinner } from "@/components/ui/spinner";
-import React from "react";
+import { AlertTriangle, Database } from "lucide-react";
+import type React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { DelightfulLoading, PersonalizedSkeleton } from "@/components/ui/delightful-loading";
+import { EncouragingEmptyState } from "@/components/ui/encouraging-empty-state";
 
 interface DataStateProps {
   isLoading: boolean;
@@ -9,6 +12,11 @@ interface DataStateProps {
   isEmpty?: boolean;
   errorMessage?: string;
   emptyMessage?: string;
+  emptyType?: "lessons" | "students" | "schedule" | "achievements" | "payments" | "reports";
+  skeletonRows?: number;
+  skeletonHeight?: string;
+  loadingVariant?: "default" | "warm" | "celebration";
+  onEmptyAction?: () => void;
   children: React.ReactNode;
 }
 
@@ -17,35 +25,38 @@ export function DataState({
   isError,
   isEmpty = false,
   errorMessage = "An error occurred while loading data.",
-  emptyMessage = "No data available.",
+  emptyMessage,
+  emptyType = "lessons",
+  skeletonRows = 3,
+  loadingVariant = "warm",
+  onEmptyAction,
   children,
 }: DataStateProps) {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-48">
-        <Spinner size="xl" />
+      <div>
+        <DelightfulLoading variant={loadingVariant} size="md" />
+        <PersonalizedSkeleton rows={skeletonRows} avatar={true} title={true} className="mt-6" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="flex justify-center items-center h-48 text-destructive">
-        <div className="text-center">
-          <p className="text-lg font-medium">{errorMessage}</p>
-          <p className="text-sm text-muted-foreground">Please try again later.</p>
-        </div>
-      </div>
+      <Alert variant="destructive" className="border-red-200 bg-red-50">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Oops! Something went wrong 💔</AlertTitle>
+        <AlertDescription>
+          {errorMessage} Don't worry though - these things happen! Try refreshing the page, and if
+          it keeps happening, just let us know. We're here to help! ✨
+        </AlertDescription>
+      </Alert>
     );
   }
 
   if (isEmpty) {
     return (
-      <div className="flex justify-center items-center h-48 text-muted-foreground">
-        <div className="text-center">
-          <p className="text-lg font-medium">{emptyMessage}</p>
-        </div>
-      </div>
+      <EncouragingEmptyState type={emptyType} message={emptyMessage} onAction={onEmptyAction} />
     );
   }
 

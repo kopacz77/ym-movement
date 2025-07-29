@@ -1,17 +1,13 @@
 // src/features/admin/layout.tsx
 "use client";
 
-import { AdminSidebar } from "@/features/admin/components/layout/AdminSidebar";
 import { useEffect, useState } from "react";
+import { AdminSidebar } from "@/features/admin/components/layout/AdminSidebar";
 
 /**
  * AdminLayout wraps all admin pages.
  */
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile viewport

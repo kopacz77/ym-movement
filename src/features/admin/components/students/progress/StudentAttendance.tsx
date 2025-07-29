@@ -1,18 +1,17 @@
 "use client";
 
+import { endOfMonth, format, isSameDay, startOfMonth } from "date-fns";
+import { Info } from "lucide-react";
+import type { HTMLAttributes } from "react";
+import React, { useEffect } from "react";
+// Import react-day-picker types
+import type { DayPicker } from "react-day-picker";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { api } from "@/lib/api";
-import { endOfMonth, format, isSameDay, startOfMonth } from "date-fns";
-import { Info } from "lucide-react";
-import React, { useEffect } from "react";
-import type { HTMLAttributes } from "react";
-import { toast } from "sonner";
-
-// Import react-day-picker types
-import type { DayPicker } from "react-day-picker";
 
 interface StudentAttendanceProps {
   studentId: string;

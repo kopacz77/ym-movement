@@ -1,6 +1,11 @@
 // src/app/auth/signup/page.tsx
 "use client";
 
+import { Level } from "@prisma/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,11 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Level } from "@prisma/client";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export default function SignupPage() {
   const [name, setName] = useState("");

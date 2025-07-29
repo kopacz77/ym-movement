@@ -1,8 +1,8 @@
 /**
  * Performance Monitoring System
- * 
+ *
  * Real-time performance tracking and monitoring for React components.
- * 
+ *
  * @description
  * This module provides comprehensive performance monitoring capabilities:
  * - Real-time render time tracking with memory usage monitoring
@@ -10,29 +10,29 @@
  * - Automatic slow component detection and alerting
  * - Performance metrics collection and reporting
  * - HOC integration for automatic component monitoring
- * 
+ *
  * @example
  * ```tsx
  * // Automatic monitoring with HOC
  * const MonitoredComponent = withPerformanceMonitoring(MyComponent);
- * 
+ *
  * // Manual monitoring with hook
  * function MyComponent() {
  *   usePerformanceMonitor('MyComponent');
  *   return <div>Content</div>;
  * }
- * 
+ *
  * // Development performance panel
  * {process.env.NODE_ENV === 'development' && <PerformancePanel />}
  * ```
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 2 Optimizations
  */
 // src/lib/performance-monitor.tsx
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 export interface PerformanceMetrics {
   componentName: string;
@@ -60,13 +60,13 @@ class PerformanceMonitor {
     this.notifyObservers();
 
     // Log slow renders in development
-    if (process.env.NODE_ENV === 'development' && renderTime > 16) {
+    if (process.env.NODE_ENV === "development" && renderTime > 16) {
       console.warn(`⚠️ Slow render detected in ${componentName}: ${renderTime.toFixed(2)}ms`);
     }
   }
 
   private getMemoryUsage(): number | undefined {
-    if (typeof window !== 'undefined' && 'memory' in performance) {
+    if (typeof window !== "undefined" && "memory" in performance) {
       return (performance as any).memory.usedJSHeapSize;
     }
     return undefined;
@@ -81,7 +81,7 @@ class PerformanceMonitor {
 
   private notifyObservers() {
     const allMetrics = Array.from(this.metrics.values());
-    this.observers.forEach(callback => callback(allMetrics));
+    this.observers.forEach((callback) => callback(allMetrics));
   }
 
   getMetrics(): PerformanceMetrics[] {
@@ -97,7 +97,7 @@ class PerformanceMonitor {
   getReport(): string {
     const metrics = this.getMetrics();
     const totalComponents = metrics.length;
-    const slowComponents = metrics.filter(m => m.renderTime > 16).length;
+    const slowComponents = metrics.filter((m) => m.renderTime > 16).length;
     const avgRenderTime = metrics.reduce((sum, m) => sum + m.renderTime, 0) / totalComponents;
 
     return `
@@ -108,9 +108,9 @@ Slow Components (>16ms): ${slowComponents}
 Average Render Time: ${avgRenderTime.toFixed(2)}ms
 
 🐌 Slowest Components:
-${this.getSlowestComponents().map(m => 
-  `  ${m.componentName}: ${m.renderTime.toFixed(2)}ms (${m.renderCount} renders)`
-).join('\n')}
+${this.getSlowestComponents()
+  .map((m) => `  ${m.componentName}: ${m.renderTime.toFixed(2)}ms (${m.renderCount} renders)`)
+  .join("\n")}
     `.trim();
   }
 
@@ -140,7 +140,7 @@ export function usePerformanceMonitor(componentName: string) {
   });
 
   const logRender = useCallback(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.log(`🔄 ${componentName} render #${renderCount.current}`);
     }
   }, [componentName]);
@@ -156,7 +156,7 @@ export function PerformancePanel() {
   const [isOpen, setIsOpen] = React.useState(false);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env.NODE_ENV !== "development") {
       return;
     }
 
@@ -164,20 +164,18 @@ export function PerformancePanel() {
     return unsubscribe;
   }, []);
 
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== "development") {
     return null;
   }
 
-  const slowComponents = metrics.filter(m => m.renderTime > 16);
+  const slowComponents = metrics.filter((m) => m.renderTime > 16);
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`px-3 py-2 rounded-lg text-xs font-mono ${
-          slowComponents.length > 0 
-            ? 'bg-red-500 text-white' 
-            : 'bg-green-500 text-white'
+          slowComponents.length > 0 ? "bg-red-500 text-white" : "bg-green-500 text-white"
         }`}
       >
         ⚡ {metrics.length} components
@@ -195,24 +193,30 @@ export function PerformancePanel() {
               Clear
             </button>
           </div>
-          
+
           <div className="space-y-2">
             {metrics.length === 0 ? (
               <p className="text-xs text-gray-500">No metrics recorded</p>
             ) : (
               <>
                 <div className="text-xs text-gray-600">
-                  Avg: {(metrics.reduce((sum, m) => sum + m.renderTime, 0) / metrics.length).toFixed(2)}ms
+                  Avg:{" "}
+                  {(metrics.reduce((sum, m) => sum + m.renderTime, 0) / metrics.length).toFixed(2)}
+                  ms
                 </div>
-                {performanceMonitor.getSlowestComponents().map(metric => (
-                  <div 
+                {performanceMonitor.getSlowestComponents().map((metric) => (
+                  <div
                     key={metric.componentName}
                     className={`text-xs p-2 rounded ${
-                      metric.renderTime > 16 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+                      metric.renderTime > 16
+                        ? "bg-red-50 text-red-700"
+                        : "bg-green-50 text-green-700"
                     }`}
                   >
                     <div className="font-mono">{metric.componentName}</div>
-                    <div>{metric.renderTime.toFixed(2)}ms ({metric.renderCount} renders)</div>
+                    <div>
+                      {metric.renderTime.toFixed(2)}ms ({metric.renderCount} renders)
+                    </div>
                   </div>
                 ))}
               </>
@@ -229,17 +233,17 @@ export function PerformancePanel() {
  */
 export function withPerformanceMonitoring<P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  componentName?: string
+  componentName?: string,
 ) {
   const MonitoredComponent = (props: P) => {
-    const name = componentName || WrappedComponent.displayName || WrappedComponent.name || 'Unknown';
+    const name =
+      componentName || WrappedComponent.displayName || WrappedComponent.name || "Unknown";
     usePerformanceMonitor(name);
-    
+
     return <WrappedComponent {...props} />;
   };
 
   MonitoredComponent.displayName = `withPerformanceMonitoring(${WrappedComponent.displayName || WrappedComponent.name})`;
-  
+
   return MonitoredComponent;
 }
-

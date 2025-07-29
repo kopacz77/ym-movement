@@ -1,6 +1,9 @@
 // src/features/admin/components/students/StudentPricingForm.tsx
 "use client";
 
+import { InfoIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
-import { InfoIcon } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 interface StudentPricingFormProps {
   studentId: string;

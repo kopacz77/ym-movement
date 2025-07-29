@@ -1,49 +1,53 @@
 // src/app/(protected)/admin/payments/page.tsx
 "use client";
 
+import type { PaymentStatus } from "@prisma/client";
+import { Search } from "lucide-react";
+import dynamic from "next/dynamic";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
-import type { PaymentStatus } from "@prisma/client";
-import dynamic from "next/dynamic";
-import { Search } from "lucide-react";
-import React, { useState } from "react";
-import { toast } from "sonner";
 
 const PaymentDetail = dynamic(
-  () => import("@/features/admin/components/payments/PaymentDetail").then((mod) => ({
-    default: mod.PaymentDetail,
-  })),
+  () =>
+    import("@/features/admin/components/payments/PaymentDetail").then((mod) => ({
+      default: mod.PaymentDetail,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const PaymentFilter = dynamic(
-  () => import("@/features/admin/components/payments/PaymentFilter").then((mod) => ({
-    default: mod.PaymentFilter,
-  })),
+  () =>
+    import("@/features/admin/components/payments/PaymentFilter").then((mod) => ({
+      default: mod.PaymentFilter,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const PaymentNoteForm = dynamic(
-  () => import("@/features/admin/components/payments/PaymentNoteForm").then((mod) => ({
-    default: mod.PaymentNoteForm,
-  })),
+  () =>
+    import("@/features/admin/components/payments/PaymentNoteForm").then((mod) => ({
+      default: mod.PaymentNoteForm,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const PaymentTable = dynamic(
-  () => import("@/features/admin/components/payments/PaymentTable").then((mod) => ({
-    default: mod.PaymentTable,
-  })),
+  () =>
+    import("@/features/admin/components/payments/PaymentTable").then((mod) => ({
+      default: mod.PaymentTable,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
@@ -135,15 +139,14 @@ export default function PaymentsPage() {
     addNote.mutate({ paymentId: selectedPaymentId, notes: note });
   };
 
-
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
+    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Payments</h1>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col gap-4">
+        <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by student name or reference code..."
@@ -152,16 +155,16 @@ export default function PaymentsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex-shrink-0">
+        <div className="self-start">
           <PaymentFilter currentFilter={statusFilter} onFilterChange={setStatusFilter} />
         </div>
       </div>
 
       <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">All Payments</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 lg:w-fit lg:grid-cols-auto">
+          <TabsTrigger value="all" className="text-sm">All Payments</TabsTrigger>
+          <TabsTrigger value="pending" className="text-sm">Pending</TabsTrigger>
+          <TabsTrigger value="completed" className="text-sm">Completed</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">

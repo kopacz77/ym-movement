@@ -1,22 +1,24 @@
 // src/features/auth/components/ChangePasswordForm.tsx
 "use client";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import { type FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordStrength } from "@/components/ui/password-strength";
+import { useSanitizedInput } from "@/hooks/useSanitizedInput";
 import { api } from "@/lib/api";
 import type { AppRouter } from "@/lib/root";
-import type { TRPCClientErrorLike } from "@trpc/client";
-import { type FormEvent, useState } from "react";
-import { toast } from "sonner";
 
 export default function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { sanitizeInput } = useSanitizedInput();
 
-  // Use the admin.auth path instead of auth directly, since that's your router structure
+  // Use the correct admin.auth router path since authRouter is nested under adminRouter
   const changePassword = api.admin.auth.changePassword.useMutation({
     onSuccess: () => {
       toast.success("Password Changed", {
@@ -37,14 +39,20 @@ export default function ChangePasswordForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (newPassword !== confirmPassword) {
+    // Sanitize inputs
+    const sanitizedCurrentPassword = sanitizeInput(currentPassword);
+    const sanitizedNewPassword = sanitizeInput(newPassword);
+    const sanitizedConfirmPassword = sanitizeInput(confirmPassword);
+
+    if (sanitizedNewPassword !== sanitizedConfirmPassword) {
       toast.error("Passwords don't match", {
         description: "New password and confirmation password must match.",
       });
       return;
     }
 
-    if (newPassword.length < 8) {
+    // Basic client-side validation (server will do comprehensive validation)
+    if (sanitizedNewPassword.length < 8) {
       toast.error("Password too short", {
         description: "New password must be at least 8 characters long.",
       });
@@ -55,8 +63,8 @@ export default function ChangePasswordForm() {
 
     try {
       changePassword.mutate({
-        currentPassword,
-        newPassword,
+        currentPassword: sanitizedCurrentPassword,
+        newPassword: sanitizedNewPassword,
       });
     } finally {
       setIsLoading(false);

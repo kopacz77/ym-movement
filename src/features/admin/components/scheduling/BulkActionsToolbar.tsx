@@ -1,11 +1,9 @@
 // src/features/admin/components/scheduling/BulkActionsToolbar.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Trash2, Square, CheckSquare, X } from "lucide-react";
+import { CheckSquare, Square, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +15,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface BulkActionsToolbarProps {
   isSelectionMode: boolean;
@@ -63,12 +63,7 @@ export function BulkActionsToolbar({
   return (
     <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 dark:bg-blue-950 dark:border-blue-800">
       <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleSelectionMode}
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="ghost" size="sm" onClick={onToggleSelectionMode} className="h-8 w-8 p-0">
           <X className="h-4 w-4" />
         </Button>
         <Badge variant="secondary" className="flex items-center gap-1">
@@ -87,7 +82,7 @@ export function BulkActionsToolbar({
           <Square className="h-4 w-4" />
           Select All
         </Button>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -106,7 +101,7 @@ export function BulkActionsToolbar({
               className="flex items-center gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              Delete {selectedCount > 0 ? `(${selectedCount})` : ''}
+              Delete {selectedCount > 0 ? `(${selectedCount})` : ""}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -114,12 +109,13 @@ export function BulkActionsToolbar({
               <AlertDialogTitle>Delete Time Slots</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
                 <p>
-                  Are you sure you want to delete {selectedCount} time slot{selectedCount !== 1 ? 's' : ''}?
+                  Are you sure you want to delete {selectedCount} time slot
+                  {selectedCount !== 1 ? "s" : ""}?
                 </p>
                 <Alert>
                   <AlertDescription>
-                    Only time slots without scheduled lessons will be deleted. 
-                    Slots with existing lessons will be skipped to prevent data loss.
+                    Only time slots without scheduled lessons will be deleted. Slots with existing
+                    lessons will be skipped to prevent data loss.
                   </AlertDescription>
                 </Alert>
               </AlertDialogDescription>

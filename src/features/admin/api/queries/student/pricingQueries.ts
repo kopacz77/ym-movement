@@ -1,7 +1,8 @@
 // src/features/admin/api/queries/student/pricingQueries.ts
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { defaultPricingSchema, studentPricingSchema } from "./schemas";
 
 export const pricingQueries = createTRPCRouter({

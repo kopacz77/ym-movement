@@ -1,15 +1,15 @@
 // src/features/admin/components/students/StudentDetailTabs.tsx
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/lib/api";
 import type { Level } from "@prisma/client"; // Use import type for type-only imports
 import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
-import { StudentPricingForm } from "./StudentPricingForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/lib/api";
 import { StudentForm } from "./profile/StudentForm";
 import { StudentNotes } from "./profile/StudentNotes";
 import { StudentAttendance } from "./progress/StudentAttendance";
+import { StudentPricingForm } from "./StudentPricingForm";
 import type { Student } from "./types";
 
 // Helper function for null to undefined conversion

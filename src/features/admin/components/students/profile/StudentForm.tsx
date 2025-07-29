@@ -1,4 +1,11 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Level } from "@prisma/client";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,14 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useSanitizedInput } from "@/hooks/useSanitizedInput";
 import { api } from "@/lib/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Level } from "@prisma/client";
-import type React from "react";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 
 // Updated schema to match the expected API types - making emergencyContact properties optional
 const studentSchema = z.object({
@@ -83,6 +84,7 @@ interface StudentFormProps {
 
 export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitAction = () => {} }) => {
   const [formInitialized, setFormInitialized] = useState(false);
+  const { sanitizeInput, sanitizeTextArea, validateEmail, validatePhone } = useSanitizedInput();
 
   // Load student data by ID if needed
   const { data: studentData, isLoading } = api.admin.student.getStudent.useQuery(
@@ -168,14 +170,41 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
   });
 
   const handleSubmit = (values: StudentFormValues) => {
-    // Ensure emergencyContact is properly formatted with non-optional fields
-    const formattedValues = {
+    // Sanitize and validate inputs
+    const sanitizedValues = {
       ...values,
+      name: sanitizeInput(values.name),
+      email: values.email, // Email is validated by schema
+      phone: values.phone ? sanitizeInput(values.phone) : undefined,
+      notes: values.notes ? sanitizeTextArea(values.notes) : undefined,
       emergencyContact: values.emergencyContact
         ? {
-            name: values.emergencyContact.name || "",
-            phone: values.emergencyContact.phone || "",
-            relationship: values.emergencyContact.relationship || "",
+            name: sanitizeInput(values.emergencyContact.name || ""),
+            phone: sanitizeInput(values.emergencyContact.phone || ""),
+            relationship: sanitizeInput(values.emergencyContact.relationship || ""),
+          }
+        : undefined,
+    };
+
+    // Additional validation
+    if (!validateEmail(sanitizedValues.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (sanitizedValues.phone && !validatePhone(sanitizedValues.phone)) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
+    // Ensure emergencyContact is properly formatted with non-optional fields
+    const formattedValues = {
+      ...sanitizedValues,
+      emergencyContact: sanitizedValues.emergencyContact
+        ? {
+            name: sanitizedValues.emergencyContact.name || "",
+            phone: sanitizedValues.emergencyContact.phone || "",
+            relationship: sanitizedValues.emergencyContact.relationship || "",
           }
         : undefined,
     };

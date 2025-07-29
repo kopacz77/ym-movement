@@ -121,7 +121,28 @@ yura-scheduler-v3/
 
 ### Installation
 
-#### Option 1: Standard Setup
+#### Option 1: Docker Setup (Recommended)
+
+**Prerequisites**: Docker and Docker Compose installed
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/yura-scheduler-v3.git
+cd yura-scheduler-v3
+
+# Copy Docker environment template
+cp .env.docker .env
+
+# Start development environment with hot reload
+pnpm docker:dev
+
+# Access services:
+# App: http://localhost:3000
+# Docs: http://localhost:3001
+# Database UI: http://localhost:5555 (Prisma Studio)
+```
+
+#### Option 2: Standard Setup
 
 ```bash
 # Clone the repository
@@ -242,6 +263,10 @@ pnpm dev
 | `pnpm analyze` | Analyze bundle size |
 | `pnpm security:audit` | Run security audit |
 | `pnpm prisma:migrate` | Deploy database migrations |
+| `pnpm docker:dev` | Start Docker development environment |
+| `pnpm docker:up` | Start Docker production environment |
+| `pnpm docker:down` | Stop Docker containers |
+| `pnpm docs:dev` | Start documentation server |
 
 ## 🔧 Development
 

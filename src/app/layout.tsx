@@ -1,8 +1,7 @@
 import { GeistSans } from "geist/font/sans";
-import { type Metadata } from "next";
-
-import { Providers } from "@/providers";
+import type { Metadata } from "next";
 import { validateEnvironment } from "@/lib/env-check";
+import { Providers } from "@/providers";
 
 import "@/styles/globals.css";
 
@@ -26,9 +25,7 @@ export default function RootLayout({
         <Providers>
           {children}
           {/* Development performance monitor */}
-          {process.env.NODE_ENV === 'development' && (
-            <div id="performance-monitor-root" />
-          )}
+          {process.env.NODE_ENV === "development" && <div id="performance-monitor-root" />}
         </Providers>
       </body>
     </html>

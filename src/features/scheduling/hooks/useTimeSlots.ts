@@ -1,8 +1,9 @@
 // src/features/scheduling/hooks/useTimeSlots.ts
-import { api } from "@/lib/api";
-import { type TimeSlot } from "@/types/scheduling";
+
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import type { TimeSlot } from "@/types/scheduling";
 
 // Define a date range type for the hook
 export interface DateRange {
@@ -24,11 +25,7 @@ export function useTimeSlots(dateRange?: DateRange, selectedRink?: string) {
   };
 
   // Get time slots data with optional parameters
-  const getTimeSlots = (params?: {
-    startDate?: Date;
-    endDate?: Date;
-    rinkId?: string;
-  }) => {
+  const getTimeSlots = (params?: { startDate?: Date; endDate?: Date; rinkId?: string }) => {
     return api.admin.schedule.getTimeSlots.useQuery(
       {
         startDate: params?.startDate || dateRange?.start,
@@ -208,8 +205,7 @@ export function useTimeSlots(dateRange?: DateRange, selectedRink?: string) {
     dateRange && timeSlotsData
       ? timeSlotsData.map((slot: TimeSlot) => {
           const studentCount = slot.Lesson?.length || 0;
-          const studentNames = slot.Lesson
-            ?.filter(lesson => lesson?.Student?.User)
+          const studentNames = slot.Lesson?.filter((lesson) => lesson?.Student?.User)
             ?.map((lesson) => lesson.Student.User.name || "Unnamed Student")
             .join(", ");
           const title = `${studentCount}/${slot.maxStudents} students${

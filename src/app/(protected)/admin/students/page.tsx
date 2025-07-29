@@ -1,52 +1,57 @@
 // src/app/(protected)/admin/students/page.tsx
 "use client";
 
+import dynamic from "next/dynamic";
+import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import dynamic from "next/dynamic";
-import React from "react";
 
 const PendingApprovals = dynamic(
-  () => import("@/features/admin/components/students/management/PendingApprovals").then((mod) => ({
-    default: mod.PendingApprovals,
-  })),
+  () =>
+    import("@/features/admin/components/students/management/PendingApprovals").then((mod) => ({
+      default: mod.PendingApprovals,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const StudentList = dynamic(
-  () => import("@/features/admin/components/students/management/StudentList").then((mod) => ({
-    default: mod.StudentList,
-  })),
+  () =>
+    import("@/features/admin/components/students/management/StudentList").then((mod) => ({
+      default: mod.StudentList,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const StudentForm = dynamic(
-  () => import("@/features/admin/components/students/profile/StudentForm").then((mod) => ({
-    default: mod.StudentForm,
-  })),
+  () =>
+    import("@/features/admin/components/students/profile/StudentForm").then((mod) => ({
+      default: mod.StudentForm,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const StudentProfile = dynamic(
-  () => import("@/features/admin/components/students/profile/StudentProfile").then((mod) => ({
-    default: mod.StudentProfile,
-  })),
+  () =>
+    import("@/features/admin/components/students/profile/StudentProfile").then((mod) => ({
+      default: mod.StudentProfile,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
 );
 
 const NewStudentDialog = dynamic(
-  () => import("@/features/admin/components/students/shared/NewStudentDialog").then((mod) => ({
-    default: mod.NewStudentDialog,
-  })),
+  () =>
+    import("@/features/admin/components/students/shared/NewStudentDialog").then((mod) => ({
+      default: mod.NewStudentDialog,
+    })),
   {
     loading: () => <LoadingSkeleton />,
   },
@@ -68,18 +73,20 @@ export default function AdminStudentsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Students</h1>
-        <NewStudentDialog />
+    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Students</h1>
+        <div className="self-start sm:self-auto">
+          <NewStudentDialog />
+        </div>
       </div>
 
       <PendingApprovals />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="list">All Students</TabsTrigger>
-          {selectedStudentId && <TabsTrigger value="profile">Student Profile</TabsTrigger>}
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-fit lg:grid-cols-auto">
+          <TabsTrigger value="list" className="text-sm">All Students</TabsTrigger>
+          {selectedStudentId && <TabsTrigger value="profile" className="text-sm">Student Profile</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="list">

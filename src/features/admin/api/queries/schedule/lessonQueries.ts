@@ -1,10 +1,11 @@
-import { googleCalendar } from "@/lib/google/calendar";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { LessonStatus, LessonType, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { randomUUID } from "crypto";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
-import { randomUUID } from "crypto";
+import { googleCalendar } from "@/lib/google/calendar";
+import { logSecurityEvent, sanitizeInput } from "@/lib/security";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const lessonRouter = createTRPCRouter({
   createLesson: protectedProcedure
@@ -19,14 +20,29 @@ export const lessonRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Sanitize input data
+      const sanitizedInput = {
+        ...input,
+        notes: input.notes ? sanitizeInput(input.notes) : undefined,
+      };
+
+      // Log security event
+      logSecurityEvent("LESSON_CREATED", {
+        userId: ctx.session?.user?.id,
+        studentId: sanitizedInput.studentId,
+        timeSlotId: sanitizedInput.timeSlotId,
+        lessonType: sanitizedInput.type,
+        price: sanitizedInput.price,
+      });
+
       try {
         const [timeSlot, student] = await Promise.all([
           ctx.prisma.rinkTimeSlot.findUnique({
-            where: { id: input.timeSlotId },
+            where: { id: sanitizedInput.timeSlotId },
             include: { Rink: true, Lesson: true },
           }),
           ctx.prisma.student.findUnique({
-            where: { id: input.studentId },
+            where: { id: sanitizedInput.studentId },
             include: { User: true },
           }),
         ]);
@@ -46,7 +62,7 @@ export const lessonRouter = createTRPCRouter({
 
         // Check if the student already has a lesson in this time slot
         const existingLesson = timeSlot.Lesson.find(
-          (lesson) => lesson.studentId === input.studentId,
+          (lesson) => lesson.studentId === sanitizedInput.studentId,
         );
         if (existingLesson) {
           throw new TRPCError({
@@ -62,10 +78,10 @@ export const lessonRouter = createTRPCRouter({
         let eventId: string | null = null;
         try {
           eventId = await googleCalendar.createEvent({
-            summary: `${input.type} Lesson with ${student.User.name || "Student"}`,
-            description: `Lesson Type: ${input.type}
-Area: ${input.area}
-${input.notes ? `Notes: ${input.notes}` : ""}`,
+            summary: `${sanitizedInput.type} Lesson with ${student.User.name || "Student"}`,
+            description: `Lesson Type: ${sanitizedInput.type}
+Area: ${sanitizedInput.area}
+${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             attendees: [
@@ -87,7 +103,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // Create the lesson with the calendar event ID (if available)
         const lesson = await ctx.prisma.lesson.create({
           data: {
-            ...input,
+            ...sanitizedInput,
             id: randomUUID(),
             status: LessonStatus.SCHEDULED,
             rinkId: timeSlot.rinkId,
@@ -276,7 +292,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
     .mutation(async ({ ctx, input }) => {
       try {
         console.log("Assigning student to time slot:", input);
-        
+
         // Validate input
         if (!input.timeSlotId || !input.studentId) {
           throw new TRPCError({

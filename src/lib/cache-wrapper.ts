@@ -1,14 +1,14 @@
 /**
  * Cache Wrapper for Database Queries
- * 
+ *
  * Intelligent caching layer for Prisma queries with automatic invalidation
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 3 Optimizations
  */
 
-import { redis, CACHE_CONFIG, type CacheOptions } from './redis';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from "@prisma/client";
+import { CACHE_CONFIG, type CacheOptions, redis } from "./redis";
 
 interface QueryCacheConfig {
   ttl?: number;
@@ -38,10 +38,7 @@ class DatabaseCacheWrapper {
   /**
    * Cached query execution
    */
-  async cachedQuery<T>(
-    queryFn: () => Promise<T>,
-    config: QueryCacheConfig = {}
-  ): Promise<T> {
+  async cachedQuery<T>(queryFn: () => Promise<T>, config: QueryCacheConfig = {}): Promise<T> {
     const startTime = performance.now();
     this.metrics.totalQueries++;
 
@@ -53,7 +50,7 @@ class DatabaseCacheWrapper {
     }
 
     const cacheKey = config.key || this.generateCacheKey(queryFn);
-    
+
     try {
       // Try to get from cache first
       if (!config.refreshCache) {
@@ -68,7 +65,7 @@ class DatabaseCacheWrapper {
       // Cache miss - execute query
       this.metrics.cacheMisses++;
       const result = await queryFn();
-      
+
       // Cache the result
       const cacheOptions: CacheOptions = {
         ttl: config.ttl || CACHE_CONFIG.TTL.MEDIUM,
@@ -77,12 +74,12 @@ class DatabaseCacheWrapper {
 
       await redis.set(cacheKey, result, cacheOptions);
       this.updateMetrics(startTime, false);
-      
+
       return result;
     } catch (error) {
       this.metrics.cacheErrors++;
-      console.error('[Cache Wrapper] Cache operation failed:', error);
-      
+      console.error("[Cache Wrapper] Cache operation failed:", error);
+
       // Fallback to direct query execution
       const result = await queryFn();
       this.updateMetrics(startTime, false);
@@ -106,7 +103,7 @@ class DatabaseCacheWrapper {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(36);
@@ -117,8 +114,8 @@ class DatabaseCacheWrapper {
    */
   private updateMetrics(startTime: number, wasFromCache: boolean): void {
     const queryTime = performance.now() - startTime;
-    this.metrics.averageQueryTime = 
-      (this.metrics.averageQueryTime * (this.metrics.totalQueries - 1) + queryTime) / 
+    this.metrics.averageQueryTime =
+      (this.metrics.averageQueryTime * (this.metrics.totalQueries - 1) + queryTime) /
       this.metrics.totalQueries;
   }
 
@@ -126,9 +123,10 @@ class DatabaseCacheWrapper {
    * Get cache metrics
    */
   getMetrics(): CacheMetrics & { hitRate: number } {
-    const hitRate = this.metrics.totalQueries > 0 
-      ? (this.metrics.cacheHits / this.metrics.totalQueries) * 100 
-      : 0;
+    const hitRate =
+      this.metrics.totalQueries > 0
+        ? (this.metrics.cacheHits / this.metrics.totalQueries) * 100
+        : 0;
 
     return {
       ...this.metrics,
@@ -162,30 +160,31 @@ export class StudentCache {
    */
   static async getById(prisma: PrismaClient, id: string) {
     return cacheWrapper.cachedQuery(
-      () => prisma.student.findUnique({
-        where: { id },
-        include: {
-          user: true,
-          lessons: {
-            include: {
-              rinkTimeSlot: {
-                include: { rink: true }
-              }
+      () =>
+        prisma.student.findUnique({
+          where: { id },
+          include: {
+            user: true,
+            lessons: {
+              include: {
+                rinkTimeSlot: {
+                  include: { rink: true },
+                },
+              },
+              orderBy: { startTime: "desc" },
+              take: 10,
             },
-            orderBy: { startTime: 'desc' },
-            take: 10,
+            payments: {
+              orderBy: { createdAt: "desc" },
+              take: 5,
+            },
           },
-          payments: {
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-          },
-        },
-      }),
+        }),
       {
         key: `${CACHE_CONFIG.PREFIXES.STUDENT}${id}`,
         ttl: CACHE_CONFIG.TTL.MEDIUM,
-        tags: ['student', `student:${id}`],
-      }
+        tags: ["student", `student:${id}`],
+      },
     );
   }
 
@@ -193,47 +192,48 @@ export class StudentCache {
    * Get student list with caching
    */
   static async getList(
-    prisma: PrismaClient, 
+    prisma: PrismaClient,
     params: {
       skip?: number;
       take?: number;
       isApproved?: boolean;
       search?: string;
-    } = {}
+    } = {},
   ) {
     const cacheKey = `${CACHE_CONFIG.PREFIXES.STUDENT}list:${JSON.stringify(params)}`;
-    
+
     return cacheWrapper.cachedQuery(
-      () => prisma.student.findMany({
-        skip: params.skip,
-        take: params.take,
-        where: {
-          ...(params.isApproved !== undefined && { isApproved: params.isApproved }),
-          ...(params.search && {
-            user: {
-              OR: [
-                { name: { contains: params.search, mode: 'insensitive' } },
-                { email: { contains: params.search, mode: 'insensitive' } },
-              ],
-            },
-          }),
-        },
-        include: {
-          user: true,
-          _count: {
-            select: {
-              lessons: true,
-              payments: true,
+      () =>
+        prisma.student.findMany({
+          skip: params.skip,
+          take: params.take,
+          where: {
+            ...(params.isApproved !== undefined && { isApproved: params.isApproved }),
+            ...(params.search && {
+              user: {
+                OR: [
+                  { name: { contains: params.search, mode: "insensitive" } },
+                  { email: { contains: params.search, mode: "insensitive" } },
+                ],
+              },
+            }),
+          },
+          include: {
+            user: true,
+            _count: {
+              select: {
+                lessons: true,
+                payments: true,
+              },
             },
           },
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
+          orderBy: { createdAt: "desc" },
+        }),
       {
         key: cacheKey,
         ttl: CACHE_CONFIG.TTL.SHORT,
-        tags: ['student', 'student-list'],
-      }
+        tags: ["student", "student-list"],
+      },
     );
   }
 
@@ -241,10 +241,10 @@ export class StudentCache {
    * Invalidate student cache
    */
   static async invalidate(studentId?: string) {
-    const tags = studentId 
-      ? ['student', `student:${studentId}`, 'student-list']
-      : ['student', 'student-list'];
-    
+    const tags = studentId
+      ? ["student", `student:${studentId}`, "student-list"]
+      : ["student", "student-list"];
+
     return redis.invalidateByTags(tags);
   }
 }
@@ -260,35 +260,36 @@ export class LessonCache {
     prisma: PrismaClient,
     startDate: Date,
     endDate: Date,
-    rinkId?: string
+    rinkId?: string,
   ) {
-    const cacheKey = `${CACHE_CONFIG.PREFIXES.LESSON}range:${startDate.toISOString()}:${endDate.toISOString()}:${rinkId || 'all'}`;
-    
+    const cacheKey = `${CACHE_CONFIG.PREFIXES.LESSON}range:${startDate.toISOString()}:${endDate.toISOString()}:${rinkId || "all"}`;
+
     return cacheWrapper.cachedQuery(
-      () => prisma.lesson.findMany({
-        where: {
-          startTime: {
-            gte: startDate,
-            lte: endDate,
+      () =>
+        prisma.lesson.findMany({
+          where: {
+            startTime: {
+              gte: startDate,
+              lte: endDate,
+            },
+            ...(rinkId && { rinkTimeSlot: { rinkId } }),
           },
-          ...(rinkId && { rinkTimeSlot: { rinkId } }),
-        },
-        include: {
-          student: {
-            include: { user: true },
+          include: {
+            student: {
+              include: { user: true },
+            },
+            rinkTimeSlot: {
+              include: { rink: true },
+            },
+            payments: true,
           },
-          rinkTimeSlot: {
-            include: { rink: true },
-          },
-          payments: true,
-        },
-        orderBy: { startTime: 'asc' },
-      }),
+          orderBy: { startTime: "asc" },
+        }),
       {
         key: cacheKey,
         ttl: CACHE_CONFIG.TTL.SHORT,
-        tags: ['lesson', 'schedule'],
-      }
+        tags: ["lesson", "schedule"],
+      },
     );
   }
 
@@ -296,30 +297,31 @@ export class LessonCache {
    * Get upcoming lessons with caching
    */
   static async getUpcoming(prisma: PrismaClient, studentId?: string, limit = 10) {
-    const cacheKey = `${CACHE_CONFIG.PREFIXES.LESSON}upcoming:${studentId || 'all'}:${limit}`;
-    
+    const cacheKey = `${CACHE_CONFIG.PREFIXES.LESSON}upcoming:${studentId || "all"}:${limit}`;
+
     return cacheWrapper.cachedQuery(
-      () => prisma.lesson.findMany({
-        where: {
-          startTime: { gt: new Date() },
-          ...(studentId && { studentId }),
-        },
-        include: {
-          student: {
-            include: { user: true },
+      () =>
+        prisma.lesson.findMany({
+          where: {
+            startTime: { gt: new Date() },
+            ...(studentId && { studentId }),
           },
-          rinkTimeSlot: {
-            include: { rink: true },
+          include: {
+            student: {
+              include: { user: true },
+            },
+            rinkTimeSlot: {
+              include: { rink: true },
+            },
           },
-        },
-        orderBy: { startTime: 'asc' },
-        take: limit,
-      }),
+          orderBy: { startTime: "asc" },
+          take: limit,
+        }),
       {
         key: cacheKey,
         ttl: CACHE_CONFIG.TTL.SHORT,
-        tags: ['lesson', 'upcoming-lessons'],
-      }
+        tags: ["lesson", "upcoming-lessons"],
+      },
     );
   }
 
@@ -327,10 +329,10 @@ export class LessonCache {
    * Invalidate lesson cache
    */
   static async invalidate(lessonId?: string) {
-    const tags = lessonId 
-      ? ['lesson', `lesson:${lessonId}`, 'schedule', 'upcoming-lessons']
-      : ['lesson', 'schedule', 'upcoming-lessons'];
-    
+    const tags = lessonId
+      ? ["lesson", `lesson:${lessonId}`, "schedule", "upcoming-lessons"]
+      : ["lesson", "schedule", "upcoming-lessons"];
+
     return redis.invalidateByTags(tags);
   }
 }
@@ -349,50 +351,47 @@ export class PaymentCache {
       take?: number;
       studentId?: string;
       status?: string;
-    } = {}
+    } = {},
   ) {
     const cacheKey = `${CACHE_CONFIG.PREFIXES.PAYMENT}list:${JSON.stringify(params)}`;
-    
+
     return cacheWrapper.cachedQuery(
-      () => prisma.payment.findMany({
-        skip: params.skip,
-        take: params.take,
-        where: {
-          ...(params.studentId && { studentId: params.studentId }),
-          ...(params.status && { status: params.status }),
-        },
-        include: {
-          student: {
-            include: { user: true },
+      () =>
+        prisma.payment.findMany({
+          skip: params.skip,
+          take: params.take,
+          where: {
+            ...(params.studentId && { studentId: params.studentId }),
+            ...(params.status && { status: params.status }),
           },
-          lesson: {
-            include: {
-              rinkTimeSlot: {
-                include: { rink: true },
+          include: {
+            student: {
+              include: { user: true },
+            },
+            lesson: {
+              include: {
+                rinkTimeSlot: {
+                  include: { rink: true },
+                },
               },
             },
           },
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
+          orderBy: { createdAt: "desc" },
+        }),
       {
         key: cacheKey,
         ttl: CACHE_CONFIG.TTL.MEDIUM,
-        tags: ['payment', 'payment-list'],
-      }
+        tags: ["payment", "payment-list"],
+      },
     );
   }
 
   /**
    * Get payment analytics with caching
    */
-  static async getAnalytics(
-    prisma: PrismaClient,
-    startDate: Date,
-    endDate: Date
-  ) {
+  static async getAnalytics(prisma: PrismaClient, startDate: Date, endDate: Date) {
     const cacheKey = `${CACHE_CONFIG.PREFIXES.PAYMENT}analytics:${startDate.toISOString()}:${endDate.toISOString()}`;
-    
+
     return cacheWrapper.cachedQuery(
       async () => {
         const [total, paid, pending, overdue] = await Promise.all([
@@ -402,25 +401,25 @@ export class PaymentCache {
             _count: true,
           }),
           prisma.payment.aggregate({
-            where: { 
+            where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: 'PAID',
+              status: "PAID",
             },
             _sum: { amount: true },
             _count: true,
           }),
           prisma.payment.aggregate({
-            where: { 
+            where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: 'PENDING',
+              status: "PENDING",
             },
             _sum: { amount: true },
             _count: true,
           }),
           prisma.payment.aggregate({
-            where: { 
+            where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: 'OVERDUE',
+              status: "OVERDUE",
             },
             _sum: { amount: true },
             _count: true,
@@ -432,8 +431,8 @@ export class PaymentCache {
       {
         key: cacheKey,
         ttl: CACHE_CONFIG.TTL.LONG,
-        tags: ['payment', 'analytics'],
-      }
+        tags: ["payment", "analytics"],
+      },
     );
   }
 
@@ -441,10 +440,10 @@ export class PaymentCache {
    * Invalidate payment cache
    */
   static async invalidate(paymentId?: string) {
-    const tags = paymentId 
-      ? ['payment', `payment:${paymentId}`, 'payment-list', 'analytics']
-      : ['payment', 'payment-list', 'analytics'];
-    
+    const tags = paymentId
+      ? ["payment", `payment:${paymentId}`, "payment-list", "analytics"]
+      : ["payment", "payment-list", "analytics"];
+
     return redis.invalidateByTags(tags);
   }
 }
@@ -456,30 +455,27 @@ export class ScheduleCache {
   /**
    * Get available time slots with caching
    */
-  static async getAvailableSlots(
-    prisma: PrismaClient,
-    date: Date,
-    rinkId?: string
-  ) {
-    const cacheKey = `${CACHE_CONFIG.PREFIXES.SCHEDULE}available:${date.toDateString()}:${rinkId || 'all'}`;
-    
+  static async getAvailableSlots(prisma: PrismaClient, date: Date, rinkId?: string) {
+    const cacheKey = `${CACHE_CONFIG.PREFIXES.SCHEDULE}available:${date.toDateString()}:${rinkId || "all"}`;
+
     return cacheWrapper.cachedQuery(
-      () => prisma.rinkTimeSlot.findMany({
-        where: {
-          date,
-          ...(rinkId && { rinkId }),
-          lesson: null, // Available slots have no lesson assigned
-        },
-        include: {
-          rink: true,
-        },
-        orderBy: { startTime: 'asc' },
-      }),
+      () =>
+        prisma.rinkTimeSlot.findMany({
+          where: {
+            date,
+            ...(rinkId && { rinkId }),
+            lesson: null, // Available slots have no lesson assigned
+          },
+          include: {
+            rink: true,
+          },
+          orderBy: { startTime: "asc" },
+        }),
       {
         key: cacheKey,
         ttl: CACHE_CONFIG.TTL.SHORT,
-        tags: ['schedule', 'time-slots'],
-      }
+        tags: ["schedule", "time-slots"],
+      },
     );
   }
 
@@ -487,10 +483,10 @@ export class ScheduleCache {
    * Invalidate schedule cache
    */
   static async invalidate(date?: Date) {
-    const tags = date 
-      ? ['schedule', 'time-slots', `schedule:${date.toDateString()}`]
-      : ['schedule', 'time-slots'];
-    
+    const tags = date
+      ? ["schedule", "time-slots", `schedule:${date.toDateString()}`]
+      : ["schedule", "time-slots"];
+
     return redis.invalidateByTags(tags);
   }
 }

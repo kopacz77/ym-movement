@@ -1,9 +1,9 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
+import { signOut, useSession } from "next-auth/react";
 import type { ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 interface User {
   id: string;
@@ -97,9 +97,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [user, isLoading, isAuthenticated, logout],
   );
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };

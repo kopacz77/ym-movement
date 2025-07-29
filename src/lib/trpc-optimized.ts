@@ -1,22 +1,22 @@
 /**
  * Optimized TRPC Configuration
- * 
+ *
  * Enhanced TRPC setup with intelligent caching, batch operations, and performance monitoring
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 3 Optimizations
  */
 
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { redis, CACHE_CONFIG } from "@/lib/redis";
-import { cacheWrapper } from "@/lib/cache-wrapper";
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
+import { getServerSession } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { authOptions } from "@/lib/auth";
+import { cacheWrapper } from "@/lib/cache-wrapper";
+import { prisma } from "@/lib/prisma";
+import { CACHE_CONFIG, redis } from "@/lib/redis";
 
 export interface OptimizedTRPCContext {
   prisma: typeof prisma;
@@ -50,16 +50,16 @@ class TRPCPerformanceMonitor {
   logRequest(data: PerformanceData) {
     const procedureMetrics = this.metrics.get(data.procedure) || [];
     procedureMetrics.push(data);
-    
+
     // Keep only last 100 requests per procedure
     if (procedureMetrics.length > 100) {
       procedureMetrics.shift();
     }
-    
+
     this.metrics.set(data.procedure, procedureMetrics);
 
     // Log slow requests in development
-    if (process.env.NODE_ENV === 'development' && data.duration > 1000) {
+    if (process.env.NODE_ENV === "development" && data.duration > 1000) {
       console.warn(`[TRPC] Slow request: ${data.procedure} took ${data.duration}ms`);
     }
   }
@@ -68,19 +68,19 @@ class TRPCPerformanceMonitor {
     if (procedure) {
       return this.metrics.get(procedure) || [];
     }
-    
+
     const allMetrics: PerformanceData[] = [];
     for (const procedureMetrics of this.metrics.values()) {
       allMetrics.push(...procedureMetrics);
     }
-    
+
     return allMetrics;
   }
 
   getAverageResponseTime(procedure?: string): number {
     const metrics = this.getMetrics(procedure);
     if (metrics.length === 0) return 0;
-    
+
     const totalTime = metrics.reduce((sum, metric) => sum + metric.duration, 0);
     return totalTime / metrics.length;
   }
@@ -88,19 +88,19 @@ class TRPCPerformanceMonitor {
   getCacheHitRate(procedure?: string): number {
     const metrics = this.getMetrics(procedure);
     if (metrics.length === 0) return 0;
-    
-    const cacheHits = metrics.filter(metric => metric.cacheHit).length;
+
+    const cacheHits = metrics.filter((metric) => metric.cacheHit).length;
     return (cacheHits / metrics.length) * 100;
   }
 
   getSlowestProcedures(limit = 10) {
     const procedureStats = new Map<string, { avgTime: number; count: number }>();
-    
+
     for (const [procedure, metrics] of this.metrics.entries()) {
       const avgTime = metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length;
       procedureStats.set(procedure, { avgTime, count: metrics.length });
     }
-    
+
     return Array.from(procedureStats.entries())
       .sort(([, a], [, b]) => b.avgTime - a.avgTime)
       .slice(0, limit)
@@ -121,10 +121,12 @@ function generateRequestId(): string {
  * Extract client IP address
  */
 function getClientIp(req: any): string {
-  return req.headers['x-forwarded-for']?.split(',')[0] || 
-         req.headers['x-real-ip'] || 
-         req.connection?.remoteAddress || 
-         'unknown';
+  return (
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.headers["x-real-ip"] ||
+    req.connection?.remoteAddress ||
+    "unknown"
+  );
 }
 
 /**
@@ -140,15 +142,13 @@ export const createOptimizedTRPCContext = async (
   // Handle both Next.js Pages Router and App Router
   if ("req" in opts && "res" in opts) {
     session = await getServerSession(opts.req, opts.res, authOptions);
-    userAgent = opts.req.headers['user-agent'];
+    userAgent = opts.req.headers["user-agent"];
     ip = getClientIp(opts.req);
   } else {
     session = await getServerSession(authOptions);
-    if ('headers' in opts) {
-      userAgent = opts.headers.get('user-agent') || undefined;
-      ip = opts.headers.get('x-forwarded-for') || 
-           opts.headers.get('x-real-ip') || 
-           undefined;
+    if ("headers" in opts) {
+      userAgent = opts.headers.get("user-agent") || undefined;
+      ip = opts.headers.get("x-forwarded-for") || opts.headers.get("x-real-ip") || undefined;
     }
   }
 
@@ -175,7 +175,7 @@ const t = initTRPC.context<OptimizedTRPCContext>().create({
       const duration = performance.now() - ctx.startTime;
       performanceMonitor.logRequest({
         requestId: ctx.requestId,
-        procedure: 'error',
+        procedure: "error",
         duration,
         cacheHit: false,
         userId: ctx.session?.user?.id,
@@ -185,11 +185,11 @@ const t = initTRPC.context<OptimizedTRPCContext>().create({
 
     // Don't expose internal errors in production
     const isSafeError =
-      error.code === "BAD_REQUEST" || 
-      error.code === "UNAUTHORIZED" || 
+      error.code === "BAD_REQUEST" ||
+      error.code === "UNAUTHORIZED" ||
       error.code === "FORBIDDEN" ||
       error.code === "NOT_FOUND";
-      
+
     const sanitizedMessage =
       process.env.NODE_ENV === "production" && !isSafeError
         ? "An unexpected error occurred"
@@ -212,10 +212,10 @@ const t = initTRPC.context<OptimizedTRPCContext>().create({
  */
 const performanceMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const startTime = performance.now();
-  
+
   try {
     const result = await next();
-    
+
     // Log successful request performance
     const duration = performance.now() - startTime;
     performanceMonitor.logRequest({
@@ -226,7 +226,7 @@ const performanceMiddleware = t.middleware(async ({ ctx, next, path }) => {
       userId: ctx.session?.user?.id,
       timestamp: Date.now(),
     });
-    
+
     return result;
   } catch (error) {
     // Log error request performance
@@ -239,7 +239,7 @@ const performanceMiddleware = t.middleware(async ({ ctx, next, path }) => {
       userId: ctx.session?.user?.id,
       timestamp: Date.now(),
     });
-    
+
     throw error;
   }
 });
@@ -253,7 +253,7 @@ const rateLimitMiddleware = (config: RateLimitConfig) => {
       return next(); // Skip rate limiting if Redis not available
     }
 
-    const key = `${CACHE_CONFIG.NAMESPACES.RATE_LIMIT}${ctx.ip || 'unknown'}:${path}`;
+    const key = `${CACHE_CONFIG.NAMESPACES.RATE_LIMIT}${ctx.ip || "unknown"}:${path}`;
     const currentCount = await redis.incr(key, config.windowMs / 1000);
 
     if (currentCount > config.maxRequests) {
@@ -276,11 +276,11 @@ const cacheMiddleware = <T>(
     tags?: string[];
     generateKey?: (ctx: OptimizedTRPCContext, input: any) => string;
     skipCache?: (ctx: OptimizedTRPCContext, input: any) => boolean;
-  } = {}
+  } = {},
 ) => {
   return t.middleware(async ({ ctx, next, input, path }) => {
-    const isQuery = path.includes('get') || path.includes('list') || path.includes('find');
-    
+    const isQuery = path.includes("get") || path.includes("list") || path.includes("find");
+
     if (!isQuery || !redis.isConnected()) {
       return next();
     }
@@ -290,7 +290,7 @@ const cacheMiddleware = <T>(
       return next();
     }
 
-    const cacheKey = config.generateKey 
+    const cacheKey = config.generateKey
       ? config.generateKey(ctx, input)
       : `${CACHE_CONFIG.NAMESPACES.QUERIES}${path}:${JSON.stringify(input)}`;
 
@@ -308,7 +308,7 @@ const cacheMiddleware = <T>(
           userId: ctx.session?.user?.id,
           timestamp: Date.now(),
         });
-        
+
         return { data: cachedResult };
       }
 
@@ -325,7 +325,7 @@ const cacheMiddleware = <T>(
 
       return result;
     } catch (error) {
-      console.error('[TRPC Cache Middleware] Error:', error);
+      console.error("[TRPC Cache Middleware] Error:", error);
       return next(); // Fallback to regular execution
     }
   });
@@ -336,8 +336,8 @@ const cacheMiddleware = <T>(
  */
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ 
-      code: "UNAUTHORIZED", 
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
       message: "Not authenticated",
     });
   }
@@ -403,12 +403,9 @@ const isStudent = t.middleware(({ ctx, next }) => {
 export const createOptimizedTRPCRouter = t.router;
 
 // Base procedures
-export const publicProcedure = t.procedure
-  .use(performanceMiddleware);
+export const publicProcedure = t.procedure.use(performanceMiddleware);
 
-export const protectedProcedure = t.procedure
-  .use(performanceMiddleware)
-  .use(isAuthed);
+export const protectedProcedure = t.procedure.use(performanceMiddleware).use(isAuthed);
 
 export const adminProcedure = t.procedure
   .use(performanceMiddleware)
@@ -421,9 +418,7 @@ export const studentProcedure = t.procedure
   .use(rateLimitMiddleware({ windowMs: 60000, maxRequests: 200 })); // 200 requests per minute
 
 // Cached procedures for read operations
-export const cachedQueryProcedure = t.procedure
-  .use(performanceMiddleware)
-  .use(cacheMiddleware());
+export const cachedQueryProcedure = t.procedure.use(performanceMiddleware).use(cacheMiddleware());
 
 export const cachedProtectedQueryProcedure = t.procedure
   .use(performanceMiddleware)
@@ -433,35 +428,36 @@ export const cachedProtectedQueryProcedure = t.procedure
 export const cachedAdminQueryProcedure = t.procedure
   .use(performanceMiddleware)
   .use(isAdmin)
-  .use(cacheMiddleware({
-    ttl: CACHE_CONFIG.TTL.LONG,
-    tags: ['admin'],
-  }));
+  .use(
+    cacheMiddleware({
+      ttl: CACHE_CONFIG.TTL.LONG,
+      tags: ["admin"],
+    }),
+  );
 
 export const cachedStudentQueryProcedure = t.procedure
   .use(performanceMiddleware)
   .use(isStudent)
-  .use(cacheMiddleware({
-    ttl: CACHE_CONFIG.TTL.MEDIUM,
-    tags: ['student'],
-  }));
+  .use(
+    cacheMiddleware({
+      ttl: CACHE_CONFIG.TTL.MEDIUM,
+      tags: ["student"],
+    }),
+  );
 
 // Batch operation utilities
 export class TRPCBatchOperations {
   /**
    * Batch get students by IDs
    */
-  static async getStudentsByIds(
-    ctx: OptimizedTRPCContext,
-    studentIds: string[]
-  ) {
+  static async getStudentsByIds(ctx: OptimizedTRPCContext, studentIds: string[]) {
     // Try to get from cache first
-    const cacheKeys = studentIds.map(id => `${CACHE_CONFIG.PREFIXES.STUDENT}${id}`);
+    const cacheKeys = studentIds.map((id) => `${CACHE_CONFIG.PREFIXES.STUDENT}${id}`);
     const cachedResults = await redis.mget<any>(cacheKeys);
-    
+
     const missingIds: string[] = [];
     const results: any[] = [];
-    
+
     cachedResults.forEach((cached, index) => {
       if (cached === null) {
         missingIds.push(studentIds[index]);
@@ -470,7 +466,7 @@ export class TRPCBatchOperations {
         results[index] = cached;
       }
     });
-    
+
     // Fetch missing students from database
     if (missingIds.length > 0) {
       const students = await ctx.prisma.student.findMany({
@@ -480,22 +476,22 @@ export class TRPCBatchOperations {
           _count: { select: { Lesson: true, Payment: true } },
         },
       });
-      
+
       // Cache the results and update the results array
       const cacheData: Record<string, any> = {};
-      
-      students.forEach(student => {
+
+      students.forEach((student) => {
         const index = studentIds.indexOf(student.id);
         results[index] = student;
         cacheData[`${CACHE_CONFIG.PREFIXES.STUDENT}${student.id}`] = student;
       });
-      
+
       // Batch cache the missing results
       if (Object.keys(cacheData).length > 0) {
         await redis.mset(cacheData, CACHE_CONFIG.TTL.MEDIUM);
       }
     }
-    
+
     return results.filter(Boolean); // Remove null entries
   }
 
@@ -503,10 +499,8 @@ export class TRPCBatchOperations {
    * Batch invalidate cache by patterns
    */
   static async invalidateByPatterns(patterns: string[]) {
-    const invalidationPromises = patterns.map(pattern => 
-      redis.clearByPattern(pattern)
-    );
-    
+    const invalidationPromises = patterns.map((pattern) => redis.clearByPattern(pattern));
+
     const results = await Promise.all(invalidationPromises);
     return results.reduce((total, count) => total + count, 0);
   }

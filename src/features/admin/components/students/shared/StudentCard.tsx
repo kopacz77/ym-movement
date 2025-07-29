@@ -1,12 +1,12 @@
 // src/features/admin/components/students/shared/StudentCard.tsx
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { Level } from "@prisma/client";
 import { format } from "date-fns";
 import { Calendar, Clock, Mail, Phone } from "lucide-react";
 import type React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Student } from "../types";
 
 interface StudentCardProps {

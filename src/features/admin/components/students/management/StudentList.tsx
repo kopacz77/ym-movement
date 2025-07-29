@@ -1,5 +1,9 @@
 // src/features/admin/components/students/management/StudentList.tsx
 "use client";
+import type { Level } from "@prisma/client";
+import { MoreHorizontal, Search } from "lucide-react";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,10 +22,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import type { Level } from "@prisma/client";
-import { MoreHorizontal, Search } from "lucide-react";
-import React, { useEffect } from "react";
-import { toast } from "sonner";
 
 interface StudentListProps {
   onEditAction: (studentId: string) => void;
@@ -64,7 +64,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -80,12 +80,12 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[150px]">Name</TableHead>
-              <TableHead className="min-w-[200px]">Email</TableHead>
+              <TableHead className="min-w-[150px] sticky left-0 bg-background">Name</TableHead>
+              <TableHead className="min-w-[200px] hidden sm:table-cell">Email</TableHead>
               <TableHead className="min-w-[120px]">Level</TableHead>
-              <TableHead className="min-w-[100px]">Status</TableHead>
-              <TableHead className="min-w-[100px]">Lessons</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
+              <TableHead className="min-w-[100px] hidden md:table-cell">Status</TableHead>
+              <TableHead className="min-w-[100px] hidden lg:table-cell">Lessons</TableHead>
+              <TableHead className="w-[80px] sticky right-0 bg-background">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -101,18 +101,23 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
 
                 return (
                   <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.User.name}</TableCell>
-                    <TableCell>{student.User.email}</TableCell>
+                    <TableCell className="font-medium sticky left-0 bg-background">
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{student.User.name}</div>
+                        <div className="text-sm text-muted-foreground sm:hidden truncate">{student.User.email}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">{student.User.email}</TableCell>
                     <TableCell>
                       <Badge className={getLevelColor(student.level)}>
                         {student.level.replace("_", " ")}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <Badge variant="default">Active</Badge>
                     </TableCell>
-                    <TableCell>{student.lessons?.length || 0} lessons</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">{student.lessons?.length || 0} lessons</TableCell>
+                    <TableCell className="sticky right-0 bg-background">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">

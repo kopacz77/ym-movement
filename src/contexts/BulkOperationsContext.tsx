@@ -1,7 +1,7 @@
 // src/contexts/BulkOperationsContext.tsx
 "use client";
 
-import { createContext, useContext, useState, useMemo, useCallback } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 type BulkOperation = {
   timestamp: number;
@@ -35,9 +35,7 @@ export function BulkOperationsProvider({ children }: { children: React.ReactNode
   );
 
   return (
-    <BulkOperationsContext.Provider value={contextValue}>
-      {children}
-    </BulkOperationsContext.Provider>
+    <BulkOperationsContext.Provider value={contextValue}>{children}</BulkOperationsContext.Provider>
   );
 }
 

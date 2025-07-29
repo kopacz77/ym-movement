@@ -1,6 +1,7 @@
 // src/features/admin/api/queries/schedule/rinkQueries.ts
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+
 import { TRPCError } from "@trpc/server";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const rinkRouter = createTRPCRouter({
   getRinks: protectedProcedure.query(async ({ ctx }) => {

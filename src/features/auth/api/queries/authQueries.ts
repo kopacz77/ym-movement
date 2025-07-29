@@ -1,13 +1,14 @@
+import { TRPCError } from "@trpc/server";
+import { compare, hash } from "bcrypt";
+// src/features/auth/api/queries/authQueries.ts
+import { z } from "zod";
+import { logSecurityEvent, validatePasswordStrength } from "@/lib/security";
 import {
   consumePasswordResetToken,
   createPasswordResetToken,
   verifyPasswordResetToken,
 } from "@/lib/auth-tokens";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc";
-import { TRPCError } from "@trpc/server";
-import { compare, hash } from "bcrypt";
-// src/features/auth/api/queries/authQueries.ts
-import { z } from "zod";
 
 export const authRouter = createTRPCRouter({
   changePassword: protectedProcedure
@@ -28,10 +29,19 @@ export const authRouter = createTRPCRouter({
           });
         }
 
-        // Get current user with password
+        // Validate new password against security policy
+        const passwordValidation = validatePasswordStrength(input.newPassword);
+        if (!passwordValidation.isValid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Password does not meet security requirements: ${passwordValidation.errors.join(', ')}`,
+          });
+        }
+
+        // Get current user with password and email for logging
         const user = await ctx.prisma.user.findUnique({
           where: { id: userId },
-          select: { id: true, password: true },
+          select: { id: true, password: true, email: true },
         });
 
         if (!user || !user.password) {
@@ -45,6 +55,14 @@ export const authRouter = createTRPCRouter({
         const isCurrentPasswordValid = await compare(input.currentPassword, user.password);
 
         if (!isCurrentPasswordValid) {
+          // Log failed password change attempt
+          logSecurityEvent('PASSWORD_CHANGE_FAILED', {
+            userId: userId,
+            userEmail: user.email,
+            reason: 'incorrect_current_password',
+            ip: ctx.ip
+          });
+
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Current password is incorrect",
@@ -58,6 +76,13 @@ export const authRouter = createTRPCRouter({
         await ctx.prisma.user.update({
           where: { id: userId },
           data: { password: hashedPassword },
+        });
+
+        // Log successful password change
+        logSecurityEvent('PASSWORD_CHANGED', {
+          userId: userId,
+          userEmail: user.email,
+          ip: ctx.ip
         });
 
         return {

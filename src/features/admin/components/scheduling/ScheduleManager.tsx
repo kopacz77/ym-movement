@@ -1,26 +1,25 @@
 // src/features/admin/components/scheduling/ScheduleManager.tsx
 "use client";
 
+import { endOfDay, startOfDay } from "date-fns";
+import { memo, useCallback, useMemo, useState } from "react";
+import type { SlotInfo } from "react-big-calendar";
+import type { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBulkOperations } from "@/contexts/BulkOperationsContext";
-import { ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { type ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
-import { endOfDay, startOfDay } from "date-fns";
-import { useCallback, useMemo, useState, memo } from "react";
-import { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
-
-import { SlotInfo } from "react-big-calendar";
+import { BulkActionsToolbar } from "./BulkActionsToolbar";
+import { formatDateRange, type TimeSlot } from "./calendarUtils";
 import { DesktopCalendarView } from "./DesktopCalendarView";
 import { BulkCreateSlotsDialog, CreateTimeSlotDialog } from "./DialogComponents";
 import { MobileCalendarView } from "./MobileCalendarView";
 import { ScheduleHeader } from "./ScheduleHeader";
-import { BulkActionsToolbar } from "./BulkActionsToolbar";
 // Import our components
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
-import { type TimeSlot, formatDateRange } from "./calendarUtils";
 
 // Define types for form data
 interface TimeSlotFormData {
@@ -61,7 +60,7 @@ const ScheduleManagerComponent = () => {
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
-  
+
   // Bulk selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedSlotIds, setSelectedSlotIds] = useState<Set<string>>(new Set());
@@ -79,7 +78,8 @@ const ScheduleManagerComponent = () => {
   useBulkOperations();
 
   // Use schedule actions hook for mutations
-  const { deleteTimeSlot, deleteBulkTimeSlots, assignStudent, unassignStudent, updateTimeSlot } = useScheduleActions();
+  const { deleteTimeSlot, deleteBulkTimeSlots, assignStudent, unassignStudent, updateTimeSlot } =
+    useScheduleActions();
 
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
@@ -287,12 +287,12 @@ const ScheduleManagerComponent = () => {
 
   // Bulk selection handlers
   const handleToggleSelectionMode = useCallback(() => {
-    setIsSelectionMode(prev => !prev);
+    setIsSelectionMode((prev) => !prev);
     setSelectedSlotIds(new Set());
   }, []);
 
   const handleSlotSelection = useCallback((slotId: string, isSelected: boolean) => {
-    setSelectedSlotIds(prev => {
+    setSelectedSlotIds((prev) => {
       const newSet = new Set(prev);
       if (isSelected) {
         newSet.add(slotId);
@@ -305,7 +305,7 @@ const ScheduleManagerComponent = () => {
 
   const handleSelectAll = useCallback(() => {
     if (timeSlots) {
-      const allSlotIds = timeSlots.map(slot => slot.id);
+      const allSlotIds = timeSlots.map((slot) => slot.id);
       setSelectedSlotIds(new Set(allSlotIds));
     }
   }, [timeSlots]);
@@ -316,8 +316,8 @@ const ScheduleManagerComponent = () => {
 
   const handleBulkDelete = useCallback(() => {
     if (selectedSlotIds.size > 0) {
-      deleteBulkTimeSlots.mutate({ 
-        ids: Array.from(selectedSlotIds) 
+      deleteBulkTimeSlots.mutate({
+        ids: Array.from(selectedSlotIds),
       });
       setSelectedSlotIds(new Set());
       setIsSelectionMode(false);
@@ -325,7 +325,7 @@ const ScheduleManagerComponent = () => {
   }, [selectedSlotIds, deleteBulkTimeSlots]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header with controls */}
       <ScheduleHeader
         selectedRink={selectedRink}
@@ -349,28 +349,32 @@ const ScheduleManagerComponent = () => {
           />
         }
         rinks={rinks || []}
+        isSelectionMode={isSelectionMode}
+        onToggleSelectionMode={handleToggleSelectionMode}
       />
 
       {/* Timezone Information Banner */}
       {selectedRink && (
-        <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center text-amber-800">
+        <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center text-amber-800 text-sm">
           <span className="mr-2">🌐</span>
-          <span>
+          <span className="truncate">
             All times shown in {rinkTimezone.split("/").pop()?.replace("_", " ")} local time
           </span>
         </div>
       )}
 
-      {/* Bulk Actions Toolbar */}
-      <BulkActionsToolbar
-        isSelectionMode={isSelectionMode}
-        selectedCount={selectedSlotIds.size}
-        onToggleSelectionMode={handleToggleSelectionMode}
-        onSelectAll={handleSelectAll}
-        onClearSelection={handleClearSelection}
-        onBulkDelete={handleBulkDelete}
-        isDeleting={deleteBulkTimeSlots.isPending}
-      />
+      {/* Bulk Actions Toolbar - Only show when in selection mode */}
+      {isSelectionMode && (
+        <BulkActionsToolbar
+          isSelectionMode={isSelectionMode}
+          selectedCount={selectedSlotIds.size}
+          onToggleSelectionMode={handleToggleSelectionMode}
+          onSelectAll={handleSelectAll}
+          onClearSelection={handleClearSelection}
+          onBulkDelete={handleBulkDelete}
+          isDeleting={deleteBulkTimeSlots.isPending}
+        />
+      )}
 
       {/* Time Slot Management Dialog - Using the adapter */}
       <TimeSlotDialogAdapter
@@ -405,7 +409,9 @@ const ScheduleManagerComponent = () => {
               groupedSlots={processedEvents}
               onSlotClickAction={handleMobileSlotClick}
               rinkTimezone={rinkTimezone}
-              rinkName={selectedRink ? rinks?.find((r: any) => r.id === selectedRink)?.name : undefined}
+              rinkName={
+                selectedRink ? rinks?.find((r: any) => r.id === selectedRink)?.name : undefined
+              }
               isSelectionMode={isSelectionMode}
               selectedSlotIds={selectedSlotIds}
               onSlotSelection={handleSlotSelection}
@@ -426,7 +432,9 @@ const ScheduleManagerComponent = () => {
               onNext={goToNext}
               onToday={goToToday}
               rinkTimezone={rinkTimezone}
-              rinkName={selectedRink ? rinks?.find((r: any) => r.id === selectedRink)?.name : undefined}
+              rinkName={
+                selectedRink ? rinks?.find((r: any) => r.id === selectedRink)?.name : undefined
+              }
               isSelectionMode={isSelectionMode}
               selectedSlotIds={selectedSlotIds}
               onSlotSelection={handleSlotSelection}

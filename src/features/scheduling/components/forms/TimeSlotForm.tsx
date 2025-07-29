@@ -1,3 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DateTime } from "luxon";
+// src/features/scheduling/components/forms/TimeSlotForm.tsx
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,12 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DateTime } from "luxon";
-// src/features/scheduling/components/forms/TimeSlotForm.tsx
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useTimeSlots } from "../../hooks/useTimeSlots";
 
 // Simplified schema for time slot creation
@@ -43,14 +43,14 @@ interface TimeSlotFormProps {
 }
 
 // Format the initial time in the rink's timezone for datetime-local input
-const formatInitialStartTime = (date: Date | null, timezone: string = "America/New_York") => {
+const formatInitialStartTime = (date: Date | null, timezone = "America/New_York") => {
   if (!date) {
     return "";
   }
 
   // Convert UTC time to rink's local timezone
   const localDateTime = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
-  
+
   // Format for datetime-local input (YYYY-MM-DDTHH:MM)
   return localDateTime.toFormat("yyyy-MM-dd'T'HH:mm");
 };
@@ -78,10 +78,12 @@ export const TimeSlotForm = ({
     resolver: zodResolver(timeSlotSchema),
     defaultValues: {
       rinkId: initialRinkId || "",
-      startTime: initialStartTime ? formatInitialStartTime(
-        initialStartTime, 
-        rinks.find(r => r.id === initialRinkId)?.timezone || "America/New_York"
-      ) : "",
+      startTime: initialStartTime
+        ? formatInitialStartTime(
+            initialStartTime,
+            rinks.find((r) => r.id === initialRinkId)?.timezone || "America/New_York",
+          )
+        : "",
       duration: initialDuration,
       maxStudents: 1,
     },

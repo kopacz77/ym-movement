@@ -1,10 +1,10 @@
-import { api } from "@/lib/api";
 import type { LessonType } from "@prisma/client";
 import { endOfWeek, startOfWeek } from "date-fns";
 import React, { useEffect } from "react";
+import { api } from "@/lib/api";
 import type { CalendarSlot } from "../../types";
-import { validateTimeSlotBooking } from "../../utils/ValidationUtils";
 import type { StudentBookingConstraints } from "../../utils/ValidationUtils";
+import { validateTimeSlotBooking } from "../../utils/ValidationUtils";
 import { ConflictDetector } from "./ConflictDetector";
 
 interface BookingValidatorProps {

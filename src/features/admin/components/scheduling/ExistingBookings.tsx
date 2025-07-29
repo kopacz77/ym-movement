@@ -1,9 +1,9 @@
+import { Calendar, Clock, User } from "lucide-react";
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, Clock, User } from "lucide-react";
-import React from "react";
 
 export const ExistingBookings = () => {
   return (
@@ -21,11 +21,11 @@ export const ExistingBookings = () => {
                     <User className="h-4 w-4" />
                     <span className="font-medium">Sarah Smith</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>Monday, Feb 15</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>3:00 PM - 4:00 PM</span>
                   </div>

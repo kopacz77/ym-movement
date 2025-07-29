@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+import type { Event } from "react-big-calendar";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/dialogs/ManageTimeSlotDialog.tsx
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,8 +12,6 @@ import {
 } from "@/components/ui/select";
 import { formatRinkTime } from "@/lib/timezone";
 import type { TimeSlot } from "@/types/scheduling";
-import { X } from "lucide-react";
-import { Event } from "react-big-calendar";
 
 interface Student {
   id: string;

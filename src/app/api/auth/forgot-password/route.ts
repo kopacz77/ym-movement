@@ -1,11 +1,26 @@
+// src/app/api/auth/forgot-password/route.ts
+import { type NextRequest, NextResponse } from "next/server";
 import { generateResetToken } from "@/lib/auth";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-// src/app/api/auth/forgot-password/route.ts
-import { type NextRequest, NextResponse } from "next/server";
+import { authRateLimiter, logSecurityEvent } from "@/lib/security";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting
+    const clientIP =
+      req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    if (!authRateLimiter.isAllowed(clientIP)) {
+      logSecurityEvent("RATE_LIMIT_EXCEEDED", {
+        endpoint: "/api/auth/forgot-password",
+        ip: clientIP,
+      });
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 },
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email) {

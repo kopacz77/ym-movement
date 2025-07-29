@@ -1,9 +1,9 @@
 // src/features/admin/components/scheduling/CalendarHeader.tsx
 "use client";
 
+import type React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import React from "react";
 
 interface CalendarHeaderProps {
   dateRangeText: string;

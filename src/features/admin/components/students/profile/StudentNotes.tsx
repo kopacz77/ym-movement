@@ -1,15 +1,16 @@
 // features/admin/components/students/profile/StudentNotes.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
 import { TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { useSanitizedInput } from "@/hooks/useSanitizedInput";
+import { api } from "@/lib/api";
 
 interface StudentNotesProps {
   studentId: string;
@@ -27,6 +28,7 @@ interface Note {
 
 export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   const [newNote, setNewNote] = React.useState("");
+  const { sanitizeTextArea } = useSanitizedInput();
 
   // Using useEffect to handle errors instead of onError in the query options
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
@@ -69,11 +71,15 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   });
 
   const handleAddNote = () => {
-    if (!newNote.trim()) return;
+    const sanitizedContent = sanitizeTextArea(newNote);
+    if (!sanitizedContent.trim()) {
+      toast.error("Note cannot be empty");
+      return;
+    }
 
     addNote.mutate({
       studentId,
-      content: newNote,
+      content: sanitizedContent,
       type: "ADMIN",
     });
   };
@@ -88,7 +94,8 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
           <Textarea
             placeholder="Add a new note..."
             value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
+            onChange={(e) => setNewNote(sanitizeTextArea(e.target.value))}
+            maxLength={10000}
           />
           <div className="flex justify-end">
             <Button onClick={handleAddNote} disabled={!newNote.trim() || addNote.isPending}>

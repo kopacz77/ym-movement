@@ -121,17 +121,17 @@ export const convertToCalendarEvents = (apiEvents: ApiEvent[]): CalendarEvent[] 
   }));
 };
 
-// Get CSS class based on event status
+// Get CSS class based on event status using semantic design tokens
 export const getEventClassName = (status?: string): string => {
   switch (status) {
     case "CONFIRMED":
-      return "bg-green-100 border-green-500 text-green-800";
+      return "bg-green-50 border-green-500 text-green-700 hover:bg-green-100";
     case "TENTATIVE":
-      return "bg-yellow-100 border-yellow-500 text-yellow-800";
+      return "bg-yellow-50 border-yellow-500 text-yellow-700 hover:bg-yellow-100";
     case "CANCELLED":
-      return "bg-red-100 border-red-500 text-red-800 line-through";
+      return "bg-red-50 border-red-500 text-red-700 hover:bg-red-100 line-through opacity-75";
     default:
-      return "bg-blue-100 border-blue-500 text-blue-800";
+      return "bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100";
   }
 };
 

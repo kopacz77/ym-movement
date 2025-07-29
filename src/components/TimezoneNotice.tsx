@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import React from "react";
+import type React from "react";
 
 interface TimezoneNoticeProps {
   rinkTimezone: string;
@@ -20,22 +20,22 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
   const getRinkTimezoneName = (timezone: string) => {
     // Map common timezone identifiers to city names
     const timezoneMap: Record<string, string> = {
-      'America/New_York': 'New York',
-      'America/Chicago': 'Chicago', 
-      'America/Denver': 'Denver',
-      'America/Los_Angeles': 'Los Angeles',
-      'America/Detroit': 'Detroit',
-      'America/Toronto': 'Toronto',
-      'America/Vancouver': 'Vancouver',
-      'America/Montreal': 'Montreal',
-      'America/Phoenix': 'Phoenix',
-      'America/Anchorage': 'Anchorage',
-      'America/Honolulu': 'Honolulu',
+      "America/New_York": "New York",
+      "America/Chicago": "Chicago",
+      "America/Denver": "Denver",
+      "America/Los_Angeles": "Los Angeles",
+      "America/Detroit": "Detroit",
+      "America/Toronto": "Toronto",
+      "America/Vancouver": "Vancouver",
+      "America/Montreal": "Montreal",
+      "America/Phoenix": "Phoenix",
+      "America/Anchorage": "Anchorage",
+      "America/Honolulu": "Honolulu",
     };
-    
+
     return timezoneMap[timezone] || timezone.split("/").pop()?.replace("_", " ") || timezone;
   };
-  
+
   const rinkTimezoneName = getRinkTimezoneName(rinkTimezone);
 
   // Calculate time difference and determine relationship
@@ -46,12 +46,12 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
 
     // Calculate the difference in hours (how many hours ahead/behind local is compared to rink)
     const diffHours = Math.abs((localTime.offset - rinkTime.offset) / 60);
-    
+
     // Determine relationship from local perspective
     // If local offset > rink offset, local is ahead (east of) rink
     // If local offset < rink offset, local is behind (west of) rink
     const isLocalAhead = localTime.offset > rinkTime.offset;
-    
+
     return {
       hours: diffHours,
       direction: isLocalAhead ? "ahead of" : "behind",
@@ -76,9 +76,7 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
         <span className="mr-2 mt-1">🌐</span>
         <div>
           <p className="font-bold">Timezone Notice:</p>
-          <p>
-            This schedule is displayed in your local time ({localTimezoneName}).
-          </p>
+          <p>This schedule is displayed in your local time ({localTimezoneName}).</p>
           <p className="text-sm mt-1">
             Current time: <strong>{localTimeStr}</strong>
           </p>
@@ -95,11 +93,12 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
       <div>
         <p className="font-bold">Timezone Notice:</p>
         <p>
-          This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}).
-          Your local time ({localTimezoneName}) is {hourDiff} {hourText} {direction} the rink time.
+          This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}). Your
+          local time ({localTimezoneName}) is {hourDiff} {hourText} {direction} the rink time.
         </p>
         <p className="text-sm mt-1">
-          Current time: <strong>{localTimeStr}</strong> your time | <strong>{rinkTimeStr}</strong> the rink time
+          Current time: <strong>{localTimeStr}</strong> your time | <strong>{rinkTimeStr}</strong>{" "}
+          the rink time
         </p>
       </div>
     </div>

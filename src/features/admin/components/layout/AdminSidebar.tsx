@@ -1,11 +1,11 @@
 // src/features/admin/components/layout/AdminSidebar.tsx
 "use client";
 
-import { useIsMobile } from "@/hooks/useMediaQuery";
-import { cn } from "@/lib/utils";
 import { BarChart2, Calendar, CreditCard, LayoutDashboard, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },

@@ -1,6 +1,12 @@
 // src/features/student/components/layout/StudentHeader.tsx
 "use client";
 
+import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,20 +18,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { LogOut } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export const StudentHeader = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
+  const breadcrumbs = useBreadcrumbs();
 
   const handleLogout = async () => {
     try {
@@ -43,45 +54,40 @@ export const StudentHeader = () => {
   };
 
   return (
-    <header className="h-16 bg-white border-b shadow-sm safe-top">
-      <div className="flex h-full items-center justify-between px-4 md:px-6">
-        <div className="flex items-center space-x-2">
-          <div className="rounded-lg bg-blue-500 p-1.5">
-            <svg
-              className="h-5 w-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              role="img"
-            >
-              <title>Skating Icon</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <span className="text-xl font-semibold">YM Movement</span>
-        </div>
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="hidden md:flex items-center gap-2 mr-4">
-            <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
-          </div>
+    <div className="space-y-4">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          {breadcrumbs.map((item, index) => (
+            <div key={index} className="flex items-center">
+              <BreadcrumbItem>
+                {item.href ? (
+                  <BreadcrumbLink asChild>
+                    <Link href={item.href}>{item.label}</Link>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                )}
+              </BreadcrumbItem>
+              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </div>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
 
+      {/* Header Actions */}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
+        </div>
+
+        <div className="flex items-center gap-2">
           {/* Notifications Popover */}
           <NotificationsPopover />
 
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 md:h-10 md:w-10"
-                aria-label="Log out"
-              >
+              <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Log out">
                 <LogOut className="h-5 w-5" />
               </Button>
             </AlertDialogTrigger>
@@ -101,6 +107,6 @@ export const StudentHeader = () => {
           </AlertDialog>
         </div>
       </div>
-    </header>
+    </div>
   );
 };

@@ -1,4 +1,7 @@
 // src/features/admin/components/scheduling/DialogComponents.tsx
+
+import { Plus } from "lucide-react";
+import type { FC } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,8 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TimeSlotForm } from "@/features/scheduling/components/forms/TimeSlotForm";
-import { Plus } from "lucide-react";
-import { FC } from "react";
 import { BulkTimeSlotForm } from "../../../scheduling/components/forms/BulkTimeSlotForm";
 
 // Define a proper interface for the Rink type

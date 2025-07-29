@@ -1,9 +1,9 @@
+import { Plus } from "lucide-react";
+import type { UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/BreakInputs.tsx
 import { FormLabel } from "@/components/ui/form";
-import { Break, BulkTimeSlotFormValues } from "@/types/scheduling";
-import { Plus } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import type { Break, BulkTimeSlotFormValues } from "@/types/scheduling";
 import { BreakInput } from "./BreakInput";
 
 interface BreakInputsProps {

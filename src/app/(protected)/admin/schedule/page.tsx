@@ -1,8 +1,9 @@
 // src/app/(protected)/admin/schedule/page.tsx
+
+import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { CalendarSkeleton } from "@/components/ui/calendar-skeleton";
 import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext";
-import dynamic from "next/dynamic";
 
 const ScheduleManager = dynamic(
   () =>
@@ -16,10 +17,7 @@ const ScheduleManager = dynamic(
 
 export default function AdminSchedulePage() {
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
-      </div>
+    <div className="flex flex-col gap-6">
       <BulkOperationsProvider>
         <ErrorBoundary>
           <ScheduleManager />

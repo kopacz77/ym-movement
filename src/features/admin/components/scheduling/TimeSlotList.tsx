@@ -1,7 +1,7 @@
+import type React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type React from "react";
 
 interface TimeSlot {
   id: string;

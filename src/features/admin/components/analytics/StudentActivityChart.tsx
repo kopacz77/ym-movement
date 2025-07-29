@@ -1,15 +1,6 @@
 // src/features/admin/components/analytics/StudentActivityChart.tsx
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { api } from "@/lib/api";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
@@ -22,6 +13,15 @@ import {
   YAxis,
 } from "recharts";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/lib/api";
 
 type ActivityMetric = "lessons" | "attendance" | "cancellations";
 type TimeRange = "week" | "month" | "year";

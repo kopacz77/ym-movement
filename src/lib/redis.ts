@@ -1,13 +1,13 @@
 /**
  * Redis Caching Integration
- * 
+ *
  * High-performance Redis caching for database queries and API responses
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 3 Optimizations
  */
 
-import Redis, { type RedisOptions } from 'ioredis';
+import Redis, { type RedisOptions } from "ioredis";
 
 // Cache configuration
 const CACHE_CONFIG = {
@@ -21,20 +21,20 @@ const CACHE_CONFIG = {
   },
   // Cache key prefixes
   PREFIXES: {
-    STUDENT: 'student:',
-    LESSON: 'lesson:',
-    PAYMENT: 'payment:',
-    ANALYTICS: 'analytics:',
-    USER: 'user:',
-    SCHEDULE: 'schedule:',
-    RINK: 'rink:',
+    STUDENT: "student:",
+    LESSON: "lesson:",
+    PAYMENT: "payment:",
+    ANALYTICS: "analytics:",
+    USER: "user:",
+    SCHEDULE: "schedule:",
+    RINK: "rink:",
   },
   // Cache namespaces
   NAMESPACES: {
-    QUERIES: 'queries:',
-    SESSIONS: 'sessions:',
-    RATE_LIMIT: 'rate_limit:',
-    LOCKS: 'locks:',
+    QUERIES: "queries:",
+    SESSIONS: "sessions:",
+    RATE_LIMIT: "rate_limit:",
+    LOCKS: "locks:",
   },
 };
 
@@ -65,10 +65,10 @@ class RedisCache {
 
   constructor() {
     const options: RedisOptions = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
+      host: process.env.REDIS_HOST || "localhost",
+      port: Number.parseInt(process.env.REDIS_PORT || "6379"),
       password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
+      db: Number.parseInt(process.env.REDIS_DB || "0"),
       retryDelayOnFailover: 100,
       enableReadyCheck: true,
       maxRetriesPerRequest: 3,
@@ -89,28 +89,28 @@ class RedisCache {
    * Setup Redis event listeners
    */
   private setupEventListeners() {
-    this.client.on('connect', () => {
-      console.log('[Redis] Connected to Redis server');
+    this.client.on("connect", () => {
+      console.log("[Redis] Connected to Redis server");
       this.connected = true;
     });
 
-    this.client.on('ready', () => {
-      console.log('[Redis] Redis client ready');
+    this.client.on("ready", () => {
+      console.log("[Redis] Redis client ready");
     });
 
-    this.client.on('error', (error) => {
-      console.error('[Redis] Redis client error:', error);
+    this.client.on("error", (error) => {
+      console.error("[Redis] Redis client error:", error);
       this.stats.errors++;
       this.connected = false;
     });
 
-    this.client.on('close', () => {
-      console.log('[Redis] Redis connection closed');
+    this.client.on("close", () => {
+      console.log("[Redis] Redis connection closed");
       this.connected = false;
     });
 
-    this.client.on('reconnecting', () => {
-      console.log('[Redis] Reconnecting to Redis server');
+    this.client.on("reconnecting", () => {
+      console.log("[Redis] Reconnecting to Redis server");
     });
   }
 
@@ -121,9 +121,9 @@ class RedisCache {
     try {
       await this.client.connect();
       this.connected = true;
-      console.log('[Redis] Successfully connected to Redis');
+      console.log("[Redis] Successfully connected to Redis");
     } catch (error) {
-      console.error('[Redis] Failed to connect to Redis:', error);
+      console.error("[Redis] Failed to connect to Redis:", error);
       this.connected = false;
       throw error;
     }
@@ -136,9 +136,9 @@ class RedisCache {
     try {
       await this.client.disconnect();
       this.connected = false;
-      console.log('[Redis] Disconnected from Redis');
+      console.log("[Redis] Disconnected from Redis");
     } catch (error) {
-      console.error('[Redis] Error disconnecting from Redis:', error);
+      console.error("[Redis] Error disconnecting from Redis:", error);
     }
   }
 
@@ -146,7 +146,7 @@ class RedisCache {
    * Check if Redis is connected
    */
   isConnected(): boolean {
-    return this.connected && this.client.status === 'ready';
+    return this.connected && this.client.status === "ready";
   }
 
   /**
@@ -154,13 +154,13 @@ class RedisCache {
    */
   async get<T>(key: string): Promise<T | null> {
     if (!this.isConnected()) {
-      console.warn('[Redis] Not connected, skipping cache get');
+      console.warn("[Redis] Not connected, skipping cache get");
       return null;
     }
 
     try {
       const value = await this.client.get(key);
-      
+
       if (value === null) {
         this.stats.misses++;
         return null;
@@ -169,7 +169,7 @@ class RedisCache {
       this.stats.hits++;
       return JSON.parse(value) as T;
     } catch (error) {
-      console.error('[Redis] Error getting from cache:', error);
+      console.error("[Redis] Error getting from cache:", error);
       this.stats.errors++;
       return null;
     }
@@ -178,13 +178,9 @@ class RedisCache {
   /**
    * Set value in cache
    */
-  async set(
-    key: string, 
-    value: any, 
-    options: CacheOptions = {}
-  ): Promise<boolean> {
+  async set(key: string, value: any, options: CacheOptions = {}): Promise<boolean> {
     if (!this.isConnected()) {
-      console.warn('[Redis] Not connected, skipping cache set');
+      console.warn("[Redis] Not connected, skipping cache set");
       return false;
     }
 
@@ -201,7 +197,7 @@ class RedisCache {
       this.stats.sets++;
       return true;
     } catch (error) {
-      console.error('[Redis] Error setting cache:', error);
+      console.error("[Redis] Error setting cache:", error);
       this.stats.errors++;
       return false;
     }
@@ -212,7 +208,7 @@ class RedisCache {
    */
   async del(key: string | string[]): Promise<number> {
     if (!this.isConnected()) {
-      console.warn('[Redis] Not connected, skipping cache delete');
+      console.warn("[Redis] Not connected, skipping cache delete");
       return 0;
     }
 
@@ -222,7 +218,7 @@ class RedisCache {
       this.stats.deletes += result;
       return result;
     } catch (error) {
-      console.error('[Redis] Error deleting from cache:', error);
+      console.error("[Redis] Error deleting from cache:", error);
       this.stats.errors++;
       return 0;
     }
@@ -240,7 +236,7 @@ class RedisCache {
       const result = await this.client.exists(key);
       return result === 1;
     } catch (error) {
-      console.error('[Redis] Error checking key existence:', error);
+      console.error("[Redis] Error checking key existence:", error);
       return false;
     }
   }
@@ -255,13 +251,13 @@ class RedisCache {
 
     try {
       const values = await this.client.mget(...keys);
-      
+
       return values.map((value, index) => {
         if (value === null) {
           this.stats.misses++;
           return null;
         }
-        
+
         this.stats.hits++;
         try {
           return JSON.parse(value) as T;
@@ -271,7 +267,7 @@ class RedisCache {
         }
       });
     } catch (error) {
-      console.error('[Redis] Error getting multiple values:', error);
+      console.error("[Redis] Error getting multiple values:", error);
       this.stats.errors++;
       return keys.map(() => null);
     }
@@ -287,7 +283,7 @@ class RedisCache {
 
     try {
       const pipeline = this.client.pipeline();
-      
+
       for (const [key, value] of Object.entries(keyValuePairs)) {
         const serializedValue = JSON.stringify(value);
         if (ttl) {
@@ -301,7 +297,7 @@ class RedisCache {
       this.stats.sets += Object.keys(keyValuePairs).length;
       return true;
     } catch (error) {
-      console.error('[Redis] Error setting multiple values:', error);
+      console.error("[Redis] Error setting multiple values:", error);
       this.stats.errors++;
       return false;
     }
@@ -318,15 +314,15 @@ class RedisCache {
     try {
       const pipeline = this.client.pipeline();
       pipeline.incr(key);
-      
+
       if (ttl) {
         pipeline.expire(key, ttl);
       }
 
       const results = await pipeline.exec();
-      return results?.[0]?.[1] as number || 0;
+      return (results?.[0]?.[1] as number) || 0;
     } catch (error) {
-      console.error('[Redis] Error incrementing counter:', error);
+      console.error("[Redis] Error incrementing counter:", error);
       this.stats.errors++;
       return 0;
     }
@@ -343,7 +339,7 @@ class RedisCache {
     try {
       return await this.client.keys(pattern);
     } catch (error) {
-      console.error('[Redis] Error getting keys by pattern:', error);
+      console.error("[Redis] Error getting keys by pattern:", error);
       return [];
     }
   }
@@ -364,7 +360,7 @@ class RedisCache {
 
       return await this.del(keys);
     } catch (error) {
-      console.error('[Redis] Error clearing cache by pattern:', error);
+      console.error("[Redis] Error clearing cache by pattern:", error);
       return 0;
     }
   }
@@ -375,7 +371,7 @@ class RedisCache {
   private async addTagsForKey(key: string, tags: string[]): Promise<void> {
     try {
       const pipeline = this.client.pipeline();
-      
+
       for (const tag of tags) {
         const tagKey = `tag:${tag}`;
         pipeline.sadd(tagKey, key);
@@ -384,7 +380,7 @@ class RedisCache {
 
       await pipeline.exec();
     } catch (error) {
-      console.error('[Redis] Error adding tags for key:', error);
+      console.error("[Redis] Error adding tags for key:", error);
     }
   }
 
@@ -398,23 +394,23 @@ class RedisCache {
 
     try {
       let totalDeleted = 0;
-      
+
       for (const tag of tags) {
         const tagKey = `tag:${tag}`;
         const keys = await this.client.smembers(tagKey);
-        
+
         if (keys.length > 0) {
           const deleted = await this.del(keys);
           totalDeleted += deleted;
         }
-        
+
         // Remove the tag set itself
         await this.del(tagKey);
       }
 
       return totalDeleted;
     } catch (error) {
-      console.error('[Redis] Error invalidating by tags:', error);
+      console.error("[Redis] Error invalidating by tags:", error);
       return 0;
     }
   }
@@ -456,7 +452,7 @@ class RedisCache {
     try {
       return await this.client.info();
     } catch (error) {
-      console.error('[Redis] Error getting cache info:', error);
+      console.error("[Redis] Error getting cache info:", error);
       return null;
     }
   }
@@ -471,10 +467,10 @@ class RedisCache {
 
     try {
       await this.client.flushall();
-      console.log('[Redis] Cache flushed successfully');
+      console.log("[Redis] Cache flushed successfully");
       return true;
     } catch (error) {
-      console.error('[Redis] Error flushing cache:', error);
+      console.error("[Redis] Error flushing cache:", error);
       return false;
     }
   }
@@ -495,8 +491,8 @@ export { CACHE_CONFIG };
 export type { CacheOptions, CacheStats };
 
 // Auto-connect in production
-if (process.env.NODE_ENV === 'production' && process.env.REDIS_HOST) {
+if (process.env.NODE_ENV === "production" && process.env.REDIS_HOST) {
   redis.connect().catch((error) => {
-    console.error('[Redis] Failed to auto-connect:', error);
+    console.error("[Redis] Failed to auto-connect:", error);
   });
 }

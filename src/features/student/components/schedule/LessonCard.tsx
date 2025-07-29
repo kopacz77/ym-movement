@@ -1,14 +1,14 @@
 // src/features/student/components/schedule/LessonCard.tsx
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { LessonWithDetails } from "@/features/student/types";
-import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils";
-import { cn } from "@/lib/utils";
 import { LessonStatus } from "@prisma/client";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LessonStatusBadge, LessonStatusIndicator } from "@/components/ui/lesson-status";
+import type { LessonWithDetails } from "@/features/student/types";
+import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -16,38 +16,21 @@ interface LessonCardProps {
 }
 
 export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
-  const getStatusBadge = () => {
-    switch (lesson.status) {
-      case LessonStatus.SCHEDULED:
-        return <Badge className="bg-blue-100 text-blue-800">Scheduled</Badge>;
-      case LessonStatus.COMPLETED:
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case LessonStatus.CANCELLED:
-        return <Badge className="bg-red-100 text-red-800">Cancelled</Badge>;
-      default:
-        return <Badge>{lesson.status}</Badge>;
-    }
-  };
-
   return (
     <Card
       className={cn("overflow-hidden", lesson.status === LessonStatus.CANCELLED && "opacity-75")}
     >
-      <div
-        className={cn(
-          "h-2",
-          lesson.status === LessonStatus.SCHEDULED && "bg-blue-500",
-          lesson.status === LessonStatus.COMPLETED && "bg-green-500",
-          lesson.status === LessonStatus.CANCELLED && "bg-red-500",
-        )}
-      />
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <h3 className="font-medium">{lesson.type.replace("_", " ")} Lesson</h3>
-          <div className="flex flex-col gap-1 items-end">{getStatusBadge()}</div>
-        </div>
+      <LessonStatusIndicator status={lesson.status} />
 
-        <div className="mt-4 space-y-2">
+      <CardHeader>
+        <CardTitle className="text-base">{lesson.type.replace("_", " ")} Lesson</CardTitle>
+        <CardAction>
+          <LessonStatusBadge status={lesson.status} />
+        </CardAction>
+      </CardHeader>
+
+      <CardContent>
+        <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span>{formatUtcDate(lesson.startTime)}</span>
@@ -68,11 +51,9 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
 
         {showActions && (
           <div className="mt-4 flex justify-end">
-            <Link href={`/student/schedule/${lesson.id}`}>
-              <Button variant="outline" size="sm">
-                View Details
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/student/schedule/${lesson.id}`}>View Details</Link>
+            </Button>
           </div>
         )}
       </CardContent>

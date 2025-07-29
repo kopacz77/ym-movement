@@ -1,7 +1,7 @@
 // src/features/admin/components/scheduling/TimeSlotDialogAdapter.tsx
-import { FC } from "react";
+import type { FC } from "react";
+import type { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
 import { TimeSlotDialog } from "./TimeSlotDialog";
-import { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
 
 // Define the Student interface matching Prisma schema
 interface Student {
@@ -114,5 +114,13 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
       }
     : null;
 
-  return <TimeSlotDialog {...props} selectedEvent={adaptedEvent} selectedSlot={adaptedSlot} isAssigning={isAssigning} isUnassigning={isUnassigning} />;
+  return (
+    <TimeSlotDialog
+      {...props}
+      selectedEvent={adaptedEvent}
+      selectedSlot={adaptedSlot}
+      isAssigning={isAssigning}
+      isUnassigning={isUnassigning}
+    />
+  );
 };

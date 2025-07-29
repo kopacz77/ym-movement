@@ -1,9 +1,10 @@
 // src/features/scheduling/components/display/DesktopCalendarView.tsx
+
+import { useCallback } from "react";
+import { Calendar, type Event, type SlotInfo, type View, Views } from "react-big-calendar";
 import { Button } from "@/components/ui/button";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { formatRinkTime } from "@/lib/timezone";
-import { useCallback } from "react";
-import { Calendar, Event, SlotInfo, View, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
 interface CalendarEvent extends Event {

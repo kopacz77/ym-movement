@@ -1,8 +1,8 @@
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc"; // Added protectedProcedure
 import { LessonStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/profileQueries.ts
 import { z } from "zod";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc"; // Added protectedProcedure
 
 // Define a proper type for the query filters
 interface LessonQueryFilters {

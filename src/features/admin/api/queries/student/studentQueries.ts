@@ -1,11 +1,12 @@
-import { createPasswordResetToken } from "@/lib/auth-tokens";
-import { sendWelcomeEmail } from "@/lib/email";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { Level, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/student/studentQueries.ts
 import { z } from "zod";
-import { StudentWithInviteStatus, studentFormSchema } from "./schemas";
+import { createPasswordResetToken } from "@/lib/auth-tokens";
+import { sendWelcomeEmail } from "@/lib/email";
+import { logSecurityEvent, sanitizeInput } from "@/lib/security";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { type StudentWithInviteStatus, studentFormSchema } from "./schemas";
 
 export const studentQueries = createTRPCRouter({
   // Debug query: Get student count and approval status
@@ -16,7 +17,6 @@ export const studentQueries = createTRPCRouter({
         ctx.prisma.student.count({ where: { isApproved: true } }),
         ctx.prisma.student.count({ where: { isApproved: false } }),
       ]);
-
 
       return {
         total,
@@ -47,7 +47,9 @@ export const studentQueries = createTRPCRouter({
       try {
         const where: Prisma.StudentWhereInput = {
           // Apply approved filter if specified, default to approved students for assignment purposes
-          ...(input?.approved !== undefined ? { isApproved: input.approved } : { isApproved: true }),
+          ...(input?.approved !== undefined
+            ? { isApproved: input.approved }
+            : { isApproved: true }),
           OR: input?.search
             ? [
                 {
@@ -154,6 +156,28 @@ export const studentQueries = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { name, email, sendEmail, sendInvite, ...studentData } = input;
 
+      // Sanitize all input data
+      const sanitizedName = sanitizeInput(name);
+      const sanitizedStudentData = {
+        ...studentData,
+        notes: studentData.notes ? sanitizeInput(studentData.notes) : undefined,
+        phone: studentData.phone ? sanitizeInput(studentData.phone) : undefined,
+        emergencyContact: studentData.emergencyContact
+          ? {
+              name: sanitizeInput(studentData.emergencyContact.name || ""),
+              phone: sanitizeInput(studentData.emergencyContact.phone || ""),
+              relationship: sanitizeInput(studentData.emergencyContact.relationship || ""),
+            }
+          : undefined,
+      };
+
+      // Log security event
+      logSecurityEvent("STUDENT_CREATED", {
+        userId: ctx.session?.user?.id,
+        studentEmail: email,
+        studentName: sanitizedName,
+      });
+
       try {
         // Check if user already exists to avoid conflicts
         const existingUser = await ctx.prisma.user.findUnique({
@@ -186,7 +210,7 @@ export const studentQueries = createTRPCRouter({
           // Create student for existing user
           student = await ctx.prisma.student.create({
             data: {
-              ...studentData,
+              ...sanitizedStudentData,
               userId: existingUser.id,
             },
             include: {
@@ -197,10 +221,10 @@ export const studentQueries = createTRPCRouter({
           // Create new user and student
           student = await ctx.prisma.student.create({
             data: {
-              ...studentData,
+              ...sanitizedStudentData,
               user: {
                 create: {
-                  name,
+                  name: sanitizedName,
                   email,
                   role: "STUDENT",
                 },
@@ -276,6 +300,28 @@ export const studentQueries = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, name, email, ...studentData } = input;
 
+      // Sanitize all input data
+      const sanitizedName = sanitizeInput(name);
+      const sanitizedStudentData = {
+        ...studentData,
+        notes: studentData.notes ? sanitizeInput(studentData.notes) : undefined,
+        phone: studentData.phone ? sanitizeInput(studentData.phone) : undefined,
+        emergencyContact: studentData.emergencyContact
+          ? {
+              name: sanitizeInput(studentData.emergencyContact.name || ""),
+              phone: sanitizeInput(studentData.emergencyContact.phone || ""),
+              relationship: sanitizeInput(studentData.emergencyContact.relationship || ""),
+            }
+          : undefined,
+      };
+
+      // Log security event
+      logSecurityEvent("STUDENT_UPDATED", {
+        userId: ctx.session?.user?.id,
+        studentId: id,
+        studentEmail: email,
+      });
+
       try {
         console.log(`Updating student with ID: ${id}`);
         // Find the student to update by ID
@@ -300,11 +346,11 @@ export const studentQueries = createTRPCRouter({
         const [user, updatedStudent] = await ctx.prisma.$transaction([
           ctx.prisma.user.update({
             where: { id: student.userId },
-            data: { name, email },
+            data: { name: sanitizedName, email },
           }),
           ctx.prisma.student.update({
             where: { id },
-            data: studentData,
+            data: sanitizedStudentData,
           }),
         ]);
 

@@ -1,7 +1,7 @@
-import type { TimeSlot } from "@/features/admin/components/scheduling/calendarUtils";
 import { DateTime } from "luxon";
 // src/hooks/useCalendarEvents.ts
 import { useMemo } from "react";
+import type { TimeSlot } from "@/features/admin/components/scheduling/calendarUtils";
 
 // Extended calendar event type for our specific needs
 export interface ExtendedCalendarEvent {

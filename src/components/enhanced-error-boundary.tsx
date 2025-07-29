@@ -1,9 +1,9 @@
 /**
  * Enhanced Error Boundary Component
- * 
+ *
  * Enterprise-grade error boundary with performance monitoring, automatic retry,
  * and comprehensive error reporting capabilities.
- * 
+ *
  * @description
  * This error boundary extends React's built-in error handling with:
  * - Performance metrics capture on component failures
@@ -11,17 +11,17 @@
  * - Error reporting to monitoring services
  * - Component isolation preventing cascade failures
  * - Development tools for error debugging
- * 
+ *
  * @example
  * ```tsx
  * // Component-level error boundary
  * <EnhancedErrorBoundary level="component" componentName="StudentList">
  *   <StudentList />
  * </EnhancedErrorBoundary>
- * 
+ *
  * // Page-level error boundary with custom error handler
- * <EnhancedErrorBoundary 
- *   level="page" 
+ * <EnhancedErrorBoundary
+ *   level="page"
  *   onError={(error, errorInfo, performanceData) => {
  *     reportToMonitoring(error, performanceData);
  *   }}
@@ -29,17 +29,17 @@
  *   <AdminDashboard />
  * </EnhancedErrorBoundary>
  * ```
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 2 Optimizations
  */
 // src/components/enhanced-error-boundary.tsx
 "use client";
 
+import { AlertTriangle, Bug, Clock, RefreshCw } from "lucide-react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, RefreshCw, Bug, Clock } from "lucide-react";
-import { Component, type ErrorInfo, type ReactNode } from "react";
 
 /**
  * Props for EnhancedErrorBoundary component
@@ -89,7 +89,7 @@ interface PerformanceData {
 }
 
 export class EnhancedErrorBoundary extends Component<Props, State> {
-  private renderStartTime: number = 0;
+  private renderStartTime = 0;
   private retryTimeout?: NodeJS.Timeout;
 
   constructor(props: Props) {
@@ -109,14 +109,14 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 
   private getPerformanceData(errorInfo: ErrorInfo): PerformanceData {
     const renderTime = performance.now() - this.renderStartTime;
-    
+
     // Get memory usage if available
     const memoryUsage = (performance as any).memory?.usedJSHeapSize;
 
     return {
       renderTime,
       memoryUsage,
-      componentStack: errorInfo.componentStack || '',
+      componentStack: errorInfo.componentStack || "",
       userAgent: navigator.userAgent,
       url: window.location.href,
       timestamp: this.state.timestamp,
@@ -127,24 +127,24 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 
   private reportError(error: Error, errorInfo: ErrorInfo, performanceData: PerformanceData) {
     // Report to external monitoring service (e.g., Sentry, DataDog, etc.)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Send to analytics
       try {
         // Example: Send to your monitoring service
-        fetch('/api/errors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        fetch("/api/errors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: error.message,
             stack: error.stack,
             componentStack: errorInfo.componentStack,
             performanceData,
-            level: this.props.level || 'component',
+            level: this.props.level || "component",
             componentName: this.props.componentName,
           }),
         }).catch(console.error);
       } catch (reportingError) {
-        console.error('Failed to report error:', reportingError);
+        console.error("Failed to report error:", reportingError);
       }
     }
 
@@ -158,11 +158,11 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const performanceData = this.getPerformanceData(errorInfo);
-    
-    console.group('🚨 Enhanced Error Boundary');
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
-    console.error('Performance Data:', performanceData);
+
+    console.group("🚨 Enhanced Error Boundary");
+    console.error("Error:", error);
+    console.error("Error Info:", errorInfo);
+    console.error("Performance Data:", performanceData);
     console.groupEnd();
 
     this.setState({ errorInfo });
@@ -172,11 +172,11 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
   private handleRetry = () => {
     if (this.state.retryCount >= 3) {
       // Max retries reached, redirect to safe page
-      window.location.href = '/';
+      window.location.href = "/";
       return;
     }
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       hasError: false,
       error: undefined,
       errorInfo: undefined,
@@ -186,7 +186,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
     }));
 
     // Auto-retry after delay for component-level errors
-    if (this.props.level === 'component') {
+    if (this.props.level === "component") {
       this.retryTimeout = setTimeout(() => {
         this.forceUpdate();
       }, 100);
@@ -206,7 +206,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 
     // Copy to clipboard or open bug report
     navigator.clipboard?.writeText(JSON.stringify(bugReport, null, 2));
-    alert('Bug report copied to clipboard');
+    alert("Bug report copied to clipboard");
   };
 
   componentWillUnmount() {
@@ -221,41 +221,42 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      const isPageLevel = this.props.level === 'page';
-      const isCritical = this.props.level === 'critical';
+      const isPageLevel = this.props.level === "page";
+      const isCritical = this.props.level === "critical";
 
       return (
-        <Card className={`w-full ${isPageLevel ? 'max-w-md mx-auto mt-8' : 'max-w-sm'}`}>
+        <Card className={`w-full ${isPageLevel ? "max-w-md mx-auto mt-8" : "max-w-sm"}`}>
           <CardHeader className="text-center">
-            <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-              isCritical ? 'bg-red-100' : 'bg-yellow-100'
-            }`}>
-              <AlertTriangle className={`h-6 w-6 ${
-                isCritical ? 'text-red-600' : 'text-yellow-600'
-              }`} />
+            <div
+              className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
+                isCritical ? "bg-red-100" : "bg-yellow-100"
+              }`}
+            >
+              <AlertTriangle
+                className={`h-6 w-6 ${isCritical ? "text-red-600" : "text-yellow-600"}`}
+              />
             </div>
-            <CardTitle className={isCritical ? 'text-red-600' : 'text-yellow-600'}>
-              {isCritical ? 'Critical Error' : 'Something went wrong'}
+            <CardTitle className={isCritical ? "text-red-600" : "text-yellow-600"}>
+              {isCritical ? "Critical Error" : "Something went wrong"}
             </CardTitle>
             <CardDescription>
-              {isCritical 
-                ? 'A critical error occurred. The page will be refreshed automatically.'
-                : `An error occurred${this.props.componentName ? ` in ${this.props.componentName}` : ''}. Please try again.`
-              }
+              {isCritical
+                ? "A critical error occurred. The page will be refreshed automatically."
+                : `An error occurred${this.props.componentName ? ` in ${this.props.componentName}` : ""}. Please try again.`}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-2">
             <div className="flex gap-2 justify-center">
-              <Button 
-                onClick={this.handleRetry} 
-                className="flex-1" 
+              <Button
+                onClick={this.handleRetry}
+                className="flex-1"
                 variant={isCritical ? "default" : "outline"}
                 disabled={this.state.retryCount >= 3}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                {this.state.retryCount > 0 ? `Retry (${3 - this.state.retryCount} left)` : 'Retry'}
+                {this.state.retryCount > 0 ? `Retry (${3 - this.state.retryCount} left)` : "Retry"}
               </Button>
-              
+
               {isPageLevel && (
                 <Button onClick={this.handleReportBug} variant="ghost" size="sm">
                   <Bug className="h-4 w-4" />
@@ -278,7 +279,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
                     <strong>Error:</strong> {this.state.error.message}
                   </div>
                   <div className="text-xs bg-blue-50 p-2 rounded">
-                    <strong>Component:</strong> {this.props.componentName || 'Unknown'}
+                    <strong>Component:</strong> {this.props.componentName || "Unknown"}
                   </div>
                   <div className="text-xs bg-yellow-50 p-2 rounded">
                     <strong>Retries:</strong> {this.state.retryCount}
@@ -305,16 +306,21 @@ export function withErrorBoundary<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   options?: {
     fallback?: ReactNode;
-    level?: Props['level'];
+    level?: Props["level"];
     componentName?: string;
-  }
+  },
 ) {
   const WithErrorBoundaryComponent = (props: P) => {
     return (
       <EnhancedErrorBoundary
         fallback={options?.fallback}
-        level={options?.level || 'component'}
-        componentName={options?.componentName || WrappedComponent.displayName || WrappedComponent.name || 'Unknown'}
+        level={options?.level || "component"}
+        componentName={
+          options?.componentName ||
+          WrappedComponent.displayName ||
+          WrappedComponent.name ||
+          "Unknown"
+        }
       >
         <WrappedComponent {...props} />
       </EnhancedErrorBoundary>
@@ -322,6 +328,6 @@ export function withErrorBoundary<P extends object>(
   };
 
   WithErrorBoundaryComponent.displayName = `withErrorBoundary(${WrappedComponent.displayName || WrappedComponent.name})`;
-  
+
   return WithErrorBoundaryComponent;
 }

@@ -1,6 +1,6 @@
-import { api } from "@/lib/api";
-import { type TimeSlot } from "@/types/scheduling";
 import { useMemo } from "react";
+import { api } from "@/lib/api";
+import type { TimeSlot } from "@/types/scheduling";
 
 // Define a date range type for the hook
 export interface DateRange {
@@ -42,23 +42,23 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     retry: 2,
     retryDelay: 1000,
     onError: (error) => {
-      console.error('Failed to fetch rinks:', error.message);
-    }
+      console.error("Failed to fetch rinks:", error.message);
+    },
   });
 
   // Get students data with error handling - fetch approved students for assignment
   const { data: studentsResponse } = api.admin.student.getStudents.useQuery(
-    { 
+    {
       limit: 100, // Get up to 100 students
-      approved: true // Only approved students can be assigned
+      approved: true, // Only approved students can be assigned
     },
     {
       retry: 2,
       retryDelay: 1000,
       onError: (error) => {
-        console.error('Failed to fetch students:', error.message);
-      }
-    }
+        console.error("Failed to fetch students:", error.message);
+      },
+    },
   );
 
   // Extract students array from paginated response
@@ -77,8 +77,8 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
       retry: 2,
       retryDelay: 1000,
       onError: (error) => {
-        console.error('Failed to fetch time slots:', error.message);
-      }
+        console.error("Failed to fetch time slots:", error.message);
+      },
     },
   );
 
@@ -87,8 +87,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     () =>
       timeSlots?.map((slot) => {
         const studentCount = slot.Lesson?.length || 0;
-        const studentNames = slot.Lesson
-          ?.filter(lesson => lesson?.Student?.User)
+        const studentNames = slot.Lesson?.filter((lesson) => lesson?.Student?.User)
           ?.map((lesson) => lesson.Student.User.name || "Unnamed Student")
           .join(", ");
         const title = `${studentCount}/${slot.maxStudents} students${

@@ -1,7 +1,8 @@
 // src/features/scheduling/components/BulkCreateDialog.tsx
+
+import { ProductionErrorBoundary } from "@/components/production-error-boundary";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BulkTimeSlotForm } from "@/features/scheduling/components/forms/BulkTimeSlotForm";
-import { ProductionErrorBoundary } from "@/components/production-error-boundary";
 
 interface BulkCreateDialogProps {
   isOpen: boolean;

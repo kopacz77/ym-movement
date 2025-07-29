@@ -1,14 +1,14 @@
 /**
  * Cache Invalidation Strategies
- * 
+ *
  * Intelligent cache invalidation for maintaining data consistency
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 3 Optimizations
  */
 
-import { redis, CACHE_CONFIG } from './redis';
-import { TRPCQueryUtils } from './api-optimized';
+import { TRPCQueryUtils } from "./api-optimized";
+import { CACHE_CONFIG, redis } from "./redis";
 
 interface InvalidationRule {
   event: string;
@@ -22,7 +22,7 @@ interface InvalidationEvent {
   type: string;
   data: any;
   timestamp: number;
-  source: 'admin' | 'student' | 'system';
+  source: "admin" | "student" | "system";
 }
 
 class CacheInvalidationManager {
@@ -41,103 +41,103 @@ class CacheInvalidationManager {
    */
   private setupDefaultRules() {
     // Student-related invalidations
-    this.addRule('student.created', {
-      event: 'student.created',
+    this.addRule("student.created", {
+      event: "student.created",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.STUDENT}list:*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*student*list*`,
       ],
-      tags: ['student', 'student-list', 'analytics'],
+      tags: ["student", "student-list", "analytics"],
     });
 
-    this.addRule('student.updated', {
-      event: 'student.updated',
+    this.addRule("student.updated", {
+      event: "student.updated",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.STUDENT}{{id}}`,
         `${CACHE_CONFIG.PREFIXES.STUDENT}list:*`,
       ],
-      tags: ['student', 'student-list'],
+      tags: ["student", "student-list"],
       conditions: (data) => !!data.id,
     });
 
-    this.addRule('student.approved', {
-      event: 'student.approved',
+    this.addRule("student.approved", {
+      event: "student.approved",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.STUDENT}{{id}}`,
         `${CACHE_CONFIG.PREFIXES.STUDENT}list:*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*pendingApprovals*`,
       ],
-      tags: ['student', 'student-list', 'pending-approvals'],
+      tags: ["student", "student-list", "pending-approvals"],
     });
 
     // Lesson-related invalidations
-    this.addRule('lesson.booked', {
-      event: 'lesson.booked',
+    this.addRule("lesson.booked", {
+      event: "lesson.booked",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.LESSON}*`,
         `${CACHE_CONFIG.PREFIXES.SCHEDULE}*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*upcoming*`,
       ],
-      tags: ['lesson', 'schedule', 'upcoming-lessons', 'time-slots'],
+      tags: ["lesson", "schedule", "upcoming-lessons", "time-slots"],
     });
 
-    this.addRule('lesson.cancelled', {
-      event: 'lesson.cancelled',
+    this.addRule("lesson.cancelled", {
+      event: "lesson.cancelled",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.LESSON}{{id}}`,
         `${CACHE_CONFIG.PREFIXES.SCHEDULE}*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*upcoming*`,
       ],
-      tags: ['lesson', 'schedule', 'upcoming-lessons', 'time-slots'],
+      tags: ["lesson", "schedule", "upcoming-lessons", "time-slots"],
     });
 
     // Payment-related invalidations
-    this.addRule('payment.updated', {
-      event: 'payment.updated',
+    this.addRule("payment.updated", {
+      event: "payment.updated",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.PAYMENT}{{id}}`,
         `${CACHE_CONFIG.PREFIXES.PAYMENT}list:*`,
         `${CACHE_CONFIG.PREFIXES.PAYMENT}analytics:*`,
       ],
-      tags: ['payment', 'payment-list', 'analytics'],
+      tags: ["payment", "payment-list", "analytics"],
     });
 
-    this.addRule('payment.verified', {
-      event: 'payment.verified',
+    this.addRule("payment.verified", {
+      event: "payment.verified",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.PAYMENT}*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*analytics*`,
       ],
-      tags: ['payment', 'analytics'],
+      tags: ["payment", "analytics"],
       delay: 1000, // Delay to ensure DB transaction is complete
     });
 
     // Schedule-related invalidations
-    this.addRule('schedule.changed', {
-      event: 'schedule.changed',
+    this.addRule("schedule.changed", {
+      event: "schedule.changed",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.SCHEDULE}*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*timeSlots*`,
         `${CACHE_CONFIG.NAMESPACES.QUERIES}*available*`,
       ],
-      tags: ['schedule', 'time-slots'],
+      tags: ["schedule", "time-slots"],
     });
 
     // System-wide invalidations
-    this.addRule('system.maintenance', {
-      event: 'system.maintenance',
-      patterns: ['*'],
+    this.addRule("system.maintenance", {
+      event: "system.maintenance",
+      patterns: ["*"],
       tags: [],
     });
 
-    this.addRule('user.roleChanged', {
-      event: 'user.roleChanged',
+    this.addRule("user.roleChanged", {
+      event: "user.roleChanged",
       patterns: [
         `${CACHE_CONFIG.PREFIXES.USER}{{id}}`,
         `${CACHE_CONFIG.PREFIXES.STUDENT}{{studentId}}`,
         `${CACHE_CONFIG.NAMESPACES.SESSIONS}*{{id}}*`,
       ],
-      tags: ['user', 'student', 'sessions'],
+      tags: ["user", "student", "sessions"],
     });
   }
 
@@ -202,7 +202,7 @@ class CacheInvalidationManager {
 
         // Apply delay if specified
         if (rule.delay) {
-          await new Promise(resolve => setTimeout(resolve, rule.delay));
+          await new Promise((resolve) => setTimeout(resolve, rule.delay));
         }
 
         // Invalidate by patterns
@@ -227,9 +227,7 @@ class CacheInvalidationManager {
    * Invalidate cache by patterns with data substitution
    */
   private async invalidateByPatterns(patterns: string[], data: any) {
-    const processedPatterns = patterns.map(pattern => 
-      this.substituteVariables(pattern, data)
-    );
+    const processedPatterns = patterns.map((pattern) => this.substituteVariables(pattern, data));
 
     for (const pattern of processedPatterns) {
       try {
@@ -248,12 +246,12 @@ class CacheInvalidationManager {
    */
   private substituteVariables(pattern: string, data: any): string {
     let result = pattern;
-    
+
     // Replace {{variable}} with data values
     const matches = pattern.match(/\{\{(\w+)\}\}/g);
     if (matches) {
-      matches.forEach(match => {
-        const variable = match.replace(/[{}]/g, '');
+      matches.forEach((match) => {
+        const variable = match.replace(/[{}]/g, "");
         const value = data[variable];
         if (value !== undefined) {
           result = result.replace(match, value);
@@ -269,15 +267,15 @@ class CacheInvalidationManager {
    */
   private async notifyListeners(event: InvalidationEvent) {
     const listeners = this.listeners.get(event.type) || [];
-    
+
     await Promise.all(
       listeners.map(async (listener) => {
         try {
           await listener(event);
         } catch (error) {
-          console.error('[Cache Invalidation] Error in event listener:', error);
+          console.error("[Cache Invalidation] Error in event listener:", error);
         }
-      })
+      }),
     );
   }
 
@@ -343,44 +341,51 @@ export class CacheInvalidationHelpers {
   /**
    * Invalidate student-related caches
    */
-  static async invalidateStudent(studentId: string, action: 'created' | 'updated' | 'deleted' | 'approved') {
+  static async invalidateStudent(
+    studentId: string,
+    action: "created" | "updated" | "deleted" | "approved",
+  ) {
     await cacheInvalidation.invalidate({
       type: `student.${action}`,
       data: { id: studentId },
       timestamp: Date.now(),
-      source: 'admin',
+      source: "admin",
     });
 
     // Also invalidate React Query caches
-    await TRPCQueryUtils.invalidateRelatedQueries('student', studentId);
+    await TRPCQueryUtils.invalidateRelatedQueries("student", studentId);
   }
 
   /**
    * Invalidate lesson-related caches
    */
-  static async invalidateLesson(lessonId: string, action: 'booked' | 'cancelled' | 'updated', additionalData: any = {}) {
+  static async invalidateLesson(
+    lessonId: string,
+    action: "booked" | "cancelled" | "updated",
+    additionalData: any = {},
+  ) {
     await cacheInvalidation.invalidate({
       type: `lesson.${action}`,
       data: { id: lessonId, ...additionalData },
       timestamp: Date.now(),
-      source: 'student',
+      source: "student",
     });
 
-    await TRPCQueryUtils.invalidateRelatedQueries('lesson', lessonId);
+    await TRPCQueryUtils.invalidateRelatedQueries("lesson", lessonId);
   }
 
   /**
    * Invalidate payment-related caches
    */
-  static async invalidatePayment(paymentId: string, action: 'updated' | 'verified' | 'created') {
+  static async invalidatePayment(paymentId: string, action: "updated" | "verified" | "created") {
     await cacheInvalidation.invalidate({
       type: `payment.${action}`,
       data: { id: paymentId },
       timestamp: Date.now(),
-      source: 'admin',
+      source: "admin",
     });
 
-    await TRPCQueryUtils.invalidateRelatedQueries('payment', paymentId);
+    await TRPCQueryUtils.invalidateRelatedQueries("payment", paymentId);
   }
 
   /**
@@ -388,35 +393,35 @@ export class CacheInvalidationHelpers {
    */
   static async invalidateSchedule(date?: Date, rinkId?: string) {
     await cacheInvalidation.invalidate({
-      type: 'schedule.changed',
+      type: "schedule.changed",
       data: { date: date?.toISOString(), rinkId },
       timestamp: Date.now(),
-      source: 'admin',
+      source: "admin",
     });
 
-    await TRPCQueryUtils.invalidateRelatedQueries('schedule');
+    await TRPCQueryUtils.invalidateRelatedQueries("schedule");
   }
 
   /**
    * Bulk invalidation for multiple entities
    */
-  static async bulkInvalidate(operations: Array<{
-    type: 'student' | 'lesson' | 'payment' | 'schedule';
-    id?: string;
-    action: string;
-    data?: any;
-  }>) {
-    const events = operations.map(op => ({
+  static async bulkInvalidate(
+    operations: Array<{
+      type: "student" | "lesson" | "payment" | "schedule";
+      id?: string;
+      action: string;
+      data?: any;
+    }>,
+  ) {
+    const events = operations.map((op) => ({
       type: `${op.type}.${op.action}`,
       data: { id: op.id, ...op.data },
       timestamp: Date.now(),
-      source: 'system' as const,
+      source: "system" as const,
     }));
 
     // Process events in parallel
-    await Promise.all(
-      events.map(event => cacheInvalidation.invalidate(event))
-    );
+    await Promise.all(events.map((event) => cacheInvalidation.invalidate(event)));
   }
 
   /**
@@ -424,41 +429,44 @@ export class CacheInvalidationHelpers {
    */
   static startTimeBasedInvalidation() {
     // Invalidate daily caches every hour
-    setInterval(async () => {
-      await redis.clearByPattern(`${CACHE_CONFIG.PREFIXES.SCHEDULE}*`);
-      await redis.clearByPattern(`${CACHE_CONFIG.NAMESPACES.QUERIES}*analytics*`);
-      console.log('[Cache Invalidation] Performed hourly cache cleanup');
-    }, 60 * 60 * 1000); // Every hour
+    setInterval(
+      async () => {
+        await redis.clearByPattern(`${CACHE_CONFIG.PREFIXES.SCHEDULE}*`);
+        await redis.clearByPattern(`${CACHE_CONFIG.NAMESPACES.QUERIES}*analytics*`);
+        console.log("[Cache Invalidation] Performed hourly cache cleanup");
+      },
+      60 * 60 * 1000,
+    ); // Every hour
 
     // Invalidate stale session data every 15 minutes
-    setInterval(async () => {
-      await redis.clearByPattern(`${CACHE_CONFIG.NAMESPACES.SESSIONS}*`);
-      console.log('[Cache Invalidation] Cleaned up stale sessions');
-    }, 15 * 60 * 1000); // Every 15 minutes
+    setInterval(
+      async () => {
+        await redis.clearByPattern(`${CACHE_CONFIG.NAMESPACES.SESSIONS}*`);
+        console.log("[Cache Invalidation] Cleaned up stale sessions");
+      },
+      15 * 60 * 1000,
+    ); // Every 15 minutes
 
     // Return cleanup function
     return () => {
       // In a real implementation, you'd store the interval IDs and clear them
-      console.log('[Cache Invalidation] Time-based invalidation stopped');
+      console.log("[Cache Invalidation] Time-based invalidation stopped");
     };
   }
 
   /**
    * Emergency cache clear
    */
-  static async emergencyClear(reason = 'Emergency maintenance') {
+  static async emergencyClear(reason = "Emergency maintenance") {
     console.warn(`[Cache Invalidation] Emergency cache clear: ${reason}`);
-    
-    await Promise.all([
-      redis.flushAll(),
-      TRPCQueryUtils.cleanupStaleQueries(),
-    ]);
+
+    await Promise.all([redis.flushAll(), TRPCQueryUtils.cleanupStaleQueries()]);
 
     await cacheInvalidation.invalidate({
-      type: 'system.maintenance',
+      type: "system.maintenance",
       data: { reason },
       timestamp: Date.now(),
-      source: 'system',
+      source: "system",
     });
   }
 }
@@ -477,17 +485,26 @@ export function useCacheInvalidation() {
     return () => clearInterval(interval);
   }, []);
 
-  const invalidateStudent = useCallback((studentId: string, action: 'created' | 'updated' | 'deleted' | 'approved') => {
-    return CacheInvalidationHelpers.invalidateStudent(studentId, action);
-  }, []);
+  const invalidateStudent = useCallback(
+    (studentId: string, action: "created" | "updated" | "deleted" | "approved") => {
+      return CacheInvalidationHelpers.invalidateStudent(studentId, action);
+    },
+    [],
+  );
 
-  const invalidateLesson = useCallback((lessonId: string, action: 'booked' | 'cancelled' | 'updated', additionalData?: any) => {
-    return CacheInvalidationHelpers.invalidateLesson(lessonId, action, additionalData);
-  }, []);
+  const invalidateLesson = useCallback(
+    (lessonId: string, action: "booked" | "cancelled" | "updated", additionalData?: any) => {
+      return CacheInvalidationHelpers.invalidateLesson(lessonId, action, additionalData);
+    },
+    [],
+  );
 
-  const invalidatePayment = useCallback((paymentId: string, action: 'updated' | 'verified' | 'created') => {
-    return CacheInvalidationHelpers.invalidatePayment(paymentId, action);
-  }, []);
+  const invalidatePayment = useCallback(
+    (paymentId: string, action: "updated" | "verified" | "created") => {
+      return CacheInvalidationHelpers.invalidatePayment(paymentId, action);
+    },
+    [],
+  );
 
   const invalidateSchedule = useCallback((date?: Date, rinkId?: string) => {
     return CacheInvalidationHelpers.invalidateSchedule(date, rinkId);

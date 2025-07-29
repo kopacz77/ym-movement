@@ -1,13 +1,13 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { LessonSummary } from "@/features/student/components/dashboard/LessonSummary";
 import { UpcomingLessons } from "@/features/student/components/dashboard/UpcomingLessons";
-import Link from "next/link";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function StudentDashboardPage() {
   const user = useCurrentUser();

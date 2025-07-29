@@ -1,8 +1,8 @@
 /**
  * Bulk Create Templates Component
- * 
+ *
  * Quick template presets for common scheduling patterns
- * 
+ *
  * @version 1.0.0
  */
 
@@ -177,7 +177,7 @@ export function BulkCreateTemplates({ onSelectTemplate }: BulkCreateTemplatesPro
     if (template.dateRange) {
       const startDate = addDays(new Date(), template.dateRange.startOffset);
       const endDate = addDays(startDate, template.dateRange.duration - 1);
-      
+
       const templateWithDates = {
         ...template,
         preset: {
@@ -186,20 +186,23 @@ export function BulkCreateTemplates({ onSelectTemplate }: BulkCreateTemplatesPro
           endDate: format(endDate, "yyyy-MM-dd"),
         },
       };
-      
+
       onSelectTemplate(templateWithDates);
     } else {
       onSelectTemplate(template);
     }
   };
 
-  const templatesByCategory = SCHEDULE_TEMPLATES.reduce((acc, template) => {
-    if (!acc[template.category]) {
-      acc[template.category] = [];
-    }
-    acc[template.category].push(template);
-    return acc;
-  }, {} as Record<string, ScheduleTemplate[]>);
+  const templatesByCategory = SCHEDULE_TEMPLATES.reduce(
+    (acc, template) => {
+      if (!acc[template.category]) {
+        acc[template.category] = [];
+      }
+      acc[template.category].push(template);
+      return acc;
+    },
+    {} as Record<string, ScheduleTemplate[]>,
+  );
 
   return (
     <Dialog>
@@ -216,16 +219,18 @@ export function BulkCreateTemplates({ onSelectTemplate }: BulkCreateTemplatesPro
             Choose from pre-configured scheduling patterns to quickly set up your time slots.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {Object.entries(templatesByCategory).map(([category, templates]) => (
             <div key={category}>
               <h3 className="text-lg font-semibold mb-3 capitalize">
-                {category === "common" ? "Common Patterns" : 
-                 category === "seasonal" ? "Seasonal Programs" : 
-                 "Custom Templates"}
+                {category === "common"
+                  ? "Common Patterns"
+                  : category === "seasonal"
+                    ? "Seasonal Programs"
+                    : "Custom Templates"}
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {templates.map((template) => (
                   <TemplateCard
@@ -250,8 +255,8 @@ interface TemplateCardProps {
 
 function TemplateCard({ template, onSelect }: TemplateCardProps) {
   const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const selectedDays = template.preset.daysOfWeek.map(d => dayLabels[d]).join(", ");
-  
+  const selectedDays = template.preset.daysOfWeek.map((d) => dayLabels[d]).join(", ");
+
   return (
     <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onSelect}>
       <CardHeader className="pb-3">
@@ -259,15 +264,15 @@ function TemplateCard({ template, onSelect }: TemplateCardProps) {
           {template.icon}
           {template.name}
         </CardTitle>
-        <CardDescription className="text-xs">
-          {template.description}
-        </CardDescription>
+        <CardDescription className="text-xs">{template.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-2 text-xs">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Time:</span>
-            <span>{template.preset.dailyStartTime} - {template.preset.dailyEndTime}</span>
+            <span>
+              {template.preset.dailyStartTime} - {template.preset.dailyEndTime}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Duration:</span>
@@ -275,33 +280,37 @@ function TemplateCard({ template, onSelect }: TemplateCardProps) {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Capacity:</span>
-            <span>{template.preset.maxStudents} student{template.preset.maxStudents !== 1 ? "s" : ""}</span>
+            <span>
+              {template.preset.maxStudents} student{template.preset.maxStudents !== 1 ? "s" : ""}
+            </span>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1">
-            {template.preset.daysOfWeek.map(day => (
+            {template.preset.daysOfWeek.map((day) => (
               <Badge key={day} variant="secondary" className="text-xs px-1.5 py-0.5">
                 {dayLabels[day]}
               </Badge>
             ))}
           </div>
-          
+
           {template.preset.breaks.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              {template.preset.breaks.length} break{template.preset.breaks.length !== 1 ? "s" : ""} included
+              {template.preset.breaks.length} break{template.preset.breaks.length !== 1 ? "s" : ""}{" "}
+              included
             </div>
           )}
         </div>
-        
+
         {template.dateRange && (
           <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-            Auto-sets {template.dateRange.duration} days starting {
-              template.dateRange.startOffset === 0 ? "today" :
-              template.dateRange.startOffset === 1 ? "tomorrow" :
-              `in ${template.dateRange.startOffset} days`
-            }
+            Auto-sets {template.dateRange.duration} days starting{" "}
+            {template.dateRange.startOffset === 0
+              ? "today"
+              : template.dateRange.startOffset === 1
+                ? "tomorrow"
+                : `in ${template.dateRange.startOffset} days`}
           </div>
         )}
       </CardContent>

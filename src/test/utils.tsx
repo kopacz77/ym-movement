@@ -1,7 +1,7 @@
-import { render, type RenderOptions } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type RenderOptions, render } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
-import { type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { vi } from "vitest";
 
 // Create a test query client
@@ -10,7 +10,7 @@ const createTestQueryClient = () =>
     defaultOptions: {
       queries: {
         retry: false,
-        staleTime: Infinity,
+        staleTime: Number.POSITIVE_INFINITY,
       },
     },
   });

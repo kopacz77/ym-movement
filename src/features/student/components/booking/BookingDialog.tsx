@@ -1,5 +1,11 @@
 // Updated BookingDialog.tsx with fixes for both errors
 
+import { LessonType, PaymentMethod } from "@prisma/client";
+import { format } from "date-fns";
+import { Calendar, Clock, MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -11,12 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
-import { LessonType, PaymentMethod } from "@prisma/client";
-import { format } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 interface TimeSlot {
   id: string;
@@ -126,7 +126,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
         </DialogHeader>
         <div className="flex flex-col gap-6">
           {/* Time slot details */}
-          <div className="bg-gray-50 p-4 rounded-lg flex flex-col gap-3">
+          <div className="bg-muted/50 p-4 rounded-lg flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{format(new Date(slot.startTime), "EEEE, MMMM d, yyyy")}</span>

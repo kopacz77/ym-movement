@@ -1,8 +1,8 @@
-import { sendApprovalEmail } from "@/lib/email";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/student/approvalQueries.ts
 import { z } from "zod";
+import { sendApprovalEmail } from "@/lib/email";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const approvalQueries = createTRPCRouter({
   // Query: Get pending approvals
@@ -119,44 +119,43 @@ export const approvalQueries = createTRPCRouter({
     }),
 
   // Mutation: Approve all students (development helper)
-  approveAllStudents: protectedProcedure
-    .mutation(async ({ ctx }) => {
-      try {
-        console.log('Approving all unapproved students');
-        
-        const unapprovedStudents = await ctx.prisma.student.findMany({
-          where: { isApproved: false },
-          include: { User: true }
-        });
-        
-        if (unapprovedStudents.length === 0) {
-          return { message: 'No unapproved students found', approved: 0 };
-        }
-        
-        const result = await ctx.prisma.student.updateMany({
-          where: { isApproved: false },
-          data: {
-            isApproved: true,
-            approvedAt: new Date(),
-            approvedById: ctx.session?.user?.id || "admin001",
-          },
-        });
-        
-        console.log(`Approved ${result.count} students`);
-        return { 
-          message: `Successfully approved ${result.count} students`,
-          approved: result.count,
-          students: unapprovedStudents.map(s => s.User.name || s.User.email)
-        };
-      } catch (error) {
-        console.error("Error approving all students:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to approve all students",
-          cause: error,
-        });
+  approveAllStudents: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      console.log("Approving all unapproved students");
+
+      const unapprovedStudents = await ctx.prisma.student.findMany({
+        where: { isApproved: false },
+        include: { User: true },
+      });
+
+      if (unapprovedStudents.length === 0) {
+        return { message: "No unapproved students found", approved: 0 };
       }
-    }),
+
+      const result = await ctx.prisma.student.updateMany({
+        where: { isApproved: false },
+        data: {
+          isApproved: true,
+          approvedAt: new Date(),
+          approvedById: ctx.session?.user?.id || "admin001",
+        },
+      });
+
+      console.log(`Approved ${result.count} students`);
+      return {
+        message: `Successfully approved ${result.count} students`,
+        approved: result.count,
+        students: unapprovedStudents.map((s) => s.User.name || s.User.email),
+      };
+    } catch (error) {
+      console.error("Error approving all students:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to approve all students",
+        cause: error,
+      });
+    }
+  }),
 
   // Mutation: Reject student
   rejectStudent: protectedProcedure

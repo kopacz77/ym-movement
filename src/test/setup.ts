@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
-import { beforeAll, afterEach, afterAll } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll } from "vitest";
 
 // Cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
@@ -26,7 +26,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
 }));
 
-// Mock NextAuth  
+// Mock NextAuth
 vi.mock("next-auth/react", () => ({
   useSession: () => ({
     data: null,
@@ -44,7 +44,7 @@ vi.mock("next/dynamic", () => ({
       // For testing, just return a simple div
       return options.loading ? options.loading() : "Dynamic Component";
     };
-    
+
     return DynamicComponent;
   },
 }));
@@ -58,7 +58,7 @@ global.IntersectionObserver = vi.fn().mockImplementation((callback) => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   root: null,
-  rootMargin: '',
+  rootMargin: "",
   thresholds: [],
   takeRecords: vi.fn(() => []),
 }));

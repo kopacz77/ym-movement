@@ -1,6 +1,8 @@
 // src/features/admin/components/scheduling/StudentSelector.tsx
 "use client";
 
+import type React from "react";
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,8 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import type React from "react";
-import { useState } from "react";
 
 // Define a type for the student object
 interface Student {

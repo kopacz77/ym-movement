@@ -1,13 +1,13 @@
 // src/app/(protected)/student/profile/page.tsx
 "use client";
 
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ProfileForm } from "@/features/student/components/profile/ProfileForm";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function StudentProfilePage() {
   const { id: studentId } = useCurrentUser();

@@ -15,7 +15,7 @@ export function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Check if window is available (client-side only)
     if (typeof window !== "undefined") {
       const media = window.matchMedia(query);

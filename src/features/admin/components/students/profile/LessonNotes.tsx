@@ -1,14 +1,15 @@
 // features/admin/components/students/profile/LessonNotes.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { useSanitizedInput } from "@/hooks/useSanitizedInput";
+import { api } from "@/lib/api";
 
 interface LessonNotesProps {
   lessonId: string;
@@ -27,6 +28,7 @@ interface Note {
 export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId }) => {
   const [note, setNote] = React.useState("");
   const [notes, setNotes] = React.useState<Note[]>([]);
+  const { sanitizeTextArea } = useSanitizedInput();
 
   // Updated to use correct namespace and removed onError option
   const {
@@ -108,12 +110,13 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
   });
 
   const handleAddNote = () => {
-    if (!note.trim()) return;
+    const sanitizedContent = sanitizeTextArea(note);
+    if (!sanitizedContent.trim()) return;
 
     // Using studentNote since we don't have a specific lessonNote API
     addNote.mutate({
       studentId,
-      content: note,
+      content: sanitizedContent,
       type: "INSTRUCTOR",
     });
   };
@@ -136,7 +139,8 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
                 id="lesson-note-textarea"
                 placeholder="Add notes about the lesson..."
                 value={note}
-                onChange={(e) => setNote(e.target.value)}
+                onChange={(e) => setNote(sanitizeTextArea(e.target.value))}
+                maxLength={10000}
               />
               <div className="flex justify-end">
                 <Button onClick={handleAddNote} disabled={!note.trim() || addNote.isPending}>

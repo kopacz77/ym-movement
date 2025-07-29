@@ -1,7 +1,8 @@
 // src/features/scheduling/components/display/MobileTimeSlotList.tsx
-import { Button } from "@/components/ui/button";
-import { type TimeSlot } from "@/types/scheduling";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { TimeSlot } from "@/types/scheduling";
 import { DayAccordion } from "./DayAccordion";
 
 interface DayWithSlots {

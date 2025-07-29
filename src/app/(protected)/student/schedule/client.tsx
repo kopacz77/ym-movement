@@ -1,15 +1,15 @@
 // app/(protected)/student/schedule/client.tsx
 "use client";
 
+import type { LessonStatus, LessonType, PaymentStatus, RinkArea } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LessonCard } from "@/features/student/components/schedule/LessonCard";
-import { LessonWithDetails } from "@/features/student/types";
+import type { LessonWithDetails } from "@/features/student/types";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
-import { LessonStatus, LessonType, PaymentStatus, RinkArea } from "@prisma/client";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 // This is the raw data shape from the API
 interface Lesson {

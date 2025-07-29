@@ -1,10 +1,10 @@
 // src/contexts/OptimizedAuthContext.tsx
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { signOut, useSession } from "next-auth/react";
 import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContextSelector, type AuthState } from "@/lib/context-utils";
 
 interface User {
@@ -80,12 +80,8 @@ export const OptimizedAuthProvider = ({ children }: { children: ReactNode }) => 
     [user, status, logout],
   );
 
-  return (
-    <AuthContextSelector.Provider value={authState}>
-      {children}
-    </AuthContextSelector.Provider>
-  );
+  return <AuthContextSelector.Provider value={authState}>{children}</AuthContextSelector.Provider>;
 };
 
 // Export optimized selectors
-export { useAuthUser, useAuthStatus, useAuthActions } from "@/lib/context-utils";
+export { useAuthActions, useAuthStatus, useAuthUser } from "@/lib/context-utils";

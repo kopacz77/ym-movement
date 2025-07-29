@@ -1,5 +1,5 @@
 // src/features/student/types/index.ts
-import { LessonStatus, LessonType, Level, PaymentStatus } from "@prisma/client";
+import type { LessonStatus, LessonType, Level, PaymentStatus } from "@prisma/client";
 
 export interface TimeSlot {
   id: string;

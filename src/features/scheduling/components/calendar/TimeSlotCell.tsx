@@ -1,6 +1,7 @@
 // src/features/scheduling/components/calendar/TimeSlotCell.tsx
-import { cn } from "@/lib/utils";
+
 import type React from "react";
+import { cn } from "@/lib/utils";
 import type { CalendarSlot } from "../../types";
 
 interface TimeSlotCellProps {

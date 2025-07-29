@@ -1,14 +1,14 @@
 // src/providers/index.tsx
 "use client";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext"; // Add this import
-import { api } from "@/lib/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { SessionProvider } from "next-auth/react";
 import type * as React from "react";
 import { useState } from "react";
 import superjson from "superjson";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext"; // Add this import
+import { api } from "@/lib/api";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(

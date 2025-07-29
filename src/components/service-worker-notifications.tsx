@@ -1,31 +1,31 @@
 /**
  * Service Worker Notifications Component
- * 
+ *
  * UI components for service worker status and notifications
- * 
+ *
  * @version 3.0.0
  * @since Phase 2 Priority 3 Optimizations
  */
 
 "use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { 
-  RefreshCw, 
-  Wifi, 
-  WifiOff, 
-  Download, 
-  CloudDrizzle, 
+import {
   AlertCircle,
   CheckCircle,
   Clock,
-  X
-} from 'lucide-react';
-import { useServiceWorker, useServiceWorkerNotifications } from '@/hooks/useServiceWorker';
+  CloudDrizzle,
+  Download,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  X,
+} from "lucide-react";
+import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useServiceWorker, useServiceWorkerNotifications } from "@/hooks/useServiceWorker";
 
 /**
  * Service Worker Update Banner
@@ -41,7 +41,7 @@ export function ServiceWorkerUpdateBanner() {
     try {
       await applyUpdate();
     } catch (error) {
-      console.error('Failed to apply update:', error);
+      console.error("Failed to apply update:", error);
     }
   };
 
@@ -58,19 +58,11 @@ export function ServiceWorkerUpdateBanner() {
       </CardHeader>
       <CardContent className="pt-0">
         <div className="flex gap-2">
-          <Button 
-            onClick={handleUpdate}
-            size="sm" 
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
-          >
+          <Button onClick={handleUpdate} size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
             <RefreshCw className="mr-2 h-3 w-3" />
             Update Now
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.location.reload()}
-          >
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
             Later
           </Button>
         </div>
@@ -87,9 +79,11 @@ export function NetworkStatusIndicator() {
 
   return (
     <div className="fixed bottom-4 left-4 z-50">
-      <Card className={`transition-all duration-300 ${
-        isOnline ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'
-      }`}>
+      <Card
+        className={`transition-all duration-300 ${
+          isOnline ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"
+        }`}
+      >
         <CardContent className="p-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -98,13 +92,13 @@ export function NetworkStatusIndicator() {
               ) : (
                 <WifiOff className="h-4 w-4 text-amber-600" />
               )}
-              <span className={`text-sm font-medium ${
-                isOnline ? 'text-green-800' : 'text-amber-800'
-              }`}>
-                {isOnline ? 'Online' : 'Offline'}
+              <span
+                className={`text-sm font-medium ${isOnline ? "text-green-800" : "text-amber-800"}`}
+              >
+                {isOnline ? "Online" : "Offline"}
               </span>
             </div>
-            
+
             {pendingActions > 0 && (
               <Badge variant="secondary" className="text-xs">
                 <CloudDrizzle className="mr-1 h-3 w-3" />
@@ -131,8 +125,8 @@ export function ServiceWorkerNotifications() {
   return (
     <div className="fixed top-4 left-4 z-50 space-y-2">
       {notifications.map((notification) => (
-        <NotificationCard 
-          key={notification.id} 
+        <NotificationCard
+          key={notification.id}
           notification={notification}
           onRemove={() => removeNotification(notification.id)}
         />
@@ -147,7 +141,7 @@ export function ServiceWorkerNotifications() {
 interface NotificationCardProps {
   notification: {
     id: string;
-    type: 'update' | 'offline' | 'sync' | 'error';
+    type: "update" | "offline" | "sync" | "error";
     message: string;
     timestamp: number;
   };
@@ -157,13 +151,13 @@ interface NotificationCardProps {
 function NotificationCard({ notification, onRemove }: NotificationCardProps) {
   const getIcon = () => {
     switch (notification.type) {
-      case 'update':
+      case "update":
         return <Download className="h-4 w-4" />;
-      case 'offline':
+      case "offline":
         return <WifiOff className="h-4 w-4" />;
-      case 'sync':
+      case "sync":
         return <CloudDrizzle className="h-4 w-4" />;
-      case 'error':
+      case "error":
         return <AlertCircle className="h-4 w-4" />;
       default:
         return <CheckCircle className="h-4 w-4" />;
@@ -172,16 +166,16 @@ function NotificationCard({ notification, onRemove }: NotificationCardProps) {
 
   const getColorClasses = () => {
     switch (notification.type) {
-      case 'update':
-        return 'border-blue-200 bg-blue-50 text-blue-800';
-      case 'offline':
-        return 'border-amber-200 bg-amber-50 text-amber-800';
-      case 'sync':
-        return 'border-green-200 bg-green-50 text-green-800';
-      case 'error':
-        return 'border-red-200 bg-red-50 text-red-800';
+      case "update":
+        return "border-blue-200 bg-blue-50 text-blue-800";
+      case "offline":
+        return "border-amber-200 bg-amber-50 text-amber-800";
+      case "sync":
+        return "border-green-200 bg-green-50 text-green-800";
+      case "error":
+        return "border-red-200 bg-red-50 text-red-800";
       default:
-        return 'border-gray-200 bg-gray-50 text-gray-800';
+        return "border-gray-200 bg-gray-50 text-gray-800";
     }
   };
 
@@ -189,9 +183,7 @@ function NotificationCard({ notification, onRemove }: NotificationCardProps) {
     <Card className={`w-80 transition-all duration-300 ${getColorClasses()}`}>
       <CardContent className="p-3">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5">
-            {getIcon()}
-          </div>
+          <div className="mt-0.5">{getIcon()}</div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium">{notification.message}</p>
             <p className="text-xs opacity-75 mt-1">
@@ -217,18 +209,18 @@ function NotificationCard({ notification, onRemove }: NotificationCardProps) {
  * Service Worker Status Panel (for development)
  */
 export function ServiceWorkerStatusPanel() {
-  const { 
-    isRegistered, 
-    isActive, 
-    updateAvailable, 
-    isOnline, 
+  const {
+    isRegistered,
+    isActive,
+    updateAvailable,
+    isOnline,
     pendingActions,
     register,
     cleanupCaches,
-    forceSync
+    forceSync,
   } = useServiceWorker();
 
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== "development") {
     return null;
   }
 
@@ -236,9 +228,7 @@ export function ServiceWorkerStatusPanel() {
     <Card className="fixed bottom-4 right-4 z-50 w-80">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Service Worker Status</CardTitle>
-        <CardDescription className="text-xs">
-          Development panel for SW monitoring
-        </CardDescription>
+        <CardDescription className="text-xs">Development panel for SW monitoring</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-2 text-xs">
@@ -275,34 +265,16 @@ export function ServiceWorkerStatusPanel() {
         )}
 
         <div className="grid grid-cols-2 gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={register}
-            disabled={isRegistered}
-          >
+          <Button variant="outline" size="sm" onClick={register} disabled={isRegistered}>
             Register SW
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={cleanupCaches}
-          >
+          <Button variant="outline" size="sm" onClick={cleanupCaches}>
             Cleanup Cache
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={forceSync}
-            disabled={pendingActions === 0}
-          >
+          <Button variant="outline" size="sm" onClick={forceSync} disabled={pendingActions === 0}>
             Force Sync
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => window.location.reload()}
-          >
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
             Reload
           </Button>
         </div>
@@ -329,7 +301,7 @@ export function OfflineActionQueue() {
           Offline Actions
         </CardTitle>
         <CardDescription>
-          {pendingActions} action{pendingActions !== 1 ? 's' : ''} waiting to sync
+          {pendingActions} action{pendingActions !== 1 ? "s" : ""} waiting to sync
         </CardDescription>
       </CardHeader>
       <CardContent>
