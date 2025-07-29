@@ -10,8 +10,18 @@
       "Bash(pnpm add:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(env)",
+      "mcp__shadcn-ui__list_components",
+      "mcp__shadcn-ui__get_component"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn-ui"
+  ]
 }
