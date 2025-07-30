@@ -22,27 +22,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Documentation Commands
 
-**Documentation System**: Uses **Docsify** for documentation serving
+**Documentation System**: Uses **MkDocs** with Material theme (replaced Docsify due to symlink issues)
 
-- **Documentation server**: `pnpm docs:dev` (serves at localhost:3001)
-- **Documentation with auto-open**: `pnpm docs:serve`
-- **Documentation preview**: `pnpm docs:preview`
+### Running Documentation Locally
 
-### 🚨 CRITICAL WARNING: Docsify + Git Symlink Issues
+**Prerequisites**: MkDocs must be installed in WSL:
+```bash
+# Install pipx if not already installed
+sudo apt install pipx
 
-**DO NOT USE SYMLINKS** in the `docs/` folder with Docsify. This causes catastrophic Git issues:
+# Install MkDocs and plugins
+pipx install mkdocs
+pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
+```
 
-- **Problem**: Docsify creates symlinks that Git cannot properly track
-- **Symptoms**: "No such file or directory" errors, commit failures, VS Code showing phantom changes
-- **Windows Issue**: Requires administrator privileges for symlinks, often breaks in WSL
-- **Solution**: Use **copied files** in `docs/` folder instead of symlinks
+**Commands**:
+- **Documentation server**: `mkdocs serve` (serves at localhost:8000)
+- **Build documentation**: `mkdocs build` (outputs to `site/` folder)
+- **Deploy to GitHub Pages**: `mkdocs gh-deploy`
 
-**Current Setup**: All documentation files in `docs/` are **copies** of the uppercase files in root directory. When updating documentation:
+**Alternative using package.json**:
+- **Documentation server**: `pnpm docs:dev`
+- **Build documentation**: `pnpm docs:build`
+- **Deploy**: `pnpm docs:deploy`
+
+### Documentation Structure
+
+**Current Setup**: All documentation files in `docs/` are **real files** (copies of uppercase files in root directory). 
+
+**When updating documentation**:
 1. Update the uppercase file (e.g., `API.md`, `CONTRIBUTING.md`)
 2. Copy it to the `docs/` folder (e.g., `cp API.md docs/api.md`)
-3. Do NOT create symlinks - they will break Git and cause deployment issues
+3. **Never use symlinks** - they cause Git and deployment issues
 
-**Reference**: [Docsify Issue #1891](https://github.com/docsifyjs/docsify/issues/1891) - Known path handling problems
+### 🚨 Why We Switched from Docsify
+
+**Problem**: Docsify created symlinks that caused catastrophic Git issues:
+- "No such file or directory" errors during commits
+- Build failures on Netlify/deployment platforms
+- VS Code showing phantom file changes
+- Windows/WSL symlink permission issues
+
+**Solution**: MkDocs with real files - no symlinks, no problems!
 
 ## Tech Stack & Architecture
 
