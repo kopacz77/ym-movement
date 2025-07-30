@@ -22,9 +22,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Documentation Commands
 
+**Documentation System**: Uses **Docsify** for documentation serving
+
 - **Documentation server**: `pnpm docs:dev` (serves at localhost:3001)
 - **Documentation with auto-open**: `pnpm docs:serve`
 - **Documentation preview**: `pnpm docs:preview`
+
+### 🚨 CRITICAL WARNING: Docsify + Git Symlink Issues
+
+**DO NOT USE SYMLINKS** in the `docs/` folder with Docsify. This causes catastrophic Git issues:
+
+- **Problem**: Docsify creates symlinks that Git cannot properly track
+- **Symptoms**: "No such file or directory" errors, commit failures, VS Code showing phantom changes
+- **Windows Issue**: Requires administrator privileges for symlinks, often breaks in WSL
+- **Solution**: Use **copied files** in `docs/` folder instead of symlinks
+
+**Current Setup**: All documentation files in `docs/` are **copies** of the uppercase files in root directory. When updating documentation:
+1. Update the uppercase file (e.g., `API.md`, `CONTRIBUTING.md`)
+2. Copy it to the `docs/` folder (e.g., `cp API.md docs/api.md`)
+3. Do NOT create symlinks - they will break Git and cause deployment issues
+
+**Reference**: [Docsify Issue #1891](https://github.com/docsifyjs/docsify/issues/1891) - Known path handling problems
 
 ## Tech Stack & Architecture
 
