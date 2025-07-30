@@ -55,7 +55,7 @@ export default function LandingPage() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="flex min-h-[90vh] flex-col items-center justify-center pt-16">
+        <section className="flex flex-col items-center justify-center pt-32 pb-12">
           <div className="container px-4 text-center">
             <div className="mb-6 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
               <span>Olympic-level Ice Dance Coaching</span>
@@ -85,14 +85,14 @@ export default function LandingPage() {
         </section>
 
         {/* Feature Cards */}
-        <section className="py-16" id="about">
+        <section className="py-12" id="about">
           <div className="container px-4">
-            <h2 className="mb-12 text-center text-3xl font-bold text-foreground">
+            <h2 className="mb-10 text-center text-3xl font-bold text-foreground">
               Why Train With Us
             </h2>
             <div className="mx-auto grid gap-8 md:grid-cols-3">
               {/* Professional Coaching */}
-              <div className="rounded-xl bg-card p-6 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <Medal className="h-6 w-6 text-primary" />
                 </div>
@@ -106,7 +106,7 @@ export default function LandingPage() {
               </div>
 
               {/* Flexible Scheduling */}
-              <div className="rounded-xl bg-card p-6 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
@@ -120,7 +120,7 @@ export default function LandingPage() {
               </div>
 
               {/* Progress Tracking */}
-              <div className="rounded-xl bg-card p-6 shadow-sm">
+              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow">
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>

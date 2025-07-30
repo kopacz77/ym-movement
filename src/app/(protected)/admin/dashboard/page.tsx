@@ -81,9 +81,11 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold tracking-tight">Revenue Overview</h2>
           </div>
-          <ErrorBoundary>
-            <RevenueChart />
-          </ErrorBoundary>
+          <div className="p-2 bg-gradient-to-br from-indigo-100/60 via-blue-50/70 to-slate-100/60 rounded-xl border border-indigo-200/50 shadow-lg">
+            <ErrorBoundary>
+              <RevenueChart />
+            </ErrorBoundary>
+          </div>
         </div>
 
         <div className="xl:col-span-4 space-y-6">
@@ -91,15 +93,27 @@ export default function AdminDashboardPage() {
             <h2 className="text-2xl font-semibold tracking-tight">Quick Actions</h2>
           </div>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingSkeleton />}>
-              <PendingApprovals />
-            </Suspense>
-          </ErrorBoundary>
+          <div className="p-2 bg-gradient-to-br from-indigo-100/60 via-blue-50/70 to-slate-100/60 rounded-xl border border-indigo-200/50 shadow-lg">
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingSkeleton />}>
+                <PendingApprovals />
+              </Suspense>
+            </ErrorBoundary>
+          </div>
+        </div>
+      </div>
 
-          <ErrorBoundary>
-            <StudentActivityChart />
-          </ErrorBoundary>
+      {/* Student Activity Chart - Centered below Revenue Overview */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-center">
+          <h2 className="text-2xl font-semibold tracking-tight">Student Activity</h2>
+        </div>
+        <div className="flex justify-center">
+          <div className="w-full max-w-4xl p-2 bg-gradient-to-br from-indigo-100/60 via-blue-50/70 to-slate-100/60 rounded-xl border border-indigo-200/50 shadow-lg">
+            <ErrorBoundary>
+              <StudentActivityChart />
+            </ErrorBoundary>
+          </div>
         </div>
       </div>
     </div>

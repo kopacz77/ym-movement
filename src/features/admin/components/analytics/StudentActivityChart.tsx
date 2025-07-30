@@ -93,7 +93,7 @@ export const StudentActivityChart: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card className="w-full h-[400px]">
+      <Card className="w-full h-[400px] bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Student Activity</CardTitle>
@@ -127,8 +127,8 @@ export const StudentActivityChart: React.FC = () => {
       : 0;
 
   return (
-    <Card className="w-full h-[400px]">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="w-full h-[400px] bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
+      <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
         <div>
           <CardTitle>Student Activity</CardTitle>
           <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
