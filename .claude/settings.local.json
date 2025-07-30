@@ -16,7 +16,8 @@
       "Bash(pnpm:*)",
       "Bash(env)",
       "mcp__shadcn-ui__list_components",
-      "mcp__shadcn-ui__get_component"
+      "mcp__shadcn-ui__get_component",
+      "WebFetch(domain:ui.shadcn.com)"
     ],
     "deny": []
   },
