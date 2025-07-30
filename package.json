@@ -51,13 +51,7 @@
     "docs:dev": "docsify serve docs --port 3001",
     "docs:serve": "docsify serve docs --port 3001 --open",
     "docs:build": "echo 'Docsify serves files statically - no build needed'",
-    "docs:preview": "docsify serve docs --port 3001",
-    "docker:up": "docker-compose up -d",
-    "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
-    "docker:down": "docker-compose down",
-    "docker:build": "docker-compose build",
-    "docker:logs": "docker-compose logs -f",
-    "docker:clean": "docker-compose down -v && docker system prune -f"
+    "docs:preview": "docsify serve docs --port 3001"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
