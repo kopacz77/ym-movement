@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { CalendarIcon, FileTextIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -40,48 +40,34 @@ export function StudentCommandPalette() {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigation">
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/dashboard"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/dashboard"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Dashboard
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/book"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/book"))}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             Book Lessons
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/schedule"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/schedule"))}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             My Schedule
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/payments"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/payments"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Payments
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/profile"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/profile"))}>
             <PersonIcon className="mr-2 h-4 w-4" />
             Profile
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/settings"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/settings"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Settings
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Quick Actions">
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/student/book"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/student/book"))}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             Book a Lesson
           </CommandItem>

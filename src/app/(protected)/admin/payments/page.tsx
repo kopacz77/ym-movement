@@ -162,9 +162,15 @@ export default function PaymentsPage() {
 
       <Tabs defaultValue="all">
         <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 lg:w-fit lg:grid-cols-auto">
-          <TabsTrigger value="all" className="text-sm">All Payments</TabsTrigger>
-          <TabsTrigger value="pending" className="text-sm">Pending</TabsTrigger>
-          <TabsTrigger value="completed" className="text-sm">Completed</TabsTrigger>
+          <TabsTrigger value="all" className="text-sm">
+            All Payments
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="text-sm">
+            Pending
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="text-sm">
+            Completed
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">

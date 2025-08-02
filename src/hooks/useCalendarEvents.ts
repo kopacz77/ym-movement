@@ -33,8 +33,8 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
 
       const end = typeof slot.endTime === "string" ? new Date(slot.endTime) : slot.endTime;
 
-      // Get associated lessons
-      const associatedLessons = slot.lessons || [];
+      // Get associated lessons (use PascalCase to match database relations)
+      const associatedLessons = slot.Lesson || [];
 
       // Build event title
       const title = `${slot.Rink.name} (${associatedLessons.length}/${slot.maxStudents})`;
@@ -104,8 +104,8 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
           endTime: endTimeStr,
           maxStudents: slot.maxStudents,
           isActive: slot.isActive,
-          lessons: slot.lessons,
-          rink: slot.rink,
+          lessons: slot.Lesson,
+          rink: slot.Rink,
         });
       }
     }

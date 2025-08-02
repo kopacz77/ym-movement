@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import { CalendarIcon, FileTextIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
+import * as React from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -40,39 +40,27 @@ export function AdminCommandPalette() {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigation">
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/admin/dashboard"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/admin/dashboard"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Dashboard
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/admin/schedule"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/admin/schedule"))}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             Schedule Management
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/admin/students"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/admin/students"))}>
             <PersonIcon className="mr-2 h-4 w-4" />
             Students
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/admin/payments"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/admin/payments"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Payments
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/admin/reports"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/admin/reports"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Reports
           </CommandItem>
-          <CommandItem
-            onSelect={() => runCommand(() => router.push("/admin/settings"))}
-          >
+          <CommandItem onSelect={() => runCommand(() => router.push("/admin/settings"))}>
             <FileTextIcon className="mr-2 h-4 w-4" />
             Settings
           </CommandItem>

@@ -323,7 +323,10 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Business Hours</h3>
                   {Object.entries(operationalSettings.days).map(([day, settings]) => (
-                    <div key={day} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                    <div
+                      key={day}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0"
+                    >
                       <div className="flex items-center space-x-2">
                         <Switch
                           id={`${day.toLowerCase()}-active`}

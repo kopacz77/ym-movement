@@ -40,16 +40,26 @@ export const StudentHeader = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirect: false });
+      await signOut({
+        redirect: false,
+        callbackUrl: "/auth/login",
+      });
+
       toast("Logged out", {
         description: "You have been successfully logged out.",
       });
-      router.push("/auth/login");
+
+      // Small delay to ensure cleanup completes before navigation
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 100);
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Error", {
         description: "There was a problem logging out.",
       });
+      // Force navigation even if signOut fails
+      router.push("/auth/login");
     }
   };
 

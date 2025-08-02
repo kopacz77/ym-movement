@@ -104,7 +104,9 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                     <TableCell className="font-medium sticky left-0 bg-background">
                       <div className="min-w-0">
                         <div className="font-medium truncate">{student.User.name}</div>
-                        <div className="text-sm text-muted-foreground sm:hidden truncate">{student.User.email}</div>
+                        <div className="text-sm text-muted-foreground sm:hidden truncate">
+                          {student.User.email}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">{student.User.email}</TableCell>
@@ -116,7 +118,9 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                     <TableCell className="hidden md:table-cell">
                       <Badge variant="default">Active</Badge>
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell">{student.lessons?.length || 0} lessons</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {student.lessons?.length || 0} lessons
+                    </TableCell>
                     <TableCell className="sticky right-0 bg-background">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

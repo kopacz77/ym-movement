@@ -72,7 +72,9 @@ export const AdminHeader = () => {
                       </Link>
                     </BreadcrumbLink>
                   ) : (
-                    <BreadcrumbPage className="text-xs sm:text-sm font-medium">{item.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="text-xs sm:text-sm font-medium">
+                      {item.label}
+                    </BreadcrumbPage>
                   )}
                 </BreadcrumbItem>
                 {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}

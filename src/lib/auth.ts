@@ -32,6 +32,13 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/login",
+    signOut: "/auth/login",
+    error: "/auth/login",
+  },
+  events: {
+    async signOut() {
+      // Clear any server-side sessions or caches here if needed
+    },
   },
   providers: [
     CredentialsProvider({

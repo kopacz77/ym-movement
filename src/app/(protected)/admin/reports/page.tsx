@@ -72,7 +72,7 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reports</h1>
         <Button onClick={handleExport} className="self-start sm:self-auto">
-          <Download className="mr-2 h-4 w-4" /> 
+          <Download className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">Export Report</span>
           <span className="sm:hidden">Export</span>
         </Button>
@@ -100,8 +100,12 @@ export default function ReportsPage() {
       {/* Properly nested Tabs structure */}
       <Tabs defaultValue="revenue">
         <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-[400px] lg:grid-cols-auto">
-          <TabsTrigger value="revenue" className="text-sm">Revenue</TabsTrigger>
-          <TabsTrigger value="attendance" className="text-sm">Attendance</TabsTrigger>
+          <TabsTrigger value="revenue" className="text-sm">
+            Revenue
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="text-sm">
+            Attendance
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue">

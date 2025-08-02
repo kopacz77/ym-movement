@@ -85,8 +85,14 @@ export default function AdminStudentsPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-fit lg:grid-cols-auto">
-          <TabsTrigger value="list" className="text-sm">All Students</TabsTrigger>
-          {selectedStudentId && <TabsTrigger value="profile" className="text-sm">Student Profile</TabsTrigger>}
+          <TabsTrigger value="list" className="text-sm">
+            All Students
+          </TabsTrigger>
+          {selectedStudentId && (
+            <TabsTrigger value="profile" className="text-sm">
+              Student Profile
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="list">

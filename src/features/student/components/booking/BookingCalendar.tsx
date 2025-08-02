@@ -422,6 +422,17 @@ const BookingCalendarComponent = () => {
 
       const showBothTimes = timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+      // For month view, keep it simple but visible
+      if (calendarView === Views.MONTH) {
+        return (
+          <div className="p-1">
+            <div className="font-medium text-xs whitespace-normal">{event.title}</div>
+            <div className="text-xs whitespace-normal opacity-80">{startTimeObj.rinkTime}</div>
+          </div>
+        );
+      }
+
+      // Detailed display for week view
       return (
         <div className="p-1">
           <div className="font-medium text-sm whitespace-normal">{event.title}</div>
@@ -435,7 +446,7 @@ const BookingCalendarComponent = () => {
         </div>
       );
     },
-    [rinkTimezone],
+    [rinkTimezone, calendarView],
   );
 
   // When no rink is selected yet
@@ -640,7 +651,8 @@ const BookingCalendarComponent = () => {
             <Calendar
               localizer={localizer}
               events={events}
-              step={30}
+              step={15}
+              timeslots={4}
               defaultView={Views.WEEK}
               views={[Views.WEEK, Views.MONTH]}
               view={calendarView}

@@ -1,8 +1,9 @@
 // src/features/admin/components/scheduling/ScheduleHeader.tsx
 
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, Filter, Plane } from "lucide-react";
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -28,6 +29,10 @@ interface ScheduleHeaderProps {
   // Bulk actions props
   isSelectionMode?: boolean;
   onToggleSelectionMode?: () => void;
+  // Date range filter props
+  dateRangeFilter?: React.ReactNode;
+  // Travel dates blocker
+  travelDateBlocker?: React.ReactNode;
 }
 
 export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
@@ -38,6 +43,8 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
   rinks,
   isSelectionMode,
   onToggleSelectionMode,
+  dateRangeFilter,
+  travelDateBlocker,
 }) => {
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -69,7 +76,9 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-gray-900 text-sm sm:text-base">Quick Actions</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground truncate">Create individual or bulk time slots</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">
+              Create individual or bulk time slots
+            </p>
           </div>
         </div>
 
@@ -108,6 +117,42 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
                 <span className="hidden sm:inline">Bulk Select</span>
                 <span className="sm:hidden">Select</span>
               </Button>
+            )}
+            {dateRangeFilter && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 text-xs sm:text-sm"
+                  >
+                    <Filter className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Filter Dates</span>
+                    <span className="sm:hidden">Filter</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80" align="start">
+                  {dateRangeFilter}
+                </PopoverContent>
+              </Popover>
+            )}
+            {travelDateBlocker && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 text-xs sm:text-sm"
+                  >
+                    <Plane className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Block Dates</span>
+                    <span className="sm:hidden">Block</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96" align="start">
+                  {travelDateBlocker}
+                </PopoverContent>
+              </Popover>
             )}
             {createTimeSlotButton}
             {bulkCreateButton}

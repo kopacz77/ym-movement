@@ -266,3 +266,38 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Minimal React Big Calendar styling - let it work as designed */
+
+/* Week and Day view optimizations */
+.rbc-time-view {
+  .rbc-event {
+    padding: 2px 4px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+  
+  .rbc-event-content {
+    white-space: normal;
+    overflow: visible;
+  }
+}
+
+/* Mobile-specific calendar optimizations */
+@media (max-width: 768px) {
+  .rbc-month-view {
+    .rbc-date-cell {
+      min-height: 80px;
+    }
+    
+    .rbc-event {
+      font-size: 10px;
+      padding: 1px 2px;
+    }
+    
+    .rbc-header {
+      padding: 4px 2px;
+      font-size: 0.75rem;
+    }
+  }
+}

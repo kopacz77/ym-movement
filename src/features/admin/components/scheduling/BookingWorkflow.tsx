@@ -57,8 +57,8 @@ export const CalendarInteractions = () => {
         selectable={true}
         onSelectSlot={handleSelectSlot}
         onSelectEvent={handleEventClick}
-        step={30}
-        timeslots={2}
+        step={15}
+        timeslots={4}
         min={new Date(0, 0, 0, 5, 0, 0)} // 5 AM
         max={new Date(0, 0, 0, 20, 0, 0)} // 8 PM
         style={{ height: 600 }}

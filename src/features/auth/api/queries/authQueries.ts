@@ -2,12 +2,12 @@ import { TRPCError } from "@trpc/server";
 import { compare, hash } from "bcrypt";
 // src/features/auth/api/queries/authQueries.ts
 import { z } from "zod";
-import { logSecurityEvent, validatePasswordStrength } from "@/lib/security";
 import {
   consumePasswordResetToken,
   createPasswordResetToken,
   verifyPasswordResetToken,
 } from "@/lib/auth-tokens";
+import { logSecurityEvent, validatePasswordStrength } from "@/lib/security";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc";
 
 export const authRouter = createTRPCRouter({
@@ -34,7 +34,7 @@ export const authRouter = createTRPCRouter({
         if (!passwordValidation.isValid) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: `Password does not meet security requirements: ${passwordValidation.errors.join(', ')}`,
+            message: `Password does not meet security requirements: ${passwordValidation.errors.join(", ")}`,
           });
         }
 
@@ -56,11 +56,11 @@ export const authRouter = createTRPCRouter({
 
         if (!isCurrentPasswordValid) {
           // Log failed password change attempt
-          logSecurityEvent('PASSWORD_CHANGE_FAILED', {
+          logSecurityEvent("PASSWORD_CHANGE_FAILED", {
             userId: userId,
             userEmail: user.email,
-            reason: 'incorrect_current_password',
-            ip: ctx.ip
+            reason: "incorrect_current_password",
+            ip: ctx.ip,
           });
 
           throw new TRPCError({
@@ -79,10 +79,10 @@ export const authRouter = createTRPCRouter({
         });
 
         // Log successful password change
-        logSecurityEvent('PASSWORD_CHANGED', {
+        logSecurityEvent("PASSWORD_CHANGED", {
           userId: userId,
           userEmail: user.email,
-          ip: ctx.ip
+          ip: ctx.ip,
         });
 
         return {

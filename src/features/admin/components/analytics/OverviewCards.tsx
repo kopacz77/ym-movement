@@ -122,7 +122,9 @@ export const OverviewCards = () => {
                   <CardTitle className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide truncate">
                     {stat.title}
                   </CardTitle>
-                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{stat.value}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
+                    {stat.value}
+                  </div>
                 </div>
               </div>
             </div>

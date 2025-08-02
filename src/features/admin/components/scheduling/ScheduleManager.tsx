@@ -14,12 +14,15 @@ import { useTimeSlots } from "@/hooks/useTimeSlots";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { BulkActionsToolbar } from "./BulkActionsToolbar";
 import { formatDateRange, type TimeSlot } from "./calendarUtils";
+import { DateRangeFilter } from "./DateRangeFilter";
 import { DesktopCalendarView } from "./DesktopCalendarView";
-import { BulkCreateSlotsDialog, CreateTimeSlotDialog } from "./DialogComponents";
+import { BulkCreateSlotsDialog } from "./DialogComponents";
+import { EnhancedBookingDialog } from "./EnhancedBookingDialog";
 import { MobileCalendarView } from "./MobileCalendarView";
 import { ScheduleHeader } from "./ScheduleHeader";
 // Import our components
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
+import { TravelDateManager } from "./TravelDateManager";
 
 // Define types for form data
 interface TimeSlotFormData {
@@ -78,8 +81,34 @@ const ScheduleManagerComponent = () => {
   useBulkOperations();
 
   // Use schedule actions hook for mutations
-  const { deleteTimeSlot, deleteBulkTimeSlots, assignStudent, unassignStudent, updateTimeSlot } =
-    useScheduleActions();
+  const {
+    createTimeSlot,
+    deleteTimeSlot,
+    deleteBulkTimeSlots,
+    assignStudent,
+    unassignStudent,
+    updateTimeSlot,
+    utils,
+  } = useScheduleActions();
+
+  // Day detail view state
+  const [dayDetailDate, setDayDetailDate] = useState<Date | null>(null);
+  const [showDayDetail, setShowDayDetail] = useState(false);
+
+  // Date range filter state
+  const [dateRangeFrom, setDateRangeFrom] = useState<Date | undefined>();
+  const [dateRangeTo, setDateRangeTo] = useState<Date | undefined>();
+
+  // Travel date blocker state (for demo purposes - in real app this would come from backend)
+  const [blockedDateRanges, setBlockedDateRanges] = useState<
+    Array<{
+      id: string;
+      title: string;
+      description?: string;
+      dateRange: { from: Date; to: Date };
+      type: "travel" | "competition" | "other";
+    }>
+  >([]);
 
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
@@ -198,9 +227,67 @@ const ScheduleManagerComponent = () => {
   }, [date, calendarView]);
 
   // Handle view change
-  const handleViewChange = useCallback((newView: string) => {
-    setCalendarView(newView);
+  const handleViewChange = useCallback(
+    (newView: string) => {
+      setCalendarView(newView);
+      // Close day detail when changing views
+      if (showDayDetail) {
+        setShowDayDetail(false);
+        setDayDetailDate(null);
+      }
+    },
+    [showDayDetail],
+  );
+
+  // Handle date change (from enhanced header)
+  const handleDateChange = useCallback((newDate: Date) => {
+    setDate(newDate);
   }, []);
+
+  // Handle day click for day detail view
+  const handleDayClick = useCallback((clickedDate: Date) => {
+    setDayDetailDate(clickedDate);
+    setShowDayDetail(true);
+  }, []);
+
+  // Handle back to month from day detail
+  const handleBackToMonth = useCallback(() => {
+    setShowDayDetail(false);
+    setDayDetailDate(null);
+    setCalendarView("month");
+  }, []);
+
+  // Handle create slot from day detail
+  const handleCreateSlotFromDay = useCallback(
+    (date: Date) => {
+      const startTime = new Date(date);
+      startTime.setHours(9, 0, 0, 0); // Default to 9 AM
+      const endTime = new Date(date);
+      endTime.setHours(10, 0, 0, 0); // Default to 10 AM
+
+      setTimeSlotFormData({
+        startTime,
+        endTime,
+        rinkId: selectedRink,
+      });
+      setIsCreateDialogOpen(true);
+    },
+    [selectedRink],
+  );
+
+  // Handle edit slot from day detail
+  const handleEditSlotFromDay = useCallback((slot: TimeSlot) => {
+    setSelectedSlot(slot);
+    setIsManageDialogOpen(true);
+  }, []);
+
+  // Handle delete slot from day detail
+  const handleDeleteSlotFromDay = useCallback(
+    (slotId: string) => {
+      deleteTimeSlot.mutate({ id: slotId });
+    },
+    [deleteTimeSlot],
+  );
 
   // Handle time slot click in mobile view
   const handleMobileSlotClick = useCallback((slot: TimeSlot) => {
@@ -261,12 +348,103 @@ const ScheduleManagerComponent = () => {
         return;
       }
 
+      // Find the student being assigned
+      const student = students?.find((s) => s.id === studentId);
+      if (!student) {
+        console.error("Student not found");
+        return;
+      }
+
+      // Immediately update the selected slot/event in the dialog
+      if (selectedSlot) {
+        const updatedSlot = {
+          ...selectedSlot,
+          Lesson: [
+            ...(selectedSlot.Lesson || []),
+            {
+              id: `optimistic-${Date.now()}`,
+              Student: student,
+              timeSlotId: timeSlotId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ],
+        };
+        setSelectedSlot(updatedSlot);
+      }
+
+      if (selectedEvent) {
+        const updatedEvent = {
+          ...selectedEvent,
+          schedule: {
+            ...selectedEvent.schedule,
+            raw: {
+              ...selectedEvent.schedule.raw,
+              lessons: [
+                ...(selectedEvent.schedule.raw.lessons || []),
+                {
+                  id: `optimistic-${Date.now()}`,
+                  Student: student,
+                  timeSlotId: timeSlotId,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                },
+              ],
+            },
+          },
+        };
+        setSelectedEvent(updatedEvent);
+      }
+
+      // The optimistic update will handle cache updates
       assignStudent.mutate({
         timeSlotId,
         studentId,
       });
     },
-    [assignStudent, selectedEvent, selectedSlot],
+    [assignStudent, selectedEvent, selectedSlot, students, setSelectedSlot, setSelectedEvent],
+  );
+
+  // Handle travel date blocking
+  const handleAddBlockedRange = useCallback((range: Omit<(typeof blockedDateRanges)[0], "id">) => {
+    const newRange = {
+      ...range,
+      id: crypto.randomUUID(),
+    };
+    setBlockedDateRanges((prev) => [...prev, newRange]);
+  }, []);
+
+  const handleRemoveBlockedRange = useCallback((id: string) => {
+    setBlockedDateRanges((prev) => prev.filter((range) => range.id !== id));
+  }, []);
+
+  // Handle enhanced booking dialog submission
+  const handleEnhancedBookingSubmit = useCallback(
+    (bookingData: {
+      date: Date;
+      startTime: string;
+      endTime: string;
+      rinkId: string;
+      maxStudents: number;
+    }) => {
+      // Convert time strings to full Date objects
+      const startDateTime = new Date(bookingData.date);
+      const [startHours, startMinutes] = bookingData.startTime.split(":").map(Number);
+      startDateTime.setHours(startHours, startMinutes, 0, 0);
+
+      const endDateTime = new Date(bookingData.date);
+      const [endHours, endMinutes] = bookingData.endTime.split(":").map(Number);
+      endDateTime.setHours(endHours, endMinutes, 0, 0);
+
+      createTimeSlot.mutate({
+        rinkId: bookingData.rinkId,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        maxStudents: bookingData.maxStudents,
+        isActive: true,
+      });
+    },
+    [createTimeSlot],
   );
 
   // Handle dialog close actions
@@ -331,13 +509,12 @@ const ScheduleManagerComponent = () => {
         selectedRink={selectedRink}
         onRinkSelect={setSelectedRink}
         createTimeSlotButton={
-          <CreateTimeSlotDialog
-            isOpen={isCreateDialogOpen}
+          <EnhancedBookingDialog
+            open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
-            timeSlotFormData={timeSlotFormData}
-            onCreateClick={handleCreateTimeSlotClick}
+            onBookingSubmit={handleEnhancedBookingSubmit}
             rinks={rinks || []}
-            onSubmitAction={handleCreateDialogClose}
+            isLoading={createTimeSlot.isPending}
           />
         }
         bulkCreateButton={
@@ -351,6 +528,21 @@ const ScheduleManagerComponent = () => {
         rinks={rinks || []}
         isSelectionMode={isSelectionMode}
         onToggleSelectionMode={handleToggleSelectionMode}
+        dateRangeFilter={
+          <DateRangeFilter
+            dateFrom={dateRangeFrom}
+            dateTo={dateRangeTo}
+            onDateFromChange={setDateRangeFrom}
+            onDateToChange={setDateRangeTo}
+          />
+        }
+        travelDateBlocker={
+          <TravelDateManager
+            blockedDateRanges={blockedDateRanges}
+            onAddBlockedRange={handleAddBlockedRange}
+            onRemoveBlockedRange={handleRemoveBlockedRange}
+          />
+        }
       />
 
       {/* Timezone Information Banner */}
@@ -388,6 +580,32 @@ const ScheduleManagerComponent = () => {
         onAssignStudent={handleAssignStudent}
         onUnassignStudent={(lessonId: string) => {
           if (lessonId) {
+            // Immediately update the selected slot/event in the dialog
+            if (selectedSlot) {
+              const updatedSlot = {
+                ...selectedSlot,
+                Lesson: (selectedSlot.Lesson || []).filter((lesson) => lesson.id !== lessonId),
+              };
+              setSelectedSlot(updatedSlot);
+            }
+
+            if (selectedEvent) {
+              const updatedEvent = {
+                ...selectedEvent,
+                schedule: {
+                  ...selectedEvent.schedule,
+                  raw: {
+                    ...selectedEvent.schedule.raw,
+                    lessons: (selectedEvent.schedule.raw.lessons || []).filter(
+                      (lesson: any) => lesson.id !== lessonId,
+                    ),
+                  },
+                },
+              };
+              setSelectedEvent(updatedEvent);
+            }
+
+            // The optimistic update will handle cache updates
             unassignStudent.mutate({ lessonId });
           }
         }}
@@ -438,6 +656,14 @@ const ScheduleManagerComponent = () => {
               isSelectionMode={isSelectionMode}
               selectedSlotIds={selectedSlotIds}
               onSlotSelection={handleSlotSelection}
+              timeSlots={timeSlots}
+              onDayClick={handleDayClick}
+              onDateChange={handleDateChange}
+              onCreateSlot={handleCreateSlotFromDay}
+              onEditSlot={handleEditSlotFromDay}
+              onDeleteSlot={handleDeleteSlotFromDay}
+              useEnhancedHeader={true}
+              blockedDateRanges={blockedDateRanges}
             />
           )}
         </CardContent>

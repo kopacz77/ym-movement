@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { useState, useEffect } from "react";
 import type React from "react";
 
 interface TimezoneNoticeProps {
@@ -12,6 +13,12 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
   rinkName = "the rink",
   className = "",
 }) => {
+  // State for current time (to prevent hydration mismatch)
+  const [currentTimes, setCurrentTimes] = useState<{
+    localTimeStr: string;
+    rinkTimeStr: string;
+  } | null>(null);
+
   // Get the local timezone in a readable format
   const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const localTimezoneName = localTimezone.split("/").pop()?.replace("_", " ") || localTimezone;
@@ -62,10 +69,24 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
   const { hours: hourDiff, direction } = getTimezoneRelationship();
   const hourText = hourDiff === 1 ? "hour" : "hours";
 
-  // Show current time in both timezones for clarity
-  const now = DateTime.now();
-  const localTimeStr = now.toFormat("h:mm a");
-  const rinkTimeStr = now.setZone(rinkTimezone).toFormat("h:mm a");
+  // Update current time only on client side to prevent hydration mismatch
+  useEffect(() => {
+    const updateTime = () => {
+      const now = DateTime.now();
+      setCurrentTimes({
+        localTimeStr: now.toFormat("h:mm a"),
+        rinkTimeStr: now.setZone(rinkTimezone).toFormat("h:mm a"),
+      });
+    };
+
+    // Initial update
+    updateTime();
+
+    // Update every minute
+    const interval = setInterval(updateTime, 60000);
+
+    return () => clearInterval(interval);
+  }, [rinkTimezone]);
 
   // Don't show timezone notice if they're the same timezone
   if (localTimezone === rinkTimezone || hourDiff === 0) {
@@ -96,10 +117,12 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
           This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}). Your
           local time ({localTimezoneName}) is {hourDiff} {hourText} {direction} the rink time.
         </p>
-        <p className="text-sm mt-1">
-          Current time: <strong>{localTimeStr}</strong> your time | <strong>{rinkTimeStr}</strong>{" "}
-          the rink time
-        </p>
+        {currentTimes && (
+          <p className="text-sm mt-1">
+            Current time: <strong>{currentTimes.localTimeStr}</strong> your time |{" "}
+            <strong>{currentTimes.rinkTimeStr}</strong> the rink time
+          </p>
+        )}
       </div>
     </div>
   );

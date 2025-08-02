@@ -191,13 +191,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="mb-4">
                 <p className="font-medium">Assign Student</p>
-                {studentStats && (
-                  <p className="text-xs text-gray-500">
-                    {studentStats.approved} approved / {studentStats.total} total students
-                  </p>
-                )}
               </div>
               <div className="flex gap-2">
                 <Select
@@ -220,11 +215,6 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     ) : (
                       <div className="px-2 py-1 text-sm text-gray-500">
                         No approved students available
-                        {studentStats && (
-                          <div className="text-xs mt-1">
-                            ({studentStats.approved} approved / {studentStats.total} total)
-                          </div>
-                        )}
                       </div>
                     )}
                   </SelectContent>
@@ -233,6 +223,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                   onClick={() => {
                     if (selectedStudentId) {
                       onAssignStudent(selectedStudentId);
+                      // Clear the selected student after assignment
+                      setSelectedStudentId("");
                     }
                   }}
                   disabled={!selectedStudentId || isAssigning}

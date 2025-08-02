@@ -80,8 +80,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [session, status, router]);
 
   const logout = useCallback(async () => {
-    await signOut({ redirect: false });
-    router.push("/auth/login");
+    try {
+      // Clear user state first to prevent React warnings
+      setUser(null);
+
+      // Use the Next.js signOut with proper URL configuration
+      await signOut({
+        redirect: false,
+        callbackUrl: "/auth/login",
+      });
+
+      // Small delay to ensure cleanup completes before navigation
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 100);
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Force navigation even if signOut fails
+      router.push("/auth/login");
+    }
   }, [router]);
 
   const isLoading = useMemo(() => status === "loading", [status]);

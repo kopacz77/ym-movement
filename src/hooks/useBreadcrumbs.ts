@@ -29,16 +29,16 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       // Admin routes
       dashboard: "Dashboard",
       schedule: "Schedule",
-      students: "Students", 
+      students: "Students",
       payments: "Payments",
       reports: "Reports",
       settings: "Settings",
       skills: "Skills",
-      
+
       // Student routes
       book: "Book Lessons",
       profile: "Profile",
-      
+
       // Common
       login: "Login",
       signup: "Sign Up",
@@ -58,7 +58,7 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       }
 
       const label = routeMap[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
-      
+
       // Last segment shouldn't have href (current page)
       if (i === segments.length - 1) {
         breadcrumbs.push({ label });

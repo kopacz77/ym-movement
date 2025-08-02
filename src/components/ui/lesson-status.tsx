@@ -1,7 +1,7 @@
+import { cva, type VariantProps } from "class-variance-authority";
+import { AlertCircle, Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CheckCircle, Clock, XCircle, Calendar, AlertCircle } from "lucide-react";
-import { cva, type VariantProps } from "class-variance-authority";
 
 const lessonStatusVariants = cva("", {
   variants: {
@@ -40,18 +40,11 @@ interface LessonStatusBadgeProps extends VariantProps<typeof lessonStatusVariant
   showIcon?: boolean;
 }
 
-function LessonStatusBadge({ 
-  status, 
-  className, 
-  showIcon = true 
-}: LessonStatusBadgeProps) {
+function LessonStatusBadge({ status, className, showIcon = true }: LessonStatusBadgeProps) {
   const Icon = statusIcons[status];
-  
+
   return (
-    <Badge 
-      variant="outline" 
-      className={cn(lessonStatusVariants({ status }), className)}
-    >
+    <Badge variant="outline" className={cn(lessonStatusVariants({ status }), className)}>
       {showIcon && <Icon className="h-3 w-3" />}
       {statusLabels[status]}
     </Badge>
@@ -64,19 +57,15 @@ interface LessonStatusIndicatorProps {
   size?: "sm" | "md" | "lg";
 }
 
-function LessonStatusIndicator({ 
-  status, 
-  className, 
-  size = "md" 
-}: LessonStatusIndicatorProps) {
+function LessonStatusIndicator({ status, className, size = "md" }: LessonStatusIndicatorProps) {
   const Icon = statusIcons[status];
-  
+
   const sizeClasses = {
     sm: "h-2 w-2",
-    md: "h-3 w-3", 
+    md: "h-3 w-3",
     lg: "h-4 w-4",
   };
-  
+
   const colorClasses = {
     scheduled: "text-blue-500",
     completed: "text-green-500",
@@ -84,21 +73,13 @@ function LessonStatusIndicator({
     pending: "text-yellow-500",
     rescheduled: "text-purple-500",
   };
-  
+
   return (
-    <div 
-      className={cn(
-        "inline-flex items-center justify-center rounded-full",
-        className
-      )}
+    <div
+      className={cn("inline-flex items-center justify-center rounded-full", className)}
       title={statusLabels[status]}
     >
-      <Icon 
-        className={cn(
-          sizeClasses[size], 
-          colorClasses[status]
-        )} 
-      />
+      <Icon className={cn(sizeClasses[size], colorClasses[status])} />
     </div>
   );
 }

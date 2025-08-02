@@ -294,33 +294,39 @@ export const timeSlotRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // Count existing time slots with these IDs that have lessons
-        const slotsWithLessons = await ctx.prisma.rinkTimeSlot.count({
-          where: {
-            id: { in: input.ids },
-            Lesson: { some: {} },
-          },
+        // First, get all the requested slots to check which ones have lessons
+        const allSlots = await ctx.prisma.rinkTimeSlot.findMany({
+          where: { id: { in: input.ids } },
+          include: { Lesson: true },
         });
 
-        if (slotsWithLessons > 0) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: `Cannot delete ${slotsWithLessons} time slots that have scheduled lessons.`,
+        // Separate slots that can be deleted from those that cannot
+        const deletableSlots = allSlots.filter((slot) => slot.Lesson.length === 0);
+        const protectedSlots = allSlots.filter((slot) => slot.Lesson.length > 0);
+
+        let deletedCount = 0;
+        if (deletableSlots.length > 0) {
+          // Delete all time slots without lessons in a batch operation
+          const result = await ctx.prisma.rinkTimeSlot.deleteMany({
+            where: {
+              id: { in: deletableSlots.map((slot) => slot.id) },
+              Lesson: { none: {} }, // Extra safety check
+            },
           });
+          deletedCount = result.count;
         }
 
-        // Delete all time slots without lessons in a batch operation
-        const result = await ctx.prisma.rinkTimeSlot.deleteMany({
-          where: {
-            id: { in: input.ids },
-            Lesson: { none: {} }, // Extra safety check
-          },
-        });
+        // Prepare response message
+        let message = `Successfully deleted ${deletedCount} time slots.`;
+        if (protectedSlots.length > 0) {
+          message += ` ${protectedSlots.length} slots with scheduled lessons were skipped.`;
+        }
 
         return {
           success: true,
-          count: result.count,
-          message: `Successfully deleted ${result.count} time slots.`,
+          count: deletedCount,
+          skipped: protectedSlots.length,
+          message,
         };
       } catch (error) {
         console.error("Error deleting bulk time slots:", error);

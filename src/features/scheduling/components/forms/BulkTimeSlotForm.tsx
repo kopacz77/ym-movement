@@ -412,26 +412,46 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                       { value: 6, label: "Sat" },
                     ].map((day) => (
                       <FormField
-                        key={day.value}
+                        key={`day-${day.value}-${day.label}`}
                         control={form.control}
                         name="daysOfWeek"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-2">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(day.value)}
-                                onCheckedChange={(checked) => {
-                                  const currentValue = field.value || [];
-                                  const newValue = checked
-                                    ? [...currentValue, day.value]
-                                    : currentValue.filter((d) => d !== day.value);
+                        render={({ field }) => {
+                          const currentValue = field.value || [];
+                          const isChecked = currentValue.includes(day.value);
+
+                          return (
+                            <FormItem className="flex flex-row items-center space-x-2">
+                              <FormControl>
+                                <Checkbox
+                                  checked={isChecked}
+                                  onCheckedChange={(checked) => {
+                                    const newValue = checked
+                                      ? [
+                                          ...currentValue.filter((d) => d !== day.value),
+                                          day.value,
+                                        ].sort((a, b) => a - b)
+                                      : currentValue.filter((d) => d !== day.value);
+                                    field.onChange(newValue);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel
+                                className="text-sm font-normal cursor-pointer"
+                                onClick={() => {
+                                  const newValue = isChecked
+                                    ? currentValue.filter((d) => d !== day.value)
+                                    : [
+                                        ...currentValue.filter((d) => d !== day.value),
+                                        day.value,
+                                      ].sort((a, b) => a - b);
                                   field.onChange(newValue);
                                 }}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-normal">{day.label}</FormLabel>
-                          </FormItem>
-                        )}
+                              >
+                                {day.label}
+                              </FormLabel>
+                            </FormItem>
+                          );
+                        }}
                       />
                     ))}
                   </div>

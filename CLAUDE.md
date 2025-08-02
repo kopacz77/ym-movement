@@ -12,6 +12,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Auto-fix lint issues**: `pnpm lint:fix` or `npm run lint:fix`
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
 
+## MCP Server Configuration
+
+**shadcn/ui MCP Server**: Configured for enhanced UI component access and development.
+
+**Setup Requirements**:
+1. **GitHub Personal Access Token**: Used for GitHub API access (5000 requests/hour vs 60 without)
+2. **Claude Code MCP Setup**: Configured using official Claude Code MCP commands
+3. **Restart Required**: Must restart Claude Code after configuration changes
+
+**Current Setup Status**: ✅ **CONFIGURED AND CONNECTED**
+- Server: `@jpisnice/shadcn-ui-mcp-server` 
+- Status: Connected (verified with `claude mcp list`)
+- Added with: `claude mcp add shadcn-ui npx @jpisnice/shadcn-ui-mcp-server -e GITHUB_PERSONAL_ACCESS_TOKEN=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`
+
+**Available MCP Tools**:
+- `mcp__shadcn-ui__list_components` - List all available shadcn/ui components
+- `mcp__shadcn-ui__get_component` - Get specific component source code
+- `mcp__shadcn-ui__get_component_demo` - Get component usage examples
+- `mcp__shadcn-ui__get_component_metadata` - Get component dependencies and info
+- `mcp__shadcn-ui__list_blocks` - List all available UI blocks
+- `mcp__shadcn-ui__get_block` - Get complete block implementations (including calendar blocks)
+
+**Usage**: Particularly useful for calendar component development, UI consistency, and accessing latest shadcn/ui patterns.
+
 ## Docker Commands (Recommended)
 
 - **Docker dev environment**: `pnpm docker:dev` (includes hot reload)

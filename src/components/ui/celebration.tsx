@@ -1,9 +1,9 @@
 "use client";
 
+import { CheckCircle, Gift, Heart, Sparkles, Star, Trophy } from "lucide-react";
 import * as React from "react";
-import { CheckCircle, Heart, Star, Sparkles, Trophy, Gift } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CelebrationProps {
   type?: "success" | "achievement" | "milestone" | "love" | "progress";
@@ -38,7 +38,7 @@ export function Celebration({
 
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        const newProgress = prev - (100 / (duration / 100));
+        const newProgress = prev - 100 / (duration / 100);
         if (newProgress <= 0) {
           setIsVisible(false);
           onClose?.();
@@ -127,17 +127,21 @@ export function Celebration({
   const Icon = config.icon;
 
   return (
-    <div className={cn(
-      "fixed top-4 right-4 z-50 max-w-sm w-full",
-      "transform transition-all duration-500 ease-out",
-      isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0",
-      className
-    )}>
-      <div className={cn(
-        "relative overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm",
-        `bg-gradient-to-br ${config.bgGradient[isAdmin ? "admin" : "student"]}`,
-        "border-white/20"
-      )}>
+    <div
+      className={cn(
+        "fixed top-4 right-4 z-50 max-w-sm w-full",
+        "transform transition-all duration-500 ease-out",
+        isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0",
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm",
+          `bg-gradient-to-br ${config.bgGradient[isAdmin ? "admin" : "student"]}`,
+          "border-white/20",
+        )}
+      >
         {/* Animated background sparkles for admin */}
         {isAdmin && (
           <div className="absolute inset-0 overflow-hidden">
@@ -161,30 +165,32 @@ export function Celebration({
         <div className="relative p-6">
           {/* Header with icon */}
           <div className="flex items-start gap-4">
-            <div className={cn(
-              "flex-shrink-0 p-2 rounded-full",
-              `bg-gradient-to-br ${config.colors[isAdmin ? "admin" : "student"]}`,
-              "shadow-lg"
-            )}>
+            <div
+              className={cn(
+                "flex-shrink-0 p-2 rounded-full",
+                `bg-gradient-to-br ${config.colors[isAdmin ? "admin" : "student"]}`,
+                "shadow-lg",
+              )}
+            >
               <Icon className="h-6 w-6 text-white animate-pulse" />
             </div>
 
             <div className="flex-1 min-w-0">
               {/* Title */}
-              <h3 className={cn(
-                "text-lg font-bold leading-tight mb-2",
-                isAdmin 
-                  ? `bg-gradient-to-r ${config.colors.admin} bg-clip-text text-transparent`
-                  : "text-foreground"
-              )}>
+              <h3
+                className={cn(
+                  "text-lg font-bold leading-tight mb-2",
+                  isAdmin
+                    ? `bg-gradient-to-r ${config.colors.admin} bg-clip-text text-transparent`
+                    : "text-foreground",
+                )}
+              >
                 {title}
               </h3>
 
               {/* Message */}
               {message && (
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  {message}
-                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{message}</p>
               )}
 
               {/* Action button */}
@@ -195,7 +201,7 @@ export function Celebration({
                   className={cn(
                     "mb-3",
                     `bg-gradient-to-r ${config.colors[isAdmin ? "admin" : "student"]}`,
-                    "hover:scale-105 transition-transform duration-200"
+                    "hover:scale-105 transition-transform duration-200",
                   )}
                 >
                   {actionLabel}
@@ -226,7 +232,7 @@ export function Celebration({
                 <div
                   className={cn(
                     "h-full transition-all duration-100 ease-linear",
-                    `bg-gradient-to-r ${config.colors[isAdmin ? "admin" : "student"]}`
+                    `bg-gradient-to-r ${config.colors[isAdmin ? "admin" : "student"]}`,
                   )}
                   style={{ width: `${progress}%` }}
                 />
@@ -249,11 +255,11 @@ export function Celebration({
 }
 
 // Specialized celebration components for common scenarios
-export function SuccessCelebration({ 
-  title, 
-  message, 
+export function SuccessCelebration({
+  title,
+  message,
   userRole,
-  onClose 
+  onClose,
 }: {
   title: string;
   message?: string;
@@ -271,11 +277,11 @@ export function SuccessCelebration({
   );
 }
 
-export function AchievementCelebration({ 
-  title, 
-  message, 
+export function AchievementCelebration({
+  title,
+  message,
   userRole,
-  onViewProgress 
+  onViewProgress,
 }: {
   title: string;
   message?: string;
@@ -294,10 +300,10 @@ export function AchievementCelebration({
   );
 }
 
-export function LoveCelebration({ 
-  title, 
+export function LoveCelebration({
+  title,
   message,
-  onClose 
+  onClose,
 }: {
   title: string;
   message?: string;

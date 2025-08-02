@@ -1,5 +1,16 @@
 "use client";
 
+// Navigation configurations for mobile sidebar
+import {
+  BarChart2,
+  Calendar,
+  Clock,
+  CreditCard,
+  LayoutDashboard,
+  Settings,
+  User,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
@@ -20,9 +31,6 @@ import { AdminCommandPalette } from "@/features/admin/components/layout/AdminCom
 import { AdminHeader } from "@/features/admin/components/layout/AdminHeader";
 import { StudentCommandPalette } from "@/features/student/components/layout/StudentCommandPalette";
 import { StudentHeader } from "@/features/student/components/layout/StudentHeader";
-
-// Navigation configurations for mobile sidebar
-import { BarChart2, Calendar, Clock, CreditCard, LayoutDashboard, Settings, User, Users } from "lucide-react";
 
 const adminNavigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -66,11 +74,9 @@ export function AppLayout({ role, children }: AppLayoutProps) {
           <header className="sticky top-0 z-10 border-b bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 px-6 py-4">
             <HeaderComponent />
           </header>
-          
+
           <main className="flex-1 p-6">
-            <div className="mx-auto w-full max-w-7xl">
-              {children}
-            </div>
+            <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>
         </div>
       </div>
@@ -114,12 +120,12 @@ export function AppLayout({ role, children }: AppLayoutProps) {
                     {(role === "admin" ? adminNavigation : studentNavigation).map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.href;
-                      
+
                       return (
                         <SidebarMenuItem key={item.name}>
                           <SidebarMenuButton asChild>
-                            <Link 
-                              href={item.href} 
+                            <Link
+                              href={item.href}
                               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full ${
                                 isActive
                                   ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
@@ -138,7 +144,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          
+
           {/* Main content area - Full width */}
           <SidebarInset className="w-full">
             {/* CRITICAL: Perfect mobile header spacing */}
@@ -148,11 +154,9 @@ export function AppLayout({ role, children }: AppLayoutProps) {
                 <HeaderComponent />
               </div>
             </header>
-            
+
             <main className="flex-1 p-4">
-              <div className="mx-auto w-full">
-                {children}
-              </div>
+              <div className="mx-auto w-full">{children}</div>
             </main>
           </SidebarInset>
         </SidebarProvider>

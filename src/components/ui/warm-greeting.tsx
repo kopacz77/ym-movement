@@ -66,27 +66,28 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     if (role !== "admin") {
       return name || "";
     }
-    
+
     // Extract first name from full name
     const firstName = name ? name.split(" ")[0] : "";
     const hour = new Date().getHours();
-    
+
     // Alternate between first name and "Beautiful" based on time of day
     if (hour >= 6 && hour < 12) {
       // Morning: Use first name
       return firstName || "Beautiful";
-    } else if (hour >= 12 && hour < 17) {
-      // Afternoon: Use "Beautiful" 
-      return "Beautiful";
-    } else if (hour >= 17 && hour < 20) {
-      // Evening: Use first name
-      return firstName || "Beautiful";
-    } else {
-      // Late night/early morning: Use "Beautiful"
+    }
+    if (hour >= 12 && hour < 17) {
+      // Afternoon: Use "Beautiful"
       return "Beautiful";
     }
+    if (hour >= 17 && hour < 20) {
+      // Evening: Use first name
+      return firstName || "Beautiful";
+    }
+    // Late night/early morning: Use "Beautiful"
+    return "Beautiful";
   };
-  
+
   const displayName = getDisplayName();
 
   return (

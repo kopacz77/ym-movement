@@ -89,10 +89,13 @@ export const delightfulToast = {
 
   error: (message: string, userRole: UserRole = "student") => {
     if (userRole === "admin") {
-      toast.error("💫 Oops! Something didn't quite work as expected. Don't worry though - these things happen! ✨", {
-        description: message,
-        duration: 4000,
-      });
+      toast.error(
+        "💫 Oops! Something didn't quite work as expected. Don't worry though - these things happen! ✨",
+        {
+          description: message,
+          duration: 4000,
+        },
+      );
     } else {
       toast.error("Something went wrong", {
         description: message,
@@ -106,11 +109,10 @@ export const delightfulToast = {
       return toast.loading("☕ Getting your coaching space ready...", {
         description: message,
       });
-    } else {
-      return toast.loading("Loading...", {
-        description: message,
-      });
     }
+    return toast.loading("Loading...", {
+      description: message,
+    });
   },
 
   success: (title: string, description?: string, userRole: UserRole = "student") => {

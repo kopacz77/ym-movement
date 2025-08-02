@@ -68,12 +68,7 @@ export const NotificationsPopover = () => {
     setIsClient(true);
   }, []);
 
-  // Don't render if not authenticated - check AFTER calling all hooks
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // Handle errors from query (but not auth errors)
+  // Handle errors from query (but not auth errors) - MOVED BEFORE CONDITIONAL RETURN
   useEffect(() => {
     if (error && error.data?.httpStatus !== 401) {
       toast.error("Failed to load notifications", {
@@ -81,6 +76,11 @@ export const NotificationsPopover = () => {
       });
     }
   }, [error]);
+
+  // Don't render if not authenticated - check AFTER calling all hooks
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.isRead).length;
