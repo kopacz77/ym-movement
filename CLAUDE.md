@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Current Setup Status**: ✅ **CONFIGURED AND CONNECTED**
 - Server: `@jpisnice/shadcn-ui-mcp-server` 
 - Status: Connected (verified with `claude mcp list`)
-- Added with: `claude mcp add shadcn-ui npx @jpisnice/shadcn-ui-mcp-server -e GITHUB_PERSONAL_ACCESS_TOKEN=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`
+- Added with: `claude mcp add shadcn-ui npx @jpisnice/shadcn-ui-mcp-server -e GITHUB_PERSONAL_ACCESS_TOKEN=your_github_token_here`
 
 **Available MCP Tools**:
 - `mcp__shadcn-ui__list_components` - List all available shadcn/ui components
