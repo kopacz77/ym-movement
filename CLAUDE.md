@@ -110,12 +110,14 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 
 - **Role-based dashboards**: Separate admin and student interfaces
 - **Advanced scheduling**: Time slot management with conflict detection and timezone support
+- **Blocked dates management**: Create and manage blocked periods (travel, competitions) with calendar integration
 - **Bulk operations**: Optimized bulk time slot creation with templates, real-time validation, and bulk delete with selection
 - **Enhanced editing**: Edit time slots with proper timezone handling and accurate time display
+- **Compact time slot creation**: Context-aware dialog with smart defaults and no scrolling required
 - **Student management**: Approval workflow, custom pricing, lesson tracking
 - **Payment tracking**: Venmo/Zelle integration with manual verification
 - **Google Calendar sync**: Automatic event creation/updates
-- **Notification system**: Real-time updates and alerts with authentication guards
+- **Unified notifications**: Sonner toast system with consistent styling and centered positioning
 
 ## Code Standards
 
@@ -133,7 +135,46 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 - Environment variables required for Google Calendar, database, NextAuth
 - **IMPORTANT**: Prisma relation names use PascalCase (e.g., `User`, `Lesson`, `Student`, `Rink`) - always use these in includes and access patterns
 
-## Recent Major Updates (2025-01-07)
+## Recent Major Updates (2025-08-05)
+
+### ✅ **Unified Toast Notification System**
+- **Achievement**: Standardized ALL toast notifications across the entire application using Sonner
+- **Replaced**: Browser `alert()` and `confirm()` dialogs with beautiful, consistent Sonner toasts
+- **Components**: `src/lib/toast-confirmations.ts` with standardized `showDeleteConfirmation()` and `showRemoveConfirmation()`
+- **Features**: Centered positioning (`top-center`), high z-index (9999), consistent styling, action/cancel buttons
+- **Impact**: 57+ components now use unified toast system, no more jarring browser dialogs
+
+### ✅ **Blocked Dates Management System**
+- **New Feature**: Complete blocked dates workflow - create, view, edit, delete
+- **Calendar Integration**: Click blocked dates in calendar to view details and delete
+- **Creation Interface**: Compact form with date pickers, type selection (Travel/Competition/Other), descriptions
+- **Smart Validation**: Prevents time slot creation on blocked dates with informative error toasts
+- **Components**: `BlockedDateDialog.tsx`, `WorkingBlockedDatesManager.tsx`
+- **Database Integration**: Full CRUD operations with automatic calendar refresh
+
+### ✅ **Compact Time Slot Creation Dialog**
+- **UX Revolution**: Redesigned create time slot dialog with 70% size reduction
+- **Context-Aware**: Pre-fills date, time, and rink from calendar clicks
+- **Smart Defaults**: Auto-calculates 1-hour duration, intelligent form pre-population
+- **No Scrolling**: Fits in standard viewport, eliminated large calendar picker
+- **Form**: `CompactTimeSlotDialog.tsx` with responsive design and proper validation
+- **Impact**: Streamlined workflow from 6+ steps to 3 focused inputs
+
+### ✅ **Button Height Consistency**
+- **UI Polish**: Fixed button height inconsistencies in header actions
+- **Standardization**: All buttons now use `size="sm"` with consistent spacing and typography
+- **Responsive**: Proper icon sizing (`h-3 w-3 sm:h-4 sm:w-4`) and text handling
+- **Components**: Updated `DialogComponents.tsx` Bulk Create Slots button
+- **Visual Harmony**: Uniform button row with consistent visual weight
+
+### ✅ **Toast Confirmation Standardization**
+- **System-wide**: Replaced browser `confirm()` dialogs with centered Sonner confirmations
+- **Error Boundary**: Enhanced error reporting with proper toast notifications
+- **Calendar Validation**: Blocked date creation attempts show elegant error toasts
+- **Consistent Messaging**: Unified language, timing, and styling across all confirmations
+- **User Experience**: No more jarring browser dialogs interrupting workflow
+
+## Previous Updates (2025-01-07)
 
 ### ✅ **Bulk Delete Functionality**
 - **New Feature**: Click-and-drag selection for multiple time slots

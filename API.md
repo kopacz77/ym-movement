@@ -142,6 +142,42 @@ admin.schedule.timeSlots.deleteBulk.useMutation()
 **Input:** `{ timeSlotIds: string[] }`
 **Security:** Prevents deletion of slots with bookings
 
+#### Get Blocked Dates
+```typescript
+admin.schedule.getBlockedDates.useQuery()
+```
+**Returns:** Array of blocked date ranges with type and metadata
+
+#### Create Blocked Date
+```typescript
+admin.schedule.createBlockedDate.useMutation()
+```
+**Input:**
+```typescript
+{
+  title: string;
+  description?: string;
+  startDate: Date;
+  endDate: Date;
+  type: 'TRAVEL' | 'COMPETITION' | 'OTHER';
+}
+```
+**Security:** Date validation, conflict detection with existing slots
+
+#### Update Blocked Date
+```typescript
+admin.schedule.updateBlockedDate.useMutation()
+```
+**Input:** Blocked date ID and updated fields
+**Security:** Ownership verification, date validation
+
+#### Delete Blocked Date
+```typescript
+admin.schedule.deleteBlockedDate.useMutation()
+```
+**Input:** `{ id: string }`
+**Security:** Ownership verification, cascade handling
+
 ---
 
 ### Payments (`admin.payments`)

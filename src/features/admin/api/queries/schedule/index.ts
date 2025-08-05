@@ -1,5 +1,6 @@
 // src/features/admin/api/queries/schedule/index.ts
 import { createTRPCRouter } from "@/lib/trpc";
+import { blockedDateRouter } from "./blockedDateQueries";
 import { lessonRouter } from "./lessonQueries";
 import { recurringPatternRouter } from "./recurringPatternQueries";
 import { rinkRouter } from "./rinkQueries";
@@ -29,4 +30,10 @@ export const scheduleRouter = createTRPCRouter({
 
   // Include all procedures from the recurringPatternRouter
   createRecurringPattern: recurringPatternRouter.createRecurringPattern,
+
+  // Include all procedures from the blockedDateRouter
+  getBlockedDates: blockedDateRouter.getBlockedDates,
+  createBlockedDate: blockedDateRouter.createBlockedDate,
+  updateBlockedDate: blockedDateRouter.updateBlockedDate,
+  deleteBlockedDate: blockedDateRouter.deleteBlockedDate,
 });

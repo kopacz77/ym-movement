@@ -11,18 +11,20 @@ import { type ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalend
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
+import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { BulkActionsToolbar } from "./BulkActionsToolbar";
 import { formatDateRange, type TimeSlot } from "./calendarUtils";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { DesktopCalendarView } from "./DesktopCalendarView";
 import { BulkCreateSlotsDialog } from "./DialogComponents";
-import { EnhancedBookingDialog } from "./EnhancedBookingDialog";
+import { CompactTimeSlotDialog } from "./CompactTimeSlotDialog";
 import { MobileCalendarView } from "./MobileCalendarView";
 import { ScheduleHeader } from "./ScheduleHeader";
 // Import our components
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
-import { TravelDateManager } from "./TravelDateManager";
+import { WorkingBlockedDatesManager } from "./WorkingBlockedDatesManager";
+import BlockedDateDialog from "./BlockedDateDialog";
 
 // Define types for form data
 interface TimeSlotFormData {
@@ -58,11 +60,15 @@ const ScheduleManagerComponent = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
+  const [isBlockedDateDialogOpen, setIsBlockedDateDialogOpen] = useState(false);
+  const [selectedBlockedRange, setSelectedBlockedRange] = useState<any>(null);
 
   // Selected data state
   const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(null);
+  const [selectedCalendarTime, setSelectedCalendarTime] = useState<string | null>(null);
 
   // Bulk selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -99,17 +105,6 @@ const ScheduleManagerComponent = () => {
   const [dateRangeFrom, setDateRangeFrom] = useState<Date | undefined>();
   const [dateRangeTo, setDateRangeTo] = useState<Date | undefined>();
 
-  // Travel date blocker state (for demo purposes - in real app this would come from backend)
-  const [blockedDateRanges, setBlockedDateRanges] = useState<
-    Array<{
-      id: string;
-      title: string;
-      description?: string;
-      dateRange: { from: Date; to: Date };
-      type: "travel" | "competition" | "other";
-    }>
-  >([]);
-
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
     const year = date.getFullYear();
@@ -129,6 +124,12 @@ const ScheduleManagerComponent = () => {
   // Use the timeSlots hook to fetch data
   const { rinks, students, timeSlots } = useTimeSlots(dateRange, selectedRink);
 
+  // Fetch blocked date ranges from database
+  const { data: blockedDateRanges = [] } = api.admin.schedule.getBlockedDates.useQuery({
+    startDate: dateRange.start,
+    endDate: dateRange.end,
+  });
+
   // Get current rink timezone
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
@@ -147,6 +148,12 @@ const ScheduleManagerComponent = () => {
   // Handle user interactions
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
+      // Extract date and time from calendar click for compact form
+      const clickedDate = slotInfo.start;
+      const clickedTime = `${clickedDate.getHours().toString().padStart(2, "0")}:${clickedDate.getMinutes().toString().padStart(2, "0")}`;
+      
+      setSelectedCalendarDate(clickedDate);
+      setSelectedCalendarTime(clickedTime);
       setTimeSlotFormData({
         startTime: slotInfo.start,
         endTime: slotInfo.end,
@@ -158,6 +165,9 @@ const ScheduleManagerComponent = () => {
   );
 
   const handleCreateTimeSlotClick = useCallback(() => {
+    // Clear calendar context when using button (not clicking on calendar)
+    setSelectedCalendarDate(null);
+    setSelectedCalendarTime(null);
     setTimeSlotFormData({
       startTime: null,
       endTime: null,
@@ -169,14 +179,31 @@ const ScheduleManagerComponent = () => {
   const handleSelectEvent = useCallback((event: object) => {
     const typedEvent = event as ExtendedCalendarEvent;
     if (typedEvent.slot) {
-      setSelectedSlot(typedEvent.slot);
-      setIsManageDialogOpen(true);
+      console.log("Selected event:", typedEvent);
+
+      // Check if this is a blocked date
+      if (typedEvent.slot.isBlocked) {
+        console.log("Blocked date selected, showing blocked date dialog");
+        setSelectedBlockedRange(typedEvent.slot.blockedRange);
+        setIsBlockedDateDialogOpen(true);
+      } else {
+        // Regular time slot
+        setSelectedSlot(typedEvent.slot);
+        setIsManageDialogOpen(true);
+      }
     }
   }, []);
 
   const handleEventDrop = useCallback(
     (eventData: EventInteractionArgs<ExtendedCalendarEvent>) => {
       const { event, start, end } = eventData;
+      
+      // Prevent dragging blocked dates
+      if (event.slot?.isBlocked) {
+        console.log("Cannot drag blocked dates - they are static periods");
+        return;
+      }
+      
       if (event.id && start && end) {
         updateTimeSlot.mutate({
           id: event.id.toString(),
@@ -297,6 +324,12 @@ const ScheduleManagerComponent = () => {
 
   // Prepare data for the edit dialog
   const handleEditSlot = useCallback(() => {
+    console.log(
+      "handleEditSlot called with selectedEvent:",
+      selectedEvent,
+      "selectedSlot:",
+      selectedSlot,
+    );
     const slotData = selectedEvent
       ? {
           startTime: selectedEvent.schedule.start || new Date(),
@@ -314,9 +347,10 @@ const ScheduleManagerComponent = () => {
               ? new Date(selectedSlot.endTime)
               : new Date()
             : new Date(),
-          rinkId: selectedSlot?.Rink.id || "",
+          rinkId: selectedSlot?.Rink?.id || selectedSlot?.rinkId || "",
         };
 
+    console.log("Generated slotData:", slotData);
     setTimeSlotFormData(slotData);
     setIsCreateDialogOpen(true);
     setIsManageDialogOpen(false);
@@ -325,9 +359,20 @@ const ScheduleManagerComponent = () => {
   // Handle deleting a time slot
   const handleDeleteSlot = useCallback(() => {
     const slotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
+    console.log(
+      "handleDeleteSlot called with selectedEvent:",
+      selectedEvent,
+      "selectedSlot:",
+      selectedSlot,
+      "slotId:",
+      slotId,
+    );
 
     if (slotId) {
+      console.log("Calling deleteTimeSlot.mutate with id:", slotId);
       deleteTimeSlot.mutate({ id: slotId });
+    } else {
+      console.error("No slotId found for deletion");
     }
   }, [deleteTimeSlot, selectedEvent, selectedSlot]);
 
@@ -405,19 +450,6 @@ const ScheduleManagerComponent = () => {
     [assignStudent, selectedEvent, selectedSlot, students, setSelectedSlot, setSelectedEvent],
   );
 
-  // Handle travel date blocking
-  const handleAddBlockedRange = useCallback((range: Omit<(typeof blockedDateRanges)[0], "id">) => {
-    const newRange = {
-      ...range,
-      id: crypto.randomUUID(),
-    };
-    setBlockedDateRanges((prev) => [...prev, newRange]);
-  }, []);
-
-  const handleRemoveBlockedRange = useCallback((id: string) => {
-    setBlockedDateRanges((prev) => prev.filter((range) => range.id !== id));
-  }, []);
-
   // Handle enhanced booking dialog submission
   const handleEnhancedBookingSubmit = useCallback(
     (bookingData: {
@@ -462,6 +494,12 @@ const ScheduleManagerComponent = () => {
     setSelectedSlot(null);
     setIsManageDialogOpen(false);
   }, []);
+
+  const handleBlockedDateDialogClose = useCallback(() => {
+    setSelectedBlockedRange(null);
+    setIsBlockedDateDialogOpen(false);
+  }, []);
+
 
   // Bulk selection handlers
   const handleToggleSelectionMode = useCallback(() => {
@@ -509,9 +547,12 @@ const ScheduleManagerComponent = () => {
         selectedRink={selectedRink}
         onRinkSelect={setSelectedRink}
         createTimeSlotButton={
-          <EnhancedBookingDialog
+          <CompactTimeSlotDialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
+            selectedDate={selectedCalendarDate || undefined}
+            selectedStartTime={selectedCalendarTime || undefined}
+            selectedRinkId={selectedRink}
             onBookingSubmit={handleEnhancedBookingSubmit}
             rinks={rinks || []}
             isLoading={createTimeSlot.isPending}
@@ -536,13 +577,7 @@ const ScheduleManagerComponent = () => {
             onDateToChange={setDateRangeTo}
           />
         }
-        travelDateBlocker={
-          <TravelDateManager
-            blockedDateRanges={blockedDateRanges}
-            onAddBlockedRange={handleAddBlockedRange}
-            onRemoveBlockedRange={handleRemoveBlockedRange}
-          />
-        }
+        travelDateBlocker={<WorkingBlockedDatesManager />}
       />
 
       {/* Timezone Information Banner */}
@@ -668,6 +703,13 @@ const ScheduleManagerComponent = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Blocked Date Management Dialog */}
+      <BlockedDateDialog
+        isOpen={isBlockedDateDialogOpen}
+        onClose={handleBlockedDateDialogClose}
+        blockedRange={selectedBlockedRange}
+      />
     </div>
   );
 };

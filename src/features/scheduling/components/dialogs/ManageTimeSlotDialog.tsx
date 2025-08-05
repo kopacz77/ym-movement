@@ -1,5 +1,7 @@
 import { X } from "lucide-react";
 import type { Event } from "react-big-calendar";
+import { toast } from "sonner";
+import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/dialogs/ManageTimeSlotDialog.tsx
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -176,9 +178,9 @@ export function ManageTimeSlotDialog({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        if (confirm("Remove this student from the time slot?")) {
+                        showRemoveConfirmation("student from time slot", () => {
                           onUnassignStudent({ lessonId: lesson.id });
-                        }
+                        });
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -218,9 +220,9 @@ export function ManageTimeSlotDialog({
                 className="w-full md:w-auto"
                 onClick={() => {
                   const slotId = selectedEvent ? selectedEvent.event.id : selectedSlot?.id || "";
-                  if (confirm("Are you sure you want to delete this time slot?")) {
+                  showDeleteConfirmation("time slot", () => {
                     onDelete(slotId);
-                  }
+                  });
                 }}
               >
                 Delete

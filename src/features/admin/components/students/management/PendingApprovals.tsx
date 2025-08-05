@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { AlertCircle, Check, Clock } from "lucide-react";
 import type React from "react";
 import { toast } from "sonner";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -74,13 +75,9 @@ export const PendingApprovals: React.FC = () => {
   };
 
   const handleReject = (studentId: string) => {
-    if (
-      window.confirm(
-        "Are you sure you want to reject this application?\nThis will permanently delete the student record.",
-      )
-    ) {
+    showDeleteConfirmation("student application", () => {
       rejectStudentMutation.mutate({ studentId });
-    }
+    });
   };
 
   // Format date for display

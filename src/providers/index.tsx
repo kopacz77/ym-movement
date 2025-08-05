@@ -9,6 +9,7 @@ import superjson from "superjson";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext"; // Add this import
 import { api } from "@/lib/api";
+import { Toaster } from "@/components/ui/sonner";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -39,10 +40,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <AuthProvider>
         <BulkOperationsProvider>
-          {" "}
-          {/* Add this provider */}
           <api.Provider client={trpcClient} queryClient={queryClient}>
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            <QueryClientProvider client={queryClient}>
+              {children}
+              <Toaster />
+            </QueryClientProvider>
           </api.Provider>
         </BulkOperationsProvider>
       </AuthProvider>

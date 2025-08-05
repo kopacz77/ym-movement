@@ -29,7 +29,9 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 
 ### 📅 **Advanced Scheduling System**
 - Dynamic time slot management with conflict detection
+- **Blocked dates management** for travel, competitions, and unavailable periods
 - **Optimized bulk operations** with templates and real-time validation
+- **Compact time slot creation** with context-aware pre-filling and smart defaults
 - Recurring pattern support for regular lessons
 - Google Calendar integration with automatic event sync
 - Timezone-aware scheduling for multiple rinks
@@ -61,6 +63,7 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 - **TypeScript 5.8.2** - Strict mode enabled
 - **Tailwind CSS** - Utility-first styling
 - **Radix UI** - Accessible component primitives
+- **Sonner** - Beautiful toast notifications with unified styling
 - **React Hook Form** - Optimized form handling
 - **TanStack Query** - Data fetching and caching
 

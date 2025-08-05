@@ -63,10 +63,10 @@ const dateRangeValidator = (startDate: string, endDate: string) => {
   }
 };
 
-// Define a break schema
+// Define a break schema - allow empty values for optional breaks
 const breakSchema = z.object({
-  startTime: z.string().min(1, "Required"),
-  duration: z.coerce.number().min(1, "Required (mins)"),
+  startTime: z.string(),
+  duration: z.coerce.number().min(0),
 });
 
 // Updated bulk time slot schema with breaks array
@@ -142,7 +142,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
       dailyStartTime: "",
       dailyEndTime: "",
       slotDuration: 60,
-      breaks: [{ startTime: "", duration: 0 }],
+      breaks: [],
       maxStudents: 1,
       daysOfWeek: [],
     },
@@ -154,9 +154,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
     "startDate",
     "endDate",
     "daysOfWeek",
-    "startTime",
-    "endTime",
-    "duration",
+    "dailyStartTime",
+    "dailyEndTime",
+    "slotDuration",
+    "breaks",
+    "maxStudents",
   ]);
   const formValues = useMemo(
     () => ({
@@ -164,9 +166,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
       startDate: watchedFields[1],
       endDate: watchedFields[2],
       daysOfWeek: watchedFields[3],
-      startTime: watchedFields[4],
-      endTime: watchedFields[5],
-      duration: watchedFields[6],
+      dailyStartTime: watchedFields[4],
+      dailyEndTime: watchedFields[5],
+      slotDuration: watchedFields[6],
+      breaks: watchedFields[7],
+      maxStudents: watchedFields[8],
     }),
     [watchedFields],
   );
@@ -276,13 +280,6 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
 
           {/* Form Fields */}
           <div className="space-y-4">
-            {/* Debug: Show rinks data (development only) */}
-            {process.env.NODE_ENV === "development" && isClient && (
-              <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-                Debug: {rinks?.length || 0} rinks available:{" "}
-                {rinks?.map((r) => r.name).join(", ") || "None"}
-              </div>
-            )}
             <FormField
               control={form.control}
               name="rinkId"
@@ -461,14 +458,6 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
             />
 
             {/* Calendar Preview */}
-            {process.env.NODE_ENV === "development" && isClient && (
-              <div className="text-xs text-muted-foreground bg-yellow-50 p-2 rounded">
-                Preview Debug: startDate={formValues.startDate || "empty"}, endDate=
-                {formValues.endDate || "empty"}, daysOfWeek=[
-                {formValues.daysOfWeek?.join(",") || "none"}] ({formValues.daysOfWeek?.length || 0}{" "}
-                selected)
-              </div>
-            )}
             {formValues.startDate &&
             formValues.endDate &&
             formValues.daysOfWeek &&

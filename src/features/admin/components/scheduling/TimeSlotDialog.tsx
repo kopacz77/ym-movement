@@ -1,5 +1,7 @@
 import { X } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
@@ -257,9 +259,9 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                           size="sm"
                           disabled={isUnassigning}
                           onClick={() => {
-                            if (confirm("Remove this student from the time slot?")) {
+                            showRemoveConfirmation("student from time slot", () => {
                               onUnassignStudent(lesson.id);
-                            }
+                            });
                           }}
                         >
                           <X className="h-4 w-4" />
@@ -279,16 +281,35 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
               <Button variant="outline" className="w-full md:w-auto" onClick={onClose}>
                 Close
               </Button>
-              <Button variant="outline" className="w-full md:w-auto" onClick={onEdit}>
+              <Button
+                variant="outline"
+                className="w-full md:w-auto"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("Edit button clicked in TimeSlotDialog");
+                  onEdit();
+                }}
+              >
                 Edit
               </Button>
               <Button
                 variant="destructive"
                 className="w-full md:w-auto"
-                onClick={() => {
-                  if (confirm("Are you sure you want to delete this time slot?")) {
-                    onDelete();
-                  }
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("Delete button clicked in TimeSlotDialog");
+                  showDeleteConfirmation(
+                    "time slot",
+                    () => {
+                      console.log("Delete action confirmed, calling onDelete");
+                      onDelete();
+                    },
+                    () => {
+                      console.log("Delete cancelled");
+                    },
+                  );
                 }}
               >
                 Delete

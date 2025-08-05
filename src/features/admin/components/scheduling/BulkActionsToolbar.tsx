@@ -107,18 +107,16 @@ export function BulkActionsToolbar({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Time Slots</AlertDialogTitle>
-              <AlertDialogDescription className="space-y-2">
-                <p>
-                  Are you sure you want to delete {selectedCount} time slot
-                  {selectedCount !== 1 ? "s" : ""}?
-                </p>
-                <Alert>
-                  <AlertDescription>
-                    Only time slots without scheduled lessons will be deleted. Slots with existing
-                    lessons will be skipped to prevent data loss.
-                  </AlertDescription>
-                </Alert>
+              <AlertDialogDescription>
+                Are you sure you want to delete {selectedCount} time slot
+                {selectedCount !== 1 ? "s" : ""}?
               </AlertDialogDescription>
+              <Alert className="mt-4">
+                <AlertDescription>
+                  Only time slots without scheduled lessons will be deleted. Slots with existing
+                  lessons will be skipped to prevent data loss.
+                </AlertDescription>
+              </Alert>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>

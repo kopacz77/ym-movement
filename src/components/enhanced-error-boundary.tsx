@@ -38,6 +38,7 @@
 
 import { AlertTriangle, Bug, Clock, RefreshCw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -206,7 +207,9 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 
     // Copy to clipboard or open bug report
     navigator.clipboard?.writeText(JSON.stringify(bugReport, null, 2));
-    alert("Bug report copied to clipboard");
+    toast.success("Bug report copied", {
+      description: "Bug report has been copied to clipboard",
+    });
   };
 
   componentWillUnmount() {

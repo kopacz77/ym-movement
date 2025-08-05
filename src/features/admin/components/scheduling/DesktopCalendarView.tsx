@@ -3,7 +3,9 @@ import { Calendar, type EventProps, type SlotInfo, Views } from "react-big-calen
 import withDragAndDrop, {
   type EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop";
+import { toast } from "sonner";
 import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
+import { CalendarErrorBoundary } from "./CalendarErrorBoundary";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -32,11 +34,12 @@ interface BlockedDateRange {
   id: string;
   title: string;
   description?: string;
-  dateRange: {
-    from: Date | undefined;
-    to: Date | undefined;
-  };
-  type: "travel" | "competition" | "other";
+  startDate: string | Date;
+  endDate: string | Date;
+  type: "TRAVEL" | "COMPETITION" | "OTHER";
+  createdById: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 interface DesktopCalendarViewProps {
@@ -67,6 +70,7 @@ interface DesktopCalendarViewProps {
   blockedDateRanges?: BlockedDateRange[];
 }
 
+// Create DnD Calendar outside component to prevent recreation on every render
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
@@ -102,9 +106,8 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   const isDateBlocked = useCallback(
     (date: Date) => {
       return blockedDateRanges.some((range) => {
-        if (!range.dateRange.from || !range.dateRange.to) return false;
-        const start = new Date(range.dateRange.from);
-        const end = new Date(range.dateRange.to);
+        const start = new Date(range.startDate);
+        const end = new Date(range.endDate);
         const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
@@ -118,35 +121,41 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   const blockedEvents = useMemo(() => {
     const blocked: ExtendedCalendarEvent[] = [];
     blockedDateRanges.forEach((range) => {
-      if (range.dateRange.from && range.dateRange.to) {
-        const start = new Date(range.dateRange.from);
-        const end = new Date(range.dateRange.to);
+      const start = new Date(range.startDate);
+      const end = new Date(range.endDate);
 
-        // Create events for each day in the blocked range
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          const dayKey = d.toDateString();
+      // Create events for each day in the blocked range
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dayKey = d.toDateString();
 
-          // Create a blocked event
-          blocked.push({
-            id: `blocked-${range.id}-${d.toISOString().split("T")[0]}`,
-            title: `🚫 ${range.title}`,
-            start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0),
-            end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 10, 0),
-            allDay: false,
-            resourceId: `blocked-${dayKey}`,
-            backgroundColor:
-              range.type === "travel"
-                ? "#ef4444"
-                : range.type === "competition"
-                  ? "#f97316"
-                  : "#6b7280",
-            slot: {
-              id: `blocked-${range.id}`,
-              isBlocked: true,
-              blockedRange: range,
-            } as any,
-          });
-        }
+        // Create a blocked event spanning multiple hours for visibility
+        blocked.push({
+          id: `blocked-${range.id}-${d.toISOString().split("T")[0]}`,
+          title: `🚫 ${range.title}`,
+          start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 10, 0), // 10 AM
+          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 14, 0), // 2 PM (4 hours span)
+          allDay: false,
+          resourceId: `blocked-${dayKey}`,
+          backgroundColor:
+            range.type === "TRAVEL"
+              ? "#ef4444" // Red for travel
+              : range.type === "COMPETITION"
+                ? "#f97316" // Orange for competition
+                : "#6b7280", // Gray for other
+          slot: {
+            id: `blocked-${range.id}`,
+            isBlocked: true,
+            blockedRange: {
+              ...range,
+              // Convert to old format for compatibility
+              dateRange: {
+                from: new Date(range.startDate),
+                to: new Date(range.endDate),
+              },
+              type: range.type.toLowerCase(),
+            },
+          } as any,
+        });
       }
     });
     return blocked;
@@ -392,6 +401,14 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
     (event: object, _e: SyntheticEvent<HTMLElement, Event>) => {
       const typedEvent = event as ExtendedCalendarEvent;
 
+      // Check if this is a blocked date event - handle specially
+      if (typedEvent.slot?.isBlocked) {
+        console.log("Blocked date clicked - opening blocked date management");
+        // Pass the blocked date event to the parent for special handling
+        onSelectEvent(typedEvent);
+        return;
+      }
+
       if (isSelectionMode && onSlotSelection) {
         // In selection mode, toggle the slot selection
         const slotId = typedEvent.slot.id;
@@ -421,9 +438,8 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       if (isDateBlocked(slotInfo.start)) {
         // Find which blocked range this date falls into
         const blockedRange = blockedDateRanges.find((range) => {
-          if (!range.dateRange.from || !range.dateRange.to) return false;
-          const start = new Date(range.dateRange.from);
-          const end = new Date(range.dateRange.to);
+          const start = new Date(range.startDate);
+          const end = new Date(range.endDate);
           const checkDate = new Date(
             slotInfo.start.getFullYear(),
             slotInfo.start.getMonth(),
@@ -436,9 +452,9 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
 
         // Show a message about the blocked date
         const rangeTitle = blockedRange?.title || "blocked period";
-        alert(
-          `Cannot create time slots on ${slotInfo.start.toLocaleDateString()} - this date is blocked for ${rangeTitle}.`,
-        );
+        toast.error("Cannot create time slot", {
+          description: `${slotInfo.start.toLocaleDateString()} is blocked for ${rangeTitle}`,
+        });
         return;
       }
 
@@ -475,31 +491,48 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       {/* Add the timezone notice banner */}
       <TimezoneNotice rinkTimezone={rinkTimezone} rinkName={rinkName} className="mb-4" />
 
-      {/* React Big Calendar implementation - with custom month view events */}
+      {/* React Big Calendar implementation - with comprehensive configuration */}
       <div className="pb-8">
-        <DnDCalendar
-          ref={calendarRef}
-          localizer={localizer}
-          events={calendarView === "month" ? processedMonthEvents : [...events, ...blockedEvents]}
-          startAccessor={startAccessor}
-          endAccessor={endAccessor}
-          style={{ height: 700 }}
-          selectable
-          onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent}
-          resizable
-          defaultView={Views.WEEK}
-          view={calendarView as (typeof Views)[keyof typeof Views]}
-          date={date}
-          step={15}
-          timeslots={4}
-          components={{
-            event: EventComponent,
-            toolbar: () => null, // Disable the default toolbar
-          }}
-          eventPropGetter={eventPropGetter}
-          onEventDrop={handleEventDrop}
-        />
+        <CalendarErrorBoundary>
+          <DnDCalendar
+            ref={calendarRef}
+            localizer={localizer}
+            events={calendarView === "month" ? processedMonthEvents : [...events, ...blockedEvents]}
+            startAccessor={startAccessor}
+            endAccessor={endAccessor}
+            style={{ height: 700 }}
+            // Selection configuration
+            selectable={true}
+            selectRangeFormat={() => ""}
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            onSelecting={() => true}
+            longPressThreshold={0}
+            // Drag and drop configuration
+            resizable={true}
+            onEventDrop={handleEventDrop}
+            onEventResize={handleEventDrop}
+            dragAndDropFromOutsideSource={false}
+            // View configuration
+            defaultView={Views.WEEK}
+            view={calendarView as (typeof Views)[keyof typeof Views]}
+            date={date}
+            step={15}
+            timeslots={4}
+            min={new Date(2024, 0, 1, 6, 0)} // 6 AM
+            max={new Date(2024, 0, 1, 22, 0)} // 10 PM
+            // Custom components
+            components={{
+              event: EventComponent,
+              toolbar: () => null, // Disable the default toolbar
+            }}
+            eventPropGetter={eventPropGetter}
+            // Performance optimizations
+            popup={false}
+            showMultiDayTimes={true}
+            rtl={false}
+          />
+        </CalendarErrorBoundary>
       </div>
     </div>
   );

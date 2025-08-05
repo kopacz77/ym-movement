@@ -363,6 +363,46 @@ This mobile layout embodies the same love and attention to detail as the desktop
 - Icon changes based on time of day
 - Perfect name alternation logic for mobile
 
+#### Sonner Toast Notifications
+*Unified notification system with consistent styling and behavior*
+
+```tsx
+// ✅ CORRECT - Standard delete confirmation
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
+
+showDeleteConfirmation("time slot", () => {
+  // Delete action
+});
+
+// ✅ CORRECT - Standard remove confirmation  
+import { showRemoveConfirmation } from "@/lib/toast-confirmations";
+
+showRemoveConfirmation("student from time slot", () => {
+  // Remove action
+});
+
+// ✅ CORRECT - Custom toast
+import { toast } from "sonner";
+
+toast.error("Cannot create time slot", {
+  description: "Date is blocked for Regional Competition"
+});
+```
+
+**Standards:**
+- **Position**: Always `top-center` for visibility
+- **Z-index**: 9999 for proper layering over dialogs
+- **Styling**: Consistent with theme colors and typography
+- **Actions**: Use standardized confirmation patterns
+- **Duration**: 10 seconds for confirmations, 4 seconds for notifications
+- **Language**: Clear, user-friendly messaging
+
+**NEVER use:**
+- ❌ Browser `alert()`, `confirm()`, or `prompt()` dialogs
+- ❌ Different toast positioning (bottom, corners)
+- ❌ Inconsistent action button styling
+- ❌ Custom confirmation patterns outside utility functions
+
 ---
 
 *Built with ❤️, ✨, and infinite admiration for an incredible coach.*

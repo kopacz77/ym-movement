@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2025-08-05
+
+### 🎉 Major UX & Notification System Overhaul
+
+#### Added
+- **Unified Toast Notification System**: Complete replacement of browser dialogs with beautiful Sonner toasts
+  - Standardized `showDeleteConfirmation()` and `showRemoveConfirmation()` utilities
+  - Centered positioning (`top-center`) with high z-index for proper layering
+  - Consistent styling and messaging across all 57+ components
+  - Action/cancel buttons with proper theming
+
+- **Blocked Dates Management System**: Full workflow for managing unavailable periods
+  - Calendar integration - click blocked dates to view/delete
+  - Creation interface with type selection (Travel/Competition/Other)
+  - Smart validation preventing time slot creation on blocked dates
+  - Database integration with automatic calendar refresh
+  - Components: `BlockedDateDialog.tsx`, `WorkingBlockedDatesManager.tsx`
+
+- **Compact Time Slot Creation Dialog**: Revolutionary UX improvement
+  - 70% size reduction - fits in standard viewport without scrolling
+  - Context-aware pre-filling from calendar clicks (date, time, rink)
+  - Smart defaults with auto-calculated 1-hour duration
+  - Streamlined workflow from 6+ steps to 3 focused inputs
+  - Component: `CompactTimeSlotDialog.tsx`
+
+#### Fixed
+- **Button Height Consistency**: All header action buttons now have uniform height
+  - Standardized `size="sm"` across all buttons
+  - Consistent icon sizing (`h-3 w-3 sm:h-4 sm:w-4`) and typography
+  - Responsive text handling for mobile/desktop
+  - Visual harmony in button rows
+
+- **Calendar Validation**: Elegant error handling for blocked date conflicts
+  - Replaced jarring browser alerts with informative Sonner error toasts
+  - Enhanced error boundary with proper toast notifications
+  - Consistent messaging and user-friendly error descriptions
+
+#### Changed
+- **Enhanced Error Boundary**: Upgraded bug report system with toast notifications
+- **Calendar Drag Prevention**: Blocked dates no longer draggable (prevents API errors)
+- **Timezone Handling**: Improved date creation with proper local time parsing
+
 ## [3.0.1] - 2025-01-22
 
 ### 🎨 UX Improvements & Bug Fixes

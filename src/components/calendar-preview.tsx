@@ -242,7 +242,7 @@ export function CalendarPreview({
         </div>
 
         {/* Breaks Summary */}
-        {breaks.some((b) => b.startTime && b.duration > 0) && (
+        {breaks && breaks.some((b) => b.startTime && b.duration > 0) && (
           <div className="text-xs text-muted-foreground">
             <div className="font-medium mb-1">Breaks:</div>
             {breaks

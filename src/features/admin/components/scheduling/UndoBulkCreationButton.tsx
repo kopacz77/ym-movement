@@ -29,25 +29,7 @@ export function UndoBulkCreationButton() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const utils = api.useContext();
 
-  // Check if operation is relevant (less than 1 hour old)
-  const isRelevant = lastBulkCreation && Date.now() - lastBulkCreation.timestamp < 60 * 60 * 1000;
-
-  // If no relevant bulk operation exists, show a disabled button as a fallback
-  if (!lastBulkCreation || !isRelevant || lastBulkCreation.operation !== "create") {
-    // Clear outdated operations
-    if (lastBulkCreation && !isRelevant) {
-      clearLastBulkCreation();
-    }
-
-    // Return a disabled button instead of null, so it's always visible
-    return (
-      <Button variant="outline" size="sm" className="flex items-center gap-1" disabled={true}>
-        <Undo2 className="h-4 w-4" />
-        Undo Bulk Creation
-      </Button>
-    );
-  }
-
+  // Move the mutation hook to the top level - hooks must always be called in the same order
   const deleteBulkMutation = api.admin.schedule.deleteBulkTimeSlots.useMutation({
     onSuccess: (result: BulkDeleteResult) => {
       toast.success("Bulk Creation Undone", {
@@ -68,6 +50,25 @@ export function UndoBulkCreationButton() {
       console.error("Error deleting bulk time slots:", error);
     },
   });
+
+  // Check if operation is relevant (less than 1 hour old) - AFTER all hooks
+  const isRelevant = lastBulkCreation && Date.now() - lastBulkCreation.timestamp < 60 * 60 * 1000;
+
+  // If no relevant bulk operation exists, show a disabled button as a fallback
+  if (!lastBulkCreation || !isRelevant || lastBulkCreation.operation !== "create") {
+    // Clear outdated operations
+    if (lastBulkCreation && !isRelevant) {
+      clearLastBulkCreation();
+    }
+
+    // Return a disabled button instead of null, so it's always visible
+    return (
+      <Button variant="outline" size="sm" className="flex items-center gap-1" disabled={true}>
+        <Undo2 className="h-4 w-4" />
+        Undo Bulk Creation
+      </Button>
+    );
+  }
 
   const handleUndo = () => {
     if (!lastBulkCreation) {
