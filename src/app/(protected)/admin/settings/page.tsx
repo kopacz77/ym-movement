@@ -2,9 +2,11 @@
 "use client";
 
 import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
-import { Clock, DollarSign, Lock, MapPin, Save } from "lucide-react";
+import { Clock, DollarSign, Lock, MapPin, Save, Edit, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
+import { delightfulToast } from "@/lib/delightful-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DefaultPricingSettings } from "@/features/admin/components/management/DefaultPricingSettings";
+import { RinkDialog } from "@/features/admin/components/management/RinkDialog";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 import { api } from "@/lib/api";
 
@@ -97,6 +100,8 @@ interface ApiError {
 
 export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
+  const [isRinkDialogOpen, setIsRinkDialogOpen] = useState(false);
+  const [editingRink, setEditingRink] = useState<Rink | null>(null);
 
   // State for settings
   const [operationalSettings, setOperationalSettings] = useState<OperationalSettings>({
@@ -146,6 +151,16 @@ export default function SettingsPage() {
 
   // Fetch rinks data
   const { data: rinks, isLoading: isLoadingRinks } = api.admin.schedule.getRinks.useQuery();
+
+  // Delete rink mutation
+  const deleteRinkMutation = api.admin.schedule.deleteRink.useMutation({
+    onSuccess: (result) => {
+      delightfulToast.success(`Perfect! ${result.message} ✨`, "Your coaching space is beautifully organized!", "admin");
+    },
+    onError: (error) => {
+      delightfulToast.error(error.message, "admin");
+    },
+  });
 
   // Define the mutation for saving settings
   const saveSettingsMutation = api.admin.settings.saveSettings.useMutation({
@@ -273,6 +288,28 @@ export default function SettingsPage() {
       payment: paymentSettings,
       rinkAreas: rinkAreas,
     });
+  };
+
+  // Rink management handlers
+  const handleAddRink = () => {
+    setEditingRink(null);
+    setIsRinkDialogOpen(true);
+  };
+
+  const handleEditRink = (rink: Rink) => {
+    setEditingRink(rink);
+    setIsRinkDialogOpen(true);
+  };
+
+  const handleDeleteRink = (rink: Rink) => {
+    showDeleteConfirmation(`rink "${rink.name}"`, () => {
+      deleteRinkMutation.mutate({ id: rink.id });
+    });
+  };
+
+  const handleRinkDialogClose = () => {
+    setIsRinkDialogOpen(false);
+    setEditingRink(null);
   };
 
   return (
@@ -612,7 +649,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Rink Locations</h3>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleAddRink}>
                   Add New Rink
                 </Button>
               </div>
@@ -639,9 +676,25 @@ export default function SettingsPage() {
                         <TableCell>{rink.timezone}</TableCell>
                         <TableCell>{rink.maxCapacity}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            Edit
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditRink(rink)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleDeleteRink(rink)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -698,6 +751,17 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Rink Management Dialog */}
+      <RinkDialog
+        isOpen={isRinkDialogOpen}
+        onOpenChange={handleRinkDialogClose}
+        rink={editingRink}
+        onSuccess={() => {
+          // Refresh rinks data after successful operation
+          // The dialog handles closing and invalidation internally
+        }}
+      />
     </div>
   );
 }

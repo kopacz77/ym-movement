@@ -11,6 +11,9 @@ import { timeSlotRouter } from "./timeSlotQueries";
 export const scheduleRouter = createTRPCRouter({
   // Include all procedures from the rinkRouter
   getRinks: rinkRouter.getRinks,
+  createRink: rinkRouter.createRink,
+  updateRink: rinkRouter.updateRink,
+  deleteRink: rinkRouter.deleteRink,
 
   // Include all procedures from the timeSlotRouter
   getTimeSlots: timeSlotRouter.getTimeSlots,

@@ -48,7 +48,7 @@ export const delightfulToast = {
 
   paymentRecorded: (amount: string, userRole: UserRole = "admin") => {
     if (userRole === "admin") {
-      toast.success("💰 Wonderful! Payment recorded with love! ✨", {
+      toast.success("💰 Wonderful! Payment recorded! ✨", {
         description: `$${amount} payment has been tracked`,
         duration: 3000,
       });

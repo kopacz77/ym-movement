@@ -22,7 +22,7 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     if (role === "admin") {
       // Loving messages for the fiancé
       if (hour < 6) {
-        setGreeting("Good morning, early bird");
+        setGreeting("Good morning");
         setIcon(<Moon className="h-5 w-5 text-purple-500" />);
       } else if (hour < 12) {
         setGreeting("Good morning");
@@ -34,7 +34,7 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
         setGreeting("Good evening");
         setIcon(<Sparkles className="h-5 w-5 text-pink-500" />);
       } else {
-        setGreeting("Working late tonight");
+        setGreeting("Hey there");
         setIcon(<Moon className="h-5 w-5 text-indigo-500" />);
       }
     } else {
@@ -61,31 +61,36 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     );
   }
 
-  // Extract first name only and alternate with "Beautiful" for admin
+  // Get randomized term of endearment for admin
   const getDisplayName = () => {
     if (role !== "admin") {
       return name || "";
     }
 
     // Extract first name from full name
-    const firstName = name ? name.split(" ")[0] : "";
-    const hour = new Date().getHours();
+    const firstName = name ? name.split(" ")[0] : "Beautiful";
+    
+    // Terms of endearment with international options
+    const terms = [
+      firstName,
+      "Beautiful", 
+      "Princess",
+      "공주님", // Princess in Korean (gongju-nim)
+      "사랑", // Love in Korean (sarang)
+      "자기야", // Honey/Darling in Korean (jagiya)
+      "Słoneczko", // Sunshine in Polish
+      "Schätzi", // Darling in German
+      "Kochanie", // Love/Darling in Polish
+    ];
 
-    // Alternate between first name and "Beautiful" based on time of day
-    if (hour >= 6 && hour < 12) {
-      // Morning: Use first name
-      return firstName || "Beautiful";
-    }
-    if (hour >= 12 && hour < 17) {
-      // Afternoon: Use "Beautiful"
-      return "Beautiful";
-    }
-    if (hour >= 17 && hour < 20) {
-      // Evening: Use first name
-      return firstName || "Beautiful";
-    }
-    // Late night/early morning: Use "Beautiful"
-    return "Beautiful";
+    // Use time + date + minutes for more frequent variation but still consistent within ~10 minutes
+    const now = new Date();
+    const hour = now.getHours();
+    const date = now.getDate();
+    const tenMinuteBlock = Math.floor(now.getMinutes() / 10);
+    const randomIndex = (hour + date + tenMinuteBlock) % terms.length;
+    
+    return terms[randomIndex];
   };
 
   const displayName = getDisplayName();
@@ -99,8 +104,7 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     >
       <div className="transition-transform duration-300 group-hover:rotate-12">{icon}</div>
       <span className="text-lg font-medium bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-        {greeting}
-        {displayName && `, ${displayName}`}
+        {greeting} {displayName}!
       </span>
       {role === "admin" && (
         <Heart className="h-4 w-4 text-red-500 opacity-0 group-hover:opacity-100 transition-all duration-300 animate-pulse" />

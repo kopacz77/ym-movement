@@ -69,7 +69,7 @@ export function EncouragingEmptyState({
       student: {
         title: "Your skating calendar is ready! 📅",
         description:
-          "Plan your progress, track your lessons, and watch your skating journey unfold beautifully.",
+          "Plan your progress, track your lessons, and watch your skating journey unfold!",
         actionLabel: "View Available Times",
         decorative: "⛸️📅",
       },
@@ -79,7 +79,7 @@ export function EncouragingEmptyState({
       admin: {
         title: "Your coaching business is perfectly set up! 💰",
         description:
-          "Every payment represents a student's investment in their dreams and your investment in their success. Beautiful things are coming!",
+          "Every payment represents a student's investment in their dreams and your investment in their success. Big things are coming!",
         actionLabel: "Record First Payment",
         decorative: "✨💕",
       },
@@ -113,7 +113,7 @@ export function EncouragingEmptyState({
       admin: {
         title: "Everything is ready for your coaching magic! ✨",
         description:
-          "Your space is beautifully prepared. Every tool, every feature, every detail designed to help you create incredible skating experiences.",
+          "Your space is prepared. Every tool, every feature, every detail designed to help you create incredible skating experiences.",
         actionLabel: "Get Started",
         decorative: "💕🌟",
       },

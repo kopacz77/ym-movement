@@ -191,14 +191,24 @@ className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium tra
 const getDisplayName = () => {
   if (role !== "admin") return name || "";
   
-  const firstName = name ? name.split(" ")[0] : "";
-  const hour = new Date().getHours();
+  const firstName = name ? name.split(" ")[0] : "Beautiful";
   
-  // Time-based alternation for intimacy and variety
-  if (hour >= 6 && hour < 12) return firstName || "Beautiful";      // Morning: "Yura"
-  else if (hour >= 12 && hour < 17) return "Beautiful";             // Afternoon: "Beautiful" 
-  else if (hour >= 17 && hour < 20) return firstName || "Beautiful"; // Evening: "Yura"
-  else return "Beautiful";                                           // Late night: "Beautiful"
+  // Terms of endearment with Korean options
+  const terms = [
+    firstName,
+    "Beautiful", 
+    "Princess",
+    "공주님", // Princess in Korean (gongju-nim)
+    "사랑", // Love in Korean (sarang)
+    "자기야", // Honey/Darling in Korean (jagiya)
+  ];
+
+  // Use time + date to create pseudo-random but consistent selection
+  const hour = new Date().getHours();
+  const date = new Date().getDate();
+  const randomIndex = (hour + date) % terms.length;
+  
+  return terms[randomIndex];
 };
 ```
 

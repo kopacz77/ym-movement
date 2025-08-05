@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { showDeleteConfirmation } from "@/lib/toast-confirmations";
+import { delightfulToast } from "@/lib/delightful-toast";
 import { api } from "@/lib/api";
 
 interface BlockedDatesManagerProps {
@@ -29,9 +30,7 @@ export function WorkingBlockedDatesManager({ className }: BlockedDatesManagerPro
   // Create mutation
   const createMutation = api.admin.schedule.createBlockedDate.useMutation({
     onSuccess: (result) => {
-      toast.success("Success", {
-        description: result.message,
-      });
+      delightfulToast.success(`Perfect! ${result.message} ✨`, "Your schedule is protected!", "admin");
       setIsCreateFormOpen(false);
       setFormData({ title: "", description: "", startDate: "", endDate: "", type: "TRAVEL" });
       refetch();
@@ -41,24 +40,18 @@ export function WorkingBlockedDatesManager({ className }: BlockedDatesManagerPro
       utils.admin.schedule.getBlockedDates.invalidate();
     },
     onError: (error) => {
-      toast.error("Error", {
-        description: error.message,
-      });
+      delightfulToast.error(error.message, "admin");
     },
   });
 
   // Delete mutation
   const deleteMutation = api.admin.schedule.deleteBlockedDate.useMutation({
     onSuccess: (result) => {
-      toast.success("Success", {
-        description: result.message,
-      });
+      delightfulToast.success(`Perfect! ${result.message} ✨`, "Your calendar is beautifully organized!", "admin");
       refetch();
     },
     onError: (error) => {
-      toast.error("Error", {
-        description: error.message,
-      });
+      delightfulToast.error(error.message, "admin");
     },
   });
 
