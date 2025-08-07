@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Level } from "@prisma/client";
+import { useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -85,6 +86,7 @@ interface StudentFormProps {
 export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitAction = () => {} }) => {
   const [formInitialized, setFormInitialized] = useState(false);
   const { sanitizeInput, sanitizeTextArea, validateEmail, validatePhone } = useSanitizedInput();
+  const queryClient = useQueryClient();
 
   // Load student data by ID if needed
   const { data: studentData, isLoading } = api.admin.student.getStudent.useQuery(
@@ -146,6 +148,8 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
       toast("Success", {
         description: "Student updated successfully",
       });
+      // Invalidate ALL student-related queries to update UI immediately
+      queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
       onSubmitAction();
     },
     onError: (error) => {
@@ -160,6 +164,8 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
       toast("Success", {
         description: "Student created successfully",
       });
+      // Invalidate ALL student-related queries to update UI immediately
+      queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
       onSubmitAction();
     },
     onError: (error) => {
@@ -218,6 +224,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
       createStudent.mutate({
         ...formattedValues,
         sendEmail: true,
+        sendInvite: false, // Important: Only send invitation after approval
       });
     }
   };

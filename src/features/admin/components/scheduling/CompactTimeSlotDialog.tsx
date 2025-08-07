@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useOperationalSettings } from "@/hooks/useOperationalSettings";
 
 interface CompactTimeSlotDialogProps {
   open: boolean;
@@ -53,11 +55,20 @@ export function CompactTimeSlotDialog({
   const [rinkId, setRinkId] = React.useState<string>("");
   const [maxStudents, setMaxStudents] = React.useState<number>(1);
 
-  // Generate time slots from 6 AM to 10 PM in 15-minute intervals
+  // Use operational settings for dynamic time slot generation
+  const { businessHours, validateTimeSlot, isDayActive } = useOperationalSettings();
+
+  // Generate time slots based on operational hours in 15-minute intervals
   const timeSlots = React.useMemo(() => {
     const slots = [];
-    for (let hour = 6; hour <= 22; hour++) {
+    const startHour = businessHours.startHour;
+    const endHour = businessHours.endHour;
+
+    for (let hour = startHour; hour <= endHour; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
+        // Don't create slots that go beyond the end hour
+        if (hour === endHour && minute > businessHours.endMinutes) break;
+
         const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
         const displayTime = new Date(2000, 0, 1, hour, minute).toLocaleTimeString("en-US", {
           hour: "numeric",
@@ -68,7 +79,7 @@ export function CompactTimeSlotDialog({
       }
     }
     return slots;
-  }, []);
+  }, [businessHours]);
 
   // Auto-calculate end time when start time changes (1 hour default)
   React.useEffect(() => {
@@ -86,7 +97,7 @@ export function CompactTimeSlotDialog({
       // Pre-fill start time if provided (from calendar click)
       setStartTime(selectedStartTime || "");
       setEndTime(""); // Will be auto-calculated
-      
+
       // Pre-fill rink if provided or use first available
       setRinkId(selectedRinkId || rinks[0]?.id || "");
       setMaxStudents(1);
@@ -95,8 +106,45 @@ export function CompactTimeSlotDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedDate || !startTime || !endTime || !rinkId) {
+      return;
+    }
+
+    // Check if the selected day is active
+    if (!isDayActive(selectedDate)) {
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const dayName = dayNames[selectedDate.getDay()];
+      toast.error("Cannot create time slot", {
+        description: `${dayName} is not configured as an active business day. Please check your operational hours settings.`,
+      });
+      return;
+    }
+
+    // Create start and end Date objects for validation
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+
+    const startDateTime = new Date(selectedDate);
+    startDateTime.setHours(startHour, startMinute, 0, 0);
+
+    const endDateTime = new Date(selectedDate);
+    endDateTime.setHours(endHour, endMinute, 0, 0);
+
+    // Validate the time slot against operational hours
+    const validation = validateTimeSlot(startDateTime, endDateTime);
+    if (!validation.isValid) {
+      toast.error("Invalid time slot", {
+        description: validation.message,
+      });
       return;
     }
 
@@ -121,7 +169,9 @@ export function CompactTimeSlotDialog({
           </DialogTitle>
           <DialogDescription>
             {selectedDate ? (
-              <>Creating slot for <strong>{format(selectedDate, "EEEE, MMMM d, yyyy")}</strong></>
+              <>
+                Creating slot for <strong>{format(selectedDate, "EEEE, MMMM d, yyyy")}</strong>
+              </>
             ) : (
               "Create a new time slot for lessons"
             )}
@@ -203,10 +253,7 @@ export function CompactTimeSlotDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!canSubmit}
-            >
+            <Button type="submit" disabled={!canSubmit}>
               {isLoading ? "Creating..." : "Create Time Slot"}
             </Button>
           </div>

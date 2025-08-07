@@ -40,7 +40,11 @@ const rinkFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   address: z.string().min(1, "Address is required").max(200, "Address is too long"),
   timezone: z.string().min(1, "Timezone is required"),
-  maxCapacity: z.coerce.number().int().min(1, "Capacity must be at least 1").max(1000, "Capacity is too high"),
+  maxCapacity: z.coerce
+    .number()
+    .int()
+    .min(1, "Capacity must be at least 1")
+    .max(1000, "Capacity is too high"),
 });
 
 type RinkFormValues = z.infer<typeof rinkFormSchema>;
@@ -111,7 +115,11 @@ export function RinkDialog({ isOpen, onOpenChange, rink, onSuccess }: RinkDialog
 
   const createMutation = api.admin.schedule.createRink.useMutation({
     onSuccess: (result) => {
-      delightfulToast.success(`Perfect! ${result.message} 💕`, "Your rink family is growing!", "admin");
+      delightfulToast.success(
+        `Perfect! ${result.message} 💕`,
+        "Your rink family is growing!",
+        "admin",
+      );
       utils.admin.schedule.getRinks.invalidate();
       onSuccess();
       onOpenChange(false);
@@ -123,7 +131,11 @@ export function RinkDialog({ isOpen, onOpenChange, rink, onSuccess }: RinkDialog
 
   const updateMutation = api.admin.schedule.updateRink.useMutation({
     onSuccess: (result) => {
-      delightfulToast.success(`Beautiful! ${result.message} ✨`, "Your coaching locations are perfectly organized!", "admin");
+      delightfulToast.success(
+        `Beautiful! ${result.message} ✨`,
+        "Your coaching locations are perfectly organized!",
+        "admin",
+      );
       utils.admin.schedule.getRinks.invalidate();
       onSuccess();
       onOpenChange(false);
@@ -155,10 +167,9 @@ export function RinkDialog({ isOpen, onOpenChange, rink, onSuccess }: RinkDialog
             {isEditing ? "Edit Rink" : "Add New Rink"}
           </DialogTitle>
           <DialogDescription>
-            {isEditing 
+            {isEditing
               ? "Update the rink information below."
-              : "Add a new rink location where lessons can be held."
-            }
+              : "Add a new rink location where lessons can be held."}
           </DialogDescription>
         </DialogHeader>
 
@@ -215,9 +226,7 @@ export function RinkDialog({ isOpen, onOpenChange, rink, onSuccess }: RinkDialog
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Timezone for scheduling at this location
-                  </FormDescription>
+                  <FormDescription>Timezone for scheduling at this location</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -230,13 +239,7 @@ export function RinkDialog({ isOpen, onOpenChange, rink, onSuccess }: RinkDialog
                 <FormItem>
                   <FormLabel>Max Capacity</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      min="1" 
-                      max="1000" 
-                      placeholder="50" 
-                      {...field} 
-                    />
+                    <Input type="number" min="1" max="1000" placeholder="50" {...field} />
                   </FormControl>
                   <FormDescription>
                     Maximum number of students that can be on the ice at once
@@ -262,8 +265,7 @@ export function RinkDialog({ isOpen, onOpenChange, rink, onSuccess }: RinkDialog
                     : "Creating..."
                   : isEditing
                     ? "Update Rink"
-                    : "Create Rink"
-                }
+                    : "Create Rink"}
               </Button>
             </DialogFooter>
           </form>

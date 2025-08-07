@@ -67,61 +67,74 @@ export default function BlockedDateDialog({
       },
     );
   };
-  
+
   if (!isOpen) return null;
-  
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        maxWidth: '500px',
-        width: '90%'
-      }}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "20px",
+          borderRadius: "8px",
+          maxWidth: "500px",
+          width: "90%",
+        }}
+      >
         <h2>Blocked Date Details</h2>
         {blockedRange && (
           <div>
-            <p><strong>Title:</strong> {blockedRange.title}</p>
-            <p><strong>Type:</strong> {blockedRange.type}</p>
-            <p><strong>Description:</strong> {blockedRange.description || 'None'}</p>
+            <p>
+              <strong>Title:</strong> {blockedRange.title}
+            </p>
+            <p>
+              <strong>Type:</strong> {blockedRange.type}
+            </p>
+            <p>
+              <strong>Description:</strong> {blockedRange.description || "None"}
+            </p>
           </div>
         )}
-        <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-          <button onClick={onClose} style={{
-            padding: '8px 16px',
-            backgroundColor: '#6b7280',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}>
+        <div style={{ marginTop: "16px", display: "flex", gap: "8px" }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#6b7280",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
             Close
           </button>
-          <button 
+          <button
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
             style={{
-              padding: '8px 16px',
-              backgroundColor: deleteMutation.isPending ? '#9ca3af' : '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: deleteMutation.isPending ? 'not-allowed' : 'pointer'
+              padding: "8px 16px",
+              backgroundColor: deleteMutation.isPending ? "#9ca3af" : "#dc2626",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: deleteMutation.isPending ? "not-allowed" : "pointer",
             }}
           >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete Blocked Period'}
+            {deleteMutation.isPending ? "Deleting..." : "Delete Blocked Period"}
           </button>
         </div>
       </div>

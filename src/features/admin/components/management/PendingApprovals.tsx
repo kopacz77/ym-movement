@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,30 +23,74 @@ interface Student {
 export const PendingApprovals = () => {
   // Always call all hooks at the top level
   const utils = api.useUtils();
+  const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   // Use the student namespace for pending approvals
   const { data, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();
   const pendingStudents = data?.students || [];
 
-  // IMPORTANT: Always declare mutations at the top level, not conditionally
+  // NUCLEAR APPROVE - FORCE RELOAD EVERYTHING!
   const approveStudent = api.admin.student.approveStudent.useMutation({
     onSuccess: () => {
-      toast("Success", {
-        description: "Student approved successfully",
-      });
-      // Invalidate the query to refresh the data
-      utils.admin.student.getPendingApprovals.invalidate();
-      setIsRefreshing(true);
-      // Set a timer to turn off refreshing state
+      console.log("🚨 NUCLEAR APPROVE: FORCING COMPLETE REFRESH!");
+      toast.success("Student approved successfully");
+
+      // NUCLEAR: Clear ALL cache and force refetch
+      queryClient.clear();
+
+      // Force immediate page reload as last resort
       setTimeout(() => {
-        setIsRefreshing(false);
-      }, 1000);
+        window.location.reload();
+      }, 500);
     },
     onError: (err) => {
-      toast.error("Error", {
+      toast.error("Failed to approve student", {
         description: err.message,
       });
+    },
+  });
+
+  // BULLETPROOF reject student mutation (for comparison)
+  const rejectStudent = api.admin.student.rejectStudent.useMutation({
+    onMutate: async ({ studentId }) => {
+      console.log("🔄 REJECTING STUDENT:", studentId);
+
+      // AGGRESSIVE: Cancel ALL queries
+      await queryClient.cancelQueries();
+
+      // BRUTE FORCE: Update ALL queries that contain students data
+      const cache = queryClient.getQueryCache();
+      const allQueries = cache.getAll();
+
+      allQueries.forEach((query) => {
+        const data = query.state.data as any;
+        if (data?.students && Array.isArray(data.students)) {
+          // Remove from ALL student lists (pending and main)
+          const filtered = data.students.filter((student: any) => student.id !== studentId);
+          queryClient.setQueryData(query.queryKey, {
+            ...data,
+            students: filtered,
+          });
+          console.log(
+            `✂️ REJECT: Removed from ${query.queryKey.join(".")} - ${data.students.length} -> ${filtered.length}`,
+          );
+        }
+      });
+
+      return { studentId };
+    },
+    onSuccess: () => {
+      console.log("✅ REJECT: Success, forcing cache refresh");
+      toast.success("Application rejected");
+      queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+    },
+    onError: (err) => {
+      console.log("❌ REJECT: Failed, showing error");
+      toast.error("Failed to reject application", {
+        description: err.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
     },
   });
 
@@ -63,6 +108,13 @@ export const PendingApprovals = () => {
       description: `Approving student ${studentName}...`,
     });
     approveStudent.mutate({ studentId });
+  };
+
+  const handleReject = (studentId: string, studentName: string) => {
+    toast("Processing", {
+      description: `Rejecting student ${studentName}...`,
+    });
+    rejectStudent.mutate({ studentId });
   };
 
   // Loading state
@@ -154,7 +206,7 @@ export const PendingApprovals = () => {
               <div className="flex gap-2">
                 <Button
                   onClick={() => handleApprove(student.id, student.user?.name || "Student")}
-                  disabled={approveStudent.isPending}
+                  disabled={approveStudent.isPending || rejectStudent.isPending}
                   className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg"
                   size="sm"
                 >
@@ -180,6 +232,21 @@ export const PendingApprovals = () => {
                       </svg>
                       <span>Approve</span>
                     </div>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => handleReject(student.id, student.user?.name || "Student")}
+                  disabled={approveStudent.isPending || rejectStudent.isPending}
+                  variant="destructive"
+                  size="sm"
+                >
+                  {rejectStudent.isPending ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Processing...</span>
+                    </div>
+                  ) : (
+                    "Reject"
                   )}
                 </Button>
               </div>

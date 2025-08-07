@@ -25,6 +25,7 @@ import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { toast } from "sonner";
+import { useOperationalSettings } from "@/hooks/useOperationalSettings";
 
 interface CalendarEvent {
   id: string;
@@ -81,6 +82,9 @@ export const CalendarEventsSystem = () => {
   const [selectedRink, setSelectedRink] = useState<string>("MAIN_RINK");
   const [viewMode, setViewMode] = useState<ViewType>("week");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+  // Use operational settings hook
+  const { validateTimeSlot, businessHours, isLoading: settingsLoading } = useOperationalSettings();
 
   // State for modal dialog
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -188,32 +192,10 @@ export const CalendarEventsSystem = () => {
     },
   });
 
-  // This method checks for business hours and minimum duration
+  // This method now uses operational settings from the database
   const validateEventTimes = (start: Date, end: Date): { isValid: boolean; message?: string } => {
-    // Simple validation - check for business hours and minimum duration
-    const businessStartHour = 5; // 5 AM
-    const businessEndHour = 18; // 6 PM
-
-    const startHour = start.getHours();
-    const endHour = end.getHours();
-
-    if (startHour < businessStartHour || endHour > businessEndHour) {
-      return {
-        isValid: false,
-        message: "Events must be scheduled between 5 AM and 6 PM.",
-      };
-    }
-
-    // Check minimum duration (15 minutes)
-    const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-    if (durationMinutes < 15) {
-      return {
-        isValid: false,
-        message: "Events must be at least 15 minutes long.",
-      };
-    }
-
-    return { isValid: true };
+    // Use the operational settings validation instead of hardcoded values
+    return validateTimeSlot(start, end);
   };
 
   // Handle event selection (click)
@@ -399,8 +381,10 @@ export const CalendarEventsSystem = () => {
           </div>
 
           <div className="h-[600px]">
-            {eventsLoading ? (
-              <div className="flex items-center justify-center h-full">Loading events...</div>
+            {eventsLoading || settingsLoading ? (
+              <div className="flex items-center justify-center h-full">
+                Loading {eventsLoading ? "events" : "settings"}...
+              </div>
             ) : (
               <Calendar
                 localizer={localizer}
@@ -416,8 +400,8 @@ export const CalendarEventsSystem = () => {
                 eventPropGetter={eventPropGetter}
                 step={15}
                 timeslots={4}
-                min={new Date(0, 0, 0, 5, 0, 0)} // 5 AM
-                max={new Date(0, 0, 0, 18, 0, 0)} // 6 PM
+                min={businessHours.displayStartTime}
+                max={businessHours.displayEndTime}
                 showMultiDayTimes
                 getNow={() => new Date()}
                 style={{ height: "100%" }}

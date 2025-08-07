@@ -5,6 +5,7 @@ import withDragAndDrop, {
 } from "react-big-calendar/lib/addons/dragAndDrop";
 import { toast } from "sonner";
 import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
+import { useOperationalSettings } from "@/hooks/useOperationalSettings";
 import { CalendarErrorBoundary } from "./CalendarErrorBoundary";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -101,6 +102,9 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   blockedDateRanges = [],
 }) => {
   const calendarRef = useRef(null);
+
+  // Use operational settings for dynamic calendar hours
+  const { businessHours, validateTimeSlot, isDayActive } = useOperationalSettings();
 
   // Check if a date is blocked
   const isDateBlocked = useCallback(
@@ -458,10 +462,37 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         return;
       }
 
-      // Date is not blocked, proceed with normal slot creation
+      // Check if the selected day is active according to operational settings
+      if (!isDayActive(slotInfo.start)) {
+        const dayNames = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
+        const dayName = dayNames[slotInfo.start.getDay()];
+        toast.error("Cannot schedule on inactive day", {
+          description: `${dayName} is not configured as an active business day. Please check your operational hours settings.`,
+        });
+        return;
+      }
+
+      // Validate the time slot against operational hours
+      const validation = validateTimeSlot(slotInfo.start, slotInfo.end);
+      if (!validation.isValid) {
+        toast.error("Invalid time slot", {
+          description: validation.message,
+        });
+        return;
+      }
+
+      // Date is not blocked and passes all validations, proceed with normal slot creation
       onSelectSlot(slotInfo);
     },
-    [onSelectSlot, isDateBlocked, blockedDateRanges],
+    [onSelectSlot, isDateBlocked, blockedDateRanges, isDayActive, validateTimeSlot],
   );
 
   return (
@@ -519,8 +550,8 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
             date={date}
             step={15}
             timeslots={4}
-            min={new Date(2024, 0, 1, 6, 0)} // 6 AM
-            max={new Date(2024, 0, 1, 22, 0)} // 10 PM
+            min={businessHours.displayStartTime}
+            max={businessHours.displayEndTime}
             // Custom components
             components={{
               event: EventComponent,

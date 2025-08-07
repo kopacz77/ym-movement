@@ -2,10 +2,12 @@
 "use client";
 
 import type { Level } from "@prisma/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, Search } from "lucide-react";
 import type React from "react";
 import { memo, useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,12 +54,16 @@ const getLevelColor = (level: Level): string => {
 const StudentActions = memo(
   ({
     studentId,
+    studentName,
     onEdit,
     onViewProfile,
+    onDelete,
   }: {
     studentId: string;
+    studentName: string;
     onEdit: (id: string) => void;
     onViewProfile: (id: string) => void;
+    onDelete: (id: string, name: string) => void;
   }) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -72,6 +78,12 @@ const StudentActions = memo(
         <DropdownMenuItem onClick={() => onEdit(studentId)} className="w-full">
           Edit
         </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => onDelete(studentId, studentName)}
+          className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+        >
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   ),
@@ -81,6 +93,8 @@ StudentActions.displayName = "StudentActions";
 
 export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
   ({ onEditAction, onViewProfileAction }) => {
+    const queryClient = useQueryClient();
+
     // Use debounced search to reduce API calls
     const [immediateSearch, debouncedSearch, setSearch] = useDebouncedState("", 300);
 
@@ -99,6 +113,76 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
       },
     );
 
+    // BULLETPROOF delete mutation - forces immediate UI update
+    const deleteStudentMutation = api.admin.student.deleteStudent.useMutation({
+      onMutate: async ({ studentId }) => {
+        console.log("🔄 OPTIMIZED STUDENTLIST: Deleting student", studentId);
+
+        // AGGRESSIVE: Cancel ALL queries
+        await queryClient.cancelQueries();
+
+        // Get ALL possible cache keys and clear them
+        const possibleKeys = [
+          ["admin", "student", "getStudents", { search: debouncedSearch || undefined, limit: 100 }],
+          ["admin", "student", "getStudents", { search: debouncedSearch || undefined }],
+          ["admin", "student", "getStudents", {}],
+          ["admin", "student", "getStudents"],
+          ["admin", "student", "getPendingApprovals"],
+        ];
+
+        console.log("🔍 OPTIMIZED: Checking all cache keys for student data...");
+
+        // Update ALL possible cache variations
+        possibleKeys.forEach((key) => {
+          const data = queryClient.getQueryData(key);
+          if (data) {
+            console.log(`📝 OPTIMIZED: Found data in key:`, key, data);
+            queryClient.setQueryData(key, (old: any) => {
+              if (old?.students) {
+                const filtered = old.students.filter((student: any) => student.id !== studentId);
+                console.log(
+                  `✂️ OPTIMIZED: Filtered ${key.join(".")} from ${old.students.length} to ${filtered.length} students`,
+                );
+                return { ...old, students: filtered };
+              }
+              return old;
+            });
+          }
+        });
+
+        // NUCLEAR OPTION: Force component re-render
+        setTimeout(() => {
+          console.log("💥 OPTIMIZED NUCLEAR: Force invalidating all student queries");
+          queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+        }, 0);
+
+        return { studentId };
+      },
+      onSuccess: (data) => {
+        console.log("✅ OPTIMIZED: Delete successful, forcing cache refresh");
+        toast.success("Student deleted successfully", {
+          description: `${data.deletedStudent.name} has been removed from the system.`,
+        });
+
+        // IMMEDIATELY invalidate everything
+        queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+
+        // Force refetch the current query
+        queryClient.refetchQueries({
+          queryKey: ["admin", "student", "getStudents"],
+          exact: false,
+        });
+      },
+      onError: (error) => {
+        console.log("❌ OPTIMIZED: Delete failed, showing error");
+        toast.error("Failed to delete student", {
+          description: error.message,
+        });
+        // Force refresh on error too
+        queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+      },
+    });
+
     useEffect(() => {
       if (error) {
         toast.error("Error loading students", {
@@ -108,6 +192,13 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
     }, [error]);
 
     const students = useMemo(() => studentsData?.students || [], [studentsData?.students]);
+
+    // Delete handler
+    const handleDeleteStudent = (studentId: string, studentName: string) => {
+      showDeleteConfirmation(`student "${studentName}"`, () => {
+        deleteStudentMutation.mutate({ studentId });
+      });
+    };
 
     // Memoized table columns configuration
     const columns = useTableColumns<Student>([
@@ -152,8 +243,10 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
         render: (student) => (
           <StudentActions
             studentId={student.id}
+            studentName={student.User.name || "Student"}
             onEdit={onEditAction}
             onViewProfile={onViewProfileAction}
+            onDelete={handleDeleteStudent}
           />
         ),
       },

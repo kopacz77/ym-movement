@@ -13,7 +13,9 @@
       "mcp__shadcn-ui__get_block",
       "Bash(pnpm format:*)",
       "Bash(pnpm type-check:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(node:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

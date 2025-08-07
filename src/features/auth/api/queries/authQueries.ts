@@ -118,6 +118,7 @@ export const authRouter = createTRPCRouter({
           valid: true,
           email: user.email,
           userId: user.id,
+          name: user.name,
         };
       } catch (error) {
         console.error("Error verifying reset token:", error);
@@ -134,12 +135,22 @@ export const authRouter = createTRPCRouter({
       z.object({
         token: z.string(),
         password: z.string().min(8, "Password must be at least 8 characters"),
+        name: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { token, password } = input;
+      const { token, password, name } = input;
 
       try {
+        // Validate password strength
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Password does not meet security requirements: ${passwordValidation.errors.join(", ")}`,
+          });
+        }
+
         // Verify and consume the token
         const userId = await consumePasswordResetToken(token);
 
@@ -153,12 +164,13 @@ export const authRouter = createTRPCRouter({
         // Hash the new password
         const hashedPassword = await hash(password, 10);
 
-        // Update the user's password
+        // Update the user's password and name if provided
         await ctx.prisma.user.update({
           where: { id: userId },
           data: {
             password: hashedPassword,
             emailVerified: new Date(), // Mark email as verified since they accessed it
+            ...(name && { name }), // Only update name if provided
           },
         });
 

@@ -40,6 +40,11 @@ async function sendEmail(to: string, subject: string, html: string) {
 
     if (error) {
       console.error(`Error sending email (${subject}):`, error);
+      // In development, don't throw - just log and return mock response
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`[DEV MODE] Email sending failed, continuing without error`);
+        return { id: "mock-email-id-dev-fallback" };
+      }
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
@@ -137,23 +142,45 @@ export async function sendWelcomeEmail(email: string, name: string) {
 }
 
 /**
- * Sends an approval notification email to a student
+ * Sends an approval notification email to a student with registration completion link
  */
-export async function sendApprovalEmail(email: string, name: string) {
+export async function sendApprovalEmail(email: string, name: string, token: string) {
+  const registrationUrl = `${BASE_URL}/auth/complete-registration?token=${token}`;
+
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">Account Approved!</h1>
+      <h1 style="color: #3b82f6;">🎉 Account Approved!</h1>
       <p>Hello ${name},</p>
-      <p>Great news! Your YM Movement account has been approved.</p>
-      <p>You can now log in and start scheduling lessons, view your progress, and more.</p>
-      <p>We look forward to helping you achieve your skating goals!</p>
-      <a href="${BASE_URL}/auth/login" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Log In Now</a>
+      <p>Great news! Your YM Movement account has been approved and you're ready to get started!</p>
+      <p>To complete your registration, please click the button below to finish setting up your account:</p>
+      <a href="${registrationUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin-top: 15px; font-weight: bold;">Complete Your Registration</a>
+      
+      <p style="margin-top: 20px;">During registration completion, you'll:</p>
+      <ul style="margin-left: 20px;">
+        <li>Complete your profile information</li>
+        <li>Create a secure password</li>
+        <li>Set up your account preferences</li>
+      </ul>
+      
+      <p style="margin-top: 20px;">Once your registration is complete, you'll be able to:</p>
+      <ul style="margin-left: 20px;">
+        <li>Schedule ice dance lessons</li>
+        <li>View your lesson history and progress</li>
+        <li>Manage your account settings</li>
+        <li>Track your skating journey</li>
+      </ul>
+      
+      <div style="margin-top: 25px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #856404;"><strong>⏰ Important:</strong> This registration link will expire in 24 hours for security purposes.</p>
+      </div>
+      
+      <p style="margin-top: 20px;">We're excited to help you achieve your skating goals!</p>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
     </div>
   `;
 
-  return sendEmail(email, "Your YM Movement Account Has Been Approved", emailContent);
+  return sendEmail(email, "🎉 Account Approved - Complete Your Registration", emailContent);
 }
 
 /**

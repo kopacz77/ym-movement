@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/student/approvalQueries.ts
 import { z } from "zod";
+import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendApprovalEmail } from "@/lib/email";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
@@ -88,14 +89,28 @@ export const approvalQueries = createTRPCRouter({
           });
         }
 
-        // Send approval email
+        // Send approval email with registration completion link
         try {
           if (updatedStudent.User?.email) {
+            // Create a password reset token for the registration completion process
+            const passwordResetToken = await createPasswordResetToken(
+              updatedStudent.User.id,
+              updatedStudent.User.email,
+              updatedStudent.User.name,
+              false, // Not an invitation
+              false, // Don't send any email - we'll send our custom approval email
+            );
+
+            // Send approval email with completion link
             await sendApprovalEmail(
               updatedStudent.User.email,
               updatedStudent.User.name || "Student",
+              passwordResetToken.token,
             );
-            console.log(`Approval email sent to ${updatedStudent.User.email}`);
+
+            console.log(
+              `Approval email with registration completion link sent to ${updatedStudent.User.email}`,
+            );
           } else {
             console.error("Cannot send approval email: user or email is missing");
           }

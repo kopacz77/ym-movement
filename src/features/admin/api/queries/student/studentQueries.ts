@@ -2,6 +2,7 @@ import { Level, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/student/studentQueries.ts
 import { z } from "zod";
+import { randomUUID } from "crypto";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendWelcomeEmail } from "@/lib/email";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
@@ -184,6 +185,7 @@ export const studentQueries = createTRPCRouter({
           where: { email },
         });
 
+        let newUser: { id: string; name: string | null; email: string } | null = null;
         let student: {
           id: string;
           userId: string;
@@ -210,25 +212,34 @@ export const studentQueries = createTRPCRouter({
           // Create student for existing user
           student = await ctx.prisma.student.create({
             data: {
+              id: randomUUID(),
               ...sanitizedStudentData,
               userId: existingUser.id,
+              updatedAt: new Date(),
             },
             include: {
               User: true,
             },
           });
         } else {
-          // Create new user and student
+          // Create new user first, then student
+          newUser = await ctx.prisma.user.create({
+            data: {
+              id: randomUUID(),
+              name: sanitizedName,
+              email,
+              role: "STUDENT",
+              updatedAt: new Date(),
+            },
+          });
+
+          // Create student with the new user's ID
           student = await ctx.prisma.student.create({
             data: {
+              id: randomUUID(),
               ...sanitizedStudentData,
-              user: {
-                create: {
-                  name: sanitizedName,
-                  email,
-                  role: "STUDENT",
-                },
-              },
+              userId: newUser.id,
+              updatedAt: new Date(),
             },
             include: {
               User: true,
@@ -242,33 +253,36 @@ export const studentQueries = createTRPCRouter({
           inviteSent: false,
         };
 
-        // Send regular welcome email if requested
-        if (sendEmail) {
-          try {
-            await sendWelcomeEmail(student.user.email, student.user.name || "Student");
-            console.log(`Welcome email sent to ${student.user.email}`);
-          } catch (emailError) {
-            console.error("Failed to send welcome email:", emailError);
-            // We don't throw here - we just log the error
-          }
-        }
+        // Get user data - either from existing user or newly created user
+        const userData = existingUser || newUser || student?.User;
 
-        // Send invitation with password reset link if requested
-        if (sendInvite) {
+        // Only send ONE email - either welcome OR invitation, not both
+        if (sendInvite && userData) {
+          // If sending invitation, don't send welcome email - the invitation serves as welcome
           try {
             await createPasswordResetToken(
               student.userId,
-              student.user.email,
-              student.user.name,
+              userData.email,
+              userData.name,
               true, // Mark as invitation
+              true, // Send invitation email
             );
 
             // Set the flag in our response object
             result.inviteSent = true;
 
-            console.log(`Invitation with password reset link sent to ${student.user.email}`);
+            console.log(`Invitation with password reset link sent to ${userData.email}`);
           } catch (inviteError) {
             console.error("Failed to send invitation email:", inviteError);
+          }
+        } else if (sendEmail && userData) {
+          // Only send welcome email if NOT sending invitation
+          try {
+            await sendWelcomeEmail(userData.email, userData.name || "Student");
+            console.log(`Welcome email sent to ${userData.email}`);
+          } catch (emailError) {
+            console.error("Failed to send welcome email:", emailError);
+            // We don't throw here - we just log the error
           }
         }
 
@@ -435,6 +449,61 @@ export const studentQueries = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to resend invitation",
+          cause: error,
+        });
+      }
+    }),
+
+  // Mutation: Delete student
+  deleteStudent: protectedProcedure
+    .input(z.object({ studentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(`Deleting student with ID: ${input.studentId}`);
+
+        // Find the student first to get user details
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          include: { User: true },
+        });
+
+        if (!student) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Log security event
+        logSecurityEvent("STUDENT_DELETED", {
+          userId: ctx.session?.user?.id,
+          studentId: input.studentId,
+          studentEmail: student.User.email,
+          studentName: student.User.name,
+        });
+
+        // Delete the student record (this will cascade to user via onDelete in schema)
+        await ctx.prisma.student.delete({
+          where: { id: input.studentId },
+        });
+
+        console.log(`Successfully deleted student: ${student.User.name} (${student.User.email})`);
+        return {
+          success: true,
+          message: "Student deleted successfully",
+          deletedStudent: {
+            name: student.User.name,
+            email: student.User.email,
+          },
+        };
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete student",
           cause: error,
         });
       }

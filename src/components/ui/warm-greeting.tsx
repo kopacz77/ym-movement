@@ -69,11 +69,11 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
 
     // Extract first name from full name
     const firstName = name ? name.split(" ")[0] : "Beautiful";
-    
+
     // Terms of endearment with international options
     const terms = [
       firstName,
-      "Beautiful", 
+      "Beautiful",
       "Princess",
       "공주님", // Princess in Korean (gongju-nim)
       "사랑", // Love in Korean (sarang)
@@ -89,7 +89,7 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     const date = now.getDate();
     const tenMinuteBlock = Math.floor(now.getMinutes() / 10);
     const randomIndex = (hour + date + tenMinuteBlock) % terms.length;
-    
+
     return terms[randomIndex];
   };
 

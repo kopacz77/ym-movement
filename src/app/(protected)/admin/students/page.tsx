@@ -72,6 +72,14 @@ export default function AdminStudentsPage() {
     setIsEditDialogOpen(true);
   };
 
+  // Handle tab changes - clear selected student when returning to list
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    if (newTab === "list") {
+      setSelectedStudentId(null); // Clear selection when returning to All Students
+    }
+  };
+
   return (
     <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -83,7 +91,7 @@ export default function AdminStudentsPage() {
 
       <PendingApprovals />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-fit lg:grid-cols-auto">
           <TabsTrigger value="list" className="text-sm">
             All Students

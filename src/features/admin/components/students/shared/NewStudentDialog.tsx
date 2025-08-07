@@ -91,7 +91,12 @@ export const NewStudentDialog = () => {
   });
 
   const onSubmit = (data: NewStudentFormData) => {
-    createStudent.mutate(data);
+    // For student creation, send welcome email but NOT invitation
+    // Invitation should only be sent after approval
+    createStudent.mutate({
+      ...data,
+      sendInvite: false, // Important: Only send invitation after approval
+    });
   };
 
   return (

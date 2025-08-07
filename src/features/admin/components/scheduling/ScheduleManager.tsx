@@ -151,7 +151,7 @@ const ScheduleManagerComponent = () => {
       // Extract date and time from calendar click for compact form
       const clickedDate = slotInfo.start;
       const clickedTime = `${clickedDate.getHours().toString().padStart(2, "0")}:${clickedDate.getMinutes().toString().padStart(2, "0")}`;
-      
+
       setSelectedCalendarDate(clickedDate);
       setSelectedCalendarTime(clickedTime);
       setTimeSlotFormData({
@@ -197,13 +197,13 @@ const ScheduleManagerComponent = () => {
   const handleEventDrop = useCallback(
     (eventData: EventInteractionArgs<ExtendedCalendarEvent>) => {
       const { event, start, end } = eventData;
-      
+
       // Prevent dragging blocked dates
       if (event.slot?.isBlocked) {
         console.log("Cannot drag blocked dates - they are static periods");
         return;
       }
-      
+
       if (event.id && start && end) {
         updateTimeSlot.mutate({
           id: event.id.toString(),
@@ -499,7 +499,6 @@ const ScheduleManagerComponent = () => {
     setSelectedBlockedRange(null);
     setIsBlockedDateDialogOpen(false);
   }, []);
-
 
   // Bulk selection handlers
   const handleToggleSelectionMode = useCallback(() => {

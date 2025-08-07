@@ -89,11 +89,7 @@ export const BulkCreateSlotsDialog: FC<BulkCreateSlotsDialogProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-2 text-xs sm:text-sm"
-        >
+        <Button variant="outline" size="sm" className="flex items-center gap-2 text-xs sm:text-sm">
           <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
           <span className="hidden sm:inline">Bulk Create Slots</span>
           <span className="sm:hidden">Bulk Create</span>

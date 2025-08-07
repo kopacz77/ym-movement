@@ -155,7 +155,11 @@ export default function SettingsPage() {
   // Delete rink mutation
   const deleteRinkMutation = api.admin.schedule.deleteRink.useMutation({
     onSuccess: (result) => {
-      delightfulToast.success(`Perfect! ${result.message} ✨`, "Your coaching space is beautifully organized!", "admin");
+      delightfulToast.success(
+        `Perfect! ${result.message} ✨`,
+        "Your coaching space is beautifully organized!",
+        "admin",
+      );
     },
     onError: (error) => {
       delightfulToast.error(error.message, "admin");
@@ -677,16 +681,12 @@ export default function SettingsPage() {
                         <TableCell>{rink.maxCapacity}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleEditRink(rink)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleEditRink(rink)}>
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
                             </Button>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteRink(rink)}
                               className="text-red-600 hover:text-red-700"

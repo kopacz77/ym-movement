@@ -1,5 +1,5 @@
 // src/lib/auth-tokens.ts
-import { randomBytes } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import { addHours } from "date-fns";
 import { sendInvitationEmail, sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +18,7 @@ export function generateToken(): string {
  * @param email - The email of the user
  * @param name - The name of the user (optional)
  * @param isInvitation - Whether this is for a new account invitation (vs. password reset)
+ * @param sendEmail - Whether to send an email (defaults to true for backwards compatibility)
  * @returns The generated token record
  */
 export async function createPasswordResetToken(
@@ -25,6 +26,7 @@ export async function createPasswordResetToken(
   email: string,
   name?: string | null,
   isInvitation = false,
+  sendEmail = true,
 ) {
   // Check if there's an existing token and delete it
   await prisma.passwordResetToken.deleteMany({
@@ -38,6 +40,7 @@ export async function createPasswordResetToken(
   // Create the token record
   const passwordResetToken = await prisma.passwordResetToken.create({
     data: {
+      id: randomUUID(),
       userId,
       token,
       expires,
@@ -45,16 +48,18 @@ export async function createPasswordResetToken(
   });
 
   // Send the proper email based on whether this is an invitation
-  try {
-    if (isInvitation) {
-      await sendInvitationEmail(email, name || "Student", token);
-    } else {
-      await sendPasswordResetEmail(email, name || "Student", token);
+  if (sendEmail) {
+    try {
+      if (isInvitation) {
+        await sendInvitationEmail(email, name || "Student", token);
+      } else {
+        await sendPasswordResetEmail(email, name || "Student", token);
+      }
+    } catch (error) {
+      console.error("Failed to send email:", error);
+      // We don't throw here because we want the token to be created
+      // even if the email fails to send
     }
-  } catch (error) {
-    console.error("Failed to send email:", error);
-    // We don't throw here because we want the token to be created
-    // even if the email fails to send
   }
 
   return passwordResetToken;
@@ -69,7 +74,7 @@ export async function createPasswordResetToken(
 export async function verifyPasswordResetToken(token: string) {
   const passwordResetToken = await prisma.passwordResetToken.findUnique({
     where: { token },
-    include: { user: true },
+    include: { User: true },
   });
 
   if (!passwordResetToken) {
@@ -85,7 +90,7 @@ export async function verifyPasswordResetToken(token: string) {
     return null;
   }
 
-  return passwordResetToken.user;
+  return passwordResetToken.User;
 }
 
 /**

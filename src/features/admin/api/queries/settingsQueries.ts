@@ -4,6 +4,7 @@ import type { PrismaClient } from "@prisma/client";
 import { Level, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define zod schema for our settings
@@ -96,8 +97,10 @@ export const settingsRouter = createTRPCRouter({
             updatedAt: new Date(),
           },
           create: {
+            id: randomUUID(),
             key: "operational",
             value: JSON.stringify(input.operational),
+            updatedAt: new Date(),
           },
         });
 
@@ -108,7 +111,12 @@ export const settingsRouter = createTRPCRouter({
             value: JSON.stringify(input.payment),
             updatedAt: new Date(),
           },
-          create: { key: "payment", value: JSON.stringify(input.payment) },
+          create: {
+            id: randomUUID(),
+            key: "payment",
+            value: JSON.stringify(input.payment),
+            updatedAt: new Date(),
+          },
         });
 
         // Save rink areas settings
@@ -119,8 +127,10 @@ export const settingsRouter = createTRPCRouter({
             updatedAt: new Date(),
           },
           create: {
+            id: randomUUID(),
             key: "rinkAreas",
             value: JSON.stringify(input.rinkAreas),
+            updatedAt: new Date(),
           },
         });
       });

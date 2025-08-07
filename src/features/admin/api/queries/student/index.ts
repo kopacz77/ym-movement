@@ -13,6 +13,7 @@ export const studentRouter = createTRPCRouter({
   getStudentStats: studentQueries.getStudentStats,
   createStudent: studentQueries.createStudent,
   updateStudent: studentQueries.updateStudent,
+  deleteStudent: studentQueries.deleteStudent,
   toggleStatus: studentQueries.toggleStatus,
   resendInvitation: studentQueries.resendInvitation,
 
