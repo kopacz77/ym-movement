@@ -126,8 +126,30 @@ export async function POST(req: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Test database connection
+    console.log("Testing database connection...");
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      console.log("Database connection successful");
+    } catch (dbError) {
+      console.error("Database connection failed:", dbError);
+      throw new Error("Database connection failed");
+    }
+
     // Create user and student profile in a transaction
+    console.log("Starting database transaction...");
+    console.log("Data to create:", {
+      name,
+      email: email.toLowerCase(),
+      phone: phone || null,
+      level,
+      maxLessonsPerWeek,
+      emergencyContact: emergencyContact || null,
+      parentConsent,
+    });
+
     const user = await prisma.$transaction(async (tx) => {
+      console.log("Creating user...");
       // Create user first
       const newUser = await tx.user.create({
         data: {
@@ -137,7 +159,9 @@ export async function POST(req: NextRequest) {
           role: "STUDENT",
         },
       });
+      console.log("User created successfully:", newUser.id);
 
+      console.log("Creating student profile...");
       // Create student profile linked to user
       const student = await tx.student.create({
         data: {
@@ -149,12 +173,14 @@ export async function POST(req: NextRequest) {
           parentConsent,
         },
       });
+      console.log("Student profile created successfully:", student.id);
 
       return {
         ...newUser,
         Student: student,
       };
     });
+    console.log("Transaction completed successfully");
 
     // Send welcome email after successful user creation (don't fail if email fails)
     try {
