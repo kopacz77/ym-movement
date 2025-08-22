@@ -156,13 +156,8 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // Send welcome email after successful user creation (don't fail if email fails)
-    try {
-      await sendWelcomeEmail(user.email, user.name || "");
-    } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
-      // Don't fail the whole signup if email fails
-    }
+    // Temporarily disable email sending to debug signup issue
+    console.log("Skipping welcome email to debug signup issue");
 
     // Return success with user data (excluding password)
     const { password: _, ...userData } = user;
@@ -175,6 +170,14 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Error creating user:", error);
-    return NextResponse.json({ message: "Failed to create account" }, { status: 500 });
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+    console.error("Error details:", {
+      name: error instanceof Error ? error.name : "Unknown",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json({ 
+      message: "Failed to create account",
+      error: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
