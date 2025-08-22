@@ -67,7 +67,6 @@ service-account*.json
 
 # Prisma
 /prisma/.env
-/prisma/migrations/
 
 # TypeScript
 *.tsbuildinfo
