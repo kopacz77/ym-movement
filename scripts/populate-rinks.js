@@ -68,27 +68,27 @@ async function populateRinks() {
   try {
     for (const rink of rinkData) {
       const existingRink = await prisma.rink.findUnique({
-        where: { id: rink.id }
+        where: { name: rink.name }
       });
       
       if (existingRink) {
         console.log(`⚠️  Rink "${rink.name}" already exists, updating...`);
         await prisma.rink.update({
-          where: { id: rink.id },
+          where: { name: rink.name },
           data: {
-            name: rink.name,
             timezone: rink.timezone,
             address: rink.address,
-            maxCapacity: rink.maxCapacity,
-            updatedAt: new Date()
+            maxCapacity: rink.maxCapacity
           }
         });
       } else {
         console.log(`✅ Creating rink: ${rink.name}`);
         await prisma.rink.create({
           data: {
-            ...rink,
-            updatedAt: new Date()
+            name: rink.name,
+            timezone: rink.timezone,
+            address: rink.address,
+            maxCapacity: rink.maxCapacity
           }
         });
       }

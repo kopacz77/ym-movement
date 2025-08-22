@@ -25,9 +25,9 @@ const EMAIL_CONFIG = {
 async function sendEmail(to: string, subject: string, html: string) {
   try {
     if (!resendApiKey || !resend) {
-      //console.warn("RESEND_API_KEY not found, using fallback email method");
-      //console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
-      //console.log(`[MOCK EMAIL] Content: ${html}`);
+      console.warn("RESEND_API_KEY not found, using fallback email method");
+      console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
+      console.log(`[MOCK EMAIL] Content: ${html}`);
       return { id: "mock-email-id" };
     }
 
@@ -48,7 +48,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
-    //console.log(`Email sent successfully (${subject}):`, data);
+    console.log(`Email sent successfully (${subject}):`, data);
     return data;
   } catch (error) {
     console.error(`Exception sending email (${subject}):`, error);
