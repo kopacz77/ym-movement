@@ -29,7 +29,7 @@ const signupSchema = z.object({
     "JUNIOR",
     "SENIOR",
   ]),
-  maxLessonsPerWeek: z.number().int().positive().default(3),
+  maxLessonsPerWeek: z.number().int().positive().optional().default(3),
   emergencyContact: z
     .object({
       name: z.string(),
@@ -58,9 +58,15 @@ export async function POST(req: NextRequest) {
 
     // Parse request body with size limit
     const body = await req.json();
+    console.log("Signup request received:", { ...body, password: "[REDACTED]" });
     const result = signupSchema.safeParse(body);
 
     if (!result.success) {
+      console.error("Signup validation failed:", {
+        body,
+        errors: result.error.format(),
+        issues: result.error.issues,
+      });
       logSecurityEvent("INVALID_SIGNUP_DATA", {
         ip: clientIP,
         errors: result.error.format(),
@@ -85,6 +91,10 @@ export async function POST(req: NextRequest) {
     // Additional password validation using security utility
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.isValid) {
+      console.error("Signup failed: Weak password:", {
+        email: email.toLowerCase(),
+        errors: passwordValidation.errors,
+      });
       logSecurityEvent("WEAK_PASSWORD_ATTEMPT", {
         ip: clientIP,
         email: email.toLowerCase(),
@@ -105,6 +115,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingUser) {
+      console.log("Signup failed: Email already in use:", email.toLowerCase());
       logSecurityEvent("DUPLICATE_EMAIL_SIGNUP", {
         ip: clientIP,
         email: email.toLowerCase(),
