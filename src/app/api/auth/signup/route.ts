@@ -127,34 +127,42 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user and student profile in a transaction
-    const user = await prisma.$transaction(async (prisma) => {
-      // Create user
-      const newUser = await prisma.user.create({
+    const user = await prisma.$transaction(async (tx) => {
+      // Create user first
+      const newUser = await tx.user.create({
         data: {
           name,
           email: email.toLowerCase(),
           password: hashedPassword,
           role: "STUDENT",
-          Student: {
-            create: {
-              phone,
-              level,
-              maxLessonsPerWeek,
-              emergencyContact,
-              parentConsent, // Fixed: Include parentConsent field
-            },
-          },
-        },
-        include: {
-          Student: true,
         },
       });
 
-      // Send welcome email
-      await sendWelcomeEmail(newUser.email, newUser.name || "");
+      // Create student profile linked to user
+      const student = await tx.student.create({
+        data: {
+          userId: newUser.id,
+          phone,
+          level,
+          maxLessonsPerWeek,
+          emergencyContact,
+          parentConsent,
+        },
+      });
 
-      return newUser;
+      return {
+        ...newUser,
+        Student: student,
+      };
     });
+
+    // Send welcome email after successful user creation (don't fail if email fails)
+    try {
+      await sendWelcomeEmail(user.email, user.name || "");
+    } catch (emailError) {
+      console.error("Failed to send welcome email:", emailError);
+      // Don't fail the whole signup if email fails
+    }
 
     // Return success with user data (excluding password)
     const { password: _, ...userData } = user;
