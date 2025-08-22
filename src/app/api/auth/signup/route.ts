@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { randomUUID } from "crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 // src/app/api/auth/signup/route.ts
@@ -150,9 +151,12 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.$transaction(async (tx) => {
       console.log("Creating user...");
+      // Generate unique ID for user
+      const userId = randomUUID();
       // Create user first
       const newUser = await tx.user.create({
         data: {
+          id: userId,
           name,
           email: email.toLowerCase(),
           password: hashedPassword,
@@ -162,9 +166,12 @@ export async function POST(req: NextRequest) {
       console.log("User created successfully:", newUser.id);
 
       console.log("Creating student profile...");
+      // Generate unique ID for student
+      const studentId = randomUUID();
       // Create student profile linked to user
       const student = await tx.student.create({
         data: {
+          id: studentId,
           userId: newUser.id,
           phone: phone || null,
           level,
