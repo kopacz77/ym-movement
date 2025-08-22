@@ -142,10 +142,10 @@ export async function POST(req: NextRequest) {
       const student = await tx.student.create({
         data: {
           userId: newUser.id,
-          phone,
+          phone: phone || null,
           level,
           maxLessonsPerWeek,
-          emergencyContact,
+          emergencyContact: emergencyContact || null,
           parentConsent,
         },
       });
@@ -156,8 +156,13 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // Temporarily disable email sending to debug signup issue
-    console.log("Skipping welcome email to debug signup issue");
+    // Send welcome email after successful user creation (don't fail if email fails)
+    try {
+      await sendWelcomeEmail(user.email, user.name || "");
+    } catch (emailError) {
+      console.error("Failed to send welcome email:", emailError);
+      // Don't fail the whole signup if email fails
+    }
 
     // Return success with user data (excluding password)
     const { password: _, ...userData } = user;
