@@ -65,7 +65,8 @@ export default function SignupPage() {
     const newPassword = e.target.value;
     setPassword(newPassword);
     if (newPassword.length > 0) {
-      setPasswordErrors(validatePassword(newPassword));
+      const errors = validatePassword(newPassword);
+      setPasswordErrors(errors);
     } else {
       setPasswordErrors([]);
     }
