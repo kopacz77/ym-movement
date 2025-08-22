@@ -31,6 +31,15 @@ async function sendEmail(to: string, subject: string, html: string) {
       return { id: "mock-email-id" };
     }
 
+    console.log("📧 Attempting to send email with config:", {
+      from: EMAIL_CONFIG.from,
+      replyTo: EMAIL_CONFIG.replyTo,
+      to,
+      subject,
+      apiKeyLength: resendApiKey?.length,
+      apiKeyPrefix: resendApiKey?.substring(0, 8) + "..."
+    });
+
     const { data, error } = await resend.emails.send({
       ...EMAIL_CONFIG,
       to,
