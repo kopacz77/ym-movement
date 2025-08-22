@@ -13,15 +13,19 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
   rinkName = "the rink",
   className = "",
 }) => {
-  // State for current time (to prevent hydration mismatch)
+  // State for current time and timezone info (to prevent hydration mismatch)
   const [currentTimes, setCurrentTimes] = useState<{
     localTimeStr: string;
     rinkTimeStr: string;
   } | null>(null);
 
-  // Get the local timezone in a readable format
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const localTimezoneName = localTimezone.split("/").pop()?.replace("_", " ") || localTimezone;
+  const [timezoneInfo, setTimezoneInfo] = useState<{
+    localTimezone: string;
+    localTimezoneName: string;
+    hourDiff: number;
+    direction: string;
+    hourText: string;
+  } | null>(null);
 
   // Get the rink timezone in a readable format
   const getRinkTimezoneName = (timezone: string) => {
@@ -45,51 +49,50 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
 
   const rinkTimezoneName = getRinkTimezoneName(rinkTimezone);
 
-  // Calculate time difference and determine relationship
-  const getTimezoneRelationship = () => {
-    const now = DateTime.now();
-    const localTime = now.setZone(localTimezone);
-    const rinkTime = now.setZone(rinkTimezone);
-
-    // Calculate the difference in hours (how many hours ahead/behind local is compared to rink)
-    const diffHours = Math.abs((localTime.offset - rinkTime.offset) / 60);
-
-    // Determine relationship from local perspective
-    // If local offset > rink offset, local is ahead (east of) rink
-    // If local offset < rink offset, local is behind (west of) rink
-    const isLocalAhead = localTime.offset > rinkTime.offset;
-
-    return {
-      hours: diffHours,
-      direction: isLocalAhead ? "ahead of" : "behind",
-    };
-  };
-
-  // Get timezone relationship
-  const { hours: hourDiff, direction } = getTimezoneRelationship();
-  const hourText = hourDiff === 1 ? "hour" : "hours";
-
-  // Update current time only on client side to prevent hydration mismatch
+  // Update current time and timezone info only on client side to prevent hydration mismatch
   useEffect(() => {
-    const updateTime = () => {
+    const updateTimeAndTimezone = () => {
       const now = DateTime.now();
+      
+      // Get current times
       setCurrentTimes({
         localTimeStr: now.toFormat("h:mm a"),
         rinkTimeStr: now.setZone(rinkTimezone).toFormat("h:mm a"),
       });
+
+      // Calculate timezone info on client side
+      const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const localTimezoneName = localTimezone.split("/").pop()?.replace("_", " ") || localTimezone;
+
+      const localTime = now.setZone(localTimezone);
+      const rinkTime = now.setZone(rinkTimezone);
+
+      // Calculate the difference in hours (how many hours ahead/behind local is compared to rink)
+      const diffHours = Math.abs((localTime.offset - rinkTime.offset) / 60);
+
+      // Determine relationship from local perspective
+      const isLocalAhead = localTime.offset > rinkTime.offset;
+
+      setTimezoneInfo({
+        localTimezone,
+        localTimezoneName,
+        hourDiff: diffHours,
+        direction: isLocalAhead ? "ahead of" : "behind",
+        hourText: diffHours === 1 ? "hour" : "hours",
+      });
     };
 
     // Initial update
-    updateTime();
+    updateTimeAndTimezone();
 
     // Update every minute
-    const interval = setInterval(updateTime, 60000);
+    const interval = setInterval(updateTimeAndTimezone, 60000);
 
     return () => clearInterval(interval);
   }, [rinkTimezone]);
 
-  // Don't show timezone notice if they're the same timezone
-  if (localTimezone === rinkTimezone || hourDiff === 0) {
+  // Show simplified version if timezones are the same (only check on client side)
+  if (timezoneInfo && (timezoneInfo.localTimezone === rinkTimezone || timezoneInfo.hourDiff === 0)) {
     return (
       <div
         className={`bg-green-50 border border-green-200 rounded p-3 flex items-start text-green-800 ${className}`}
@@ -97,7 +100,7 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
         <span className="mr-2 mt-1">🌐</span>
         <div>
           <p className="font-bold">Timezone Notice:</p>
-          <p>This schedule is displayed in your local time ({localTimezoneName}).</p>
+          <p>This schedule is displayed in your local time ({timezoneInfo?.localTimezoneName || "Loading..."}).</p>
           <p className="text-sm mt-1">
             Current time: <strong>{currentTimes?.localTimeStr}</strong>
           </p>
@@ -114,8 +117,12 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
       <div>
         <p className="font-bold">Timezone Notice:</p>
         <p>
-          This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}). Your
-          local time ({localTimezoneName}) is {hourDiff} {hourText} {direction} the rink time.
+          This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}). 
+          {timezoneInfo ? (
+            <>Your local time ({timezoneInfo.localTimezoneName}) is {timezoneInfo.hourDiff} {timezoneInfo.hourText} {timezoneInfo.direction} the rink time.</>
+          ) : (
+            <>Loading timezone information...</>
+          )}
         </p>
         {currentTimes && (
           <p className="text-sm mt-1">
