@@ -164,11 +164,11 @@ export class StudentCache {
         prisma.student.findUnique({
           where: { id },
           include: {
-            user: true,
-            lessons: {
+            User: true,
+            Lesson: {
               include: {
-                rinkTimeSlot: {
-                  include: { rink: true },
+                RinkTimeSlot: {
+                  include: { Rink: true },
                 },
               },
               orderBy: { startTime: "desc" },
@@ -219,10 +219,10 @@ export class StudentCache {
             }),
           },
           include: {
-            user: true,
+            User: true,
             _count: {
               select: {
-                lessons: true,
+                Lesson: true,
                 payments: true,
               },
             },
@@ -272,14 +272,14 @@ export class LessonCache {
               gte: startDate,
               lte: endDate,
             },
-            ...(rinkId && { rinkTimeSlot: { rinkId } }),
+            ...(rinkId && { RinkTimeSlot: { rinkId } }),
           },
           include: {
-            student: {
-              include: { user: true },
+            Student: {
+              include: { User: true },
             },
-            rinkTimeSlot: {
-              include: { rink: true },
+            RinkTimeSlot: {
+              include: { Rink: true },
             },
             payments: true,
           },
@@ -307,11 +307,11 @@ export class LessonCache {
             ...(studentId && { studentId }),
           },
           include: {
-            student: {
-              include: { user: true },
+            Student: {
+              include: { User: true },
             },
-            rinkTimeSlot: {
-              include: { rink: true },
+            RinkTimeSlot: {
+              include: { Rink: true },
             },
           },
           orderBy: { startTime: "asc" },
@@ -365,13 +365,13 @@ export class PaymentCache {
             ...(params.status && { status: params.status }),
           },
           include: {
-            student: {
-              include: { user: true },
+            Student: {
+              include: { User: true },
             },
-            lesson: {
+            Lesson: {
               include: {
-                rinkTimeSlot: {
-                  include: { rink: true },
+                RinkTimeSlot: {
+                  include: { Rink: true },
                 },
               },
             },
@@ -467,7 +467,7 @@ export class ScheduleCache {
             lesson: null, // Available slots have no lesson assigned
           },
           include: {
-            rink: true,
+            Rink: true,
           },
           orderBy: { startTime: "asc" },
         }),
@@ -491,6 +491,5 @@ export class ScheduleCache {
   }
 }
 
-// Export cache classes and wrapper
-export { cacheWrapper };
+// Cache wrapper is already exported above
 export type { QueryCacheConfig, CacheMetrics };

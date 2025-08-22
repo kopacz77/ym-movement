@@ -617,5 +617,4 @@ export const CommonComponentRules = {
   }),
 };
 
-// Export utilities
-export { ComponentOptimizer, ServerClientPerformanceUtils, ComponentMigrationUtils };
+// All utilities are already exported above

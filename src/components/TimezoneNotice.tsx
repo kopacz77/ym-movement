@@ -99,7 +99,7 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
           <p className="font-bold">Timezone Notice:</p>
           <p>This schedule is displayed in your local time ({localTimezoneName}).</p>
           <p className="text-sm mt-1">
-            Current time: <strong>{localTimeStr}</strong>
+            Current time: <strong>{currentTimes?.localTimeStr}</strong>
           </p>
         </div>
       </div>

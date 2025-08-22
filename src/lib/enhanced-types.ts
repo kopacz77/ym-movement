@@ -517,7 +517,6 @@ export function validateEnvironment(): Result<EnvironmentConfig, string[]> {
   return ResultHelpers.success(env as EnvironmentConfig);
 }
 
-// Export all type utilities
-export { TypeGuards, TypeFactories, ResultHelpers, Validators, ValidationError, assertNever };
+// All type utilities are already exported above
 
 // Types are already exported above - no need for re-export

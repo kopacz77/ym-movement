@@ -243,8 +243,8 @@ class ServiceWorkerManager {
       for (const actionType of actionTypes) {
         const syncTag = this.getSyncTagForActionType(actionType);
 
-        if ("sync" in window.ServiceWorkerRegistration.prototype) {
-          await this.registration?.sync.register(syncTag);
+        if ("serviceWorker" in navigator && this.registration && "sync" in this.registration) {
+          await (this.registration as any).sync.register(syncTag);
           console.log("[SW Manager] Background sync registered:", syncTag);
         } else {
           // Fallback for browsers without background sync

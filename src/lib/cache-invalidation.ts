@@ -7,6 +7,7 @@
  * @since Phase 2 Priority 3 Optimizations
  */
 
+import { useCallback, useEffect, useState } from "react";
 import { TRPCQueryUtils } from "./api-optimized";
 import { CACHE_CONFIG, redis } from "./redis";
 
@@ -520,5 +521,5 @@ export function useCacheInvalidation() {
 }
 
 // Export main classes and helpers
-export { cacheInvalidation, CacheInvalidationHelpers };
+// Cache invalidation manager and helpers are already exported above
 export type { InvalidationRule, InvalidationEvent };

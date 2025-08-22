@@ -250,7 +250,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
     (props: EventProps<object>) => {
       const event = props.event as ExtendedCalendarEvent;
       const timezone = event.slot?.rink?.timezone || "America/New_York";
-      const isSelected = selectedSlotIds.has(event.slot.id);
+      const isSelected = event.slot?.id ? selectedSlotIds.has(event.slot.id) : false;
 
       // Check if this is a blocked date event
       if (event.slot?.isBlocked) {
@@ -287,12 +287,19 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       const start = new Date(event.start);
       const end = new Date(event.end);
 
-      const startTimeObj = formatTimeWithTimezone(start, timezone, "h:mm a");
-      const endTimeObj = formatTimeWithTimezone(end, timezone, "h:mm a");
+      let localTimeStr = "N/A";
+      let rinkTimeStr = "N/A";
 
-      // Format the times for display
-      const localTimeStr = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
-      const rinkTimeStr = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
+      try {
+        const startTimeObj = formatTimeWithTimezone(start, timezone, "h:mm a");
+        const endTimeObj = formatTimeWithTimezone(end, timezone, "h:mm a");
+
+        // Format the times for display
+        localTimeStr = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
+        rinkTimeStr = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
+      } catch (error) {
+        console.error("Error formatting time for event:", event, error);
+      }
 
       // For month view, show daily summary information with day detail popover
       if (calendarView === "month") {

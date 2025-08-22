@@ -420,6 +420,5 @@ export function useOptimisticLessonBooking() {
   });
 }
 
-// Export query client creator and utilities
-export { createOptimizedQueryClient, TRPCQueryUtils };
+// Query client creator and utilities are already exported above
 export type { DefaultOptions };

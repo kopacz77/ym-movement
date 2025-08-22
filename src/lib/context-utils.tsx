@@ -157,7 +157,7 @@ export function useRenderCount(componentName: string) {
 export function useDebouncedState<T>(initialValue: T, delay: number): [T, T, (value: T) => void] {
   const [immediateValue, setImmediateValue] = useState(initialValue);
   const [debouncedValue, setDebouncedValue] = useState(initialValue);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const setValue = useCallback(
     (value: T) => {

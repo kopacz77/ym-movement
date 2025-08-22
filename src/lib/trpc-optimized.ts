@@ -506,6 +506,5 @@ export class TRPCBatchOperations {
   }
 }
 
-// Export performance monitor and batch operations
-export { performanceMonitor, TRPCBatchOperations };
+// Performance monitor and batch operations are already exported above
 export type { PerformanceData, RateLimitConfig };
