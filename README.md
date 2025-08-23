@@ -76,7 +76,8 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 
 ### **Development & Quality**
 - **Biome** - Fast linting and formatting
-- **Vitest** - Modern testing framework
+- **Vitest** - Modern unit testing framework
+- **Playwright** - End-to-end browser testing with MCP integration
 - **TypeScript** - Static type checking
 - **GitHub Actions** - CI/CD and security scanning
 - **Bundle Analyzer** - Performance monitoring
@@ -107,10 +108,21 @@ yura-scheduler-v3/
 ├── prisma/                     # Database schema and migrations
 ├── scripts/                    # Utility scripts
 │   └── security-audit.js       # Security monitoring
-├── __tests__/                  # Test files
+├── tests/                      # End-to-end test files
+│   ├── student-signup.spec.ts  # Student registration tests
+│   ├── authentication.spec.ts  # Login/logout tests
+│   ├── admin-dashboard.spec.ts # Admin functionality tests
+│   ├── lesson-scheduling.spec.ts # Scheduling tests
+│   ├── e2e-complete-flow.spec.ts # Full user journey tests
+│   └── helpers/                # Test utilities and helpers
+├── __tests__/                  # Unit test files
+├── playwright.config.ts        # Playwright configuration
 └── docs/                       # Documentation
     ├── PHASE2_OPTIMIZATIONS.md
     └── SECURITY_FIXES_SUMMARY.md
+├── TESTING.md                  # Comprehensive testing guide
+├── CONTRIBUTING.md             # Contributing guidelines
+└── API.md                      # API documentation
 ```
 
 ## 🚀 Quick Start
@@ -261,8 +273,12 @@ pnpm dev
 | `pnpm lint` | Run Biome linter |
 | `pnpm lint:fix` | Fix linting issues |
 | `pnpm format` | Format code with Biome |
-| `pnpm test` | Run test suite |
+| `pnpm test` | Run unit test suite |
 | `pnpm test:coverage` | Run tests with coverage |
+| `pnpm test:e2e` | Run end-to-end tests |
+| `pnpm test:e2e:ui` | Run E2E tests with interactive UI |
+| `pnpm test:e2e:debug` | Debug E2E tests step-by-step |
+| `pnpm test:all` | Run both unit and E2E tests |
 | `pnpm analyze` | Analyze bundle size |
 | `pnpm security:audit` | Run security audit |
 | `pnpm prisma:migrate` | Deploy database migrations |
@@ -279,7 +295,8 @@ This project maintains high code quality standards:
 
 - **TypeScript Strict Mode** - Catch errors at compile time
 - **Biome Linting** - Fast, comprehensive linting
-- **Automated Testing** - Unit and integration tests
+- **Automated Testing** - Unit tests with Vitest + E2E tests with Playwright
+- **MCP Integration** - Claude Code MCP servers for enhanced development
 - **Security Scanning** - Daily vulnerability checks
 - **Performance Monitoring** - Real-time performance tracking
 
@@ -296,8 +313,11 @@ The application includes enterprise-grade optimizations:
 
 ### Testing
 
+The application includes comprehensive testing with both unit and end-to-end tests:
+
+#### Unit Tests (Vitest)
 ```bash
-# Run all tests
+# Run all unit tests
 pnpm test
 
 # Run tests in watch mode
@@ -309,6 +329,46 @@ pnpm test:coverage
 # Run specific test file
 pnpm test StudentList.test.tsx
 ```
+
+#### End-to-End Tests (Playwright)
+```bash
+# Run all E2E tests (headless)
+pnpm test:e2e
+
+# Run E2E tests with interactive UI
+pnpm test:e2e:ui
+
+# Run E2E tests with visible browser
+pnpm test:e2e:headed
+
+# Debug E2E tests step-by-step
+pnpm test:e2e:debug
+
+# Generate test code by recording interactions
+pnpm test:e2e:codegen
+
+# View HTML test reports
+pnpm test:e2e:report
+
+# Run all tests (unit + E2E)
+pnpm test:all
+```
+
+#### Test Coverage
+- ✅ **Student signup and registration flow**
+- ✅ **Authentication and authorization**
+- ✅ **Admin dashboard functionality**
+- ✅ **Lesson scheduling and booking**
+- ✅ **Payment processing workflows**
+- ✅ **Email notification systems**
+- ✅ **Responsive design testing**
+- ✅ **Complete end-to-end user journeys**
+
+#### Browser Support
+E2E tests run on multiple browsers:
+- 🌐 **Chromium** (Desktop & Mobile)
+- 🦊 **Firefox** (Desktop)
+- 🍎 **Safari/WebKit** (Desktop & Mobile)
 
 ## 🔒 Security
 

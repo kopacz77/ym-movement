@@ -5,13 +5,60 @@ This document outlines the comprehensive testing strategy and implementation for
 ## 🧪 Test Infrastructure
 
 ### Framework & Tools
-- **Testing Framework**: Vitest
+- **Unit Testing Framework**: Vitest
 - **React Testing**: @testing-library/react
+- **End-to-End Testing**: Playwright with MCP integration
 - **Mock Service Worker**: MSW for API mocking
 - **Test Database**: Neon PostgreSQL with proper cleanup
 - **Faker**: @faker-js/faker for test data generation
 
 ### Test Categories
+
+## 🎭 End-to-End Testing (Playwright)
+
+### Overview
+Comprehensive browser automation testing covering complete user workflows across multiple browsers and devices.
+
+### Test Suites (`tests/`)
+- **`student-signup.spec.ts`** - Student registration and validation flows
+- **`authentication.spec.ts`** - Login, logout, and session management
+- **`admin-dashboard.spec.ts`** - Admin interface and functionality testing
+- **`lesson-scheduling.spec.ts`** - Time slot management and lesson booking
+- **`e2e-complete-flow.spec.ts`** - Full end-to-end user journeys
+
+### Browser Coverage
+- **Chromium** (Desktop + Mobile)
+- **Firefox** (Desktop)
+- **WebKit/Safari** (Desktop + Mobile)
+
+### Key Features Tested
+- ✅ Cross-browser compatibility
+- ✅ Responsive design (Mobile/Tablet/Desktop)
+- ✅ Real user interactions and workflows
+- ✅ Email notification systems
+- ✅ Payment processing flows
+- ✅ Role-based access control
+- ✅ Error handling and edge cases
+
+### MCP Integration
+- **Playwright MCP Server**: Browser automation capabilities
+- **Claude Code Integration**: Enhanced testing workflow
+- **Status**: ✅ Configured and connected
+
+### Commands
+```bash
+# Run all E2E tests
+npm run test:e2e
+
+# Interactive testing UI
+npm run test:e2e:ui
+
+# Debug mode
+npm run test:e2e:debug
+
+# Generate test reports
+npm run test:e2e:report
+```
 
 ## 🔒 Security Tests
 Security is our top priority. All security features have comprehensive test coverage.

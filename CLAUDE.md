@@ -12,6 +12,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Auto-fix lint issues**: `pnpm lint:fix` or `npm run lint:fix`
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
 
+## Testing Commands
+
+**End-to-End Testing**: Uses **Playwright** for comprehensive browser testing
+
+- **Run all E2E tests**: `npm run test:e2e` or `pnpm test:e2e`
+- **Run E2E tests with UI**: `npm run test:e2e:ui` (interactive mode)
+- **Run E2E tests headed**: `npm run test:e2e:headed` (visible browser)
+- **Debug E2E tests**: `npm run test:e2e:debug` (step-by-step debugging)
+- **View test report**: `npm run test:e2e:report` (HTML report)
+- **Generate test code**: `npm run test:e2e:codegen` (record interactions)
+- **Run all tests**: `npm run test:all` (unit + E2E tests)
+
+**Test Coverage**:
+- Student signup and registration flow
+- Admin dashboard functionality
+- Lesson scheduling and booking
+- Authentication and authorization
+- Payment processing workflows
+- Responsive design across devices
+- Email notification systems
+- Complete end-to-end user journeys
+
 ## MCP Server Configuration
 
 **shadcn/ui MCP Server**: Configured for enhanced UI component access and development.
@@ -35,6 +57,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `mcp__shadcn-ui__get_block` - Get complete block implementations (including calendar blocks)
 
 **Usage**: Particularly useful for calendar component development, UI consistency, and accessing latest shadcn/ui patterns.
+
+**Playwright MCP Server**: Configured for automated browser testing and web automation.
+
+**Current Setup Status**: ✅ **CONFIGURED AND CONNECTED**
+- Server: `@executeautomation/playwright-mcp-server`
+- Status: Connected (verified with `claude mcp list`)
+- Added with: `claude mcp add playwright npx @executeautomation/playwright-mcp-server`
+
+**Available Testing Capabilities**:
+- Browser automation for end-to-end testing
+- Web page navigation and form interaction
+- Screenshot capture and visual testing
+- Data extraction from web pages
+- Automated testing of signup/login flows
+- Performance and accessibility testing
+
+**Usage**: Essential for comprehensive testing of the YM Movement application, particularly for testing the student signup flow, admin dashboard functionality, and cross-browser compatibility.
 
 ## Docker Commands (Recommended)
 
