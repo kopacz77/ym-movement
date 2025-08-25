@@ -5,8 +5,7 @@ import { PaymentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
-// Import email functions if you have them
-// import { sendPaymentReminderEmail } from '@/lib/email';
+import { sendPaymentReminderEmail } from "@/lib/email";
 
 export const paymentRouter = createTRPCRouter({
   getPayments: protectedProcedure
@@ -273,17 +272,23 @@ export const paymentRouter = createTRPCRouter({
         }
 
         // Send email reminder
-        // This would be implemented in your email service
-        // For example:
-        // await sendPaymentReminderEmail(
-        //   payment.Student.User.email,
-        //   payment.Student.User.name || 'Student',
-        //   {
-        //     amount: payment.amount,
-        //     referenceCode: payment.referenceCode,
-        //     dueDate: new Date(payment.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days after creation
-        //   }
-        // );
+        try {
+          await sendPaymentReminderEmail(
+            payment.Student.User.email,
+            payment.Student.User.name || "Student",
+            {
+              amount: payment.amount,
+              referenceCode: payment.referenceCode,
+              dueDate: new Date(payment.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days after creation
+              lessonDate: payment.Lesson?.startTime,
+              lessonType: payment.Lesson?.type,
+              paymentMethod: payment.method,
+            },
+          );
+        } catch (emailError) {
+          // Log email error but don't fail the entire operation
+          console.error("Failed to send payment reminder email:", emailError);
+        }
 
         // Update the payment to record when reminder was sent
         return await ctx.prisma.payment.update({

@@ -331,3 +331,90 @@ export async function sendInvitationEmail(email: string, name: string, token: st
 
   return sendEmail(email, "Welcome to YM Movement - Complete Your Registration", emailContent);
 }
+
+/**
+ * Sends a payment reminder email to a student for an outstanding payment
+ */
+export async function sendPaymentReminderEmail(
+  studentEmail: string,
+  studentName: string,
+  paymentDetails: {
+    amount: number;
+    referenceCode: string;
+    dueDate: Date;
+    lessonDate?: Date;
+    lessonType?: string;
+    paymentMethod: string;
+  },
+) {
+  const paymentInstructions =
+    paymentDetails.paymentMethod.toLowerCase() === "venmo"
+      ? {
+          method: "Venmo",
+          details: "@yura-min",
+          instructions: "Send payment to @yura-min via Venmo",
+        }
+      : {
+          method: "Zelle",
+          details: "(714) 743-7071",
+          instructions: "Send payment to (714) 743-7071 via Zelle",
+        };
+
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #e11d48;">💳 Payment Reminder</h1>
+      <p>Hello ${studentName},</p>
+      <p>This is a friendly reminder that you have an outstanding payment for your recent lesson at YM Movement.</p>
+      
+      <div style="background-color: #fee2e2; border-left: 4px solid #e11d48; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #991b1b; margin-top: 0;">Payment Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">💰 <strong>Amount Due:</strong> $${paymentDetails.amount.toFixed(2)}</li>
+          ${paymentDetails.lessonDate ? `<li style="margin-bottom: 8px;">📅 <strong>Lesson Date:</strong> ${formatDate(paymentDetails.lessonDate)}</li>` : ""}
+          ${paymentDetails.lessonType ? `<li style="margin-bottom: 8px;">🏆 <strong>Lesson Type:</strong> ${paymentDetails.lessonType}</li>` : ""}
+          <li style="margin-bottom: 8px;">⏰ <strong>Due Date:</strong> ${formatDate(paymentDetails.dueDate)}</li>
+        </ul>
+      </div>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #0c4a6e; margin-top: 0;">How to Pay</h2>
+        <p style="margin-bottom: 15px;">💳 <strong>Payment Method:</strong> ${paymentInstructions.method}</p>
+        <p style="margin-bottom: 15px;"><strong>${paymentInstructions.method}:</strong> ${paymentInstructions.details}</p>
+        
+        <div style="background-color: #fff; padding: 15px; border-radius: 4px; margin-top: 15px;">
+          <p style="margin: 0; font-size: 14px;">⚠️ <strong>Important:</strong> Please include this reference code in your payment note:</p>
+          <p style="font-size: 20px; font-weight: bold; margin: 10px 0; color: #0066cc; background-color: #f8f9fa; padding: 8px; border-radius: 4px; text-align: center;">${paymentDetails.referenceCode}</p>
+        </div>
+      </div>
+
+      <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #374151; margin-top: 0;">Need Help?</h3>
+        <p style="margin-bottom: 10px;">If you have any questions about this payment or need to discuss payment arrangements, please don't hesitate to contact us:</p>
+        <p style="margin-bottom: 10px;">📧 Email: info@ym-movement.com</p>
+        <p style="margin-bottom: 10px;">📱 Text/Call: (714) 743-7071</p>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${BASE_URL}/student/payments" 
+           style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            View Payment Details
+        </a>
+      </div>
+
+      <p style="margin-top: 30px;">Thank you for your prompt attention to this matter. We appreciate your business and look forward to seeing you at your next lesson!</p>
+      
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated reminder. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(
+    studentEmail,
+    `💳 Payment Reminder - $${paymentDetails.amount.toFixed(2)} Due`,
+    emailContent,
+  );
+}

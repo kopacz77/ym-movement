@@ -70,8 +70,10 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     // Extract first name from full name
     const firstName = name ? name.split(" ")[0] : "Beautiful";
 
-    // Terms of endearment with international options
+    // Terms of endearment with international options - firstName appears more frequently
     const terms = [
+      firstName, // Appears 3 times for higher probability
+      firstName,
       firstName,
       "Beautiful",
       "Princess",
@@ -95,6 +97,20 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
 
   const displayName = getDisplayName();
 
+  // Get randomized punctuation for varied personalization
+  const getPunctuation = () => {
+    // Use similar logic as name selection for consistency within ~10 minutes
+    const now = new Date();
+    const hour = now.getHours();
+    const date = now.getDate();
+    const tenMinuteBlock = Math.floor(now.getMinutes() / 10);
+    const punctuations = ["!", ":)"];
+    const randomIndex = (hour + date + tenMinuteBlock + 1) % punctuations.length;
+    return punctuations[randomIndex];
+  };
+
+  const punctuation = getPunctuation();
+
   return (
     <div
       className={cn(
@@ -104,7 +120,8 @@ export function WarmGreeting({ name, role = "student", className }: WarmGreeting
     >
       <div className="transition-transform duration-300 group-hover:rotate-12">{icon}</div>
       <span className="text-lg font-medium bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-        {greeting} {displayName}!
+        {greeting} {displayName}
+        {punctuation}
       </span>
       {role === "admin" && (
         <Heart className="h-4 w-4 text-red-500 opacity-0 group-hover:opacity-100 transition-all duration-300 animate-pulse" />

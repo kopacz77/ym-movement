@@ -2,11 +2,18 @@
 "use client";
 
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import { Download } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -18,6 +25,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceReport } from "@/features/admin/components/reports/AttendanceReport";
 import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
 import { api } from "@/lib/api";
+import {
+  exportRevenueToCSV,
+  exportAttendanceToCSV,
+  exportCombinedReportToCSV,
+  exportToPDF,
+} from "@/lib/export-utils";
 import { formatCurrency } from "@/lib/utils";
 
 export default function ReportsPage() {
@@ -26,6 +39,10 @@ export default function ReportsPage() {
   // Fetch overview data for summary
   const { data: overviewData, isLoading: isLoadingOverview } =
     api.admin.analytics.getOverview.useQuery();
+
+  // Fetch report data for exports
+  const { data: revenueData } = api.admin.analytics.getRevenueReport.useQuery({ period });
+  const { data: attendanceData } = api.admin.analytics.getStudentActivity.useQuery({ period });
 
   // Calculate date range based on period
   const getDateRange = () => {
@@ -54,28 +71,128 @@ export default function ReportsPage() {
     }
   };
 
-  const handleExport = () => {
-    toast("Export started", {
-      description: "Your report is being prepared for download.",
-    });
-
-    // In a real implementation, this would trigger an export to CSV or PDF
-    setTimeout(() => {
-      toast("Export complete", {
-        description: "Your report has been downloaded.",
+  // Export handlers
+  const handleExportCSV = (type: "revenue" | "attendance" | "combined") => {
+    if (!revenueData || !attendanceData || !overviewData) {
+      toast.error("Export failed", {
+        description: "Report data is not yet loaded. Please wait and try again.",
       });
-    }, 1500);
+      return;
+    }
+
+    try {
+      toast("Export started", {
+        description: "Preparing your CSV download...",
+      });
+
+      const options = { period, format: "csv" as const };
+
+      switch (type) {
+        case "revenue":
+          exportRevenueToCSV(revenueData, options);
+          break;
+        case "attendance":
+          // Transform attendance data to match expected format
+          const formattedAttendanceData = attendanceData.map((item) => ({
+            ...item,
+            attendanceRate:
+              item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0,
+          }));
+          exportAttendanceToCSV(formattedAttendanceData, options);
+          break;
+        case "combined":
+          const formattedCombined = attendanceData.map((item) => ({
+            ...item,
+            attendanceRate:
+              item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0,
+          }));
+          exportCombinedReportToCSV(revenueData, formattedCombined, overviewData, options);
+          break;
+      }
+
+      setTimeout(() => {
+        toast.success("Export complete", {
+          description: "Your CSV file has been downloaded.",
+        });
+      }, 500);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Export failed", {
+        description: "There was an error generating your report. Please try again.",
+      });
+    }
+  };
+
+  const handleExportPDF = async () => {
+    if (!revenueData || !attendanceData || !overviewData) {
+      toast.error("Export failed", {
+        description: "Report data is not yet loaded. Please wait and try again.",
+      });
+      return;
+    }
+
+    try {
+      toast("Export started", {
+        description: "Opening print dialog for PDF export...",
+      });
+
+      const formattedAttendanceData = attendanceData.map((item) => ({
+        ...item,
+        attendanceRate:
+          item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0,
+      }));
+
+      await exportToPDF(revenueData, formattedAttendanceData, overviewData, {
+        period,
+        format: "pdf",
+      });
+
+      setTimeout(() => {
+        toast.success("Export ready", {
+          description: "Use the print dialog to save as PDF or print the report.",
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Export failed", {
+        description: error instanceof Error ? error.message : "Failed to generate PDF report.",
+      });
+    }
   };
 
   return (
     <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reports</h1>
-        <Button onClick={handleExport} className="self-start sm:self-auto">
-          <Download className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Export Report</span>
-          <span className="sm:hidden">Export</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="self-start sm:self-auto">
+              <Download className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Export Report</span>
+              <span className="sm:hidden">Export</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleExportCSV("combined")}>
+              <FileText className="mr-2 h-4 w-4" />
+              Export Full Report (CSV)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleExportCSV("revenue")}>
+              <Download className="mr-2 h-4 w-4" />
+              Revenue Only (CSV)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExportCSV("attendance")}>
+              <Download className="mr-2 h-4 w-4" />
+              Attendance Only (CSV)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleExportPDF}>
+              <FileText className="mr-2 h-4 w-4" />
+              Export as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

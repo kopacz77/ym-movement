@@ -103,23 +103,8 @@ export default function SettingsPage() {
   const [isRinkDialogOpen, setIsRinkDialogOpen] = useState(false);
   const [editingRink, setEditingRink] = useState<Rink | null>(null);
 
-  // State for settings
-  const [operationalSettings, setOperationalSettings] = useState<OperationalSettings>({
-    days: {
-      monday: { active: true, startTime: "09:00", endTime: "18:00" },
-      tuesday: { active: true, startTime: "09:00", endTime: "18:00" },
-      wednesday: { active: true, startTime: "09:00", endTime: "18:00" },
-      thursday: { active: true, startTime: "09:00", endTime: "18:00" },
-      friday: { active: true, startTime: "09:00", endTime: "18:00" },
-      saturday: { active: true, startTime: "09:00", endTime: "18:00" },
-      sunday: { active: false, startTime: "", endTime: "" },
-    },
-    defaultLessonDuration: "60",
-    minBookingNotice: 24,
-    cancellationDeadline: 48,
-    allowOverlapping: false,
-    autoApproval: true,
-  });
+  // State for settings - initialize with null to prevent hardcoded defaults showing before API loads
+  const [operationalSettings, setOperationalSettings] = useState<OperationalSettings | null>(null);
 
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
     methods: {
@@ -185,10 +170,13 @@ export default function SettingsPage() {
   // Fetch settings from API
   const { data: savedSettings } = api.admin.settings.getSettings.useQuery();
 
-  // Update settings when data is loaded
+  // Update settings when data is loaded - only set once API data arrives
   useEffect(() => {
     if (savedSettings) {
-      if (savedSettings.operational) setOperationalSettings(savedSettings.operational);
+      // Set operational settings from API (no hardcoded fallback)
+      if (savedSettings.operational) {
+        setOperationalSettings(savedSettings.operational);
+      }
       if (savedSettings.payment) setPaymentSettings(savedSettings.payment);
       if (savedSettings.rinkAreas) setRinkAreas(savedSettings.rinkAreas);
     }
@@ -200,16 +188,19 @@ export default function SettingsPage() {
     field: "active" | "startTime" | "endTime",
     value: boolean | string,
   ) => {
-    setOperationalSettings((prev) => ({
-      ...prev,
-      days: {
-        ...prev.days,
-        [day]: {
-          ...prev.days[day],
-          [field]: value,
+    setOperationalSettings((prev) => {
+      if (!prev) return prev; // Don't update if not loaded yet
+      return {
+        ...prev,
+        days: {
+          ...prev.days,
+          [day]: {
+            ...prev.days[day],
+            [field]: value,
+          },
         },
-      },
-    }));
+      };
+    });
   };
 
   // Handle changes for payment settings
@@ -286,6 +277,7 @@ export default function SettingsPage() {
 
   // Save all settings
   const handleSave = () => {
+    if (!operationalSettings) return; // Don't save if settings not loaded yet
     setIsSaving(true);
     saveSettingsMutation.mutate({
       operational: operationalSettings,
@@ -320,9 +312,13 @@ export default function SettingsPage() {
     <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
-        <Button onClick={handleSave} disabled={isSaving} className="self-start sm:self-auto">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || !operationalSettings}
+          className="self-start sm:self-auto"
+        >
           <Save className="h-4 w-4 mr-2" />
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? "Saving..." : !operationalSettings ? "Loading..." : "Save Changes"}
         </Button>
       </div>
 
@@ -360,141 +356,144 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Business Hours</h3>
-                  {Object.entries(operationalSettings.days).map(([day, settings]) => (
-                    <div
-                      key={day}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id={`${day.toLowerCase()}-active`}
-                          checked={settings.active}
-                          onCheckedChange={(checked) =>
-                            handleDaySettingChange(day, "active", checked)
-                          }
-                        />
-                        <Label htmlFor={`${day.toLowerCase()}-active`} className="min-w-[80px]">
-                          {day.charAt(0).toUpperCase() + day.slice(1)}
-                        </Label>
+              {!operationalSettings ? (
+                <div className="flex items-center justify-center p-8">
+                  <p className="text-muted-foreground">Loading settings...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Business Hours</h3>
+                    {Object.entries(operationalSettings.days).map(([day, settings]) => (
+                      <div
+                        key={day}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id={`${day.toLowerCase()}-active`}
+                            checked={settings.active}
+                            onCheckedChange={(checked) =>
+                              handleDaySettingChange(day, "active", checked)
+                            }
+                          />
+                          <Label htmlFor={`${day.toLowerCase()}-active`} className="min-w-[80px]">
+                            {day.charAt(0).toUpperCase() + day.slice(1)}
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-8 sm:ml-0">
+                          <Input
+                            type="time"
+                            className="w-28 sm:w-32"
+                            value={settings.startTime}
+                            onChange={(e) =>
+                              handleDaySettingChange(day, "startTime", e.target.value)
+                            }
+                            disabled={!settings.active}
+                          />
+                          <span className="text-muted-foreground">-</span>
+                          <Input
+                            type="time"
+                            className="w-28 sm:w-32"
+                            value={settings.endTime}
+                            onChange={(e) => handleDaySettingChange(day, "endTime", e.target.value)}
+                            disabled={!settings.active}
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2 ml-8 sm:ml-0">
-                        <Input
-                          type="time"
-                          className="w-28 sm:w-32"
-                          value={settings.startTime}
-                          onChange={(e) => handleDaySettingChange(day, "startTime", e.target.value)}
-                          disabled={!settings.active}
-                        />
-                        <span className="text-muted-foreground">-</span>
-                        <Input
-                          type="time"
-                          className="w-28 sm:w-32"
-                          value={settings.endTime}
-                          onChange={(e) => handleDaySettingChange(day, "endTime", e.target.value)}
-                          disabled={!settings.active}
-                        />
-                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Scheduling Settings</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="default-lesson-duration" className="w-full">
+                        Default Lesson Duration (minutes)
+                      </Label>
+                      <Select
+                        value={operationalSettings.defaultLessonDuration}
+                        onValueChange={(value) =>
+                          setOperationalSettings((prev) =>
+                            prev ? { ...prev, defaultLessonDuration: value } : prev,
+                          )
+                        }
+                      >
+                        <SelectTrigger id="default-lesson-duration" className="w-full">
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="30" className="w-full">
+                            30 minutes
+                          </SelectItem>
+                          <SelectItem value="45" className="w-full">
+                            45 minutes
+                          </SelectItem>
+                          <SelectItem value="60" className="w-full">
+                            60 minutes
+                          </SelectItem>
+                          <SelectItem value="90" className="w-full">
+                            90 minutes
+                          </SelectItem>
+                          <SelectItem value="120" className="w-full">
+                            120 minutes
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Scheduling Settings</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="default-lesson-duration" className="w-full">
-                      Default Lesson Duration (minutes)
-                    </Label>
-                    <Select
-                      value={operationalSettings.defaultLessonDuration}
-                      onValueChange={(value) =>
-                        setOperationalSettings((prev) => ({
-                          ...prev,
-                          defaultLessonDuration: value,
-                        }))
-                      }
-                    >
-                      <SelectTrigger id="default-lesson-duration" className="w-full">
-                        <SelectValue placeholder="Select duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="30" className="w-full">
-                          30 minutes
-                        </SelectItem>
-                        <SelectItem value="45" className="w-full">
-                          45 minutes
-                        </SelectItem>
-                        <SelectItem value="60" className="w-full">
-                          60 minutes
-                        </SelectItem>
-                        <SelectItem value="90" className="w-full">
-                          90 minutes
-                        </SelectItem>
-                        <SelectItem value="120" className="w-full">
-                          120 minutes
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="min-booking-notice">Minimum Booking Notice (hours)</Label>
-                    <Input
-                      id="min-booking-notice"
-                      type="number"
-                      value={operationalSettings.minBookingNotice}
-                      onChange={(e) =>
-                        setOperationalSettings((prev) => ({
-                          ...prev,
-                          minBookingNotice: Number(e.target.value),
-                        }))
-                      }
-                      min="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cancellation-deadline">Cancellation Deadline (hours)</Label>
-                    <Input
-                      id="cancellation-deadline"
-                      type="number"
-                      value={operationalSettings.cancellationDeadline}
-                      onChange={(e) =>
-                        setOperationalSettings((prev) => ({
-                          ...prev,
-                          cancellationDeadline: Number(e.target.value),
-                        }))
-                      }
-                      min="0"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2 pt-2">
-                    <Switch
-                      id="allow-overlapping"
-                      checked={operationalSettings.allowOverlapping}
-                      onCheckedChange={(checked) =>
-                        setOperationalSettings((prev) => ({
-                          ...prev,
-                          allowOverlapping: checked,
-                        }))
-                      }
-                    />
-                    <Label htmlFor="allow-overlapping">Allow overlapping lessons</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="auto-approval"
-                      checked={operationalSettings.autoApproval}
-                      onCheckedChange={(checked) =>
-                        setOperationalSettings((prev) => ({
-                          ...prev,
-                          autoApproval: checked,
-                        }))
-                      }
-                    />
-                    <Label htmlFor="auto-approval">Automatically approve bookings</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="min-booking-notice">Minimum Booking Notice (hours)</Label>
+                      <Input
+                        id="min-booking-notice"
+                        type="number"
+                        value={operationalSettings.minBookingNotice}
+                        onChange={(e) =>
+                          setOperationalSettings((prev) =>
+                            prev ? { ...prev, minBookingNotice: Number(e.target.value) } : prev,
+                          )
+                        }
+                        min="0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cancellation-deadline">Cancellation Deadline (hours)</Label>
+                      <Input
+                        id="cancellation-deadline"
+                        type="number"
+                        value={operationalSettings.cancellationDeadline}
+                        onChange={(e) =>
+                          setOperationalSettings((prev) =>
+                            prev ? { ...prev, cancellationDeadline: Number(e.target.value) } : prev,
+                          )
+                        }
+                        min="0"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2 pt-2">
+                      <Switch
+                        id="allow-overlapping"
+                        checked={operationalSettings.allowOverlapping}
+                        onCheckedChange={(checked) =>
+                          setOperationalSettings((prev) =>
+                            prev ? { ...prev, allowOverlapping: checked } : prev,
+                          )
+                        }
+                      />
+                      <Label htmlFor="allow-overlapping">Allow overlapping lessons</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="auto-approval"
+                        checked={operationalSettings.autoApproval}
+                        onCheckedChange={(checked) =>
+                          setOperationalSettings((prev) =>
+                            prev ? { ...prev, autoApproval: checked } : prev,
+                          )
+                        }
+                      />
+                      <Label htmlFor="auto-approval">Automatically approve bookings</Label>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

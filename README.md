@@ -404,9 +404,11 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## 📝 Documentation
 
 - [**CHANGELOG.md**](CHANGELOG.md) - Version history and changes
+- [**CLAUDE.md**](CLAUDE.md) - Development guide and recent updates
+- [**API Documentation**](API.md) - Complete TRPC API reference with new features
+- [**Reports & Payments Guide**](docs/reports-and-payments-guide.md) - Export and email features
 - [**OPTIMIZATION.md**](OPTIMIZATION.md) - Performance optimization details
 - [**SECURITY.md**](SECURITY.md) - Security policies and practices
-- [**API Documentation**](docs/api.md) - TRPC API reference
 - [**Deployment Guide**](docs/deployment.md) - Production deployment
 
 ## 🐛 Troubleshooting

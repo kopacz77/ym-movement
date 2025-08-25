@@ -4,24 +4,41 @@ import { toast } from "sonner";
 
 type UserRole = "admin" | "student";
 
+// Helper function to get randomized punctuation for consistent personalization
+const getRandomPunctuation = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  const date = now.getDate();
+  const tenMinuteBlock = Math.floor(now.getMinutes() / 10);
+  const punctuations = ["!", ":)"];
+  const randomIndex = (hour + date + tenMinuteBlock + 1) % punctuations.length;
+  return punctuations[randomIndex];
+};
+
 export const delightfulToast = {
   lessonBooked: (studentName: string, time: string, userRole: UserRole = "student") => {
     if (userRole === "admin") {
-      toast.success("🎉 Amazing! Time to create some magic on the ice! ⛸️", {
+      const punct = getRandomPunctuation();
+      toast.success(`🎉 Amazing${punct} Time to create some magic on the ice${punct} ⛸️`, {
         description: `${studentName}'s lesson is booked for ${time}`,
         duration: 4000,
       });
     } else {
-      toast.success("🎉 Lesson booked successfully! We're excited to see you on the ice! ⛸️", {
-        description: `Your lesson is scheduled for ${time}`,
-        duration: 4000,
-      });
+      const punct = getRandomPunctuation();
+      toast.success(
+        `🎉 Lesson booked successfully${punct} We're excited to see you on the ice :) ⛸️`,
+        {
+          description: `Your lesson is scheduled for ${time}`,
+          duration: 4000,
+        },
+      );
     }
   },
 
   lessonCancelled: (userRole: UserRole = "student") => {
     if (userRole === "admin") {
-      toast.info("✨ Lesson cancelled - more time for other amazing students! 💕", {
+      const punct = getRandomPunctuation();
+      toast.info(`✨ Lesson cancelled - more time for other amazing students${punct} 💕`, {
         duration: 3000,
       });
     } else {
@@ -34,7 +51,8 @@ export const delightfulToast = {
 
   studentCreated: (studentName: string, userRole: UserRole = "admin") => {
     if (userRole === "admin") {
-      toast.success("🌟 Perfect! Welcome to our skating family! 🏆", {
+      const punct = getRandomPunctuation();
+      toast.success(`🌟 Perfect${punct} Welcome to our skating family${punct} 🏆`, {
         description: `${studentName} has been added to your coaching roster`,
         duration: 4000,
       });
@@ -48,7 +66,8 @@ export const delightfulToast = {
 
   paymentRecorded: (amount: string, userRole: UserRole = "admin") => {
     if (userRole === "admin") {
-      toast.success("💰 Wonderful! Payment recorded! ✨", {
+      const punct = getRandomPunctuation();
+      toast.success(`💰 Wonderful${punct} Payment recorded${punct} ✨`, {
         description: `$${amount} payment has been tracked`,
         duration: 3000,
       });
@@ -62,7 +81,8 @@ export const delightfulToast = {
 
   scheduleUpdated: (userRole: UserRole = "admin") => {
     if (userRole === "admin") {
-      toast.success("📅 Beautiful! Your schedule is perfectly organized! 💕", {
+      const punct = getRandomPunctuation();
+      toast.success(`📅 Beautiful${punct} Your schedule is perfectly organized${punct} 💕`, {
         description: "Schedule changes have been saved",
         duration: 3000,
       });
@@ -76,7 +96,8 @@ export const delightfulToast = {
 
   profileUpdated: (userRole: UserRole = "student") => {
     if (userRole === "admin") {
-      toast.success("⭐ Perfect! Your coaching profile shines! ✨", {
+      const punct = getRandomPunctuation();
+      toast.success(`⭐ Perfect${punct} Your coaching profile shines${punct} ✨`, {
         duration: 3000,
       });
     } else {
@@ -90,7 +111,7 @@ export const delightfulToast = {
   error: (message: string, userRole: UserRole = "student") => {
     if (userRole === "admin") {
       toast.error(
-        "💫 Oops! Something didn't quite work as expected. Don't worry though - these things happen! ✨",
+        `💫 Oops${getRandomPunctuation()} Something didn't quite work as expected. Don't worry though - these things happen ${getRandomPunctuation()}✨`,
         {
           description: message,
           duration: 4000,
