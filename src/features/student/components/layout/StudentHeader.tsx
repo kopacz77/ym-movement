@@ -27,9 +27,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { TouchIconButton } from "@/components/ui/touch-button";
 import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { useTouchTarget } from "@/hooks/useTouchTarget";
 
 export const StudentHeader = () => {
   const router = useRouter();
@@ -37,6 +39,7 @@ export const StudentHeader = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
   const breadcrumbs = useBreadcrumbs();
+  const { getTouchSpacing } = useTouchTarget();
 
   const handleLogout = async () => {
     try {
@@ -91,15 +94,15 @@ export const StudentHeader = () => {
           <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center ${getTouchSpacing("gap-2")}`}>
           {/* Notifications Popover */}
           <NotificationsPopover />
 
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Log out">
+              <TouchIconButton variant="ghost" aria-label="Log out">
                 <LogOut className="h-5 w-5" />
-              </Button>
+              </TouchIconButton>
             </AlertDialogTrigger>
             <AlertDialogContent className={isMobile ? "w-[90%] max-w-md mx-auto" : ""}>
               <AlertDialogHeader>

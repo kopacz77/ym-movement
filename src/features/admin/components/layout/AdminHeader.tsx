@@ -26,11 +26,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { TouchIconButton } from "@/components/ui/touch-button";
 import { WarmGreeting } from "@/components/ui/warm-greeting";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { useTouchTarget } from "@/hooks/useTouchTarget";
 
 export const AdminHeader = () => {
   const router = useRouter();
@@ -38,6 +40,7 @@ export const AdminHeader = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
   const breadcrumbs = useBreadcrumbs();
+  const { getTouchSpacing } = useTouchTarget();
 
   const handleLogout = async () => {
     try {
@@ -90,15 +93,15 @@ export const AdminHeader = () => {
           <WarmGreeting name={user?.name || "Beautiful"} role="admin" />
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div className={`flex items-center shrink-0 ${getTouchSpacing("gap-2")}`}>
           {/* Notifications Popover */}
           <NotificationsPopover />
 
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+              <TouchIconButton variant="ghost" aria-label="Log out">
                 <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
+              </TouchIconButton>
             </AlertDialogTrigger>
             <AlertDialogContent className={isMobile ? "w-[90%] max-w-md mx-auto" : ""}>
               <AlertDialogHeader>

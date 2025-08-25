@@ -406,6 +406,298 @@ it('should create student with sanitized input', async () => {
 });
 ```
 
+---
+
+## Reports & Analytics (`admin.analytics`)
+
+### Get Overview Data
+```typescript
+admin.analytics.getOverview.useQuery()
+```
+**Returns:** Dashboard overview statistics
+```typescript
+{
+  totalStudents: number;
+  activeLessons: number;
+  pendingPayments: number;
+  monthlyRevenue: number;
+}
+```
+
+### Get Revenue Report
+```typescript
+admin.analytics.getRevenueReport.useQuery({ period })
+```
+**Input:**
+```typescript
+{
+  period: "week" | "month" | "year"
+}
+```
+**Returns:** Revenue data grouped by date
+```typescript
+Array<{
+  date: string;
+  totalRevenue: number;
+  byMethod: Record<string, number>;
+  byLessonType: Record<string, number>;
+  byStudentLevel: Record<string, number>;
+}>
+```
+
+### Get Student Activity Report  
+```typescript
+admin.analytics.getStudentActivity.useQuery({ period })
+```
+**Input:**
+```typescript
+{
+  period: "week" | "month" | "year"
+}
+```
+**Returns:** Attendance and lesson activity data
+```typescript
+Array<{
+  date: string;
+  totalLessons: number;
+  completedLessons: number;
+  cancelledLessons: number;
+  byType: Record<string, number>;
+  byArea: Record<string, number>;
+}>
+```
+
+### Get Individual Student Attendance
+```typescript
+admin.analytics.getStudentAttendance.useQuery({ 
+  studentId, 
+  startDate?, 
+  endDate? 
+})
+```
+**Input:**
+```typescript
+{
+  studentId: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+```
+**Returns:** Detailed attendance metrics for a specific student
+
+---
+
+## Payment Management (`admin.payment`)
+
+### Get Payments with Filtering
+```typescript
+admin.payment.getPayments.useQuery({ 
+  search?, 
+  status?, 
+  startDate?, 
+  endDate?, 
+  page?, 
+  limit? 
+})
+```
+**Input:**
+```typescript
+{
+  search?: string;        // Search by student name or reference code
+  status?: PaymentStatus; // PENDING | COMPLETED | FAILED
+  startDate?: Date;
+  endDate?: Date;
+  page?: number;         // For pagination (min: 1)
+  limit?: number;        // Max 100 per page
+}
+```
+**Returns:** Paginated payments with student and lesson details
+
+### Get Payment by ID
+```typescript
+admin.payment.getPaymentById.useQuery({ paymentId })
+```
+**Returns:** Complete payment details including student and lesson information
+
+### Verify Payment
+```typescript
+admin.payment.verifyPayment.useMutation()
+```
+**Input:**
+```typescript
+{
+  paymentId: string;
+  verifiedBy: string;
+}
+```
+**Action:** Changes payment status from PENDING to COMPLETED and records verification details
+
+### Send Payment Reminder
+```typescript
+admin.payment.sendPaymentReminder.useMutation()
+```
+**Input:**
+```typescript
+{
+  paymentId: string;
+}
+```
+**Action:** Sends email reminder to student and updates `reminderSentAt` timestamp
+**Email Features:**
+- Professional HTML template with payment details
+- Payment method instructions (Venmo/Zelle)
+- Reference code highlighted for easy copying
+- Direct link to student payment dashboard
+- Contact information for support
+
+### Add Payment Note
+```typescript
+admin.payment.addPaymentNote.useMutation()
+```
+**Input:**
+```typescript
+{
+  paymentId: string;
+  notes: string;
+}
+```
+**Action:** Appends timestamped note to payment record
+
+### Get Payment Statistics
+```typescript
+admin.payment.getPaymentStats.useQuery()
+```
+**Returns:** Aggregated payment metrics
+```typescript
+{
+  totalPayments: number;
+  pendingAmount: number;
+  completedAmount: number;
+}
+```
+
+---
+
+## Notifications System (`notifications.notifications`)
+
+### Get User Notifications
+```typescript
+notifications.notifications.getNotifications.useQuery()
+```
+**Returns:** Array of user notifications ordered by creation date
+```typescript
+Array<{
+  id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  type: string;
+  link?: string;
+  createdAt: Date;
+}>
+```
+**Auto-refresh:** Every 60 seconds when user is authenticated
+**Error Handling:** Gracefully handles 401 errors without showing toast notifications
+
+### Mark Notification as Read
+```typescript
+notifications.notifications.markAsRead.useMutation()
+```
+**Input:**
+```typescript
+{
+  id: string;
+}
+```
+
+### Mark All Notifications as Read
+```typescript
+notifications.notifications.markAllAsRead.useMutation()
+```
+**Action:** Marks all unread notifications for the current user as read
+
+---
+
+## Export Utilities
+
+### Client-Side Export Functions
+Located in `src/lib/export-utils.ts`, these functions provide comprehensive report export capabilities:
+
+#### CSV Exports
+```typescript
+// Export revenue data to CSV
+exportRevenueToCSV(data: RevenueDataItem[], options: ExportOptions)
+
+// Export attendance data to CSV  
+exportAttendanceToCSV(data: AttendanceDataItem[], options: ExportOptions)
+
+// Export combined report with summary statistics
+exportCombinedReportToCSV(
+  revenueData: RevenueDataItem[], 
+  attendanceData: AttendanceDataItem[], 
+  overviewData: OverviewData, 
+  options: ExportOptions
+)
+```
+
+#### PDF Export
+```typescript
+// Export styled PDF report via browser print dialog
+exportToPDF(
+  revenueData: RevenueDataItem[], 
+  attendanceData: AttendanceDataItem[], 
+  overviewData: OverviewData, 
+  options: ExportOptions
+): Promise<void>
+```
+
+**Features:**
+- Professional styling with YM Movement branding
+- Summary statistics cards
+- Formatted data tables
+- Responsive design for print
+- Error handling for popup blockers
+
+---
+
+## Email Integration
+
+### Payment Reminder Emails
+```typescript
+sendPaymentReminderEmail(
+  studentEmail: string,
+  studentName: string,
+  paymentDetails: {
+    amount: number;
+    referenceCode: string;
+    dueDate: Date;
+    lessonDate?: Date;
+    lessonType?: string;
+    paymentMethod: string;
+  }
+): Promise<EmailResult>
+```
+
+**Email Features:**
+- Professional HTML template with YM Movement branding
+- Payment amount and due date prominently displayed
+- Payment method instructions (Venmo @yura-min or Zelle (714) 743-7071)
+- Reference code highlighted for easy copying
+- Lesson details when available
+- Contact information and support links
+- Direct link to student payment dashboard
+- Automated reminder footer
+
+**Error Handling:**
+- Graceful fallback in development environment
+- Comprehensive logging for debugging
+- Non-blocking errors (payment operations continue even if email fails)
+
+### Email Configuration
+- **Service**: Resend API (with fallback to mock in development)
+- **From Address**: `YM Movement <info@ym-movement.com>`
+- **Environment Variables**: `RESEND_API_KEY`, `NEXT_PUBLIC_BASE_URL`
+
 ## Development
 
 ### Adding New Endpoints

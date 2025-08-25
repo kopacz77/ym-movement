@@ -2,7 +2,22 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(grep:*)",
+      "mcp__shadcn-ui__list_components",
+      "mcp__shadcn-ui__get_component",
+      "mcp__shadcn-ui__get_component_demo",
+      "mcp__shadcn-ui__get_component_metadata",
+      "mcp__shadcn-ui__list_blocks",
+      "mcp__shadcn-ui__get_block",
+      "Bash(pnpm format:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(cp:*)",
+      "Bash(node:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

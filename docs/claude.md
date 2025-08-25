@@ -135,7 +135,39 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 - Environment variables required for Google Calendar, database, NextAuth
 - **IMPORTANT**: Prisma relation names use PascalCase (e.g., `User`, `Lesson`, `Student`, `Rink`) - always use these in includes and access patterns
 
-## Recent Major Updates (2025-08-05)
+## Recent Major Updates (2025-08-07)
+
+### ✅ **Reports Dashboard Export System**
+- **New Feature**: Comprehensive export functionality for business reports
+- **CSV Exports**: Revenue, attendance, and combined reports with proper data formatting
+- **PDF Export**: Professional print-ready reports via browser dialog with YM Movement branding
+- **Components**: `src/lib/export-utils.ts` with full export utilities
+- **UI Enhancement**: Dropdown menu in Reports page with multiple export options
+- **Features**: Error handling, popup blocker detection, responsive design
+
+### ✅ **Email Payment Reminder System** 
+- **New Feature**: Automated email reminders for outstanding payments
+- **Email Template**: Professional HTML with payment details, instructions, and branding
+- **Integration**: `sendPaymentReminderEmail()` function in `src/lib/email.ts`
+- **Payment Methods**: Smart detection of Venmo (@yura-min) vs Zelle ((714) 743-7071) instructions  
+- **API Integration**: Full integration with `admin.payment.sendPaymentReminder` mutation
+- **Error Handling**: Non-blocking email failures, graceful development fallbacks
+
+### ✅ **Notifications System Architecture**
+- **API Structure**: `notifications.notifications.getNotifications` (double-nested routing)
+- **Auto-refresh**: Every 60 seconds when user is authenticated  
+- **Error Resilience**: Graceful handling of 404/500 errors during authentication timing
+- **Features**: Mark as read, mark all as read, real-time updates
+- **Database**: Notification table with proper indexing and user relationships
+
+### ✅ **Enhanced Greeting Personalization**
+- **New Feature**: Randomized punctuation in greeting system
+- **Variations**: Greetings now alternate between "!" and ":)" for variety
+- **Implementation**: `getPunctuation()` function in `WarmGreeting` component
+- **Consistency**: Same randomization logic across greeting and toast systems
+- **Timing**: Changes every ~10 minutes for stable but varied experience
+
+## Previous Major Updates (2025-08-05)
 
 ### ✅ **Unified Toast Notification System**
 - **Achievement**: Standardized ALL toast notifications across the entire application using Sonner
