@@ -210,7 +210,7 @@ test.describe('Admin Dashboard', () => {
         await verifyButton.click();
         
         // Should show confirmation or update status
-        await expect(page.locator('text=Payment verified', text=Verified')).toBeVisible({ timeout: 5000 });
+        await expect(page.locator('text=Payment verified')).toBeVisible({ timeout: 5000 });
       }
     });
   });

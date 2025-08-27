@@ -69,7 +69,7 @@ export const renderWithProviders = (
 };
 
 // Mock TRPC utilities
-export const mockTRPCSuccess = (data: any) => ({
+export const mockTRPCSuccess = <T,>(data: T) => ({
   data,
   isLoading: false,
   isError: false,

@@ -3,7 +3,7 @@
 
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { Download, FileText } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -4,7 +4,7 @@
 import type { PaymentStatus } from "@prisma/client";
 import { Search } from "lucide-react";
 import dynamic from "next/dynamic";
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
