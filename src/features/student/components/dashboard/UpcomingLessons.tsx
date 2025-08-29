@@ -14,7 +14,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
 import { formatTime } from "@/lib/date"; // Import the consistent time formatter
 
-export const UpcomingLessons = () => {
+export function UpcomingLessons() {
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
 
@@ -145,4 +145,4 @@ export const UpcomingLessons = () => {
       </CardContent>
     </Card>
   );
-};
+}

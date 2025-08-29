@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
 
-export const LessonSummary = () => {
+export function LessonSummary() {
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
 
@@ -93,4 +93,4 @@ export const LessonSummary = () => {
       </CardContent>
     </Card>
   );
-};
+}
