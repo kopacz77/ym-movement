@@ -689,5 +689,5 @@ function BookingCalendarComponent() {
   );
 };
 
-const MemoizedBookingCalendarComponent = memo(BookingCalendarComponent);
-export { MemoizedBookingCalendarComponent as BookingCalendar };
+const BookingCalendar = memo(BookingCalendarComponent);
+export default BookingCalendar;

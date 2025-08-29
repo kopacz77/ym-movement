@@ -6,10 +6,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { CalendarSkeleton } from "@/components/ui/calendar-skeleton";
 
 const BookingCalendar = dynamic(
-  () =>
-    import("@/features/student/components/booking/BookingCalendar").then((mod) => ({
-      default: mod.BookingCalendar,
-    })),
+  () => import("@/features/student/components/booking/BookingCalendar"),
   {
     loading: () => <CalendarSkeleton />,
   },
