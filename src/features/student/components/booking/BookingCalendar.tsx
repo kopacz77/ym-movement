@@ -83,7 +83,7 @@ interface CalendarEvent {
 // Define a type for view
 type View = typeof Views.WEEK | typeof Views.MONTH;
 
-const BookingCalendarComponent = () => {
+function BookingCalendarComponent() {
   const { id: studentId } = useCurrentUser();
   const isMobile = useIsMobile();
 
@@ -689,4 +689,5 @@ const BookingCalendarComponent = () => {
   );
 };
 
-export const BookingCalendar = memo(BookingCalendarComponent);
+const MemoizedBookingCalendarComponent = memo(BookingCalendarComponent);
+export { MemoizedBookingCalendarComponent as BookingCalendar };

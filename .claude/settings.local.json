@@ -20,7 +20,8 @@
       "Bash(find:*)",
       "Bash(mv:*)",
       "Bash(npm run type-check:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "WebSearch"
     ],
     "deny": []
   }
