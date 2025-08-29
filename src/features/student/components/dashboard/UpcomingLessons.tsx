@@ -97,7 +97,7 @@ export const UpcomingLessons = () => {
       </CardHeader>
       <CardContent className="p-6">
         {showLoading ? (
-          <DelightfulLoading variant="warm" message="Loading your exciting lessons..." size="md" />
+          <DelightfulLoading message="Loading your exciting lessons..." />
         ) : upcomingLessons?.length ? (
           <div className="space-y-4">
             {upcomingLessons.map((lesson) => (

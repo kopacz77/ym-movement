@@ -17,7 +17,8 @@
       "Bash(cp:*)",
       "Bash(node:*)",
       "Bash(npx tsc:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
