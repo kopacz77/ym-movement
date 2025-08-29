@@ -15,7 +15,7 @@ interface CancellationDialogProps {
   onCloseAction: () => void;
 }
 
-export const CancellationDialog = ({ lessonId, open, onCloseAction }: CancellationDialogProps) => {
+export function CancellationDialog({ lessonId, open, onCloseAction }: CancellationDialogProps) {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -111,4 +111,4 @@ export const CancellationDialog = ({ lessonId, open, onCloseAction }: Cancellati
       </DialogContent>
     </Dialog>
   );
-};
+}

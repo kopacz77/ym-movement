@@ -2,7 +2,7 @@ import { LessonStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/profileQueries.ts
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc"; // Added protectedProcedure
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define a proper type for the query filters
 interface LessonQueryFilters {
@@ -15,7 +15,7 @@ interface LessonQueryFilters {
 }
 
 export const profileRouter = createTRPCRouter({
-  getStudentProfile: publicProcedure
+  getStudentProfile: protectedProcedure
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
@@ -53,7 +53,7 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  updateStudentProfile: publicProcedure
+  updateStudentProfile: protectedProcedure
     .input(
       z.object({
         studentId: z.string(),
@@ -96,7 +96,7 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getStudentLessons: publicProcedure
+  getStudentLessons: protectedProcedure
     .input(
       z.object({
         studentId: z.string(),
@@ -191,7 +191,7 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getStudentLessonStats: publicProcedure
+  getStudentLessonStats: protectedProcedure
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {

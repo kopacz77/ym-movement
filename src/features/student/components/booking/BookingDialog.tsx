@@ -34,7 +34,7 @@ interface BookingDialogProps {
   onCloseAction: () => void;
 }
 
-export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogProps) => {
+export function BookingDialog({ slot, studentId, onCloseAction }: BookingDialogProps) {
   const [lessonType, setLessonType] = useState<LessonType>(LessonType.PRIVATE);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.VENMO);
   const [notes, setNotes] = useState("");
@@ -139,7 +139,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span>{slot.Rink.name}</span>
+              <span>{slot.rink.name}</span>
             </div>
           </div>
 
@@ -207,4 +207,4 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
       </DialogContent>
     </Dialog>
   );
-};
+}

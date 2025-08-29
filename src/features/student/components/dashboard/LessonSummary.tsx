@@ -33,8 +33,9 @@ export function LessonSummary() {
   // Handle errors with useEffect
   useEffect(() => {
     if (error) {
+      console.error("Error loading lesson stats:", error);
       toast.error("Error loading lesson stats", {
-        description: error.message,
+        description: error.message || "Failed to load statistics",
       });
     }
   }, [error]);

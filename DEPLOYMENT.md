@@ -2,9 +2,68 @@
 
 ## Overview
 
-This guide covers deployment options for Yura Scheduler v3, from development to production environments. The application supports multiple deployment strategies including Vercel, Docker, and traditional VPS hosting.
+This guide covers deployment options for Yura Scheduler v3, from development to production environments. The application supports multiple deployment strategies including Netlify, Vercel, Docker, and traditional VPS hosting.
 
-## 🚀 Quick Deploy to Vercel (Recommended)
+## 🚀 Netlify Deployment (Current Production)
+
+### Prerequisites
+- GitHub account with repository access
+- Netlify account (free tier available)
+- PostgreSQL database (Neon, Supabase, or other provider)
+
+### Configuration
+
+The project is already configured for Netlify with `netlify.toml`:
+
+```toml
+[build]
+  command = "npx prisma generate && npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NEXT_USE_NETLIFY_EDGE = "true"
+```
+
+### Deployment Steps
+
+1. **Environment Variables in Netlify Dashboard**
+   ```bash
+   # Required for production
+   DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
+   NEXTAUTH_SECRET="your-32-character-secret-key"
+   NEXTAUTH_URL="https://your-app.netlify.app"
+   
+   # Optional but recommended
+   GOOGLE_CLIENT_EMAIL="service-account@project.iam.gserviceaccount.com"
+   GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour-Key\n-----END PRIVATE KEY-----"
+   GOOGLE_CALENDAR_ID="calendar-id@group.calendar.google.com"
+   INSTRUCTOR_EMAIL="instructor@example.com"
+   RESEND_API_KEY="your-email-api-key"
+   ```
+
+2. **Deploy to Netlify**
+   - Push to GitHub repository
+   - Connect repository in Netlify dashboard
+   - Build settings are automatically detected from `netlify.toml`
+   - Deployment will run: `npx prisma generate && npm run build`
+
+3. **Database Setup**
+   ```bash
+   # After first deployment, run migrations
+   # Use Netlify CLI or connect to your database directly
+   npx prisma migrate deploy
+   ```
+
+### Netlify Features Used
+- **Next.js Plugin**: Automatic optimization for Next.js apps
+- **Edge Runtime**: Enhanced performance with `NEXT_USE_NETLIFY_EDGE`
+- **Automatic Builds**: Triggered on GitHub pushes
+- **Custom Build Command**: Includes Prisma generation
+
+## 🚀 Alternative: Vercel Deployment
 
 ### Prerequisites
 - GitHub account with repository access

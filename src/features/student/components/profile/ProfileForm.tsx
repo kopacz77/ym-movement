@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
 
-export const ProfileForm = () => {
+export function ProfileForm() {
   const { id: studentId } = useCurrentUser();
   const [isReady, setIsReady] = useState(false);
 
@@ -225,4 +225,4 @@ export const ProfileForm = () => {
       </CardContent>
     </Card>
   );
-};
+}

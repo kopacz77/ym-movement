@@ -6,7 +6,7 @@ import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek } from "date
 import { z } from "zod";
 import { sendLessonConfirmationEmail } from "@/lib/email";
 import { googleCalendar } from "@/lib/google/calendar";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define extended Student type with custom pricing fields
 interface ExtendedStudent {
@@ -25,7 +25,7 @@ interface ExtendedStudent {
 }
 
 export const bookingRouter = createTRPCRouter({
-  bookLesson: publicProcedure
+  bookLesson: protectedProcedure
     .input(
       z.object({
         studentId: z.string(),
@@ -332,7 +332,7 @@ export const bookingRouter = createTRPCRouter({
     }),
 
   // The cancel lesson functionality remains unchanged
-  cancelLesson: publicProcedure
+  cancelLesson: protectedProcedure
     .input(
       z.object({
         lessonId: z.string(),

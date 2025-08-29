@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/lessonQueries.ts
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const lessonRouter = createTRPCRouter({
-  getLesson: publicProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
+  getLesson: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
     try {
       // Get the lesson with related data
       const lesson = await ctx.prisma.lesson.findUnique({
@@ -37,7 +37,7 @@ export const lessonRouter = createTRPCRouter({
     }
   }),
 
-  cancelLesson: publicProcedure
+  cancelLesson: protectedProcedure
     .input(
       z.object({
         lessonId: z.string(),

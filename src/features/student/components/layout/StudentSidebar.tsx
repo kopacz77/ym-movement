@@ -16,7 +16,7 @@ const navigation = [
   { name: "Settings", href: "/student/settings", icon: Settings },
 ];
 
-export const StudentSidebar = () => {
+export function StudentSidebar() {
   const isMobile = useIsMobile();
 
   // Using React 19 compatible hooks
@@ -51,4 +51,4 @@ export const StudentSidebar = () => {
       </nav>
     </div>
   );
-};
+}

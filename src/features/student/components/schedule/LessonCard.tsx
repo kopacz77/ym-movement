@@ -15,7 +15,7 @@ interface LessonCardProps {
   showActions?: boolean;
 }
 
-export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
+export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
   return (
     <Card
       className={cn("overflow-hidden", lesson.status === LessonStatus.CANCELLED && "opacity-75")}
@@ -59,4 +59,4 @@ export const LessonCard = ({ lesson, showActions = true }: LessonCardProps) => {
       </CardContent>
     </Card>
   );
-};
+}

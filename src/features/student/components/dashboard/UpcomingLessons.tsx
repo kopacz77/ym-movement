@@ -48,8 +48,9 @@ export function UpcomingLessons() {
   // Handle errors
   useEffect(() => {
     if (error) {
+      console.error("Error loading lessons:", error);
       toast.error("Error loading lessons", {
-        description: error.message,
+        description: error.message || "Failed to load lesson data",
       });
     }
   }, [error]);

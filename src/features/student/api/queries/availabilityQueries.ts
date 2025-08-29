@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/availabilityQueries.ts
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define a proper type for the where clause
 interface WhereClause {
@@ -14,7 +14,7 @@ interface WhereClause {
 }
 
 export const availabilityRouter = createTRPCRouter({
-  getAvailableTimeSlots: publicProcedure
+  getAvailableTimeSlots: protectedProcedure
     .input(
       z.object({
         startDate: z.date().optional(),
@@ -125,7 +125,7 @@ export const availabilityRouter = createTRPCRouter({
       }
     }),
 
-  getRinks: publicProcedure.query(async ({ ctx }) => {
+  getRinks: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.prisma.rink.findMany({
         select: {

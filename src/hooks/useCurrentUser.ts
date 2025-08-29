@@ -11,13 +11,26 @@ export function useCurrentUser() {
     // If we have a session and the user is a student, fetch their student profile ID
     if (session?.user && session.user.role === "STUDENT") {
       fetch("/api/auth/me")
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then((userData) => {
-          if (isMounted && userData.Student?.id) {
-            setStudentId(userData.Student.id);
+          if (isMounted) {
+            if (userData.Student?.id) {
+              setStudentId(userData.Student.id);
+            } else {
+              console.warn("Student profile not found in user data:", userData);
+            }
           }
         })
-        .catch((err) => console.error("Error fetching user data:", err));
+        .catch((err) => {
+          console.error("Error fetching user data:", err);
+          // Don't throw here to prevent React error boundary triggers
+          // The components will handle missing studentId gracefully
+        });
     }
 
     return () => {

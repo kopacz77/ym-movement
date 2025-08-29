@@ -33,7 +33,7 @@ import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useTouchTarget } from "@/hooks/useTouchTarget";
 
-export const StudentHeader = () => {
+export function StudentHeader() {
   const router = useRouter();
   const { data: session } = useSession();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -122,4 +122,4 @@ export const StudentHeader = () => {
       </div>
     </div>
   );
-};
+}
