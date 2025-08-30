@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { TouchIconButton } from "@/components/ui/touch-button";
+import { WarmGreeting } from "@/components/ui/warm-greeting";
 import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -67,34 +68,43 @@ export function StudentHeader() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="w-full h-full flex flex-col justify-center">
       {/* Breadcrumb Navigation */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          {breadcrumbs.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <BreadcrumbItem>
-                {item.href ? (
-                  <BreadcrumbLink asChild>
-                    <Link href={item.href}>{item.label}</Link>
-                  </BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-            </div>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="mb-1 lg:mb-1">
+        <Breadcrumb>
+          <BreadcrumbList>
+            {breadcrumbs.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <BreadcrumbItem>
+                  {item.href ? (
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href={item.href}
+                        className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage className="text-xs sm:text-sm font-medium">
+                      {item.label}
+                    </BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+              </div>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       {/* Header Actions */}
       <div className="flex items-center justify-between w-full">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{session?.user?.name || "Student"}</span>
+        <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
+          <WarmGreeting name={session?.user?.name || "Student"} role="student" />
         </div>
 
-        <div className={`flex items-center ${getTouchSpacing("gap-2")}`}>
+        <div className={`flex items-center shrink-0 ${getTouchSpacing("gap-2")}`}>
           {/* Notifications Popover */}
           <NotificationsPopover />
 
