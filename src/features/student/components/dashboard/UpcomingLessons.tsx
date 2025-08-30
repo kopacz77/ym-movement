@@ -105,7 +105,7 @@ export function UpcomingLessons() {
               <Card key={lesson.id} className="border rounded-lg">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">
-                    {lesson.type.replace("_", " ")} Lesson
+                    {lesson.type ? lesson.type.replace("_", " ") : "Private"} Lesson
                   </CardTitle>
                   <CardAction>
                     <LessonStatusBadge status={lesson.status} />
