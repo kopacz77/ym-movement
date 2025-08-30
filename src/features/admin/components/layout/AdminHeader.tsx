@@ -34,7 +34,7 @@ import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useTouchTarget } from "@/hooks/useTouchTarget";
 
-export const AdminHeader = () => {
+export function AdminHeader() {
   const router = useRouter();
   const { user, logout } = useAuth(); // Use our custom Auth context
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -121,4 +121,4 @@ export const AdminHeader = () => {
       </div>
     </div>
   );
-};
+}

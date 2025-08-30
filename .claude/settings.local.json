@@ -21,7 +21,8 @@
       "Bash(mv:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run lint)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }
