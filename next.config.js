@@ -12,6 +12,11 @@ const withBundleAnalyzer = BundleAnalyzer({
 
 const nextConfig = {
   reactStrictMode: true,
+  // TEMPORARY: Disable minification to see actual React errors
+  swcMinify: false,
+  compiler: {
+    removeConsole: false, // Keep all console logs temporarily
+  },
   // Security configuration for CVE-2025-48068
   allowedDevOrigins: process.env.NODE_ENV === 'development' ? ['localhost'] : [],
   typescript: {
@@ -31,11 +36,6 @@ const nextConfig = {
       "lucide-react",
       "@/components/ui"
     ],
-  },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error']
-    } : false,
   },
   images: {
     formats: ["image/avif", "image/webp"],

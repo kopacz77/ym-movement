@@ -41,7 +41,7 @@ interface LessonStatusBadgeProps extends VariantProps<typeof lessonStatusVariant
 }
 
 function LessonStatusBadge({ status, className, showIcon = true }: LessonStatusBadgeProps) {
-  const Icon = statusIcons[status];
+  const Icon = statusIcons[status] || Clock;
 
   return (
     <Badge variant="outline" className={cn(lessonStatusVariants({ status }), className)}>
@@ -58,7 +58,7 @@ interface LessonStatusIndicatorProps {
 }
 
 function LessonStatusIndicator({ status, className, size = "md" }: LessonStatusIndicatorProps) {
-  const Icon = statusIcons[status];
+  const Icon = statusIcons[status] || Clock;
 
   const sizeClasses = {
     sm: "h-2 w-2",
@@ -77,9 +77,9 @@ function LessonStatusIndicator({ status, className, size = "md" }: LessonStatusI
   return (
     <div
       className={cn("inline-flex items-center justify-center rounded-full", className)}
-      title={statusLabels[status]}
+      title={statusLabels[status] || "Unknown"}
     >
-      <Icon className={cn(sizeClasses[size], colorClasses[status])} />
+      <Icon className={cn(sizeClasses[size], colorClasses[status] || "text-gray-500")} />
     </div>
   );
 }
