@@ -7,8 +7,8 @@ import { Page, expect } from '@playwright/test';
 // Common test data
 export const testData = {
   admin: {
-    email: 'admin@ym-movement.com',
-    password: 'admin123', // Update with actual admin password
+    email: 'admin@test.com',
+    password: 'ADMINPASS2025!',
   },
   student: {
     email: 'test.student@example.com',
@@ -34,22 +34,22 @@ export const testData = {
  * Login as admin user
  */
 export async function loginAsAdmin(page: Page) {
-  await page.goto('/auth/signin');
-  await page.fill('input[name="email"]', testData.admin.email);
-  await page.fill('input[name="password"]', testData.admin.password);
+  await page.goto('/auth/login');
+  await page.fill('input[id="email"]', testData.admin.email);
+  await page.fill('input[id="password"]', testData.admin.password);
   await page.click('button[type="submit"]');
-  await page.waitForURL('/admin', { timeout: 10000 });
+  await page.waitForURL('/admin/dashboard', { timeout: 10000 });
 }
 
 /**
  * Login as student user
  */
 export async function loginAsStudent(page: Page, email?: string, password?: string) {
-  await page.goto('/auth/signin');
-  await page.fill('input[name="email"]', email || testData.student.email);
-  await page.fill('input[name="password"]', password || testData.student.password);
+  await page.goto('/auth/login');
+  await page.fill('input[id="email"]', email || testData.student.email);
+  await page.fill('input[id="password"]', password || testData.student.password);
   await page.click('button[type="submit"]');
-  await page.waitForLoadState('networkidle');
+  await page.waitForURL('/student/dashboard', { timeout: 10000 });
 }
 
 /**

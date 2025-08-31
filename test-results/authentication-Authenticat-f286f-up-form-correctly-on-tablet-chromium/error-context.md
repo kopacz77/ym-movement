@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: Join YM Movement
+      - generic [ref=e6]: Create a new student account
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]: Full Name
+        - textbox "Full Name" [ref=e11]
+      - generic [ref=e12]:
+        - generic [ref=e13]: Email
+        - textbox "Email" [ref=e14]
+      - generic [ref=e15]:
+        - generic [ref=e16]: Password
+        - textbox "Password" [ref=e17]
+      - generic [ref=e18]:
+        - generic [ref=e19]: Phone (optional)
+        - textbox "Phone (optional)" [ref=e20]
+      - generic [ref=e21]:
+        - generic [ref=e22]: Skating Level
+        - combobox [ref=e23] [cursor=pointer]:
+          - generic: PRE PRELIMINARY
+          - img
+        - combobox [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - checkbox "I am a parent/legal guardian creating this account for my child" [ref=e27] [cursor=pointer]
+          - checkbox
+          - generic [ref=e28] [cursor=pointer]: I am a parent/legal guardian creating this account for my child
+        - paragraph [ref=e29]: For students under 13, accounts must be created and managed by a parent or legal guardian.
+      - button "Sign Up" [ref=e30] [cursor=pointer]
+    - generic [ref=e31]:
+      - paragraph [ref=e32]:
+        - text: Already have an account?
+        - link "Login" [ref=e33] [cursor=pointer]:
+          - /url: /auth/login
+      - paragraph [ref=e34]:
+        - text: By signing up, you agree to our
+        - link "Terms of Service" [ref=e35] [cursor=pointer]:
+          - /url: /terms
+        - text: and
+        - link "Privacy Policy" [ref=e36] [cursor=pointer]:
+          - /url: /privacy
+  - region "Notifications alt+T"
+  - alert [ref=e37]
+  - button "Open Next.js Dev Tools" [ref=e43] [cursor=pointer]:
+    - img [ref=e44] [cursor=pointer]
+```

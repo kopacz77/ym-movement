@@ -18,8 +18,8 @@ test.describe('Complete End-to-End User Journey', () => {
     await page.goto('/auth/signup');
     
     await page.fill('input[name="name"]', 'E2E Test Student');
-    await page.fill('input[name="email"]', studentEmail);
-    await page.fill('input[name="password"]', 'TestPassword123!');
+    await page.fill('input[id="email"]', studentEmail);
+    await page.fill('input[id="password"]', 'TestPassword123!');
     await page.fill('input[name="phone"]', '555-E2E-TEST');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.fill('input[name="maxLessonsPerWeek"]', '2');
@@ -71,9 +71,9 @@ test.describe('Complete End-to-End User Journey', () => {
     }
     
     // 4. Student logs in and books lesson
-    await page.goto('/auth/signin');
-    await page.fill('input[name="email"]', studentEmail);
-    await page.fill('input[name="password"]', 'TestPassword123!');
+    await page.goto('/auth/login');
+    await page.fill('input[id="email"]', studentEmail);
+    await page.fill('input[id="password"]', 'TestPassword123!');
     await page.click('button[type="submit"]');
     
     // Should redirect to student dashboard
@@ -127,9 +127,9 @@ test.describe('Complete End-to-End User Journey', () => {
     // This test assumes there's already a booked lesson to cancel
     
     // 1. Student logs in
-    await page.goto('/auth/signin');
-    await page.fill('input[name="email"]', 'existing.student@example.com'); // Use existing student
-    await page.fill('input[name="password"]', 'StudentPassword123!');
+    await page.goto('/auth/login');
+    await page.fill('input[id="email"]', 'existing.student@example.com'); // Use existing student
+    await page.fill('input[id="password"]', 'StudentPassword123!');
     await page.click('button[type="submit"]');
     
     // 2. Navigate to lessons
@@ -212,7 +212,7 @@ test.describe('Complete End-to-End User Journey', () => {
     ];
     
     const pages = [
-      '/auth/signin',
+      '/auth/login',
       '/auth/signup',
       '/admin',
       '/admin/students',
@@ -274,8 +274,8 @@ test.describe('Complete End-to-End User Journey', () => {
     // Create student account (triggers welcome email)
     await page.goto('/auth/signup');
     await page.fill('input[name="name"]', 'Email Test Student');
-    await page.fill('input[name="email"]', testEmail);
-    await page.fill('input[name="password"]', 'TestPassword123!');
+    await page.fill('input[id="email"]', testEmail);
+    await page.fill('input[id="password"]', 'TestPassword123!');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.check('input[name="parentConsent"]');
     

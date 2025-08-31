@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 
 // Helper function to login as admin
 async function loginAsAdmin(page: any) {
-  await page.goto('/auth/signin');
-  await page.fill('input[name="email"]', 'admin@ym-movement.com');
-  await page.fill('input[name="password"]', 'admin123'); // Replace with actual admin password
+  await page.goto('/auth/login');
+  await page.fill('input[id="email"]', 'admin@ym-movement.com');
+  await page.fill('input[id="password"]', 'admin123'); // Replace with actual admin password
   await page.click('button[type="submit"]');
   await page.waitForURL('/admin', { timeout: 10000 });
 }

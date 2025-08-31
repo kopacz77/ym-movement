@@ -12,8 +12,8 @@ test.describe('Student Signup Flow', () => {
     
     // Check form elements are present
     await expect(page.locator('input[name="name"]')).toBeVisible();
-    await expect(page.locator('input[name="email"]')).toBeVisible();
-    await expect(page.locator('input[name="password"]')).toBeVisible();
+    await expect(page.locator('input[id="email"]')).toBeVisible();
+    await expect(page.locator('input[id="password"]')).toBeVisible();
     await expect(page.locator('input[name="phone"]')).toBeVisible();
     await expect(page.locator('select[name="level"]')).toBeVisible();
     await expect(page.locator('input[name="maxLessonsPerWeek"]')).toBeVisible();
@@ -24,7 +24,7 @@ test.describe('Student Signup Flow', () => {
   });
 
   test('should show real-time password validation', async ({ page }) => {
-    const passwordInput = page.locator('input[name="password"]');
+    const passwordInput = page.locator('input[id="password"]');
     
     // Test weak password
     await passwordInput.fill('weak');
@@ -42,8 +42,8 @@ test.describe('Student Signup Flow', () => {
   test('should successfully create student account', async ({ page }) => {
     // Fill out the form with valid data
     await page.fill('input[name="name"]', 'Test Student');
-    await page.fill('input[name="email"]', `test.student.${Date.now()}@example.com`);
-    await page.fill('input[name="password"]', 'SecurePassword123!');
+    await page.fill('input[id="email"]', `test.student.${Date.now()}@example.com`);
+    await page.fill('input[id="password"]', 'SecurePassword123!');
     await page.fill('input[name="phone"]', '555-123-4567');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.fill('input[name="maxLessonsPerWeek"]', '2');
@@ -75,8 +75,8 @@ test.describe('Student Signup Flow', () => {
   test('should prevent duplicate email registration', async ({ page }) => {
     // Try to register with an existing email (assuming admin exists)
     await page.fill('input[name="name"]', 'Duplicate User');
-    await page.fill('input[name="email"]', 'admin@ym-movement.com');
-    await page.fill('input[name="password"]', 'SecurePassword123!');
+    await page.fill('input[id="email"]', 'admin@ym-movement.com');
+    await page.fill('input[id="password"]', 'SecurePassword123!');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.check('input[name="parentConsent"]');
     
@@ -118,13 +118,13 @@ test.describe('Student Signup Flow', () => {
 
   test('should navigate to login page', async ({ page }) => {
     // Check for login link
-    const loginLink = page.locator('a[href="/auth/signin"]');
+    const loginLink = page.locator('a[href="/auth/login"]');
     await expect(loginLink).toBeVisible();
     
     // Click login link
     await loginLink.click();
     
     // Verify navigation
-    await expect(page).toHaveURL('/auth/signin');
+    await expect(page).toHaveURL('/auth/login');
   });
 });

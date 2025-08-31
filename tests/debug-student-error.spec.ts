@@ -48,20 +48,20 @@ test.describe('Student Dashboard Error Debug', () => {
       console.log('📝 Redirected to auth page (expected for unauthenticated user)');
       
       // Try to see the signin form
-      const emailInput = await page.locator('input[type="email"], input[name="email"]').first();
+      const emailInput = await page.locator('input[type="email"], input[id="email"]').first();
       if (await emailInput.isVisible()) {
         console.log('📧 Found email input, attempting login...');
         
         // Use a test email that should exist
         await emailInput.fill('admin@test.com'); // Start with admin login to see if auth works
         
-        const passwordInput = await page.locator('input[type="password"], input[name="password"]').first();
+        const passwordInput = await page.locator('input[type="password"], input[id="password"]').first();
         await passwordInput.fill('ADMINPASS2025!');
         
         await page.screenshot({ path: 'debug-03-login-form.png' });
         
         // Submit login
-        const loginButton = await page.locator('button[type="submit"], button:has-text("Sign In")').first();
+        const loginButton = await page.locator('button[type="submit"], button:has-text("Login")').first();
         if (await loginButton.isVisible()) {
           await loginButton.click();
           console.log('⏳ Waiting for login...');
