@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test';
 // Helper function to login as admin
 async function loginAsAdmin(page: any) {
   await page.goto('/auth/login');
-  await page.fill('input[id="email"]', 'admin@ym-movement.com');
+  await page.fill('input[id="email"]', 'admin@test.com');
   await page.fill('input[id="password"]', 'admin123');
   await page.click('button[type="submit"]');
-  await page.waitForURL('/admin', { timeout: 10000 });
+  await page.waitForURL('/admin/dashboard', { timeout: 10000 });
 }
 
 // Helper function to login as student (if approved)

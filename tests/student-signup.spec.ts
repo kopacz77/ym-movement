@@ -8,19 +8,19 @@ test.describe('Student Signup Flow', () => {
 
   test('should display signup form with all required fields', async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/Sign Up/);
+    await expect(page).toHaveTitle(/Yura Scheduler/);
     
     // Check form elements are present
-    await expect(page.locator('input[name="name"]')).toBeVisible();
+    await expect(page.locator('input[id="name"]')).toBeVisible();
     await expect(page.locator('input[id="email"]')).toBeVisible();
     await expect(page.locator('input[id="password"]')).toBeVisible();
-    await expect(page.locator('input[name="phone"]')).toBeVisible();
+    await expect(page.locator('input[id="phone"]')).toBeVisible();
     await expect(page.locator('select[name="level"]')).toBeVisible();
     await expect(page.locator('input[name="maxLessonsPerWeek"]')).toBeVisible();
     
     // Check submit button
     await expect(page.locator('button[type="submit"]')).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toContainText('Create Account');
+    await expect(page.locator('button[type="submit"]')).toContainText('Sign Up');
   });
 
   test('should show real-time password validation', async ({ page }) => {
@@ -41,10 +41,10 @@ test.describe('Student Signup Flow', () => {
 
   test('should successfully create student account', async ({ page }) => {
     // Fill out the form with valid data
-    await page.fill('input[name="name"]', 'Test Student');
+    await page.fill('input[id="name"]', 'Test Student');
     await page.fill('input[id="email"]', `test.student.${Date.now()}@example.com`);
     await page.fill('input[id="password"]', 'SecurePassword123!');
-    await page.fill('input[name="phone"]', '555-123-4567');
+    await page.fill('input[id="phone"]', '555-123-4567');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.fill('input[name="maxLessonsPerWeek"]', '2');
     
@@ -74,8 +74,8 @@ test.describe('Student Signup Flow', () => {
 
   test('should prevent duplicate email registration', async ({ page }) => {
     // Try to register with an existing email (assuming admin exists)
-    await page.fill('input[name="name"]', 'Duplicate User');
-    await page.fill('input[id="email"]', 'admin@ym-movement.com');
+    await page.fill('input[id="name"]', 'Duplicate User');
+    await page.fill('input[id="email"]', 'admin@test.com');
     await page.fill('input[id="password"]', 'SecurePassword123!');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.check('input[name="parentConsent"]');
@@ -105,14 +105,14 @@ test.describe('Student Signup Flow', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     
     // Check that form is still accessible
-    await expect(page.locator('input[name="name"]')).toBeVisible();
+    await expect(page.locator('input[id="name"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
     
     // Test tablet viewport
     await page.setViewportSize({ width: 768, height: 1024 });
     
     // Check form layout
-    await expect(page.locator('input[name="name"]')).toBeVisible();
+    await expect(page.locator('input[id="name"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 

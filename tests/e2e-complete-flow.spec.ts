@@ -17,10 +17,10 @@ test.describe('Complete End-to-End User Journey', () => {
     const studentEmail = generateTestEmail('e2e-student');
     await page.goto('/auth/signup');
     
-    await page.fill('input[name="name"]', 'E2E Test Student');
+    await page.fill('input[id="name"]', 'E2E Test Student');
     await page.fill('input[id="email"]', studentEmail);
     await page.fill('input[id="password"]', 'TestPassword123!');
-    await page.fill('input[name="phone"]', '555-E2E-TEST');
+    await page.fill('input[id="phone"]', '555-E2E-TEST');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');
     await page.fill('input[name="maxLessonsPerWeek"]', '2');
     
@@ -75,6 +75,9 @@ test.describe('Complete End-to-End User Journey', () => {
     await page.fill('input[id="email"]', studentEmail);
     await page.fill('input[id="password"]', 'TestPassword123!');
     await page.click('button[type="submit"]');
+    
+    // Wait for redirect to student dashboard
+    await page.waitForURL('/student/dashboard', { timeout: 10000 });
     
     // Should redirect to student dashboard
     await page.waitForLoadState('networkidle');
@@ -131,6 +134,9 @@ test.describe('Complete End-to-End User Journey', () => {
     await page.fill('input[id="email"]', 'existing.student@example.com'); // Use existing student
     await page.fill('input[id="password"]', 'StudentPassword123!');
     await page.click('button[type="submit"]');
+    
+    // Wait for redirect to student dashboard
+    await page.waitForURL('/student/dashboard', { timeout: 10000 });
     
     // 2. Navigate to lessons
     await page.goto('/student/lessons');
@@ -214,7 +220,7 @@ test.describe('Complete End-to-End User Journey', () => {
     const pages = [
       '/auth/login',
       '/auth/signup',
-      '/admin',
+      '/admin/dashboard',
       '/admin/students',
       '/admin/schedule',
       '/student/schedule',
@@ -249,7 +255,7 @@ test.describe('Complete End-to-End User Journey', () => {
     await loginAsAdmin(page);
     
     const adminLinks = [
-      { text: 'Dashboard', url: '/admin' },
+      { text: 'Dashboard', url: '/admin/dashboard' },
       { text: 'Students', url: '/admin/students' },
       { text: 'Schedule', url: '/admin/schedule' },
       { text: 'Lessons', url: '/admin/lessons' },
@@ -273,7 +279,7 @@ test.describe('Complete End-to-End User Journey', () => {
     
     // Create student account (triggers welcome email)
     await page.goto('/auth/signup');
-    await page.fill('input[name="name"]', 'Email Test Student');
+    await page.fill('input[id="name"]', 'Email Test Student');
     await page.fill('input[id="email"]', testEmail);
     await page.fill('input[id="password"]', 'TestPassword123!');
     await page.selectOption('select[name="level"]', 'PRELIMINARY');

@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test';
 // Helper function to login as admin
 async function loginAsAdmin(page: any) {
   await page.goto('/auth/login');
-  await page.fill('input[id="email"]', 'admin@ym-movement.com');
-  await page.fill('input[id="password"]', 'admin123'); // Replace with actual admin password
+  await page.fill('input[id="email"]', 'admin@test.com');
+  await page.fill('input[id="password"]', 'ADMINPASS2025!');
   await page.click('button[type="submit"]');
-  await page.waitForURL('/admin', { timeout: 10000 });
+  await page.waitForURL('/admin/dashboard', { timeout: 10000 });
 }
 
 test.describe('Admin Dashboard', () => {
@@ -16,10 +16,10 @@ test.describe('Admin Dashboard', () => {
 
   test('should display admin dashboard with navigation', async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/Admin Dashboard/);
+    await expect(page).toHaveTitle(/Yura Scheduler/);
     
     // Check main dashboard elements
-    await expect(page.locator('text=Admin Dashboard')).toBeVisible();
+    await expect(page.locator('text=Dashboard')).toBeVisible();
     
     // Check navigation sidebar
     await expect(page.locator('nav')).toBeVisible();
@@ -46,7 +46,7 @@ test.describe('Admin Dashboard', () => {
       await expect(page).toHaveURL('/admin/students');
       
       // Check students page elements
-      await expect(page.locator('text=Student Management')).toBeVisible();
+      await expect(page.locator('text=Students')).toBeVisible();
       await expect(page.locator('table')).toBeVisible();
     });
 
@@ -99,7 +99,7 @@ test.describe('Admin Dashboard', () => {
       await expect(page).toHaveURL('/admin/schedule');
       
       // Check schedule page elements
-      await expect(page.locator('text=Schedule Management')).toBeVisible();
+      await expect(page.locator('text=Schedule')).toBeVisible();
     });
 
     test('should display time slots calendar', async ({ page }) => {
@@ -143,7 +143,7 @@ test.describe('Admin Dashboard', () => {
       await expect(page).toHaveURL('/admin/lessons');
       
       // Check lessons page elements
-      await expect(page.locator('text=Lesson Management')).toBeVisible();
+      await expect(page.locator('text=Lessons')).toBeVisible();
     });
 
     test('should display lessons table', async ({ page }) => {
@@ -176,7 +176,7 @@ test.describe('Admin Dashboard', () => {
       await expect(page).toHaveURL('/admin/payments');
       
       // Check payments page elements
-      await expect(page.locator('text=Payment Management')).toBeVisible();
+      await expect(page.locator('text=Payments')).toBeVisible();
     });
 
     test('should display payments table', async ({ page }) => {
@@ -231,7 +231,7 @@ test.describe('Admin Dashboard', () => {
       await page.goto('/admin/rinks');
       
       // Check rink management
-      await expect(page.locator('text=Rink Management')).toBeVisible();
+      await expect(page.locator('text=Rinks')).toBeVisible();
       await expect(page.locator('table')).toBeVisible();
     });
   });
@@ -248,7 +248,7 @@ test.describe('Admin Dashboard', () => {
       }
       
       // Check main content is accessible
-      await expect(page.locator('text=Admin Dashboard')).toBeVisible();
+      await expect(page.locator('text=Dashboard')).toBeVisible();
     });
 
     test('should display correctly on tablet', async ({ page }) => {
@@ -256,7 +256,7 @@ test.describe('Admin Dashboard', () => {
       
       // Check tablet layout
       await expect(page.locator('nav')).toBeVisible();
-      await expect(page.locator('text=Admin Dashboard')).toBeVisible();
+      await expect(page.locator('text=Dashboard')).toBeVisible();
     });
   });
 

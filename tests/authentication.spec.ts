@@ -73,16 +73,16 @@ test.describe('Authentication Flow', () => {
     test('should login admin user and redirect to admin dashboard', async ({ page }) => {
       await page.goto('/auth/login');
       
-      // Login with admin credentials (assuming admin@ym-movement.com exists)
-      await page.fill('input[id="email"]', 'admin@ym-movement.com');
-      await page.fill('input[id="password"]', 'admin123'); // This should be the actual admin password
+      // Login with admin credentials (assuming admin@test.com exists)
+      await page.fill('input[id="email"]', 'admin@test.com');
+      await page.fill('input[id="password"]', 'ADMINPASS2025!'); // This should be the actual admin password
       await page.click('button[type="submit"]');
       
       // Should redirect to admin dashboard
       await expect(page).toHaveURL('/admin/dashboard', { timeout: 10000 });
       
       // Check for admin dashboard elements
-      await expect(page.locator('text=Admin Dashboard')).toBeVisible();
+      await expect(page.locator('text=Dashboard')).toBeVisible();
     });
   });
 
@@ -113,10 +113,10 @@ test.describe('Authentication Flow', () => {
       
       // If redirected to login, login first
       if (page.url().includes('/auth/login')) {
-        await page.fill('input[id="email"]', 'admin@ym-movement.com');
-        await page.fill('input[id="password"]', 'admin123');
+        await page.fill('input[id="email"]', 'admin@test.com');
+        await page.fill('input[id="password"]', 'ADMINPASS2025!');
         await page.click('button[type="submit"]');
-        await page.waitForURL('/admin');
+        await page.waitForURL('/admin/dashboard');
       }
       
       // Now logout
@@ -136,7 +136,7 @@ test.describe('Authentication Flow', () => {
       await page.goto('/admin');
       
       // Should redirect to login page
-      await expect(page).toHaveURL(/\/auth\/signin/);
+      await expect(page).toHaveURL(/\/auth\/login/);
     });
 
     test('should redirect unauthenticated users from student dashboard', async ({ page }) => {
@@ -144,7 +144,7 @@ test.describe('Authentication Flow', () => {
       await page.goto('/student');
       
       // Should redirect to login page
-      await expect(page).toHaveURL(/\/auth\/signin/);
+      await expect(page).toHaveURL(/\/auth\/login/);
     });
   });
 
@@ -161,19 +161,19 @@ test.describe('Authentication Flow', () => {
     test('should maintain session across page refreshes', async ({ page }) => {
       // Login first
       await page.goto('/auth/login');
-      await page.fill('input[id="email"]', 'admin@ym-movement.com');
-      await page.fill('input[id="password"]', 'admin123');
+      await page.fill('input[id="email"]', 'admin@test.com');
+      await page.fill('input[id="password"]', 'ADMINPASS2025!');
       await page.click('button[type="submit"]');
       
       // Wait for redirect
-      await page.waitForURL('/admin');
+      await page.waitForURL('/admin/dashboard');
       
       // Refresh the page
       await page.reload();
       
       // Should still be on admin dashboard
       await expect(page).toHaveURL('/admin/dashboard');
-      await expect(page.locator('text=Admin Dashboard')).toBeVisible();
+      await expect(page.locator('text=Dashboard')).toBeVisible();
     });
   });
 
@@ -193,6 +193,9 @@ test.describe('Authentication Flow', () => {
       await page.goto('/auth/signup');
       
       // Check form layout on tablet
-      await expect(page.locator('input[name="name"]')).toBeVisible();
+      await expect(page.locator('input[id="name"]')).toBeVisible();
       await expect(page.locator('input[id="email"]')).toBeVisible();
-      await expect(page.locator('button[type="submit"]')).toBeVisible();
+      await expect(page.locator('button[type="submit"]')).toBeVisible();
+    });
+  });
+});

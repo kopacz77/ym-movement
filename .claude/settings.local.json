@@ -24,7 +24,8 @@
       "WebSearch",
       "Bash(npm run build:*)",
       "Bash(npx playwright test:*)",
-      "Bash(sudo npx playwright:*)"
+      "Bash(sudo npx playwright:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

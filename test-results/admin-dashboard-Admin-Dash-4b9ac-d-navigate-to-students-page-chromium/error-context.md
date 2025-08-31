@@ -1,0 +1,84 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e10]:
+          - generic [ref=e11]: YM Movement
+          - generic [ref=e12]: Admin Dashboard
+      - navigation [ref=e14]:
+        - link "Dashboard" [ref=e15] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e16] [cursor=pointer]
+          - generic [ref=e21] [cursor=pointer]: Dashboard
+        - link "Schedule" [ref=e22] [cursor=pointer]:
+          - /url: /admin/schedule
+          - img [ref=e23] [cursor=pointer]
+          - generic [ref=e25] [cursor=pointer]: Schedule
+        - link "Students" [active] [ref=e26] [cursor=pointer]:
+          - /url: /admin/students
+          - img [ref=e27] [cursor=pointer]
+          - generic [ref=e32] [cursor=pointer]: Students
+        - link "Payments" [ref=e33] [cursor=pointer]:
+          - /url: /admin/payments
+          - img [ref=e34] [cursor=pointer]
+          - generic [ref=e36] [cursor=pointer]: Payments
+        - link "Reports" [ref=e37] [cursor=pointer]:
+          - /url: /admin/reports
+          - img [ref=e38] [cursor=pointer]
+          - generic [ref=e39] [cursor=pointer]: Reports
+        - link "Settings" [ref=e40] [cursor=pointer]:
+          - /url: /admin/settings
+          - img [ref=e41] [cursor=pointer]
+          - generic [ref=e44] [cursor=pointer]: Settings
+    - generic [ref=e45]:
+      - banner [ref=e46]:
+        - generic [ref=e47]:
+          - navigation "breadcrumb" [ref=e49]:
+            - list [ref=e50]:
+              - generic [ref=e51]:
+                - listitem [ref=e52]:
+                  - link "Admin" [ref=e53] [cursor=pointer]:
+                    - /url: /admin/dashboard
+                - listitem [ref=e54]:
+                  - img [ref=e55]
+              - listitem [ref=e58]:
+                - link "Dashboard" [disabled] [ref=e59]
+          - generic [ref=e60]:
+            - generic [ref=e62]:
+              - img [ref=e64]
+              - generic [ref=e66]: Hey there Schätzi!
+              - img [ref=e67]
+            - generic [ref=e69]:
+              - button [ref=e70] [cursor=pointer]:
+                - img
+              - button "Log out" [ref=e71] [cursor=pointer]:
+                - img
+      - main [ref=e72]:
+        - generic [ref=e74]:
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - heading "Dashboard" [level=1] [ref=e78]
+              - paragraph [ref=e79]: Welcome back! Here's what's happening with YM Movement today.
+            - generic [ref=e81]: Saturday, August 30, 2025
+          - heading "Overview" [level=2] [ref=e84]
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - heading "Revenue Overview" [level=2] [ref=e122]
+              - generic [ref=e127]: Revenue Overview
+            - generic [ref=e131]:
+              - heading "Quick Actions" [level=2] [ref=e133]
+              - generic [ref=e135]:
+                - generic [ref=e137]: Pending Approvals
+                - generic [ref=e139]: Loading...
+          - generic [ref=e140]:
+            - heading "Student Activity" [level=2] [ref=e142]
+            - generic [ref=e148]: Student Activity
+  - region "Notifications alt+T"
+  - alert [ref=e152]
+  - button "Open Next.js Dev Tools" [ref=e158] [cursor=pointer]:
+    - img [ref=e159] [cursor=pointer]
+```

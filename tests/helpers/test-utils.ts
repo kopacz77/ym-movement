@@ -59,10 +59,10 @@ export async function createStudentAccount(page: Page, studentData = testData.st
   await page.goto('/auth/signup');
   
   // Fill basic information
-  await page.fill('input[name="name"]', studentData.name);
-  await page.fill('input[name="email"]', `${Date.now()}.${studentData.email}`);
-  await page.fill('input[name="password"]', studentData.password);
-  await page.fill('input[name="phone"]', studentData.phone);
+  await page.fill('input[id="name"]', studentData.name);
+  await page.fill('input[id="email"]', `${Date.now()}.${studentData.email}`);
+  await page.fill('input[id="password"]', studentData.password);
+  await page.fill('input[id="phone"]', studentData.phone);
   await page.selectOption('select[name="level"]', studentData.level);
   await page.fill('input[name="maxLessonsPerWeek"]', studentData.maxLessonsPerWeek.toString());
   
