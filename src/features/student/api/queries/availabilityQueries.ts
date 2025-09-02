@@ -25,6 +25,27 @@ export const availabilityRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
+        // CRITICAL: Check if the student is approved before showing available slots
+        if (ctx.session?.user?.role === "STUDENT") {
+          const student = await ctx.prisma.student.findUnique({
+            where: { userId: ctx.session.user.id },
+            select: { isApproved: true, id: true }
+          });
+
+          if (!student) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Student profile not found",
+            });
+          }
+
+          if (!student.isApproved) {
+            throw new TRPCError({
+              code: "FORBIDDEN", 
+              message: "Your account is pending approval. Please wait for admin approval before booking lessons.",
+            });
+          }
+        }
         const startDate = input.startDate || new Date();
         const endDate = input.endDate || new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -127,6 +148,21 @@ export const availabilityRouter = createTRPCRouter({
 
   getRinks: protectedProcedure.query(async ({ ctx }) => {
     try {
+      // CRITICAL: Check if the student is approved before showing rinks
+      if (ctx.session?.user?.role === "STUDENT") {
+        const student = await ctx.prisma.student.findUnique({
+          where: { userId: ctx.session.user.id },
+          select: { isApproved: true }
+        });
+
+        if (!student?.isApproved) {
+          throw new TRPCError({
+            code: "FORBIDDEN", 
+            message: "Your account is pending approval. Please wait for admin approval before booking lessons.",
+          });
+        }
+      }
+
       return await ctx.prisma.rink.findMany({
         select: {
           id: true,

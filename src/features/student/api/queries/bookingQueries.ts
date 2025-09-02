@@ -12,6 +12,7 @@ import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 interface ExtendedStudent {
   id: string;
   userId: string;
+  isApproved: boolean;
   User: {
     email: string;
     name: string | null;
@@ -74,7 +75,7 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 3. Get student info and check weekly lesson limit
+        // 3. Get student info and check approval status + weekly lesson limit
         const student = (await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
@@ -87,6 +88,15 @@ export const bookingRouter = createTRPCRouter({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",
+          });
+        }
+
+        // CRITICAL: Check if student is approved before allowing booking
+        if (!student.isApproved) {
+          console.log(`[BOOKING] Student ${input.studentId} is not approved`);
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Your account is pending approval. Please wait for admin approval before booking lessons.",
           });
         }
 

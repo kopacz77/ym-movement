@@ -484,7 +484,7 @@ function BookingCalendarComponent() {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Book a Lesson</CardTitle>
         <Select value={selectedRink} onValueChange={setSelectedRink}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[320px] flex-shrink-0">
             <SelectValue placeholder="Select a Rink" />
           </SelectTrigger>
           <SelectContent>
