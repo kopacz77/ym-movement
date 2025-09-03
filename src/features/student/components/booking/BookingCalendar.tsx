@@ -265,8 +265,21 @@ function BookingCalendarComponent() {
   // Format time in the rink's timezone
   const formatTimeInRinkTimezone = useCallback(
     (timeStr: string | Date) => {
-      const dateTime = DateTime.fromISO(timeStr.toString()).setZone(rinkTimezone);
-      return dateTime.toFormat("h:mm a");
+      try {
+        const dateTime = typeof timeStr === "string" 
+          ? DateTime.fromISO(timeStr, { zone: "utc" }).setZone(rinkTimezone)
+          : DateTime.fromJSDate(timeStr, { zone: "utc" }).setZone(rinkTimezone);
+        
+        if (!dateTime.isValid) {
+          console.error("Invalid date in formatTimeInRinkTimezone:", timeStr);
+          return "Invalid time";
+        }
+        
+        return dateTime.toFormat("h:mm a");
+      } catch (error) {
+        console.error("Error formatting time in rink timezone:", error);
+        return "Invalid time";
+      }
     },
     [rinkTimezone],
   );
@@ -678,6 +691,7 @@ function BookingCalendarComponent() {
           <BookingDialog
             slot={selectedSlot}
             studentId={studentId}
+            rinkTimezone={rinkTimezone}
             onCloseAction={() => {
               setIsBookingDialogOpen(false);
               setSelectedSlot(null);

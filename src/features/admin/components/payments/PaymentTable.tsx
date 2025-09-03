@@ -20,8 +20,8 @@ interface Payment {
   referenceCode: string;
   status: PaymentStatus;
   createdAt: string | Date;
-  student?: {
-    user?: {
+  Student?: {
+    User?: {
       name?: string | null;
     };
   };
@@ -108,7 +108,7 @@ export const PaymentTable = ({
           {filteredPayments.map((payment) => (
             <TableRow key={payment.id}>
               <TableCell className="font-medium">
-                {payment.student?.user?.name || "Unknown"}
+                {payment.Student?.User?.name || "Unknown"}
               </TableCell>
               <TableCell>{format(new Date(payment.createdAt), "PP")}</TableCell>
               <TableCell className="font-medium">{formatCurrency(payment.amount)}</TableCell>

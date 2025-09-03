@@ -29,7 +29,7 @@ export const availabilityRouter = createTRPCRouter({
         if (ctx.session?.user?.role === "STUDENT") {
           const student = await ctx.prisma.student.findUnique({
             where: { userId: ctx.session.user.id },
-            select: { isApproved: true, id: true }
+            select: { isApproved: true, id: true },
           });
 
           if (!student) {
@@ -41,16 +41,21 @@ export const availabilityRouter = createTRPCRouter({
 
           if (!student.isApproved) {
             throw new TRPCError({
-              code: "FORBIDDEN", 
-              message: "Your account is pending approval. Please wait for admin approval before booking lessons.",
+              code: "FORBIDDEN",
+              message:
+                "Your account is pending approval. Please wait for admin approval before booking lessons.",
             });
           }
         }
         const startDate = input.startDate || new Date();
         const endDate = input.endDate || new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+        // CRITICAL: Ensure we never show past time slots - use current time as minimum start time
+        const now = new Date();
+        const effectiveStartDate = startDate > now ? startDate : now;
+
         console.log(
-          `[DEBUG] Fetching time slots from ${startDate.toISOString()} to ${endDate.toISOString()}`,
+          `[DEBUG] Fetching time slots from ${effectiveStartDate.toISOString()} to ${endDate.toISOString()}`,
         );
 
         // Log the input parameters
@@ -60,10 +65,10 @@ export const availabilityRouter = createTRPCRouter({
           }`,
         );
 
-        // Create where clause with all matching slots in the date range
+        // Create where clause with all matching slots in the date range (excluding past slots)
         const whereClause: WhereClause = {
           startTime: {
-            gte: startDate,
+            gte: effectiveStartDate,
             lte: endDate,
           },
         };
@@ -152,13 +157,14 @@ export const availabilityRouter = createTRPCRouter({
       if (ctx.session?.user?.role === "STUDENT") {
         const student = await ctx.prisma.student.findUnique({
           where: { userId: ctx.session.user.id },
-          select: { isApproved: true }
+          select: { isApproved: true },
         });
 
         if (!student?.isApproved) {
           throw new TRPCError({
-            code: "FORBIDDEN", 
-            message: "Your account is pending approval. Please wait for admin approval before booking lessons.",
+            code: "FORBIDDEN",
+            message:
+              "Your account is pending approval. Please wait for admin approval before booking lessons.",
           });
         }
       }

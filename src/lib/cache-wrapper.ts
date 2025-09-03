@@ -7,7 +7,7 @@
  * @since Phase 2 Priority 3 Optimizations
  */
 
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, PaymentStatus } from "@prisma/client";
 import { CACHE_CONFIG, type CacheOptions, redis } from "./redis";
 
 interface QueryCacheConfig {
@@ -174,7 +174,7 @@ export class StudentCache {
               orderBy: { startTime: "desc" },
               take: 10,
             },
-            payments: {
+            Payment: {
               orderBy: { createdAt: "desc" },
               take: 5,
             },
@@ -223,7 +223,7 @@ export class StudentCache {
             _count: {
               select: {
                 Lesson: true,
-                payments: true,
+                Payment: true,
               },
             },
           },
@@ -281,7 +281,7 @@ export class LessonCache {
             RinkTimeSlot: {
               include: { Rink: true },
             },
-            payments: true,
+            Payment: true,
           },
           orderBy: { startTime: "asc" },
         }),
@@ -350,7 +350,7 @@ export class PaymentCache {
       skip?: number;
       take?: number;
       studentId?: string;
-      status?: string;
+      status?: PaymentStatus;
     } = {},
   ) {
     const cacheKey = `${CACHE_CONFIG.PREFIXES.PAYMENT}list:${JSON.stringify(params)}`;
@@ -403,7 +403,7 @@ export class PaymentCache {
           prisma.payment.aggregate({
             where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: "PAID",
+              status: PaymentStatus.PAID,
             },
             _sum: { amount: true },
             _count: true,
@@ -419,7 +419,7 @@ export class PaymentCache {
           prisma.payment.aggregate({
             where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: "OVERDUE",
+              status: PaymentStatus.OVERDUE,
             },
             _sum: { amount: true },
             _count: true,

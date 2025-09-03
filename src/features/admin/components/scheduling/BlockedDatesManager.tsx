@@ -81,15 +81,15 @@ const typeIcons = {
 
 // Type colors mapping
 const typeColors = {
-  TRAVEL: "bg-red-500",
-  COMPETITION: "bg-orange-500",
+  TRAVEL: "bg-gray-500",
+  COMPETITION: "bg-red-500",
   OTHER: "bg-gray-500",
 };
 
 // Type badge variants
 const typeBadgeVariants = {
-  TRAVEL: "destructive",
-  COMPETITION: "default",
+  TRAVEL: "secondary",
+  COMPETITION: "destructive",
   OTHER: "secondary",
 } as const;
 

@@ -141,20 +141,41 @@ export const formatTimeWithTimezone = (
   rinkTimezone: string,
   format = "h:mm a", // Removed the explicit ": string" type annotation
 ) => {
-  const dateTime =
-    typeof time === "string"
-      ? DateTime.fromISO(time, { zone: "utc" }).setZone(rinkTimezone)
-      : DateTime.fromJSDate(time, { zone: "utc" }).setZone(rinkTimezone);
+  try {
+    const dateTime =
+      typeof time === "string"
+        ? DateTime.fromISO(time, { zone: "utc" }).setZone(rinkTimezone)
+        : DateTime.fromJSDate(time, { zone: "utc" }).setZone(rinkTimezone);
 
-  const localDateTime =
-    typeof time === "string"
-      ? DateTime.fromISO(time, { zone: "utc" })
-      : DateTime.fromJSDate(time, { zone: "utc" });
+    const localDateTime =
+      typeof time === "string"
+        ? DateTime.fromISO(time, { zone: "utc" })
+        : DateTime.fromJSDate(time, { zone: "utc" });
 
-  return {
-    localTime: localDateTime.toFormat(format),
-    rinkTime: dateTime.toFormat(format),
-    localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    rinkTimezone,
-  };
+    // Check if DateTime objects are valid
+    if (!dateTime.isValid || !localDateTime.isValid) {
+      console.error("Invalid DateTime in formatTimeWithTimezone:", time);
+      return {
+        localTime: "Invalid time",
+        rinkTime: "Invalid time",
+        localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        rinkTimezone,
+      };
+    }
+
+    return {
+      localTime: localDateTime.toFormat(format),
+      rinkTime: dateTime.toFormat(format),
+      localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      rinkTimezone,
+    };
+  } catch (error) {
+    console.error("Error in formatTimeWithTimezone:", error);
+    return {
+      localTime: "Invalid time",
+      rinkTime: "Invalid time", 
+      localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      rinkTimezone,
+    };
+  }
 };

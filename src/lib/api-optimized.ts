@@ -69,11 +69,6 @@ const queryClientConfig: DefaultOptions = {
 export function createOptimizedQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: queryClientConfig,
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: process.env.NODE_ENV === "development" ? console.error : () => {},
-    },
   });
 }
 
@@ -82,8 +77,12 @@ export function createOptimizedQueryClient(): QueryClient {
  */
 function createTRPCLinks() {
   const getBaseUrl = () => {
-    if (typeof window !== "undefined") return ""; // browser should use relative url
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+    if (typeof window !== "undefined") {
+      return ""; // browser should use relative url
+    }
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+    }
     return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
   };
 
@@ -123,13 +122,7 @@ function createTRPCLinks() {
           };
         },
 
-        // Request timeout
-        fetch(url, options) {
-          return fetch(url, {
-            ...options,
-            signal: AbortSignal.timeout(30000), // 30 second timeout
-          });
-        },
+        // Use default fetch behavior
       }),
     }),
   ];
@@ -140,7 +133,6 @@ function createTRPCLinks() {
  */
 export function createOptimizedTRPCClient() {
   return createTRPCProxyClient<AppRouter>({
-    transformer: superjson,
     links: createTRPCLinks(),
   });
 }
@@ -153,20 +145,22 @@ export const api = createTRPCReact<AppRouter>();
 /**
  * Enhanced query utilities
  */
-export class TRPCQueryUtils {
-  private static queryClient: QueryClient;
+export namespace TRPCQueryUtils {
+  let queryClient: QueryClient;
 
-  static setQueryClient(client: QueryClient) {
-    TRPCQueryUtils.queryClient = client;
+  export function setQueryClient(client: QueryClient) {
+    queryClient = client;
   }
 
   /**
    * Prefetch data for faster navigation
    */
-  static async prefetchStudentList() {
-    if (!TRPCQueryUtils.queryClient) return;
+  export async function prefetchStudentList() {
+    if (!queryClient) {
+      return;
+    }
 
-    await TRPCQueryUtils.queryClient.prefetchQuery({
+    await queryClient.prefetchQuery({
       queryKey: [["admin", "student", "list"], { type: "query" }],
       queryFn: () => {
         // This would be handled by TRPC automatically
@@ -179,10 +173,12 @@ export class TRPCQueryUtils {
   /**
    * Prefetch upcoming lessons
    */
-  static async prefetchUpcomingLessons(studentId?: string) {
-    if (!TRPCQueryUtils.queryClient) return;
+  export async function prefetchUpcomingLessons(studentId?: string) {
+    if (!queryClient) {
+      return;
+    }
 
-    await TRPCQueryUtils.queryClient.prefetchQuery({
+    await queryClient.prefetchQuery({
       queryKey: [["student", "lesson", "upcoming"], { type: "query", input: { studentId } }],
       queryFn: () => Promise.resolve([]),
       staleTime: 1000 * 60 * 2, // 2 minutes
@@ -192,23 +188,25 @@ export class TRPCQueryUtils {
   /**
    * Optimistic updates for better UX
    */
-  static async optimisticLessonBooking(lessonData: any) {
-    if (!TRPCQueryUtils.queryClient) return;
+  export async function optimisticLessonBooking(lessonData: any) {
+    if (!queryClient) {
+      return;
+    }
 
     // Cancel outgoing refetches
-    await TRPCQueryUtils.queryClient.cancelQueries({
+    await queryClient.cancelQueries({
       queryKey: [["student", "lesson", "upcoming"]],
     });
 
     // Snapshot previous value
-    const previousLessons = TRPCQueryUtils.queryClient.getQueryData([
+    const previousLessons = queryClient.getQueryData([
       ["student", "lesson", "upcoming"],
     ]);
 
     // Optimistically update
-    TRPCQueryUtils.queryClient.setQueryData([["student", "lesson", "upcoming"]], (old: any[]) => [
+    queryClient.setQueryData([["student", "lesson", "upcoming"]], (old: any[]) => [
       ...old,
-      { ...lessonData, id: "temp-" + Date.now(), status: "pending" },
+      { ...lessonData, id: `temp-${Date.now()}`, status: "pending" },
     ]);
 
     return { previousLessons };
@@ -217,10 +215,12 @@ export class TRPCQueryUtils {
   /**
    * Revert optimistic update on error
    */
-  static revertOptimisticUpdate(context: { previousLessons: any }) {
-    if (!TRPCQueryUtils.queryClient) return;
+  export function revertOptimisticUpdate(context: { previousLessons: any }) {
+    if (!queryClient) {
+      return;
+    }
 
-    TRPCQueryUtils.queryClient.setQueryData(
+    queryClient.setQueryData(
       [["student", "lesson", "upcoming"]],
       context.previousLessons,
     );
@@ -229,11 +229,13 @@ export class TRPCQueryUtils {
   /**
    * Intelligent cache invalidation
    */
-  static async invalidateRelatedQueries(
+  export async function invalidateRelatedQueries(
     type: "student" | "lesson" | "payment" | "schedule",
     id?: string,
   ) {
-    if (!TRPCQueryUtils.queryClient) return;
+    if (!queryClient) {
+      return;
+    }
 
     const invalidationMap = {
       student: [
@@ -257,27 +259,29 @@ export class TRPCQueryUtils {
     const queryKeys = invalidationMap[type] || [];
 
     await Promise.all(
-      queryKeys.map((queryKey) => TRPCQueryUtils.queryClient.invalidateQueries({ queryKey })),
+      queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
     );
   }
 
   /**
    * Preload critical data
    */
-  static async preloadCriticalData(userRole: "ADMIN" | "STUDENT", userId: string) {
-    if (!TRPCQueryUtils.queryClient) return;
+  export async function preloadCriticalData(userRole: "ADMIN" | "STUDENT", _userId: string) {
+    if (!queryClient) {
+      return;
+    }
 
     const preloadPromises: Promise<any>[] = [];
 
     if (userRole === "ADMIN") {
       // Preload admin dashboard data
       preloadPromises.push(
-        TRPCQueryUtils.queryClient.prefetchQuery({
+        queryClient.prefetchQuery({
           queryKey: [["admin", "analytics", "dashboard"]],
           queryFn: () => Promise.resolve({}),
           staleTime: 1000 * 60 * 10, // 10 minutes
         }),
-        TRPCQueryUtils.queryClient.prefetchQuery({
+        queryClient.prefetchQuery({
           queryKey: [["admin", "student", "pendingApprovals"]],
           queryFn: () => Promise.resolve([]),
           staleTime: 1000 * 60 * 5, // 5 minutes
@@ -286,12 +290,12 @@ export class TRPCQueryUtils {
     } else if (userRole === "STUDENT") {
       // Preload student dashboard data
       preloadPromises.push(
-        TRPCQueryUtils.queryClient.prefetchQuery({
+        queryClient.prefetchQuery({
           queryKey: [["student", "dashboard"]],
           queryFn: () => Promise.resolve({}),
           staleTime: 1000 * 60 * 5, // 5 minutes
         }),
-        TRPCQueryUtils.queryClient.prefetchQuery({
+        queryClient.prefetchQuery({
           queryKey: [["student", "lesson", "upcoming"]],
           queryFn: () => Promise.resolve([]),
           staleTime: 1000 * 60 * 2, // 2 minutes
@@ -305,13 +309,15 @@ export class TRPCQueryUtils {
   /**
    * Background refresh for stale data
    */
-  static startBackgroundRefresh() {
-    if (!TRPCQueryUtils.queryClient) return;
+  export function startBackgroundRefresh() {
+    if (!queryClient) {
+      return;
+    }
 
     const refreshInterval = setInterval(
       () => {
         // Refresh stale queries in the background
-        TRPCQueryUtils.queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           stale: true,
           refetchType: "none", // Don't refetch immediately
         });
@@ -326,10 +332,12 @@ export class TRPCQueryUtils {
   /**
    * Get cache statistics
    */
-  static getCacheStats() {
-    if (!TRPCQueryUtils.queryClient) return null;
+  export function getCacheStats() {
+    if (!queryClient) {
+      return null;
+    }
 
-    const queryCache = TRPCQueryUtils.queryClient.getQueryCache();
+    const queryCache = queryClient.getQueryCache();
     const queries = queryCache.getAll();
 
     const stats = {
@@ -346,10 +354,12 @@ export class TRPCQueryUtils {
   /**
    * Clean up stale queries
    */
-  static cleanupStaleQueries() {
-    if (!TRPCQueryUtils.queryClient) return;
+  export function cleanupStaleQueries() {
+    if (!queryClient) {
+      return;
+    }
 
-    TRPCQueryUtils.queryClient.getQueryCache().clear();
+    queryClient.getQueryCache().clear();
   }
 }
 
@@ -357,28 +367,28 @@ export class TRPCQueryUtils {
  * Custom hooks for optimized data fetching
  */
 export function useOptimizedStudentList(params: any = {}) {
-  return api.admin.student.list.useQuery(params, {
+  return api.admin.student.getStudents.useQuery(params, {
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
+    placeholderData: (previousData: any) => previousData,
   });
 }
 
 export function useOptimizedUpcomingLessons(studentId?: string) {
-  return api.student.lesson.upcoming.useQuery(
-    { studentId },
+  return api.student.profile.getStudentLessons.useQuery(
+    { studentId: studentId!, status: "SCHEDULED" },
     {
       staleTime: 1000 * 60 * 2, // 2 minutes
+      enabled: !!studentId,
       gcTime: 1000 * 60 * 10, // 10 minutes
       refetchInterval: 1000 * 60 * 5, // Auto-refresh every 5 minutes
-      enabled: !!studentId,
     },
   );
 }
 
 export function useOptimizedAnalytics(dateRange: any) {
-  return api.admin.analytics.dashboard.useQuery(dateRange, {
+  return api.admin.analytics.getOverview.useQuery(dateRange, {
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
@@ -391,31 +401,39 @@ export function useOptimizedAnalytics(dateRange: any) {
 export function useOptimisticLessonBooking() {
   const utils = api.useUtils();
 
-  return api.student.lesson.book.useMutation({
-    onMutate: async (variables) => {
+  return api.student.booking.bookLesson.useMutation({
+    onMutate: async (variables: any) => {
       // Cancel outgoing refetches
-      await utils.student.lesson.upcoming.cancel();
+      await utils.student.profile.getStudentLessons.cancel();
 
       // Snapshot previous value
-      const previousLessons = utils.student.lesson.upcoming.getData();
+      const previousLessons = utils.student.profile.getStudentLessons.getData();
 
       // Optimistically update
-      utils.student.lesson.upcoming.setData(undefined, (old) => [
-        ...(old || []),
-        { ...variables, id: "temp-" + Date.now(), status: "pending" },
-      ]);
+      if (variables.studentId) {
+        utils.student.profile.getStudentLessons.setData(
+          { studentId: variables.studentId, status: "SCHEDULED" },
+          (old: any) => [
+            ...(old || []),
+            { ...variables, id: `temp-${Date.now()}`, status: "pending" },
+          ],
+        );
+      }
 
       return { previousLessons };
     },
-    onError: (err, variables, context) => {
+    onError: (_err: any, variables: any, context: any) => {
       // Revert optimistic update
-      if (context?.previousLessons) {
-        utils.student.lesson.upcoming.setData(undefined, context.previousLessons);
+      if (context?.previousLessons && variables.studentId) {
+        utils.student.profile.getStudentLessons.setData(
+          { studentId: variables.studentId, status: "SCHEDULED" },
+          context.previousLessons,
+        );
       }
     },
     onSettled: () => {
       // Refetch to ensure we have the latest data
-      utils.student.lesson.upcoming.invalidate();
+      utils.student.profile.getStudentLessons.invalidate();
     },
   });
 }

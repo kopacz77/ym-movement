@@ -4,8 +4,9 @@ import { createTRPCMsw } from "msw-trpc";
 import { setupServer } from "msw/node";
 import { TRPCError } from "@trpc/server";
 import { createTestLesson, createTestUser } from "../../helpers/test-data";
+import { appRouter } from "@/lib/root";
 
-const trpcMsw = createTRPCMsw();
+const trpcMsw = createTRPCMsw(appRouter);
 const server = setupServer();
 
 describe("Admin Schedule API", () => {
@@ -19,7 +20,7 @@ describe("Admin Schedule API", () => {
     server.close();
   });
 
-  describe("admin.schedule.timeSlots.getByDateRange", () => {
+  describe("admin.schedule.getTimeSlots", () => {
     it("should return time slots within date range", async () => {
       const mockTimeSlots = [
         {
@@ -39,7 +40,7 @@ describe("Admin Schedule API", () => {
       ];
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.getByDateRange.query((req) => {
+        trpcMsw.admin.schedule.getTimeSlots.query((req: any) => {
           const { input } = req;
           expect(input.startDate).toBeInstanceOf(Date);
           expect(input.endDate).toBeInstanceOf(Date);
@@ -48,7 +49,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.getByDateRange", {
+      const response = await fetch("/api/trpc/admin.schedule.getTimeSlots", {
         headers: {
           "Authorization": "Bearer admin-token"
         }
@@ -69,7 +70,7 @@ describe("Admin Schedule API", () => {
       ];
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.getByDateRange.query((req) => {
+        trpcMsw.admin.schedule.getTimeSlots.query((req: any) => {
           const { input } = req;
           
           if (input.rinkId === "rink-2") {
@@ -88,7 +89,7 @@ describe("Admin Schedule API", () => {
         })
       });
 
-      const response = await fetch(`/api/trpc/admin.schedule.timeSlots.getByDateRange?${queryParams}`, {
+      const response = await fetch(`/api/trpc/admin.schedule.getTimeSlots?${queryParams}`, {
         headers: {
           "Authorization": "Bearer admin-token"
         }
@@ -99,7 +100,7 @@ describe("Admin Schedule API", () => {
 
     it("should require admin authentication", async () => {
       server.use(
-        trpcMsw.admin.schedule.timeSlots.getByDateRange.query(() => {
+        trpcMsw.admin.schedule.getTimeSlots.query(() => {
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Admin access required"
@@ -108,7 +109,7 @@ describe("Admin Schedule API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.schedule.timeSlots.getByDateRange", {
+        await fetch("/api/trpc/admin.schedule.getTimeSlots", {
           headers: {
             "Authorization": "Bearer student-token"
           }
@@ -119,7 +120,7 @@ describe("Admin Schedule API", () => {
     });
   });
 
-  describe("admin.schedule.timeSlots.create", () => {
+  describe("admin.schedule.createTimeSlot", () => {
     it("should create a single time slot", async () => {
       const timeSlotData = {
         startTime: new Date("2025-01-30T10:00:00Z"),
@@ -129,7 +130,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.create.mutation((req) => {
+        trpcMsw.admin.schedule.createTimeSlot.mutation((req: any) => {
           const { input } = req;
           
           expect(input.startTime).toBeInstanceOf(Date);
@@ -141,7 +142,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.create", {
+      const response = await fetch("/api/trpc/admin.schedule.createTimeSlot", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -167,7 +168,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.create.mutation((req) => {
+        trpcMsw.admin.schedule.createTimeSlot.mutation((req: any) => {
           const { input } = req;
           
           expect(input.isRecurring).toBe(true);
@@ -188,7 +189,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.create", {
+      const response = await fetch("/api/trpc/admin.schedule.createTimeSlot", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -208,7 +209,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.create.mutation(() => {
+        trpcMsw.admin.schedule.createTimeSlot.mutation(() => {
           throw new TRPCError({
             code: "CONFLICT",
             message: "Time slot conflicts with existing booking"
@@ -217,7 +218,7 @@ describe("Admin Schedule API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.schedule.timeSlots.create", {
+        await fetch("/api/trpc/admin.schedule.createTimeSlot", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -238,7 +239,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.create.mutation(() => {
+        trpcMsw.admin.schedule.createTimeSlot.mutation(() => {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "End time must be after start time"
@@ -247,7 +248,7 @@ describe("Admin Schedule API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.schedule.timeSlots.create", {
+        await fetch("/api/trpc/admin.schedule.createTimeSlot", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -261,7 +262,7 @@ describe("Admin Schedule API", () => {
     });
   });
 
-  describe("admin.schedule.timeSlots.createBulk", () => {
+  describe("admin.schedule.createBulkTimeSlots", () => {
     it("should create multiple time slots at once", async () => {
       const bulkSlotData = {
         template: {
@@ -280,7 +281,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.createBulk.mutation((req) => {
+        trpcMsw.admin.schedule.createBulkTimeSlots.mutation((req: any) => {
           const { input } = req;
           
           expect(input.dates).toHaveLength(3);
@@ -296,7 +297,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.createBulk", {
+      const response = await fetch("/api/trpc/admin.schedule.createBulkTimeSlots", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -321,7 +322,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.createBulk.mutation((req) => {
+        trpcMsw.admin.schedule.createBulkTimeSlots.mutation((req: any) => {
           return {
             slotsCreated: 3, // Only 3 out of 4 created
             conflicts: [
@@ -336,7 +337,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.createBulk", {
+      const response = await fetch("/api/trpc/admin.schedule.createBulkTimeSlots", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -360,7 +361,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.createBulk.mutation(() => {
+        trpcMsw.admin.schedule.createBulkTimeSlots.mutation(() => {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid template configuration"
@@ -369,7 +370,7 @@ describe("Admin Schedule API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.schedule.timeSlots.createBulk", {
+        await fetch("/api/trpc/admin.schedule.createBulkTimeSlots", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -383,12 +384,12 @@ describe("Admin Schedule API", () => {
     });
   });
 
-  describe("admin.schedule.timeSlots.deleteBulk", () => {
+  describe("admin.schedule.deleteBulkTimeSlots", () => {
     it("should delete multiple time slots", async () => {
       const timeSlotIds = ["slot-1", "slot-2", "slot-3"];
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.deleteBulk.mutation((req) => {
+        trpcMsw.admin.schedule.deleteBulkTimeSlots.mutation((req: any) => {
           const { input } = req;
           
           expect(input.timeSlotIds).toEqual(timeSlotIds);
@@ -401,7 +402,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.deleteBulk", {
+      const response = await fetch("/api/trpc/admin.schedule.deleteBulkTimeSlots", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -417,7 +418,7 @@ describe("Admin Schedule API", () => {
       const timeSlotIds = ["slot-1", "slot-2", "slot-with-booking"];
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.deleteBulk.mutation((req) => {
+        trpcMsw.admin.schedule.deleteBulkTimeSlots.mutation((req: any) => {
           return {
             deletedCount: 2,
             skipped: [
@@ -431,7 +432,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.timeSlots.deleteBulk", {
+      const response = await fetch("/api/trpc/admin.schedule.deleteBulkTimeSlots", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -448,7 +449,7 @@ describe("Admin Schedule API", () => {
       const timeSlotIds = ["slot-1", "slot-2"];
 
       server.use(
-        trpcMsw.admin.schedule.timeSlots.deleteBulk.mutation((req) => {
+        trpcMsw.admin.schedule.deleteBulkTimeSlots.mutation((req: any) => {
           // Simulate security logging
           console.log('SECURITY_EVENT:', JSON.stringify({
             event: 'BULK_TIME_SLOTS_DELETED',
@@ -460,7 +461,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      await fetch("/api/trpc/admin.schedule.timeSlots.deleteBulk", {
+      await fetch("/api/trpc/admin.schedule.deleteBulkTimeSlots", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -476,7 +477,7 @@ describe("Admin Schedule API", () => {
     });
   });
 
-  describe("admin.schedule.lessons.create", () => {
+  describe("admin.schedule.createLesson", () => {
     it("should create a new lesson booking", async () => {
       const lessonData = {
         timeSlotId: "slot-1",
@@ -486,7 +487,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.lessons.create.mutation((req) => {
+        trpcMsw.admin.schedule.createLesson.mutation((req: any) => {
           const { input } = req;
           
           expect(input.timeSlotId).toBe("slot-1");
@@ -502,7 +503,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.lessons.create", {
+      const response = await fetch("/api/trpc/admin.schedule.createLesson", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -523,7 +524,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.lessons.create.mutation((req) => {
+        trpcMsw.admin.schedule.createLesson.mutation((req: any) => {
           const { input } = req;
           
           // Notes should be sanitized
@@ -534,7 +535,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.lessons.create", {
+      const response = await fetch("/api/trpc/admin.schedule.createLesson", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -554,7 +555,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.lessons.create.mutation(() => {
+        trpcMsw.admin.schedule.createLesson.mutation(() => {
           throw new TRPCError({
             code: "CONFLICT",
             message: "Time slot is already booked"
@@ -563,7 +564,7 @@ describe("Admin Schedule API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.schedule.lessons.create", {
+        await fetch("/api/trpc/admin.schedule.createLesson", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -577,7 +578,7 @@ describe("Admin Schedule API", () => {
     });
   });
 
-  describe("admin.schedule.lessons.update", () => {
+  describe("admin.schedule.cancelLesson", () => {
     it("should update lesson details", async () => {
       const updateData = {
         lessonId: "lesson-123",
@@ -587,7 +588,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.lessons.update.mutation((req) => {
+        trpcMsw.admin.schedule.cancelLesson.mutation((req: any) => {
           const { input } = req;
           
           expect(input.lessonId).toBe("lesson-123");
@@ -600,7 +601,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.lessons.update", {
+      const response = await fetch("/api/trpc/admin.schedule.cancelLesson", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -619,7 +620,7 @@ describe("Admin Schedule API", () => {
       };
 
       server.use(
-        trpcMsw.admin.schedule.lessons.update.mutation((req) => {
+        trpcMsw.admin.schedule.cancelLesson.mutation((req: any) => {
           const { input } = req;
           
           // Instructor notes should be sanitized
@@ -631,7 +632,7 @@ describe("Admin Schedule API", () => {
         })
       );
 
-      const response = await fetch("/api/trpc/admin.schedule.lessons.update", {
+      const response = await fetch("/api/trpc/admin.schedule.cancelLesson", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -647,7 +648,7 @@ describe("Admin Schedule API", () => {
   describe("Error Handling", () => {
     it("should handle database connection errors", async () => {
       server.use(
-        trpcMsw.admin.schedule.timeSlots.getByDateRange.query(() => {
+        trpcMsw.admin.schedule.getTimeSlots.query(() => {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Database connection failed"
@@ -656,7 +657,7 @@ describe("Admin Schedule API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.schedule.timeSlots.getByDateRange", {
+        await fetch("/api/trpc/admin.schedule.getTimeSlots", {
           headers: {
             "Authorization": "Bearer admin-token"
           }
@@ -668,7 +669,7 @@ describe("Admin Schedule API", () => {
 
     it("should handle invalid date formats", async () => {
       server.use(
-        trpcMsw.admin.schedule.timeSlots.getByDateRange.query(() => {
+        trpcMsw.admin.schedule.getTimeSlots.query(() => {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid date format"
@@ -684,7 +685,7 @@ describe("Admin Schedule API", () => {
           })
         });
 
-        await fetch(`/api/trpc/admin.schedule.timeSlots.getByDateRange?${queryParams}`, {
+        await fetch(`/api/trpc/admin.schedule.getTimeSlots?${queryParams}`, {
           headers: {
             "Authorization": "Bearer admin-token"
           }

@@ -115,7 +115,7 @@ test.describe('Reports Dashboard', () => {
         
         // Simulate onload trigger
         setTimeout(() => {
-          if (mockWindow.onload) mockWindow.onload();
+          if (mockWindow.onload) (mockWindow.onload as () => void)();
         }, 100);
         
         return mockWindow as any;

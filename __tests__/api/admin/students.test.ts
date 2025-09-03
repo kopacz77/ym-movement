@@ -5,9 +5,10 @@ import { setupServer } from "msw/node";
 import { TRPCError } from "@trpc/server";
 import { createTestUser, createTestStudent, createMaliciousInput } from "../../helpers/test-data";
 import { sanitizeInput } from "@/lib/security";
+import { appRouter } from "@/lib/root";
 
 // Mock the admin student queries
-const trpcMsw = createTRPCMsw();
+const trpcMsw = createTRPCMsw(appRouter);
 
 const server = setupServer();
 
@@ -22,7 +23,7 @@ describe("Admin Students API", () => {
     server.close();
   });
 
-  describe("admin.students.getAll", () => {
+  describe("admin.student.getStudents", () => {
     it("should return all students for admin", async () => {
       const mockStudents = [
         createTestStudent(),
@@ -31,13 +32,13 @@ describe("Admin Students API", () => {
       ];
 
       server.use(
-        trpcMsw.admin.students.getAll.query(() => {
+        trpcMsw.admin.student.getStudents.query(() => {
           return mockStudents;
         })
       );
 
       // Simulate admin request
-      const result = await fetch("/api/trpc/admin.students.getAll", {
+      const result = await fetch("/api/trpc/admin.student.getStudents", {
         headers: {
           "Authorization": "Bearer admin-token"
         }
@@ -48,7 +49,7 @@ describe("Admin Students API", () => {
 
     it("should require admin authentication", async () => {
       server.use(
-        trpcMsw.admin.students.getAll.query(() => {
+        trpcMsw.admin.student.getStudents.query(() => {
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Admin access required"
@@ -57,7 +58,7 @@ describe("Admin Students API", () => {
       );
 
       try {
-        await fetch("/api/trpc/admin.students.getAll", {
+        await fetch("/api/trpc/admin.student.getStudents", {
           headers: {
             "Authorization": "Bearer student-token"
           }
@@ -74,7 +75,7 @@ describe("Admin Students API", () => {
       ];
 
       server.use(
-        trpcMsw.admin.students.getAll.query((req) => {
+        trpcMsw.admin.student.getStudents.query((req: any) => {
           const { input } = req;
           if (input?.filter?.isApproved === true) {
             return approvedStudents;
@@ -84,7 +85,7 @@ describe("Admin Students API", () => {
       );
 
       // Test approved filter
-      const result = await fetch("/api/trpc/admin.students.getAll?input={\"filter\":{\"isApproved\":true}}", {
+      const result = await fetch("/api/trpc/admin.student.getStudents?input={\"filter\":{\"isApproved\":true}}", {
         headers: {
           "Authorization": "Bearer admin-token"
         }
@@ -100,7 +101,7 @@ describe("Admin Students API", () => {
       const createdStudent = { ...studentData, id: "new-student-id" };
 
       server.use(
-        trpcMsw.admin.students.create.mutation((req) => {
+        trpcMsw.admin.students.create.mutation((req: any) => {
           const { input } = req;
           
           // Verify input sanitization
@@ -134,7 +135,7 @@ describe("Admin Students API", () => {
       };
 
       server.use(
-        trpcMsw.admin.students.create.mutation((req) => {
+        trpcMsw.admin.students.create.mutation((req: any) => {
           const { input } = req;
           
           // Input should be sanitized
@@ -218,7 +219,7 @@ describe("Admin Students API", () => {
       const studentData = createTestStudent();
 
       server.use(
-        trpcMsw.admin.students.create.mutation((req) => {
+        trpcMsw.admin.students.create.mutation((req: any) => {
           // Simulate security logging
           console.log('SECURITY_EVENT:', JSON.stringify({
             event: 'STUDENT_CREATED',
@@ -255,7 +256,7 @@ describe("Admin Students API", () => {
       };
 
       server.use(
-        trpcMsw.admin.students.update.mutation((req) => {
+        trpcMsw.admin.students.update.mutation((req: any) => {
           const { input } = req;
           expect(input.id).toBe("student-123");
           expect(input.name).toBe("Updated Name");
@@ -285,7 +286,7 @@ describe("Admin Students API", () => {
       };
 
       server.use(
-        trpcMsw.admin.students.update.mutation((req) => {
+        trpcMsw.admin.students.update.mutation((req: any) => {
           const { input } = req;
           
           // Verify sanitization
@@ -314,7 +315,7 @@ describe("Admin Students API", () => {
       const studentId = "student-to-delete";
 
       server.use(
-        trpcMsw.admin.students.delete.mutation((req) => {
+        trpcMsw.admin.students.delete.mutation((req: any) => {
           const { input } = req;
           expect(input.id).toBe(studentId);
           
@@ -365,7 +366,7 @@ describe("Admin Students API", () => {
       const studentId = "pending-student";
 
       server.use(
-        trpcMsw.admin.students.approve.mutation((req) => {
+        trpcMsw.admin.students.approve.mutation((req: any) => {
           const { input } = req;
           expect(input.studentId).toBe(studentId);
           
@@ -394,7 +395,7 @@ describe("Admin Students API", () => {
       const studentId = "student-to-approve";
 
       server.use(
-        trpcMsw.admin.students.approve.mutation((req) => {
+        trpcMsw.admin.students.approve.mutation((req: any) => {
           // Simulate security logging
           console.log('SECURITY_EVENT:', JSON.stringify({
             event: 'STUDENT_APPROVED',
@@ -467,7 +468,7 @@ describe("Admin Students API", () => {
       };
 
       server.use(
-        trpcMsw.admin.students.create.mutation((req) => {
+        trpcMsw.admin.students.create.mutation((req: any) => {
           const { input } = req;
           
           // Should be truncated to 10000 characters
@@ -498,7 +499,7 @@ describe("Admin Students API", () => {
       };
 
       server.use(
-        trpcMsw.admin.students.create.mutation((req) => {
+        trpcMsw.admin.students.create.mutation((req: any) => {
           const { input } = req;
           
           // Null/undefined should be handled gracefully
@@ -535,7 +536,7 @@ describe("Admin Students API", () => {
       };
 
       server.use(
-        trpcMsw.admin.students.create.mutation((req) => {
+        trpcMsw.admin.students.create.mutation((req: any) => {
           const { input } = req;
           
           // Emergency contact should be sanitized

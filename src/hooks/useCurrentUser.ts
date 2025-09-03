@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 export function useCurrentUser() {
   const { data: session } = useSession();
   const [studentId, setStudentId] = useState("");
+  const [isApproved, setIsApproved] = useState<boolean | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -21,16 +22,22 @@ export function useCurrentUser() {
           if (isMounted) {
             if (userData.Student?.id) {
               setStudentId(userData.Student.id);
+              setIsApproved(userData.Student.isApproved || false); // FIXED: Include approval status
             } else {
               console.warn("Student profile not found in user data:", userData);
+              setIsApproved(false);
             }
           }
         })
         .catch((err) => {
           console.error("Error fetching user data:", err);
+          setIsApproved(false);
           // Don't throw here to prevent React error boundary triggers
           // The components will handle missing studentId gracefully
         });
+    } else if (session?.user?.role === "ADMIN") {
+      // Admins are always "approved"
+      setIsApproved(true);
     }
 
     return () => {
@@ -44,5 +51,8 @@ export function useCurrentUser() {
     email: session?.user?.email || "",
     name: session?.user?.name || "",
     role: session?.user?.role || "",
+    isApproved: isApproved, // FIXED: Include approval status
+    isStudent: session?.user?.role === "STUDENT",
+    isAdmin: session?.user?.role === "ADMIN",
   };
 }

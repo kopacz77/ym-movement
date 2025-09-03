@@ -25,7 +25,12 @@
       "Bash(npm run build:*)",
       "Bash(npx playwright test:*)",
       "Bash(sudo npx playwright:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(.husky/pre-commit)",
+      "Bash(npx biome check:*)",
+      "Bash(npx biome format:*)",
+      "Bash(pnpm exec biome check:*)"
     ],
     "deny": []
   }

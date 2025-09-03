@@ -1,5 +1,6 @@
 // Streamlined src/lib/email.ts
 import { Resend } from "resend";
+import { DateTime } from "luxon";
 
 // Initialize Resend with API key
 const resendApiKey = process.env.RESEND_API_KEY || "";
@@ -66,65 +67,61 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 /**
- * Formats a date to a readable string (e.g., "Monday, January 1, 2025")
+ * Formats a date to a readable string in the specified timezone (e.g., "Monday, January 1, 2025")
  */
-function formatDate(date: Date): string {
-  // Get the date components directly from the UTC fields
-  const year = date.getUTCFullYear();
-  const month = date.getUTCMonth();
-  const day = date.getUTCDate();
-  const weekday = date.getUTCDay();
-
-  // Create array for display
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-  return `${days[weekday]}, ${months[month]} ${day}, ${year}`;
+function formatDate(date: Date, timezone: string): string {
+  try {
+    const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
+    
+    if (!dt.isValid) {
+      console.error("Invalid date for formatDate:", date);
+      return "Invalid date";
+    }
+    
+    return dt.toFormat("EEEE, MMMM d, yyyy");
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return date.toLocaleDateString();
+  }
 }
 
 /**
- * Formats time to a readable string (e.g., "7:30 AM")
- * Treats UTC time fields directly as local time (no conversion)
+ * Formats time to a readable string in the specified timezone (e.g., "7:30 AM")
  */
-function formatTime(date: Date): string {
-  // Get UTC hours and minutes but treat them as local time
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-
-  // Format in AM/PM
-  const ampm = hours >= 12 ? "PM" : "AM";
-  const hour12 = hours % 12 || 12; // Convert 0 to 12
-
-  return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+function formatTime(date: Date, timezone: string): string {
+  try {
+    const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
+    
+    if (!dt.isValid) {
+      console.error("Invalid date for formatTime:", date);
+      return "Invalid time";
+    }
+    
+    return dt.toFormat("h:mm a");
+  } catch (error) {
+    console.error("Error formatting time:", error);
+    return date.toLocaleTimeString();
+  }
 }
 
 /**
- * Formats a raw UTC time for Google Calendar, treating UTC fields as local time
- * This function ensures that 7:30 UTC becomes 7:30 in the calendar
+ * Formats a UTC time for Google Calendar in the specified timezone
  */
-function formatRawTimeForCalendar(date: Date): string {
-  // Extract the UTC components
-  const year = date.getUTCFullYear();
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  const day = date.getUTCDate().toString().padStart(2, "0");
-  const hours = date.getUTCHours().toString().padStart(2, "0");
-  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-
-  // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
-  return `${year}${month}${day}T${hours}${minutes}00`;
+function formatRawTimeForCalendar(date: Date, timezone: string): string {
+  try {
+    const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
+    
+    if (!dt.isValid) {
+      console.error("Invalid date for formatRawTimeForCalendar:", date);
+      return "";
+    }
+    
+    // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
+    return dt.toFormat("yyyyMMdd'T'HHmmss");
+  } catch (error) {
+    console.error("Error formatting time for calendar:", error);
+    return "";
+  }
 }
 
 /**
@@ -133,21 +130,28 @@ function formatRawTimeForCalendar(date: Date): string {
 export async function sendWelcomeEmail(email: string, name: string) {
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">Welcome to YM Movement!</h1>
+      <h1 style="color: #3b82f6;">Registration Received!</h1>
       <p>Hello ${name},</p>
-      <p>Thank you for registering with YM Movement. We're excited to have you join us!</p>
-      <p>Your account has been created and is currently pending approval by our administrators. You'll receive another email once your account has been approved.</p>
-      <p>In the meantime, if you have any questions, please don't hesitate to contact us at info@ym-movement.com.</p>
+      <p>Thank you for your interest in YM Movement. We've received your registration and are excited about the possibility of having you join us!</p>
+      <p><strong>What happens next:</strong></p>
+      <ul style="margin-left: 20px;">
+        <li>Our administrators will review your registration</li>
+        <li>Once approved, you'll receive an email to complete your account setup</li>
+        <li>You'll create your password and finalize your profile</li>
+        <li>Then you can start booking ice dance lessons!</li>
+      </ul>
+      <p>If you have any questions while waiting for approval, please don't hesitate to contact us at info@ym-movement.com.</p>
       <div style="margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 5px;">
-        <p style="margin: 0; font-weight: bold;">Your account details:</p>
+        <p style="margin: 0; font-weight: bold;">Your registration details:</p>
         <p style="margin: 5px 0;">Email: ${email}</p>
+        <p style="margin: 5px 0;">Name: ${name}</p>
       </div>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
     </div>
   `;
 
-  return sendEmail(email, "Welcome to YM Movement", emailContent);
+  return sendEmail(email, "Registration Received - YM Movement", emailContent);
 }
 
 /**
@@ -158,38 +162,45 @@ export async function sendApprovalEmail(email: string, name: string, token: stri
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">🎉 Account Approved!</h1>
+      <h1 style="color: #3b82f6;">🎉 Registration Approved!</h1>
       <p>Hello ${name},</p>
-      <p>Great news! Your YM Movement account has been approved and you're ready to get started!</p>
-      <p>To complete your registration, please click the button below to finish setting up your account:</p>
-      <a href="${registrationUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin-top: 15px; font-weight: bold;">Complete Your Registration</a>
+      <p>Fantastic news! Your YM Movement registration has been approved by our administrators!</p>
+      <p><strong>Next Step:</strong> Complete your account setup by creating your password and finalizing your profile.</p>
       
-      <p style="margin-top: 20px;">During registration completion, you'll:</p>
-      <ul style="margin-left: 20px;">
-        <li>Complete your profile information</li>
-        <li>Create a secure password</li>
-        <li>Set up your account preferences</li>
-      </ul>
-      
-      <p style="margin-top: 20px;">Once your registration is complete, you'll be able to:</p>
-      <ul style="margin-left: 20px;">
-        <li>Schedule ice dance lessons</li>
-        <li>View your lesson history and progress</li>
-        <li>Manage your account settings</li>
-        <li>Track your skating journey</li>
-      </ul>
-      
-      <div style="margin-top: 25px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
-        <p style="margin: 0; font-size: 14px; color: #856404;"><strong>⏰ Important:</strong> This registration link will expire in 24 hours for security purposes.</p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${registrationUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Complete Account Setup</a>
       </div>
       
-      <p style="margin-top: 20px;">We're excited to help you achieve your skating goals!</p>
+      <p style="margin-top: 20px;">During account setup, you'll:</p>
+      <ul style="margin-left: 20px; color: #374151;">
+        <li><strong>Create your secure password</strong> - This will be your login password</li>
+        <li><strong>Complete your profile</strong> - Add any additional details</li>
+        <li><strong>Review your information</strong> - Make sure everything is correct</li>
+      </ul>
+      
+      <p style="margin-top: 20px;">Once setup is complete, you'll have full access to:</p>
+      <ul style="margin-left: 20px; color: #059669;">
+        <li>📅 <strong>Book ice dance lessons</strong> with available time slots</li>
+        <li>🏆 <strong>Track your progress</strong> and lesson history</li>
+        <li>💳 <strong>Manage payments</strong> via Venmo or Zelle</li>
+        <li>⚙️ <strong>Update account settings</strong> and preferences</li>
+      </ul>
+      
+      <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>⏰ Important:</strong> This setup link expires in 24 hours. Please complete your registration soon!</p>
+      </div>
+      
+      <div style="margin-top: 25px; padding: 15px; background-color: #ecfdf5; border-left: 4px solid #10b981; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #047857;"><strong>🎯 Ready to Start:</strong> After setup, you can immediately begin booking lessons and start your skating journey with us!</p>
+      </div>
+      
+      <p style="margin-top: 20px;">We're thrilled to welcome you to the YM Movement family!</p>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
     </div>
   `;
 
-  return sendEmail(email, "🎉 Account Approved - Complete Your Registration", emailContent);
+  return sendEmail(email, "🎉 Registration Approved - Set Up Your Account", emailContent);
 }
 
 /**
@@ -215,11 +226,11 @@ export async function sendLessonConfirmationEmail(
     (lessonData.endTime.getTime() - lessonData.startTime.getTime()) / (1000 * 60),
   );
 
-  // Format raw calendar times without timezone conversion
-  const startTimeForCal = formatRawTimeForCalendar(lessonData.startTime);
-  const endTimeForCal = formatRawTimeForCalendar(lessonData.endTime);
+  // Format calendar times in the rink timezone
+  const startTimeForCal = formatRawTimeForCalendar(lessonData.startTime, lessonData.rinkTimezone);
+  const endTimeForCal = formatRawTimeForCalendar(lessonData.endTime, lessonData.rinkTimezone);
 
-  // Generate Google Calendar link that treats the UTC value as the actual time
+  // Generate Google Calendar link with proper timezone
   const googleCalendarLink = `https://calendar.google.com/calendar/event?action=TEMPLATE&ctz=${encodeURIComponent(
     lessonData.rinkTimezone,
   )}&dates=${startTimeForCal}/${endTimeForCal}&text=${encodeURIComponent(
@@ -239,10 +250,12 @@ export async function sendLessonConfirmationEmail(
         <ul style="list-style: none; padding: 0;">
           <li style="margin-bottom: 10px;">📅 <strong>Date:</strong> ${formatDate(
             lessonData.startTime,
+            lessonData.rinkTimezone,
           )}</li>
           <li style="margin-bottom: 10px;">⏰ <strong>Time:</strong> ${formatTime(
             lessonData.startTime,
-          )} - ${formatTime(lessonData.endTime)}</li>
+            lessonData.rinkTimezone,
+          )} - ${formatTime(lessonData.endTime, lessonData.rinkTimezone)}</li>
           <li style="margin-bottom: 10px;">📍 <strong>Location:</strong> ${lessonData.rinkName}</li>
           <li style="margin-bottom: 10px;">📝 <strong>Address:</strong> ${lessonData.rinkAddress}</li>
           <li style="margin-bottom: 10px;">⏱️ <strong>Duration:</strong> ${

@@ -78,7 +78,7 @@ export function TravelDateManager({
   const getTypeColor = (type: BlockedDateRange["type"]) => {
     switch (type) {
       case "travel":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-gray-50 text-gray-700 border-gray-200";
       case "competition":
         return "bg-red-50 text-red-700 border-red-200";
       default:

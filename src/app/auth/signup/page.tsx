@@ -29,57 +29,16 @@ import {
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [level, setLevel] = useState<Level>(Level.PRE_PRELIMINARY);
-  const [parentConsent, setParentConsent] = useState(false); // Added state for parent consent
+  const [parentConsent, setParentConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const router = useRouter();
 
-  // Client-side password validation
-  const validatePassword = (password: string): string[] => {
-    const errors: string[] = [];
-    if (password.length < 8) {
-      errors.push("Password must be at least 8 characters long");
-    }
-    if (password.length > 128) {
-      errors.push("Password must be less than 128 characters long");
-    }
-    if (!/[a-z]/.test(password)) {
-      errors.push("Password must contain at least one lowercase letter");
-    }
-    if (!/[A-Z]/.test(password)) {
-      errors.push("Password must contain at least one uppercase letter");
-    }
-    if (!/\d/.test(password)) {
-      errors.push("Password must contain at least one number");
-    }
-    if (!/[@$!%*?&]/.test(password)) {
-      errors.push("Password must contain at least one special character (@$!%*?&)");
-    }
-    return errors;
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    if (newPassword.length > 0) {
-      const errors = validatePassword(newPassword);
-      setPasswordErrors(errors);
-    } else {
-      setPasswordErrors([]);
-    }
-  };
+  // REMOVED: Password validation - passwords are set during registration completion after approval
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Prevent submission if there are password errors
-    if (passwordErrors.length > 0) {
-      toast.error("Please fix password requirements before submitting");
-      return;
-    }
     
     setIsLoading(true);
 
@@ -90,7 +49,6 @@ export default function SignupPage() {
         body: JSON.stringify({
           name,
           email,
-          password,
           phone,
           level,
           parentConsent,
@@ -129,8 +87,8 @@ export default function SignupPage() {
         }
       }
 
-      toast("Account created", {
-        description: "Your account has been created successfully!",
+      toast("Registration submitted", {
+        description: "Your registration has been submitted for admin approval. You'll receive an email to complete setup once approved.",
       });
 
       // Redirect to login page after successful signup
@@ -149,7 +107,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Join YM Movement</CardTitle>
-          <CardDescription>Create a new student account</CardDescription>
+          <CardDescription>Submit your registration for admin approval</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -173,34 +131,6 @@ export default function SignupPage() {
                 placeholder="Enter your email"
                 required
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                placeholder="Create a password"
-                required
-                className={passwordErrors.length > 0 ? "border-red-500" : ""}
-              />
-              {passwordErrors.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {passwordErrors.map((error, index) => (
-                    <p key={index} className="text-sm text-red-600 flex items-center">
-                      <span className="mr-1">•</span>
-                      {error}
-                    </p>
-                  ))}
-                </div>
-              )}
-              {password.length > 0 && passwordErrors.length === 0 && (
-                <p className="text-sm text-green-600 flex items-center">
-                  <span className="mr-1">✓</span>
-                  Password meets all requirements
-                </p>
-              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone (optional)</Label>
@@ -255,9 +185,9 @@ export default function SignupPage() {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading || passwordErrors.length > 0}
+              disabled={isLoading}
             >
-              {isLoading ? "Signing up..." : "Sign Up"}
+              {isLoading ? "Submitting..." : "Submit Registration"}
             </Button>
           </form>
         </CardContent>

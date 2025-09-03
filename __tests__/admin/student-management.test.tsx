@@ -8,6 +8,8 @@ import { createTestStudent, createMaliciousInput } from "../helpers/test-data";
 const mockGetStudents = vi.fn();
 const mockCreateStudent = vi.fn();
 const mockUpdateStudent = vi.fn();
+const mockOnEditAction = vi.fn();
+const mockOnViewProfileAction = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   api: {
@@ -43,12 +45,12 @@ describe("Student Management", () => {
   });
 
   it("should render student list", () => {
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     expect(screen.getByText("Test User")).toBeInTheDocument();
   });
 
   it("should handle student search", async () => {
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     const searchInput = screen.getByPlaceholderText(/search students/i);
     fireEvent.change(searchInput, { target: { value: "Test" } });
@@ -62,17 +64,17 @@ describe("Student Management", () => {
 
   it("should sanitize malicious input in search", async () => {
     const maliciousInput = createMaliciousInput();
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     const searchInput = screen.getByPlaceholderText(/search students/i);
     fireEvent.change(searchInput, { target: { value: maliciousInput.xssPayload } });
     
     // Should not contain script tags
-    expect(searchInput.value).not.toContain("<script>");
+    expect((searchInput as HTMLInputElement).value).not.toContain("<script>");
   });
 
   it("should filter students by level", async () => {
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     const levelFilter = screen.getByRole("combobox", { name: /level/i });
     fireEvent.click(levelFilter);
@@ -88,7 +90,7 @@ describe("Student Management", () => {
   });
 
   it("should handle approval status filtering", async () => {
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     const approvalFilter = screen.getByRole("combobox", { name: /approval/i });
     fireEvent.click(approvalFilter);
@@ -110,7 +112,7 @@ describe("Student Management", () => {
       isApproved: true,
     });
 
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("john@example.com")).toBeInTheDocument();
@@ -118,7 +120,7 @@ describe("Student Management", () => {
   });
 
   it("should handle pagination", async () => {
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     const nextPageButton = screen.getByText(/next/i);
     fireEvent.click(nextPageButton);
@@ -137,7 +139,7 @@ describe("Student Management", () => {
       error: null,
     });
 
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
@@ -148,7 +150,7 @@ describe("Student Management", () => {
       error: new Error("Failed to load students"),
     });
 
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     expect(screen.getByText(/error/i)).toBeInTheDocument();
   });
 
@@ -157,7 +159,7 @@ describe("Student Management", () => {
       user: { name: "<script>alert('xss')</script>" },
     });
 
-    render(<StudentList />);
+    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
     
     // Should not execute script or contain raw HTML
     expect(document.querySelector("script")).not.toBeInTheDocument();

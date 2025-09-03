@@ -12,8 +12,6 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Assuming the isApproved field doesn't exist in your Prisma model
-    // according to TypeScript errors
     const user = await prisma.user.findUnique({
       where: {
         id: session.user.id,
@@ -30,7 +28,7 @@ export async function GET(_req: NextRequest) {
                   id: true,
                   level: true,
                   maxLessonsPerWeek: true,
-                  // Remove isApproved if it's not in your model
+                  isApproved: true, // FIXED: Include approval status
                 },
               }
             : undefined,

@@ -59,9 +59,15 @@ export default function StudentDashboardPage() {
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <Link href="/student/book">
-            <Button>Book a Lesson</Button>
-          </Link>
+          {user.isApproved ? (
+            <Link href="/student/book">
+              <Button>Book a Lesson</Button>
+            </Link>
+          ) : (
+            <Button disabled variant="outline">
+              Pending Approval
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">

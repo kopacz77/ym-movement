@@ -66,7 +66,19 @@ export const bookingRouter = createTRPCRouter({
           `[BOOKING] Time slot has ${timeSlot.Lesson.length}/${timeSlot.maxStudents} lessons`,
         );
 
-        // 2. Check if slot is available
+        // 2. Check if time slot is in the past
+        const now = new Date();
+        if (timeSlot.startTime <= now) {
+          console.log(
+            `[BOOKING] Time slot ${input.timeSlotId} is in the past (${timeSlot.startTime.toISOString()} <= ${now.toISOString()})`,
+          );
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cannot book lessons for past time slots",
+          });
+        }
+
+        // 3. Check if slot is available
         if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
           console.log(`[BOOKING] Time slot ${input.timeSlotId} is fully booked`);
           throw new TRPCError({
@@ -75,7 +87,7 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 3. Get student info and check approval status + weekly lesson limit
+        // 4. Get student info and check approval status + weekly lesson limit
         const student = (await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
@@ -96,12 +108,12 @@ export const bookingRouter = createTRPCRouter({
           console.log(`[BOOKING] Student ${input.studentId} is not approved`);
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Your account is pending approval. Please wait for admin approval before booking lessons.",
+            message:
+              "Your account is pending approval. Please wait for admin approval before booking lessons.",
           });
         }
 
-        // Get start and end of current week (Sunday to Saturday)
-        const now = new Date();
+        // Get start and end of current week (Sunday to Saturday) - reuse existing 'now' variable
         const startOfWeek = dateStartOfWeek(now, { weekStartsOn: 0 }); // 0 = Sunday
         const endOfWeek = dateEndOfWeek(now, { weekStartsOn: 0 });
 
@@ -139,7 +151,7 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 4. Try to create Google Calendar event
+        // 5. Try to create Google Calendar event
         let googleEventId = null;
 
         try {
@@ -185,7 +197,7 @@ export const bookingRouter = createTRPCRouter({
           // Continue with booking even if calendar fails
         }
 
-        // 5. Calculate price based on lesson type and student's custom pricing if available
+        // 6. Calculate price based on lesson type and student's custom pricing if available
         // First, get the default pricing
         const defaultPricing = await ctx.prisma.$queryRaw`
           SELECT * FROM "DefaultPricing" LIMIT 1
@@ -241,7 +253,7 @@ export const bookingRouter = createTRPCRouter({
           }`,
         );
 
-        // 6. Create the lesson and payment in a transaction
+        // 7. Create the lesson and payment in a transaction
         console.log("[BOOKING] Creating lesson and payment records");
         // Generate payment reference code
         const paymentRef = `PAY-${randomUUID().substring(0, 8)}`;
@@ -296,7 +308,7 @@ export const bookingRouter = createTRPCRouter({
           `[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`,
         );
 
-        // 7. Send confirmation email to the student with fixed timezone information
+        // 8. Send confirmation email to the student with fixed timezone information
         if (student.User?.email && student.User?.name) {
           try {
             console.log(`[BOOKING] Sending confirmation email to ${student.User.email}`);

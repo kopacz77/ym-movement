@@ -95,7 +95,7 @@ export function TravelDateBlocker({
   const getTypeColor = (type: BlockedDateRange["type"]) => {
     switch (type) {
       case "travel":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-gray-100 text-gray-800 border-gray-200";
       case "competition":
         return "bg-red-100 text-red-800 border-red-200";
       default:
@@ -205,7 +205,7 @@ export function TravelDateBlocker({
               blocked: blockedDates,
             }}
             modifiersClassNames={{
-              blocked: "bg-red-100 text-red-900 line-through opacity-75",
+              blocked: "bg-gray-100 text-gray-900 line-through opacity-75",
             }}
             className="bg-transparent"
             formatters={{

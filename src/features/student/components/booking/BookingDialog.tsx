@@ -2,6 +2,7 @@
 
 import { LessonType, PaymentMethod } from "@prisma/client";
 import { format } from "date-fns";
+import { DateTime } from "luxon";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -31,10 +32,11 @@ interface TimeSlot {
 interface BookingDialogProps {
   slot: TimeSlot;
   studentId: string;
+  rinkTimezone: string; // ADDED: Timezone for proper time formatting
   onCloseAction: () => void;
 }
 
-export function BookingDialog({ slot, studentId, onCloseAction }: BookingDialogProps) {
+export function BookingDialog({ slot, studentId, rinkTimezone, onCloseAction }: BookingDialogProps) {
   const [lessonType, setLessonType] = useState<LessonType>(LessonType.PRIVATE);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.VENMO);
   const [notes, setNotes] = useState("");
@@ -106,16 +108,23 @@ export function BookingDialog({ slot, studentId, onCloseAction }: BookingDialogP
     return defaultPrices[type];
   };
 
-  // Convert UTC time to AM/PM format
+  // Convert UTC time to AM/PM format in the rink's timezone
   const formatAMPM = (dateStr: string | Date) => {
-    const date = new Date(dateStr);
-    let hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const strMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${hours}:${strMinutes} ${ampm}`;
+    try {
+      const dateTime = typeof dateStr === "string" 
+        ? DateTime.fromISO(dateStr, { zone: "utc" }).setZone(rinkTimezone)
+        : DateTime.fromJSDate(dateStr, { zone: "utc" }).setZone(rinkTimezone);
+      
+      if (!dateTime.isValid) {
+        console.error("Invalid date in BookingDialog formatAMPM:", dateStr);
+        return "Invalid time";
+      }
+      
+      return dateTime.toFormat("h:mm a");
+    } catch (error) {
+      console.error("Error formatting time in BookingDialog:", error);
+      return "Invalid time";
+    }
   };
 
   return (
