@@ -13,6 +13,42 @@ import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 import type { AppRouter } from "@/lib/root";
 
+// Type definitions for better type safety
+interface LessonData {
+  studentId: string;
+  timeSlotId: string;
+  type: string;
+  area?: string;
+  notes?: string;
+  id?: string;
+  status?: string;
+}
+
+interface StudentListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+}
+
+interface DateRange {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+interface BookingMutationVariables {
+  studentId: string;
+  timeSlotId: string;
+  type: string;
+  area?: string;
+  paymentMethod: string;
+  notes?: string;
+}
+
+interface OptimisticUpdateContext {
+  previousLessons: unknown;
+}
+
 // Enhanced React Query configuration
 const queryClientConfig: DefaultOptions = {
   queries: {
@@ -188,7 +224,7 @@ export namespace TRPCQueryUtils {
   /**
    * Optimistic updates for better UX
    */
-  export async function optimisticLessonBooking(lessonData: any) {
+  export async function optimisticLessonBooking(lessonData: LessonData) {
     if (!queryClient) {
       return;
     }
@@ -199,12 +235,10 @@ export namespace TRPCQueryUtils {
     });
 
     // Snapshot previous value
-    const previousLessons = queryClient.getQueryData([
-      ["student", "lesson", "upcoming"],
-    ]);
+    const previousLessons = queryClient.getQueryData([["student", "lesson", "upcoming"]]);
 
     // Optimistically update
-    queryClient.setQueryData([["student", "lesson", "upcoming"]], (old: any[]) => [
+    queryClient.setQueryData([["student", "lesson", "upcoming"]], (old: LessonData[]) => [
       ...old,
       { ...lessonData, id: `temp-${Date.now()}`, status: "pending" },
     ]);
@@ -215,15 +249,12 @@ export namespace TRPCQueryUtils {
   /**
    * Revert optimistic update on error
    */
-  export function revertOptimisticUpdate(context: { previousLessons: any }) {
+  export function revertOptimisticUpdate(context: OptimisticUpdateContext) {
     if (!queryClient) {
       return;
     }
 
-    queryClient.setQueryData(
-      [["student", "lesson", "upcoming"]],
-      context.previousLessons,
-    );
+    queryClient.setQueryData([["student", "lesson", "upcoming"]], context.previousLessons);
   }
 
   /**
@@ -258,9 +289,7 @@ export namespace TRPCQueryUtils {
 
     const queryKeys = invalidationMap[type] || [];
 
-    await Promise.all(
-      queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
-    );
+    await Promise.all(queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
   }
 
   /**
@@ -271,7 +300,7 @@ export namespace TRPCQueryUtils {
       return;
     }
 
-    const preloadPromises: Promise<any>[] = [];
+    const preloadPromises: Promise<unknown>[] = [];
 
     if (userRole === "ADMIN") {
       // Preload admin dashboard data
@@ -366,18 +395,18 @@ export namespace TRPCQueryUtils {
 /**
  * Custom hooks for optimized data fetching
  */
-export function useOptimizedStudentList(params: any = {}) {
+export function useOptimizedStudentList(params: StudentListParams = {}) {
   return api.admin.student.getStudents.useQuery(params, {
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
-    placeholderData: (previousData: any) => previousData,
+    placeholderData: (previousData: unknown) => previousData,
   });
 }
 
 export function useOptimizedUpcomingLessons(studentId?: string) {
   return api.student.profile.getStudentLessons.useQuery(
-    { studentId: studentId!, status: "SCHEDULED" },
+    { studentId: studentId || "", status: "SCHEDULED" },
     {
       staleTime: 1000 * 60 * 2, // 2 minutes
       enabled: !!studentId,
@@ -387,7 +416,7 @@ export function useOptimizedUpcomingLessons(studentId?: string) {
   );
 }
 
-export function useOptimizedAnalytics(dateRange: any) {
+export function useOptimizedAnalytics(dateRange: DateRange) {
   return api.admin.analytics.getOverview.useQuery(dateRange, {
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
@@ -402,7 +431,7 @@ export function useOptimisticLessonBooking() {
   const utils = api.useUtils();
 
   return api.student.booking.bookLesson.useMutation({
-    onMutate: async (variables: any) => {
+    onMutate: async (variables: BookingMutationVariables) => {
       // Cancel outgoing refetches
       await utils.student.profile.getStudentLessons.cancel();
 
@@ -413,7 +442,7 @@ export function useOptimisticLessonBooking() {
       if (variables.studentId) {
         utils.student.profile.getStudentLessons.setData(
           { studentId: variables.studentId, status: "SCHEDULED" },
-          (old: any) => [
+          (old: LessonData[]) => [
             ...(old || []),
             { ...variables, id: `temp-${Date.now()}`, status: "pending" },
           ],
@@ -422,7 +451,11 @@ export function useOptimisticLessonBooking() {
 
       return { previousLessons };
     },
-    onError: (_err: any, variables: any, context: any) => {
+    onError: (
+      _err: Error,
+      variables: BookingMutationVariables,
+      context: OptimisticUpdateContext,
+    ) => {
       // Revert optimistic update
       if (context?.previousLessons && variables.studentId) {
         utils.student.profile.getStudentLessons.setData(

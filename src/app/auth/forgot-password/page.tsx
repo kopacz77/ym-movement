@@ -15,40 +15,27 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // TRPC mutation for password reset request
+  const requestResetMutation = api.passwordReset.requestReset.useMutation({
+    onSuccess: () => {
+      setSubmitted(true);
+    },
+    onError: (error) => {
+      toast.error("Error", {
+        description: error.message || "Failed to process password reset request",
+      });
+    },
+  });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to process password reset request");
-      }
-
-      setSubmitted(true);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-      toast.error("Error", {
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    requestResetMutation.mutate({ email });
   };
 
   return (
@@ -86,8 +73,8 @@ export default function ForgotPasswordPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Processing..." : "Reset Password"}
+              <Button type="submit" className="w-full" disabled={requestResetMutation.isPending}>
+                {requestResetMutation.isPending ? "Processing..." : "Reset Password"}
               </Button>
             </form>
           )}

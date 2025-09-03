@@ -65,7 +65,7 @@ export default function ResetPasswordForm() {
   const [email, setEmail] = useState("");
 
   // Verify token mutation
-  const verifyTokenMutation = api.admin.auth.verifyResetToken.useMutation({
+  const verifyTokenMutation = api.passwordReset.verifyToken.useMutation({
     onSuccess: (result) => {
       if (result?.valid) {
         setIsValidToken(true);
@@ -88,7 +88,7 @@ export default function ResetPasswordForm() {
   });
 
   // Reset password mutation
-  const resetPasswordMutation = api.admin.auth.resetPassword.useMutation({
+  const resetPasswordMutation = api.passwordReset.resetPassword.useMutation({
     onSuccess: () => {
       toast.success("Password reset successful", {
         description: "You can now login with your new password",

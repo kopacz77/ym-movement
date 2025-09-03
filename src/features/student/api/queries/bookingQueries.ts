@@ -7,6 +7,7 @@ import { z } from "zod";
 import { sendLessonConfirmationEmail } from "@/lib/email";
 import { googleCalendar } from "@/lib/google/calendar";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 
 // Define extended Student type with custom pricing fields
 interface ExtendedStudent {
@@ -308,7 +309,24 @@ export const bookingRouter = createTRPCRouter({
           `[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`,
         );
 
-        // 8. Send confirmation email to the student with fixed timezone information
+        // 8. Create notification for the student
+        try {
+          await createNotification({
+            userId: student.User.id,
+            title: "Lesson Booked Successfully",
+            message: `Your ${input.type} lesson has been scheduled for ${new Date(
+              timeSlot.startTime,
+            ).toLocaleDateString()} at ${timeSlot.Rink.name}`,
+            type: "SUCCESS",
+            link: `/student/schedule/${result.lesson.id}`,
+          });
+          console.log(`[BOOKING] Created notification for user ${student.User.id}`);
+        } catch (notificationError) {
+          console.error("[BOOKING] Error creating notification:", notificationError);
+          // Continue even if notification fails - the booking itself was successful
+        }
+
+        // 9. Send confirmation email to the student with fixed timezone information
         if (student.User?.email && student.User?.name) {
           try {
             console.log(`[BOOKING] Sending confirmation email to ${student.User.email}`);

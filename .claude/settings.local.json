@@ -30,7 +30,8 @@
       "Bash(.husky/pre-commit)",
       "Bash(npx biome check:*)",
       "Bash(npx biome format:*)",
-      "Bash(pnpm exec biome check:*)"
+      "Bash(pnpm exec biome check:*)",
+      "Bash(pnpm exec biome format:*)"
     ],
     "deny": []
   }
