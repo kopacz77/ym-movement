@@ -2,11 +2,9 @@
 "use client";
 
 import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
-import { Clock, DollarSign, Lock, MapPin, Save, Edit, Trash2 } from "lucide-react";
+import { Clock, DollarSign, Edit, Lock, MapPin, Save, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { showDeleteConfirmation } from "@/lib/toast-confirmations";
-import { delightfulToast } from "@/lib/delightful-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +31,8 @@ import { DefaultPricingSettings } from "@/features/admin/components/management/D
 import { RinkDialog } from "@/features/admin/components/management/RinkDialog";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 import { api } from "@/lib/api";
+import { delightfulToast } from "@/lib/delightful-toast";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 
 // Define interfaces for the settings
 interface OperationalSettings {
@@ -318,7 +318,7 @@ export default function SettingsPage() {
           className="self-start sm:self-auto"
         >
           <Save className="h-4 w-4 mr-2" />
-          {isSaving ? "Saving..." : !operationalSettings ? "Loading..." : "Save Changes"}
+          {isSaving ? "Saving..." : operationalSettings ? "Save Changes" : "Loading..."}
         </Button>
       </div>
 
@@ -356,11 +356,7 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {!operationalSettings ? (
-                <div className="flex items-center justify-center p-8">
-                  <p className="text-muted-foreground">Loading settings...</p>
-                </div>
-              ) : (
+              {operationalSettings ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">Business Hours</h3>
@@ -492,6 +488,10 @@ export default function SettingsPage() {
                       <Label htmlFor="auto-approval">Automatically approve bookings</Label>
                     </div>
                   </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center p-8">
+                  <p className="text-muted-foreground">Loading settings...</p>
                 </div>
               )}
             </CardContent>

@@ -7,7 +7,6 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { delightfulToast } from "@/lib/delightful-toast";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
+import { delightfulToast } from "@/lib/delightful-toast";
 
 const rinkFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),

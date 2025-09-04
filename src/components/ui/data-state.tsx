@@ -12,7 +12,7 @@ interface DataStateProps {
   isEmpty?: boolean;
   errorMessage?: string;
   emptyMessage?: string;
-  emptyType?: "lessons" | "students" | "schedule" | "achievements" | "payments" | "reports";
+  emptyType?: "lessons" | "students" | "schedule" | "general" | "payments" | "reports";
   skeletonRows?: number;
   skeletonHeight?: string;
   loadingVariant?: "default" | "warm" | "celebration";
@@ -35,8 +35,8 @@ export function DataState({
   if (isLoading) {
     return (
       <div>
-        <DelightfulLoading variant={loadingVariant} size="md" />
-        <PersonalizedSkeleton rows={skeletonRows} avatar={true} title={true} className="mt-6" />
+        <DelightfulLoading />
+        <PersonalizedSkeleton lines={skeletonRows} showAvatar={true} className="mt-6" />
       </div>
     );
   }
@@ -55,9 +55,7 @@ export function DataState({
   }
 
   if (isEmpty) {
-    return (
-      <EncouragingEmptyState type={emptyType} message={emptyMessage} onAction={onEmptyAction} />
-    );
+    return <EncouragingEmptyState type={emptyType} onAction={onEmptyAction} />;
   }
 
   return <>{children}</>;

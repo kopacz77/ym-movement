@@ -1,8 +1,5 @@
 // src/lib/security.ts
-import { randomBytes, scrypt, timingSafeEqual } from "crypto";
-import { promisify } from "util";
-
-const scryptAsync = promisify(scrypt);
+import { randomBytes, timingSafeEqual } from "node:crypto";
 
 /**
  * Security utility functions for the application
@@ -65,7 +62,9 @@ export function safeCompare(a: string, b: string): boolean {
  * @returns Sanitized string
  */
 export function sanitizeInput(input: string): string {
-  if (!input) return "";
+  if (!input) {
+    return "";
+  }
 
   return (
     input

@@ -44,16 +44,24 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 - Parent/guardian communication tools
 
 ### 💳 **Payment Processing**
-- Payment status tracking and verification
+- Payment status tracking and verification with proper student name display
 - Multiple payment method support (Venmo, Zelle)
-- Automated payment reminders
+- Automated payment reminders with professional email templates
 - Financial reporting and analytics
+
+### 🔔 **Notifications & Communication**
+- Real-time notification system with bell icon and badge counters
+- Auto-notifications for lesson bookings and important updates
+- Mark as read/unread functionality with persistent state
+- Email confirmations with proper timezone formatting
+- Password recovery system with secure token-based reset flow
 
 ### 🔐 **Security & Performance**
 - Enterprise-grade security with automated vulnerability scanning
+- Past time slot booking prevention with dual-layer validation
 - Advanced error boundaries with automatic recovery
 - Performance monitoring and optimization
-- Role-based access control (Admin/Student)
+- Role-based access control (Admin/Student) with approval workflow
 - Comprehensive audit logging
 
 ## 🛠️ Tech Stack

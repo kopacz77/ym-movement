@@ -96,7 +96,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
 
   // Initialize form with default values first
   const form = useForm<StudentFormValues>({
-    resolver: zodResolver(studentSchema),
+    resolver: zodResolver(studentSchema) as any,
     defaultValues: {
       name: "",
       email: "",
@@ -235,7 +235,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit as any)} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}

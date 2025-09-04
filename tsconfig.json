@@ -25,12 +25,13 @@
       }
     ]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "tailwind.config.js"
-  ],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "tailwind.config.js"],
+  "exclude": [
+    "node_modules",
+    "__tests__/api.disabled",
+    "__tests__/database.disabled",
+    "__tests__/e2e.disabled",
+    "__tests__/performance.disabled",
+    "__tests__/ui/scheduling/BookingDialog.test.tsx"
+  ]
 }

@@ -1,4 +1,4 @@
-// features/admin/components/students/progress/LessonProgress.tsx
+// features/admin/components/Students/progress/LessonProgress.tsx
 "use client";
 
 import { format } from "date-fns";
@@ -18,7 +18,7 @@ import {
 import { api } from "@/lib/api";
 
 interface LessonProgressProps {
-  studentId: string;
+  StudentId: string;
 }
 
 type LessonStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
@@ -41,7 +41,7 @@ type APILesson = {
     createdAt: Date;
     updatedAt: Date;
   };
-  student: {
+  Student: {
     user: {
       id: string;
       name: string | null;
@@ -58,7 +58,7 @@ type APILesson = {
   } | null;
 };
 
-export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => {
+export const LessonProgress: React.FC<LessonProgressProps> = ({ StudentId }) => {
   const {
     data: lessons,
     isLoading,
@@ -70,7 +70,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
 
   // Filter lessons for the specific student
   const studentLessons = lessons?.filter(
-    (lesson) => lesson.student?.user?.id === studentId && lesson.status !== "CANCELLED",
+    (lesson) => lesson.Student?.User?.id === StudentId && lesson.status !== "CANCELLED",
   );
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {studentLessons.map((lesson: APILesson) => (
+              {studentLessons.map((lesson: any) => (
                 <TableRow key={lesson.id}>
                   <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
                   <TableCell>
@@ -135,7 +135,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
                     </div>
                   </TableCell>
                   <TableCell>{lesson.type.replace("_", " ")}</TableCell>
-                  <TableCell>{lesson.Rink.name}</TableCell>
+                  <TableCell>{lesson.Rink?.name || lesson.rink?.name}</TableCell>
                   <TableCell className="max-w-xs">
                     <p className="text-sm text-muted-foreground truncate">{lesson.notes ?? "-"}</p>
                   </TableCell>

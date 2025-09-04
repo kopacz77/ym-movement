@@ -39,7 +39,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setIsLoading(true);
 
     try {
@@ -62,33 +62,33 @@ export default function SignupPage() {
         // Handle detailed validation errors
         if (data.errors) {
           let errorMessage = data.message || "Validation failed";
-          
+
           // Format password validation errors
           if (Array.isArray(data.errors)) {
             errorMessage += ":\n" + data.errors.join("\n");
-          } 
+          }
           // Format Zod validation errors
-          else if (typeof data.errors === 'object') {
+          else if (typeof data.errors === "object") {
             const errorList = [];
             for (const [field, fieldErrors] of Object.entries(data.errors)) {
-              if (fieldErrors && typeof fieldErrors === 'object' && '_errors' in fieldErrors) {
+              if (fieldErrors && typeof fieldErrors === "object" && "_errors" in fieldErrors) {
                 const messages = (fieldErrors as { _errors: string[] })._errors;
-                errorList.push(`${field}: ${messages.join(', ')}`);
+                errorList.push(`${field}: ${messages.join(", ")}`);
               }
             }
             if (errorList.length > 0) {
               errorMessage += ":\n" + errorList.join("\n");
             }
           }
-          
+
           throw new Error(errorMessage);
-        } else {
-          throw new Error(data.message || "Something went wrong");
         }
+        throw new Error(data.message || "Something went wrong");
       }
 
       toast("Registration submitted", {
-        description: "Your registration has been submitted for admin approval. You'll receive an email to complete setup once approved.",
+        description:
+          "Your registration has been submitted for admin approval. You'll receive an email to complete setup once approved.",
       });
 
       // Redirect to login page after successful signup
@@ -182,11 +182,7 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Submitting..." : "Submit Registration"}
             </Button>
           </form>

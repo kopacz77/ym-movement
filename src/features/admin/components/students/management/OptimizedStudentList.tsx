@@ -7,7 +7,6 @@ import { MoreHorizontal, Search } from "lucide-react";
 import type React from "react";
 import { memo, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { useTableColumns, VirtualizedTable } from "@/components/ui/virtualized-table";
 import { api } from "@/lib/api";
 import { useDebouncedState } from "@/lib/context-utils";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 
 interface Student {
   id: string;
@@ -136,7 +136,7 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
         possibleKeys.forEach((key) => {
           const data = queryClient.getQueryData(key);
           if (data) {
-            console.log(`📝 OPTIMIZED: Found data in key:`, key, data);
+            console.log("📝 OPTIMIZED: Found data in key:", key, data);
             queryClient.setQueryData(key, (old: any) => {
               if (old?.students) {
                 const filtered = old.students.filter((student: any) => student.id !== studentId);
@@ -206,14 +206,14 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
         key: "name",
         header: "Name",
         minWidth: 150,
-        render: (student) => <div className="font-medium">{student.User.name}</div>,
+        render: (student) => <div className="font-medium">{student.user.name}</div>,
       },
       {
         key: "email",
         header: "Email",
         minWidth: 200,
         render: (student) => (
-          <div className="text-sm text-muted-foreground">{student.User.email}</div>
+          <div className="text-sm text-muted-foreground">{student.user.email}</div>
         ),
       },
       {
@@ -243,7 +243,7 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
         render: (student) => (
           <StudentActions
             studentId={student.id}
-            studentName={student.User.name || "Student"}
+            studentName={student.user.name || "Student"}
             onEdit={onEditAction}
             onViewProfile={onViewProfileAction}
             onDelete={handleDeleteStudent}
@@ -301,7 +301,7 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
           </div>
         ) : (
           <VirtualizedTable
-            data={students}
+            data={students as any}
             columns={columns}
             height={500}
             itemHeight={52}

@@ -13,18 +13,18 @@ import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
 import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
+import BlockedDateDialog from "./BlockedDateDialog";
 import { BulkActionsToolbar } from "./BulkActionsToolbar";
+import { CompactTimeSlotDialog } from "./CompactTimeSlotDialog";
 import { formatDateRange, type TimeSlot } from "./calendarUtils";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { DesktopCalendarView } from "./DesktopCalendarView";
 import { BulkCreateSlotsDialog } from "./DialogComponents";
-import { CompactTimeSlotDialog } from "./CompactTimeSlotDialog";
 import { MobileCalendarView } from "./MobileCalendarView";
 import { ScheduleHeader } from "./ScheduleHeader";
 // Import our components
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
 import { WorkingBlockedDatesManager } from "./WorkingBlockedDatesManager";
-import BlockedDateDialog from "./BlockedDateDialog";
 
 // Define types for form data
 interface TimeSlotFormData {
@@ -182,9 +182,11 @@ const ScheduleManagerComponent = () => {
       console.log("Selected event:", typedEvent);
 
       // Check if this is a blocked date
-      if (typedEvent.slot.isBlocked) {
+      if ("isBlocked" in typedEvent.slot && typedEvent.slot.isBlocked) {
         console.log("Blocked date selected, showing blocked date dialog");
-        setSelectedBlockedRange(typedEvent.slot.blockedRange);
+        setSelectedBlockedRange(
+          "blockedRange" in typedEvent.slot ? typedEvent.slot.blockedRange : null,
+        );
         setIsBlockedDateDialogOpen(true);
       } else {
         // Regular time slot
@@ -199,7 +201,7 @@ const ScheduleManagerComponent = () => {
       const { event, start, end } = eventData;
 
       // Prevent dragging blocked dates
-      if (event.slot?.isBlocked) {
+      if (event.slot && "isBlocked" in event.slot && event.slot.isBlocked) {
         console.log("Cannot drag blocked dates - they are static periods");
         return;
       }
@@ -347,7 +349,10 @@ const ScheduleManagerComponent = () => {
               ? new Date(selectedSlot.endTime)
               : new Date()
             : new Date(),
-          rinkId: selectedSlot?.Rink?.id || selectedSlot?.rinkId || "",
+          rinkId:
+            selectedSlot?.Rink?.id ||
+            (selectedSlot && "rinkId" in selectedSlot ? (selectedSlot as any).rinkId : "") ||
+            "",
         };
 
     console.log("Generated slotData:", slotData);
@@ -394,7 +399,7 @@ const ScheduleManagerComponent = () => {
       }
 
       // Find the student being assigned
-      const student = students?.find((s) => s.id === studentId);
+      const student = students?.find((s: any) => s.id === studentId);
       if (!student) {
         console.error("Student not found");
         return;
@@ -608,7 +613,7 @@ const ScheduleManagerComponent = () => {
         onClose={handleManageDialogClose}
         onEdit={handleEditSlot}
         onDelete={handleDeleteSlot}
-        selectedEvent={selectedEvent}
+        selectedEvent={selectedEvent as any}
         selectedSlot={selectedSlot}
         students={students || []}
         onAssignStudent={handleAssignStudent}
@@ -618,7 +623,7 @@ const ScheduleManagerComponent = () => {
             if (selectedSlot) {
               const updatedSlot = {
                 ...selectedSlot,
-                Lesson: (selectedSlot.Lesson || []).filter((lesson) => lesson.id !== lessonId),
+                Lesson: (selectedSlot.Lesson || []).filter((lesson: any) => lesson.id !== lessonId),
               };
               setSelectedSlot(updatedSlot);
             }
@@ -697,7 +702,7 @@ const ScheduleManagerComponent = () => {
               onEditSlot={handleEditSlotFromDay}
               onDeleteSlot={handleDeleteSlotFromDay}
               useEnhancedHeader={true}
-              blockedDateRanges={blockedDateRanges}
+              blockedDateRanges={blockedDateRanges as any}
             />
           )}
         </CardContent>

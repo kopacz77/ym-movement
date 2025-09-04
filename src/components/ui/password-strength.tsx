@@ -90,7 +90,11 @@ function validatePasswordStrength(password: string): {
 }
 
 export function PasswordStrength({ password, showErrors = false }: PasswordStrengthProps) {
-  const [validation, setValidation] = useState({ isValid: false, errors: [], score: 0 });
+  const [validation, setValidation] = useState({
+    isValid: false,
+    errors: [] as string[],
+    score: 0,
+  });
   const [message, setMessage] = useState("");
   const [color, setColor] = useState("bg-gray-200");
 

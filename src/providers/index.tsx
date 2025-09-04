@@ -6,10 +6,10 @@ import { SessionProvider } from "next-auth/react";
 import type * as React from "react";
 import { useState } from "react";
 import superjson from "superjson";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext"; // Add this import
 import { api } from "@/lib/api";
-import { Toaster } from "@/components/ui/sonner";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(

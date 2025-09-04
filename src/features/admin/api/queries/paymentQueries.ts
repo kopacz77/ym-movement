@@ -4,8 +4,8 @@ import type { Prisma } from "@prisma/client";
 import { PaymentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 import { sendPaymentReminderEmail } from "@/lib/email";
+import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const paymentRouter = createTRPCRouter({
   getPayments: protectedProcedure

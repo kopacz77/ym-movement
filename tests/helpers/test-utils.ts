@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from "@playwright/test";
 
 /**
  * Test utilities and helper functions for YM Movement Playwright tests
@@ -7,26 +7,26 @@ import { Page, expect } from '@playwright/test';
 // Common test data
 export const testData = {
   admin: {
-    email: 'admin@test.com',
-    password: 'ADMINPASS2025!',
+    email: "admin@test.com",
+    password: "ADMINPASS2025!",
   },
   student: {
-    email: 'test.student@example.com',
-    password: 'TestPassword123!',
-    name: 'Test Student',
-    phone: '555-123-4567',
-    level: 'PRELIMINARY',
+    email: "test.student@example.com",
+    password: "TestPassword123!",
+    name: "Test Student",
+    phone: "555-123-4567",
+    level: "PRELIMINARY",
     maxLessonsPerWeek: 2,
     emergencyContact: {
-      name: 'Test Parent',
-      phone: '555-987-6543',
-      relationship: 'Parent',
+      name: "Test Parent",
+      phone: "555-987-6543",
+      relationship: "Parent",
     },
   },
   rink: {
-    name: 'Test Ice Rink',
-    address: '123 Ice Street, Test City, TC 12345',
-    timezone: 'America/Los_Angeles',
+    name: "Test Ice Rink",
+    address: "123 Ice Street, Test City, TC 12345",
+    timezone: "America/Los_Angeles",
   },
 };
 
@@ -34,30 +34,30 @@ export const testData = {
  * Login as admin user
  */
 export async function loginAsAdmin(page: Page) {
-  await page.goto('/auth/login');
+  await page.goto("/auth/login");
   await page.fill('input[id="email"]', testData.admin.email);
   await page.fill('input[id="password"]', testData.admin.password);
   await page.click('button[type="submit"]');
-  await page.waitForURL('/admin/dashboard', { timeout: 10000 });
+  await page.waitForURL("/admin/dashboard", { timeout: 10000 });
 }
 
 /**
  * Login as student user
  */
 export async function loginAsStudent(page: Page, email?: string, password?: string) {
-  await page.goto('/auth/login');
+  await page.goto("/auth/login");
   await page.fill('input[id="email"]', email || testData.student.email);
   await page.fill('input[id="password"]', password || testData.student.password);
   await page.click('button[type="submit"]');
-  await page.waitForURL('/student/dashboard', { timeout: 10000 });
+  await page.waitForURL("/student/dashboard", { timeout: 10000 });
 }
 
 /**
  * Create a new student account
  */
 export async function createStudentAccount(page: Page, studentData = testData.student) {
-  await page.goto('/auth/signup');
-  
+  await page.goto("/auth/signup");
+
   // Fill basic information
   await page.fill('input[id="name"]', studentData.name);
   await page.fill('input[id="email"]', `${Date.now()}.${studentData.email}`);
@@ -65,20 +65,23 @@ export async function createStudentAccount(page: Page, studentData = testData.st
   await page.fill('input[id="phone"]', studentData.phone);
   await page.selectOption('select[name="level"]', studentData.level);
   await page.fill('input[name="maxLessonsPerWeek"]', studentData.maxLessonsPerWeek.toString());
-  
+
   // Fill emergency contact
   await page.fill('input[name="emergencyContact.name"]', studentData.emergencyContact.name);
   await page.fill('input[name="emergencyContact.phone"]', studentData.emergencyContact.phone);
-  await page.fill('input[name="emergencyContact.relationship"]', studentData.emergencyContact.relationship);
-  
+  await page.fill(
+    'input[name="emergencyContact.relationship"]',
+    studentData.emergencyContact.relationship,
+  );
+
   // Accept parent consent
   await page.check('input[name="parentConsent"]');
-  
+
   // Submit form
   await page.click('button[type="submit"]');
-  
+
   // Wait for success message
-  await expect(page.locator('text=Account created successfully')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("text=Account created successfully")).toBeVisible({ timeout: 10000 });
 }
 
 /**
@@ -100,60 +103,67 @@ export async function navigateToStudentPage(page: Page, section: string) {
 /**
  * Create a time slot (admin only)
  */
-export async function createTimeSlot(page: Page, slotData: {
-  startTime: string;
-  endTime: string;
-  rinkId?: string;
-}) {
-  await navigateToAdminPage(page, 'schedule');
-  
-  const addButton = page.locator('button:has-text("Add Time Slot"), button:has-text("Create Slot")');
+export async function createTimeSlot(
+  page: Page,
+  slotData: {
+    startTime: string;
+    endTime: string;
+    rinkId?: string;
+  },
+) {
+  await navigateToAdminPage(page, "schedule");
+
+  const addButton = page.locator(
+    'button:has-text("Add Time Slot"), button:has-text("Create Slot")',
+  );
   await addButton.click();
-  
+
   // Fill time slot form
   await page.fill('input[name="startTime"]', slotData.startTime);
   await page.fill('input[name="endTime"]', slotData.endTime);
-  
+
   if (slotData.rinkId) {
     await page.selectOption('select[name="rinkId"]', slotData.rinkId);
   }
-  
+
   await page.click('button[type="submit"]');
-  await expect(page.locator('text=Time slot created')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("text=Time slot created")).toBeVisible({ timeout: 10000 });
 }
 
 /**
  * Book a lesson (student only)
  */
 export async function bookLesson(page: Page, slotSelector?: string) {
-  await navigateToStudentPage(page, 'schedule');
-  
-  const bookButton = slotSelector 
+  await navigateToStudentPage(page, "schedule");
+
+  const bookButton = slotSelector
     ? page.locator(slotSelector).locator('button:has-text("Book")')
     : page.locator('button:has-text("Book")').first();
-  
+
   await bookButton.click();
-  
+
   // Fill booking form if needed
-  const submitButton = page.locator('button[type="submit"]:has-text("Book"), button[type="submit"]:has-text("Confirm")');
+  const submitButton = page.locator(
+    'button[type="submit"]:has-text("Book"), button[type="submit"]:has-text("Confirm")',
+  );
   await submitButton.click();
-  
-  await expect(page.locator('text=Lesson booked')).toBeVisible({ timeout: 10000 });
+
+  await expect(page.locator("text=Lesson booked")).toBeVisible({ timeout: 10000 });
 }
 
 /**
  * Approve a student (admin only)
  */
 export async function approveStudent(page: Page, studentEmail: string) {
-  await navigateToAdminPage(page, 'students');
-  
+  await navigateToAdminPage(page, "students");
+
   // Find the student row and approve
   const studentRow = page.locator(`tr:has-text("${studentEmail}")`);
   const approveButton = studentRow.locator('button:has-text("Approve")');
-  
+
   if (await approveButton.isVisible()) {
     await approveButton.click();
-    await expect(page.locator('text=Student approved')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=Student approved")).toBeVisible({ timeout: 10000 });
   }
 }
 
@@ -161,15 +171,15 @@ export async function approveStudent(page: Page, studentEmail: string) {
  * Verify payment (admin only)
  */
 export async function verifyPayment(page: Page, paymentReference: string) {
-  await navigateToAdminPage(page, 'payments');
-  
+  await navigateToAdminPage(page, "payments");
+
   // Find payment by reference and verify
   const paymentRow = page.locator(`tr:has-text("${paymentReference}")`);
   const verifyButton = paymentRow.locator('button:has-text("Verify")');
-  
+
   if (await verifyButton.isVisible()) {
     await verifyButton.click();
-    await expect(page.locator('text=Payment verified')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=Payment verified")).toBeVisible({ timeout: 10000 });
   }
 }
 
@@ -178,20 +188,20 @@ export async function verifyPayment(page: Page, paymentReference: string) {
  */
 export async function testResponsiveDesign(page: Page, url: string) {
   const viewports = [
-    { width: 375, height: 667, name: 'Mobile' },
-    { width: 768, height: 1024, name: 'Tablet' },
-    { width: 1920, height: 1080, name: 'Desktop' },
+    { width: 375, height: 667, name: "Mobile" },
+    { width: 768, height: 1024, name: "Tablet" },
+    { width: 1920, height: 1080, name: "Desktop" },
   ];
-  
+
   for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto(url);
-    
+
     // Basic visibility checks
     await expect(page.locator('main, [role="main"]')).toBeVisible();
-    
+
     // Check navigation is accessible
-    const nav = page.locator('nav');
+    const nav = page.locator("nav");
     if (viewport.width < 768) {
       // Mobile: check for hamburger menu
       const mobileMenuButton = page.locator('button[aria-label="Menu"], button:has-text("☰")');
@@ -210,18 +220,20 @@ export async function testResponsiveDesign(page: Page, url: string) {
  * Wait for API calls to complete
  */
 export async function waitForApiCalls(page: Page, apiPattern: string | RegExp = /\/api\//) {
-  await page.waitForLoadState('networkidle');
-  
+  await page.waitForLoadState("networkidle");
+
   // Wait for any pending API calls
-  await page.waitForFunction(
-    () => {
-      return (window as any).fetch && !(window as any).fetch.isFetching;
-    },
-    undefined,
-    { timeout: 5000 }
-  ).catch(() => {
-    // Ignore timeout - this is a best effort wait
-  });
+  await page
+    .waitForFunction(
+      () => {
+        return (window as any).fetch && !(window as any).fetch.isFetching;
+      },
+      undefined,
+      { timeout: 5000 },
+    )
+    .catch(() => {
+      // Ignore timeout - this is a best effort wait
+    });
 }
 
 /**
@@ -229,29 +241,29 @@ export async function waitForApiCalls(page: Page, apiPattern: string | RegExp = 
  */
 export async function clearTestData(page: Page) {
   // This should only be used in test environment
-  if (process.env.NODE_ENV !== 'test') {
-    throw new Error('clearTestData should only be used in test environment');
+  if (process.env.NODE_ENV !== "test") {
+    throw new Error("clearTestData should only be used in test environment");
   }
-  
+
   // Implementation would depend on having a test data cleanup endpoint
-  console.warn('clearTestData not implemented - manual cleanup required');
+  console.warn("clearTestData not implemented - manual cleanup required");
 }
 
 /**
  * Generate unique test email
  */
-export function generateTestEmail(prefix: string = 'test'): string {
+export function generateTestEmail(prefix = "test"): string {
   return `${prefix}.${Date.now()}@playwright-test.com`;
 }
 
 /**
  * Generate future date for time slots
  */
-export function generateFutureDateTime(daysFromNow: number = 7, hour: number = 10): string {
+export function generateFutureDateTime(daysFromNow = 7, hour = 10): string {
   const date = new Date();
   date.setDate(date.getDate() + daysFromNow);
   date.setHours(hour, 0, 0, 0);
-  
+
   // Format as datetime-local input format
   return date.toISOString().slice(0, 16);
 }
@@ -260,9 +272,9 @@ export function generateFutureDateTime(daysFromNow: number = 7, hour: number = 1
  * Take screenshot with test context
  */
 export async function takeScreenshot(page: Page, name: string) {
-  await page.screenshot({ 
+  await page.screenshot({
     path: `test-results/screenshots/${name}-${Date.now()}.png`,
-    fullPage: true 
+    fullPage: true,
   });
 }
 
@@ -271,16 +283,16 @@ export async function takeScreenshot(page: Page, name: string) {
  */
 export async function assertNoConsoleErrors(page: Page) {
   const consoleErrors: string[] = [];
-  
-  page.on('console', (msg) => {
-    if (msg.type() === 'error') {
+
+  page.on("console", (msg) => {
+    if (msg.type() === "error") {
       consoleErrors.push(msg.text());
     }
   });
-  
+
   // Run your test actions here
-  
-  expect(consoleErrors, `Console errors found: ${consoleErrors.join(', ')}`).toHaveLength(0);
+
+  expect(consoleErrors, `Console errors found: ${consoleErrors.join(", ")}`).toHaveLength(0);
 }
 
 /**
@@ -290,7 +302,7 @@ export async function mockApiResponse(page: Page, url: string | RegExp, response
   await page.route(url, async (route) => {
     await route.fulfill({
       status: 200,
-      contentType: 'application/json',
+      contentType: "application/json",
       body: JSON.stringify(response),
     });
   });
@@ -299,13 +311,19 @@ export async function mockApiResponse(page: Page, url: string | RegExp, response
 /**
  * Test form validation
  */
-export async function testFormValidation(page: Page, formSelector: string, requiredFields: string[]) {
+export async function testFormValidation(
+  page: Page,
+  formSelector: string,
+  requiredFields: string[],
+) {
   // Submit empty form
   await page.click(`${formSelector} button[type="submit"]`);
-  
+
   // Check that validation errors appear for required fields
   for (const field of requiredFields) {
-    const errorMessage = page.locator(`text=${field} is required, text=Please enter ${field.toLowerCase()}`);
+    const errorMessage = page.locator(
+      `text=${field} is required, text=Please enter ${field.toLowerCase()}`,
+    );
     await expect(errorMessage).toBeVisible();
   }
 }

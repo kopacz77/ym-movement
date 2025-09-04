@@ -1,8 +1,8 @@
 // __tests__/admin/student-management.test.tsx
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StudentList } from "@/features/admin/components/students/management/StudentList";
-import { createTestStudent, createMaliciousInput } from "../helpers/test-data";
+import { createMaliciousInput, createTestStudent } from "../helpers/test-data";
 
 // Mock the API
 const mockGetStudents = vi.fn();
@@ -45,63 +45,69 @@ describe("Student Management", () => {
   });
 
   it("should render student list", () => {
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
     expect(screen.getByText("Test User")).toBeInTheDocument();
   });
 
   it("should handle student search", async () => {
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     const searchInput = screen.getByPlaceholderText(/search students/i);
     fireEvent.change(searchInput, { target: { value: "Test" } });
-    
+
     await waitFor(() => {
-      expect(mockGetStudents).toHaveBeenCalledWith(
-        expect.objectContaining({ search: "Test" })
-      );
+      expect(mockGetStudents).toHaveBeenCalledWith(expect.objectContaining({ search: "Test" }));
     });
   });
 
   it("should sanitize malicious input in search", async () => {
     const maliciousInput = createMaliciousInput();
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     const searchInput = screen.getByPlaceholderText(/search students/i);
     fireEvent.change(searchInput, { target: { value: maliciousInput.xssPayload } });
-    
+
     // Should not contain script tags
     expect((searchInput as HTMLInputElement).value).not.toContain("<script>");
   });
 
   it("should filter students by level", async () => {
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     const levelFilter = screen.getByRole("combobox", { name: /level/i });
     fireEvent.click(levelFilter);
-    
+
     const preliminaryOption = screen.getByText("PRELIMINARY");
     fireEvent.click(preliminaryOption);
-    
+
     await waitFor(() => {
       expect(mockGetStudents).toHaveBeenCalledWith(
-        expect.objectContaining({ level: "PRELIMINARY" })
+        expect.objectContaining({ level: "PRELIMINARY" }),
       );
     });
   });
 
   it("should handle approval status filtering", async () => {
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     const approvalFilter = screen.getByRole("combobox", { name: /approval/i });
     fireEvent.click(approvalFilter);
-    
+
     const pendingOption = screen.getByText("Pending");
     fireEvent.click(pendingOption);
-    
+
     await waitFor(() => {
-      expect(mockGetStudents).toHaveBeenCalledWith(
-        expect.objectContaining({ approved: false })
-      );
+      expect(mockGetStudents).toHaveBeenCalledWith(expect.objectContaining({ approved: false }));
     });
   });
 
@@ -112,23 +118,25 @@ describe("Student Management", () => {
       isApproved: true,
     });
 
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     expect(screen.getByText("John Doe")).toBeInTheDocument();
     expect(screen.getByText("john@example.com")).toBeInTheDocument();
     expect(screen.getByText("PRELIMINARY")).toBeInTheDocument();
   });
 
   it("should handle pagination", async () => {
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     const nextPageButton = screen.getByText(/next/i);
     fireEvent.click(nextPageButton);
-    
+
     await waitFor(() => {
-      expect(mockGetStudents).toHaveBeenCalledWith(
-        expect.objectContaining({ page: 2 })
-      );
+      expect(mockGetStudents).toHaveBeenCalledWith(expect.objectContaining({ page: 2 }));
     });
   });
 
@@ -139,7 +147,9 @@ describe("Student Management", () => {
       error: null,
     });
 
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
@@ -150,7 +160,9 @@ describe("Student Management", () => {
       error: new Error("Failed to load students"),
     });
 
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
     expect(screen.getByText(/error/i)).toBeInTheDocument();
   });
 
@@ -159,8 +171,10 @@ describe("Student Management", () => {
       user: { name: "<script>alert('xss')</script>" },
     });
 
-    render(<StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />);
-    
+    render(
+      <StudentList onEditAction={mockOnEditAction} onViewProfileAction={mockOnViewProfileAction} />,
+    );
+
     // Should not execute script or contain raw HTML
     expect(document.querySelector("script")).not.toBeInTheDocument();
   });

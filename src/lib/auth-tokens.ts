@@ -1,5 +1,5 @@
 // src/lib/auth-tokens.ts
-import { randomBytes, randomUUID } from "crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { addHours } from "date-fns";
 import { sendInvitationEmail, sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";

@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, Search } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
-import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 
 interface StudentListProps {
   onEditAction: (studentId: string) => void;
@@ -73,9 +73,9 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
       // Update ALL possible cache variations
       possibleKeys.forEach((key) => {
         const data = queryClient.getQueryData(key);
-        console.log(`🔍 Checking key:`, key, "Data found:", !!data);
+        console.log("🔍 Checking key:", key, "Data found:", !!data);
         if (data) {
-          console.log(`📝 Found data in key:`, key, data);
+          console.log("📝 Found data in key:", key, data);
           queryClient.setQueryData(key, (old: any) => {
             if (old?.students) {
               const filtered = old.students.filter((student: any) => student.id !== studentId);
@@ -94,7 +94,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
       allQueries.forEach((query) => {
         const data = query.state.data as any;
         if (data?.students && Array.isArray(data.students)) {
-          console.log(`🎯 BRUTE FORCE: Updating query with key:`, query.queryKey);
+          console.log("🎯 BRUTE FORCE: Updating query with key:", query.queryKey);
           const filtered = data.students.filter((student: any) => student.id !== studentId);
           queryClient.setQueryData(query.queryKey, {
             ...data,
@@ -227,7 +227,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                       <Badge variant="default">Active</Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
-                      {student.lessons?.length || 0} lessons
+                      {student.Lesson?.length || 0} Lesson
                     </TableCell>
                     <TableCell className="sticky right-0 bg-background">
                       <DropdownMenu>

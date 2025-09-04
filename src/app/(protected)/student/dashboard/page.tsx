@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Component, ErrorInfo, ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LessonSummary } from "@/features/student/components/dashboard/LessonSummary";
@@ -24,8 +24,8 @@ class DebugErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Dashboard Error Boundary caught an error:', error);
-    console.error('Error Info:', errorInfo);
+    console.error("Dashboard Error Boundary caught an error:", error);
+    console.error("Error Info:", errorInfo);
   }
 
   render() {
@@ -34,13 +34,8 @@ class DebugErrorBoundary extends Component<
         <div className="p-4 border border-red-500 rounded bg-red-50">
           <h2 className="text-red-800 font-bold">Dashboard Error:</h2>
           <p className="text-red-700 mt-2">{this.state.error.message}</p>
-          <pre className="text-xs text-red-600 mt-2 overflow-auto">
-            {this.state.error.stack}
-          </pre>
-          <Button 
-            onClick={() => this.setState({ hasError: false, error: null })}
-            className="mt-4"
-          >
+          <pre className="text-xs text-red-600 mt-2 overflow-auto">{this.state.error.stack}</pre>
+          <Button onClick={() => this.setState({ hasError: false, error: null })} className="mt-4">
             Try Again
           </Button>
         </div>
@@ -83,29 +78,29 @@ export default function StudentDashboardPage() {
           </div>
         </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4">
-            <p>
-              We accept payments via Venmo and Zelle. Please make payments within 24 hours of
-              booking your lesson to avoid automatic cancellation.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium">Venmo</h3>
-                <p className="text-sm mt-1">@yura-min</p>
-              </div>
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium">Zelle</h3>
-                <p className="text-sm mt-1">+1 (714) 743-7071</p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <p>
+                We accept payments via Venmo and Zelle. Please make payments within 24 hours of
+                booking your lesson to avoid automatic cancellation.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-medium">Venmo</h3>
+                  <p className="text-sm mt-1">@yura-min</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-medium">Zelle</h3>
+                  <p className="text-sm mt-1">+1 (714) 743-7071</p>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
       </div>
     </DebugErrorBoundary>
   );

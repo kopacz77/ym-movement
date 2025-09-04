@@ -58,7 +58,7 @@ interface AppLayoutProps {
 export function AppLayout({ role, children }: AppLayoutProps) {
   const HeaderComponent = role === "admin" ? AdminHeader : StudentHeader;
   const pathname = usePathname() ?? "";
-  
+
   // Safety check to prevent React #130 errors
   if (!HeaderComponent) {
     console.error("HeaderComponent is undefined for role:", role);

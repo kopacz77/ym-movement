@@ -1,28 +1,28 @@
 // __tests__/notifications/notifications.test.ts
-import { describe, expect, it, beforeEach, vi, afterEach } from "vitest";
-import { createTestUser, createTestLesson, createMaliciousInput } from "../helpers/test-data";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sanitizeInput } from "@/lib/security";
+import { createMaliciousInput, createTestLesson, createTestUser } from "../helpers/test-data";
 
 // Mock notification services
 const mockEmailService = {
   sendEmail: vi.fn(),
-  sendBulkEmail: vi.fn()
+  sendBulkEmail: vi.fn(),
 };
 
 const mockPushService = {
   sendPushNotification: vi.fn(),
-  sendBulkPushNotification: vi.fn()
+  sendBulkPushNotification: vi.fn(),
 };
 
 // Mock external services
 vi.mock("@/lib/email", () => ({
   sendEmail: (...args: any[]) => mockEmailService.sendEmail(...args),
-  sendBulkEmail: (...args: any[]) => mockEmailService.sendBulkEmail(...args)
+  sendBulkEmail: (...args: any[]) => mockEmailService.sendBulkEmail(...args),
 }));
 
 vi.mock("@/lib/push-notifications", () => ({
   sendPushNotification: (...args: any[]) => mockPushService.sendPushNotification(...args),
-  sendBulkPushNotification: (...args: any[]) => mockPushService.sendBulkPushNotification(...args)
+  sendBulkPushNotification: (...args: any[]) => mockPushService.sendBulkPushNotification(...args),
 }));
 
 // Mock database for notification queries
@@ -35,18 +35,18 @@ const mockNotifications = [
     userId: "user-1",
     isRead: false,
     createdAt: new Date(),
-    data: { lessonId: "lesson-1" }
+    data: { lessonId: "lesson-1" },
   },
   {
-    id: "notif-2", 
+    id: "notif-2",
     title: "Payment Confirmed",
     message: "Your payment has been verified",
     type: "PAYMENT_CONFIRMED",
     userId: "user-1",
     isRead: true,
     createdAt: new Date(),
-    data: { paymentId: "payment-1" }
-  }
+    data: { paymentId: "payment-1" },
+  },
 ];
 
 const mockNotificationService = {
@@ -54,7 +54,7 @@ const mockNotificationService = {
   findMany: vi.fn().mockResolvedValue(mockNotifications),
   markAsRead: vi.fn(),
   delete: vi.fn(),
-  markAllAsRead: vi.fn()
+  markAllAsRead: vi.fn(),
 };
 
 vi.mock("@/lib/prisma", () => ({
@@ -62,13 +62,13 @@ vi.mock("@/lib/prisma", () => ({
     notification: mockNotificationService,
     user: {
       findMany: vi.fn(),
-      findUnique: vi.fn()
+      findUnique: vi.fn(),
     },
     lesson: {
       findMany: vi.fn(),
-      findUnique: vi.fn()
-    }
-  }
+      findUnique: vi.fn(),
+    },
+  },
 }));
 
 describe("Notification System Tests", () => {
@@ -88,7 +88,7 @@ describe("Notification System Tests", () => {
         message: maliciousInput.htmlInjection,
         type: "LESSON_REMINDER",
         userId: "user-1",
-        data: { lessonId: "lesson-1" }
+        data: { lessonId: "lesson-1" },
       };
 
       mockNotificationService.create.mockResolvedValue({
@@ -97,7 +97,7 @@ describe("Notification System Tests", () => {
         title: sanitizeInput(notificationData.title),
         message: sanitizeInput(notificationData.message),
         isRead: false,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       // Simulate notification creation
@@ -105,8 +105,8 @@ describe("Notification System Tests", () => {
         data: {
           ...notificationData,
           title: sanitizeInput(notificationData.title),
-          message: sanitizeInput(notificationData.message)
-        }
+          message: sanitizeInput(notificationData.message),
+        },
       });
 
       expect(mockNotificationService.create).toHaveBeenCalled();
@@ -121,16 +121,16 @@ describe("Notification System Tests", () => {
         title: "", // Empty title
         message: "", // Empty message
         type: "INVALID_TYPE", // Invalid type
-        userId: "user-1"
+        userId: "user-1",
       };
 
       mockNotificationService.create.mockRejectedValue(
-        new Error("Validation failed: title and message are required")
+        new Error("Validation failed: title and message are required"),
       );
 
-      await expect(
-        mockNotificationService.create({ data: invalidNotification })
-      ).rejects.toThrow("Validation failed");
+      await expect(mockNotificationService.create({ data: invalidNotification })).rejects.toThrow(
+        "Validation failed",
+      );
     });
 
     it("should enforce notification message length limits", async () => {
@@ -139,7 +139,7 @@ describe("Notification System Tests", () => {
         title: "Test Notification",
         message: longMessage,
         type: "LESSON_REMINDER",
-        userId: "user-1"
+        userId: "user-1",
       };
 
       mockNotificationService.create.mockResolvedValue({
@@ -147,14 +147,14 @@ describe("Notification System Tests", () => {
         message: sanitizeInput(longMessage).substring(0, 1000), // Truncated
         id: "notif-truncated",
         isRead: false,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       const result = await mockNotificationService.create({
         data: {
           ...notificationData,
-          message: sanitizeInput(longMessage).substring(0, 1000)
-        }
+          message: sanitizeInput(longMessage).substring(0, 1000),
+        },
       });
 
       expect(result.message.length).toBeLessThanOrEqual(1000);
@@ -168,7 +168,7 @@ describe("Notification System Tests", () => {
 
       mockEmailService.sendEmail.mockResolvedValue({
         success: true,
-        messageId: "email-123"
+        messageId: "email-123",
       });
 
       // Simulate sending lesson reminder
@@ -179,9 +179,9 @@ describe("Notification System Tests", () => {
         data: {
           studentName: student.name,
           lessonTime: lesson.startTime,
-          lessonType: lesson.lessonType,
-          rinkName: "Main Rink"
-        }
+          type: lesson.type,
+          rinkName: "Main Rink",
+        },
       });
 
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith({
@@ -190,21 +190,21 @@ describe("Notification System Tests", () => {
         template: "lesson-reminder",
         data: expect.objectContaining({
           studentName: student.name,
-          lessonTime: lesson.startTime
-        })
+          lessonTime: lesson.startTime,
+        }),
       });
     });
 
     it("should sanitize email content before sending", async () => {
       const maliciousInput = createMaliciousInput();
-      const student = createTestUser({ 
+      const student = createTestUser({
         role: "STUDENT",
-        name: maliciousInput.xssPayload
+        name: maliciousInput.xssPayload,
       });
 
       mockEmailService.sendEmail.mockResolvedValue({
         success: true,
-        messageId: "email-sanitized"
+        messageId: "email-sanitized",
       });
 
       // Email content should be sanitized
@@ -214,26 +214,24 @@ describe("Notification System Tests", () => {
         template: "welcome",
         data: {
           studentName: sanitizeInput(student.name),
-          message: sanitizeInput(maliciousInput.htmlInjection)
-        }
+          message: sanitizeInput(maliciousInput.htmlInjection),
+        },
       });
 
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             studentName: expect.not.stringContaining("<script>"),
-            message: expect.not.stringContaining("<img")
-          })
-        })
+            message: expect.not.stringContaining("<img"),
+          }),
+        }),
       );
     });
 
     it("should handle email delivery failures gracefully", async () => {
       const student = createTestUser({ role: "STUDENT" });
 
-      mockEmailService.sendEmail.mockRejectedValue(
-        new Error("SMTP server unavailable")
-      );
+      mockEmailService.sendEmail.mockRejectedValue(new Error("SMTP server unavailable"));
 
       // Should not throw error, but log failure
       await expect(
@@ -241,32 +239,30 @@ describe("Notification System Tests", () => {
           to: student.email,
           subject: "Test Email",
           template: "generic",
-          data: {}
-        })
+          data: {},
+        }),
       ).rejects.toThrow("SMTP server unavailable");
 
       expect(mockEmailService.sendEmail).toHaveBeenCalled();
     });
 
     it("should send bulk notifications efficiently", async () => {
-      const students = Array.from({ length: 100 }, () => 
-        createTestUser({ role: "STUDENT" })
-      );
+      const students = Array.from({ length: 100 }, () => createTestUser({ role: "STUDENT" }));
 
       mockEmailService.sendBulkEmail.mockResolvedValue({
         success: true,
         sentCount: 100,
-        failedCount: 0
+        failedCount: 0,
       });
 
-      const emailData = students.map(student => ({
+      const emailData = students.map((student) => ({
         to: student.email,
         subject: "Important Announcement",
         template: "announcement",
         data: {
           studentName: sanitizeInput(student.name),
-          message: "Rink will be closed for maintenance"
-        }
+          message: "Rink will be closed for maintenance",
+        },
       }));
 
       const result = await mockEmailService.sendBulkEmail(emailData);
@@ -284,7 +280,7 @@ describe("Notification System Tests", () => {
 
       mockPushService.sendPushNotification.mockResolvedValue({
         success: true,
-        messageId: "push-123"
+        messageId: "push-123",
       });
 
       await mockPushService.sendPushNotification({
@@ -294,8 +290,8 @@ describe("Notification System Tests", () => {
         data: {
           type: "LESSON_REMINDER",
           lessonId: "lesson-1",
-          action: "view_lesson"
-        }
+          action: "view_lesson",
+        },
       });
 
       expect(mockPushService.sendPushNotification).toHaveBeenCalledWith({
@@ -304,8 +300,8 @@ describe("Notification System Tests", () => {
         body: "Your lesson starts in 15 minutes",
         data: expect.objectContaining({
           type: "LESSON_REMINDER",
-          lessonId: "lesson-1"
-        })
+          lessonId: "lesson-1",
+        }),
       });
     });
 
@@ -315,7 +311,7 @@ describe("Notification System Tests", () => {
 
       mockPushService.sendPushNotification.mockResolvedValue({
         success: true,
-        messageId: "push-sanitized"
+        messageId: "push-sanitized",
       });
 
       await mockPushService.sendPushNotification({
@@ -324,8 +320,8 @@ describe("Notification System Tests", () => {
         body: sanitizeInput(maliciousInput.htmlInjection),
         data: {
           type: "ANNOUNCEMENT",
-          message: sanitizeInput("Important update <script>alert('hack')</script>")
-        }
+          message: sanitizeInput("Important update <script>alert('hack')</script>"),
+        },
       });
 
       expect(mockPushService.sendPushNotification).toHaveBeenCalledWith(
@@ -333,26 +329,24 @@ describe("Notification System Tests", () => {
           title: expect.not.stringContaining("<script>"),
           body: expect.not.stringContaining("<img"),
           data: expect.objectContaining({
-            message: expect.not.stringContaining("<script>")
-          })
-        })
+            message: expect.not.stringContaining("<script>"),
+          }),
+        }),
       );
     });
 
     it("should handle push notification failures", async () => {
       const deviceToken = "invalid-token";
 
-      mockPushService.sendPushNotification.mockRejectedValue(
-        new Error("Invalid device token")
-      );
+      mockPushService.sendPushNotification.mockRejectedValue(new Error("Invalid device token"));
 
       await expect(
         mockPushService.sendPushNotification({
           token: deviceToken,
           title: "Test Notification",
           body: "This should fail",
-          data: {}
-        })
+          data: {},
+        }),
       ).rejects.toThrow("Invalid device token");
     });
 
@@ -363,7 +357,7 @@ describe("Notification System Tests", () => {
         success: true,
         sentCount: 48,
         failedCount: 2, // Some tokens might be invalid
-        failedTokens: ["token-5", "token-23"]
+        failedTokens: ["token-5", "token-23"],
       });
 
       const pushData = {
@@ -372,8 +366,8 @@ describe("Notification System Tests", () => {
         body: "The rink will be closed tomorrow for maintenance",
         data: {
           type: "ANNOUNCEMENT",
-          priority: "high"
-        }
+          priority: "high",
+        },
       };
 
       const result = await mockPushService.sendBulkPushNotification(pushData);
@@ -393,14 +387,14 @@ describe("Notification System Tests", () => {
         where: { userId },
         orderBy: { createdAt: "desc" },
         take: 20,
-        skip: 0
+        skip: 0,
       });
 
       expect(mockNotificationService.findMany).toHaveBeenCalledWith({
         where: { userId },
         orderBy: { createdAt: "desc" },
         take: 20,
-        skip: 0
+        skip: 0,
       });
 
       expect(result).toHaveLength(2);
@@ -409,18 +403,16 @@ describe("Notification System Tests", () => {
 
     it("should filter notifications by type", async () => {
       const userId = "user-1";
-      const filteredNotifications = mockNotifications.filter(
-        n => n.type === "LESSON_REMINDER"
-      );
+      const filteredNotifications = mockNotifications.filter((n) => n.type === "LESSON_REMINDER");
 
       mockNotificationService.findMany.mockResolvedValue(filteredNotifications);
 
       const result = await mockNotificationService.findMany({
-        where: { 
+        where: {
           userId,
-          type: "LESSON_REMINDER"
+          type: "LESSON_REMINDER",
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
       });
 
       expect(result).toHaveLength(1);
@@ -429,16 +421,16 @@ describe("Notification System Tests", () => {
 
     it("should filter unread notifications", async () => {
       const userId = "user-1";
-      const unreadNotifications = mockNotifications.filter(n => !n.isRead);
+      const unreadNotifications = mockNotifications.filter((n) => !n.isRead);
 
       mockNotificationService.findMany.mockResolvedValue(unreadNotifications);
 
       const result = await mockNotificationService.findMany({
-        where: { 
+        where: {
           userId,
-          isRead: false
+          isRead: false,
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
       });
 
       expect(result).toHaveLength(1);
@@ -449,11 +441,11 @@ describe("Notification System Tests", () => {
   describe("Notification Actions", () => {
     it("should mark notification as read", async () => {
       const notificationId = "notif-1";
-      
+
       mockNotificationService.markAsRead.mockResolvedValue({
         id: notificationId,
         isRead: true,
-        readAt: new Date()
+        readAt: new Date(),
       });
 
       const result = await mockNotificationService.markAsRead(notificationId);
@@ -465,9 +457,9 @@ describe("Notification System Tests", () => {
 
     it("should mark all notifications as read for user", async () => {
       const userId = "user-1";
-      
+
       mockNotificationService.markAllAsRead.mockResolvedValue({
-        count: 5 // Number of notifications marked as read
+        count: 5, // Number of notifications marked as read
       });
 
       const result = await mockNotificationService.markAllAsRead(userId);
@@ -478,10 +470,10 @@ describe("Notification System Tests", () => {
 
     it("should delete notification", async () => {
       const notificationId = "notif-1";
-      
+
       mockNotificationService.delete.mockResolvedValue({
         id: notificationId,
-        deleted: true
+        deleted: true,
       });
 
       const result = await mockNotificationService.delete(notificationId);
@@ -505,10 +497,10 @@ describe("Notification System Tests", () => {
         data: {
           studentName: student.name,
           lessonTime: lesson.startTime.toLocaleString(),
-          lessonType: lesson.lessonType,
+          type: lesson.type,
           rinkName: "Main Rink",
-          instructorName: "Coach Smith"
-        }
+          instructorName: "Coach Smith",
+        },
       });
 
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
@@ -516,9 +508,9 @@ describe("Notification System Tests", () => {
           template: "lesson-reminder",
           data: expect.objectContaining({
             studentName: student.name,
-            lessonType: lesson.lessonType
-          })
-        })
+            type: lesson.type,
+          }),
+        }),
       );
     });
 
@@ -536,8 +528,8 @@ describe("Notification System Tests", () => {
           amount: "$75.00",
           paymentMethod: "Venmo",
           transactionId: "txn-123",
-          lessonDate: "January 30, 2025"
-        }
+          lessonDate: "January 30, 2025",
+        },
       });
 
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
@@ -545,9 +537,9 @@ describe("Notification System Tests", () => {
           template: "payment-confirmed",
           data: expect.objectContaining({
             amount: "$75.00",
-            paymentMethod: "Venmo"
-          })
-        })
+            paymentMethod: "Venmo",
+          }),
+        }),
       );
     });
 
@@ -565,8 +557,8 @@ describe("Notification System Tests", () => {
           lessonDate: "January 30, 2025",
           lessonTime: "10:00 AM",
           cancellationReason: "Student request",
-          refundAmount: "$75.00"
-        }
+          refundAmount: "$75.00",
+        },
       });
 
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
@@ -574,9 +566,9 @@ describe("Notification System Tests", () => {
           template: "lesson-cancelled",
           data: expect.objectContaining({
             lessonDate: "January 30, 2025",
-            refundAmount: "$75.00"
-          })
-        })
+            refundAmount: "$75.00",
+          }),
+        }),
       );
     });
   });
@@ -584,13 +576,13 @@ describe("Notification System Tests", () => {
   describe("Notification Security", () => {
     it("should prevent notification injection attacks", async () => {
       const maliciousInput = createMaliciousInput();
-      
+
       // Attempt to create notification with malicious content
       const notificationData = {
         title: maliciousInput.xssPayload,
         message: `${maliciousInput.htmlInjection} Your lesson is confirmed`,
         type: "LESSON_CONFIRMATION",
-        userId: "user-1"
+        userId: "user-1",
       };
 
       mockNotificationService.create.mockImplementation(({ data }) => {
@@ -601,12 +593,12 @@ describe("Notification System Tests", () => {
           title: sanitizeInput(data.title),
           message: sanitizeInput(data.message),
           isRead: false,
-          createdAt: new Date()
+          createdAt: new Date(),
         });
       });
 
       const result = await mockNotificationService.create({
-        data: notificationData
+        data: notificationData,
       });
 
       expect(result.title).not.toContain("<script>");
@@ -620,16 +612,16 @@ describe("Notification System Tests", () => {
         title: "Admin Only Notification",
         message: "This should not be accessible",
         type: "ADMIN_ALERT",
-        userId: unauthorizedUser
+        userId: unauthorizedUser,
       };
 
       // Simulate permission check failure
       mockNotificationService.create.mockRejectedValue(
-        new Error("Insufficient permissions to create admin notifications")
+        new Error("Insufficient permissions to create admin notifications"),
       );
 
       await expect(
-        mockNotificationService.create({ data: restrictedNotification })
+        mockNotificationService.create({ data: restrictedNotification }),
       ).rejects.toThrow("Insufficient permissions");
     });
 
@@ -648,7 +640,7 @@ describe("Notification System Tests", () => {
           message: "Test message",
           userId,
           isRead: false,
-          createdAt: new Date()
+          createdAt: new Date(),
         });
       });
 
@@ -659,8 +651,8 @@ describe("Notification System Tests", () => {
             title: "Test",
             message: "Test message",
             type: "TEST",
-            userId
-          }
+            userId,
+          },
         });
       }
 
@@ -671,9 +663,9 @@ describe("Notification System Tests", () => {
             title: "Test",
             message: "Test message",
             type: "TEST",
-            userId
-          }
-        })
+            userId,
+          },
+        }),
       ).rejects.toThrow("Rate limit exceeded");
     });
   });
@@ -682,7 +674,7 @@ describe("Notification System Tests", () => {
     it("should emit real-time notification events", async () => {
       const mockWebSocket = {
         emit: vi.fn(),
-        to: vi.fn().mockReturnThis()
+        to: vi.fn().mockReturnThis(),
       };
 
       // Mock WebSocket implementation
@@ -697,7 +689,7 @@ describe("Notification System Tests", () => {
         type: "MESSAGE",
         userId: "user-1",
         isRead: false,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       emitNotification(notification.userId, notification);
@@ -711,7 +703,7 @@ describe("Notification System Tests", () => {
         emit: vi.fn().mockImplementation(() => {
           throw new Error("WebSocket connection lost");
         }),
-        to: vi.fn().mockReturnThis()
+        to: vi.fn().mockReturnThis(),
       };
 
       const emitNotification = (userId: string, notification: any) => {
@@ -721,7 +713,7 @@ describe("Notification System Tests", () => {
           console.error("Failed to emit real-time notification:", error);
           // Fall back to persistent notification storage
           return mockNotificationService.create({
-            data: notification
+            data: notification,
           });
         }
       };
@@ -732,14 +724,14 @@ describe("Notification System Tests", () => {
         message: "Stored for later delivery",
         userId: "user-1",
         isRead: false,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       const notification = {
         title: "Test Notification",
         message: "This should fallback to storage",
         type: "TEST",
-        userId: "user-1"
+        userId: "user-1",
       };
 
       const result = await emitNotification(notification.userId, notification);

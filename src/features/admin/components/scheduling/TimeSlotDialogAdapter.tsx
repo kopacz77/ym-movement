@@ -33,7 +33,7 @@ interface ScheduleEvent {
       };
       maxStudents: number;
       isActive: boolean;
-      lessons: unknown[];
+      Lesson: unknown[];
       timeDisplay: string;
       timezone: string;
     };
@@ -54,7 +54,7 @@ interface TimeSlotDialogAdapterProps {
   isUnassigning?: boolean;
 }
 
-// Helper function to safely cast unknown lessons to Lesson[]
+// Helper function to safely cast unknown Lesson to Lesson[]
 function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
   if (!unknownLessons) {
     return [];
@@ -96,10 +96,10 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
           end: selectedEvent.schedule.end,
           extendedProps: {
             Rink: selectedEvent.schedule.raw.rink,
-            currentStudents: selectedEvent.schedule.raw.lessons?.length || 0,
+            currentStudents: selectedEvent.schedule.raw.Lesson?.length || 0,
             maxStudents: selectedEvent.schedule.raw.maxStudents,
             // Use our helper function to safely cast
-            Lesson: castToLessons(selectedEvent.schedule.raw.lessons),
+            Lesson: castToLessons(selectedEvent.schedule.raw.Lesson),
           },
         },
       }
@@ -109,8 +109,8 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
   const adaptedSlot = selectedSlot
     ? {
         ...selectedSlot,
-        Lesson: castToLessons(selectedSlot.Lesson || selectedSlot.lessons),
-        Rink: selectedSlot.Rink || selectedSlot.rink,
+        Lesson: castToLessons(selectedSlot.Lesson || selectedSlot.Lesson),
+        Rink: selectedSlot.Rink || (selectedSlot as any).rink,
       }
     : null;
 

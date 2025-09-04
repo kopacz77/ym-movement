@@ -204,7 +204,7 @@ function BookingCalendarComponent() {
       const isAvailable = slot.isAvailable === true;
       const isYuraSlot = slot.isActive === true;
       const studentCount = slot.currentStudents || 0;
-      const timezone = slot.Rink.timezone || rinkTimezone;
+      const timezone = (slot as any).Rink.timezone || rinkTimezone;
 
       // Format times in the rink's timezone
       const startTimeInfo = displayInRinkLocalTime(slot.startTime, timezone);
@@ -222,7 +222,7 @@ function BookingCalendarComponent() {
         start: startTimeInfo.dateTime.toJSDate(),
         end: endTimeInfo.dateTime.toJSDate(),
         interactive: isYuraSlot && isAvailable,
-        rinkName: slot.rink?.name || "",
+        rinkName: (slot as any).Rink?.name || "",
         timezone,
         timeDisplay,
         status: isAvailable && isYuraSlot ? "available" : "unavailable",
@@ -252,7 +252,7 @@ function BookingCalendarComponent() {
           };
         }
 
-        groups[dateKey].slots.push(slot);
+        groups[dateKey].slots.push(slot as any);
         return groups;
       },
       {} as Record<string, { date: Date; slots: ApiTimeSlot[] }>,
@@ -266,15 +266,16 @@ function BookingCalendarComponent() {
   const formatTimeInRinkTimezone = useCallback(
     (timeStr: string | Date) => {
       try {
-        const dateTime = typeof timeStr === "string" 
-          ? DateTime.fromISO(timeStr, { zone: "utc" }).setZone(rinkTimezone)
-          : DateTime.fromJSDate(timeStr, { zone: "utc" }).setZone(rinkTimezone);
-        
+        const dateTime =
+          typeof timeStr === "string"
+            ? DateTime.fromISO(timeStr, { zone: "utc" }).setZone(rinkTimezone)
+            : DateTime.fromJSDate(timeStr, { zone: "utc" }).setZone(rinkTimezone);
+
         if (!dateTime.isValid) {
           console.error("Invalid date in formatTimeInRinkTimezone:", timeStr);
           return "Invalid time";
         }
-        
+
         return dateTime.toFormat("h:mm a");
       } catch (error) {
         console.error("Error formatting time in rink timezone:", error);
@@ -342,10 +343,10 @@ function BookingCalendarComponent() {
         lessons: rawSlot.lessons,
         isActive: rawSlot.isActive,
         rink: {
-          name: rawSlot.Rink.name,
-          address: rawSlot.Rink.address,
-          id: rawSlot.Rink.id || "unknown",
-          timezone: rawSlot.Rink.timezone || rinkTimezone,
+          name: (rawSlot as any).Rink.name,
+          address: (rawSlot as any).Rink.address,
+          id: (rawSlot as any).Rink.id || "unknown",
+          timezone: (rawSlot as any).Rink.timezone || rinkTimezone,
         },
         interactive: rawSlot.isAvailable,
       };
@@ -577,7 +578,7 @@ function BookingCalendarComponent() {
                         const endTime = formatTimeInRinkTimezone(slot.endTime);
 
                         // Add local time if timezone differs from user's timezone
-                        const timezone = slot.Rink.timezone || rinkTimezone;
+                        const timezone = (slot as any).Rink.timezone || rinkTimezone;
                         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                         const showLocalTime = timezone !== userTimezone;
 
@@ -615,7 +616,8 @@ function BookingCalendarComponent() {
                               </div>
                             )}
                             <div className="text-sm text-muted-foreground">
-                              {slot.Rink.name} {isSlotBookable ? "- Available" : "- Not Available"}
+                              {(slot as any).Rink.name}{" "}
+                              {isSlotBookable ? "- Available" : "- Not Available"}
                             </div>
                           </button>
                         );
@@ -701,7 +703,7 @@ function BookingCalendarComponent() {
       </CardContent>
     </Card>
   );
-};
+}
 
 const BookingCalendar = memo(BookingCalendarComponent);
 export default BookingCalendar;

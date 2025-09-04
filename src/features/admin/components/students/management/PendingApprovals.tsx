@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { AlertCircle, Check, Clock } from "lucide-react";
 import type React from "react";
 import { toast } from "sonner";
-import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import type { AppRouter } from "@/lib/root";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 
 // Define proper types
 type StudentStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -60,7 +60,7 @@ export const PendingApprovals: React.FC = () => {
         console.log(`Cache [${index}]:`, {
           key: query.queryKey,
           hasStudents: data?.students ? data.students.length : "no students",
-          isEnabled: query.options?.enabled !== false,
+          isEnabled: (query.options as any)?.enabled !== false,
           state: query.state.status,
         });
       });
@@ -91,12 +91,15 @@ export const PendingApprovals: React.FC = () => {
       const approvedStudent = {
         id: studentToApprove.id,
         userId: studentToApprove.userId || studentToApprove.user?.id,
-        isApproved: true,
-        status: "APPROVED",
-        approvedAt: new Date().toISOString(),
         level: studentToApprove.level || "PRE_PRELIMINARY",
+        maxLessonsPerWeek: studentToApprove.maxLessonsPerWeek,
+        phone: studentToApprove.phone,
+        notes: studentToApprove.notes,
         createdAt: studentToApprove.createdAt,
         updatedAt: new Date().toISOString(),
+        approvedAt: new Date().toISOString(),
+        isApproved: true,
+        status: "APPROVED",
         // User data - handle both formats
         User: {
           id: studentToApprove.user?.id || studentToApprove.User?.id,
@@ -104,19 +107,8 @@ export const PendingApprovals: React.FC = () => {
           email: studentToApprove.user?.email || studentToApprove.User?.email,
           role: "STUDENT",
         },
-        user: {
-          id: studentToApprove.user?.id || studentToApprove.User?.id,
-          name: studentToApprove.user?.name || studentToApprove.User?.name,
-          email: studentToApprove.user?.email || studentToApprove.User?.email,
-        },
         // Initialize empty arrays
         Lesson: [],
-        lessons: [],
-        // Copy any other fields
-        ...studentToApprove,
-        // Ensure approved status overrides
-        isApproved: true,
-        status: "APPROVED",
       };
 
       console.log("🔄 TRANSFORMED STUDENT:", approvedStudent);

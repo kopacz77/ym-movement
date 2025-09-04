@@ -1,6 +1,6 @@
 // __tests__/auth/password-change.test.tsx
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 import { createMaliciousInput } from "../helpers/test-data";
 
@@ -29,7 +29,7 @@ describe("Password Change Form", () => {
 
   it("should render password change form", () => {
     render(<ChangePasswordForm />);
-    
+
     expect(screen.getByLabelText(/current password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm new password/i)).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe("Password Change Form", () => {
 
   it("should validate password confirmation", async () => {
     render(<ChangePasswordForm />);
-    
+
     const currentPassword = screen.getByLabelText(/current password/i);
     const newPassword = screen.getByLabelText(/new password/i);
     const confirmPassword = screen.getByLabelText(/confirm new password/i);
@@ -58,7 +58,7 @@ describe("Password Change Form", () => {
 
   it("should enforce minimum password length", async () => {
     render(<ChangePasswordForm />);
-    
+
     const currentPassword = screen.getByLabelText(/current password/i);
     const newPassword = screen.getByLabelText(/new password/i);
     const confirmPassword = screen.getByLabelText(/confirm new password/i);
@@ -79,17 +79,17 @@ describe("Password Change Form", () => {
   it("should sanitize malicious input", async () => {
     const maliciousInput = createMaliciousInput();
     render(<ChangePasswordForm />);
-    
+
     const currentPassword = screen.getByLabelText(/current password/i);
     fireEvent.change(currentPassword, { target: { value: maliciousInput.xssPayload } });
 
     // Input should be sanitized
-    expect(currentPassword.value).not.toContain("<script>");
+    expect((currentPassword as HTMLInputElement).value).not.toContain("<script>");
   });
 
   it("should submit valid password change", async () => {
     render(<ChangePasswordForm />);
-    
+
     const currentPassword = screen.getByLabelText(/current password/i);
     const newPassword = screen.getByLabelText(/new password/i);
     const confirmPassword = screen.getByLabelText(/confirm new password/i);
@@ -110,7 +110,7 @@ describe("Password Change Form", () => {
 
   it("should show password strength indicator", () => {
     render(<ChangePasswordForm />);
-    
+
     const newPassword = screen.getByLabelText(/new password/i);
     fireEvent.change(newPassword, { target: { value: "WeakPassword123!" } });
 
@@ -125,7 +125,7 @@ describe("Password Change Form", () => {
     }));
 
     render(<ChangePasswordForm />);
-    
+
     const submitButton = screen.getByRole("button", { name: /updating/i });
     expect(submitButton).toBeDisabled();
   });
@@ -137,7 +137,7 @@ describe("Password Change Form", () => {
     });
 
     render(<ChangePasswordForm />);
-    
+
     const currentPassword = screen.getByLabelText(/current password/i);
     const newPassword = screen.getByLabelText(/new password/i);
     const confirmPassword = screen.getByLabelText(/confirm new password/i);
@@ -149,9 +149,9 @@ describe("Password Change Form", () => {
     fireEvent.click(screen.getByRole("button", { name: /update password/i }));
 
     await waitFor(() => {
-      expect(currentPassword.value).toBe("");
-      expect(newPassword.value).toBe("");
-      expect(confirmPassword.value).toBe("");
+      expect((currentPassword as HTMLInputElement).value).toBe("");
+      expect((newPassword as HTMLInputElement).value).toBe("");
+      expect((confirmPassword as HTMLInputElement).value).toBe("");
     });
   });
 
@@ -166,7 +166,7 @@ describe("Password Change Form", () => {
     });
 
     render(<ChangePasswordForm />);
-    
+
     const currentPassword = screen.getByLabelText(/current password/i);
     const newPassword = screen.getByLabelText(/new password/i);
     const confirmPassword = screen.getByLabelText(/confirm new password/i);

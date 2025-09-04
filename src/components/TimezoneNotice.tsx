@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
-import { useState, useEffect } from "react";
 import type React from "react";
+import { useEffect, useState } from "react";
 
 interface TimezoneNoticeProps {
   rinkTimezone: string;
@@ -53,7 +53,7 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
   useEffect(() => {
     const updateTimeAndTimezone = () => {
       const now = DateTime.now();
-      
+
       // Get current times
       setCurrentTimes({
         localTimeStr: now.toFormat("h:mm a"),
@@ -92,7 +92,10 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
   }, [rinkTimezone]);
 
   // Show simplified version if timezones are the same (only check on client side)
-  if (timezoneInfo && (timezoneInfo.localTimezone === rinkTimezone || timezoneInfo.hourDiff === 0)) {
+  if (
+    timezoneInfo &&
+    (timezoneInfo.localTimezone === rinkTimezone || timezoneInfo.hourDiff === 0)
+  ) {
     return (
       <div
         className={`bg-green-50 border border-green-200 rounded p-3 flex items-start text-green-800 ${className}`}
@@ -100,7 +103,10 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
         <span className="mr-2 mt-1">🌐</span>
         <div>
           <p className="font-bold">Timezone Notice:</p>
-          <p>This schedule is displayed in your local time ({timezoneInfo?.localTimezoneName || "Loading..."}).</p>
+          <p>
+            This schedule is displayed in your local time (
+            {timezoneInfo?.localTimezoneName || "Loading..."}).
+          </p>
           <p className="text-sm mt-1">
             Current time: <strong>{currentTimes?.localTimeStr}</strong>
           </p>
@@ -117,9 +123,12 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
       <div>
         <p className="font-bold">Timezone Notice:</p>
         <p>
-          This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}). 
+          This schedule is displayed in <strong>the rink time</strong> ({rinkTimezoneName}).
           {timezoneInfo ? (
-            <>Your local time ({timezoneInfo.localTimezoneName}) is {timezoneInfo.hourDiff} {timezoneInfo.hourText} {timezoneInfo.direction} the rink time.</>
+            <>
+              Your local time ({timezoneInfo.localTimezoneName}) is {timezoneInfo.hourDiff}{" "}
+              {timezoneInfo.hourText} {timezoneInfo.direction} the rink time.
+            </>
           ) : (
             <>Loading timezone information...</>
           )}
@@ -173,7 +182,7 @@ export const formatTimeWithTimezone = (
     console.error("Error in formatTimeWithTimezone:", error);
     return {
       localTime: "Invalid time",
-      rinkTime: "Invalid time", 
+      rinkTime: "Invalid time",
       localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       rinkTimezone,
     };

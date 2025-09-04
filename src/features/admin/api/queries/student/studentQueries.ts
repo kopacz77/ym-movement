@@ -1,8 +1,8 @@
 import { Level, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { randomUUID } from "node:crypto";
 // src/features/admin/api/queries/student/studentQueries.ts
 import { z } from "zod";
-import { randomUUID } from "crypto";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendWelcomeEmail } from "@/lib/email";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
@@ -189,9 +189,10 @@ export const studentQueries = createTRPCRouter({
         let student: {
           id: string;
           userId: string;
-          user: {
+          User?: {
             name: string | null;
             email: string;
+            [key: string]: unknown;
           };
           [key: string]: unknown;
         } | null = null;
@@ -248,8 +249,16 @@ export const studentQueries = createTRPCRouter({
         }
 
         // Create result object with proper typing
+        if (!student || !student.id) {
+          throw new Error("Failed to create student");
+        }
+
         const result: StudentWithInviteStatus = {
           ...student,
+          user: {
+            name: student?.User?.name || null,
+            email: student?.User?.email || "",
+          },
           inviteSent: false,
         };
 
@@ -257,7 +266,7 @@ export const studentQueries = createTRPCRouter({
         const userData = existingUser || newUser || student?.User;
 
         // Only send ONE email - either welcome OR invitation, not both
-        if (sendInvite && userData) {
+        if (sendInvite && userData && student) {
           // If sending invitation, don't send welcome email - the invitation serves as welcome
           try {
             await createPasswordResetToken(

@@ -1,5 +1,5 @@
 // __tests__/helpers/test-data.ts
-import { Level, LessonStatus, LessonType, RinkArea, Role } from "@prisma/client";
+import { LessonStatus, LessonType, Level, RinkArea, Role } from "@prisma/client";
 
 // Test user data
 export const createTestUser = (overrides = {}) => ({
@@ -71,7 +71,7 @@ export const createTestLesson = (overrides = {}) => ({
   endTime: new Date("2024-01-01T11:00:00Z"),
   duration: 60,
   type: LessonType.PRIVATE,
-  area: RinkArea.MAIN,
+  area: RinkArea.MAIN_RINK,
   status: LessonStatus.SCHEDULED,
   price: 75.0,
   notes: "Test lesson notes",

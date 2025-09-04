@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordStrength } from "@/components/ui/password-strength";
 import {
   Select,
   SelectContent,
@@ -28,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PasswordStrength } from "@/components/ui/password-strength";
 import { api } from "@/lib/api";
 
 // Client-side password validation (matches server-side logic)

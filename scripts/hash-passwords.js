@@ -28,9 +28,7 @@ async function hashAllPasswords() {
     for (const user of users) {
       if (!user.password || user.password.startsWith("$2")) {
         // Skip if password is null or already appears to be hashed (bcrypt hashes start with $2)
-        console.log(
-          `Skipping user ${user.email}: Password is null or already hashed`,
-        );
+        console.log(`Skipping user ${user.email}: Password is null or already hashed`);
         continue;
       }
 

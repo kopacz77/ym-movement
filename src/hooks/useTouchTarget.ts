@@ -15,7 +15,7 @@ export function useTouchTarget() {
    * @param baseClasses - Base CSS classes to combine with touch classes
    * @returns Combined class string with touch optimizations
    */
-  const getTouchTargetClasses = (baseClasses: string = "") => {
+  const getTouchTargetClasses = (baseClasses = "") => {
     const touchClasses = isMobile ? "min-h-[44px] min-w-[44px] touch-manipulation" : "";
 
     return `${baseClasses} ${touchClasses}`.trim();
@@ -26,7 +26,7 @@ export function useTouchTarget() {
    * @param baseClasses - Base CSS classes to combine with touch classes
    * @returns Combined class string optimized for icon buttons
    */
-  const getIconButtonClasses = (baseClasses: string = "") => {
+  const getIconButtonClasses = (baseClasses = "") => {
     const classes = isMobile
       ? "min-h-[44px] min-w-[44px] p-2" // Ensures 44px minimum with proper padding
       : "h-9 w-9 p-2"; // Desktop size maintains visual consistency
@@ -39,7 +39,7 @@ export function useTouchTarget() {
    * @param baseSpacing - Base spacing classes
    * @returns Touch-optimized spacing classes
    */
-  const getTouchSpacing = (baseSpacing: string = "gap-2") => {
+  const getTouchSpacing = (baseSpacing = "gap-2") => {
     return isMobile
       ? "gap-3 sm:gap-4" // Increased mobile spacing
       : baseSpacing;
@@ -50,7 +50,7 @@ export function useTouchTarget() {
    * @param baseClasses - Base CSS classes
    * @returns Touch-optimized dropdown item classes
    */
-  const getDropdownItemClasses = (baseClasses: string = "") => {
+  const getDropdownItemClasses = (baseClasses = "") => {
     const touchClasses = isMobile ? "min-h-[44px] py-3 touch-manipulation" : "py-1.5";
 
     return `${baseClasses} ${touchClasses}`.trim();
@@ -61,7 +61,7 @@ export function useTouchTarget() {
    * @param baseClasses - Base CSS classes
    * @returns Touch-optimized form input classes
    */
-  const getFormInputClasses = (baseClasses: string = "") => {
+  const getFormInputClasses = (baseClasses = "") => {
     const touchClasses = isMobile ? "min-h-[44px] touch-manipulation" : "";
 
     return `${baseClasses} ${touchClasses}`.trim();

@@ -7,7 +7,8 @@
  * @since Phase 2 Priority 3 Optimizations
  */
 
-import type { PrismaClient, PaymentStatus } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
+import { PaymentStatus } from "@prisma/client";
 import { CACHE_CONFIG, type CacheOptions, redis } from "./redis";
 
 interface QueryCacheConfig {
@@ -403,7 +404,7 @@ export class PaymentCache {
           prisma.payment.aggregate({
             where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: PaymentStatus.PAID,
+              status: PaymentStatus.COMPLETED,
             },
             _sum: { amount: true },
             _count: true,
@@ -419,7 +420,7 @@ export class PaymentCache {
           prisma.payment.aggregate({
             where: {
               lesson_date: { gte: startDate, lte: endDate },
-              status: PaymentStatus.OVERDUE,
+              status: PaymentStatus.FAILED,
             },
             _sum: { amount: true },
             _count: true,
@@ -462,9 +463,12 @@ export class ScheduleCache {
       () =>
         prisma.rinkTimeSlot.findMany({
           where: {
-            date,
+            startTime: {
+              gte: date,
+              lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+            },
             ...(rinkId && { rinkId }),
-            lesson: null, // Available slots have no lesson assigned
+            Lesson: null as any, // Available slots have no lesson assigned
           },
           include: {
             Rink: true,

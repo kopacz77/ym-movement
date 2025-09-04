@@ -60,7 +60,7 @@ export const authRouter = createTRPCRouter({
             userId: userId,
             userEmail: user.email,
             reason: "incorrect_current_password",
-            ip: ctx.ip,
+            ip: (ctx as any).ip,
           });
 
           throw new TRPCError({
@@ -82,7 +82,7 @@ export const authRouter = createTRPCRouter({
         logSecurityEvent("PASSWORD_CHANGED", {
           userId: userId,
           userEmail: user.email,
-          ip: ctx.ip,
+          ip: (ctx as any).ip,
         });
 
         return {

@@ -26,9 +26,9 @@ import { AttendanceReport } from "@/features/admin/components/reports/Attendance
 import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
 import { api } from "@/lib/api";
 import {
-  exportRevenueToCSV,
   exportAttendanceToCSV,
   exportCombinedReportToCSV,
+  exportRevenueToCSV,
   exportToPDF,
 } from "@/lib/export-utils";
 import { formatCurrency } from "@/lib/utils";
@@ -91,7 +91,7 @@ export default function ReportsPage() {
         case "revenue":
           exportRevenueToCSV(revenueData, options);
           break;
-        case "attendance":
+        case "attendance": {
           // Transform attendance data to match expected format
           const formattedAttendanceData = attendanceData.map((item) => ({
             ...item,
@@ -100,7 +100,8 @@ export default function ReportsPage() {
           }));
           exportAttendanceToCSV(formattedAttendanceData, options);
           break;
-        case "combined":
+        }
+        case "combined": {
           const formattedCombined = attendanceData.map((item) => ({
             ...item,
             attendanceRate:
@@ -108,6 +109,7 @@ export default function ReportsPage() {
           }));
           exportCombinedReportToCSV(revenueData, formattedCombined, overviewData, options);
           break;
+        }
       }
 
       setTimeout(() => {

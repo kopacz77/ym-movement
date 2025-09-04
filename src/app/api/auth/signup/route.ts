@@ -69,15 +69,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const {
-      name,
-      email,
-      phone,
-      level,
-      maxLessonsPerWeek,
-      emergencyContact,
-      parentConsent,
-    } = result.data;
+    const { name, email, phone, level, maxLessonsPerWeek, emergencyContact, parentConsent } =
+      result.data;
 
     // REMOVED: Password validation - password will be set during registration completion
 
@@ -158,7 +151,7 @@ export async function POST(req: NextRequest) {
     console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
     console.log("RESEND_API_KEY length:", process.env.RESEND_API_KEY?.length || 0);
     console.log("Sending welcome email to:", user.email);
-    
+
     try {
       const emailResult = await sendWelcomeEmail(user.email, user.name || "");
       console.log("✅ Welcome email sent successfully:", emailResult);
@@ -166,7 +159,7 @@ export async function POST(req: NextRequest) {
       console.error("❌ Failed to send welcome email:", emailError);
       // Don't fail the whole signup if email fails
     }
-    
+
     console.log("=== EMAIL SENDING COMPLETE ===");
 
     // Return success with user data (excluding password)
@@ -185,9 +178,12 @@ export async function POST(req: NextRequest) {
       name: error instanceof Error ? error.name : "Unknown",
       message: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.json({ 
-      message: "Failed to create account",
-      error: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: "Failed to create account",
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
   }
 }

@@ -235,6 +235,63 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 - **Fallbacks**: `|| Clock` for icons, `|| "Unknown"` for labels, `|| "text-gray-500"` for colors
 - **Robustness**: Prevents React errors when invalid status values are encountered
 
+## Recent Critical Bug Fixes & System Improvements (2025-09-03)
+
+### ✅ **Critical Issue Resolution Session**
+Addressed all critical and high-priority issues identified through comprehensive system audit:
+
+#### **Student Names "Unknown" in Payments - FIXED**
+- **Issue**: PaymentTable displayed "Unknown" instead of student names
+- **Root Cause**: Incorrect Prisma relation naming (`student.user.name` vs `Student.User.name`)
+- **Solution**: Updated `PaymentTable.tsx:111` to use PascalCase relation conventions
+- **Impact**: All payment records now display correct student names
+
+#### **Past Time Slot Booking Prevention - IMPLEMENTED**
+- **Issue**: Users could book lessons for time slots that had already passed
+- **Solution**: Dual-layer validation approach
+  - **Frontend**: Updated `availabilityQueries.ts:54` to filter past slots from queries
+  - **Backend**: Added server-side validation in `bookingQueries.ts:71` with clear error messages
+- **Security**: Defense-in-depth prevents edge cases and improves data integrity
+
+#### **Password Recovery System - FIXED**
+- **Issue**: TRPC API routing inconsistencies preventing password reset
+- **Root Cause**: `ResetPasswordForm.tsx` called wrong endpoints (`admin.auth.*` vs `passwordReset.*`)
+- **Solution**: 
+  - Updated API calls to use correct `api.passwordReset.*` endpoints
+  - Converted forgot password page from fetch() to TRPC mutations for consistency
+  - Verified complete password reset flow functionality
+- **Impact**: Password recovery now works end-to-end
+
+#### **Blocked Dates Styling Consistency - STANDARDIZED**
+- **Issue**: Travel dates shown in inconsistent colors (blue/red instead of neutral)
+- **Solution**: Standardized color scheme across all components:
+  - **Travel dates**: Gray (neutral, less visually intrusive)
+  - **Competition dates**: Red (important, attention-grabbing)
+  - **Other dates**: Gray (neutral)
+- **Files Updated**: `TravelDateBlocker.tsx`, `TravelDateManager.tsx`, `BlockedDatesManager.tsx`
+
+#### **Notification System Integration - ACTIVATED**
+- **Enhancement**: Notification UI existed but no notifications were being generated
+- **Solution**: Integrated `createNotification` helper into lesson booking flow
+- **Features Added**:
+  - Auto-notifications for successful lesson bookings
+  - Success messages with links to lesson details
+  - Real-time notification display in both admin and student headers
+- **Impact**: Users now receive immediate feedback for important actions
+
+#### **Custom Student Pricing - VERIFIED**
+- **Status**: Already fully implemented and functional
+- **Components**: Complete admin interface with price override capabilities
+- **Integration**: Booking dialog shows custom prices, backend calculates with fallbacks
+- **Database**: Schema includes per-student pricing fields with toggle
+
+### 📊 **System Status After Fixes**
+- ✅ All critical data integrity issues resolved
+- ✅ Security vulnerabilities addressed (past booking prevention)
+- ✅ User experience enhanced (notifications, consistent styling)
+- ✅ Code consistency improved (TRPC standardization)
+- ✅ Database relations properly named (PascalCase conventions)
+
 ## Previous Major Updates (2025-08-05)
 
 ### ✅ **Unified Toast Notification System**

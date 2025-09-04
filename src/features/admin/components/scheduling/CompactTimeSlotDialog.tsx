@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -19,8 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useOperationalSettings } from "@/hooks/useOperationalSettings";
 
 interface CompactTimeSlotDialogProps {
@@ -239,7 +239,7 @@ export function CompactTimeSlotDialog({
               min="1"
               max="20"
               value={maxStudents}
-              onChange={(e) => setMaxStudents(parseInt(e.target.value) || 1)}
+              onChange={(e) => setMaxStudents(Number.parseInt(e.target.value) || 1)}
             />
           </div>
 

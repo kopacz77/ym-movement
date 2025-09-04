@@ -238,10 +238,13 @@ export namespace TRPCQueryUtils {
     const previousLessons = queryClient.getQueryData([["student", "lesson", "upcoming"]]);
 
     // Optimistically update
-    queryClient.setQueryData([["student", "lesson", "upcoming"]], (old: LessonData[]) => [
-      ...old,
-      { ...lessonData, id: `temp-${Date.now()}`, status: "pending" },
-    ]);
+    queryClient.setQueryData(
+      [["student", "lesson", "upcoming"]],
+      (old: LessonData[] | undefined) => [
+        ...(old || []),
+        { ...lessonData, id: `temp-${Date.now()}`, status: "pending" },
+      ],
+    );
 
     return { previousLessons };
   }
@@ -400,7 +403,7 @@ export function useOptimizedStudentList(params: StudentListParams = {}) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 15, // 15 minutes
     refetchOnWindowFocus: false,
-    placeholderData: (previousData: unknown) => previousData,
+    placeholderData: (previousData: any) => previousData,
   });
 }
 
@@ -417,7 +420,7 @@ export function useOptimizedUpcomingLessons(studentId?: string) {
 }
 
 export function useOptimizedAnalytics(dateRange: DateRange) {
-  return api.admin.analytics.getOverview.useQuery(dateRange, {
+  return api.admin.analytics.getOverview.useQuery(dateRange as any, {
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
@@ -442,7 +445,7 @@ export function useOptimisticLessonBooking() {
       if (variables.studentId) {
         utils.student.profile.getStudentLessons.setData(
           { studentId: variables.studentId, status: "SCHEDULED" },
-          (old: LessonData[]) => [
+          (old: any) => [
             ...(old || []),
             { ...variables, id: `temp-${Date.now()}`, status: "pending" },
           ],
@@ -451,16 +454,12 @@ export function useOptimisticLessonBooking() {
 
       return { previousLessons };
     },
-    onError: (
-      _err: Error,
-      variables: BookingMutationVariables,
-      context: OptimisticUpdateContext,
-    ) => {
+    onError: (_err: any, variables: any, context: any) => {
       // Revert optimistic update
       if (context?.previousLessons && variables.studentId) {
         utils.student.profile.getStudentLessons.setData(
           { studentId: variables.studentId, status: "SCHEDULED" },
-          context.previousLessons,
+          context.previousLessons as any,
         );
       }
     },

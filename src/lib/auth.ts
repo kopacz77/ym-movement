@@ -107,6 +107,6 @@ export function generateResetToken(): string {
     return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
   }
   // Node.js environment
-  const nodeCrypto = require("crypto");
+  const nodeCrypto = require("node:crypto");
   return nodeCrypto.randomBytes(32).toString("hex");
 }

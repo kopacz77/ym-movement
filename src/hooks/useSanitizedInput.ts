@@ -7,7 +7,9 @@ import { useCallback } from "react";
  */
 export function useSanitizedInput() {
   const sanitizeInput = useCallback((input: string): string => {
-    if (!input) return "";
+    if (!input) {
+      return "";
+    }
 
     return (
       input
@@ -26,7 +28,9 @@ export function useSanitizedInput() {
   }, []);
 
   const sanitizeTextArea = useCallback((input: string): string => {
-    if (!input) return "";
+    if (!input) {
+      return "";
+    }
 
     // More lenient sanitization for text areas (preserves line breaks)
     return input

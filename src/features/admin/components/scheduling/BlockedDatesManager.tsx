@@ -3,18 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
+  AlertCircle,
   Calendar as CalendarIcon,
-  Plus,
-  Trash2,
   Edit,
   Plane,
+  Plus,
+  Trash2,
   Trophy,
-  AlertCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +49,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 import { cn } from "@/lib/utils";
 
 // Form validation schema
@@ -63,7 +63,7 @@ const blockedDateSchema = z
     endDate: z.date({
       required_error: "End date is required",
     }),
-    type: z.enum(["TRAVEL", "COMPETITION", "OTHER"]).default("TRAVEL"),
+    type: z.enum(["TRAVEL", "COMPETITION", "OTHER"]),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: "End date must be after or equal to start date",
@@ -157,8 +157,6 @@ export function BlockedDatesManager({ className }: BlockedDatesManagerProps) {
     defaultValues: {
       title: "",
       description: "",
-      startDate: undefined,
-      endDate: undefined,
       type: "TRAVEL",
     },
   });

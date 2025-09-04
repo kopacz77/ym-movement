@@ -1,8 +1,8 @@
 // src/features/admin/components/management/PendingApprovals.tsx
 "use client";
 
-import React, { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

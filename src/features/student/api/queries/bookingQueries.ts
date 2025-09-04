@@ -4,10 +4,10 @@ import { TRPCError } from "@trpc/server";
 import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek } from "date-fns";
 // src/features/student/api/queries/bookingQueries.ts
 import { z } from "zod";
+import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { sendLessonConfirmationEmail } from "@/lib/email";
 import { googleCalendar } from "@/lib/google/calendar";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
-import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 
 // Define extended Student type with custom pricing fields
 interface ExtendedStudent {
@@ -312,7 +312,7 @@ export const bookingRouter = createTRPCRouter({
         // 8. Create notification for the student
         try {
           await createNotification({
-            userId: student.User.id,
+            userId: (student as any).User?.id || (student as any).userId,
             title: "Lesson Booked Successfully",
             message: `Your ${input.type} lesson has been scheduled for ${new Date(
               timeSlot.startTime,
@@ -320,7 +320,9 @@ export const bookingRouter = createTRPCRouter({
             type: "SUCCESS",
             link: `/student/schedule/${result.lesson.id}`,
           });
-          console.log(`[BOOKING] Created notification for user ${student.User.id}`);
+          console.log(
+            `[BOOKING] Created notification for user ${(student as any).User?.id || (student as any).userId}`,
+          );
         } catch (notificationError) {
           console.error("[BOOKING] Error creating notification:", notificationError);
           // Continue even if notification fails - the booking itself was successful
@@ -389,8 +391,8 @@ export const bookingRouter = createTRPCRouter({
             id: input.lessonId,
           },
           include: {
-            timeSlot: true,
-          },
+            TimeSlot: true,
+          } as any,
         });
 
         if (!lesson) {

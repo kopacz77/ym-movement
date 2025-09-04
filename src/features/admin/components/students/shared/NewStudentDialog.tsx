@@ -52,7 +52,7 @@ export const NewStudentDialog = () => {
   const utils = api.useUtils();
 
   const form = useForm<NewStudentFormData>({
-    resolver: zodResolver(newStudentSchema),
+    resolver: zodResolver(newStudentSchema) as any,
     defaultValues: {
       maxLessonsPerWeek: 1,
       sendEmail: true,
@@ -115,7 +115,7 @@ export const NewStudentDialog = () => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"

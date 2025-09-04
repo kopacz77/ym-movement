@@ -2,9 +2,9 @@
  * TRPC queries and mutations for blocked date management
  */
 
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
-import { TRPCError } from "@trpc/server";
 
 // Input validation schemas
 const createBlockedDateSchema = z

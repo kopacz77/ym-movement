@@ -20,12 +20,12 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
     <Card
       className={cn("overflow-hidden", lesson.status === LessonStatus.CANCELLED && "opacity-75")}
     >
-      <LessonStatusIndicator status={lesson.status} />
+      <LessonStatusIndicator status={lesson.status as any} />
 
       <CardHeader>
         <CardTitle className="text-base">{lesson.type.replace("_", " ")} Lesson</CardTitle>
         <CardAction>
-          <LessonStatusBadge status={lesson.status} />
+          <LessonStatusBadge status={lesson.status as any} />
         </CardAction>
       </CardHeader>
 

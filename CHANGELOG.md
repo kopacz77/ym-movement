@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2025-09-03
+
+### 🔧 Critical Bug Fixes & System Improvements
+
+#### Fixed
+- **Student Names in Payments**: Fixed "unknown" display issue by correcting Prisma relation naming
+  - Updated from `payment.student?.user?.name` to `payment.Student?.User?.name`
+  - Consistent with PascalCase relation conventions across the codebase
+  - File: `src/features/admin/components/payments/PaymentTable.tsx:111`
+
+- **Past Time Slot Booking Prevention**: Implemented dual-layer validation
+  - Frontend: Updated `availabilityQueries.ts` to filter past slots from queries
+  - Backend: Added server-side validation in `bookingQueries.ts` with clear error messages
+  - Defense-in-depth approach prevents edge cases and improves data integrity
+
+- **Password Recovery API Routing**: Resolved TRPC endpoint inconsistencies
+  - Fixed `ResetPasswordForm.tsx` to use `api.passwordReset.*` instead of `api.admin.auth.*`
+  - Converted forgot password page from fetch() to TRPC mutations for consistency
+  - Verified complete password reset flow functionality
+
+- **Blocked Dates Styling Consistency**: Standardized visual color scheme
+  - Travel dates: Changed from blue/red to consistent gray (neutral, less intrusive)
+  - Competition dates: Maintained red color (important, attention-grabbing)
+  - Updated across `TravelDateBlocker.tsx`, `TravelDateManager.tsx`, `BlockedDatesManager.tsx`
+
+#### Enhanced
+- **Notification System Integration**: Activated automatic notifications
+  - Added lesson booking notifications with success messages
+  - Integrated `createNotification` helper into booking flow
+  - Users now receive real-time notifications for successful lesson bookings
+  - Links directly to lesson details in student dashboard
+
+- **Custom Student Pricing**: Verified full implementation status
+  - Complete admin interface with toggle and price override capabilities
+  - Integration with booking dialog showing custom prices
+  - Backend price calculation with custom/default fallbacks
+  - Database schema with per-student pricing fields
+
 ## [3.1.0] - 2025-08-05
 
 ### 🎉 Major UX & Notification System Overhaul

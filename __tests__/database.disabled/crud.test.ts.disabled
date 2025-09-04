@@ -118,36 +118,36 @@ describe("Database CRUD Operations", () => {
         data: {
           id: "test-rink",
           name: "Test Rink",
-          location: "Test Location"
+          address: "Test Location",
+          timezone: "America/Los_Angeles"
         }
       });
     });
 
     it("should create a new lesson", async () => {
       const lessonData = createTestLesson();
+      const { Student, Rink, ...lessonCreateData } = lessonData;
       
       const lesson = await prisma.lesson.create({
         data: {
-          ...lessonData,
+          ...lessonCreateData,
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
 
       expect(lesson.id).toBeDefined();
       expect(lesson.studentId).toBe(studentUser.id);
-      expect(lesson.instructorId).toBe(adminUser.id);
       expect(lesson.rinkId).toBe(rink.id);
     });
 
     it("should read lesson with relationships", async () => {
       const lessonData = createTestLesson();
+      const { Student, Rink, ...lessonCreateData } = lessonData;
       const createdLesson = await prisma.lesson.create({
         data: {
-          ...lessonData,
+          ...lessonCreateData,
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
@@ -155,25 +155,22 @@ describe("Database CRUD Operations", () => {
       const lesson = await prisma.lesson.findUnique({
         where: { id: createdLesson.id },
         include: {
-          Student: true,
-          Instructor: true,
           Rink: true
         }
       });
 
       expect(lesson).toBeDefined();
-      expect(lesson?.Student.email).toBe(studentUser.email);
-      expect(lesson?.Instructor.email).toBe(adminUser.email);
+      expect(lesson?.studentId).toBe(studentUser.id);
       expect(lesson?.Rink.name).toBe("Test Rink");
     });
 
     it("should update lesson status", async () => {
       const lessonData = createTestLesson();
+      const { Student, Rink, ...lessonCreateData } = lessonData;
       const lesson = await prisma.lesson.create({
         data: {
-          ...lessonData,
+          ...lessonCreateData,
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
@@ -188,11 +185,11 @@ describe("Database CRUD Operations", () => {
 
     it("should delete lesson", async () => {
       const lessonData = createTestLesson();
+      const { Student, Rink, ...lessonCreateData } = lessonData;
       const lesson = await prisma.lesson.create({
         data: {
-          ...lessonData,
+          ...lessonCreateData,
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
@@ -216,22 +213,20 @@ describe("Database CRUD Operations", () => {
       // Create lessons for different days
       await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           startTime: today,
           endTime: new Date(today.getTime() + 3600000),
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
 
       await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           startTime: tomorrow,
           endTime: new Date(tomorrow.getTime() + 3600000),
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
@@ -259,9 +254,8 @@ describe("Database CRUD Operations", () => {
       // Create lesson for first student
       await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
@@ -269,9 +263,8 @@ describe("Database CRUD Operations", () => {
       // Create lesson for second student
       await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           studentId: anotherStudent.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
@@ -296,11 +289,15 @@ describe("Database CRUD Operations", () => {
 
     it("should create a new payment", async () => {
       const paymentData = createTestPayment();
+      const { Student, ...paymentCreateData } = paymentData;
       
       const payment = await prisma.payment.create({
         data: {
-          ...paymentData,
-          studentId: studentUser.id
+          ...paymentCreateData,
+          studentId: studentUser.id,
+          referenceCode: "TEST-REF-001",
+          lesson_date: new Date(),
+          lessonId: undefined
         }
       });
 
@@ -312,23 +309,25 @@ describe("Database CRUD Operations", () => {
 
     it("should update payment status", async () => {
       const paymentData = createTestPayment();
+      const { Student, ...paymentCreateData } = paymentData;
       const payment = await prisma.payment.create({
         data: {
-          ...paymentData,
-          studentId: studentUser.id
+          ...paymentCreateData,
+          studentId: studentUser.id,
+          referenceCode: "TEST-REF-001",
+          lesson_date: new Date(),
+          lessonId: undefined
         }
       });
 
       const updatedPayment = await prisma.payment.update({
         where: { id: payment.id },
         data: { 
-          status: "VERIFIED",
-          adminNotes: "Payment verified by admin"
+          status: "COMPLETED"
         }
       });
 
-      expect(updatedPayment.status).toBe("VERIFIED");
-      expect(updatedPayment.adminNotes).toBe("Payment verified by admin");
+      expect(updatedPayment.status).toBe("COMPLETED");
     });
 
     it("should find payments by status", async () => {
@@ -339,7 +338,10 @@ describe("Database CRUD Operations", () => {
         data: {
           ...payment1,
           studentId: studentUser.id,
-          status: "PENDING"
+          status: "PENDING",
+          referenceCode: "TEST-REF-002",
+          lesson_date: new Date(),
+          lessonId: undefined
         }
       });
 
@@ -347,7 +349,10 @@ describe("Database CRUD Operations", () => {
         data: {
           ...payment2,
           studentId: studentUser.id,
-          status: "VERIFIED"
+          status: "COMPLETED",
+          referenceCode: "TEST-REF-003",
+          lesson_date: new Date(),
+          lessonId: undefined
         }
       });
 
@@ -356,7 +361,7 @@ describe("Database CRUD Operations", () => {
       });
 
       const verifiedPayments = await prisma.payment.findMany({
-        where: { status: "VERIFIED" }
+        where: { status: "COMPLETED" }
       });
 
       expect(pendingPayments).toHaveLength(1);
@@ -365,16 +370,20 @@ describe("Database CRUD Operations", () => {
 
     it("should calculate total payments for student", async () => {
       const payments = [
-        { ...createTestPayment(), amount: 100 },
-        { ...createTestPayment(), amount: 150 },
-        { ...createTestPayment(), amount: 200 }
+        { ...(({ Student, ...rest }) => rest)(createTestPayment()), amount: 100 },
+        { ...(({ Student, ...rest }) => rest)(createTestPayment()), amount: 150 },
+        { ...(({ Student, ...rest }) => rest)(createTestPayment()), amount: 200 }
       ];
 
-      for (const paymentData of payments) {
+      for (let i = 0; i < payments.length; i++) {
+        const paymentData = payments[i];
         await prisma.payment.create({
           data: {
             ...paymentData,
-            studentId: studentUser.id
+            studentId: studentUser.id,
+            referenceCode: `TEST-REF-${i + 4}`,
+            lesson_date: new Date(),
+            lessonId: undefined
           }
         });
       }
@@ -398,7 +407,8 @@ describe("Database CRUD Operations", () => {
         data: {
           id: "test-rink",
           name: "Test Rink",
-          location: "Test Location"
+          address: "Test Location",
+          timezone: "America/Los_Angeles"
         }
       });
     });
@@ -412,12 +422,11 @@ describe("Database CRUD Operations", () => {
           startTime,
           endTime,
           rinkId: rink.id,
-          isAvailable: true
         }
       });
 
       expect(timeSlot.id).toBeDefined();
-      expect(timeSlot.isAvailable).toBe(true);
+      expect(timeSlot.isActive).toBe(true);
       expect(timeSlot.rinkId).toBe(rink.id);
     });
 
@@ -430,7 +439,6 @@ describe("Database CRUD Operations", () => {
           startTime: baseTime,
           endTime: new Date(baseTime.getTime() + 3600000),
           rinkId: rink.id,
-          isAvailable: true
         }
       });
 
@@ -440,19 +448,17 @@ describe("Database CRUD Operations", () => {
           startTime: new Date(baseTime.getTime() + 7200000),
           endTime: new Date(baseTime.getTime() + 10800000),
           rinkId: rink.id,
-          isAvailable: false
         }
       });
 
       const availableSlots = await prisma.rinkTimeSlot.findMany({
         where: { 
-          isAvailable: true,
           rinkId: rink.id
         }
       });
 
       expect(availableSlots).toHaveLength(1);
-      expect(availableSlots[0].isAvailable).toBe(true);
+      expect(availableSlots[0].isActive).toBe(true);
     });
 
     it("should bulk create time slots", async () => {
@@ -467,7 +473,6 @@ describe("Database CRUD Operations", () => {
           startTime,
           endTime,
           rinkId: rink.id,
-          isAvailable: true
         });
       }
 
@@ -491,16 +496,15 @@ describe("Database CRUD Operations", () => {
           startTime,
           endTime,
           rinkId: rink.id,
-          isAvailable: true
         }
       });
 
       const updatedSlot = await prisma.rinkTimeSlot.update({
         where: { id: timeSlot.id },
-        data: { isAvailable: false }
+        data: { isActive: false }
       });
 
-      expect(updatedSlot.isAvailable).toBe(false);
+      expect(updatedSlot.isActive).toBe(false);
     });
 
     it("should delete expired time slots", async () => {
@@ -513,7 +517,6 @@ describe("Database CRUD Operations", () => {
           startTime: pastTime,
           endTime: new Date(pastTime.getTime() + 3600000),
           rinkId: rink.id,
-          isAvailable: true
         }
       });
 
@@ -523,7 +526,6 @@ describe("Database CRUD Operations", () => {
           startTime: futureTime,
           endTime: new Date(futureTime.getTime() + 3600000),
           rinkId: rink.id,
-          isAvailable: true
         }
       });
 
@@ -563,7 +565,8 @@ describe("Database CRUD Operations", () => {
         data: {
           id: "test-rink",
           name: "Test Rink",
-          location: "Test Location"
+          address: "Test Location",
+          timezone: "America/Los_Angeles"
         }
       });
     });
@@ -571,18 +574,19 @@ describe("Database CRUD Operations", () => {
     it("should find lessons with payments", async () => {
       const lesson = await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
 
       await prisma.payment.create({
         data: {
-          ...createTestPayment(),
+          ...(({ Student, ...rest }) => rest)(createTestPayment()),
           studentId: studentUser.id,
-          lessonId: lesson.id
+          lessonId: lesson.id,
+          referenceCode: "TEST-REF-LESSON",
+          lesson_date: lesson.startTime
         }
       });
 
@@ -609,29 +613,26 @@ describe("Database CRUD Operations", () => {
       // Create lessons for instructor
       await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           startTime: today,
           endTime: new Date(today.getTime() + 3600000),
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
 
       await prisma.lesson.create({
         data: {
-          ...createTestLesson(),
+          ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
           startTime: tomorrow,
           endTime: new Date(tomorrow.getTime() + 3600000),
           studentId: studentUser.id,
-          instructorId: adminUser.id,
           rinkId: rink.id
         }
       });
 
       const instructorSchedule = await prisma.lesson.findMany({
         where: {
-          instructorId: adminUser.id,
           startTime: {
             gte: today,
             lt: new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000)
@@ -654,20 +655,22 @@ describe("Database CRUD Operations", () => {
       for (let i = 0; i < 5; i++) {
         const lesson = await prisma.lesson.create({
           data: {
-            ...createTestLesson(),
+            ...(({ Student, Rink, ...rest }) => rest)(createTestLesson()),
             status: i % 2 === 0 ? "COMPLETED" : "SCHEDULED",
             studentId: studentUser.id,
-            instructorId: adminUser.id,
-            rinkId: rink.id
+              rinkId: rink.id
           }
         });
 
         await prisma.payment.create({
           data: {
-            ...createTestPayment(),
+            ...(({ Student, ...rest }) => rest)(createTestPayment()),
             amount: (i + 1) * 50,
-            status: "VERIFIED",
+            status: "COMPLETED",
             studentId: studentUser.id,
+            referenceCode: `TEST-REF-ANALYTICS-${i}`,
+            lesson_date: new Date(),
+            lessonId: undefined,
             lessonId: lesson.id
           }
         });
@@ -676,7 +679,7 @@ describe("Database CRUD Operations", () => {
       // Get analytics
       const totalRevenue = await prisma.payment.aggregate({
         _sum: { amount: true },
-        where: { status: "VERIFIED" }
+        where: { status: "COMPLETED" }
       });
 
       const lessonStats = await prisma.lesson.groupBy({
@@ -688,7 +691,7 @@ describe("Database CRUD Operations", () => {
         by: ["createdAt"],
         _sum: { amount: true },
         where: {
-          status: "VERIFIED",
+          status: "COMPLETED",
           createdAt: {
             gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
           }

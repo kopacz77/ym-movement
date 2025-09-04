@@ -36,6 +36,40 @@ echo $NEXTAUTH_SECRET
 echo $NEXTAUTH_URL
 ```
 
+## ✅ Recently Resolved Issues (v3.2.0)
+
+### Student Names Showing as "Unknown" in Payments
+**Status:** FIXED ✅  
+**Issue:** Payment table displayed "Unknown" instead of student names  
+**Root Cause:** Incorrect Prisma relation naming (`student.user.name` vs `Student.User.name`)  
+**Solution:** Updated `PaymentTable.tsx:111` to use PascalCase relations consistently  
+
+### Past Time Slot Booking Prevention  
+**Status:** FIXED ✅  
+**Issue:** Users could book lessons for past time slots  
+**Solution:** Implemented dual-layer validation:
+- Frontend: Filter past slots in `availabilityQueries.ts` 
+- Backend: Server-side validation in `bookingQueries.ts`
+
+### Password Recovery Not Working
+**Status:** FIXED ✅  
+**Issue:** TRPC API routing mismatch in password reset flow  
+**Root Cause:** `ResetPasswordForm` called wrong endpoints (`admin.auth.*` vs `passwordReset.*`)  
+**Solution:** Updated API calls and standardized on TRPC mutations
+
+### Inconsistent Blocked Dates Colors
+**Status:** FIXED ✅  
+**Issue:** Travel dates shown in red/blue instead of neutral colors  
+**Solution:** Standardized color scheme:
+- Travel: Gray (neutral)
+- Competition: Red (important)
+- Other: Gray (neutral)
+
+### Notification System Not Active
+**Status:** ENHANCED ✅  
+**Issue:** Notification UI existed but no notifications were generated  
+**Solution:** Integrated `createNotification` helper into lesson booking flow
+
 ## 🔍 Common Issues
 
 ### Development Environment

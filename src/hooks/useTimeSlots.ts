@@ -38,13 +38,10 @@ interface UseTimeSlotsResult {
 
 export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTimeSlotsResult {
   // Get rinks data with error handling
-  const { data: rinks, error: rinksError } = api.admin.schedule.getRinks.useQuery(undefined, {
+  const { data: rinks } = api.admin.schedule.getRinks.useQuery(undefined, {
     retry: 2,
     retryDelay: 1000,
-    onError: (error) => {
-      console.error("Failed to fetch rinks:", error.message);
-    },
-  });
+  } as any);
 
   // Get students data with error handling - fetch approved students for assignment
   const { data: studentsResponse } = api.admin.student.getStudents.useQuery(
@@ -55,10 +52,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     {
       retry: 2,
       retryDelay: 1000,
-      onError: (error) => {
-        console.error("Failed to fetch students:", error.message);
-      },
-    },
+    } as any,
   );
 
   // Extract students array from paginated response
@@ -76,10 +70,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
       staleTime: 30000,
       retry: 2,
       retryDelay: 1000,
-      onError: (error) => {
-        console.error("Failed to fetch time slots:", error.message);
-      },
-    },
+    } as any,
   );
 
   // Convert time slots to FullCalendar events

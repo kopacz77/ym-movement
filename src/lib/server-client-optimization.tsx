@@ -439,9 +439,16 @@ export class ServerClientPerformanceUtils {
    * Server component wrapper with error handling
    */
   static withServerErrorHandling<P extends object>(Component: React.ComponentType<P>) {
-    return async (props: P) => {
+    return (props: P) => {
       try {
-        return await Component(props);
+        // Check if Component is a function component
+        if (typeof Component === "function") {
+          const result = (Component as React.FunctionComponent<P>)(props);
+          return result;
+        }
+        // For class components, use JSX
+        const ComponentElement = Component as any;
+        return <ComponentElement {...props} />;
       } catch (error) {
         console.error("Server component error:", error);
         return <div>Error loading component</div>;

@@ -1,8 +1,7 @@
 // src/app/auth/forgot-password/page.tsx
 "use client";
 import Link from "next/link";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +19,9 @@ import { api } from "@/lib/api";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  // Generate unique ID for the email input
+  const emailId = React.useId();
 
   // TRPC mutation for password reset request
   const requestResetMutation = api.passwordReset.requestReset.useMutation({
@@ -63,9 +65,9 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor={emailId}>Email</Label>
                 <Input
-                  id="email"
+                  id={emailId}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

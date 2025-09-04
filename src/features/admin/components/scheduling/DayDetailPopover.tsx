@@ -213,7 +213,7 @@ export function DayDetailPopover({
                         {/* Show assigned students */}
                         {slot.Lesson && slot.Lesson.length > 0 && (
                           <div className="mt-2">
-                            {slot.Lesson.map((lesson) => (
+                            {slot.Lesson.map((lesson: any) => (
                               <p key={lesson.id} className="text-xs text-muted-foreground">
                                 {lesson.Student?.User?.name || "Student"}
                               </p>

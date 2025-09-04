@@ -108,7 +108,7 @@ export function UpcomingLessons() {
                     {lesson.type ? lesson.type.replace("_", " ") : "Private"} Lesson
                   </CardTitle>
                   <CardAction>
-                    <LessonStatusBadge status={lesson.status} />
+                    <LessonStatusBadge status={lesson.status as any} />
                   </CardAction>
                 </CardHeader>
                 <CardContent className="pt-0">

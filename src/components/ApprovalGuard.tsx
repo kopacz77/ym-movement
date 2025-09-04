@@ -2,9 +2,9 @@
 "use client";
 
 import { Clock, UserCheck } from "lucide-react";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface ApprovalGuardProps {
   children: React.ReactNode;
@@ -12,10 +12,10 @@ interface ApprovalGuardProps {
   fallbackMessage?: string;
 }
 
-export function ApprovalGuard({ 
-  children, 
+export function ApprovalGuard({
+  children,
   fallbackTitle = "Account Approval Required",
-  fallbackMessage = "Your account is currently pending approval by our administrators."
+  fallbackMessage = "Your account is currently pending approval by our administrators.",
 }: ApprovalGuardProps) {
   const { isApproved, isStudent, name } = useCurrentUser();
 
@@ -56,26 +56,19 @@ export function ApprovalGuard({
               <li>• Once approved, you can book lessons immediately</li>
             </ul>
           </div>
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-semibold text-blue-800 mb-2">Need help?</h4>
             <p className="text-sm text-blue-700">
               Contact us at{" "}
-              <a 
-                href="mailto:info@ym-movement.com" 
-                className="underline hover:no-underline"
-              >
+              <a href="mailto:info@ym-movement.com" className="underline hover:no-underline">
                 info@ym-movement.com
               </a>{" "}
               if you have any questions about your approval status.
             </p>
           </div>
 
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => window.location.reload()}
-          >
+          <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
             Refresh Status
           </Button>
         </CardContent>

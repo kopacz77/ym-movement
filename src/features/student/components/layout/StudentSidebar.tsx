@@ -44,10 +44,10 @@ export function StudentSidebar() {
               href={isDisabled ? "#" : item.href}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isDisabled 
-                  ? "text-zinc-400 cursor-not-allowed" 
-                  : isActive 
-                    ? "bg-sky-50 text-sky-600" 
+                isDisabled
+                  ? "text-zinc-400 cursor-not-allowed"
+                  : isActive
+                    ? "bg-sky-50 text-sky-600"
                     : "text-zinc-700 hover:bg-zinc-100",
               )}
               onClick={(e) => {

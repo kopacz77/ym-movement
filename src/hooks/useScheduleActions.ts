@@ -67,12 +67,15 @@ export function useScheduleActions() {
         const queryClient = utils.client;
 
         // Get all cached getTimeSlots queries (with different parameters)
-        const cachedQueries = queryClient.getQueriesData({
+        const cachedQueries = (queryClient as any).getQueriesData({
           queryKey: ["admin", "schedule", "getTimeSlots"],
         });
 
         // Snapshot all previous values
-        const previousData = cachedQueries.map(([queryKey, data]) => ({ queryKey, data }));
+        const previousData = cachedQueries.map(([queryKey, data]: [any, any]) => ({
+          queryKey,
+          data,
+        }));
 
         // Get student data for optimistic update
         const studentsData = utils.admin.student.getStudents.getData({
@@ -83,7 +86,7 @@ export function useScheduleActions() {
 
         if (student) {
           // Update all cached getTimeSlots queries
-          previousData.forEach(({ queryKey, data }, index) => {
+          previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }, index: any) => {
             if (data && Array.isArray(data)) {
               const updatedTimeSlots = data.map((slot: any) => {
                 if (slot.id === timeSlotId) {
@@ -106,12 +109,12 @@ export function useScheduleActions() {
               });
 
               // Update this specific cached query
-              queryClient.setQueryData(queryKey, updatedTimeSlots);
+              (queryClient as any).setQueryData(queryKey, updatedTimeSlots);
             }
           });
         }
         return { previousData };
-      } catch (error) {
+      } catch {
         return { previousData: [] };
       }
     },
@@ -129,8 +132,8 @@ export function useScheduleActions() {
       // Rollback on error
       if (context?.previousData) {
         const queryClient = utils.client;
-        context.previousData.forEach(({ queryKey, data }) => {
-          queryClient.setQueryData(queryKey, data);
+        context.previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }) => {
+          (queryClient as any).setQueryData(queryKey, data);
         });
       }
     },
@@ -146,15 +149,18 @@ export function useScheduleActions() {
       const queryClient = utils.client;
 
       // Get all cached getTimeSlots queries (with different parameters)
-      const cachedQueries = queryClient.getQueriesData({
+      const cachedQueries = (queryClient as any).getQueriesData({
         queryKey: ["admin", "schedule", "getTimeSlots"],
       });
 
       // Snapshot all previous values
-      const previousData = cachedQueries.map(([queryKey, data]) => ({ queryKey, data }));
+      const previousData = cachedQueries.map(([queryKey, data]: [any, any]) => ({
+        queryKey,
+        data,
+      }));
 
       // Update all cached getTimeSlots queries
-      previousData.forEach(({ queryKey, data }) => {
+      previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }) => {
         if (data && Array.isArray(data)) {
           const updatedTimeSlots = data.map((slot: any) => ({
             ...slot,
@@ -162,7 +168,7 @@ export function useScheduleActions() {
           }));
 
           // Update this specific cached query
-          queryClient.setQueryData(queryKey, updatedTimeSlots);
+          (queryClient as any).setQueryData(queryKey, updatedTimeSlots);
         }
       });
 
@@ -182,8 +188,8 @@ export function useScheduleActions() {
       // Rollback on error
       if (context?.previousData) {
         const queryClient = utils.client;
-        context.previousData.forEach(({ queryKey, data }) => {
-          queryClient.setQueryData(queryKey, data);
+        context.previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }) => {
+          (queryClient as any).setQueryData(queryKey, data);
         });
       }
     },

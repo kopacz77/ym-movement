@@ -123,7 +123,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span>{slot.Rink.name}</span>
+              <span>{slot.rink.name}</span>
             </div>
           </div>
 

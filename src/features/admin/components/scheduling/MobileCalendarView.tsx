@@ -20,6 +20,9 @@ interface MobileCalendarViewProps {
   onSlotClickAction: (slot: TimeSlot) => void;
   rinkTimezone: string;
   rinkName?: string;
+  isSelectionMode?: boolean;
+  selectedSlotIds?: Set<string>;
+  onSlotSelection?: (slotId: string, isSelected: boolean) => void;
 }
 
 export function MobileCalendarView({
@@ -70,17 +73,17 @@ export function MobileCalendarView({
 
   // Get status color for a slot
   const getSlotColor = (slot: TimeSlot) => {
-    const lessonsCount = slot.lessons?.length || 0;
+    const LessonCount = slot.Lesson?.length || 0;
 
     if (!slot.isActive) {
       return "bg-slate-400";
     }
 
-    if (lessonsCount >= slot.maxStudents) {
+    if (LessonCount >= slot.maxStudents) {
       return "bg-blue-500";
     }
 
-    if (lessonsCount > 0) {
+    if (LessonCount > 0) {
       return "bg-amber-400";
     }
 
@@ -171,8 +174,8 @@ export function MobileCalendarView({
                       localTimeDisplay = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
                     }
 
-                    // Count lessons
-                    const lessonsCount = slot.lessons?.length || 0;
+                    // Count Lesson
+                    const LessonCount = slot.Lesson?.length || 0;
 
                     return (
                       <button
@@ -198,9 +201,9 @@ export function MobileCalendarView({
                             {slot.Rink.timezone.split("/").pop()?.replace("_", " ")})
                           </div>
                           <div className="text-sm">
-                            {lessonsCount > 0 ? (
+                            {LessonCount > 0 ? (
                               <span>
-                                {lessonsCount}/{slot.maxStudents} students
+                                {LessonCount}/{slot.maxStudents} students
                               </span>
                             ) : (
                               <span className="text-gray-500 dark:text-gray-400">

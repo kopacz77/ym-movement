@@ -31,12 +31,6 @@ export const NotificationsPopover = () => {
     refetchInterval: 60000,
     enabled: isAuthenticated, // Only fetch when authenticated
     retry: false, // Don't retry 401s
-    onError: (error) => {
-      // Don't show toast for auth errors
-      if (error.data?.httpStatus !== 401) {
-        console.error("Notifications error:", error.message);
-      }
-    },
   });
 
   // Mark as read mutation

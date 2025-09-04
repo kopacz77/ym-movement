@@ -100,7 +100,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
   };
 
   // Check if we have students data to display
-  const students = (studentsData as StudentsResponse)?.students || [];
+  const students = (studentsData as unknown as StudentsResponse)?.students || [];
 
   return (
     <Dialog open={open} onOpenChange={onCloseAction}>
@@ -136,7 +136,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
                       ) : (
                         students.map((student) => (
                           <SelectItem key={student.id} value={student.id}>
-                            {student.User.name || student.User.email}
+                            {student.user?.name ||
+                              (student as any).User?.name ||
+                              student.user?.email ||
+                              (student as any).User?.email}
                           </SelectItem>
                         ))
                       )}

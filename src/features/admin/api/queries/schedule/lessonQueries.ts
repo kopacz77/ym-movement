@@ -1,6 +1,6 @@
 import { LessonStatus, LessonType, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
 import { googleCalendar } from "@/lib/google/calendar";

@@ -2,8 +2,8 @@
 
 import { LessonType, PaymentMethod } from "@prisma/client";
 import { format } from "date-fns";
-import { DateTime } from "luxon";
 import { Calendar, Clock, MapPin } from "lucide-react";
+import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -36,7 +36,12 @@ interface BookingDialogProps {
   onCloseAction: () => void;
 }
 
-export function BookingDialog({ slot, studentId, rinkTimezone, onCloseAction }: BookingDialogProps) {
+export function BookingDialog({
+  slot,
+  studentId,
+  rinkTimezone,
+  onCloseAction,
+}: BookingDialogProps) {
   const [lessonType, setLessonType] = useState<LessonType>(LessonType.PRIVATE);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.VENMO);
   const [notes, setNotes] = useState("");
@@ -111,15 +116,16 @@ export function BookingDialog({ slot, studentId, rinkTimezone, onCloseAction }: 
   // Convert UTC time to AM/PM format in the rink's timezone
   const formatAMPM = (dateStr: string | Date) => {
     try {
-      const dateTime = typeof dateStr === "string" 
-        ? DateTime.fromISO(dateStr, { zone: "utc" }).setZone(rinkTimezone)
-        : DateTime.fromJSDate(dateStr, { zone: "utc" }).setZone(rinkTimezone);
-      
+      const dateTime =
+        typeof dateStr === "string"
+          ? DateTime.fromISO(dateStr, { zone: "utc" }).setZone(rinkTimezone)
+          : DateTime.fromJSDate(dateStr, { zone: "utc" }).setZone(rinkTimezone);
+
       if (!dateTime.isValid) {
         console.error("Invalid date in BookingDialog formatAMPM:", dateStr);
         return "Invalid time";
       }
-      
+
       return dateTime.toFormat("h:mm a");
     } catch (error) {
       console.error("Error formatting time in BookingDialog:", error);

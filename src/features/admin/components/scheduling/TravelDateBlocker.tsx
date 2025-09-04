@@ -1,7 +1,9 @@
 "use client";
 
+import { CalendarIcon, PlaneIcon, PlusIcon, TrashIcon } from "lucide-react";
 import * as React from "react";
-import { CalendarIcon, PlusIcon, TrashIcon, PlaneIcon } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { DateRange } from "react-day-picker";
 
 interface BlockedDateRange {
   id: string;

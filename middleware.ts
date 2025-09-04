@@ -1,6 +1,7 @@
 // Updated middleware.ts
-import { NextResponse } from "next/server";
+
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Add environment variable control without breaking development flow
@@ -9,11 +10,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Immediately skip processing for static assets and API routes
-  if (
-    path.startsWith('/_next/') ||
-    path.startsWith('/api/') ||
-    path.includes('.')
-  ) {
+  if (path.startsWith("/_next/") || path.startsWith("/api/") || path.includes(".")) {
     return NextResponse.next();
   }
 
@@ -33,7 +30,10 @@ export async function middleware(request: NextRequest) {
     });
   } catch (error) {
     // Log token verification errors for security monitoring
-    console.error("Token verification failed:", error instanceof Error ? error.message : "Unknown error");
+    console.error(
+      "Token verification failed:",
+      error instanceof Error ? error.message : "Unknown error",
+    );
     token = null;
   }
 
@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
   if (!isPublicPath && !isAuthenticated) {
     // REMOVED: Development bypass for security
     // All environments must properly authenticate
-    
+
     const loginUrl = new URL("/auth/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
@@ -52,8 +52,7 @@ export async function middleware(request: NextRequest) {
   if (isAuthenticated && isPublicPath && path !== "/") {
     // Redirect to the appropriate dashboard based on role
     const role = token?.role as string;
-    const redirectPath =
-      role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
+    const redirectPath = role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
     const dashboardUrl = new URL(redirectPath, request.url);
     return NextResponse.redirect(dashboardUrl);
   }
@@ -92,9 +91,9 @@ export const config = {
     // Only match specific routes, completely avoiding static assets
     "/",
     "/admin/:path*",
-    "/student/:path*", 
+    "/student/:path*",
     "/auth/:path*",
     "/terms",
-    "/privacy"
+    "/privacy",
   ],
 };

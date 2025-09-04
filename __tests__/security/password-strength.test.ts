@@ -46,7 +46,7 @@ describe("Password Strength Validation", () => {
       "MySecure@Pass1",
       "Complex#Password9",
       "Strong$Pass123",
-      "Secure&Pass456"
+      "Secure&Pass456",
     ];
 
     for (const password of strongPasswords) {

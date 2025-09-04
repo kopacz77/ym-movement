@@ -74,7 +74,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
   const studentLessons = React.useMemo(() => {
     if (!lessons) return [];
     return lessons.filter(
-      (lesson) => lesson.student?.user?.id === studentId && lesson.status !== "CANCELLED",
+      (lesson) => lesson.Student?.User?.id === studentId && lesson.status !== "CANCELLED",
     );
   }, [lessons, studentId]);
 
@@ -121,7 +121,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {studentLessons.map((lesson: APILesson) => (
+              {studentLessons.map((lesson: any) => (
                 <TableRow key={lesson.id}>
                   <TableCell>{format(new Date(lesson.startTime), "PP")}</TableCell>
                   <TableCell>
@@ -141,7 +141,7 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
                     </div>
                   </TableCell>
                   <TableCell>{lesson.type.replace("_", " ")}</TableCell>
-                  <TableCell>{lesson.Rink.name}</TableCell>
+                  <TableCell>{lesson.Rink?.name || lesson.rink?.name}</TableCell>
                   <TableCell className="max-w-xs">
                     <p className="text-sm text-muted-foreground truncate">{lesson.notes ?? "-"}</p>
                   </TableCell>

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { redirect } from "next/navigation";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -42,7 +42,7 @@ describe("Routing Tests", () => {
       // Test dashboard route consistency
       const adminDashboard = "/admin/dashboard";
       const studentDashboard = "/student/dashboard";
-      
+
       expect(adminDashboard).toBe("/admin/dashboard");
       expect(studentDashboard).toBe("/student/dashboard");
     });
@@ -52,14 +52,14 @@ describe("Routing Tests", () => {
     it("should redirect admin users to admin dashboard", () => {
       const userRole = "ADMIN";
       const dashboardPath = userRole === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
-      
+
       expect(dashboardPath).toBe("/admin/dashboard");
     });
 
     it("should redirect student users to student dashboard", () => {
-      const userRole: "STUDENT" | "ADMIN" = "STUDENT";
+      const userRole = "STUDENT" as "STUDENT" | "ADMIN";
       const dashboardPath = userRole === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
-      
+
       expect(dashboardPath).toBe("/student/dashboard");
     });
 
@@ -67,7 +67,7 @@ describe("Routing Tests", () => {
       const userRole = "COACH" as string;
       // Assuming coaches get redirected to student dashboard as fallback
       const dashboardPath = userRole === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
-      
+
       expect(dashboardPath).toBe("/student/dashboard");
     });
   });
@@ -78,10 +78,10 @@ describe("Routing Tests", () => {
         "/admin/dashboard",
         "/admin/students",
         "/admin/schedule",
-        "/admin/settings"
+        "/admin/settings",
       ];
 
-      adminRoutes.forEach(route => {
+      adminRoutes.forEach((route) => {
         expect(route.startsWith("/admin")).toBe(true);
       });
     });
@@ -91,10 +91,10 @@ describe("Routing Tests", () => {
         "/student/dashboard",
         "/student/profile",
         "/student/schedule",
-        "/student/lessons"
+        "/student/lessons",
       ];
 
-      studentRoutes.forEach(route => {
+      studentRoutes.forEach((route) => {
         expect(route.startsWith("/student")).toBe(true);
       });
     });
@@ -105,17 +105,19 @@ describe("Routing Tests", () => {
         "/auth/login",
         "/auth/signup",
         "/api/auth/signin",
-        "/api/auth/callback"
+        "/api/auth/callback",
       ];
 
       const isPublicRoute = (path: string) => {
-        return path === "/" || 
-               path === "/auth/login" || 
-               path === "/auth/signup" || 
-               path.startsWith("/api/auth");
+        return (
+          path === "/" ||
+          path === "/auth/login" ||
+          path === "/auth/signup" ||
+          path.startsWith("/api/auth")
+        );
       };
 
-      publicRoutes.forEach(route => {
+      publicRoutes.forEach((route) => {
         expect(isPublicRoute(route)).toBe(true);
       });
 
@@ -130,10 +132,10 @@ describe("Routing Tests", () => {
       const baseUrl = "http://localhost:3000";
       const loginPath = "/auth/login";
       const adminPath = "/admin/dashboard";
-      
+
       const loginUrl = new URL(loginPath, baseUrl);
       const adminUrl = new URL(adminPath, baseUrl);
-      
+
       expect(loginUrl.toString()).toBe("http://localhost:3000/auth/login");
       expect(adminUrl.toString()).toBe("http://localhost:3000/admin/dashboard");
     });
@@ -143,8 +145,10 @@ describe("Routing Tests", () => {
       const returnTo = "/student/dashboard";
       const loginUrl = new URL("/auth/login", baseUrl);
       loginUrl.searchParams.set("returnTo", returnTo);
-      
-      expect(loginUrl.toString()).toBe("http://localhost:3000/auth/login?returnTo=%2Fstudent%2Fdashboard");
+
+      expect(loginUrl.toString()).toBe(
+        "http://localhost:3000/auth/login?returnTo=%2Fstudent%2Fdashboard",
+      );
     });
   });
 });

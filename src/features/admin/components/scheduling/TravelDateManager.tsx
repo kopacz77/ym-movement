@@ -1,7 +1,9 @@
 "use client";
 
+import { CalendarIcon, Plane, PlusIcon, TrashIcon } from "lucide-react";
 import * as React from "react";
-import { CalendarIcon, PlusIcon, TrashIcon, Plane } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -14,8 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { DateRange } from "react-day-picker";
 
 interface BlockedDateRange {
   id: string;
@@ -43,6 +43,11 @@ export function TravelDateManager({
   const [description, setDescription] = React.useState("");
   const [type, setType] = React.useState<"travel" | "competition" | "other">("travel");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>();
+
+  // Generate unique IDs for form elements
+  const titleId = React.useId();
+  const typeId = React.useId();
+  const descriptionId = React.useId();
 
   const handleSubmit = () => {
     if (!title.trim() || !dateRange?.from || !dateRange?.to) {
@@ -118,11 +123,11 @@ export function TravelDateManager({
             <div className="space-y-6 pt-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor={titleId} className="text-sm font-medium text-gray-700">
                     Title *
                   </Label>
                   <Input
-                    id="title"
+                    id={titleId}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., Nationals Competition"
@@ -130,13 +135,13 @@ export function TravelDateManager({
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="type" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor={typeId} className="text-sm font-medium text-gray-700">
                     Type
                   </Label>
                   <select
-                    id="type"
+                    id={typeId}
                     value={type}
-                    onChange={(e) => setType(e.target.value as any)}
+                    onChange={(e) => setType(e.target.value as "travel" | "competition" | "other")}
                     className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-background focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="travel">Travel</option>
@@ -147,11 +152,11 @@ export function TravelDateManager({
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                <Label htmlFor={descriptionId} className="text-sm font-medium text-gray-700">
                   Description (optional)
                 </Label>
                 <Input
-                  id="description"
+                  id={descriptionId}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Additional details..."

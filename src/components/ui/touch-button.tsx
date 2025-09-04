@@ -1,10 +1,16 @@
 // src/components/ui/touch-button.tsx
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import React from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button, type buttonVariants } from "@/components/ui/button";
 import { useTouchTarget } from "@/hooks/useTouchTarget";
 import { cn } from "@/lib/utils";
+
+type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  };
 
 interface TouchButtonProps extends ButtonProps {
   /**

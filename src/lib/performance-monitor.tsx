@@ -173,6 +173,7 @@ export function PerformancePanel() {
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`px-3 py-2 rounded-lg text-xs font-mono ${
           slowComponents.length > 0 ? "bg-red-500 text-white" : "bg-green-500 text-white"
@@ -187,6 +188,7 @@ export function PerformancePanel() {
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-semibold text-sm">Performance Monitor</h3>
             <button
+              type="button"
               onClick={() => performanceMonitor.clear()}
               className="text-xs text-red-600 hover:text-red-800"
             >

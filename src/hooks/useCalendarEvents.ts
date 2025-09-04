@@ -104,8 +104,8 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
           endTime: endTimeStr,
           maxStudents: slot.maxStudents,
           isActive: slot.isActive,
-          lessons: slot.Lesson,
-          rink: slot.Rink,
+          Lesson: slot.Lesson,
+          Rink: slot.Rink,
         });
       }
     }

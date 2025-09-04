@@ -14,7 +14,6 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import type { DateLocalizer } from "react-big-calendar";
 // src/features/admin/components/scheduling/DesktopCalendarView.tsx
 import { CalendarHeader } from "./CalendarHeader";
-import { CustomMonthView } from "./CustomMonthView";
 import type { TimeSlot } from "./calendarUtils";
 import { DayDetailPopover } from "./DayDetailPopover";
 import { EnhancedCalendarHeader } from "./EnhancedCalendarHeader";
@@ -94,7 +93,6 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   selectedSlotIds = new Set(),
   onSlotSelection,
   timeSlots = [],
-  onDayClick,
   onCreateSlot,
   onEditSlot,
   onDeleteSlot,
@@ -163,11 +161,13 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       }
     });
     return blocked;
-  }, [blockedDateRanges]);
+  }, []);
 
   // Process events for month view - create daily summary events
   const processedMonthEvents = useMemo(() => {
-    if (calendarView !== "month" || !timeSlots) return [...events, ...blockedEvents];
+    if (calendarView !== "month" || !timeSlots) {
+      return [...events, ...blockedEvents];
+    }
 
     // Group time slots by day
     const dayGroups = new Map<string, TimeSlot[]>();
@@ -179,7 +179,10 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       if (!dayGroups.has(dayKey)) {
         dayGroups.set(dayKey, []);
       }
-      dayGroups.get(dayKey)!.push(slot);
+      const daySlots = dayGroups.get(dayKey);
+      if (daySlots) {
+        daySlots.push(slot);
+      }
     });
 
     // Create summary events for each day
@@ -224,7 +227,9 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
           : `${availableSlots} open slot${availableSlots !== 1 ? "s" : ""}`;
       }
 
-      if (!title) title = "No activity";
+      if (!title) {
+        title = "No activity";
+      }
 
       // Create a single event that spans 1 hour at the beginning of the day for better visibility
       return {
@@ -241,7 +246,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
 
     // Combine blocked events and summary events
     return [...blockedEvents, ...summaryEvents];
-  }, [calendarView, timeSlots, events, blockedDateRanges, blockedEvents]);
+  }, [calendarView, timeSlots, events, blockedEvents]);
 
   // rinkTimezone and rinkName are now passed as props
 
@@ -249,12 +254,12 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   const EventComponent = useCallback(
     (props: EventProps<object>) => {
       const event = props.event as ExtendedCalendarEvent;
-      const timezone = event.slot?.rink?.timezone || "America/New_York";
+      const timezone = event.slot?.Rink?.timezone || "America/New_York";
       const isSelected = event.slot?.id ? selectedSlotIds.has(event.slot.id) : false;
 
       // Check if this is a blocked date event
-      if (event.slot?.isBlocked) {
-        const blockedRange = event.slot.blockedRange;
+      if (event.slot && "isBlocked" in event.slot && event.slot.isBlocked) {
+        const blockedRange = "blockedRange" in event.slot ? event.slot.blockedRange : null;
         return (
           <div
             style={{
@@ -275,9 +280,14 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
           >
             <div className="w-full">
               <div className="font-bold">{event.title}</div>
-              {blockedRange?.description && (
-                <div className="text-xs opacity-90 mt-1">{blockedRange.description}</div>
-              )}
+              {blockedRange &&
+                typeof blockedRange === "object" &&
+                "description" in blockedRange &&
+                (blockedRange as any).description && (
+                  <div className="text-xs opacity-90 mt-1">
+                    {String((blockedRange as any).description)}
+                  </div>
+                )}
             </div>
           </div>
         );
@@ -341,6 +351,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
                   onDeleteSlot={onDeleteSlot}
                   trigger={
                     <button
+                      type="button"
                       className="w-4 h-4 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -385,7 +396,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         </div>
       );
     },
-    [rinkName, isSelectionMode, selectedSlotIds, calendarView],
+    [rinkName, isSelectionMode, selectedSlotIds, calendarView, timeSlots, onCreateSlot, onEditSlot, onDeleteSlot],
   );
 
   // Accessor functions for calendar
@@ -413,7 +424,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       const typedEvent = event as ExtendedCalendarEvent;
 
       // Check if this is a blocked date event - handle specially
-      if (typedEvent.slot?.isBlocked) {
+      if (typedEvent.slot && "isBlocked" in typedEvent.slot && typedEvent.slot.isBlocked) {
         console.log("Blocked date clicked - opening blocked date management");
         // Pass the blocked date event to the parent for special handling
         onSelectEvent(typedEvent);
@@ -541,7 +552,6 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
             style={{ height: 700 }}
             // Selection configuration
             selectable={true}
-            selectRangeFormat={() => ""}
             onSelectSlot={handleSelectSlot}
             onSelectEvent={handleSelectEvent}
             onSelecting={() => true}
@@ -550,7 +560,6 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
             resizable={true}
             onEventDrop={handleEventDrop}
             onEventResize={handleEventDrop}
-            dragAndDropFromOutsideSource={false}
             // View configuration
             defaultView={Views.WEEK}
             view={calendarView as (typeof Views)[keyof typeof Views]}

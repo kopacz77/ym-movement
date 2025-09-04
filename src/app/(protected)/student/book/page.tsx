@@ -15,8 +15,8 @@ const BookingCalendar = dynamic(
 
 export default function BookLessonPage() {
   return (
-    <ApprovalGuard 
-      fallbackTitle="Account Approval Required" 
+    <ApprovalGuard
+      fallbackTitle="Account Approval Required"
       fallbackMessage="Your account must be approved by an administrator before you can book lessons."
     >
       <div className="space-y-6">

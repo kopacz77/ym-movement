@@ -43,9 +43,9 @@ export const StudentCard: React.FC<StudentCardProps> = ({ student, onViewProfile
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium">{student.User.name}</h3>
+            <h3 className="font-medium">{student.user.name}</h3>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <Mail className="h-4 w-4" /> {student.User.email}
+              <Mail className="h-4 w-4" /> {student.user.email}
             </div>
             {student.phone && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -3,8 +3,8 @@
 import type { PrismaClient } from "@prisma/client";
 import { Level, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { randomUUID } from "crypto";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define zod schema for our settings

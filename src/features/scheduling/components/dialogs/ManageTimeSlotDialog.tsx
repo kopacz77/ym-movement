@@ -1,7 +1,6 @@
 import { X } from "lucide-react";
 import type { Event } from "react-big-calendar";
 import { toast } from "sonner";
-import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/dialogs/ManageTimeSlotDialog.tsx
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatRinkTime } from "@/lib/timezone";
+import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import type { TimeSlot } from "@/types/scheduling";
 
 interface Student {

@@ -1,6 +1,7 @@
 // Streamlined src/lib/email.ts
-import { Resend } from "resend";
+
 import { DateTime } from "luxon";
+import { Resend } from "resend";
 
 // Initialize Resend with API key
 const resendApiKey = process.env.RESEND_API_KEY || "";
@@ -38,7 +39,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       to,
       subject,
       apiKeyLength: resendApiKey?.length,
-      apiKeyPrefix: resendApiKey?.substring(0, 8) + "..."
+      apiKeyPrefix: `${resendApiKey?.substring(0, 8)}...`,
     });
 
     const { data, error } = await resend.emails.send({
@@ -52,7 +53,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       console.error(`Error sending email (${subject}):`, error);
       // In development, don't throw - just log and return mock response
       if (process.env.NODE_ENV === "development") {
-        console.warn(`[DEV MODE] Email sending failed, continuing without error`);
+        console.warn("[DEV MODE] Email sending failed, continuing without error");
         return { id: "mock-email-id-dev-fallback" };
       }
       throw new Error(`Failed to send email: ${error.message}`);
@@ -72,12 +73,12 @@ async function sendEmail(to: string, subject: string, html: string) {
 function formatDate(date: Date, timezone: string): string {
   try {
     const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
-    
+
     if (!dt.isValid) {
       console.error("Invalid date for formatDate:", date);
       return "Invalid date";
     }
-    
+
     return dt.toFormat("EEEE, MMMM d, yyyy");
   } catch (error) {
     console.error("Error formatting date:", error);
@@ -91,12 +92,12 @@ function formatDate(date: Date, timezone: string): string {
 function formatTime(date: Date, timezone: string): string {
   try {
     const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
-    
+
     if (!dt.isValid) {
       console.error("Invalid date for formatTime:", date);
       return "Invalid time";
     }
-    
+
     return dt.toFormat("h:mm a");
   } catch (error) {
     console.error("Error formatting time:", error);
@@ -110,12 +111,12 @@ function formatTime(date: Date, timezone: string): string {
 function formatRawTimeForCalendar(date: Date, timezone: string): string {
   try {
     const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
-    
+
     if (!dt.isValid) {
       console.error("Invalid date for formatRawTimeForCalendar:", date);
       return "";
     }
-    
+
     // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
     return dt.toFormat("yyyyMMdd'T'HHmmss");
   } catch (error) {
@@ -392,9 +393,9 @@ export async function sendPaymentReminderEmail(
         <h2 style="color: #991b1b; margin-top: 0;">Payment Details</h2>
         <ul style="list-style: none; padding: 0;">
           <li style="margin-bottom: 8px;">💰 <strong>Amount Due:</strong> $${paymentDetails.amount.toFixed(2)}</li>
-          ${paymentDetails.lessonDate ? `<li style="margin-bottom: 8px;">📅 <strong>Lesson Date:</strong> ${formatDate(paymentDetails.lessonDate)}</li>` : ""}
+          ${paymentDetails.lessonDate ? `<li style="margin-bottom: 8px;">📅 <strong>Lesson Date:</strong> ${formatDate(paymentDetails.lessonDate, "America/Los_Angeles")}</li>` : ""}
           ${paymentDetails.lessonType ? `<li style="margin-bottom: 8px;">🏆 <strong>Lesson Type:</strong> ${paymentDetails.lessonType}</li>` : ""}
-          <li style="margin-bottom: 8px;">⏰ <strong>Due Date:</strong> ${formatDate(paymentDetails.dueDate)}</li>
+          <li style="margin-bottom: 8px;">⏰ <strong>Due Date:</strong> ${formatDate(paymentDetails.dueDate, "America/Los_Angeles")}</li>
         </ul>
       </div>
 

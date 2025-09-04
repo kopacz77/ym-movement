@@ -1,7 +1,6 @@
 import { X } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
+import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 
 // Define interfaces for the data structures
 interface Rink {
