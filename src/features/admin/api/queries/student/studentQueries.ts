@@ -470,10 +470,15 @@ export const studentQueries = createTRPCRouter({
       try {
         console.log(`Deleting student with ID: ${input.studentId}`);
 
-        // Find the student first to get user details
+        // Find the student first to get user details and check for related data
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
-          include: { User: true },
+          include: {
+            User: true,
+            Lesson: { select: { id: true } },
+            Payment: { select: { id: true } },
+            StudentNote: { select: { id: true } }
+          },
         });
 
         if (!student) {
@@ -483,6 +488,8 @@ export const studentQueries = createTRPCRouter({
           });
         }
 
+        console.log(`Found student with ${student.Lesson.length} lessons, ${student.Payment.length} payments, ${student.StudentNote.length} notes`);
+
         // Log security event
         logSecurityEvent("STUDENT_DELETED", {
           userId: ctx.session?.user?.id,
@@ -491,9 +498,59 @@ export const studentQueries = createTRPCRouter({
           studentName: student.User.name,
         });
 
-        // Delete the student record (this will cascade to user via onDelete in schema)
-        await ctx.prisma.student.delete({
-          where: { id: input.studentId },
+        // Use transaction to properly handle cascade deletions
+        await ctx.prisma.$transaction(async (tx) => {
+          console.log("Starting transaction to delete student and related records...");
+
+          // 1. Delete student notes first
+          if (student.StudentNote.length > 0) {
+            console.log(`Deleting ${student.StudentNote.length} student notes...`);
+            await tx.studentNote.deleteMany({
+              where: { studentId: input.studentId }
+            });
+          }
+
+          // 2. Delete payments (these reference lessons, so delete before lessons)
+          if (student.Payment.length > 0) {
+            console.log(`Deleting ${student.Payment.length} payments...`);
+            await tx.payment.deleteMany({
+              where: { studentId: input.studentId }
+            });
+          }
+
+          // 3. Delete lessons
+          if (student.Lesson.length > 0) {
+            console.log(`Deleting ${student.Lesson.length} lessons...`);
+            await tx.lesson.deleteMany({
+              where: { studentId: input.studentId }
+            });
+          }
+
+          // 4. Delete any notifications for this user
+          console.log("Deleting user notifications...");
+          await tx.notification.deleteMany({
+            where: { userId: student.userId }
+          });
+
+          // 5. Delete any password reset tokens
+          console.log("Deleting password reset tokens...");
+          await tx.passwordResetToken.deleteMany({
+            where: { userId: student.userId }
+          });
+
+          // 6. Finally delete the student record
+          console.log("Deleting student record...");
+          await tx.student.delete({
+            where: { id: input.studentId }
+          });
+
+          // 7. Delete the user record last
+          console.log("Deleting user record...");
+          await tx.user.delete({
+            where: { id: student.userId }
+          });
+
+          console.log("Transaction completed successfully");
         });
 
         console.log(`Successfully deleted student: ${student.User.name} (${student.User.email})`);
@@ -507,9 +564,27 @@ export const studentQueries = createTRPCRouter({
         };
       } catch (error) {
         console.error("Error deleting student:", error);
+
+        // Provide more specific error messages
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === "P2003") {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Cannot delete student due to foreign key constraints. Please check for related records.",
+            });
+          }
+          if (error.code === "P2025") {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Student record not found during deletion",
+            });
+          }
+        }
+
         if (error instanceof TRPCError) {
           throw error;
         }
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to delete student",
