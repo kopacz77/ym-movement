@@ -72,16 +72,27 @@ async function sendEmail(to: string, subject: string, html: string) {
  */
 function formatDate(date: Date, timezone: string): string {
   try {
+    // IMPROVED: Handle timezone conversion more robustly with debugging
+    console.log(`[EMAIL_DATE] Input date: ${date.toISOString()}, target timezone: ${timezone}`);
+
+    // Use UTC approach (standard for database dates)
     const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
 
+    // Log both approaches for debugging
+    console.log(`[EMAIL_DATE] UTC approach: ${dt.toFormat("EEEE, MMMM d, yyyy")}`);
+
+    const dtLocal = DateTime.fromJSDate(date).setZone(timezone);
+    console.log(`[EMAIL_DATE] Local approach: ${dtLocal.toFormat("EEEE, MMMM d, yyyy")}`);
+
     if (!dt.isValid) {
-      console.error("Invalid date for formatDate:", date);
+      console.error("Invalid date for formatDate:", date, "timezone:", timezone);
       return "Invalid date";
     }
 
+    console.log(`[EMAIL_DATE] Final result: ${dt.toFormat("EEEE, MMMM d, yyyy")}`);
     return dt.toFormat("EEEE, MMMM d, yyyy");
   } catch (error) {
-    console.error("Error formatting date:", error);
+    console.error("Error formatting date:", error, "date:", date, "timezone:", timezone);
     return date.toLocaleDateString();
   }
 }
@@ -91,36 +102,50 @@ function formatDate(date: Date, timezone: string): string {
  */
 function formatTime(date: Date, timezone: string): string {
   try {
+    // IMPROVED: Handle timezone conversion more robustly
+    // Database stores dates as UTC, but we need to be careful about the conversion
+    console.log(`[EMAIL_TIME] Input date: ${date.toISOString()}, target timezone: ${timezone}`);
+
+    // First, try treating the date as UTC (standard database behavior)
     const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
 
+    // Log both approaches for debugging
+    console.log(`[EMAIL_TIME] UTC approach: ${dt.toFormat("h:mm a")}`);
+
+    const dtLocal = DateTime.fromJSDate(date).setZone(timezone);
+    console.log(`[EMAIL_TIME] Local approach: ${dtLocal.toFormat("h:mm a")}`);
+
     if (!dt.isValid) {
-      console.error("Invalid date for formatTime:", date);
+      console.error("Invalid date for formatTime:", date, "timezone:", timezone);
       return "Invalid time";
     }
 
+    console.log(`[EMAIL_TIME] Final result: ${dt.toFormat("h:mm a")}`);
     return dt.toFormat("h:mm a");
   } catch (error) {
-    console.error("Error formatting time:", error);
+    console.error("Error formatting time:", error, "date:", date, "timezone:", timezone);
     return date.toLocaleTimeString();
   }
 }
 
 /**
- * Formats a UTC time for Google Calendar in the specified timezone
+ * Formats a time for Google Calendar in the specified timezone
  */
 function formatRawTimeForCalendar(date: Date, timezone: string): string {
   try {
-    const dt = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
+    // FIXED: Don't assume the date is in UTC, let Luxon handle the conversion properly
+    const dt = DateTime.fromJSDate(date).setZone(timezone);
 
     if (!dt.isValid) {
-      console.error("Invalid date for formatRawTimeForCalendar:", date);
+      console.error("Invalid date for formatRawTimeForCalendar:", date, "timezone:", timezone);
       return "";
     }
 
     // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
+    console.log(`[EMAIL_CAL] Converting ${date.toISOString()} to ${timezone}: ${dt.toFormat("yyyyMMdd'T'HHmmss")}`);
     return dt.toFormat("yyyyMMdd'T'HHmmss");
   } catch (error) {
-    console.error("Error formatting time for calendar:", error);
+    console.error("Error formatting time for calendar:", error, "date:", date, "timezone:", timezone);
     return "";
   }
 }

@@ -41,100 +41,19 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
     error,
   } = api.admin.student.getStudents.useQuery({ search: search || undefined });
 
-  // BULLETPROOF delete mutation - forces immediate UI update
   const deleteStudentMutation = api.admin.student.deleteStudent.useMutation({
-    onMutate: async ({ studentId }) => {
-      console.log("🔄 REGULAR STUDENTLIST: Deleting student", studentId);
-
-      // AGGRESSIVE: Cancel ALL queries, not just student ones
-      await queryClient.cancelQueries();
-
-      // Get ALL possible cache keys and clear them
-      const possibleKeys = [
-        ["admin", "student", "getStudents", { search: search || undefined }],
-        ["admin", "student", "getStudents", {}],
-        ["admin", "student", "getStudents"],
-        ["admin", "student", "getPendingApprovals"],
-      ];
-
-      console.log("🔍 Checking all cache keys for student data...");
-
-      // FIRST: Let's see what keys actually exist in the cache
-      const cache = queryClient.getQueryCache();
-      const allQueries = cache.getAll();
-      console.log(
-        "🗂️ ALL CACHE KEYS:",
-        allQueries.map((q) => ({
-          key: q.queryKey,
-          hasData: !!q.state.data,
-        })),
-      );
-
-      // Update ALL possible cache variations
-      possibleKeys.forEach((key) => {
-        const data = queryClient.getQueryData(key);
-        console.log("🔍 Checking key:", key, "Data found:", !!data);
-        if (data) {
-          console.log("📝 Found data in key:", key, data);
-          queryClient.setQueryData(key, (old: any) => {
-            if (old?.students) {
-              const filtered = old.students.filter((student: any) => student.id !== studentId);
-              console.log(
-                `✂️ Filtered ${key.join(".")} from ${old.students.length} to ${filtered.length} students`,
-              );
-              return { ...old, students: filtered };
-            }
-            return old;
-          });
-        }
-      });
-
-      // BRUTE FORCE: Update ALL queries that contain students data
-      console.log("🔨 BRUTE FORCE: Updating all queries with students data...");
-      allQueries.forEach((query) => {
-        const data = query.state.data as any;
-        if (data?.students && Array.isArray(data.students)) {
-          console.log("🎯 BRUTE FORCE: Updating query with key:", query.queryKey);
-          const filtered = data.students.filter((student: any) => student.id !== studentId);
-          queryClient.setQueryData(query.queryKey, {
-            ...data,
-            students: filtered,
-          });
-          console.log(
-            `✂️ BRUTE FORCE: Filtered from ${data.students.length} to ${filtered.length} students`,
-          );
-        }
-      });
-
-      // NUCLEAR OPTION: Force component re-render
-      setTimeout(() => {
-        console.log("💥 NUCLEAR: Force invalidating all student queries");
-        queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
-      }, 0);
-
-      return { studentId };
-    },
     onSuccess: (data) => {
-      console.log("✅ Delete successful, forcing cache refresh");
       toast.success("Student deleted successfully", {
         description: `${data.deletedStudent.name} has been removed from the system.`,
       });
 
-      // IMMEDIATELY invalidate everything
+      // Simple invalidation - let TRPC handle the rest
       queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
-
-      // Force refetch the current query
-      queryClient.refetchQueries({
-        queryKey: ["admin", "student", "getStudents"],
-        exact: false,
-      });
     },
     onError: (error) => {
-      console.log("❌ Delete failed, showing error");
       toast.error("Failed to delete student", {
         description: error.message,
       });
-      // Force refresh on error too
       queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
     },
   });

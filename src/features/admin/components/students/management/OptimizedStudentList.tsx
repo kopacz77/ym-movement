@@ -113,72 +113,19 @@ export const OptimizedStudentList: React.FC<OptimizedStudentListProps> = memo(
       },
     );
 
-    // BULLETPROOF delete mutation - forces immediate UI update
     const deleteStudentMutation = api.admin.student.deleteStudent.useMutation({
-      onMutate: async ({ studentId }) => {
-        console.log("🔄 OPTIMIZED STUDENTLIST: Deleting student", studentId);
-
-        // AGGRESSIVE: Cancel ALL queries
-        await queryClient.cancelQueries();
-
-        // Get ALL possible cache keys and clear them
-        const possibleKeys = [
-          ["admin", "student", "getStudents", { search: debouncedSearch || undefined, limit: 100 }],
-          ["admin", "student", "getStudents", { search: debouncedSearch || undefined }],
-          ["admin", "student", "getStudents", {}],
-          ["admin", "student", "getStudents"],
-          ["admin", "student", "getPendingApprovals"],
-        ];
-
-        console.log("🔍 OPTIMIZED: Checking all cache keys for student data...");
-
-        // Update ALL possible cache variations
-        possibleKeys.forEach((key) => {
-          const data = queryClient.getQueryData(key);
-          if (data) {
-            console.log("📝 OPTIMIZED: Found data in key:", key, data);
-            queryClient.setQueryData(key, (old: any) => {
-              if (old?.students) {
-                const filtered = old.students.filter((student: any) => student.id !== studentId);
-                console.log(
-                  `✂️ OPTIMIZED: Filtered ${key.join(".")} from ${old.students.length} to ${filtered.length} students`,
-                );
-                return { ...old, students: filtered };
-              }
-              return old;
-            });
-          }
-        });
-
-        // NUCLEAR OPTION: Force component re-render
-        setTimeout(() => {
-          console.log("💥 OPTIMIZED NUCLEAR: Force invalidating all student queries");
-          queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
-        }, 0);
-
-        return { studentId };
-      },
       onSuccess: (data) => {
-        console.log("✅ OPTIMIZED: Delete successful, forcing cache refresh");
         toast.success("Student deleted successfully", {
           description: `${data.deletedStudent.name} has been removed from the system.`,
         });
 
-        // IMMEDIATELY invalidate everything
+        // Simple invalidation - let TRPC handle the rest
         queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
-
-        // Force refetch the current query
-        queryClient.refetchQueries({
-          queryKey: ["admin", "student", "getStudents"],
-          exact: false,
-        });
       },
       onError: (error) => {
-        console.log("❌ OPTIMIZED: Delete failed, showing error");
         toast.error("Failed to delete student", {
           description: error.message,
         });
-        // Force refresh on error too
         queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
       },
     });
