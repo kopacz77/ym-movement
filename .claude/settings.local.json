@@ -32,7 +32,8 @@
       "Bash(npx biome format:*)",
       "Bash(pnpm exec biome check:*)",
       "Bash(pnpm exec biome format:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm build:*)"
     ],
     "deny": []
   }
