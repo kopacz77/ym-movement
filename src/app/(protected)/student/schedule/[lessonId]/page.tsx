@@ -6,28 +6,17 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { formatRinkTime } from "@/lib/timezone";
+import { formatUtcDate } from "@/lib/date-utils";
 
 export const metadata: Metadata = {
   title: "Lesson Details",
   description: "View details about your scheduled lesson",
 };
 
-// Function to format time without timezone conversion and without seconds
-function formatTime(date: Date): string {
-  // Use UTC hours and minutes
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-
-  // Format in AM/PM
-  const ampm = hours >= 12 ? "AM" : "AM";
-  const hour12 = hours % 12 || 12; // Convert 0 to 12
-
-  return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
-}
-
-// Function to format date
-function formatDate(date: Date): string {
-  return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+// Helper function to format time with timezone awareness
+function formatLessonTime(date: Date, timezone: string): string {
+  return formatRinkTime(date, timezone, "h:mm a");
 }
 
 // The key change: params is a Promise that must be awaited
@@ -76,6 +65,10 @@ export default async function LessonDetailsPage({
     const endTime = new Date(lesson.endTime);
     const duration = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
 
+    // Format times in the rink's timezone
+    const startTimeFormatted = formatLessonTime(startTime, lesson.Rink.timezone);
+    const endTimeFormatted = formatLessonTime(endTime, lesson.Rink.timezone);
+
     return (
       <div className="container py-6 space-y-6">
         <div className="flex items-center gap-2">
@@ -93,8 +86,10 @@ export default async function LessonDetailsPage({
               <div>
                 <h3 className="font-medium">Date & Time</h3>
                 <p className="text-gray-600">
-                  {formatDate(startTime)}, {formatTime(startTime)} - {formatTime(endTime)} (
-                  {duration} minutes)
+                  {formatUtcDate(startTime)}, {startTimeFormatted} - {endTimeFormatted} ({duration} minutes)
+                </p>
+                <p className="text-xs text-gray-500">
+                  Times shown in rink timezone ({lesson.Rink.timezone.replace('_', ' ')})
                 </p>
               </div>
 
