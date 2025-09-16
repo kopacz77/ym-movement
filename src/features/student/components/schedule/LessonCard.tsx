@@ -3,10 +3,10 @@
 import { LessonStatus } from "@prisma/client";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
+import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LessonStatusBadge, LessonStatusIndicator } from "@/components/ui/lesson-status";
-import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import type { LessonWithDetails } from "@/features/student/types";
 import { formatUtcDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";

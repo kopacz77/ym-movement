@@ -1,5 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { randomUUID } from "node:crypto";
+import { TRPCError } from "@trpc/server";
 import { DateTime } from "luxon"; // Import DateTime for timezone handling
 // src/features/admin/api/queries/schedule/timeSlotQueries.ts
 import { z } from "zod";

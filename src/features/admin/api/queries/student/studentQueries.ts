@@ -1,6 +1,6 @@
+import { randomUUID } from "node:crypto";
 import { Level, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { randomUUID } from "node:crypto";
 // src/features/admin/api/queries/student/studentQueries.ts
 import { z } from "zod";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
@@ -477,7 +477,7 @@ export const studentQueries = createTRPCRouter({
             User: true,
             Lesson: { select: { id: true } },
             Payment: { select: { id: true } },
-            StudentNote: { select: { id: true } }
+            StudentNote: { select: { id: true } },
           },
         });
 
@@ -488,7 +488,9 @@ export const studentQueries = createTRPCRouter({
           });
         }
 
-        console.log(`Found student with ${student.Lesson.length} lessons, ${student.Payment.length} payments, ${student.StudentNote.length} notes`);
+        console.log(
+          `Found student with ${student.Lesson.length} lessons, ${student.Payment.length} payments, ${student.StudentNote.length} notes`,
+        );
 
         // Log security event
         logSecurityEvent("STUDENT_DELETED", {
@@ -506,7 +508,7 @@ export const studentQueries = createTRPCRouter({
           if (student.StudentNote.length > 0) {
             console.log(`Deleting ${student.StudentNote.length} student notes...`);
             await tx.studentNote.deleteMany({
-              where: { studentId: input.studentId }
+              where: { studentId: input.studentId },
             });
           }
 
@@ -514,7 +516,7 @@ export const studentQueries = createTRPCRouter({
           if (student.Payment.length > 0) {
             console.log(`Deleting ${student.Payment.length} payments...`);
             await tx.payment.deleteMany({
-              where: { studentId: input.studentId }
+              where: { studentId: input.studentId },
             });
           }
 
@@ -522,32 +524,32 @@ export const studentQueries = createTRPCRouter({
           if (student.Lesson.length > 0) {
             console.log(`Deleting ${student.Lesson.length} lessons...`);
             await tx.lesson.deleteMany({
-              where: { studentId: input.studentId }
+              where: { studentId: input.studentId },
             });
           }
 
           // 4. Delete any notifications for this user
           console.log("Deleting user notifications...");
           await tx.notification.deleteMany({
-            where: { userId: student.userId }
+            where: { userId: student.userId },
           });
 
           // 5. Delete any password reset tokens
           console.log("Deleting password reset tokens...");
           await tx.passwordResetToken.deleteMany({
-            where: { userId: student.userId }
+            where: { userId: student.userId },
           });
 
           // 6. Finally delete the student record
           console.log("Deleting student record...");
           await tx.student.delete({
-            where: { id: input.studentId }
+            where: { id: input.studentId },
           });
 
           // 7. Delete the user record last
           console.log("Deleting user record...");
           await tx.user.delete({
-            where: { id: student.userId }
+            where: { id: student.userId },
           });
 
           console.log("Transaction completed successfully");
@@ -570,7 +572,8 @@ export const studentQueries = createTRPCRouter({
           if (error.code === "P2003") {
             throw new TRPCError({
               code: "CONFLICT",
-              message: "Cannot delete student due to foreign key constraints. Please check for related records.",
+              message:
+                "Cannot delete student due to foreign key constraints. Please check for related records.",
             });
           }
           if (error.code === "P2025") {

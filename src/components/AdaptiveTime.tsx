@@ -25,9 +25,7 @@ export function AdaptiveTime({
     <span className={cn(className)}>
       {displayTime}
       {showTimezone && isLoaded && (
-        <span className="text-xs text-muted-foreground ml-1">
-          ({timezoneLabel})
-        </span>
+        <span className="text-xs text-muted-foreground ml-1">({timezoneLabel})</span>
       )}
     </span>
   );
@@ -57,9 +55,7 @@ export function AdaptiveTimeRange({
     <span className={cn(className)}>
       {start.displayTime} - {end.displayTime}
       {showTimezone && start.isLoaded && (
-        <span className="text-xs text-muted-foreground ml-1">
-          ({start.timezoneLabel})
-        </span>
+        <span className="text-xs text-muted-foreground ml-1">({start.timezoneLabel})</span>
       )}
     </span>
   );

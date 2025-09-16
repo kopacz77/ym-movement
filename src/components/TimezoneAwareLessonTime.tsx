@@ -1,10 +1,10 @@
 // src/components/TimezoneAwareLessonTime.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { Clock, MapPin } from "lucide-react";
-import { formatRinkTime } from "@/lib/timezone";
+import { useEffect, useState } from "react";
 import { formatUtcDate } from "@/lib/date-utils";
+import { formatRinkTime } from "@/lib/timezone";
 
 interface TimezoneAwareLessonTimeProps {
   startTime: Date;
@@ -37,10 +37,11 @@ export function TimezoneAwareLessonTime({
       <div>
         <h3 className="font-medium">Date & Time</h3>
         <p className="text-gray-600">
-          {formatUtcDate(startTime)}, {formatRinkTime(startTime, rinkTimezone)} - {formatRinkTime(endTime, rinkTimezone)} ({duration} minutes)
+          {formatUtcDate(startTime)}, {formatRinkTime(startTime, rinkTimezone)} -{" "}
+          {formatRinkTime(endTime, rinkTimezone)} ({duration} minutes)
         </p>
         <p className="text-xs text-gray-500">
-          Times shown in rink timezone ({rinkTimezone.replace('_', ' ')})
+          Times shown in rink timezone ({rinkTimezone.replace("_", " ")})
         </p>
       </div>
     );
@@ -57,20 +58,26 @@ export function TimezoneAwareLessonTime({
   // Get timezone abbreviations for display
   const getUserTimezoneAbbr = () => {
     const date = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: userTimezone!,
-      timeZoneName: 'short'
+      timeZoneName: "short",
     });
-    return formatter.formatToParts(date).find(part => part.type === 'timeZoneName')?.value || userTimezone;
+    return (
+      formatter.formatToParts(date).find((part) => part.type === "timeZoneName")?.value ||
+      userTimezone
+    );
   };
 
   const getRinkTimezoneAbbr = () => {
     const date = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: rinkTimezone,
-      timeZoneName: 'short'
+      timeZoneName: "short",
     });
-    return formatter.formatToParts(date).find(part => part.type === 'timeZoneName')?.value || rinkTimezone;
+    return (
+      formatter.formatToParts(date).find((part) => part.type === "timeZoneName")?.value ||
+      rinkTimezone
+    );
   };
 
   return (
@@ -108,8 +115,9 @@ export function TimezoneAwareLessonTime({
           {/* Travel warning */}
           <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mt-3">
             <p className="text-sm text-amber-800">
-              <strong>🧳 Timezone Change Detected:</strong> You appear to be in a different timezone than when you booked.
-              Make sure to arrive at the rink according to the local time shown above.
+              <strong>🧳 Timezone Change Detected:</strong> You appear to be in a different timezone
+              than when you booked. Make sure to arrive at the rink according to the local time
+              shown above.
             </p>
           </div>
         </div>
@@ -119,9 +127,7 @@ export function TimezoneAwareLessonTime({
           <p className="text-gray-600">
             {formatUtcDate(startTime)}, {rinkTimeStart} - {rinkTimeEnd} ({duration} minutes)
           </p>
-          <p className="text-xs text-gray-500">
-            Local time ({getRinkTimezoneAbbr()})
-          </p>
+          <p className="text-xs text-gray-500">Local time ({getRinkTimezoneAbbr()})</p>
         </div>
       )}
     </div>

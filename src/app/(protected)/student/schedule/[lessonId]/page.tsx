@@ -4,11 +4,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
+import { TimezoneAwareLessonTime } from "@/components/TimezoneAwareLessonTime";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatRinkTime } from "@/lib/timezone";
-import { formatUtcDate } from "@/lib/date-utils";
-import { TimezoneAwareLessonTime } from "@/components/TimezoneAwareLessonTime";
 
 export const metadata: Metadata = {
   title: "Lesson Details",

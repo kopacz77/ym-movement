@@ -396,7 +396,16 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         </div>
       );
     },
-    [rinkName, isSelectionMode, selectedSlotIds, calendarView, timeSlots, onCreateSlot, onEditSlot, onDeleteSlot],
+    [
+      rinkName,
+      isSelectionMode,
+      selectedSlotIds,
+      calendarView,
+      timeSlots,
+      onCreateSlot,
+      onEditSlot,
+      onDeleteSlot,
+    ],
   );
 
   // Accessor functions for calendar

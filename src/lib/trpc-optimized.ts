@@ -79,7 +79,9 @@ class TRPCPerformanceMonitor {
 
   getAverageResponseTime(procedure?: string): number {
     const metrics = this.getMetrics(procedure);
-    if (metrics.length === 0) { return 0; }
+    if (metrics.length === 0) {
+      return 0;
+    }
 
     const totalTime = metrics.reduce((sum, metric) => sum + metric.duration, 0);
     return totalTime / metrics.length;
@@ -87,7 +89,9 @@ class TRPCPerformanceMonitor {
 
   getCacheHitRate(procedure?: string): number {
     const metrics = this.getMetrics(procedure);
-    if (metrics.length === 0) { return 0; }
+    if (metrics.length === 0) {
+      return 0;
+    }
 
     const cacheHits = metrics.filter((metric) => metric.cacheHit).length;
     return (cacheHits / metrics.length) * 100;

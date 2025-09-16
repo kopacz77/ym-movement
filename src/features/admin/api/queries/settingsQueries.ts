@@ -1,9 +1,9 @@
 // src/features/admin/api/queries/settingsQueries.ts
 
+import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { Level, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 

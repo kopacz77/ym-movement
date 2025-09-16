@@ -18,7 +18,7 @@ interface TimezoneAwareTimeResult {
 export function useTimezoneAwareTime(
   dateTime: Date | string,
   rinkTimezone: string,
-  format: string = "h:mm a"
+  format = "h:mm a",
 ): TimezoneAwareTimeResult {
   const [userTimezone, setUserTimezone] = useState<string>("");
   const [isLoaded, setIsLoaded] = useState(false);
@@ -35,19 +35,25 @@ export function useTimezoneAwareTime(
   // Get timezone abbreviations
   const getUserTimezoneAbbr = () => {
     if (!isLoaded) return "";
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: userTimezone,
-      timeZoneName: 'short'
+      timeZoneName: "short",
     });
-    return formatter.formatToParts(date).find(part => part.type === 'timeZoneName')?.value || userTimezone;
+    return (
+      formatter.formatToParts(date).find((part) => part.type === "timeZoneName")?.value ||
+      userTimezone
+    );
   };
 
   const getRinkTimezoneAbbr = () => {
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: rinkTimezone,
-      timeZoneName: 'short'
+      timeZoneName: "short",
     });
-    return formatter.formatToParts(date).find(part => part.type === 'timeZoneName')?.value || rinkTimezone;
+    return (
+      formatter.formatToParts(date).find((part) => part.type === "timeZoneName")?.value ||
+      rinkTimezone
+    );
   };
 
   const userTime = isLoaded ? formatRinkTime(date, userTimezone, format) : "";
@@ -70,16 +76,20 @@ export function useTimezoneAwareTime(
 export function useAdaptiveTime(
   dateTime: Date | string,
   rinkTimezone: string,
-  format: string = "h:mm a"
+  format = "h:mm a",
 ): { displayTime: string; timezoneLabel: string; isLoaded: boolean } {
   const result = useTimezoneAwareTime(dateTime, rinkTimezone, format);
 
   const displayTime = result.isLoaded
-    ? (result.isDifferentTimezone ? result.userTime : result.rinkTime)
+    ? result.isDifferentTimezone
+      ? result.userTime
+      : result.rinkTime
     : result.rinkTime;
 
   const timezoneLabel = result.isLoaded
-    ? (result.isDifferentTimezone ? result.userTimezoneAbbr : result.rinkTimezoneAbbr)
+    ? result.isDifferentTimezone
+      ? result.userTimezoneAbbr
+      : result.rinkTimezoneAbbr
     : result.rinkTimezoneAbbr;
 
   return {

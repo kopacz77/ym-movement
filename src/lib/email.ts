@@ -142,10 +142,19 @@ function formatRawTimeForCalendar(date: Date, timezone: string): string {
     }
 
     // Create a string that looks like 20250330T073000 (for Mar 30, 2025, 7:30 AM)
-    console.log(`[EMAIL_CAL] Converting ${date.toISOString()} to ${timezone}: ${dt.toFormat("yyyyMMdd'T'HHmmss")}`);
+    console.log(
+      `[EMAIL_CAL] Converting ${date.toISOString()} to ${timezone}: ${dt.toFormat("yyyyMMdd'T'HHmmss")}`,
+    );
     return dt.toFormat("yyyyMMdd'T'HHmmss");
   } catch (error) {
-    console.error("Error formatting time for calendar:", error, "date:", date, "timezone:", timezone);
+    console.error(
+      "Error formatting time for calendar:",
+      error,
+      "date:",
+      date,
+      "timezone:",
+      timezone,
+    );
     return "";
   }
 }

@@ -5,12 +5,12 @@ import { Calendar, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DelightfulLoading } from "@/components/ui/delightful-loading";
 import { EncouragingEmptyState } from "@/components/ui/encouraging-empty-state";
 import { LessonStatusBadge } from "@/components/ui/lesson-status";
-import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
 
@@ -62,7 +62,6 @@ export function UpcomingLessons() {
   // 1. We don't have a studentId yet
   // 2. We're fetching the data
   const showLoading = !isReady || isLoading || !studentId;
-
 
   return (
     <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30">
