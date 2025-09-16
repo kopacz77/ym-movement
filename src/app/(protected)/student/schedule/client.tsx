@@ -26,6 +26,7 @@ interface Lesson {
   Rink: {
     name: string;
     address: string;
+    timezone: string;
   };
   cancellationReason?: string;
   cancellationTime?: string | Date;
@@ -102,6 +103,7 @@ export default function StudentScheduleClient() {
       Rink: {
         name: lesson.Rink.name,
         address: lesson.Rink.address,
+        timezone: lesson.Rink.timezone,
       },
     };
 

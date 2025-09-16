@@ -13,6 +13,7 @@ export interface TimeSlot {
   Rink: {
     name: string;
     address: string;
+    timezone: string;
   };
 }
 
@@ -31,6 +32,7 @@ export interface LessonWithDetails {
   Rink: {
     name: string;
     address: string;
+    timezone: string;
   };
   Payment?: {
     id: string;

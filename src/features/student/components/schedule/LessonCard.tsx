@@ -6,8 +6,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LessonStatusBadge, LessonStatusIndicator } from "@/components/ui/lesson-status";
+import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import type { LessonWithDetails } from "@/features/student/types";
-import { formatUtcDate, formatUtcTime12h } from "@/lib/date-utils";
+import { formatUtcDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 interface LessonCardProps {
@@ -38,9 +39,11 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
 
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>
-              {formatUtcTime12h(lesson.startTime)} - {formatUtcTime12h(lesson.endTime)}
-            </span>
+            <AdaptiveTimeRange
+              startTime={lesson.startTime}
+              endTime={lesson.endTime}
+              rinkTimezone={lesson.Rink.timezone}
+            />
           </div>
 
           <div className="flex items-center gap-2 text-sm">

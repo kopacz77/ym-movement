@@ -29,6 +29,7 @@ interface Lesson {
   Rink: {
     name: string;
     address: string;
+    timezone: string;
   };
   cancellationReason?: string;
   cancellationTime?: string | Date;
@@ -51,6 +52,7 @@ interface LessonWithDetails {
   Rink: {
     name: string;
     address: string;
+    timezone: string;
   };
   cancellationReason?: string;
   cancellationTime?: Date;

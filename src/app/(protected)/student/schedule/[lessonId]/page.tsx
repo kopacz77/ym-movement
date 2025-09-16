@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatRinkTime } from "@/lib/timezone";
 import { formatUtcDate } from "@/lib/date-utils";
+import { TimezoneAwareLessonTime } from "@/components/TimezoneAwareLessonTime";
 
 export const metadata: Metadata = {
   title: "Lesson Details",
@@ -83,15 +84,13 @@ export default async function LessonDetailsPage({
           <div className="rounded-lg border p-4">
             <h2 className="font-semibold text-lg mb-4">Lesson Information</h2>
             <div className="space-y-3">
-              <div>
-                <h3 className="font-medium">Date & Time</h3>
-                <p className="text-gray-600">
-                  {formatUtcDate(startTime)}, {startTimeFormatted} - {endTimeFormatted} ({duration} minutes)
-                </p>
-                <p className="text-xs text-gray-500">
-                  Times shown in rink timezone ({lesson.Rink.timezone.replace('_', ' ')})
-                </p>
-              </div>
+              <TimezoneAwareLessonTime
+                startTime={startTime}
+                endTime={endTime}
+                rinkTimezone={lesson.Rink.timezone}
+                rinkName={lesson.Rink.name}
+                duration={duration}
+              />
 
               <div>
                 <h3 className="font-medium">Location</h3>

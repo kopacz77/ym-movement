@@ -10,9 +10,9 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { DelightfulLoading } from "@/components/ui/delightful-loading";
 import { EncouragingEmptyState } from "@/components/ui/encouraging-empty-state";
 import { LessonStatusBadge } from "@/components/ui/lesson-status";
+import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
-import { formatTime } from "@/lib/date"; // Import the consistent time formatter
 
 export function UpcomingLessons() {
   const { id: studentId } = useCurrentUser();
@@ -63,25 +63,6 @@ export function UpcomingLessons() {
   // 2. We're fetching the data
   const showLoading = !isReady || isLoading || !studentId;
 
-  // Helper function to format time in a UTC-aware way with error handling
-  const formatLessonTime = (dateStr: string | Date) => {
-    try {
-      // Create a date that treats the UTC time as local time
-      const date = new Date(dateStr);
-      // Extract hours and minutes from UTC
-      const hours = date.getUTCHours();
-      const minutes = date.getUTCMinutes();
-
-      // Create a new date with those hours/minutes in local time
-      const localDate = new Date();
-      localDate.setHours(hours, minutes, 0, 0);
-
-      return formatTime(localDate);
-    } catch (error) {
-      console.error("Error formatting lesson time:", error);
-      return "Invalid time";
-    }
-  };
 
   return (
     <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30">
@@ -118,9 +99,11 @@ export function UpcomingLessons() {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        {formatLessonTime(lesson.startTime)} - {formatLessonTime(lesson.endTime)}
-                      </span>
+                      <AdaptiveTimeRange
+                        startTime={lesson.startTime}
+                        endTime={lesson.endTime}
+                        rinkTimezone={lesson.Rink.timezone}
+                      />
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
