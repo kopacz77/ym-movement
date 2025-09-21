@@ -276,8 +276,10 @@ function BookingCalendarComponent() {
             return groups;
           }
 
-          // Get the date in the rink's timezone
-          const slotDateTime = DateTime.fromISO(slot.startTime.toString()).setZone(rinkTimezone);
+          // Get the date in the rink's timezone - handle both Date objects and ISO strings
+          const slotDateTime = typeof slot.startTime === 'string'
+            ? DateTime.fromISO(slot.startTime).setZone(rinkTimezone)
+            : DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
 
           // Check if the DateTime is valid
           if (!slotDateTime.isValid) {
