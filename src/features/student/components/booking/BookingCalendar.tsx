@@ -269,39 +269,19 @@ function BookingCalendarComponent() {
     // Group events by day in the rink's timezone
     const groupedEvents = availableSlots.reduce(
       (groups, slot) => {
-        try {
-          // Validate slot.startTime before processing
-          if (!slot.startTime) {
-            console.warn("Slot missing startTime:", slot.id);
-            return groups;
-          }
+        // Get the date in the rink's timezone
+        const slotDateTime = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
+        const dateKey = slotDateTime.toFormat("yyyy-MM-dd");
 
-          // Get the date in the rink's timezone - handle both Date objects and ISO strings
-          const slotDateTime = typeof slot.startTime === 'string'
-            ? DateTime.fromISO(slot.startTime).setZone(rinkTimezone)
-            : DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
-
-          // Check if the DateTime is valid
-          if (!slotDateTime.isValid) {
-            console.warn("Invalid slot startTime:", slot.startTime, "Error:", slotDateTime.invalidReason);
-            return groups;
-          }
-
-          const dateKey = slotDateTime.toFormat("yyyy-MM-dd");
-
-          if (!groups[dateKey]) {
-            groups[dateKey] = {
-              date: slotDateTime.toJSDate(),
-              slots: [],
-            };
-          }
-
-          groups[dateKey].slots.push(slot as any);
-          return groups;
-        } catch (error) {
-          console.error("Error processing slot for custom list:", error, slot);
-          return groups;
+        if (!groups[dateKey]) {
+          groups[dateKey] = {
+            date: slotDateTime.toJSDate(),
+            slots: [],
+          };
         }
+
+        groups[dateKey].slots.push(slot as any);
+        return groups;
       },
       {} as Record<string, { date: Date; slots: ApiTimeSlot[] }>,
     );
@@ -597,14 +577,8 @@ function BookingCalendarComponent() {
             </Button>
 
             {processEventsForCustomList().map((day) => {
-              // Format the date in the rink's timezone with validation
+              // Format the date in the rink's timezone
               const dayDate = DateTime.fromJSDate(day.date).setZone(rinkTimezone);
-
-              // Fallback for invalid dates
-              if (!dayDate.isValid) {
-                console.error("Invalid day date in mobile calendar:", day.date, dayDate.invalidReason);
-                return null; // Skip rendering this day
-              }
 
               return (
                 <div key={dayDate.toFormat("yyyy-MM-dd")} className="mb-4">
