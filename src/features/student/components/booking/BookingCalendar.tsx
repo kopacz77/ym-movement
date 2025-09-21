@@ -176,22 +176,50 @@ function BookingCalendarComponent() {
       return "";
     }
 
-    // Use Luxon for proper timezone handling
-    const startDate = DateTime.fromJSDate(date).setZone(rinkTimezone);
+    try {
+      // Use Luxon for proper timezone handling
+      const startDate = DateTime.fromJSDate(date).setZone(rinkTimezone);
 
-    if (calendarView === Views.WEEK) {
-      const endDate = startDate.plus({ days: 6 });
-      if (startDate.month === endDate.month) {
-        return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("d")}, ${startDate.toFormat(
+      // Check if the DateTime is valid
+      if (!startDate.isValid) {
+        console.error("Invalid date for dateRangeText:", date, "timezone:", rinkTimezone, "error:", startDate.invalidReason);
+        // Fallback to a simple date format
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+      }
+
+      if (calendarView === Views.WEEK) {
+        const endDate = startDate.plus({ days: 6 });
+
+        // Check if endDate is also valid
+        if (!endDate.isValid) {
+          console.error("Invalid endDate for dateRangeText:", endDate.invalidReason);
+          return startDate.toFormat("MMM d, yyyy");
+        }
+
+        if (startDate.month === endDate.month) {
+          return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("d")}, ${startDate.toFormat(
+            "yyyy",
+          )}`;
+        }
+        return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("MMM d")}, ${startDate.toFormat(
           "yyyy",
         )}`;
       }
-      return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("MMM d")}, ${startDate.toFormat(
-        "yyyy",
-      )}`;
-    }
 
-    return startDate.toFormat("MMMM yyyy");
+      return startDate.toFormat("MMMM yyyy");
+    } catch (error) {
+      console.error("Error formatting date range:", error);
+      // Fallback to basic date formatting
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
   }, [date, calendarView, rinkTimezone, selectedRink]);
 
   // Convert slots to calendar events

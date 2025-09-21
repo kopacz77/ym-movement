@@ -33,7 +33,8 @@
       "Bash(pnpm exec biome check:*)",
       "Bash(pnpm exec biome format:*)",
       "Bash(ls:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }
