@@ -1,5 +1,5 @@
 # YM Movement Scheduler - Docker Compose Configuration
-# Complete development environment with database and caching
+# Simplified Docker setup using Neon cloud database
 
 version: '3.8'
 
@@ -14,55 +14,35 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:password@db:5432/yura_scheduler_dev
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=development-secret-key-change-in-production
-      - REDIS_URL=redis://redis:6379
+      # Use .env file for all environment variables (including DATABASE_URL from Neon)
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL}
+      - GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY}
+      - GOOGLE_CALENDAR_ID=${GOOGLE_CALENDAR_ID}
+      - INSTRUCTOR_EMAIL=${INSTRUCTOR_EMAIL}
+      # Optional Redis (if configured)
+      - REDIS_URL=${REDIS_URL:-}
     volumes:
       # Enable hot reload in development
       - .:/app
       - /app/node_modules
       - /app/.next
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     command: pnpm dev
     networks:
       - yura-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
-  # PostgreSQL Database
-  db:
-    image: postgres:15-alpine
-    container_name: yura-scheduler-db
-    environment:
-      POSTGRES_DB: yura_scheduler_dev
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/init-db:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    networks:
-      - yura-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d yura_scheduler_dev"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis Cache (Optional)
+  # Redis Cache (Optional - uncomment if needed)
   redis:
     image: redis:7-alpine
     container_name: yura-scheduler-redis
@@ -79,34 +59,10 @@ services:
       timeout: 5s
       retries: 3
     command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
-
-  # Prisma Studio (Database GUI)
-  prisma-studio:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: deps
-    container_name: yura-scheduler-studio
-    ports:
-      - "5555:5555"
-    environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/yura_scheduler_dev
-    volumes:
-      - .:/app
-      - /app/node_modules
-    depends_on:
-      db:
-        condition: service_healthy
-    command: npx prisma studio --hostname 0.0.0.0
-    networks:
-      - yura-network
-    restart: unless-stopped
     profiles:
-      - studio
+      - redis
 
 volumes:
-  postgres_data:
-    driver: local
   redis_data:
     driver: local
 

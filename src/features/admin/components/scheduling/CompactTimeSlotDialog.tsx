@@ -186,7 +186,7 @@ export function CompactTimeSlotDialog({
               <SelectTrigger id="start-time">
                 <SelectValue placeholder="Select start time" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[320px]">
                 {timeSlots.map((slot) => (
                   <SelectItem key={slot.value} value={slot.value}>
                     {slot.label}
@@ -203,7 +203,7 @@ export function CompactTimeSlotDialog({
               <SelectTrigger id="end-time">
                 <SelectValue placeholder="Select end time" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[320px]">
                 {timeSlots.map((slot) => (
                   <SelectItem key={slot.value} value={slot.value}>
                     {slot.label}

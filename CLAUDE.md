@@ -4,13 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Dev server**: `pnpm dev` or `npm run dev` 
+- **Dev server**: `pnpm dev` or `npm run dev`
 - **Build**: `pnpm build` or `npm run build`
 - **Type checking**: `pnpm type-check` or `npm run type-check`
 - **Linting**: `pnpm lint` or `npm run lint`
 - **Format code**: `pnpm format` or `npm run format`
 - **Auto-fix lint issues**: `pnpm lint:fix` or `npm run lint:fix`
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
+
+## Developer Tools
+
+### API Documentation (Swagger)
+**Development-only tool** for viewing complete API structure and testing endpoints.
+
+- **Access**: Visit `http://localhost:3000/api-docs` when running `pnpm dev`
+- **Security**: Only available in development mode (returns 404 in production)
+- **Features**: Interactive API testing, request/response schemas, endpoint catalog
+- **Documentation**: See [SWAGGER-API-DOCS.md](SWAGGER-API-DOCS.md) for usage guide
 
 ## Testing Commands
 

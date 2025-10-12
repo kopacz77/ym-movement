@@ -109,7 +109,7 @@ export const TimeSlotDialogAdapter: FC<TimeSlotDialogAdapterProps> = ({
   const adaptedSlot = selectedSlot
     ? {
         ...selectedSlot,
-        Lesson: castToLessons(selectedSlot.Lesson || selectedSlot.Lesson),
+        Lesson: castToLessons(selectedSlot.Lesson),
         Rink: selectedSlot.Rink || (selectedSlot as any).rink,
       }
     : null;

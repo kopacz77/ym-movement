@@ -182,12 +182,19 @@ function BookingCalendarComponent() {
 
       // Check if the DateTime is valid
       if (!startDate.isValid) {
-        console.error("Invalid date for dateRangeText:", date, "timezone:", rinkTimezone, "error:", startDate.invalidReason);
+        console.error(
+          "Invalid date for dateRangeText:",
+          date,
+          "timezone:",
+          rinkTimezone,
+          "error:",
+          startDate.invalidReason,
+        );
         // Fallback to a simple date format
         return date.toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
-          year: "numeric"
+          year: "numeric",
         });
       }
 
@@ -217,7 +224,7 @@ function BookingCalendarComponent() {
       return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
-        year: "numeric"
+        year: "numeric",
       });
     }
   }, [date, calendarView, rinkTimezone, selectedRink]);

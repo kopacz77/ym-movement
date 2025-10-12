@@ -12,6 +12,8 @@ const withBundleAnalyzer = BundleAnalyzer({
 
 const nextConfig = {
   reactStrictMode: true,
+  // Enable standalone output for Docker containerization
+  output: "standalone",
   // TEMPORARY: Disable minification to see actual React errors
   swcMinify: false,
   compiler: {

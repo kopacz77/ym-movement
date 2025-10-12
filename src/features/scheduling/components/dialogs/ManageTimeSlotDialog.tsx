@@ -85,7 +85,8 @@ export function ManageTimeSlotDialog({
         <DialogHeader>
           <DialogTitle>Manage Time Slot</DialogTitle>
           <DialogDescription>
-            View and manage time slot details, assign or remove students, and edit or delete the slot.
+            View and manage time slot details, assign or remove students, and edit or delete the
+            slot.
           </DialogDescription>
         </DialogHeader>
         {(selectedEvent || selectedSlot) && (

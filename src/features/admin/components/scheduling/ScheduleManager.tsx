@@ -619,7 +619,7 @@ const ScheduleManagerComponent = () => {
         onAssignStudent={handleAssignStudent}
         onUnassignStudent={(lessonId: string) => {
           if (lessonId) {
-            // Immediately update the selected slot/event in the dialog
+            // Immediately update the selected slot in the dialog
             if (selectedSlot) {
               const updatedSlot = {
                 ...selectedSlot,
@@ -628,21 +628,8 @@ const ScheduleManagerComponent = () => {
               setSelectedSlot(updatedSlot);
             }
 
-            if (selectedEvent) {
-              const updatedEvent = {
-                ...selectedEvent,
-                schedule: {
-                  ...selectedEvent.schedule,
-                  raw: {
-                    ...selectedEvent.schedule.raw,
-                    lessons: (selectedEvent.schedule.raw.lessons || []).filter(
-                      (lesson: any) => lesson.id !== lessonId,
-                    ),
-                  },
-                },
-              };
-              setSelectedEvent(updatedEvent);
-            }
+            // Note: selectedEvent is typically null when clicking from calendar
+            // The dialog uses selectedSlot which is updated above
 
             // The optimistic update will handle cache updates
             unassignStudent.mutate({ lessonId });
