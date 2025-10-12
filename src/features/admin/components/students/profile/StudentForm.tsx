@@ -28,6 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useSanitizedInput } from "@/hooks/useSanitizedInput";
 import { api } from "@/lib/api";
+import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 
 // Updated schema to match the expected API types - making emergencyContact properties optional
 const studentSchema = z.object({
@@ -176,18 +177,18 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
   });
 
   const handleSubmit = (values: StudentFormValues) => {
-    // Sanitize and validate inputs
+    // Sanitize, format, and validate inputs
     const sanitizedValues = {
       ...values,
-      name: sanitizeInput(values.name),
-      email: values.email, // Email is validated by schema
-      phone: values.phone ? sanitizeInput(values.phone) : undefined,
+      name: toProperCase(sanitizeInput(values.name)),
+      email: formatEmail(values.email),
+      phone: values.phone ? formatPhoneNumber(sanitizeInput(values.phone)) : undefined,
       notes: values.notes ? sanitizeTextArea(values.notes) : undefined,
       emergencyContact: values.emergencyContact
         ? {
-            name: sanitizeInput(values.emergencyContact.name || ""),
-            phone: sanitizeInput(values.emergencyContact.phone || ""),
-            relationship: sanitizeInput(values.emergencyContact.relationship || ""),
+            name: toProperCase(sanitizeInput(values.emergencyContact.name || "")),
+            phone: formatPhoneNumber(sanitizeInput(values.emergencyContact.phone || "")),
+            relationship: toProperCase(sanitizeInput(values.emergencyContact.relationship || "")),
           }
         : undefined,
     };
@@ -244,7 +245,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onBlur={(e) => field.onChange(toProperCase(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -257,7 +262,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onBlur={(e) => field.onChange(formatEmail(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -294,7 +303,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onBlur={(e) => field.onChange(formatPhoneNumber(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -343,7 +356,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onBlur={(e) => field.onChange(toProperCase(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -356,7 +373,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onBlur={(e) => field.onChange(formatPhoneNumber(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -369,7 +390,11 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitActio
               <FormItem>
                 <FormLabel>Relationship</FormLabel>
                 <FormControl>
-                  <Input {...field} value={field.value || ""} />
+                  <Input
+                    {...field}
+                    value={field.value || ""}
+                    onBlur={(e) => field.onChange(toProperCase(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

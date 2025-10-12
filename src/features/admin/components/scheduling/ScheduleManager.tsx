@@ -588,7 +588,7 @@ const ScheduleManagerComponent = () => {
       {selectedRink && (
         <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center text-amber-800 text-sm">
           <span className="mr-2">🌐</span>
-          <span className="truncate">
+          <span className="truncate" suppressHydrationWarning>
             All times shown in {rinkTimezone.split("/").pop()?.replace("_", " ")} local time
           </span>
         </div>

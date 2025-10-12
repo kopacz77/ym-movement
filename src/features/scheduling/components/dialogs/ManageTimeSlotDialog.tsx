@@ -3,7 +3,13 @@ import type { Event } from "react-big-calendar";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/dialogs/ManageTimeSlotDialog.tsx
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -78,6 +84,9 @@ export function ManageTimeSlotDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Manage Time Slot</DialogTitle>
+          <DialogDescription>
+            View and manage time slot details, assign or remove students, and edit or delete the slot.
+          </DialogDescription>
         </DialogHeader>
         {(selectedEvent || selectedSlot) && (
           <div className="space-y-4">

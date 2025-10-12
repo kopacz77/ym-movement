@@ -34,7 +34,9 @@
       "Bash(pnpm exec biome format:*)",
       "Bash(ls:*)",
       "Bash(pnpm build:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(wc:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": []
   }

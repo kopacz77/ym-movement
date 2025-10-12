@@ -7,6 +7,7 @@ import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendWelcomeEmail } from "@/lib/email";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 import { type StudentWithInviteStatus, studentFormSchema } from "./schemas";
 
 export const studentQueries = createTRPCRouter({
@@ -157,17 +158,20 @@ export const studentQueries = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { name, email, sendEmail, sendInvite, ...studentData } = input;
 
-      // Sanitize all input data
-      const sanitizedName = sanitizeInput(name);
+      // Sanitize and format all input data
+      const sanitizedName = toProperCase(sanitizeInput(name));
+      const sanitizedEmail = formatEmail(email);
       const sanitizedStudentData = {
         ...studentData,
         notes: studentData.notes ? sanitizeInput(studentData.notes) : undefined,
-        phone: studentData.phone ? sanitizeInput(studentData.phone) : undefined,
+        phone: studentData.phone ? formatPhoneNumber(sanitizeInput(studentData.phone)) : undefined,
         emergencyContact: studentData.emergencyContact
           ? {
-              name: sanitizeInput(studentData.emergencyContact.name || ""),
-              phone: sanitizeInput(studentData.emergencyContact.phone || ""),
-              relationship: sanitizeInput(studentData.emergencyContact.relationship || ""),
+              name: toProperCase(sanitizeInput(studentData.emergencyContact.name || "")),
+              phone: formatPhoneNumber(sanitizeInput(studentData.emergencyContact.phone || "")),
+              relationship: toProperCase(
+                sanitizeInput(studentData.emergencyContact.relationship || ""),
+              ),
             }
           : undefined,
       };
@@ -175,14 +179,14 @@ export const studentQueries = createTRPCRouter({
       // Log security event
       logSecurityEvent("STUDENT_CREATED", {
         userId: ctx.session?.user?.id,
-        studentEmail: email,
+        studentEmail: sanitizedEmail,
         studentName: sanitizedName,
       });
 
       try {
         // Check if user already exists to avoid conflicts
         const existingUser = await ctx.prisma.user.findUnique({
-          where: { email },
+          where: { email: sanitizedEmail },
         });
 
         let newUser: { id: string; name: string | null; email: string } | null = null;
@@ -228,7 +232,7 @@ export const studentQueries = createTRPCRouter({
             data: {
               id: randomUUID(),
               name: sanitizedName,
-              email,
+              email: sanitizedEmail,
               role: "STUDENT",
               updatedAt: new Date(),
             },
@@ -323,17 +327,20 @@ export const studentQueries = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, name, email, ...studentData } = input;
 
-      // Sanitize all input data
-      const sanitizedName = sanitizeInput(name);
+      // Sanitize and format all input data
+      const sanitizedName = toProperCase(sanitizeInput(name));
+      const sanitizedEmail = formatEmail(email);
       const sanitizedStudentData = {
         ...studentData,
         notes: studentData.notes ? sanitizeInput(studentData.notes) : undefined,
-        phone: studentData.phone ? sanitizeInput(studentData.phone) : undefined,
+        phone: studentData.phone ? formatPhoneNumber(sanitizeInput(studentData.phone)) : undefined,
         emergencyContact: studentData.emergencyContact
           ? {
-              name: sanitizeInput(studentData.emergencyContact.name || ""),
-              phone: sanitizeInput(studentData.emergencyContact.phone || ""),
-              relationship: sanitizeInput(studentData.emergencyContact.relationship || ""),
+              name: toProperCase(sanitizeInput(studentData.emergencyContact.name || "")),
+              phone: formatPhoneNumber(sanitizeInput(studentData.emergencyContact.phone || "")),
+              relationship: toProperCase(
+                sanitizeInput(studentData.emergencyContact.relationship || ""),
+              ),
             }
           : undefined,
       };
@@ -342,7 +349,7 @@ export const studentQueries = createTRPCRouter({
       logSecurityEvent("STUDENT_UPDATED", {
         userId: ctx.session?.user?.id,
         studentId: id,
-        studentEmail: email,
+        studentEmail: sanitizedEmail,
       });
 
       try {
@@ -369,7 +376,7 @@ export const studentQueries = createTRPCRouter({
         const [user, updatedStudent] = await ctx.prisma.$transaction([
           ctx.prisma.user.update({
             where: { id: student.userId },
-            data: { name: sanitizedName, email },
+            data: { name: sanitizedName, email: sanitizedEmail },
           }),
           ctx.prisma.student.update({
             where: { id },

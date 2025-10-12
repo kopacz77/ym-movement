@@ -4,7 +4,13 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -120,6 +126,9 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Manage Time Slot</DialogTitle>
+          <DialogDescription>
+            View and manage time slot details, assign or remove students, and edit or delete the slot.
+          </DialogDescription>
         </DialogHeader>
         {(selectedEvent || selectedSlot) && (
           <div className="space-y-4">
@@ -149,7 +158,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                       {selectedSlot?.Rink?.timezone &&
                         formatRinkTime(selectedSlot.startTime, selectedSlot.Rink.timezone)}
                     </span>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs" suppressHydrationWarning>
                       {selectedSlot?.Rink?.timezone?.split("/")?.pop()?.replace("_", " ")}
                     </Badge>
                   </div>

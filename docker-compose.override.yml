@@ -1,0 +1,98 @@
+# YM Movement Scheduler - Docker Compose Override
+# Local development customizations and personal preferences
+# This file is ignored by git and allows individual developer customization
+
+version: '3.8'
+
+services:
+  app:
+    # Override ports if needed for local development
+    # ports:
+    #   - "3001:3000"  # Use port 3001 instead of 3000
+
+    # Add custom environment variables for local development
+    environment:
+      # Development-specific settings
+      - NEXT_TELEMETRY_DISABLED=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+
+      # Custom local database URL if using external DB
+      # - DATABASE_URL=postgresql://username:password@localhost:5432/custom_db
+
+      # Local email testing (optional)
+      # - RESEND_API_KEY=your-test-key
+
+      # Google Calendar API for local testing
+      # - GOOGLE_CLIENT_ID=your-local-client-id
+      # - GOOGLE_CLIENT_SECRET=your-local-client-secret
+
+    # Additional volume mounts for development tools
+    volumes:
+      # Persist VS Code extensions and settings
+      - ~/.vscode-server:/home/node/.vscode-server
+
+      # Cache node_modules for faster rebuilds
+      - node_modules_cache:/app/node_modules
+
+    # Development command override (uncomment to use)
+    # command: pnpm dev --turbo
+
+    # Add extra hosts for local testing
+    # extra_hosts:
+    #   - "local.yurascheduler.com:127.0.0.1"
+
+  db:
+    # Override database configuration for local needs
+    environment:
+      # Custom database settings
+      - POSTGRES_DB=yura_scheduler_local
+      # - POSTGRES_USER=custom_user
+      # - POSTGRES_PASSWORD=custom_password
+
+    # Additional ports for external database access
+    # ports:
+    #   - "5433:5432"  # Use different port to avoid conflicts
+
+    # Custom database initialization scripts
+    # volumes:
+    #   - ./docker/custom-init:/docker-entrypoint-initdb.d
+
+  redis:
+    # Redis configuration overrides
+    # ports:
+    #   - "6380:6379"  # Use different port if needed
+
+    # Custom Redis configuration
+    # command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Add additional services for local development
+  # mailhog:
+  #   image: mailhog/mailhog:latest
+  #   container_name: yura-scheduler-mailhog
+  #   ports:
+  #     - "1025:1025"  # SMTP port
+  #     - "8025:8025"  # Web UI port
+  #   networks:
+  #     - yura-network
+
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   container_name: yura-scheduler-pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - yura-network
+
+volumes:
+  node_modules_cache:
+    driver: local
+
+# Add custom networks if needed
+# networks:
+#   custom-network:
+#     driver: bridge

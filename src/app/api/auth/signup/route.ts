@@ -5,6 +5,7 @@ import { z } from "zod";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { authRateLimiter, logSecurityEvent } from "@/lib/security";
+import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
@@ -69,21 +70,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Apply formatting to all inputs
+    const formattedData = {
+      name: toProperCase(result.data.name),
+      email: formatEmail(result.data.email),
+      phone: result.data.phone ? formatPhoneNumber(result.data.phone) : null,
+      level: result.data.level,
+      maxLessonsPerWeek: result.data.maxLessonsPerWeek,
+      emergencyContact: result.data.emergencyContact
+        ? {
+            name: toProperCase(result.data.emergencyContact.name),
+            phone: formatPhoneNumber(result.data.emergencyContact.phone),
+            relationship: toProperCase(result.data.emergencyContact.relationship),
+          }
+        : null,
+      parentConsent: result.data.parentConsent,
+    };
+
     const { name, email, phone, level, maxLessonsPerWeek, emergencyContact, parentConsent } =
-      result.data;
+      formattedData;
 
     // REMOVED: Password validation - password will be set during registration completion
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { email },
     });
 
     if (existingUser) {
-      console.log("Signup failed: Email already in use:", email.toLowerCase());
+      console.log("Signup failed: Email already in use:", email);
       logSecurityEvent("DUPLICATE_EMAIL_SIGNUP", {
         ip: clientIP,
-        email: email.toLowerCase(),
+        email,
       });
       return NextResponse.json({ message: "Email already in use" }, { status: 400 });
     }
@@ -118,7 +136,7 @@ export async function POST(req: NextRequest) {
       const newUser = await tx.user.create({
         data: {
           name,
-          email: email.toLowerCase(),
+          email,
           password: null, // Password will be set during registration completion
           role: "STUDENT",
         },
@@ -130,7 +148,7 @@ export async function POST(req: NextRequest) {
       const student = await tx.student.create({
         data: {
           userId: newUser.id,
-          phone: phone || null,
+          phone,
           level,
           maxLessonsPerWeek,
           emergencyContact: emergencyContact || undefined,

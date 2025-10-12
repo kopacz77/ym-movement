@@ -196,7 +196,7 @@ export function MobileCalendarView({
                               Your time: {localTimeDisplay}
                             </div>
                           )}
-                          <div className="text-sm text-gray-500 dark:text-gray-400 break-words">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 break-words" suppressHydrationWarning>
                             {slot.Rink.name} (
                             {slot.Rink.timezone.split("/").pop()?.replace("_", " ")})
                           </div>

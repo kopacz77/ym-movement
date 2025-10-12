@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -117,6 +118,7 @@ export default function SignupPage() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onBlur={(e) => setName(toProperCase(e.target.value))}
                 placeholder="Enter your full name"
                 required
               />
@@ -128,6 +130,7 @@ export default function SignupPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={(e) => setEmail(formatEmail(e.target.value))}
                 placeholder="Enter your email"
                 required
               />
@@ -138,6 +141,7 @@ export default function SignupPage() {
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                onBlur={(e) => setPhone(formatPhoneNumber(e.target.value))}
                 placeholder="Enter your phone number"
               />
             </div>

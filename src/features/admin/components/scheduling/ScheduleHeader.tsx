@@ -95,7 +95,7 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
               <SelectItem value="all_rinks">All Rinks</SelectItem>
               {rinks?.map((rink: Rink) => (
                 <SelectItem key={rink.id} value={rink.id} className="whitespace-normal">
-                  <span className="block">
+                  <span className="block" suppressHydrationWarning>
                     {rink.name} ({rink.timezone.split("/").pop()?.replace("_", " ")})
                   </span>
                 </SelectItem>

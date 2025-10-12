@@ -77,11 +77,52 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Docker Commands (Recommended)
 
-- **Docker dev environment**: `pnpm docker:dev` (includes hot reload)
-- **Docker production**: `pnpm docker:up` 
-- **Stop containers**: `pnpm docker:down`
+**Docker Development Environment**: Complete containerized development with PostgreSQL and Redis.
+
+**Quick Start**:
+- **Start development environment**: `pnpm docker:dev` (includes hot reload, database, Redis)
+- **Stop all services**: `pnpm docker:down`
 - **View logs**: `pnpm docker:logs`
-- **Clean up**: `pnpm docker:clean`
+- **Clean up everything**: `pnpm docker:clean` (removes containers, volumes, and images)
+
+**Specialized Commands**:
+- **Build containers**: `pnpm docker:build`
+- **Database + Redis only**: `pnpm docker:db` (useful for hybrid development)
+- **Prisma Studio**: `pnpm docker:studio` (database GUI at localhost:5555)
+- **Container shell access**: `pnpm docker:shell`
+
+**Development Workflow**:
+1. `pnpm docker:dev` - Starts complete environment (app, database, Redis)
+2. Visit `http://localhost:3000` - Next.js app with hot reload
+3. Visit `http://localhost:5555` - Prisma Studio (run `pnpm docker:studio` separately)
+4. `pnpm docker:logs` - Monitor all service logs
+5. `pnpm docker:down` - Stop when done
+
+**Database Access**:
+- **Host**: localhost
+- **Port**: 5432
+- **Database**: yura_scheduler_dev
+- **Username**: postgres
+- **Password**: password
+- **Connection String**: `postgresql://postgres:password@localhost:5432/yura_scheduler_dev`
+
+**Redis Access**:
+- **Host**: localhost
+- **Port**: 6379
+- **No authentication required**
+
+**Benefits**:
+- ✅ **Instant setup** - One command gets everything running
+- ✅ **Team consistency** - Same environment for all developers
+- ✅ **No local dependencies** - Only Docker required
+- ✅ **Production-like** - Matches deployed environment
+- ✅ **Easy cleanup** - Remove everything with one command
+
+**Troubleshooting**:
+- **Port conflicts**: Modify `docker-compose.override.yml` to use different ports
+- **Permission issues**: Ensure Docker daemon is running and user has permissions
+- **Database issues**: Run `pnpm docker:clean` and restart
+- **Hot reload not working**: Check volume mounts in docker-compose.yml
 
 ## Documentation Commands
 
