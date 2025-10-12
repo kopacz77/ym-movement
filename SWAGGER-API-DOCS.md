@@ -6,7 +6,7 @@ This document explains how to use and extend the Swagger/OpenAPI documentation f
 
 **IMPORTANT**: This API documentation is **ONLY accessible in development mode** for security reasons.
 
-- ✅ **Development**: Available at [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+- ✅ **Development**: Available at [http://localhost:3100/api-docs](http://localhost:3100/api-docs)
 - ❌ **Production**: Returns 404 (completely hidden from users)
 - 🔐 **Security**: Both the UI and API endpoint are protected
 
@@ -20,8 +20,8 @@ This document explains how to use and extend the Swagger/OpenAPI documentation f
 ## Accessing the Documentation
 
 ### Local Development
-1. Start dev server: `pnpm dev`
-2. Visit [http://localhost:3000/api-docs](http://localhost:3000/api-docs) (or port 3001 if 3000 is in use)
+1. Start dev server: `pnpm dev` (runs on port 3100)
+2. Visit [http://localhost:3100/api-docs](http://localhost:3100/api-docs)
 3. You'll see a yellow "🔧 Development Only" badge confirming it's restricted
 
 ### Production

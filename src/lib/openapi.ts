@@ -10,12 +10,12 @@ export const openApiDocument = {
     version: "3.0.0",
     contact: {
       name: "YM Movement",
-      url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100",
     },
   },
   servers: [
     {
-      url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3100",
       description: "Main API Server",
     },
   ],

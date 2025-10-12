@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Dev server**: `pnpm dev` or `npm run dev`
+- **Dev server**: `pnpm dev` or `npm run dev` (runs on port **3100**)
 - **Build**: `pnpm build` or `npm run build`
 - **Type checking**: `pnpm type-check` or `npm run type-check`
 - **Linting**: `pnpm lint` or `npm run lint`
@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### API Documentation (Swagger)
 **Development-only tool** for viewing complete API structure and testing endpoints.
 
-- **Access**: Visit `http://localhost:3000/api-docs` when running `pnpm dev`
+- **Access**: Visit `http://localhost:3100/api-docs` when running `pnpm dev`
 - **Security**: Only available in development mode (returns 404 in production)
 - **Features**: Interactive API testing, request/response schemas, endpoint catalog
 - **Documentation**: See [SWAGGER-API-DOCS.md](SWAGGER-API-DOCS.md) for usage guide

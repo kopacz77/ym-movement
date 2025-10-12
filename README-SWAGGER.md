@@ -10,7 +10,7 @@ A **developer-only** interactive API documentation tool that shows all your TRPC
 pnpm dev
 ```
 
-Then visit: **http://localhost:3000/api-docs**
+Then visit: **http://localhost:3100/api-docs**
 
 ## 🔒 Security
 
