@@ -165,10 +165,14 @@ export function useScheduleActions() {
       // Update all cached getTimeSlots queries
       previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }) => {
         if (data && Array.isArray(data)) {
-          const updatedTimeSlots = data.map((slot: any) => ({
-            ...slot,
-            Lesson: (slot.Lesson || []).filter((lesson: any) => lesson.id !== lessonId),
-          }));
+          const updatedTimeSlots = data.map((slot: any) => {
+            // Ensure Lesson is an array before filtering
+            const currentLessons = Array.isArray(slot.Lesson) ? slot.Lesson : [];
+            return {
+              ...slot,
+              Lesson: currentLessons.filter((lesson: any) => lesson.id !== lessonId),
+            };
+          });
 
           // Update this specific cached query
           (queryClient as any).setQueryData(queryKey, updatedTimeSlots);
