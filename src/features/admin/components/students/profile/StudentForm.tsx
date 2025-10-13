@@ -54,10 +54,7 @@ interface StudentFormProps {
   onSubmitAction?: () => void;
 }
 
-export const StudentForm: React.FC<StudentFormProps> = ({
-  student,
-  onSubmitAction = () => {}
-}) => {
+export const StudentForm: React.FC<StudentFormProps> = ({ student, onSubmitAction = () => {} }) => {
   const { sanitizeInput, sanitizeTextArea, validateEmail, validatePhone } = useSanitizedInput();
   const queryClient = useQueryClient();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -67,7 +64,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   // Load student data if editing
   const { data: studentData, isLoading } = api.admin.student.getStudent.useQuery(
     { studentId: student?.id || "" },
-    { enabled: !!student?.id }
+    { enabled: !!student?.id },
   );
 
   // Initialize form
@@ -99,16 +96,18 @@ export const StudentForm: React.FC<StudentFormProps> = ({
         email: studentData.User?.email || "",
         phone: studentData.phone || "",
         maxLessonsPerWeek: studentData.maxLessonsPerWeek || 1,
-        level: studentData.level || "PRE_PRELIMINARY" as Level,
-        emergencyContact: emergencyContact ? {
-          name: emergencyContact.name || "",
-          phone: emergencyContact.phone || "",
-          relationship: emergencyContact.relationship || "",
-        } : {
-          name: "",
-          phone: "",
-          relationship: "",
-        },
+        level: studentData.level || ("PRE_PRELIMINARY" as Level),
+        emergencyContact: emergencyContact
+          ? {
+              name: emergencyContact.name || "",
+              phone: emergencyContact.phone || "",
+              relationship: emergencyContact.relationship || "",
+            }
+          : {
+              name: "",
+              phone: "",
+              relationship: "",
+            },
         notes: studentData.notes || "",
         dateOfBirth: studentData.dateOfBirth || "",
       };
@@ -119,18 +118,16 @@ export const StudentForm: React.FC<StudentFormProps> = ({
         setIsDataLoaded(true);
       }, 0);
     }
-  }, [studentData, isLoading, isDataLoaded]);
+  }, [studentData, isLoading, isDataLoaded, form.reset]);
 
   const updateStudent = api.admin.student.updateStudent.useMutation({
-    onSuccess: async (updatedStudent) => {
+    onSuccess: async (_updatedStudent) => {
       // Invalidate the SPECIFIC getStudents query using TRPC utils
       await utils.admin.student.getStudents.invalidate();
 
       // Also invalidate all other student queries using predicate
       await queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === "admin" &&
-          query.queryKey[1] === "student"
+        predicate: (query) => query.queryKey[0] === "admin" && query.queryKey[1] === "student",
       });
 
       toast("Success", {
@@ -156,9 +153,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
 
       // Also invalidate all other student queries
       await queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === "admin" &&
-          query.queryKey[1] === "student"
+        predicate: (query) => query.queryKey[0] === "admin" && query.queryKey[1] === "student",
       });
 
       toast("Success", {
@@ -192,14 +187,17 @@ export const StudentForm: React.FC<StudentFormProps> = ({
       email: formatEmail(values.email),
       phone: values.phone ? formatPhoneNumber(sanitizeInput(values.phone)) : undefined,
       notes: values.notes ? sanitizeTextArea(values.notes) : undefined,
-      emergencyContact: values.emergencyContact &&
-        (values.emergencyContact.name || values.emergencyContact.phone || values.emergencyContact.relationship)
-        ? {
-            name: toProperCase(sanitizeInput(values.emergencyContact.name || "")),
-            phone: formatPhoneNumber(sanitizeInput(values.emergencyContact.phone || "")),
-            relationship: toProperCase(sanitizeInput(values.emergencyContact.relationship || "")),
-          }
-        : undefined,
+      emergencyContact:
+        values.emergencyContact &&
+        (values.emergencyContact.name ||
+          values.emergencyContact.phone ||
+          values.emergencyContact.relationship)
+          ? {
+              name: toProperCase(sanitizeInput(values.emergencyContact.name || "")),
+              phone: formatPhoneNumber(sanitizeInput(values.emergencyContact.phone || "")),
+              relationship: toProperCase(sanitizeInput(values.emergencyContact.relationship || "")),
+            }
+          : undefined,
     };
 
     // Additional validation
@@ -231,7 +229,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center space-y-2">
-          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
           <p className="text-sm text-muted-foreground">Loading student data...</p>
         </div>
       </div>
@@ -316,10 +314,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Level *</FormLabel>
-                <Select
-                  value={field.value || undefined}
-                  onValueChange={field.onChange}
-                >
+                <Select value={field.value || undefined} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select level">

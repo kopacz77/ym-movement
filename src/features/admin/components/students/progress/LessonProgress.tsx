@@ -3,7 +3,7 @@
 
 import { format } from "date-fns";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { type FC, useEffect } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +23,8 @@ interface LessonProgressProps {
 
 type LessonStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
 
-// Use type instead of interface to better match the API return type
+// Unused type - kept for future use
+/*
 type APILesson = {
   id: string;
   startTime: Date;
@@ -57,6 +58,7 @@ type APILesson = {
     status: string;
   } | null;
 };
+*/
 
 export const LessonProgress: React.FC<LessonProgressProps> = ({ StudentId }) => {
   const {

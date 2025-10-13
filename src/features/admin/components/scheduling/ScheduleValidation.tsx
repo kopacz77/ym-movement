@@ -17,7 +17,7 @@ interface ValidationResult {
 }
 
 export const ScheduleValidation = () => {
-  const [validationResults, setValidationResults] = React.useState<
+  const [validationResults, _setValidationResults] = React.useState<
     Record<string, ValidationResult>
   >({});
 

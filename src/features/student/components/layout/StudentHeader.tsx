@@ -26,7 +26,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { TouchIconButton } from "@/components/ui/touch-button";
 import { WarmGreeting } from "@/components/ui/warm-greeting";
 import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
@@ -101,7 +100,7 @@ export function StudentHeader() {
       {/* Header Actions */}
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
-          <WarmGreeting name={session?.user?.name || "Student"} role="student" />
+          <WarmGreeting name={session?.user?.name || "Student"} />
         </div>
 
         <div className={`flex items-center shrink-0 ${getTouchSpacing("gap-2")}`}>

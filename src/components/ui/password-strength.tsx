@@ -1,6 +1,6 @@
 // src/components/ui/password-strength.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 
 interface PasswordStrengthProps {
@@ -60,25 +60,47 @@ function validatePasswordStrength(password: string): {
 
   // Calculate score (0-100)
   let score = 0;
-  if (!password) return { isValid: false, errors, score: 0 };
+  if (!password) {
+    return { isValid: false, errors, score: 0 };
+  }
 
   // Base points for length
-  if (password.length >= 8) score += 25;
-  if (password.length >= 12) score += 15;
+  if (password.length >= 8) {
+    score += 25;
+  }
+  if (password.length >= 12) {
+    score += 15;
+  }
 
   // Points for character types
-  if (/[A-Z]/.test(password)) score += 15;
-  if (/[a-z]/.test(password)) score += 15;
-  if (/\d/.test(password)) score += 15;
-  if (/[@$!%*?&]/.test(password)) score += 15;
+  if (/[A-Z]/.test(password)) {
+    score += 15;
+  }
+  if (/[a-z]/.test(password)) {
+    score += 15;
+  }
+  if (/\d/.test(password)) {
+    score += 15;
+  }
+  if (/[@$!%*?&]/.test(password)) {
+    score += 15;
+  }
 
   // Bonus points for longer passwords
-  if (password.length >= 16) score += 10;
+  if (password.length >= 16) {
+    score += 10;
+  }
 
   // Deduct points for common patterns
-  if (/(.)\1{2,}/.test(password)) score -= 15; // Repeated characters
-  if (/^[A-Za-z]+$/.test(password)) score -= 10; // Only letters
-  if (/^[0-9]+$/.test(password)) score -= 10; // Only numbers
+  if (/(.)\1{2,}/.test(password)) {
+    score -= 15; // Repeated characters
+  }
+  if (/^[A-Za-z]+$/.test(password)) {
+    score -= 10; // Only letters
+  }
+  if (/^[0-9]+$/.test(password)) {
+    score -= 10; // Only numbers
+  }
 
   score = Math.max(0, Math.min(100, score));
 
@@ -98,13 +120,7 @@ export function PasswordStrength({ password, showErrors = false }: PasswordStren
   const [message, setMessage] = useState("");
   const [color, setColor] = useState("bg-gray-200");
 
-  useEffect(() => {
-    const result = validatePasswordStrength(password);
-    setValidation(result);
-    updateDisplay(result.score, result.isValid);
-  }, [password]);
-
-  const updateDisplay = (score: number, isValid: boolean) => {
+  const updateDisplay = useCallback((score: number, isValid: boolean) => {
     if (score < 30) {
       setMessage("Weak");
       setColor("bg-red-500");
@@ -121,7 +137,13 @@ export function PasswordStrength({ password, showErrors = false }: PasswordStren
       setMessage("Needs work");
       setColor("bg-orange-500");
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const result = validatePasswordStrength(password);
+    setValidation(result);
+    updateDisplay(result.score, result.isValid);
+  }, [password, updateDisplay]);
 
   return (
     <div className="space-y-2">

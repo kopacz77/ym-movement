@@ -1,7 +1,7 @@
 // src/features/admin/components/payments/PaymentDetail.tsx
 
 import type { LessonType, PaymentMethod, PaymentStatus } from "@prisma/client";
-import { Check, ExternalLink, FileText, Send } from "lucide-react";
+import { Check, FileText, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/date";

@@ -1,9 +1,8 @@
 // src/app/(protected)/admin/settings/page.tsx
 "use client";
 
-import { PaymentMethod, RinkArea as PrismaRinkArea } from "@prisma/client";
 import { Clock, DollarSign, Edit, Lock, MapPin, Save, Trash2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -177,8 +176,12 @@ export default function SettingsPage() {
       if (savedSettings.operational) {
         setOperationalSettings(savedSettings.operational);
       }
-      if (savedSettings.payment) setPaymentSettings(savedSettings.payment);
-      if (savedSettings.rinkAreas) setRinkAreas(savedSettings.rinkAreas);
+      if (savedSettings.payment) {
+        setPaymentSettings(savedSettings.payment);
+      }
+      if (savedSettings.rinkAreas) {
+        setRinkAreas(savedSettings.rinkAreas);
+      }
     }
   }, [savedSettings]);
 
@@ -189,7 +192,9 @@ export default function SettingsPage() {
     value: boolean | string,
   ) => {
     setOperationalSettings((prev) => {
-      if (!prev) return prev; // Don't update if not loaded yet
+      if (!prev) {
+        return prev; // Don't update if not loaded yet
+      }
       return {
         ...prev,
         days: {
@@ -221,7 +226,7 @@ export default function SettingsPage() {
     }));
   };
 
-  const handlePricingChange = (
+  const _handlePricingChange = (
     lessonType: keyof PaymentSettings["defaultPricing"],
     value: number,
   ) => {
@@ -277,7 +282,9 @@ export default function SettingsPage() {
 
   // Save all settings
   const handleSave = () => {
-    if (!operationalSettings) return; // Don't save if settings not loaded yet
+    if (!operationalSettings) {
+      return; // Don't save if settings not loaded yet
+    }
     setIsSaving(true);
     saveSettingsMutation.mutate({
       operational: operationalSettings,

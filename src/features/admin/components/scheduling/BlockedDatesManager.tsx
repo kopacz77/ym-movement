@@ -46,7 +46,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { showDeleteConfirmation } from "@/lib/toast-confirmations";

@@ -88,7 +88,7 @@ export function useScheduleActions() {
 
         if (student) {
           // Update all cached getTimeSlots queries
-          previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }, index: any) => {
+          previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }, _index: any) => {
             if (data && Array.isArray(data)) {
               const updatedTimeSlots = data.map((slot: any) => {
                 if (slot.id === timeSlotId) {
@@ -127,7 +127,7 @@ export function useScheduleActions() {
       // Invalidate to get the real data from server
       utils.admin.schedule.getTimeSlots.invalidate();
     },
-    onError: (err, variables, context) => {
+    onError: (err, _variables, context) => {
       toast.error("Error", {
         description: err.message,
       });

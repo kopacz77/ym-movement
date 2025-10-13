@@ -85,8 +85,12 @@ export function useOperationalSettings() {
     let latestEnd = "00:00";
 
     activeDays.forEach((day) => {
-      if (day.startTime < earliestStart) earliestStart = day.startTime;
-      if (day.endTime > latestEnd) latestEnd = day.endTime;
+      if (day.startTime < earliestStart) {
+        earliestStart = day.startTime;
+      }
+      if (day.endTime > latestEnd) {
+        latestEnd = day.endTime;
+      }
     });
 
     // Parse time strings

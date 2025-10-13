@@ -338,7 +338,9 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
 
   // Optimized events conversion with caching
   const events = useMemo(() => {
-    if (!availableSlots || !deferredSelectedRink) return [];
+    if (!availableSlots || !deferredSelectedRink) {
+      return [];
+    }
 
     const currentParams = `${availableSlots.length}-${deferredSelectedRink}-${cacheKey}`;
 
@@ -388,7 +390,9 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
 
   // Optimized mobile list data with virtualization support
   const mobileListData = useMemo(() => {
-    if (!availableSlots || !deferredSelectedRink) return [];
+    if (!availableSlots || !deferredSelectedRink) {
+      return [];
+    }
 
     // Group by day and sort
     const groupedByDay = availableSlots.reduce(
@@ -502,7 +506,9 @@ const OptimizedBookingCalendarComponent: React.FC = () => {
 
   // Date range text for display
   const dateRangeText = useMemo(() => {
-    if (!deferredSelectedRink) return "";
+    if (!deferredSelectedRink) {
+      return "";
+    }
 
     const startDate = DateTime.fromJSDate(calendarState.date).setZone(rinkTimezone);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarIcon, FileTextIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
+import { CalendarIcon, FileTextIcon, PersonIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import {

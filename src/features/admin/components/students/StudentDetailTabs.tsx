@@ -3,7 +3,7 @@
 
 import type { Level } from "@prisma/client"; // Use import type for type-only imports
 import { Loader2 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import { StudentForm } from "./profile/StudentForm";

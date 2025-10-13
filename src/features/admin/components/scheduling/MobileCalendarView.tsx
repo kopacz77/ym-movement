@@ -43,7 +43,7 @@ export function MobileCalendarView({
   React.useEffect(() => {
     // Clear any previous errors when props change
     setError(null);
-  }, [groupedSlots, rinkTimezone]);
+  }, []);
 
   if (error) {
     return (

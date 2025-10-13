@@ -56,8 +56,8 @@ export function CalendarPreview({
 
   try {
     // Parse dates at noon to avoid timezone issues
-    parsedStartDate = parse(startDate + " 12:00", "yyyy-MM-dd HH:mm", new Date());
-    parsedEndDate = parse(endDate + " 12:00", "yyyy-MM-dd HH:mm", new Date());
+    parsedStartDate = parse(`${startDate} 12:00`, "yyyy-MM-dd HH:mm", new Date());
+    parsedEndDate = parse(`${endDate} 12:00`, "yyyy-MM-dd HH:mm", new Date());
   } catch {
     return (
       <Card className="bg-red-50 border-red-200">
@@ -242,7 +242,7 @@ export function CalendarPreview({
         </div>
 
         {/* Breaks Summary */}
-        {breaks && breaks.some((b) => b.startTime && b.duration > 0) && (
+        {breaks?.some((b) => b.startTime && b.duration > 0) && (
           <div className="text-xs text-muted-foreground">
             <div className="font-medium mb-1">Breaks:</div>
             {breaks

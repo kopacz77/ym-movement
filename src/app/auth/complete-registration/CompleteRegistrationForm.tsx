@@ -128,7 +128,9 @@ function PasswordRequirements({ password }: { password: string }) {
     },
   ];
 
-  if (!password) return null;
+  if (!password) {
+    return null;
+  }
 
   return (
     <div className="space-y-2 mt-2">

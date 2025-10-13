@@ -7,9 +7,6 @@
  * @since Phase 3 Architecture Optimizations
  */
 
-import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
 import type React from "react";
 import { cache, memo } from "react";
 
@@ -406,7 +403,7 @@ export class ServerClientPerformanceUtils {
    */
   static createCachedFunction<T extends any[], R>(
     fn: (...args: T) => Promise<R>,
-    options: {
+    _options: {
       revalidate?: number;
       tags?: string[];
     } = {},
@@ -426,7 +423,7 @@ export class ServerClientPerformanceUtils {
    */
   static withClientPerformance<P extends object>(
     Component: React.ComponentType<P>,
-    componentName: string,
+    _componentName: string,
   ) {
     return memo((props: P) => {
       // This would be implemented in the actual component

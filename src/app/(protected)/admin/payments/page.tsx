@@ -135,7 +135,9 @@ export default function PaymentsPage() {
   };
 
   const handleAddNote = (note: string) => {
-    if (!selectedPaymentId) return;
+    if (!selectedPaymentId) {
+      return;
+    }
     addNote.mutate({ paymentId: selectedPaymentId, notes: note });
   };
 

@@ -14,7 +14,9 @@
         "noExplicitAny": "warn",
         "noEmptyInterface": "error",
         "noRedundantUseStrict": "error",
-        "noConsole": { "level": "off", "options": { "allow": ["log"] } }
+        "noConsole": { "level": "off", "options": { "allow": ["log"] } },
+        "noArrayIndexKey": "warn",
+        "noAssignInExpressions": "warn"
       },
       "style": {
         "noNegationElse": "error",
@@ -32,7 +34,19 @@
         "noUselessElse": "error",
         "useConsistentArrayType": { "level": "error", "options": { "syntax": "shorthand" } }
       },
-      "nursery": {}
+      "nursery": {
+        "useUniqueElementIds": "off",
+        "noNestedComponentDefinitions": "warn"
+      },
+      "a11y": {
+        "noLabelWithoutControl": "warn",
+        "useButtonType": "warn",
+        "noSvgWithoutTitle": "warn",
+        "noStaticElementInteractions": "warn",
+        "useSemanticElements": "warn",
+        "useKeyWithClickEvents": "warn",
+        "useFocusableInteractive": "warn"
+      }
     }
   },
   "formatter": {

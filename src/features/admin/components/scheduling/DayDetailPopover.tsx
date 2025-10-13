@@ -16,7 +16,6 @@ import { formatTimeWithTimezone } from "@/components/TimezoneNotice";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import type { TimeSlot } from "./calendarUtils";
 
 interface DayDetailPopoverProps {
@@ -89,9 +88,15 @@ export function DayDetailPopover({
 
   const getSlotStatusColor = (slot: TimeSlot) => {
     const studentsInSlot = slot.Lesson?.length || 0;
-    if (studentsInSlot === 0) return "bg-slate-100 text-slate-700";
-    if (studentsInSlot === 1) return "bg-green-100 text-green-700";
-    if (studentsInSlot <= 3) return "bg-blue-100 text-blue-700";
+    if (studentsInSlot === 0) {
+      return "bg-slate-100 text-slate-700";
+    }
+    if (studentsInSlot === 1) {
+      return "bg-green-100 text-green-700";
+    }
+    if (studentsInSlot <= 3) {
+      return "bg-blue-100 text-blue-700";
+    }
     return "bg-purple-100 text-purple-700";
   };
 

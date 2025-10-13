@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MapPin } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {

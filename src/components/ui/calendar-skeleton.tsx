@@ -1,5 +1,3 @@
-import React from "react";
-
 export const CalendarSkeleton = () => {
   return (
     <div className="w-full h-full animate-pulse">

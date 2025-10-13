@@ -97,7 +97,7 @@ export function CustomMonthView({
     const weeksArray: DayStats[][] = [];
     let currentWeek: DayStats[] = [];
 
-    dailyStats.forEach((dayStats, index) => {
+    dailyStats.forEach((dayStats, _index) => {
       currentWeek.push(dayStats);
 
       if (currentWeek.length === 7) {
@@ -115,13 +115,23 @@ export function CustomMonthView({
 
   const getDayBusyLevel = (stats: DayStats) => {
     const totalSlots = stats.bookedSlots + stats.availableSlots;
-    if (totalSlots === 0) return "none";
+    if (totalSlots === 0) {
+      return "none";
+    }
 
     const busyPercentage = (stats.bookedSlots / totalSlots) * 100;
-    if (busyPercentage === 0) return "none";
-    if (busyPercentage <= 25) return "light";
-    if (busyPercentage <= 50) return "medium";
-    if (busyPercentage <= 75) return "busy";
+    if (busyPercentage === 0) {
+      return "none";
+    }
+    if (busyPercentage <= 25) {
+      return "light";
+    }
+    if (busyPercentage <= 50) {
+      return "medium";
+    }
+    if (busyPercentage <= 75) {
+      return "busy";
+    }
     return "very-busy";
   };
 

@@ -111,7 +111,9 @@ export const LessonNotes: React.FC<LessonNotesProps> = ({ lessonId, studentId })
 
   const handleAddNote = () => {
     const sanitizedContent = sanitizeTextArea(note);
-    if (!sanitizedContent.trim()) return;
+    if (!sanitizedContent.trim()) {
+      return;
+    }
 
     // Using studentNote since we don't have a specific lessonNote API
     addNote.mutate({

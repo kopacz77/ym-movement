@@ -22,9 +22,9 @@ interface Student {
 
 export const PendingApprovals = () => {
   // Always call all hooks at the top level
-  const utils = api.useUtils();
+  const _utils = api.useUtils();
   const queryClient = useQueryClient();
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isRefreshing, _setIsRefreshing] = React.useState(false);
 
   // Use the student namespace for pending approvals
   const { data, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();

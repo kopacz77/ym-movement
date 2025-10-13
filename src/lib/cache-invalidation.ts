@@ -176,7 +176,9 @@ class CacheInvalidationManager {
    * Process event queue
    */
   private async processEventQueue() {
-    if (this.isProcessing || this.eventQueue.length === 0) return;
+    if (this.isProcessing || this.eventQueue.length === 0) {
+      return;
+    }
 
     this.isProcessing = true;
 

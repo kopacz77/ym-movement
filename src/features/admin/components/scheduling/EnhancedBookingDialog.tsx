@@ -232,7 +232,7 @@ export function EnhancedBookingDialog({
                   <span className="font-medium">{selectedEndTime}</span>
                 </>
               ) : (
-                <>Select a date, time range, and rink to create the time slot.</>
+                "Select a date, time range, and rink to create the time slot."
               )}
             </div>
             <div className="flex gap-2">

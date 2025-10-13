@@ -234,7 +234,9 @@ export const OptimizedTextarea = memo(
     );
 
     const characterCount = useMemo(() => {
-      if (!maxLength) return null;
+      if (!maxLength) {
+        return null;
+      }
       return `${immediateValue.length}/${maxLength}`;
     }, [immediateValue.length, maxLength]);
 

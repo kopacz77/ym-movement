@@ -113,7 +113,7 @@ class DatabaseCacheWrapper {
   /**
    * Update performance metrics
    */
-  private updateMetrics(startTime: number, wasFromCache: boolean): void {
+  private updateMetrics(startTime: number, _wasFromCache: boolean): void {
     const queryTime = performance.now() - startTime;
     this.metrics.averageQueryTime =
       (this.metrics.averageQueryTime * (this.metrics.totalQueries - 1) + queryTime) /

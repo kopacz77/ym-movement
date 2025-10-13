@@ -130,7 +130,7 @@ export const TimezoneNotice: React.FC<TimezoneNoticeProps> = ({
               {timezoneInfo.hourText} {timezoneInfo.direction} the rink time.
             </>
           ) : (
-            <>Loading timezone information...</>
+            "Loading timezone information..."
           )}
         </p>
         {currentTimes && (

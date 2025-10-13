@@ -174,7 +174,7 @@ describe("LoginPage", () => {
     expect(screen.getByRole("button", { name: /loading/i })).toBeDisabled();
 
     // Resolve the promise
-    resolveSignIn!({ error: null });
+    resolveSignIn?.({ error: null });
     (global.fetch as any).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ role: "STUDENT" }),

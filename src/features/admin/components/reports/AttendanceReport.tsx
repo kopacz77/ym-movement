@@ -40,7 +40,9 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) =>
 
   // Calculate averages with explicit type handling
   const averageAttendance = React.useMemo(() => {
-    if (!data || !Array.isArray(data) || data.length === 0) return 0;
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return 0;
+    }
 
     const totalAttendance = data.reduce((sum: number, item: ActivityData) => {
       const rate = item.totalLessons > 0 ? (item.completedLessons / item.totalLessons) * 100 : 0;
@@ -51,7 +53,9 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) =>
   }, [data]);
 
   const totalLessons = React.useMemo(() => {
-    if (!data || !Array.isArray(data)) return 0;
+    if (!data || !Array.isArray(data)) {
+      return 0;
+    }
 
     return data.reduce((sum: number, item: ActivityData) => {
       return sum + item.totalLessons;

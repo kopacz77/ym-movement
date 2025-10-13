@@ -1,5 +1,3 @@
-import React from "react";
-
 export const LoadingSkeleton = () => {
   return (
     <div className="w-full h-full animate-pulse">

@@ -99,7 +99,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationData, setConfirmationData] = useState<BulkCreateConfirmationData | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [_isClient, setIsClient] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -220,7 +220,9 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
   };
 
   const handleConfirmedSubmit = () => {
-    if (!confirmationData) return;
+    if (!confirmationData) {
+      return;
+    }
 
     const values = {
       rinkId: formValues.rinkId,

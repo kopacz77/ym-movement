@@ -71,8 +71,8 @@ export function WorkingBlockedDatesManager({ className }: BlockedDatesManagerPro
     }
 
     // Fix timezone issue by creating dates at local time (not UTC)
-    const startDate = new Date(formData.startDate + "T00:00:00");
-    const endDate = new Date(formData.endDate + "T23:59:59");
+    const startDate = new Date(`${formData.startDate}T00:00:00`);
+    const endDate = new Date(`${formData.endDate}T23:59:59`);
 
     createMutation.mutate({
       title: formData.title,

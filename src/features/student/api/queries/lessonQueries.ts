@@ -29,7 +29,9 @@ export const lessonRouter = createTRPCRouter({
         return lesson;
       } catch (error) {
         console.error("Error fetching lesson details:", error);
-        if (error instanceof TRPCError) throw error;
+        if (error instanceof TRPCError) {
+          throw error;
+        }
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -61,7 +63,9 @@ export const lessonRouter = createTRPCRouter({
         return result;
       } catch (error) {
         console.error("Error cancelling lesson:", error);
-        if (error instanceof TRPCError) throw error;
+        if (error instanceof TRPCError) {
+          throw error;
+        }
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

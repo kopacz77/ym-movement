@@ -81,7 +81,7 @@ export namespace TypeGuards {
   }
 
   export function isISODateString(value: string): value is ISODateString {
-    return typeof value === "string" && !isNaN(Date.parse(value));
+    return typeof value === "string" && !Number.isNaN(Date.parse(value));
   }
 
   export function isTimezone(value: string): value is Timezone {

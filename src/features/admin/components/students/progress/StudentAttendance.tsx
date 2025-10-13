@@ -1,13 +1,8 @@
 "use client";
 
 import { endOfMonth, format, isSameDay, startOfMonth } from "date-fns";
-import { Info } from "lucide-react";
-import type { HTMLAttributes } from "react";
 import React, { useEffect } from "react";
-// Import react-day-picker types
-import type { DayPicker } from "react-day-picker";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -54,11 +49,15 @@ export const StudentAttendance: React.FC<StudentAttendanceProps> = ({ studentId 
   }, [error]);
 
   const getLessonStyles = (date: Date) => {
-    if (!attendance) return {};
+    if (!attendance) {
+      return {};
+    }
 
     const lesson = attendance.lessons.find((l) => isSameDay(new Date(l.date), date));
 
-    if (!lesson) return {};
+    if (!lesson) {
+      return {};
+    }
 
     switch (lesson.status) {
       case "COMPLETED":

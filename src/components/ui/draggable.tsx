@@ -26,7 +26,9 @@ export const Draggable = ({
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = (e: React.DragEvent) => {
-    if (!isDraggable) return;
+    if (!isDraggable) {
+      return;
+    }
 
     setIsDragging(true);
 

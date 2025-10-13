@@ -17,7 +17,7 @@ export function ApprovalGuard({
   fallbackTitle = "Account Approval Required",
   fallbackMessage = "Your account is currently pending approval by our administrators.",
 }: ApprovalGuardProps) {
-  const { isApproved, isStudent, name } = useCurrentUser();
+  const { isApproved, isStudent } = useCurrentUser();
 
   // Show loading state while checking approval status
   if (isStudent && isApproved === null) {

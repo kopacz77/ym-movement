@@ -1,6 +1,6 @@
 // src/components/ui/data-state.tsx
 
-import { AlertTriangle, Database } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import type React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DelightfulLoading, PersonalizedSkeleton } from "@/components/ui/delightful-loading";

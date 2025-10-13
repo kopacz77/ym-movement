@@ -34,7 +34,9 @@ export function useTimezoneAwareTime(
 
   // Get timezone abbreviations
   const getUserTimezoneAbbr = () => {
-    if (!isLoaded) return "";
+    if (!isLoaded) {
+      return "";
+    }
     const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: userTimezone,
       timeZoneName: "short",

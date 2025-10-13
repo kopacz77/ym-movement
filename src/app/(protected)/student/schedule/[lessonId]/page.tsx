@@ -66,8 +66,8 @@ export default async function LessonDetailsPage({
     const duration = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
 
     // Format times in the rink's timezone
-    const startTimeFormatted = formatLessonTime(startTime, lesson.Rink.timezone);
-    const endTimeFormatted = formatLessonTime(endTime, lesson.Rink.timezone);
+    const _startTimeFormatted = formatLessonTime(startTime, lesson.Rink.timezone);
+    const _endTimeFormatted = formatLessonTime(endTime, lesson.Rink.timezone);
 
     return (
       <div className="container py-6 space-y-6">

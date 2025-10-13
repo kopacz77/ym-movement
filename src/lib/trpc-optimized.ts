@@ -290,7 +290,7 @@ const cacheMiddleware = <T>(
     }
 
     // Skip cache if specified
-    if (config.skipCache && config.skipCache(ctx, input)) {
+    if (config.skipCache?.(ctx, input)) {
       return next();
     }
 

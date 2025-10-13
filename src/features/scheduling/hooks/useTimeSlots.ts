@@ -14,31 +14,25 @@ export interface DateRange {
 export function useTimeSlots(dateRange?: DateRange, selectedRink?: string) {
   const utils = api.useUtils();
 
-  // Get rinks data
-  const getRinks = () => {
-    return api.admin.schedule.getRinks.useQuery();
-  };
+  // Get rinks data - call hook at top level
+  const rinksQuery = api.admin.schedule.getRinks.useQuery();
 
-  // Get students data
-  const getStudents = () => {
-    return api.admin.student.getStudents.useQuery();
-  };
+  // Get students data - call hook at top level
+  const studentsQuery = api.admin.student.getStudents.useQuery();
 
-  // Get time slots data with optional parameters
-  const getTimeSlots = (params?: { startDate?: Date; endDate?: Date; rinkId?: string }) => {
-    return api.admin.schedule.getTimeSlots.useQuery(
-      {
-        startDate: params?.startDate || dateRange?.start,
-        endDate: params?.endDate || dateRange?.end,
-        rinkId: params?.rinkId || selectedRink,
-      },
-      {
-        refetchOnWindowFocus: false,
-        staleTime: 30000,
-        enabled: !!(params?.startDate || dateRange?.start),
-      },
-    );
-  };
+  // Get time slots data with parameters
+  const timeSlotsQuery = api.admin.schedule.getTimeSlots.useQuery(
+    {
+      startDate: dateRange?.start,
+      endDate: dateRange?.end,
+      rinkId: selectedRink,
+    },
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 30000,
+      enabled: !!dateRange?.start,
+    },
+  );
 
   // Define mutations
   const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
@@ -198,7 +192,7 @@ export function useTimeSlots(dateRange?: DateRange, selectedRink?: string) {
   );
 
   // Get the time slots data
-  const timeSlotsData = getTimeSlots().data;
+  const timeSlotsData = timeSlotsQuery.data;
 
   // Convert time slots to FullCalendar events
   const events =
@@ -263,10 +257,10 @@ export function useTimeSlots(dateRange?: DateRange, selectedRink?: string) {
       : [];
 
   return {
-    // Data fetching
-    getRinks,
-    getStudents,
-    getTimeSlots,
+    // Data queries
+    rinks: rinksQuery,
+    students: studentsQuery,
+    timeSlots: timeSlotsQuery,
 
     // Methods
     createSlot,

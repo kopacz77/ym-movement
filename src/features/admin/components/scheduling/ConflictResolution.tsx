@@ -21,10 +21,10 @@ interface Resolution {
 }
 
 export const ConflictResolution = () => {
-  const [conflicts, setConflicts] = React.useState<Conflict[]>([]);
+  const [conflicts, _setConflicts] = React.useState<Conflict[]>([]);
   const [selectedResolution, setSelectedResolution] = React.useState<string | null>(null);
 
-  const handleResolveConflict = async (resolution: Resolution) => {
+  const handleResolveConflict = async (_resolution: Resolution) => {
     // Implement resolution logic
   };
 

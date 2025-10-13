@@ -25,7 +25,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { TouchIconButton } from "@/components/ui/touch-button";
 import { WarmGreeting } from "@/components/ui/warm-greeting";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,7 +34,7 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useTouchTarget } from "@/hooks/useTouchTarget";
 
 export function AdminHeader() {
-  const router = useRouter();
+  const _router = useRouter();
   const { user, logout } = useAuth(); // Use our custom Auth context
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
@@ -90,7 +89,7 @@ export function AdminHeader() {
       {/* Header Actions */}
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
-          <WarmGreeting name={user?.name || "Beautiful"} role="admin" />
+          <WarmGreeting name={user?.name || "Beautiful"} />
         </div>
 
         <div className={`flex items-center shrink-0 ${getTouchSpacing("gap-2")}`}>

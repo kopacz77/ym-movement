@@ -67,7 +67,9 @@ export function CompactTimeSlotDialog({
     for (let hour = startHour; hour <= endHour; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
         // Don't create slots that go beyond the end hour
-        if (hour === endHour && minute > businessHours.endMinutes) break;
+        if (hour === endHour && minute > businessHours.endMinutes) {
+          break;
+        }
 
         const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
         const displayTime = new Date(2000, 0, 1, hour, minute).toLocaleTimeString("en-US", {

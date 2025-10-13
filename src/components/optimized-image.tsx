@@ -10,7 +10,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface OptimizedImageProps {
@@ -77,7 +77,9 @@ class ImagePerformanceMonitor {
   }
 
   static getAverageLoadTime() {
-    if (ImagePerformanceMonitor.metrics.length === 0) return 0;
+    if (ImagePerformanceMonitor.metrics.length === 0) {
+      return 0;
+    }
     const totalTime = ImagePerformanceMonitor.metrics.reduce(
       (sum, metric) => sum + metric.loadTime,
       0,
@@ -86,7 +88,9 @@ class ImagePerformanceMonitor {
   }
 
   static getCacheHitRate() {
-    if (ImagePerformanceMonitor.metrics.length === 0) return 0;
+    if (ImagePerformanceMonitor.metrics.length === 0) {
+      return 0;
+    }
     const cachedImages = ImagePerformanceMonitor.metrics.filter((metric) => metric.cached).length;
     return (cachedImages / ImagePerformanceMonitor.metrics.length) * 100;
   }
@@ -106,14 +110,16 @@ class ImagePreloader {
   private static preloadQueue: string[] = [];
   private static isProcessing = false;
 
-  static preload(src: string, priority = false): Promise<void> {
+  static preload(src: string, _priority = false): Promise<void> {
     return new Promise((resolve, reject) => {
       if (ImagePreloader.preloadedImages.has(src)) {
         resolve();
         return;
       }
 
-      if (typeof window === "undefined") return;
+      if (typeof window === "undefined") {
+        return;
+      }
 
       const img = new (window as any).Image();
       const startTime = performance.now();
@@ -162,7 +168,9 @@ class ImagePreloader {
   }
 
   private static async processQueue() {
-    if (ImagePreloader.isProcessing || ImagePreloader.preloadQueue.length === 0) return;
+    if (ImagePreloader.isProcessing || ImagePreloader.preloadQueue.length === 0) {
+      return;
+    }
 
     ImagePreloader.isProcessing = true;
 
@@ -231,7 +239,9 @@ export function OptimizedImage({
 
   // Monitor intersection for lazy loading optimization
   useEffect(() => {
-    if (!imageRef.current || priority || eager) return;
+    if (!imageRef.current || priority || eager) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -286,7 +296,9 @@ export function OptimizedImage({
 
   // Generate optimized src with format detection
   const optimizedSrc = useMemo(() => {
-    if (typeof window === "undefined") return src;
+    if (typeof window === "undefined") {
+      return src;
+    }
 
     // Check WebP support
     const supportsWebP = (() => {
@@ -387,7 +399,7 @@ export function OptimizedImageGallery({
   preloadNext = 3,
   lazyLoad = true,
 }: OptimizedImageGalleryProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, _setCurrentIndex] = useState(0);
 
   // Preload next images
   useEffect(() => {

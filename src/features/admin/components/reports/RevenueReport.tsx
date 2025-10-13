@@ -32,7 +32,9 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period }) => {
 
   // Calculate totals and averages with very explicit type handling
   const totalRevenue = React.useMemo(() => {
-    if (!data || !Array.isArray(data)) return 0;
+    if (!data || !Array.isArray(data)) {
+      return 0;
+    }
 
     return data.reduce((sum: number, item: RevenueDataItem) => {
       const itemRevenue = typeof item.totalRevenue === "number" ? item.totalRevenue : 0;
@@ -41,7 +43,9 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period }) => {
   }, [data]);
 
   const averageRevenue = React.useMemo(() => {
-    if (!data || !Array.isArray(data) || data.length === 0) return 0;
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return 0;
+    }
     return totalRevenue / data.length;
   }, [data, totalRevenue]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Gift, Heart, Sparkles, Star, Trophy } from "lucide-react";
+import { CheckCircle, Heart, Sparkles, Star, Trophy } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,9 @@ export function Celebration({
   const [progress, setProgress] = React.useState(100);
 
   React.useEffect(() => {
-    if (!autoClose) return;
+    if (!autoClose) {
+      return;
+    }
 
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
@@ -51,7 +53,9 @@ export function Celebration({
     return () => clearInterval(progressInterval);
   }, [autoClose, duration, onClose]);
 
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
 
   const isAdmin = userRole === "admin";
 

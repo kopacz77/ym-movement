@@ -66,7 +66,9 @@ export const StudentActivityChart: React.FC = () => {
 
   // Transform API data into the format expected by our chart.
   const chartData = useMemo<ChartData[]>(() => {
-    if (!data) return [];
+    if (!data) {
+      return [];
+    }
     const activityData = data as ActivityData[];
     return activityData.map((day) => ({
       date: day.date,

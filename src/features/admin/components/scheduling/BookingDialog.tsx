@@ -2,7 +2,7 @@
 
 import { LessonType, PaymentMethod } from "@prisma/client";
 import { format } from "date-fns";
-import { Calendar, Check, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";

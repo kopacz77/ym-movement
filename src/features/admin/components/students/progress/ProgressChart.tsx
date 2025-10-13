@@ -24,7 +24,8 @@ interface LessonProgressProps {
 // Use type instead of interface to better match the API return type
 type LessonStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
 
-// Properly define API lesson type for React 19 compatibility
+// Unused type - kept for future use
+/*
 type APILesson = {
   id: string;
   startTime: Date;
@@ -58,6 +59,7 @@ type APILesson = {
     status: string;
   } | null;
 };
+*/
 
 export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => {
   // Use a consistent query pattern for React 19
@@ -72,7 +74,9 @@ export const LessonProgress: React.FC<LessonProgressProps> = ({ studentId }) => 
 
   // Filter lessons for the specific student
   const studentLessons = React.useMemo(() => {
-    if (!lessons) return [];
+    if (!lessons) {
+      return [];
+    }
     return lessons.filter(
       (lesson) => lesson.Student?.User?.id === studentId && lesson.status !== "CANCELLED",
     );

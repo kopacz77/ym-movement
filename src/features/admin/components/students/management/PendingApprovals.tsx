@@ -36,7 +36,7 @@ interface StudentData {
 
 export const PendingApprovals: React.FC = () => {
   const queryClient = useQueryClient();
-  const pendingApprovalKey = ["admin", "student", "getPendingApprovals"];
+  const _pendingApprovalKey = ["admin", "student", "getPendingApprovals"];
 
   // Fetch pending approvals from API
   const { data: pendingStudents, isLoading } = api.admin.student.getPendingApprovals.useQuery();
@@ -119,7 +119,9 @@ export const PendingApprovals: React.FC = () => {
 
       allQueries.forEach((query) => {
         const data = query.state.data as any;
-        if (!data?.students || !Array.isArray(data.students)) return;
+        if (!data?.students || !Array.isArray(data.students)) {
+          return;
+        }
 
         const queryKey = query.queryKey.join(".");
 
@@ -171,7 +173,7 @@ export const PendingApprovals: React.FC = () => {
       return { studentId, approvedStudent, pendingRemoved, approvedAdded };
     },
 
-    onSuccess: (data, variables, context) => {
+    onSuccess: (_data, _variables, context) => {
       console.log("🎉💰 SUCCESS! Student approved - results:", {
         pendingRemoved: context?.pendingRemoved,
         approvedAdded: context?.approvedAdded,

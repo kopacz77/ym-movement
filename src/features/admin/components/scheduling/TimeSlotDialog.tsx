@@ -1,6 +1,5 @@
 import { X } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
@@ -99,8 +98,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
 }) => {
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
 
-  // Debug: Get student stats
-  const { data: studentStats } = api.admin.student.getStudentStats.useQuery(undefined, {
+  // Debug: Get student stats (currently unused but kept for future features)
+  const { data: _studentStats } = api.admin.student.getStudentStats.useQuery(undefined, {
     enabled: isOpen, // Only fetch when dialog is open
   });
 

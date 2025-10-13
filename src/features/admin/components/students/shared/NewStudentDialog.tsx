@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Level } from "@prisma/client";
 import { Plus } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -65,7 +65,7 @@ export const NewStudentDialog = () => {
 
   // Use the correct path to the createStudent procedure
   const createStudent = api.admin.student.createStudent.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       toast("Success", {
         description: "Student created successfully.",
       });

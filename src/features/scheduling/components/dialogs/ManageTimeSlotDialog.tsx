@@ -1,6 +1,5 @@
 import { X } from "lucide-react";
 import type { Event } from "react-big-calendar";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 // src/features/scheduling/components/dialogs/ManageTimeSlotDialog.tsx
 import {

@@ -1,6 +1,3 @@
-// src/components/schedule-calendar-styles.tsx
-import React from "react";
-
 export function ScheduleCalendarStyles() {
   return (
     <style jsx global>{`

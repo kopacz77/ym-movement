@@ -179,9 +179,12 @@ export const rinkRouter = createTRPCRouter({
 
       if (timeSlotCount > 0 || lessonCount > 0) {
         const conflicts = [];
-        if (timeSlotCount > 0)
+        if (timeSlotCount > 0) {
           conflicts.push(`${timeSlotCount} time slot${timeSlotCount === 1 ? "" : "s"}`);
-        if (lessonCount > 0) conflicts.push(`${lessonCount} lesson${lessonCount === 1 ? "" : "s"}`);
+        }
+        if (lessonCount > 0) {
+          conflicts.push(`${lessonCount} lesson${lessonCount === 1 ? "" : "s"}`);
+        }
 
         throw new TRPCError({
           code: "CONFLICT",

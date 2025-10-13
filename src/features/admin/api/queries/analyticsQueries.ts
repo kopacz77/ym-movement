@@ -1,4 +1,4 @@
-import { LessonStatus, LessonType, Level, PaymentStatus, RinkArea } from "@prisma/client";
+import { LessonStatus, PaymentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { z } from "zod";

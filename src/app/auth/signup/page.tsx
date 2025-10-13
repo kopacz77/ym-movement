@@ -66,7 +66,7 @@ export default function SignupPage() {
 
           // Format password validation errors
           if (Array.isArray(data.errors)) {
-            errorMessage += ":\n" + data.errors.join("\n");
+            errorMessage += `:\n${data.errors.join("\n")}`;
           }
           // Format Zod validation errors
           else if (typeof data.errors === "object") {
@@ -78,7 +78,7 @@ export default function SignupPage() {
               }
             }
             if (errorList.length > 0) {
-              errorMessage += ":\n" + errorList.join("\n");
+              errorMessage += `:\n${errorList.join("\n")}`;
             }
           }
 

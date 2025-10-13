@@ -53,7 +53,9 @@ export default function BlockedDateDialog({
   });
 
   const handleDelete = () => {
-    if (!blockedRange) return;
+    if (!blockedRange) {
+      return;
+    }
 
     console.log("Delete blocked date clicked for ID:", blockedRange.id);
     showDeleteConfirmation(
@@ -68,7 +70,9 @@ export default function BlockedDateDialog({
     );
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div

@@ -1,7 +1,6 @@
 // features/admin/components/students/profile/StudentNotes.tsx
 "use client";
 
-import { TRPCClientError, TRPCClientErrorLike } from "@trpc/client";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import React, { useEffect } from "react";
@@ -43,7 +42,9 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
 
   // Access notes directly from student
   const notes = React.useMemo(() => {
-    if (!student?.notes) return [];
+    if (!student?.notes) {
+      return [];
+    }
 
     // Convert the single notes field to an array of note objects
     return [

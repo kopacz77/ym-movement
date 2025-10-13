@@ -161,7 +161,7 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       }
     });
     return blocked;
-  }, []);
+  }, [blockedDateRanges.forEach]);
 
   // Process events for month view - create daily summary events
   const processedMonthEvents = useMemo(() => {

@@ -26,12 +26,12 @@ import { ScheduleHeader } from "./ScheduleHeader";
 import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
 import { WorkingBlockedDatesManager } from "./WorkingBlockedDatesManager";
 
-// Define types for form data
-interface TimeSlotFormData {
-  startTime: Date | null;
-  endTime: Date | null;
-  rinkId?: string;
-}
+// Define types for form data (kept for future use)
+// interface TimeSlotFormData {
+//   startTime: Date | null;
+//   endTime: Date | null;
+//   rinkId?: string;
+// }
 
 // Calendar schedule event type
 interface ScheduleEvent {

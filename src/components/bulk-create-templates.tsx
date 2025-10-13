@@ -255,7 +255,7 @@ interface TemplateCardProps {
 
 function TemplateCard({ template, onSelect }: TemplateCardProps) {
   const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const selectedDays = template.preset.daysOfWeek.map((d) => dayLabels[d]).join(", ");
+  const _selectedDays = template.preset.daysOfWeek.map((d) => dayLabels[d]).join(", ");
 
   return (
     <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={onSelect}>

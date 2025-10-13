@@ -48,13 +48,17 @@ export const RevenueChart = () => {
   }, [error]);
 
   const chartData = React.useMemo(() => {
-    if (!data || !Array.isArray(data)) return [];
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
 
     const formattedData: ChartData[] = [];
 
     for (const item of data) {
       // Safe type checking
-      if (typeof item !== "object" || item === null) continue;
+      if (typeof item !== "object" || item === null) {
+        continue;
+      }
 
       // Extract date with fallback
       let date = "";
