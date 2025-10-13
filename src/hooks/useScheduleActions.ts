@@ -1,8 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export function useScheduleActions() {
   const utils = api.useUtils();
+  const queryClient = useQueryClient();
 
   // Create time slot mutation
   const createTimeSlot = api.admin.schedule.createTimeSlot.useMutation({
@@ -146,11 +148,8 @@ export function useScheduleActions() {
       // Cancel any outgoing refetches
       await utils.admin.schedule.getTimeSlots.cancel();
 
-      // Get the query client to access all cached queries
-      const queryClient = utils.client;
-
       // Get all cached getTimeSlots queries (with different parameters)
-      const cachedQueries = (queryClient as any).getQueriesData({
+      const cachedQueries = queryClient.getQueriesData({
         queryKey: ["admin", "schedule", "getTimeSlots"],
       });
 
@@ -175,7 +174,7 @@ export function useScheduleActions() {
           });
 
           // Update this specific cached query
-          (queryClient as any).setQueryData(queryKey, updatedTimeSlots);
+          queryClient.setQueryData(queryKey, updatedTimeSlots);
           console.log("Updated cache for queryKey:", queryKey);
         }
       });
@@ -199,9 +198,8 @@ export function useScheduleActions() {
       });
       // Rollback on error
       if (context?.previousData) {
-        const queryClient = utils.client;
         context.previousData.forEach(({ queryKey, data }: { queryKey: any; data: any }) => {
-          (queryClient as any).setQueryData(queryKey, data);
+          queryClient.setQueryData(queryKey, data);
         });
       }
     },
