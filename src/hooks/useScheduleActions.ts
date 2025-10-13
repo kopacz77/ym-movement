@@ -142,6 +142,7 @@ export function useScheduleActions() {
   // Unassign student mutation
   const unassignStudent = api.admin.schedule.unassignStudent.useMutation({
     onMutate: async ({ lessonId }) => {
+      console.log("unassignStudent onMutate - lessonId:", lessonId);
       // Cancel any outgoing refetches
       await utils.admin.schedule.getTimeSlots.cancel();
 
@@ -152,6 +153,8 @@ export function useScheduleActions() {
       const cachedQueries = (queryClient as any).getQueriesData({
         queryKey: ["admin", "schedule", "getTimeSlots"],
       });
+
+      console.log("cachedQueries count:", cachedQueries.length);
 
       // Snapshot all previous values
       const previousData = cachedQueries.map(([queryKey, data]: [any, any]) => ({
@@ -169,12 +172,14 @@ export function useScheduleActions() {
 
           // Update this specific cached query
           (queryClient as any).setQueryData(queryKey, updatedTimeSlots);
+          console.log("Updated cache for queryKey:", queryKey);
         }
       });
 
       return { previousData };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("unassignStudent onSuccess - data:", data);
       toast("Success", {
         description: "Student unassigned successfully",
       });
@@ -182,6 +187,9 @@ export function useScheduleActions() {
       utils.admin.schedule.getTimeSlots.invalidate();
     },
     onError: (err, variables, context) => {
+      console.error("unassignStudent onError - err:", err);
+      console.error("unassignStudent onError - err.message:", err.message);
+      console.error("unassignStudent onError - variables:", variables);
       toast.error("Error", {
         description: err.message,
       });

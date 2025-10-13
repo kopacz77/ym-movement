@@ -64,7 +64,7 @@ const ScheduleManagerComponent = () => {
   const [selectedBlockedRange, setSelectedBlockedRange] = useState<any>(null);
 
   // Selected data state
-  const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
+  // const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(null);
@@ -94,11 +94,11 @@ const ScheduleManagerComponent = () => {
     assignStudent,
     unassignStudent,
     updateTimeSlot,
-    utils,
+    // utils, // Unused but kept in destructuring for potential future use
   } = useScheduleActions();
 
   // Day detail view state
-  const [dayDetailDate, setDayDetailDate] = useState<Date | null>(null);
+  // const [dayDetailDate, setDayDetailDate] = useState<Date | null>(null);
   const [showDayDetail, setShowDayDetail] = useState(false);
 
   // Date range filter state
@@ -164,17 +164,17 @@ const ScheduleManagerComponent = () => {
     [selectedRink],
   );
 
-  const handleCreateTimeSlotClick = useCallback(() => {
-    // Clear calendar context when using button (not clicking on calendar)
-    setSelectedCalendarDate(null);
-    setSelectedCalendarTime(null);
-    setTimeSlotFormData({
-      startTime: null,
-      endTime: null,
-      rinkId: selectedRink,
-    });
-    setIsCreateDialogOpen(true);
-  }, [selectedRink]);
+  // const handleCreateTimeSlotClick = useCallback(() => {
+  //   // Clear calendar context when using button (not clicking on calendar)
+  //   setSelectedCalendarDate(null);
+  //   setSelectedCalendarTime(null);
+  //   setTimeSlotFormData({
+  //     startTime: null,
+  //     endTime: null,
+  //     rinkId: selectedRink,
+  //   });
+  //   setIsCreateDialogOpen(true);
+  // }, [selectedRink]);
 
   const handleSelectEvent = useCallback((event: object) => {
     const typedEvent = event as ExtendedCalendarEvent;
@@ -280,11 +280,11 @@ const ScheduleManagerComponent = () => {
   }, []);
 
   // Handle back to month from day detail
-  const handleBackToMonth = useCallback(() => {
-    setShowDayDetail(false);
-    setDayDetailDate(null);
-    setCalendarView("month");
-  }, []);
+  // const handleBackToMonth = useCallback(() => {
+  //   setShowDayDetail(false);
+  //   setDayDetailDate(null);
+  //   setCalendarView("month");
+  // }, []);
 
   // Handle create slot from day detail
   const handleCreateSlotFromDay = useCallback(
@@ -452,7 +452,7 @@ const ScheduleManagerComponent = () => {
         studentId,
       });
     },
-    [assignStudent, selectedEvent, selectedSlot, students, setSelectedSlot, setSelectedEvent],
+    [assignStudent, selectedEvent, selectedSlot, students],
   );
 
   // Handle enhanced booking dialog submission
@@ -485,10 +485,10 @@ const ScheduleManagerComponent = () => {
   );
 
   // Handle dialog close actions
-  const handleCreateDialogClose = useCallback(() => {
-    setIsCreateDialogOpen(false);
-    setTimeSlotFormData(null);
-  }, []);
+  // const handleCreateDialogClose = useCallback(() => {
+  //   setIsCreateDialogOpen(false);
+  //   setTimeSlotFormData(null);
+  // }, []);
 
   const handleBulkCreateClose = useCallback(() => {
     setIsBulkCreateOpen(false);
@@ -618,11 +618,7 @@ const ScheduleManagerComponent = () => {
         students={students || []}
         onAssignStudent={handleAssignStudent}
         onUnassignStudent={(lessonId: string) => {
-          console.log("ScheduleManager onUnassignStudent called with:", lessonId);
-          console.log("selectedSlot:", selectedSlot);
-          console.log("selectedSlot.Lesson type:", typeof selectedSlot?.Lesson);
-          console.log("selectedSlot.Lesson isArray:", Array.isArray(selectedSlot?.Lesson));
-          console.log("selectedSlot.Lesson value:", selectedSlot?.Lesson);
+          console.log("🔵 ScheduleManager: Removing student - lessonId:", lessonId);
 
           if (lessonId) {
             // Immediately update the selected slot in the dialog
@@ -631,22 +627,17 @@ const ScheduleManagerComponent = () => {
               const currentLessons = Array.isArray(selectedSlot.Lesson)
                 ? selectedSlot.Lesson
                 : [];
-              console.log("currentLessons:", currentLessons);
-              console.log("Filtering lessons to remove:", lessonId);
 
               const updatedSlot = {
                 ...selectedSlot,
-                Lesson: currentLessons.filter((lesson: any) => {
-                  console.log("Checking lesson:", lesson, "ID:", lesson?.id);
-                  return lesson.id !== lessonId;
-                }),
+                Lesson: currentLessons.filter((lesson: any) => lesson.id !== lessonId),
               };
-              console.log("updatedSlot:", updatedSlot);
               setSelectedSlot(updatedSlot);
+              console.log("✅ UI updated optimistically - Lesson removed from slot");
             }
 
             // The optimistic update will handle cache updates
-            console.log("Calling unassignStudent.mutate with:", { lessonId });
+            console.log("🚀 Calling mutation to delete lesson from backend...");
             unassignStudent.mutate({ lessonId });
           }
         }}
