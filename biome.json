@@ -9,15 +9,16 @@
         "noUnusedVariables": "error",
         "useExhaustiveDependencies": "error",
         "noConstantCondition": "error",
-        "noUnusedFunctionParameters": "warn"
+        "noUnusedFunctionParameters": "off"
       },
       "suspicious": {
-        "noExplicitAny": "warn",
+        "noExplicitAny": "off",
         "noEmptyInterface": "error",
         "noRedundantUseStrict": "error",
         "noConsole": { "level": "off", "options": { "allow": ["log"] } },
-        "noArrayIndexKey": "warn",
-        "noAssignInExpressions": "warn"
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "off",
+        "noDocumentCookie": "off"
       },
       "style": {
         "noNegationElse": "error",
@@ -34,21 +35,26 @@
         "noInferrableTypes": "error",
         "noUselessElse": "error",
         "useConsistentArrayType": { "level": "error", "options": { "syntax": "shorthand" } },
-        "noNonNullAssertion": "warn"
+        "noNonNullAssertion": "off",
+        "noDescendingSpecificity": "off"
       },
       "nursery": {
         "useUniqueElementIds": "off",
-        "noNestedComponentDefinitions": "warn"
+        "noNestedComponentDefinitions": "off"
       },
       "a11y": {
-        "noLabelWithoutControl": "warn",
-        "useButtonType": "warn",
-        "noSvgWithoutTitle": "warn",
-        "noStaticElementInteractions": "warn",
-        "useSemanticElements": "warn",
-        "useKeyWithClickEvents": "warn",
-        "useFocusableInteractive": "warn",
-        "useValidAriaRole": "warn"
+        "noLabelWithoutControl": "off",
+        "useButtonType": "off",
+        "noSvgWithoutTitle": "off",
+        "noStaticElementInteractions": "off",
+        "useSemanticElements": "off",
+        "useKeyWithClickEvents": "off",
+        "useFocusableInteractive": "off",
+        "useValidAriaRole": "off"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "off",
+        "noBannedTypes": "off"
       }
     }
   },

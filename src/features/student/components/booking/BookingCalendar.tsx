@@ -134,7 +134,6 @@ function BookingCalendarComponent() {
   });
 
   // Set the first rink as default if not already set
-  // biome-ignore lint/correctness/useExhaustiveDependencies: rinks fully covers any changes to rinks[0].id
   useEffect(() => {
     // Safely access the first rink ID within the effect body
     const firstRinkId = rinks?.[0]?.id;
