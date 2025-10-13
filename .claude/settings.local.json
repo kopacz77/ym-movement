@@ -38,7 +38,8 @@
       "Bash(wc:*)",
       "Bash(pnpm add:*)",
       "Bash(npm run format:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(pnpm audit:*)"
     ],
     "deny": []
   }

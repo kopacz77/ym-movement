@@ -618,6 +618,12 @@ const ScheduleManagerComponent = () => {
         students={students || []}
         onAssignStudent={handleAssignStudent}
         onUnassignStudent={(lessonId: string) => {
+          console.log("ScheduleManager onUnassignStudent called with:", lessonId);
+          console.log("selectedSlot:", selectedSlot);
+          console.log("selectedSlot.Lesson type:", typeof selectedSlot?.Lesson);
+          console.log("selectedSlot.Lesson isArray:", Array.isArray(selectedSlot?.Lesson));
+          console.log("selectedSlot.Lesson value:", selectedSlot?.Lesson);
+
           if (lessonId) {
             // Immediately update the selected slot in the dialog
             if (selectedSlot) {
@@ -625,14 +631,22 @@ const ScheduleManagerComponent = () => {
               const currentLessons = Array.isArray(selectedSlot.Lesson)
                 ? selectedSlot.Lesson
                 : [];
+              console.log("currentLessons:", currentLessons);
+              console.log("Filtering lessons to remove:", lessonId);
+
               const updatedSlot = {
                 ...selectedSlot,
-                Lesson: currentLessons.filter((lesson: any) => lesson.id !== lessonId),
+                Lesson: currentLessons.filter((lesson: any) => {
+                  console.log("Checking lesson:", lesson, "ID:", lesson?.id);
+                  return lesson.id !== lessonId;
+                }),
               };
+              console.log("updatedSlot:", updatedSlot);
               setSelectedSlot(updatedSlot);
             }
 
             // The optimistic update will handle cache updates
+            console.log("Calling unassignStudent.mutate with:", { lessonId });
             unassignStudent.mutate({ lessonId });
           }
         }}
