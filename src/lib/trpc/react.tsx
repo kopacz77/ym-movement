@@ -19,7 +19,8 @@ const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 30 * 1000, // 30 seconds
+        staleTime: 5 * 1000, // 5 seconds - more aggressive refetching
+        refetchOnWindowFocus: true, // Refetch when user returns to window
       },
     },
   });

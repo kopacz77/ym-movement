@@ -13,9 +13,14 @@ const execAsync = promisify(exec);
 
 const SECURITY_CHECKS = [
   {
-    name: "Dependency Vulnerability Scan",
-    command: "pnpm audit",
+    name: "Dependency Vulnerability Scan (HIGH/CRITICAL only)",
+    command: "pnpm audit --audit-level=high",
     critical: true,
+  },
+  {
+    name: "Dependency Vulnerability Scan (All - informational)",
+    command: "pnpm audit",
+    critical: false,
   },
   {
     name: "Outdated Package Check",

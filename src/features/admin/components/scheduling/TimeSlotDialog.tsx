@@ -273,9 +273,15 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                             e.stopPropagation();
                             console.log("X button clicked - Lesson data:", lesson);
                             console.log("X button clicked - Lesson ID:", lesson.id);
-                            console.log("X button clicked - onUnassignStudent type:", typeof onUnassignStudent);
+                            console.log(
+                              "X button clicked - onUnassignStudent type:",
+                              typeof onUnassignStudent,
+                            );
                             showRemoveConfirmation("student from time slot", () => {
-                              console.log("Remove confirmed - calling onUnassignStudent with:", lesson.id);
+                              console.log(
+                                "Remove confirmed - calling onUnassignStudent with:",
+                                lesson.id,
+                              );
                               onUnassignStudent(lesson.id);
                             });
                           }}

@@ -168,6 +168,7 @@ model Student {
   id                   String        @id @default(cuid())
   userId               String        @unique
   phone                String?
+  dateOfBirth          String?
   maxLessonsPerWeek    Int           @default(3)
   notes                String?
   level                Level         @default(PRELIMINARY)

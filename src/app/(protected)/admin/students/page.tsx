@@ -72,6 +72,21 @@ export default function AdminStudentsPage() {
     setIsEditDialogOpen(true);
   };
 
+  const handleEditComplete = () => {
+    setIsEditDialogOpen(false);
+    // Small delay to ensure smooth dialog close animation before clearing selection
+    setTimeout(() => {
+      setSelectedStudentId(null);
+    }, 300);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditDialogOpen(false);
+    setTimeout(() => {
+      setSelectedStudentId(null);
+    }, 300);
+  };
+
   // Handle tab changes - clear selected student when returning to list
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
@@ -117,15 +132,23 @@ export default function AdminStudentsPage() {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCancelEdit();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Student</DialogTitle>
           </DialogHeader>
           {selectedStudentId && (
             <StudentForm
+              key={selectedStudentId}
               student={{ id: selectedStudentId }}
-              onSubmitAction={() => setIsEditDialogOpen(false)}
+              onSubmitAction={handleEditComplete}
             />
           )}
         </DialogContent>

@@ -165,6 +165,7 @@ export const studentQueries = createTRPCRouter({
         ...studentData,
         notes: studentData.notes ? sanitizeInput(studentData.notes) : undefined,
         phone: studentData.phone ? formatPhoneNumber(sanitizeInput(studentData.phone)) : undefined,
+        dateOfBirth: studentData.dateOfBirth || undefined,
         emergencyContact: studentData.emergencyContact
           ? {
               name: toProperCase(sanitizeInput(studentData.emergencyContact.name || "")),
@@ -334,6 +335,7 @@ export const studentQueries = createTRPCRouter({
         ...studentData,
         notes: studentData.notes ? sanitizeInput(studentData.notes) : undefined,
         phone: studentData.phone ? formatPhoneNumber(sanitizeInput(studentData.phone)) : undefined,
+        dateOfBirth: studentData.dateOfBirth || undefined,
         emergencyContact: studentData.emergencyContact
           ? {
               name: toProperCase(sanitizeInput(studentData.emergencyContact.name || "")),

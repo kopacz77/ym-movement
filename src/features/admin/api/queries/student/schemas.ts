@@ -17,6 +17,7 @@ export const studentFormSchema = z.object({
     })
     .optional(),
   notes: z.string().optional(),
+  dateOfBirth: z.string().optional(),
   active: z.boolean().optional(),
 });
 

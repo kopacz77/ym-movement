@@ -624,9 +624,7 @@ const ScheduleManagerComponent = () => {
             // Immediately update the selected slot in the dialog
             if (selectedSlot) {
               // Ensure Lesson is an array before filtering (prevents "e[o] is not a function" error)
-              const currentLessons = Array.isArray(selectedSlot.Lesson)
-                ? selectedSlot.Lesson
-                : [];
+              const currentLessons = Array.isArray(selectedSlot.Lesson) ? selectedSlot.Lesson : [];
 
               const updatedSlot = {
                 ...selectedSlot,
