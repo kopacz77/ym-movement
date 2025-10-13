@@ -621,15 +621,16 @@ const ScheduleManagerComponent = () => {
           if (lessonId) {
             // Immediately update the selected slot in the dialog
             if (selectedSlot) {
+              // Ensure Lesson is an array before filtering (prevents "e[o] is not a function" error)
+              const currentLessons = Array.isArray(selectedSlot.Lesson)
+                ? selectedSlot.Lesson
+                : [];
               const updatedSlot = {
                 ...selectedSlot,
-                Lesson: (selectedSlot.Lesson || []).filter((lesson: any) => lesson.id !== lessonId),
+                Lesson: currentLessons.filter((lesson: any) => lesson.id !== lessonId),
               };
               setSelectedSlot(updatedSlot);
             }
-
-            // Note: selectedEvent is typically null when clicking from calendar
-            // The dialog uses selectedSlot which is updated above
 
             // The optimistic update will handle cache updates
             unassignStudent.mutate({ lessonId });
