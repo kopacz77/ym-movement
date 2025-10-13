@@ -39,7 +39,8 @@
       "Bash(pnpm add:*)",
       "Bash(npm run format:*)",
       "Bash(mkdir:*)",
-      "Bash(pnpm audit:*)"
+      "Bash(pnpm audit:*)",
+      "Bash(pnpm biome check:*)"
     ],
     "deny": []
   }

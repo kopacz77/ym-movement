@@ -159,7 +159,7 @@ describe("LoginPage", () => {
     renderWithProviders(<LoginPage />);
 
     // Mock slow sign in
-    let resolveSignIn: (value: any) => void;
+    let resolveSignIn: ((value: any) => void) | undefined;
     const signInPromise = new Promise((resolve) => {
       resolveSignIn = resolve;
     });

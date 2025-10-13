@@ -1,7 +1,6 @@
 // src/features/admin/components/students/StudentDetailTabs.tsx
 "use client";
 
-import type { Level } from "@prisma/client"; // Use import type for type-only imports
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,33 +10,6 @@ import { StudentNotes } from "./profile/StudentNotes";
 import { StudentAttendance } from "./progress/StudentAttendance";
 import { StudentPricingForm } from "./StudentPricingForm";
 import type { Student } from "./types";
-
-// Helper function for null to undefined conversion
-function nullToUndefined<T>(value: T | null): T | undefined {
-  return value === null ? undefined : value;
-}
-
-// Emergency contact interface to avoid using any
-interface EmergencyContact {
-  name: string;
-  phone: string;
-  relationship: string;
-}
-
-// Type for the student object that we're passing to the StudentForm
-interface FormCompatibleStudent {
-  id?: string;
-  user?: {
-    name?: string;
-    email?: string;
-  };
-  phone?: string;
-  maxLessonsPerWeek?: number;
-  level?: Level;
-  emergencyContact?: EmergencyContact | null;
-  notes?: string;
-  dateOfBirth?: string;
-}
 
 interface StudentDetailTabsProps {
   student: Student & {
@@ -56,42 +28,6 @@ interface StudentDetailTabsProps {
 
 export function StudentDetailTabs({ student }: StudentDetailTabsProps) {
   const [activeTab, setActiveTab] = useState("profile");
-
-  // Parse emergency contact safely
-  function parseEmergencyContact(data: unknown): EmergencyContact | undefined {
-    if (!data) {
-      return undefined;
-    }
-
-    try {
-      const parsed = typeof data === "string" ? JSON.parse(data) : data;
-      if (typeof parsed === "object" && parsed !== null) {
-        return {
-          name: String(parsed.name || ""),
-          phone: String(parsed.phone || ""),
-          relationship: String(parsed.relationship || ""),
-        };
-      }
-    } catch (error) {
-      console.error("Failed to parse emergency contact", error);
-    }
-
-    return undefined;
-  }
-
-  // Prepare the student object for the StudentForm component
-  const formStudent: FormCompatibleStudent = {
-    id: student.id,
-    user: {
-      name: student.user.name || undefined, // Convert null to undefined
-      email: student.user.email,
-    },
-    phone: nullToUndefined(student.phone),
-    maxLessonsPerWeek: student.maxLessonsPerWeek,
-    level: student.level,
-    emergencyContact: parseEmergencyContact(student.emergencyContact),
-    notes: nullToUndefined(student.notes),
-  };
 
   // Fetch default pricing for the pricing tab
   const { data: pricingData, isLoading: isPricingLoading } =
@@ -121,7 +57,7 @@ export function StudentDetailTabs({ student }: StudentDetailTabsProps) {
       </TabsList>
 
       <TabsContent value="profile" className="space-y-4 mt-6">
-        <StudentForm student={formStudent} />
+        <StudentForm student={{ id: student.id }} />
       </TabsContent>
 
       <TabsContent value="notes" className="space-y-4 mt-6">

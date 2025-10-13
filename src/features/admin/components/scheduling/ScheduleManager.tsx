@@ -64,7 +64,11 @@ const ScheduleManagerComponent = () => {
   const [selectedBlockedRange, setSelectedBlockedRange] = useState<any>(null);
 
   // Selected data state
-  // const [timeSlotFormData, setTimeSlotFormData] = useState<TimeSlotFormData | null>(null);
+  const [_timeSlotFormData, setTimeSlotFormData] = useState<{
+    startTime: Date | null;
+    endTime: Date | null;
+    rinkId?: string;
+  } | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(null);
@@ -98,7 +102,7 @@ const ScheduleManagerComponent = () => {
   } = useScheduleActions();
 
   // Day detail view state
-  // const [dayDetailDate, setDayDetailDate] = useState<Date | null>(null);
+  const [_dayDetailDate, setDayDetailDate] = useState<Date | null>(null);
   const [showDayDetail, setShowDayDetail] = useState(false);
 
   // Date range filter state

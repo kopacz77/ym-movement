@@ -8,7 +8,8 @@
       "correctness": {
         "noUnusedVariables": "error",
         "useExhaustiveDependencies": "error",
-        "noConstantCondition": "error"
+        "noConstantCondition": "error",
+        "noUnusedFunctionParameters": "warn"
       },
       "suspicious": {
         "noExplicitAny": "warn",
@@ -32,7 +33,8 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error",
-        "useConsistentArrayType": { "level": "error", "options": { "syntax": "shorthand" } }
+        "useConsistentArrayType": { "level": "error", "options": { "syntax": "shorthand" } },
+        "noNonNullAssertion": "warn"
       },
       "nursery": {
         "useUniqueElementIds": "off",
@@ -45,7 +47,8 @@
         "noStaticElementInteractions": "warn",
         "useSemanticElements": "warn",
         "useKeyWithClickEvents": "warn",
-        "useFocusableInteractive": "warn"
+        "useFocusableInteractive": "warn",
+        "useValidAriaRole": "warn"
       }
     }
   },
