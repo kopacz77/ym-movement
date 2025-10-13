@@ -130,7 +130,12 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                   <TableRow key={student.id}>
                     <TableCell className="font-medium sticky left-0 bg-background">
                       <div className="min-w-0">
-                        <div className="font-medium truncate">{student.User.name}</div>
+                        <button
+                          onClick={() => onViewProfileAction(student.id)}
+                          className="font-medium truncate text-left hover:text-blue-600 hover:underline cursor-pointer transition-colors"
+                        >
+                          {student.User.name}
+                        </button>
                         <div className="text-sm text-muted-foreground sm:hidden truncate">
                           {student.User.email}
                         </div>
