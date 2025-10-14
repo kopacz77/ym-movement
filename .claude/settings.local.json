@@ -40,7 +40,9 @@
       "Bash(npm run format:*)",
       "Bash(mkdir:*)",
       "Bash(pnpm audit:*)",
-      "Bash(pnpm biome check:*)"
+      "Bash(pnpm biome check:*)",
+      "Bash(npm run lint 2)",
+      "Bash(1)"
     ],
     "deny": []
   }

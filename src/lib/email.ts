@@ -475,3 +475,53 @@ export async function sendPaymentReminderEmail(
     emailContent,
   );
 }
+
+/**
+ * Sends a generic notification email to a student when schedule changes have been made
+ * This is called once per day for students who have pending email notifications
+ */
+export async function sendScheduleChangesEmail(
+  studentEmail: string,
+  studentName: string,
+  changeCount: number,
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">📅 Schedule Update</h1>
+      <p>Hello ${studentName},</p>
+      <p>Changes have been made to your schedule. Please log in to the YM Movement platform to review your updated schedule.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <p style="margin: 0; font-size: 16px; color: #0c4a6e;">
+          <strong>Action Required:</strong> Please check your schedule on the YM Movement app to see the updates.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 40px 0;">
+        <a href="${BASE_URL}/student/schedule"
+           style="display: inline-block; background-color: #3b82f6; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 18px;">
+            Check Your Schedule
+        </a>
+      </div>
+
+      <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 30px 0;">
+        <h3 style="color: #374151; margin-top: 0;">Need Help?</h3>
+        <p style="margin-bottom: 10px;">If you have any questions about your schedule, please contact us:</p>
+        <p style="margin-bottom: 8px;">📧 Email: info@ym-movement.com</p>
+        <p style="margin-bottom: 8px;">📱 Text/Call: (714) 743-7071</p>
+      </div>
+
+      <p style="margin-top: 30px;">Thank you for choosing YM Movement!</p>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">You receive this email only when changes are made to your schedule.</p>
+        <p style="margin: 5px 0 0 0;">To discuss your schedule or this notification, please contact us at info@ym-movement.com</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(studentEmail, "Schedule Update - Please Check YM Movement App", emailContent);
+}

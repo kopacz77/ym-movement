@@ -66,6 +66,22 @@ model Notification {
   @@index([userId])
 }
 
+model PendingEmailNotification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String    @default("SCHEDULE_CHANGE")
+  lessonId  String?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([sentAt])
+  @@index([userId, sentAt])
+}
+
 model PasswordResetToken {
   id        String   @id @default(cuid())
   userId    String
@@ -210,19 +226,20 @@ model StudentNote {
 }
 
 model User {
-  id                 String               @id @default(cuid())
-  email              String               @unique
-  name               String?
-  password           String?
-  role               Role                 @default(STUDENT)
-  emailVerified      DateTime?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  BlockedDateRange   BlockedDateRange[]
-  Notification       Notification[]
-  PasswordResetToken PasswordResetToken[]
-  Student            Student?
-  StudentNote        StudentNote[]
+  id                       String                     @id @default(cuid())
+  email                    String                     @unique
+  name                     String?
+  password                 String?
+  role                     Role                       @default(STUDENT)
+  emailVerified            DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  BlockedDateRange         BlockedDateRange[]
+  Notification             Notification[]
+  PendingEmailNotification PendingEmailNotification[]
+  PasswordResetToken       PasswordResetToken[]
+  Student                  Student?
+  StudentNote              StudentNote[]
 
   @@index([createdAt])
   @@index([emailVerified])

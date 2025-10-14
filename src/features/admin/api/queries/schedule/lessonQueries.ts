@@ -3,6 +3,7 @@ import { LessonStatus, LessonType, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
+import { createScheduleChangeNotification } from "@/features/notifications/utils/notificationHelpers";
 import { googleCalendar } from "@/lib/google/calendar";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
@@ -377,7 +378,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1); // Ensure at least 1 minute
 
         // Create the lesson
-        return await ctx.prisma.lesson.create({
+        const lesson = await ctx.prisma.lesson.create({
           data: {
             id: randomUUID(),
             studentId: input.studentId,
@@ -395,6 +396,28 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           },
           include: { Student: { include: { User: true } } },
         });
+
+        // Create notifications for the student (in-app + pending email)
+        try {
+          await createScheduleChangeNotification({
+            userId: student.userId,
+            title: "New Lesson Scheduled",
+            message: `A new lesson has been scheduled for ${timeSlot.startTime.toLocaleDateString()} at ${timeSlot.startTime.toLocaleTimeString()}`,
+            link: "/student/schedule",
+            lessonId: lesson.id,
+            metadata: {
+              lessonType: "PRIVATE",
+              rinkName: timeSlot.Rink.name,
+              startTime: timeSlot.startTime.toISOString(),
+              endTime: timeSlot.endTime.toISOString(),
+            },
+          });
+        } catch (notificationError) {
+          console.error("Error creating notifications:", notificationError);
+          // Don't fail the lesson creation if notification fails
+        }
+
+        return lesson;
       } catch (error) {
         if (error instanceof TRPCError) {
           throw error;
