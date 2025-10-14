@@ -34,7 +34,7 @@ model Lesson {
   timeSlotId            String?
   googleCalendarEventId String?
   createdAt             DateTime      @default(now())
-  updatedAt             DateTime             @updatedAt
+  updatedAt             DateTime      @updatedAt
   Rink                  Rink          @relation(fields: [rinkId], references: [id])
   Student               Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
   RinkTimeSlot          RinkTimeSlot? @relation(fields: [timeSlotId], references: [id])
@@ -91,7 +91,7 @@ model Payment {
   reminderSentAt DateTime?
   notes          String?
   createdAt      DateTime      @default(now())
-  updatedAt      DateTime @updatedAt
+  updatedAt      DateTime      @updatedAt
   lesson_date    DateTime
   Lesson         Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   Student        Student       @relation(fields: [studentId], references: [id])
@@ -129,7 +129,7 @@ model Rink {
   address          String
   maxCapacity      Int?
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime @updatedAt
+  updatedAt        DateTime           @updatedAt
   Lesson           Lesson[]
   RecurringPattern RecurringPattern[]
   RinkTimeSlot     RinkTimeSlot[]
@@ -280,12 +280,12 @@ model BlockedDateRange {
   id          String          @id @default(cuid())
   title       String
   description String?
-  startDate   DateTime        
-  endDate     DateTime        
+  startDate   DateTime
+  endDate     DateTime
   type        BlockedDateType @default(TRAVEL)
   createdById String
   createdAt   DateTime        @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime        @updatedAt
   User        User            @relation(fields: [createdById], references: [id])
 
   @@index([startDate])

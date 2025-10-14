@@ -85,17 +85,57 @@ export function useOperationalSettings() {
     let latestEnd = "00:00";
 
     activeDays.forEach((day) => {
-      if (day.startTime < earliestStart) {
-        earliestStart = day.startTime;
+      // Validate time strings before comparison
+      if (
+        day.startTime &&
+        typeof day.startTime === "string" &&
+        day.startTime.match(/^\d{2}:\d{2}$/)
+      ) {
+        if (day.startTime < earliestStart) {
+          earliestStart = day.startTime;
+        }
       }
-      if (day.endTime > latestEnd) {
-        latestEnd = day.endTime;
+      if (day.endTime && typeof day.endTime === "string" && day.endTime.match(/^\d{2}:\d{2}$/)) {
+        if (day.endTime > latestEnd) {
+          latestEnd = day.endTime;
+        }
       }
     });
 
-    // Parse time strings
-    const [startHour, startMinutes] = earliestStart.split(":").map(Number);
-    const [endHour, endMinutes] = latestEnd.split(":").map(Number);
+    // Parse time strings with validation
+    const startParts = earliestStart.split(":").map(Number);
+    const endParts = latestEnd.split(":").map(Number);
+
+    const startHour = startParts[0];
+    const startMinutes = startParts[1] || 0;
+    const endHour = endParts[0];
+    const endMinutes = endParts[1] || 0;
+
+    // Validate parsed values
+    if (
+      Number.isNaN(startHour) ||
+      Number.isNaN(startMinutes) ||
+      Number.isNaN(endHour) ||
+      Number.isNaN(endMinutes)
+    ) {
+      console.error("Invalid time values in operational settings:", {
+        earliestStart,
+        latestEnd,
+        startHour,
+        startMinutes,
+        endHour,
+        endMinutes,
+      });
+      // Return safe fallback
+      return {
+        startHour: 9,
+        endHour: 18,
+        startMinutes: 0,
+        endMinutes: 0,
+        displayStartTime: new Date(2024, 0, 1, 9, 0),
+        displayEndTime: new Date(2024, 0, 1, 18, 0),
+      };
+    }
 
     return {
       startHour,
@@ -150,9 +190,27 @@ export function useOperationalSettings() {
       };
     }
 
-    // Parse day's business hours
-    const [dayStartHour, dayStartMinutes] = dayValidation.startTime.split(":").map(Number);
-    const [dayEndHour, dayEndMinutes] = dayValidation.endTime.split(":").map(Number);
+    // Parse day's business hours with validation
+    const startParts = dayValidation.startTime.split(":").map(Number);
+    const endParts = dayValidation.endTime.split(":").map(Number);
+
+    const dayStartHour = startParts[0];
+    const dayStartMinutes = startParts[1] || 0;
+    const dayEndHour = endParts[0];
+    const dayEndMinutes = endParts[1] || 0;
+
+    // Validate parsed values
+    if (
+      Number.isNaN(dayStartHour) ||
+      Number.isNaN(dayStartMinutes) ||
+      Number.isNaN(dayEndHour) ||
+      Number.isNaN(dayEndMinutes)
+    ) {
+      return {
+        isValid: false,
+        message: "Invalid business hours configuration. Please check operational settings.",
+      };
+    }
 
     // Get time slot hours and minutes
     const slotStartHour = start.getHours();

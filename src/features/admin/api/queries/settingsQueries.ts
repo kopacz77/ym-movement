@@ -168,7 +168,7 @@ export const settingsRouter = createTRPCRouter({
           thursday: { active: true, startTime: "09:00", endTime: "18:00" },
           friday: { active: true, startTime: "09:00", endTime: "18:00" },
           saturday: { active: true, startTime: "09:00", endTime: "18:00" },
-          sunday: { active: false, startTime: "", endTime: "" },
+          sunday: { active: false, startTime: "09:00", endTime: "18:00" },
         },
         defaultLessonDuration: "60",
         minBookingNotice: 24,

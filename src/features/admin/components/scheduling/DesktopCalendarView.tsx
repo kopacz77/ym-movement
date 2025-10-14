@@ -126,16 +126,27 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
       const start = new Date(range.startDate);
       const end = new Date(range.endDate);
 
+      // Validate dates before processing
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        console.error("Invalid date in blocked range:", range);
+        return;
+      }
+
       // Create events for each day in the blocked range
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        const dayKey = d.toDateString();
+      // Use a safe iteration method that doesn't mutate the loop variable
+      const currentDate = new Date(start);
+      while (currentDate <= end) {
+        const dayKey = currentDate.toDateString();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const date = currentDate.getDate();
 
         // Create a blocked event spanning multiple hours for visibility
         blocked.push({
-          id: `blocked-${range.id}-${d.toISOString().split("T")[0]}`,
+          id: `blocked-${range.id}-${year}-${month + 1}-${date}`,
           title: `🚫 ${range.title}`,
-          start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 10, 0), // 10 AM
-          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 14, 0), // 2 PM (4 hours span)
+          start: new Date(year, month, date, 10, 0), // 10 AM
+          end: new Date(year, month, date, 14, 0), // 2 PM (4 hours span)
           allDay: false,
           resourceId: `blocked-${dayKey}`,
           backgroundColor:
@@ -158,10 +169,13 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
             },
           } as any,
         });
+
+        // Move to next day safely
+        currentDate.setDate(currentDate.getDate() + 1);
       }
     });
     return blocked;
-  }, [blockedDateRanges.forEach]);
+  }, [blockedDateRanges]);
 
   // Process events for month view - create daily summary events
   const processedMonthEvents = useMemo(() => {

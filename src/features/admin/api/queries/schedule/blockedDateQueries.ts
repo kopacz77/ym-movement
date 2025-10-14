@@ -103,7 +103,25 @@ export const blockedDateRouter = createTRPCRouter({
         orderBy: [{ startDate: "asc" }, { createdAt: "desc" }],
       });
 
-      return blockedDates;
+      // Filter out any blocked dates with invalid date values
+      const validBlockedDates = blockedDates.filter((range) => {
+        const start = new Date(range.startDate);
+        const end = new Date(range.endDate);
+        const isValid = !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime());
+
+        if (!isValid) {
+          console.error("Invalid date in blocked range:", {
+            id: range.id,
+            title: range.title,
+            startDate: range.startDate,
+            endDate: range.endDate,
+          });
+        }
+
+        return isValid;
+      });
+
+      return validBlockedDates;
     } catch (error) {
       console.error("Error fetching blocked dates:", error);
       throw new TRPCError({
