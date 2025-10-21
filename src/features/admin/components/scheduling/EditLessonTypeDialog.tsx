@@ -27,6 +27,7 @@ interface EditLessonTypeDialogProps {
   lessonId: string;
   currentType: LessonType;
   currentPrice: number;
+  studentId: string;
   studentName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,6 +37,7 @@ export function EditLessonTypeDialog({
   lessonId,
   currentType,
   currentPrice,
+  studentId,
   studentName,
   open,
   onOpenChange,
@@ -44,6 +46,12 @@ export function EditLessonTypeDialog({
   const [notes, setNotes] = useState("");
 
   const utils = api.useUtils();
+
+  // Fetch student pricing information
+  const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
+    { studentId },
+    { enabled: !!studentId && open },
+  );
 
   const updateLessonType = api.admin.schedule.updateLessonType.useMutation({
     onSuccess: (updatedLesson) => {
@@ -70,7 +78,7 @@ export function EditLessonTypeDialog({
     });
   };
 
-  // Get pricing information for display
+  // Get pricing information for display based on student's custom pricing
   const getLessonTypePrice = (type: LessonType) => {
     const defaultPrices = {
       PRIVATE: 75,
@@ -78,6 +86,23 @@ export function EditLessonTypeDialog({
       CHOREOGRAPHY: 90,
       COMPETITION_PREP: 95,
     };
+
+    // If we have student pricing data, use it
+    if (studentPricing) {
+      switch (type) {
+        case LessonType.PRIVATE:
+          return studentPricing.privateLessonPrice;
+        case LessonType.CHOREOGRAPHY:
+          return studentPricing.choreographyPrice;
+        case LessonType.GROUP:
+          return studentPricing.groupLessonPrice;
+        case LessonType.COMPETITION_PREP:
+          return studentPricing.competitionPrepPrice;
+        default:
+          return defaultPrices[type];
+      }
+    }
+
     return defaultPrices[type];
   };
 
@@ -102,7 +127,7 @@ export function EditLessonTypeDialog({
               <SelectTrigger id="lesson-type">
                 <SelectValue placeholder="Select lesson type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px]">
                 <SelectItem value={LessonType.PRIVATE}>
                   Private Lesson - ${getLessonTypePrice(LessonType.PRIVATE)}
                 </SelectItem>
@@ -121,6 +146,11 @@ export function EditLessonTypeDialog({
             {priceWillChange && (
               <p className="text-sm text-muted-foreground">
                 Price will change from ${currentPrice.toFixed(2)} to ${estimatedNewPrice.toFixed(2)}
+              </p>
+            )}
+            {studentPricing?.customPricingEnabled && (
+              <p className="text-xs text-blue-600 font-medium">
+                ✓ This student has custom pricing enabled
               </p>
             )}
           </div>

@@ -65,7 +65,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     },
     {
       refetchOnWindowFocus: false,
-      staleTime: 30000,
+      staleTime: 0,
       retry: 2,
       retryDelay: 1000,
     } as any,

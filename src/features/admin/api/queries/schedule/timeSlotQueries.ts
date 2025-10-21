@@ -54,7 +54,8 @@ export const timeSlotRouter = createTRPCRouter({
                 status: true,
                 notes: true,
                 Student: {
-                  include: {
+                  select: {
+                    id: true,
                     User: {
                       select: {
                         id: true,
@@ -69,6 +70,8 @@ export const timeSlotRouter = createTRPCRouter({
           },
           orderBy: { startTime: "asc" },
         });
+
+        return timeSlots;
       } catch (error) {
         console.error("Error fetching time slots:", error);
         throw new TRPCError({

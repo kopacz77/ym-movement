@@ -14,8 +14,11 @@ interface Student {
 // Define the Lesson interface matching Prisma schema
 interface Lesson {
   id: string;
+  type: string;
+  price: number;
+  status: string;
+  notes: string | null;
   Student: Student;
-  // Other fields can be added if needed
 }
 
 // Schedule event structure from the calendar
@@ -64,11 +67,19 @@ function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
     // Safely access the properties we need
     const unknownLesson = item as {
       id?: string;
+      type?: string;
+      price?: number;
+      status?: string;
+      notes?: string | null;
       student?: { id?: string; user?: { name?: string | null } };
       Student?: { id?: string; User?: { name?: string | null } };
     };
     return {
       id: unknownLesson.id || "unknown",
+      type: unknownLesson.type || "PRIVATE",
+      price: unknownLesson.price || 0,
+      status: unknownLesson.status || "CONFIRMED",
+      notes: unknownLesson.notes || null,
       Student: {
         id: unknownLesson.Student?.id || unknownLesson.student?.id || "unknown",
         User: {

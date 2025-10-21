@@ -1,6 +1,24 @@
 // src/features/admin/components/scheduling/calendarUtils.ts
+import { type LessonStatus, type LessonType } from "@prisma/client";
 import { parseISO } from "date-fns";
 import { DateTime } from "luxon";
+
+// Define Lesson interface for TimeSlot
+export interface Lesson {
+  id: string;
+  type: LessonType;
+  price: number;
+  status: LessonStatus;
+  notes: string | null;
+  Student: {
+    id: string;
+    User: {
+      id: string;
+      name: string | null;
+      email: string;
+    };
+  };
+}
 
 // Define the TimeSlot interface
 export interface TimeSlot {
@@ -9,7 +27,7 @@ export interface TimeSlot {
   endTime: string | Date;
   maxStudents: number;
   currentStudents?: number;
-  Lesson?: unknown[];
+  Lesson?: Lesson[];
   isActive: boolean;
   Rink: {
     id: string;

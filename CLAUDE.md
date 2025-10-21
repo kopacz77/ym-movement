@@ -251,6 +251,69 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 - Environment variables required for Google Calendar, database, NextAuth
 - **IMPORTANT**: Prisma relation names use PascalCase (e.g., `User`, `Lesson`, `Student`, `Rink`) - always use these in includes and access patterns
 
+## 🚨 CRITICAL: TimeSlotDialog Data Flow Architecture
+
+**⚠️ NEVER MODIFY THE ADAPTER WITHOUT PRESERVING ALL LESSON FIELDS ⚠️**
+
+### Data Flow Chain (DO NOT BREAK)
+```
+Database (Prisma)
+  → timeSlotQueries.ts (API query with full Lesson fields)
+  → useTimeSlots hook
+  → useCalendarEvents hook
+  → ScheduleManager.handleSelectEvent
+  → TimeSlotDialogAdapter.castToLessons() ⚠️ CRITICAL POINT
+  → TimeSlotDialog component (displays price/type)
+```
+
+### TimeSlotDialogAdapter Requirements (IMMUTABLE)
+**File**: `src/features/admin/components/scheduling/TimeSlotDialogAdapter.tsx`
+
+**CRITICAL FUNCTION**: `castToLessons()` at lines 58-91
+
+**MUST PRESERVE ALL FIELDS**:
+```typescript
+interface Lesson {
+  id: string;
+  type: string;        // ⚠️ REQUIRED - lesson type (PRIVATE, CHOREOGRAPHY, etc)
+  price: number;       // ⚠️ REQUIRED - lesson price (e.g., 120)
+  status: string;      // ⚠️ REQUIRED - lesson status (CONFIRMED, etc)
+  notes: string | null; // ⚠️ REQUIRED - lesson notes
+  Student: {
+    id: string;
+    User: {
+      name: string | null;
+    };
+  };
+}
+```
+
+**WHY THIS IS CRITICAL**:
+- The adapter converts lesson data from unknown[] to typed Lesson[]
+- If ANY field is missing from the return object, it will show as undefined in the UI
+- Price displays as $0.00 if `price` field is not preserved
+- Type shows as "Unknown" if `type` field is not preserved
+
+**FORBIDDEN ACTIONS**:
+- ❌ NEVER remove fields from the Lesson interface
+- ❌ NEVER return partial objects from castToLessons()
+- ❌ NEVER skip fields in the mapping function
+- ❌ NEVER assume fields are optional - ALL are required for proper display
+
+**TESTING CHECKLIST**:
+After ANY changes to TimeSlotDialogAdapter.tsx:
+1. Click a time slot with an assigned student
+2. Verify "Assigned Students" card shows correct price (not $0.00)
+3. Verify lesson type badge displays (Private, Choreography, etc)
+4. Verify student name shows correctly
+5. Verify "Edit Lesson Type" dialog opens with correct current price
+
+**Related Files**:
+- `TimeSlotDialog.tsx` - Displays the lesson cards (lines 260-330)
+- `ScheduleManager.tsx` - Passes slot data to adapter
+- `timeSlotQueries.ts` - Database query with Lesson selection (lines 47-72)
+- `calendarUtils.ts` - TypeScript interface definitions for Lesson/TimeSlot
+
 ## Recent Major Updates (2025-10-14)
 
 ### ✅ **Comprehensive Lesson Type Management System**

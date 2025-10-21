@@ -1,22 +1,23 @@
 // src/types/scheduling.ts
+import { type LessonStatus, type LessonType } from "@prisma/client";
 
 /**
  * Represents a lesson for a student
  */
 export interface Lesson {
   id: string;
+  type: LessonType;
+  price: number;
+  status: LessonStatus;
+  notes: string | null;
   Student: {
     id: string;
     User: {
+      id: string;
       name: string | null;
+      email: string;
     };
   };
-  startTime: string | Date;
-  endTime: string | Date;
-  duration: number;
-  type: string;
-  price: number;
-  status: string;
 }
 
 /**

@@ -22,6 +22,7 @@ import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
 import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { AdminAssignmentDialog } from "./AdminAssignmentDialog";
+import { type Lesson, type TimeSlot } from "./calendarUtils";
 import { EditLessonTypeDialog } from "./EditLessonTypeDialog";
 
 // Define interfaces for the data structures
@@ -38,22 +39,7 @@ interface Student {
   };
 }
 
-interface Lesson {
-  id: string;
-  type?: LessonType;
-  price?: number;
-  Student: Student;
-  // Add other properties if needed
-}
-
-interface TimeSlot {
-  id: string;
-  startTime: string | Date;
-  endTime: string | Date;
-  maxStudents: number;
-  Lesson?: Lesson[];
-  Rink: Rink;
-}
+// Lesson and TimeSlot interfaces now imported from calendarUtils
 
 // Define our own event interface based on React Big Calendar's Event type
 interface CalendarEvent {
@@ -274,11 +260,11 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
               <p className="font-medium">Assigned Students</p>
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {(() => {
-                  const lessons =
-                    (selectedEvent
-                      ? selectedEvent.event.extendedProps.Lesson
-                      : selectedSlot?.Lesson
-                    )?.filter((lesson) => lesson?.id && lesson?.Student) || [];
+                  const rawLessons = selectedEvent
+                    ? selectedEvent.event.extendedProps.Lesson
+                    : selectedSlot?.Lesson;
+
+                  const lessons = rawLessons?.filter((lesson) => lesson?.id && lesson?.Student) || [];
 
                   return lessons.length > 0 ? (
                     lessons.map((lesson) => (
@@ -399,7 +385,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
         <EditLessonTypeDialog
           lessonId={selectedLesson.id}
           currentType={selectedLesson.type || LessonType.PRIVATE}
-          currentPrice={selectedLesson.price || 75}
+          currentPrice={selectedLesson.price || 0}
+          studentId={selectedLesson.Student.id}
           studentName={selectedLesson.Student?.User?.name || "Student"}
           open={showEditLessonTypeDialog}
           onOpenChange={setShowEditLessonTypeDialog}

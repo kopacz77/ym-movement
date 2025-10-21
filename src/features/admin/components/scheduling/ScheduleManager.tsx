@@ -2,6 +2,7 @@
 "use client";
 
 import { endOfDay, startOfDay } from "date-fns";
+import { DateTime } from "luxon";
 import { memo, useCallback, useMemo, useState } from "react";
 import type { SlotInfo } from "react-big-calendar";
 import type { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
@@ -111,6 +112,29 @@ const ScheduleManagerComponent = () => {
 
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
+    // For mobile week view, only fetch the current week's data
+    if (isMobile && calendarView === "week") {
+      const dateTime = DateTime.fromJSDate(date);
+      const currentWeekday = dateTime.weekday;
+      const daysToSubtract = currentWeekday === 1 ? 0 : currentWeekday - 1;
+      const startOfWeek = dateTime.minus({ days: daysToSubtract });
+      const endOfWeek = startOfWeek.plus({ days: 6 });
+
+      return {
+        start: startOfDay(startOfWeek.toJSDate()),
+        end: endOfDay(endOfWeek.toJSDate()),
+      };
+    }
+
+    // For mobile day view, only fetch the current day's data
+    if (isMobile && calendarView === "day") {
+      return {
+        start: startOfDay(date),
+        end: endOfDay(date),
+      };
+    }
+
+    // For desktop or mobile month view, fetch the entire month
     const year = date.getFullYear();
     const month = date.getMonth();
 
@@ -123,7 +147,7 @@ const ScheduleManagerComponent = () => {
       start: startOfDay(firstDay),
       end: endOfDay(lastDay),
     };
-  }, [date]);
+  }, [date, isMobile, calendarView]);
 
   // Use the timeSlots hook to fetch data
   const { rinks, students, timeSlots } = useTimeSlots(dateRange, selectedRink);
@@ -183,11 +207,8 @@ const ScheduleManagerComponent = () => {
   const handleSelectEvent = useCallback((event: object) => {
     const typedEvent = event as ExtendedCalendarEvent;
     if (typedEvent.slot) {
-      console.log("Selected event:", typedEvent);
-
       // Check if this is a blocked date
       if ("isBlocked" in typedEvent.slot && typedEvent.slot.isBlocked) {
-        console.log("Blocked date selected, showing blocked date dialog");
         setSelectedBlockedRange(
           "blockedRange" in typedEvent.slot ? typedEvent.slot.blockedRange : null,
         );
