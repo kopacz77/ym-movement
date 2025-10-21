@@ -29,6 +29,10 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 
 ### 📅 **Advanced Scheduling System**
 - Dynamic time slot management with conflict detection
+- **Lesson type management** - Choreography, Private, Group, and Competition Prep lessons
+  - Calendar-integrated lesson type selection and editing
+  - Visual badges with color coding for instant identification
+  - Automatic pricing based on lesson type and student custom rates
 - **Blocked dates management** for travel, competitions, and unavailable periods
 - **Optimized bulk operations** with templates and real-time validation
 - **Compact time slot creation** with context-aware pre-filling and smart defaults
@@ -39,7 +43,9 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 ### 👥 **Student Management**
 - Student approval workflow with role-based access
 - Progress tracking and skill assessments
-- Custom pricing per student
+- **Custom pricing per student** with lesson type-specific rates
+  - Individual pricing for Private, Choreography, Group, and Competition Prep lessons
+  - Automatic price calculation in booking and assignment workflows
 - Lesson notes and attendance tracking
 - Parent/guardian communication tools
 

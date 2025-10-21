@@ -1,7 +1,7 @@
 // src/lib/batch-email-sender.ts
 
-import { sendScheduleChangesEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { sendScheduleChangesEmail } from "@/lib/email";
 
 /**
  * Process and send batch email notifications for all users with pending notifications
@@ -10,6 +10,10 @@ import { prisma } from "@/lib/prisma";
  * Returns stats about emails sent
  */
 export async function sendBatchEmailNotifications() {
+  console.log("[BATCH_EMAIL] ========================================");
+  console.log("[BATCH_EMAIL] Function called! Starting...");
+  console.log("[BATCH_EMAIL] ========================================");
+
   const stats = {
     usersProcessed: 0,
     emailsSent: 0,
@@ -18,6 +22,7 @@ export async function sendBatchEmailNotifications() {
   };
 
   try {
+    console.log("[BATCH_EMAIL] Inside try block");
     console.log("[BATCH_EMAIL] Starting batch email notification process...");
 
     // Get all pending email notifications that haven't been sent
@@ -118,6 +123,8 @@ export async function sendBatchEmailNotifications() {
     };
   } catch (error) {
     console.error("[BATCH_EMAIL] Fatal error in batch email process:", error);
+    console.error("[BATCH_EMAIL] Error stack:", error instanceof Error ? error.stack : "No stack");
+    console.error("[BATCH_EMAIL] Error details:", JSON.stringify(error, null, 2));
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

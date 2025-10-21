@@ -53,6 +53,7 @@
     "security:audit": "node scripts/security-audit.js",
     "security:fix": "pnpm audit --fix",
     "prisma:migrate": "prisma migrate deploy",
+    "migrate:lesson-types": "tsx scripts/migrate-lesson-types.ts",
     "postinstall": "prisma generate",
     "prepare": "husky",
     "mobile:test": "node scripts/validate-touch-targets.js",

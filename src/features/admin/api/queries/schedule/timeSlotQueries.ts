@@ -47,7 +47,24 @@ export const timeSlotRouter = createTRPCRouter({
           include: {
             Rink: true,
             Lesson: {
-              include: { Student: { include: { User: true } } },
+              select: {
+                id: true,
+                type: true,
+                price: true,
+                status: true,
+                notes: true,
+                Student: {
+                  include: {
+                    User: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
           orderBy: { startTime: "asc" },

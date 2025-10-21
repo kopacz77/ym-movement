@@ -1,4 +1,5 @@
-import { X } from "lucide-react";
+import { LessonType } from "@prisma/client";
+import { Edit, X } from "lucide-react";
 import { type FC, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
@@ -20,6 +21,8 @@ import {
 import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
 import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
+import { AdminAssignmentDialog } from "./AdminAssignmentDialog";
+import { EditLessonTypeDialog } from "./EditLessonTypeDialog";
 
 // Define interfaces for the data structures
 interface Rink {
@@ -37,6 +40,8 @@ interface Student {
 
 interface Lesson {
   id: string;
+  type?: LessonType;
+  price?: number;
   Student: Student;
   // Add other properties if needed
 }
@@ -97,6 +102,9 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
   isUnassigning = false,
 }) => {
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [showAdminAssignmentDialog, setShowAdminAssignmentDialog] = useState(false);
+  const [showEditLessonTypeDialog, setShowEditLessonTypeDialog] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
   // Debug: Get student stats (currently unused but kept for future features)
   const { data: _studentStats } = api.admin.student.getStudentStats.useQuery(undefined, {
@@ -107,6 +115,9 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setSelectedStudentId("");
+      setShowAdminAssignmentDialog(false);
+      setShowEditLessonTypeDialog(false);
+      setSelectedLesson(null);
     }
   }, [isOpen]);
 
@@ -120,6 +131,51 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
     }
     setWasAssigning(isAssigning);
   }, [isAssigning, wasAssigning]);
+
+  // Convert slot to format needed by AdminAssignmentDialog
+  const timeSlotForAssignment = selectedSlot
+    ? {
+        id: selectedSlot.id,
+        startTime: new Date(selectedSlot.startTime),
+        endTime: new Date(selectedSlot.endTime),
+        rink: {
+          id: selectedSlot.Rink.id,
+          name: selectedSlot.Rink.name,
+        },
+      }
+    : selectedEvent
+      ? {
+          id: selectedEvent.event.id,
+          startTime: selectedEvent.event.start,
+          endTime: selectedEvent.event.end,
+          rink: {
+            id: selectedEvent.event.extendedProps.Rink.id,
+            name: selectedEvent.event.extendedProps.Rink.name,
+          },
+        }
+      : null;
+
+  const formatLessonType = (type: LessonType | undefined) => {
+    if (!type) return "Private"; // Default fallback
+    return type.replace(/_/g, " ");
+  };
+
+  const getLessonTypeBadgeColor = (type: LessonType | undefined) => {
+    if (!type) return "bg-blue-100 text-blue-700 border-blue-300"; // Default to private styling
+
+    switch (type) {
+      case LessonType.CHOREOGRAPHY:
+        return "bg-purple-100 text-purple-700 border-purple-300";
+      case LessonType.PRIVATE:
+        return "bg-blue-100 text-blue-700 border-blue-300";
+      case LessonType.GROUP:
+        return "bg-green-100 text-green-700 border-green-300";
+      case LessonType.COMPETITION_PREP:
+        return "bg-orange-100 text-orange-700 border-orange-300";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-300";
+    }
+  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -202,53 +258,21 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
             </div>
 
             <div className="space-y-2">
-              <div className="mb-4">
+              <div className="mb-2">
                 <p className="font-medium">Assign Student</p>
               </div>
-              <div className="flex gap-2">
-                <Select
-                  value={selectedStudentId}
-                  onValueChange={setSelectedStudentId}
-                  disabled={isAssigning}
-                >
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder="Select student" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {students && students.length > 0 ? (
-                      students
-                        .filter((student) => student?.id && student?.User?.name)
-                        .map((student) => (
-                          <SelectItem key={student.id} value={student.id}>
-                            {student.User.name}
-                          </SelectItem>
-                        ))
-                    ) : (
-                      <div className="px-2 py-1 text-sm text-gray-500">
-                        No approved students available
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={() => {
-                    if (selectedStudentId) {
-                      onAssignStudent(selectedStudentId);
-                      // Clear the selected student after assignment
-                      setSelectedStudentId("");
-                    }
-                  }}
-                  disabled={!selectedStudentId || isAssigning}
-                  size="sm"
-                >
-                  {isAssigning ? "Assigning..." : "Assign"}
-                </Button>
-              </div>
+              <Button
+                onClick={() => setShowAdminAssignmentDialog(true)}
+                variant="outline"
+                className="w-full"
+              >
+                Assign Student with Lesson Type
+              </Button>
             </div>
 
             <div className="space-y-2">
               <p className="font-medium">Assigned Students</p>
-              <div className="space-y-1 max-h-40 overflow-y-auto">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
                 {(() => {
                   const lessons =
                     (selectedEvent
@@ -260,37 +284,58 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     lessons.map((lesson) => (
                       <div
                         key={lesson.id}
-                        className="flex items-center justify-between p-2 border rounded"
+                        className="flex items-start justify-between p-3 border rounded-lg bg-muted/30"
                       >
-                        <span>{lesson.Student?.User?.name || "Unnamed Student"}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={isUnassigning}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log("X button clicked - Lesson data:", lesson);
-                            console.log("X button clicked - Lesson ID:", lesson.id);
-                            console.log(
-                              "X button clicked - onUnassignStudent type:",
-                              typeof onUnassignStudent,
-                            );
-                            showRemoveConfirmation("student from time slot", () => {
-                              console.log(
-                                "Remove confirmed - calling onUnassignStudent with:",
-                                lesson.id,
-                              );
-                              onUnassignStudent(lesson.id);
-                            });
-                          }}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <div className="flex-1 space-y-1">
+                          <div className="font-medium">
+                            {lesson.Student?.User?.name || "Unnamed Student"}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className={getLessonTypeBadgeColor(lesson.type)}
+                            >
+                              {formatLessonType(lesson.type)}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              ${lesson.price?.toFixed(2) || "0.00"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedLesson(lesson);
+                              setShowEditLessonTypeDialog(true);
+                            }}
+                            title="Edit lesson type"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={isUnassigning}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              showRemoveConfirmation("student from time slot", () => {
+                                onUnassignStudent(lesson.id);
+                              });
+                            }}
+                            title="Remove student"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-sm text-gray-500 text-center py-4">
+                    <div className="text-sm text-muted-foreground text-center py-4 border rounded-lg">
                       No students assigned to this time slot
                     </div>
                   );
@@ -339,6 +384,27 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
           </div>
         )}
       </DialogContent>
+
+      {/* Admin Assignment Dialog with Lesson Type */}
+      {timeSlotForAssignment && (
+        <AdminAssignmentDialog
+          timeSlot={timeSlotForAssignment}
+          open={showAdminAssignmentDialog}
+          onOpenChange={setShowAdminAssignmentDialog}
+        />
+      )}
+
+      {/* Edit Lesson Type Dialog */}
+      {selectedLesson && (
+        <EditLessonTypeDialog
+          lessonId={selectedLesson.id}
+          currentType={selectedLesson.type || LessonType.PRIVATE}
+          currentPrice={selectedLesson.price || 75}
+          studentName={selectedLesson.Student?.User?.name || "Student"}
+          open={showEditLessonTypeDialog}
+          onOpenChange={setShowEditLessonTypeDialog}
+        />
+      )}
     </Dialog>
   );
 };

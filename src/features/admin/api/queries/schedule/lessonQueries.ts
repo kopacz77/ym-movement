@@ -288,6 +288,8 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
       z.object({
         timeSlotId: z.string(),
         studentId: z.string(),
+        lessonType: z.nativeEnum(LessonType).optional().default(LessonType.PRIVATE),
+        notes: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -353,12 +355,31 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         // Default to a safe timezone if not specified
         const timezone = timeSlot.Rink.timezone || "America/Toronto";
 
+        // Determine pricing based on lesson type and student custom pricing
+        let price = 75; // Default private lesson price
+        if (student.customPricingEnabled) {
+          if (input.lessonType === LessonType.CHOREOGRAPHY && student.choreographyPrice) {
+            price = student.choreographyPrice;
+          } else if (input.lessonType === LessonType.PRIVATE && student.privateLessonPrice) {
+            price = student.privateLessonPrice;
+          }
+        } else {
+          // Use default pricing from settings
+          const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
+          if (defaultPricing) {
+            price = input.lessonType === LessonType.CHOREOGRAPHY
+              ? defaultPricing.choreographyPrice
+              : defaultPricing.privateLessonPrice;
+          }
+        }
+
         // Create Google Calendar event
         let eventId: string | null = null;
         try {
           eventId = await googleCalendar.createEvent({
-            summary: `Lesson with ${student.User.name || "Student"}`,
-            description: "Quick assignment from scheduler",
+            summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
+            description: `Lesson Type: ${input.lessonType}
+${input.notes ? `Notes: ${input.notes}` : ""}`,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             attendees: [
@@ -387,9 +408,10 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
             status: "SCHEDULED",
-            type: "PRIVATE",
+            type: input.lessonType || LessonType.PRIVATE,
             area: "MAIN_RINK",
-            price: 0,
+            price,
+            notes: input.notes ? sanitizeInput(input.notes) : undefined,
             duration: durationMinutes,
             googleCalendarEventId: eventId,
             updatedAt: new Date(),
@@ -402,11 +424,11 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           await createScheduleChangeNotification({
             userId: student.userId,
             title: "New Lesson Scheduled",
-            message: `A new lesson has been scheduled for ${timeSlot.startTime.toLocaleDateString()} at ${timeSlot.startTime.toLocaleTimeString()}`,
+            message: `A new ${input.lessonType || "PRIVATE"} lesson has been scheduled for ${timeSlot.startTime.toLocaleDateString()} at ${timeSlot.startTime.toLocaleTimeString()}`,
             link: "/student/schedule",
             lessonId: lesson.id,
             metadata: {
-              lessonType: "PRIVATE",
+              lessonType: input.lessonType || "PRIVATE",
               rinkName: timeSlot.Rink.name,
               startTime: timeSlot.startTime.toISOString(),
               endTime: timeSlot.endTime.toISOString(),
@@ -426,6 +448,137 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to assign student",
+          cause: error,
+        });
+      }
+    }),
+
+  updateLessonType: protectedProcedure
+    .input(
+      z.object({
+        lessonId: z.string(),
+        lessonType: z.nativeEnum(LessonType),
+        notes: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get existing lesson with student and rink info
+        const existingLesson = await ctx.prisma.lesson.findUnique({
+          where: { id: input.lessonId },
+          include: {
+            Student: { include: { User: true } },
+            Rink: true,
+          },
+        });
+
+        if (!existingLesson) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Lesson not found",
+          });
+        }
+
+        // Calculate new price based on lesson type and student custom pricing
+        let price = existingLesson.price; // Keep existing price by default
+        const student = existingLesson.Student;
+
+        if (student.customPricingEnabled) {
+          if (input.lessonType === LessonType.CHOREOGRAPHY && student.choreographyPrice) {
+            price = student.choreographyPrice;
+          } else if (input.lessonType === LessonType.PRIVATE && student.privateLessonPrice) {
+            price = student.privateLessonPrice;
+          }
+        } else {
+          // Use default pricing from settings
+          const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
+          if (defaultPricing) {
+            price = input.lessonType === LessonType.CHOREOGRAPHY
+              ? defaultPricing.choreographyPrice
+              : defaultPricing.privateLessonPrice;
+          }
+        }
+
+        // Update Google Calendar event if it exists
+        if (existingLesson.googleCalendarEventId) {
+          try {
+            await googleCalendar.updateEvent(existingLesson.googleCalendarEventId, {
+              summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
+              description: `Lesson Type: ${input.lessonType}
+${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
+            });
+          } catch (calendarError) {
+            console.error("Error updating Google Calendar event:", calendarError);
+            // Continue with lesson update even if calendar update fails
+          }
+        }
+
+        // Update the lesson
+        const updatedLesson = await ctx.prisma.lesson.update({
+          where: { id: input.lessonId },
+          data: {
+            type: input.lessonType,
+            price,
+            notes: input.notes !== undefined ? (input.notes ? sanitizeInput(input.notes) : null) : undefined,
+            updatedAt: new Date(),
+          },
+          include: {
+            Student: { include: { User: true } },
+            Rink: true,
+            Payment: true,
+          },
+        });
+
+        // Update payment amount if payment exists
+        if (existingLesson.Payment) {
+          await ctx.prisma.payment.update({
+            where: { lessonId: input.lessonId },
+            data: {
+              amount: price,
+              updatedAt: new Date(),
+            },
+          });
+        }
+
+        // Log security event
+        logSecurityEvent("LESSON_TYPE_UPDATED", {
+          userId: ctx.session?.user?.id,
+          lessonId: input.lessonId,
+          oldType: existingLesson.type,
+          newType: input.lessonType,
+          oldPrice: existingLesson.price,
+          newPrice: price,
+        });
+
+        // Create notification for student
+        try {
+          await createScheduleChangeNotification({
+            userId: student.userId,
+            title: "Lesson Type Updated",
+            message: `Your lesson on ${existingLesson.startTime.toLocaleDateString()} has been updated to ${input.lessonType}`,
+            link: `/student/schedule/${input.lessonId}`,
+            lessonId: input.lessonId,
+            metadata: {
+              oldType: existingLesson.type,
+              newType: input.lessonType,
+              oldPrice: existingLesson.price,
+              newPrice: price,
+            },
+          });
+        } catch (notificationError) {
+          console.error("Error creating notification:", notificationError);
+          // Don't fail the update if notification fails
+        }
+
+        return updatedLesson;
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error("Error updating lesson type:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update lesson type",
           cause: error,
         });
       }

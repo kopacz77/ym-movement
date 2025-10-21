@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Format code**: `pnpm format` or `npm run format`
 - **Auto-fix lint issues**: `pnpm lint:fix` or `npm run lint:fix`
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
+- **Lesson type migration**: `pnpm migrate:lesson-types` (migrate existing lessons to use lesson types)
 
 ## Developer Tools
 
@@ -85,54 +86,74 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Usage**: Essential for comprehensive testing of the YM Movement application, particularly for testing the student signup flow, admin dashboard functionality, and cross-browser compatibility.
 
-## Docker Commands (Recommended)
+## Docker Commands (Recommended for Local Development)
 
-**Docker Development Environment**: Complete containerized development with PostgreSQL and Redis.
+**Docker Development Environment**: Containerized Next.js app using Neon cloud database with optional Redis caching.
 
 **Quick Start**:
-- **Start development environment**: `pnpm docker:dev` (includes hot reload, database, Redis)
+```bash
+# First time: Build the Docker image
+pnpm docker:build
+
+# Start development environment with hot reload
+pnpm docker:dev
+
+# Access app at http://localhost:3000
+# Uses your .env file (Neon database connection)
+```
+
+**Core Commands**:
+- **Start development**: `pnpm docker:dev` (foreground with logs)
+- **Start in background**: `pnpm docker:dev -d` (detached mode)
 - **Stop all services**: `pnpm docker:down`
 - **View logs**: `pnpm docker:logs`
-- **Clean up everything**: `pnpm docker:clean` (removes containers, volumes, and images)
+- **Container shell**: `pnpm docker:shell` (for debugging)
+- **Clean rebuild**: `pnpm docker:clean` (removes containers, volumes, images)
 
-**Specialized Commands**:
-- **Build containers**: `pnpm docker:build`
-- **Database + Redis only**: `pnpm docker:db` (useful for hybrid development)
-- **Prisma Studio**: `pnpm docker:studio` (database GUI at localhost:5555)
-- **Container shell access**: `pnpm docker:shell`
+**Build Commands**:
+- **Build containers**: `pnpm docker:build` (required first time)
+- **Rebuild from scratch**: `pnpm docker:clean && pnpm docker:build`
+
+**Optional Redis** (for caching):
+```bash
+# Start app + Redis
+docker-compose --profile redis up
+
+# Redis available at localhost:6379
+```
 
 **Development Workflow**:
-1. `pnpm docker:dev` - Starts complete environment (app, database, Redis)
-2. Visit `http://localhost:3000` - Next.js app with hot reload
-3. Visit `http://localhost:5555` - Prisma Studio (run `pnpm docker:studio` separately)
-4. `pnpm docker:logs` - Monitor all service logs
+1. `pnpm docker:build` - Build Docker image (first time only)
+2. `pnpm docker:dev` - Start Next.js app in Docker
+3. Visit `http://localhost:3000` - App with hot reload enabled
+4. Edit files in VS Code - Changes auto-reload in container
 5. `pnpm docker:down` - Stop when done
 
-**Database Access**:
-- **Host**: localhost
-- **Port**: 5432
-- **Database**: yura_scheduler_dev
-- **Username**: postgres
-- **Password**: password
-- **Connection String**: `postgresql://postgres:password@localhost:5432/yura_scheduler_dev`
-
-**Redis Access**:
-- **Host**: localhost
-- **Port**: 6379
-- **No authentication required**
+**Database Configuration**:
+- **Type**: Neon PostgreSQL (cloud database)
+- **Connection**: Configured via `DATABASE_URL` in `.env` file
+- **No local PostgreSQL needed** - Uses your existing Neon database
+- **Health Check**: `/api/health` endpoint verifies database connectivity
 
 **Benefits**:
-- ✅ **Instant setup** - One command gets everything running
-- ✅ **Team consistency** - Same environment for all developers
-- ✅ **No local dependencies** - Only Docker required
+- ✅ **Consistent environment** - Same Node.js version for all developers
+- ✅ **No local Node.js required** - Only Docker needed
+- ✅ **Hot reload enabled** - Code changes update instantly
 - ✅ **Production-like** - Matches deployed environment
 - ✅ **Easy cleanup** - Remove everything with one command
+- ✅ **Works with Neon** - No local database setup required
+
+**When to Use Docker vs Local**:
+- **Use Docker (`pnpm docker:dev`)** - Team consistency, production-like environment
+- **Use Local (`pnpm dev`)** - Faster startup, simpler debugging
+- **Both work with Neon** - Same database connection either way
 
 **Troubleshooting**:
-- **Port conflicts**: Modify `docker-compose.override.yml` to use different ports
-- **Permission issues**: Ensure Docker daemon is running and user has permissions
-- **Database issues**: Run `pnpm docker:clean` and restart
-- **Hot reload not working**: Check volume mounts in docker-compose.yml
+- **Port 3000 in use**: Stop local dev server first (`pnpm dev`)
+- **Changes not updating**: Restart with `pnpm docker:down && pnpm docker:dev`
+- **Build errors**: Clean rebuild with `pnpm docker:clean && pnpm docker:build`
+- **Database connection fails**: Check `.env` file has correct `DATABASE_URL`
+- **Out of disk space**: Run `docker system prune -a --volumes`
 
 ## Documentation Commands
 
@@ -200,12 +221,17 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 
 - **Role-based dashboards**: Separate admin and student interfaces
 - **Advanced scheduling**: Time slot management with conflict detection and timezone support
+- **Lesson type management**: Complete workflow for Private, Choreography, Group, and Competition Prep lessons
+  - Calendar-integrated assignment and editing
+  - Visual color-coded badges (Purple=Choreography, Blue=Private, Green=Group, Orange=Competition Prep)
+  - Automatic pricing based on lesson type and student custom rates
+  - Edit lesson types with price preview and automatic payment/calendar updates
 - **Blocked dates management**: Create and manage blocked periods (travel, competitions) with calendar integration
 - **Bulk operations**: Optimized bulk time slot creation with templates, real-time validation, and bulk delete with selection
 - **Enhanced editing**: Edit time slots with proper timezone handling and accurate time display
 - **Compact time slot creation**: Context-aware dialog with smart defaults and no scrolling required
-- **Student management**: Approval workflow, custom pricing, lesson tracking
-- **Payment tracking**: Venmo/Zelle integration with manual verification
+- **Student management**: Approval workflow, custom pricing per lesson type, lesson tracking
+- **Payment tracking**: Venmo/Zelle integration with manual verification and automatic price calculation
 - **Google Calendar sync**: Automatic event creation/updates
 - **Unified notifications**: Sonner toast system with consistent styling and centered positioning
 
@@ -225,7 +251,45 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 - Environment variables required for Google Calendar, database, NextAuth
 - **IMPORTANT**: Prisma relation names use PascalCase (e.g., `User`, `Lesson`, `Student`, `Rink`) - always use these in includes and access patterns
 
-## Recent Major Updates (2025-08-07)
+## Recent Major Updates (2025-10-14)
+
+### ✅ **Comprehensive Lesson Type Management System**
+- **Calendar Integration**: Complete lesson type workflow directly in admin calendar
+  - Click time slot → "Assign Student with Lesson Type" button
+  - Visual badges with color coding (Purple=Choreography, Blue=Private, Green=Group, Orange=Competition Prep)
+  - Edit lesson type button (pencil icon) for each assigned student
+
+- **Components Added**:
+  - `AdminAssignmentDialog.tsx`: Assign students with lesson type selection
+  - `EditLessonTypeDialog.tsx`: Edit existing lesson types with price preview
+  - Enhanced `TimeSlotDialog.tsx`: Shows lesson types and prices for all assigned students
+
+- **Backend Enhancements**:
+  - `assignStudentToTimeSlot`: Now accepts `lessonType` and `notes` parameters
+  - `updateLessonType`: New mutation for changing lesson types
+  - Automatic price recalculation based on lesson type and student custom pricing
+  - Google Calendar event updates with lesson type in title
+  - Payment record synchronization on type changes
+  - Student notifications for type updates
+
+- **Database Migration**:
+  - Migration script: `scripts/migrate-lesson-types.ts`
+  - Command: `pnpm migrate:lesson-types`
+  - Sets default `PRIVATE` type for existing lessons without type
+  - Calculates proper pricing based on student custom rates or defaults
+  - Safe error handling with comprehensive logging
+
+- **Documentation**:
+  - `LESSON-TYPE-FEATURE.md`: Complete feature documentation
+  - `CALENDAR-INTEGRATION-GUIDE.md`: Calendar workflow guide
+  - `MIGRATION-LESSON-TYPES.md`: Database migration guide with rollback procedures
+
+- **Bug Fixes**:
+  - Fixed TypeError for lessons without type field (null safety)
+  - Added fallback to "Private" for undefined lesson types
+  - Optional type and price fields in TypeScript interfaces
+
+## Previous Major Updates (2025-08-07)
 
 ### ✅ **Reports Dashboard Export System**
 - **New Feature**: Comprehensive export functionality for business reports

@@ -1,0 +1,256 @@
+"use client";
+
+import { LessonType } from "@prisma/client";
+import { format } from "date-fns";
+import { Calendar, Clock, MapPin } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/lib/api";
+
+interface TimeSlot {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  rink: {
+    id: string;
+    name: string;
+  };
+}
+
+interface AdminAssignmentDialogProps {
+  timeSlot: TimeSlot;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function AdminAssignmentDialog({
+  timeSlot,
+  open,
+  onOpenChange,
+}: AdminAssignmentDialogProps) {
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [lessonType, setLessonType] = useState<LessonType>(LessonType.PRIVATE);
+  const [notes, setNotes] = useState("");
+
+  const utils = api.useUtils();
+
+  // Fetch students
+  const { data: studentsData, isLoading: studentsLoading } = api.admin.student.getStudents.useQuery(
+    {
+      limit: 100,
+      approved: true,
+    },
+  );
+
+  // Get student pricing for selected student
+  const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
+    { studentId: selectedStudentId },
+    { enabled: !!selectedStudentId },
+  );
+
+  // Assign student mutation
+  const assignStudent = api.admin.schedule.assignStudentToTimeSlot.useMutation({
+    onSuccess: (lesson) => {
+      const student = studentsData?.students?.find((s) => s.id === selectedStudentId);
+      toast.success("Student Assigned", {
+        description: `${student?.User?.name || "Student"} assigned to ${lessonType} lesson`,
+      });
+      // Invalidate relevant queries
+      utils.admin.schedule.getTimeSlots.invalidate();
+      utils.admin.schedule.getLessonsByDate.invalidate();
+      onOpenChange(false);
+      // Reset form
+      setSelectedStudentId("");
+      setLessonType(LessonType.PRIVATE);
+      setNotes("");
+    },
+    onError: (error) => {
+      toast.error("Error Assigning Student", {
+        description: error.message,
+      });
+    },
+  });
+
+  const handleAssign = () => {
+    if (!selectedStudentId) {
+      toast.error("Please select a student");
+      return;
+    }
+
+    assignStudent.mutate({
+      timeSlotId: timeSlot.id,
+      studentId: selectedStudentId,
+      lessonType,
+      notes: notes.trim() || undefined,
+    });
+  };
+
+  // Get lesson type price based on student's custom pricing if available
+  const getLessonTypePrice = (type: LessonType) => {
+    const defaultPrices = {
+      PRIVATE: 75,
+      GROUP: 45,
+      CHOREOGRAPHY: 90,
+      COMPETITION_PREP: 95,
+    };
+
+    // If we have student pricing data with custom pricing
+    if (studentPricing?.customPricingEnabled) {
+      switch (type) {
+        case LessonType.PRIVATE:
+          return studentPricing.privateLessonPrice ?? defaultPrices.PRIVATE;
+        case LessonType.CHOREOGRAPHY:
+          return studentPricing.choreographyPrice ?? defaultPrices.CHOREOGRAPHY;
+        case LessonType.GROUP:
+          return studentPricing.groupLessonPrice ?? defaultPrices.GROUP;
+        case LessonType.COMPETITION_PREP:
+          return studentPricing.competitionPrepPrice ?? defaultPrices.COMPETITION_PREP;
+        default:
+          return defaultPrices[type];
+      }
+    }
+
+    return defaultPrices[type];
+  };
+
+  const selectedStudent = studentsData?.students?.find((s) => s.id === selectedStudentId);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[550px]">
+        <DialogHeader>
+          <DialogTitle>Assign Student to Time Slot</DialogTitle>
+          <DialogDescription>
+            Select a student and lesson type for this time slot
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Time slot details */}
+          <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{format(timeSlot.startTime, "EEEE, MMMM d, yyyy")}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>
+                {format(timeSlot.startTime, "h:mm a")} - {format(timeSlot.endTime, "h:mm a")}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span>{timeSlot.rink.name}</span>
+            </div>
+          </div>
+
+          {/* Student selection */}
+          <div className="space-y-2">
+            <Label htmlFor="student-select">Student</Label>
+            <Select
+              value={selectedStudentId}
+              onValueChange={setSelectedStudentId}
+              disabled={studentsLoading}
+            >
+              <SelectTrigger id="student-select">
+                <SelectValue placeholder="Select a student" />
+              </SelectTrigger>
+              <SelectContent>
+                {studentsLoading ? (
+                  <SelectItem value="loading" disabled>
+                    Loading students...
+                  </SelectItem>
+                ) : (
+                  studentsData?.students?.map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      {student.User?.name || "Unnamed Student"}
+                      {student.User?.email && ` (${student.User.email})`}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Lesson type selection */}
+          <div className="space-y-2">
+            <Label htmlFor="lesson-type-select">Lesson Type</Label>
+            <Select
+              value={lessonType}
+              onValueChange={(val) => setLessonType(val as LessonType)}
+              disabled={!selectedStudentId}
+            >
+              <SelectTrigger id="lesson-type-select">
+                <SelectValue placeholder="Select lesson type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={LessonType.PRIVATE}>
+                  Private Lesson - ${getLessonTypePrice(LessonType.PRIVATE)}
+                </SelectItem>
+                <SelectItem value={LessonType.CHOREOGRAPHY}>
+                  Choreography - ${getLessonTypePrice(LessonType.CHOREOGRAPHY)}
+                </SelectItem>
+                <SelectItem value={LessonType.GROUP}>
+                  Group Lesson - ${getLessonTypePrice(LessonType.GROUP)}
+                </SelectItem>
+                <SelectItem value={LessonType.COMPETITION_PREP}>
+                  Competition Prep - ${getLessonTypePrice(LessonType.COMPETITION_PREP)}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {selectedStudent?.customPricingEnabled && (
+              <p className="text-sm text-muted-foreground">
+                This student has custom pricing enabled
+              </p>
+            )}
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="assignment-notes">Notes (Optional)</Label>
+            <Textarea
+              id="assignment-notes"
+              placeholder="Add any notes for this lesson..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={assignStudent.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAssign}
+            disabled={!selectedStudentId || assignStudent.isPending}
+          >
+            {assignStudent.isPending ? "Assigning..." : "Assign Student"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

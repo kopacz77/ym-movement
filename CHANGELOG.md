@@ -5,6 +5,104 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2025-10-14
+
+### 🎯 Major Feature: Comprehensive Lesson Type Management
+
+#### Added
+- **Calendar-Integrated Lesson Type Management**: Complete lesson type workflow in admin calendar
+  - Click time slot to assign students with lesson type selection
+  - Visual lesson type badges with color coding (Purple=Choreography, Blue=Private, Green=Group, Orange=Competition Prep)
+  - Edit lesson type directly from calendar with automatic price updates
+  - Components: `AdminAssignmentDialog.tsx`, `EditLessonTypeDialog.tsx`
+  - Enhanced: `TimeSlotDialog.tsx` with lesson type display and editing
+
+- **Admin Assignment with Lesson Type**: New streamlined assignment workflow
+  - Student selector with email display
+  - Lesson type selector with live pricing
+  - Custom pricing indicator for students
+  - Optional notes field
+  - Automatic price calculation based on lesson type and student rates
+  - File: `src/features/admin/components/scheduling/AdminAssignmentDialog.tsx`
+
+- **Lesson Type Editing**: Update existing lesson types with full integration
+  - Price change preview before updating
+  - Updates Google Calendar events automatically
+  - Updates payment records automatically
+  - Sends notifications to students
+  - Security audit logging for all changes
+  - File: `src/features/admin/components/scheduling/EditLessonTypeDialog.tsx`
+
+- **Enhanced Time Slot Dialog**: Improved calendar interaction
+  - Shows lesson type badges for all assigned students
+  - Displays pricing per lesson
+  - Edit button (pencil icon) for each lesson
+  - Enhanced visual design with color-coded badges
+  - Responsive card layout for lesson display
+
+- **Database Migration Script**: Migrate existing lessons to new system
+  - Script: `scripts/migrate-lesson-types.ts`
+  - Command: `pnpm migrate:lesson-types`
+  - Sets default `PRIVATE` type for lessons without type
+  - Calculates proper pricing based on student custom rates
+  - Creates default pricing if missing
+  - Comprehensive progress logging
+  - Safe error handling and rollback support
+
+#### Enhanced
+- **Backend API Updates**: Full lesson type support in scheduling system
+  - `assignStudentToTimeSlot`: Now accepts `lessonType` and `notes` parameters
+  - `updateLessonType`: New mutation for changing lesson types
+  - Automatic price recalculation based on lesson type
+  - Google Calendar event updates with lesson type
+  - Payment record synchronization
+  - Student notifications for type changes
+  - File: `src/features/admin/api/queries/schedule/lessonQueries.ts`
+
+- **Time Slot Queries**: Enhanced to include lesson type data
+  - Added `type` and `price` fields to lesson data
+  - Updated `getTimeSlots` query with proper field selection
+  - File: `src/features/admin/api/queries/schedule/timeSlotQueries.ts`
+
+- **Pricing System**: Two-tier pricing with fallbacks
+  - Custom per-student pricing (when enabled)
+  - Default pricing from database
+  - Automatic selection based on lesson type
+  - Support for: Private ($75), Choreography ($90), Group ($45), Competition Prep ($95)
+
+#### Fixed
+- **Lesson Type Display Error**: Fixed TypeError for lessons without type
+  - Added null safety checks in `TimeSlotDialog.tsx`
+  - Default fallback to "Private" for undefined types
+  - Optional type and price fields in TypeScript interfaces
+  - Safe formatting functions for lesson types
+
+- **Data Migration Support**: Backward compatibility for existing lessons
+  - Graceful handling of lessons created before lesson type feature
+  - Migration script to update historical data
+  - No breaking changes to existing workflows
+
+#### Documentation
+- **LESSON-TYPE-FEATURE.md**: Comprehensive feature documentation
+  - Feature overview and capabilities
+  - API endpoints documentation
+  - Component usage examples
+  - Database schema details
+  - Testing recommendations
+
+- **CALENDAR-INTEGRATION-GUIDE.md**: Calendar workflow guide
+  - User workflows for admins
+  - Visual design specifications
+  - Error handling procedures
+  - Troubleshooting guide
+
+- **MIGRATION-LESSON-TYPES.md**: Database migration guide
+  - Step-by-step migration instructions
+  - Backup and restore procedures
+  - Rollback plan
+  - Production deployment checklist
+  - FAQ and troubleshooting
+
 ## [3.2.0] - 2025-09-03
 
 ### 🔧 Critical Bug Fixes & System Improvements

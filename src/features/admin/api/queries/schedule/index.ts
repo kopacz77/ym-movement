@@ -29,6 +29,7 @@ export const scheduleRouter = createTRPCRouter({
   getLessonsByDate: lessonRouter.getLessonsByDate,
   getStudents: lessonRouter.getStudents,
   assignStudentToTimeSlot: lessonRouter.assignStudentToTimeSlot,
+  updateLessonType: lessonRouter.updateLessonType,
   unassignStudent: lessonRouter.unassignStudent,
 
   // Include all procedures from the recurringPatternRouter

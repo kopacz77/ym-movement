@@ -1,451 +1,351 @@
-# YM Movement Scheduler - Deployment Guide
+# Docker Deployment Guide - YM Movement Scheduler
 
 ## Overview
 
-This document provides comprehensive deployment instructions for the YM Movement scheduler application. The project is designed to be deployed on Netlify (free tier) with external database hosting on Neon PostgreSQL.
+This guide covers Docker usage for YM Movement Scheduler v3. The Docker setup is optimized for **local development** using your existing **Neon PostgreSQL** cloud database.
 
-## Current Architecture
+## 🎯 **Important: Docker is for Local Development**
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Netlify       │    │   Neon           │    │   Resend        │
-│   (Frontend +   │────│   (PostgreSQL    │    │   (Email        │
-│   API Routes)   │    │   Database)      │    │   Service)      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
+The YM Movement Scheduler uses:
+- ✅ **Netlify** for production hosting (recommended - keep using it!)
+- ✅ **Neon PostgreSQL** for database (cloud-managed)
+- ✅ **Docker** for local development environment (optional but recommended)
 
-## Prerequisites
+**You do NOT need to deploy Docker containers to production.** Netlify handles that automatically.
 
-### Required Accounts (All Free Tier)
-1. **GitHub Account** - Source code repository
-2. **Netlify Account** - Application hosting
-3. **Neon Account** - PostgreSQL database
-4. **Resend Account** - Email services (optional)
-5. **Google Cloud Console** - Calendar API (optional)
+## 🚀 Quick Start
 
-### Local Development Requirements
-- **Node.js 20+** and **pnpm**
-- **Docker & Docker Compose** (for containerized development)
+### Prerequisites
+
+- **Docker Desktop** installed and running
 - **Git** for version control
+- **`.env` file** with your Neon database credentials
 
-## Environment Variables
-
-### Required Environment Variables
-
-Create a `.env` file in the project root with these variables:
+### First Time Setup
 
 ```bash
-# Database Configuration
-DATABASE_URL="postgresql://username:password@host.neon.tech/database_name?sslmode=require"
+# 1. Clone the repository (if not already done)
+git clone <repository-url>
+cd yura-scheduler-v3
 
-# NextAuth Configuration
-NEXTAUTH_URL="https://your-netlify-site.netlify.app"
-NEXTAUTH_SECRET="your-super-secret-key-minimum-32-characters"
+# 2. Ensure your .env file exists with Neon database URL
+cat .env | grep DATABASE_URL
+# Should show: DATABASE_URL="postgresql://..."
 
-# Application Settings
-NODE_ENV="production"
-NEXT_TELEMETRY_DISABLED=1
+# 3. Build the Docker image (first time only)
+pnpm docker:build
+# This takes 2-5 minutes
+
+# 4. Start the development environment
+pnpm docker:dev
+# App will be available at http://localhost:3000
 ```
 
-### Optional Environment Variables
+### Daily Development Workflow
 
 ```bash
-# Email Services (Resend)
-RESEND_API_KEY="re_your_api_key_here"
-RESEND_FROM_EMAIL="noreply@yourdomain.com"
-
-# Google Calendar Integration
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-GOOGLE_REDIRECT_URI="https://your-netlify-site.netlify.app/api/auth/callback/google"
-
-# Redis (if using external Redis)
-REDIS_URL="redis://username:password@host:port"
-
-# Development Settings
-ENABLE_AUTH_BYPASS="false"  # Only use in development
-```
-
-## Database Setup (Neon)
-
-### 1. Create Neon Database
-
-1. Visit [neon.tech](https://neon.tech) and create a free account
-2. Create a new project: **"YM Movement Scheduler"**
-3. Choose region closest to your users
-4. Copy the connection string from the dashboard
-
-### 2. Configure Database
-
-```bash
-# Set your DATABASE_URL
-DATABASE_URL="postgresql://username:password@ep-example.us-east-2.aws.neon.tech/neondb?sslmode=require"
-
-# Run database migrations
-pnpm prisma:migrate
-
-# Verify connection
-pnpm prisma studio
-```
-
-### 3. Database Security
-
-- Enable **Connection Pooling** in Neon dashboard
-- Set **Auto-pause** to reduce costs
-- Configure **Branch Protection** for production data
-
-## Netlify Deployment
-
-### 1. Initial Setup
-
-1. **Connect Repository**:
-   - Log in to Netlify
-   - Click "New site from Git"
-   - Connect your GitHub repository
-   - Select the main branch
-
-2. **Build Settings**:
-   ```
-   Base directory: (leave empty)
-   Build command: pnpm build
-   Publish directory: .next
-   ```
-
-3. **Environment Variables**:
-   - Go to Site settings → Environment variables
-   - Add all required environment variables from your `.env` file
-   - **Important**: Never commit `.env` to git
-
-### 2. Build Configuration
-
-Create `netlify.toml` in project root:
-
-```toml
-[build]
-  command = "pnpm build"
-  publish = ".next"
-
-[build.environment]
-  NODE_VERSION = "20"
-  NPM_FLAGS = "--version"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-[functions]
-  node_bundler = "esbuild"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-```
-
-### 3. Deployment Process
-
-1. **Automatic Deployment**:
-   - Push to main branch triggers automatic deployment
-   - Build takes ~3-5 minutes
-   - Check deploy logs for any errors
-
-2. **Environment Setup**:
-   ```bash
-   # Production build locally (optional)
-   pnpm build
-
-   # Test production build
-   pnpm start
-   ```
-
-3. **Custom Domain** (Optional):
-   - Purchase domain from your preferred registrar
-   - Add custom domain in Netlify dashboard
-   - Configure DNS settings as instructed
-
-## Docker Development Environment
-
-### Quick Start
-
-The project includes a complete Docker development environment for team consistency:
-
-```bash
-# Start complete development environment
+# Start Docker development
 pnpm docker:dev
 
-# Access the application
-open http://localhost:3000
+# Open http://localhost:3000 in your browser
+# Edit code in VS Code - changes auto-reload
 
-# View database with Prisma Studio
-pnpm docker:studio
-open http://localhost:5555
-
-# Stop everything
+# When done:
+# Press Ctrl+C or run:
 pnpm docker:down
 ```
 
-### Docker Services
+## 📋 Available Commands
 
-The development environment includes:
+### Core Commands
 
-1. **Next.js Application** (localhost:3000)
-   - Hot reload enabled
-   - TypeScript compilation
-   - All features working
+| Command | Description |
+|---------|-------------|
+| `pnpm docker:build` | Build Docker image (first time only) |
+| `pnpm docker:dev` | Start dev server (foreground with logs) |
+| `pnpm docker:dev -d` | Start in background (detached mode) |
+| `pnpm docker:down` | Stop all containers |
+| `pnpm docker:logs` | View application logs |
+| `pnpm docker:shell` | Access container shell for debugging |
+| `pnpm docker:clean` | Remove all containers, volumes, images |
 
-2. **PostgreSQL Database** (localhost:5432)
-   - Pre-configured with test data
-   - Automatic schema migration
-   - Persistent data storage
-
-3. **Redis Cache** (localhost:6379)
-   - Session storage
-   - API response caching
-   - Background job queue
-
-4. **Prisma Studio** (localhost:5555)
-   - Database GUI
-   - Data browsing and editing
-   - Query execution
-
-### Docker Benefits
-
-- ✅ **Zero Configuration** - Works immediately on any machine with Docker
-- ✅ **Team Consistency** - Same environment for all developers
-- ✅ **Production Parity** - Matches deployment environment closely
-- ✅ **Isolated Dependencies** - No conflicts with local installations
-- ✅ **Easy Cleanup** - Remove everything with one command
-
-### Docker Commands Reference
+### Rebuild Commands
 
 ```bash
-# Start development environment
+# Clean rebuild after dependency changes
+pnpm docker:clean
+pnpm docker:build
 pnpm docker:dev
 
-# Build containers
+# Quick restart
+pnpm docker:down && pnpm docker:dev
+```
+
+## 🗄️ Database Configuration
+
+### Using Neon (Current Setup)
+
+Your Docker setup is configured to use your **Neon cloud database** from the `.env` file:
+
+```bash
+# .env file
+DATABASE_URL="postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
+NEXTAUTH_SECRET="your-secret-here"
+NEXTAUTH_URL="http://localhost:3000"
+# ... other environment variables
+```
+
+**No local PostgreSQL installation needed!** The containerized app connects to your Neon database.
+
+### Health Check
+
+Test database connectivity:
+```bash
+# With Docker running
+curl http://localhost:3000/api/health
+
+# Should return:
+# {"status":"healthy","database":"connected","timestamp":"..."}
+```
+
+## 🔧 Optional: Redis Caching
+
+Redis is optional and disabled by default:
+
+```bash
+# Start with Redis enabled
+docker-compose --profile redis up
+
+# Redis will be available at localhost:6379
+# Add to .env: REDIS_URL="redis://localhost:6379"
+```
+
+## 🆚 Docker vs Local Development
+
+### Option 1: Docker Development
+
+```bash
+pnpm docker:dev
+```
+
+**Pros:**
+- ✅ Consistent Node.js version across team
+- ✅ Isolated dependencies
+- ✅ Production-like environment
+- ✅ No local Node.js needed
+
+**Cons:**
+- ❌ Slower startup (~30 seconds)
+- ❌ More complex debugging
+
+### Option 2: Local Development
+
+```bash
+pnpm dev
+```
+
+**Pros:**
+- ✅ Faster startup (~5 seconds)
+- ✅ Simpler debugging
+- ✅ Direct file access
+
+**Cons:**
+- ❌ Requires local Node.js 20+
+- ❌ Potential version inconsistencies
+
+**Both use the same Neon database!** Choose based on preference.
+
+## 🐛 Troubleshooting
+
+### Port 3000 Already in Use
+
+```bash
+# Stop your local dev server first
+# Then start Docker
+pnpm docker:dev
+```
+
+### Changes Not Showing Up
+
+```bash
+# Restart the container
+pnpm docker:down && pnpm docker:dev
+
+# Or clean rebuild
+pnpm docker:clean
+pnpm docker:build
+pnpm docker:dev
+```
+
+### Database Connection Fails
+
+```bash
+# Verify .env file has correct DATABASE_URL
+cat .env | grep DATABASE_URL
+
+# Test health check
+curl http://localhost:3000/api/health
+
+# Check Neon dashboard for database status
+```
+
+### Build Errors
+
+```bash
+# Clean everything and rebuild
+pnpm docker:clean
 pnpm docker:build
 
-# Stop all services
-pnpm docker:down
-
-# View logs
-pnpm docker:logs
-
-# Clean up everything (containers, volumes, images)
-pnpm docker:clean
-
-# Start only database and Redis
-pnpm docker:db
-
-# Access container shell
-pnpm docker:shell
-
-# Start Prisma Studio
-pnpm docker:studio
+# Check Docker is running
+docker --version
+docker ps
 ```
 
-## Production Checklist
+### Out of Disk Space
 
-### Pre-Deployment
-- [ ] All environment variables configured
-- [ ] Database migrations run successfully
-- [ ] Build completes without errors locally
-- [ ] Tests pass (`pnpm test:all`)
-- [ ] No console errors in production build
-- [ ] Docker environment tested and working
+```bash
+# Clean up old Docker data
+docker system prune -a --volumes
 
-### Post-Deployment
-- [ ] Site loads correctly at Netlify URL
-- [ ] Authentication works (login/logout)
-- [ ] Database connections successful
-- [ ] Email notifications working (if configured)
-- [ ] Calendar sync functioning (if configured)
-- [ ] Mobile responsiveness verified
-- [ ] Performance metrics acceptable
+# Remove specific images
+docker images
+docker rmi <image-id>
+```
 
-### Security Verification
-- [ ] HTTPS enabled (automatic with Netlify)
-- [ ] Environment variables not exposed
-- [ ] Database access restricted to application
-- [ ] No development credentials in production
-- [ ] Security headers configured correctly
+### Hot Reload Not Working
 
-## Monitoring & Maintenance
+```bash
+# Ensure you're editing files in the project directory
+pwd
+# Should show: /home/username/projects/yura-scheduler-v3
 
-### Performance Monitoring
+# Restart with clean volumes
+pnpm docker:down
+pnpm docker:dev
+```
 
-1. **Netlify Analytics**:
-   - Enable in Netlify dashboard
-   - Monitor page views, performance
-   - Track Core Web Vitals
+## 📦 What's Inside docker-compose.yml
 
-2. **Database Monitoring**:
-   - Monitor Neon dashboard for query performance
-   - Set up alerts for connection limits
-   - Review slow query logs
+```yaml
+services:
+  app:
+    # Next.js application
+    # Uses .env file for all config
+    # Connects to Neon database
+    # Hot reload enabled via volume mounts
 
-### Backup Strategy
+  redis: (optional)
+    # Redis caching layer
+    # Only starts with --profile redis
+    # Available at localhost:6379
+```
 
-1. **Database Backups**:
-   - Neon provides automatic backups
-   - Export critical data periodically
-   - Test restore procedures
+**Removed from original setup:**
+- ❌ Local PostgreSQL (using Neon instead)
+- ❌ Prisma Studio (not needed for cloud DB)
 
-2. **Code Backups**:
-   - GitHub serves as primary backup
-   - Tag releases for easy rollback
-   - Document deployment procedures
+## 🏗️ Architecture
 
-### Update Process
+```
+┌─────────────────────┐
+│  Docker Container   │
+│  ┌───────────────┐  │
+│  │   Next.js     │  │◄───── Hot reload from host
+│  │   App (3000)  │  │
+│  └───────┬───────┘  │
+└──────────┼──────────┘
+           │
+           ▼
+   ┌────────────────┐
+   │  Neon Cloud    │
+   │  PostgreSQL    │◄────────── Cloud Database
+   └────────────────┘
+```
 
-1. **Regular Updates**:
-   ```bash
-   # Update dependencies
-   pnpm update
+## ✅ Health Checks
 
-   # Security audit
-   pnpm audit
+The Docker container includes automatic health checks:
 
-   # Test changes locally
-   pnpm test:all
+```bash
+# Check container health
+docker ps
+# STATUS shows "healthy" when database connected
 
-   # Test in Docker environment
-   pnpm docker:dev
+# Manual health check
+curl http://localhost:3000/api/health
+```
 
-   # Deploy
-   git push origin main
-   ```
+Health check runs every 30 seconds and verifies:
+- ✅ App is responding
+- ✅ Database connection is active
+- ✅ Critical services are running
 
-2. **Emergency Rollback**:
-   - Use Netlify deploy history
-   - Rollback to previous working deploy
-   - Fix issues and redeploy
+## 🚀 Production Deployment
 
-## Troubleshooting
+**Important:** For production, continue using **Netlify** (not Docker containers).
 
-### Common Issues
+Netlify deployment is optimized for:
+- ✅ Serverless functions (no container overhead)
+- ✅ Global CDN distribution
+- ✅ Automatic scaling
+- ✅ Zero DevOps maintenance
+- ✅ Free tier for small apps
 
-1. **Build Failures**:
-   - Check Node.js version (must be 20+)
-   - Verify all dependencies installed
-   - Review build logs in Netlify
+Your production workflow:
+```bash
+# 1. Make changes locally (Docker or local dev)
+pnpm docker:dev  # or pnpm dev
 
-2. **Database Connection Issues**:
-   - Verify DATABASE_URL format
-   - Check Neon database status
-   - Confirm SSL requirements
+# 2. Test locally
+# Visit http://localhost:3000
 
-3. **Authentication Problems**:
-   - Verify NEXTAUTH_URL matches site URL
-   - Check NEXTAUTH_SECRET is set
-   - Confirm callback URLs configured
+# 3. Commit and push to GitHub
+git add .
+git commit -m "Add new feature"
+git push origin main
 
-4. **Function Timeouts**:
-   - Optimize database queries
-   - Implement caching strategies
-   - Consider query pagination
+# 4. Netlify automatically deploys!
+# Visit your-app.netlify.app
+```
 
-5. **Docker Issues**:
-   - Ensure Docker daemon is running
-   - Check port conflicts (3000, 5432, 6379)
-   - Run `pnpm docker:clean` and restart
+## 📚 Additional Resources
 
-### Support Resources
+- **Main Documentation**: [README.md](README.md)
+- **Development Guide**: [CLAUDE.md](CLAUDE.md)
+- **Deployment Guide**: [DEPLOYMENT.md](DEPLOYMENT.md)
+- **Docker Compose File**: [docker-compose.yml](docker-compose.yml)
+- **Dockerfile**: [Dockerfile](Dockerfile)
 
-- **Netlify Documentation**: [docs.netlify.com](https://docs.netlify.com)
-- **Neon Documentation**: [neon.tech/docs](https://neon.tech/docs)
-- **Next.js Deployment**: [nextjs.org/docs/deployment](https://nextjs.org/docs/deployment)
-- **Docker Documentation**: [docs.docker.com](https://docs.docker.com)
-- **Project Issues**: [GitHub Issues](https://github.com/your-username/yura-scheduler-v3/issues)
+## 🤔 FAQ
 
-## Cost Optimization
+**Q: Do I need Docker for development?**
+A: No, it's optional. You can use `pnpm dev` for local development.
 
-### Free Tier Limits
+**Q: Does Docker replace Netlify?**
+A: No! Docker is for local development. Netlify is for production hosting.
 
-**Netlify Free Tier**:
-- 100GB bandwidth/month
-- 300 build minutes/month
-- 125,000 function calls/month
+**Q: Can I use Docker for production?**
+A: You can, but Netlify is recommended for this app. It's optimized for Next.js serverless deployment.
 
-**Neon Free Tier**:
-- 0.5GB storage
-- 1 database
-- Auto-pause after inactivity
+**Q: Do I need a local database?**
+A: No! The Docker setup uses your Neon cloud database.
 
-### Optimization Tips
+**Q: How do I switch between Docker and local dev?**
+A: Just stop one and start the other:
+```bash
+# Stop Docker
+pnpm docker:down
 
-1. **Reduce Bundle Size**:
-   - Use dynamic imports
-   - Optimize images
-   - Remove unused dependencies
+# Start local dev
+pnpm dev
 
-2. **Database Optimization**:
-   - Use connection pooling
-   - Optimize query patterns
-   - Implement caching
+# Or vice versa
+```
 
-3. **Function Optimization**:
-   - Minimize cold starts
-   - Cache responses
-   - Optimize query complexity
-
-## Scaling Considerations
-
-### When to Upgrade
-
-Consider upgrading when you hit these limits:
-- **100+ concurrent users**
-- **1000+ lessons/month**
-- **10GB+ database storage**
-- **Consistent function timeouts**
-
-### Migration Path
-
-1. **Database**: Upgrade Neon tier or migrate to dedicated PostgreSQL
-2. **Hosting**: Migrate to Vercel Pro or dedicated hosting (Docker ready!)
-3. **Monitoring**: Implement comprehensive observability
-4. **CDN**: Add Cloudflare for global performance
-
-## Security Best Practices
-
-### Production Security
-
-1. **Environment Variables**:
-   - Never commit secrets to git
-   - Use strong random values for secrets
-   - Rotate credentials regularly
-
-2. **Database Security**:
-   - Use connection pooling
-   - Implement query timeouts
-   - Monitor for suspicious activity
-
-3. **Application Security**:
-   - Keep dependencies updated
-   - Implement rate limiting
-   - Use HTTPS everywhere
-   - Validate all inputs
-
-4. **Docker Security**:
-   - Use non-root user in containers
-   - Keep base images updated
-   - Scan images for vulnerabilities
-   - Minimize container attack surface
-
-### Compliance
-
-- **Data Protection**: Implement GDPR-compliant data handling
-- **User Privacy**: Clear privacy policy and consent
-- **Payment Security**: PCI compliance for payment processing
-- **Audit Trail**: Log all administrative actions
+**Q: Will Docker slow down my development?**
+A: Startup is slower (~30s vs ~5s), but hot reload works the same. Many developers prefer Docker for team consistency.
 
 ---
 
-**Last Updated**: 2025-01-07
-**Next Review**: 2025-04-07
+**Last Updated**: 2025-10-21
+**Docker Setup**: Optimized for Neon + Netlify architecture
