@@ -3,6 +3,7 @@
 // Navigation configurations for mobile sidebar
 import {
   BarChart2,
+  BookOpen,
   Calendar,
   Clock,
   CreditCard,
@@ -39,6 +40,7 @@ const adminNavigation = [
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Reports", href: "/admin/reports", icon: BarChart2 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Guide", href: "/admin/guide", icon: BookOpen },
 ];
 
 const studentNavigation = [

@@ -1,7 +1,7 @@
 // src/features/admin/components/layout/AdminSidebar.tsx
 "use client";
 
-import { BarChart2, Calendar, CreditCard, LayoutDashboard, Settings, Users } from "lucide-react";
+import { BarChart2, BookOpen, Calendar, CreditCard, LayoutDashboard, Settings, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -14,6 +14,7 @@ const navigation = [
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Reports", href: "/admin/reports", icon: BarChart2 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Guide", href: "/admin/guide", icon: BookOpen },
 ];
 
 export const AdminSidebar = () => {
