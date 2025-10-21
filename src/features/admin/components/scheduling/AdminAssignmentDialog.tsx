@@ -172,7 +172,7 @@ export function AdminAssignmentDialog({
               <SelectTrigger id="student-select">
                 <SelectValue placeholder="Select a student" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px]">
                 {studentsLoading ? (
                   <SelectItem value="loading" disabled>
                     Loading students...

@@ -358,18 +358,42 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         // Determine pricing based on lesson type and student custom pricing
         let price = 75; // Default private lesson price
         if (student.customPricingEnabled) {
-          if (input.lessonType === LessonType.CHOREOGRAPHY && student.choreographyPrice) {
-            price = student.choreographyPrice;
-          } else if (input.lessonType === LessonType.PRIVATE && student.privateLessonPrice) {
-            price = student.privateLessonPrice;
+          switch (input.lessonType) {
+            case LessonType.CHOREOGRAPHY:
+              price = student.choreographyPrice ?? 90;
+              break;
+            case LessonType.PRIVATE:
+              price = student.privateLessonPrice ?? 75;
+              break;
+            case LessonType.GROUP:
+              price = student.groupLessonPrice ?? 45;
+              break;
+            case LessonType.COMPETITION_PREP:
+              price = student.competitionPrepPrice ?? 95;
+              break;
+            default:
+              price = student.privateLessonPrice ?? 75;
           }
         } else {
           // Use default pricing from settings
           const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
           if (defaultPricing) {
-            price = input.lessonType === LessonType.CHOREOGRAPHY
-              ? defaultPricing.choreographyPrice
-              : defaultPricing.privateLessonPrice;
+            switch (input.lessonType) {
+              case LessonType.CHOREOGRAPHY:
+                price = defaultPricing.choreographyPrice;
+                break;
+              case LessonType.PRIVATE:
+                price = defaultPricing.privateLessonPrice;
+                break;
+              case LessonType.GROUP:
+                price = defaultPricing.groupLessonPrice;
+                break;
+              case LessonType.COMPETITION_PREP:
+                price = defaultPricing.competitionPrice;
+                break;
+              default:
+                price = defaultPricing.privateLessonPrice;
+            }
           }
         }
 
@@ -469,6 +493,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           include: {
             Student: { include: { User: true } },
             Rink: true,
+            Payment: true,
           },
         });
 
@@ -484,28 +509,61 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         const student = existingLesson.Student;
 
         if (student.customPricingEnabled) {
-          if (input.lessonType === LessonType.CHOREOGRAPHY && student.choreographyPrice) {
-            price = student.choreographyPrice;
-          } else if (input.lessonType === LessonType.PRIVATE && student.privateLessonPrice) {
-            price = student.privateLessonPrice;
+          switch (input.lessonType) {
+            case LessonType.CHOREOGRAPHY:
+              price = student.choreographyPrice ?? 90;
+              break;
+            case LessonType.PRIVATE:
+              price = student.privateLessonPrice ?? 75;
+              break;
+            case LessonType.GROUP:
+              price = student.groupLessonPrice ?? 45;
+              break;
+            case LessonType.COMPETITION_PREP:
+              price = student.competitionPrepPrice ?? 95;
+              break;
+            default:
+              price = student.privateLessonPrice ?? 75;
           }
         } else {
           // Use default pricing from settings
           const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
           if (defaultPricing) {
-            price = input.lessonType === LessonType.CHOREOGRAPHY
-              ? defaultPricing.choreographyPrice
-              : defaultPricing.privateLessonPrice;
+            switch (input.lessonType) {
+              case LessonType.CHOREOGRAPHY:
+                price = defaultPricing.choreographyPrice;
+                break;
+              case LessonType.PRIVATE:
+                price = defaultPricing.privateLessonPrice;
+                break;
+              case LessonType.GROUP:
+                price = defaultPricing.groupLessonPrice;
+                break;
+              case LessonType.COMPETITION_PREP:
+                price = defaultPricing.competitionPrice;
+                break;
+              default:
+                price = defaultPricing.privateLessonPrice;
+            }
           }
         }
 
         // Update Google Calendar event if it exists
         if (existingLesson.googleCalendarEventId) {
           try {
-            await googleCalendar.updateEvent(existingLesson.googleCalendarEventId, {
+            await googleCalendar.updateEvent({
+              eventId: existingLesson.googleCalendarEventId,
               summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
               description: `Lesson Type: ${input.lessonType}
 ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
+              startTime: existingLesson.startTime,
+              endTime: existingLesson.endTime,
+              attendees: [
+                { email: student.User.email, name: student.User.name || undefined },
+                { email: process.env.INSTRUCTOR_EMAIL || "" },
+              ],
+              location: existingLesson.Rink.address || "",
+              timeZone: existingLesson.Rink.timezone || "America/Toronto",
             });
           } catch (calendarError) {
             console.error("Error updating Google Calendar event:", calendarError);

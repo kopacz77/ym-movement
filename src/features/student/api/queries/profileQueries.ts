@@ -160,6 +160,8 @@ export const profileRouter = createTRPCRouter({
             customPricingEnabled: true,
             privateLessonPrice: true,
             choreographyPrice: true,
+            groupLessonPrice: true,
+            competitionPrepPrice: true,
           },
         });
 
@@ -178,6 +180,9 @@ export const profileRouter = createTRPCRouter({
           privateLessonPrice:
             student.privateLessonPrice ?? defaultPricing?.privateLessonPrice ?? 75,
           choreographyPrice: student.choreographyPrice ?? defaultPricing?.choreographyPrice ?? 90,
+          groupLessonPrice: student.groupLessonPrice ?? defaultPricing?.groupLessonPrice ?? 45,
+          competitionPrepPrice:
+            student.competitionPrepPrice ?? defaultPricing?.competitionPrice ?? 95,
         };
       } catch (error) {
         if (error instanceof TRPCError) {
