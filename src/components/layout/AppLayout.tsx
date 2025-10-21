@@ -50,6 +50,7 @@ const studentNavigation = [
   { name: "Payments", href: "/student/payments", icon: CreditCard },
   { name: "Profile", href: "/student/profile", icon: User },
   { name: "Settings", href: "/student/settings", icon: Settings },
+  { name: "Guide", href: "/student/guide", icon: BookOpen },
 ];
 
 interface AppLayoutProps {

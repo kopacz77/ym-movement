@@ -1,7 +1,7 @@
 // src/features/student/components/layout/StudentSidebar.tsx
 "use client";
 
-import { Calendar, Clock, CreditCard, Settings, User } from "lucide-react";
+import { BookOpen, Calendar, Clock, CreditCard, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -15,6 +15,7 @@ const navigation = [
   { name: "Payments", href: "/student/payments", icon: CreditCard },
   { name: "Profile", href: "/student/profile", icon: User },
   { name: "Settings", href: "/student/settings", icon: Settings },
+  { name: "Guide", href: "/student/guide", icon: BookOpen },
 ];
 
 export function StudentSidebar() {
