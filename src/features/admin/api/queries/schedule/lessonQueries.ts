@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { LessonStatus, LessonType, RinkArea } from "@prisma/client";
+import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
 import { createScheduleChangeNotification } from "@/features/notifications/utils/notificationHelpers";
 import { googleCalendar } from "@/lib/google/calendar";
+import { calculateLessonPrice } from "@/lib/pricing";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
@@ -355,47 +356,20 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         // Default to a safe timezone if not specified
         const timezone = timeSlot.Rink.timezone || "America/Toronto";
 
-        // Determine pricing based on lesson type and student custom pricing
-        let price = 75; // Default private lesson price
-        if (student.customPricingEnabled) {
-          switch (input.lessonType) {
-            case LessonType.CHOREOGRAPHY:
-              price = student.choreographyPrice ?? 90;
-              break;
-            case LessonType.PRIVATE:
-              price = student.privateLessonPrice ?? 75;
-              break;
-            case LessonType.GROUP:
-              price = student.groupLessonPrice ?? 45;
-              break;
-            case LessonType.COMPETITION_PREP:
-              price = student.competitionPrepPrice ?? 95;
-              break;
-            default:
-              price = student.privateLessonPrice ?? 75;
-          }
-        } else {
-          // Use default pricing from settings
-          const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
-          if (defaultPricing) {
-            switch (input.lessonType) {
-              case LessonType.CHOREOGRAPHY:
-                price = defaultPricing.choreographyPrice;
-                break;
-              case LessonType.PRIVATE:
-                price = defaultPricing.privateLessonPrice;
-                break;
-              case LessonType.GROUP:
-                price = defaultPricing.groupLessonPrice;
-                break;
-              case LessonType.COMPETITION_PREP:
-                price = defaultPricing.competitionPrice;
-                break;
-              default:
-                price = defaultPricing.privateLessonPrice;
-            }
-          }
-        }
+        // Calculate duration in minutes
+        const durationMs = timeSlot.endTime.getTime() - timeSlot.startTime.getTime();
+        const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1);
+
+        // Get default pricing from database
+        const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
+
+        // Calculate price based on lesson type, duration, and student custom pricing
+        const price = calculateLessonPrice(
+          input.lessonType || LessonType.PRIVATE,
+          durationMinutes,
+          student,
+          defaultPricing,
+        );
 
         // Create Google Calendar event
         let eventId: string | null = null;
@@ -418,29 +392,43 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           // Continue without calendar event
         }
 
-        // Calculate duration properly
-        const durationMs = timeSlot.endTime.getTime() - timeSlot.startTime.getTime();
-        const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1); // Ensure at least 1 minute
+        // Create the lesson and payment in a transaction
+        const { lesson, payment } = await ctx.prisma.$transaction(async (prisma) => {
+          // Create the lesson
+          const lesson = await prisma.lesson.create({
+            data: {
+              id: randomUUID(),
+              studentId: input.studentId,
+              timeSlotId: input.timeSlotId,
+              rinkId: timeSlot.rinkId,
+              startTime: timeSlot.startTime,
+              endTime: timeSlot.endTime,
+              status: "SCHEDULED",
+              type: input.lessonType || LessonType.PRIVATE,
+              area: "MAIN_RINK",
+              price,
+              notes: input.notes ? sanitizeInput(input.notes) : undefined,
+              duration: durationMinutes,
+              googleCalendarEventId: eventId,
+              updatedAt: new Date(),
+            },
+            include: { Student: { include: { User: true } } },
+          });
 
-        // Create the lesson
-        const lesson = await ctx.prisma.lesson.create({
-          data: {
-            id: randomUUID(),
-            studentId: input.studentId,
-            timeSlotId: input.timeSlotId,
-            rinkId: timeSlot.rinkId,
-            startTime: timeSlot.startTime,
-            endTime: timeSlot.endTime,
-            status: "SCHEDULED",
-            type: input.lessonType || LessonType.PRIVATE,
-            area: "MAIN_RINK",
-            price,
-            notes: input.notes ? sanitizeInput(input.notes) : undefined,
-            duration: durationMinutes,
-            googleCalendarEventId: eventId,
-            updatedAt: new Date(),
-          },
-          include: { Student: { include: { User: true } } },
+          // Create payment record
+          const payment = await prisma.payment.create({
+            data: {
+              lessonId: lesson.id,
+              studentId: input.studentId,
+              amount: price,
+              method: PaymentMethod.VENMO, // Default to Venmo, can be changed later
+              status: PaymentStatus.PENDING,
+              referenceCode: `PAY-${randomUUID().substring(0, 8)}`,
+              lesson_date: timeSlot.startTime,
+            },
+          });
+
+          return { lesson, payment };
         });
 
         // Create notifications for the student (in-app + pending email)
@@ -504,49 +492,21 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
           });
         }
 
-        // Calculate new price based on lesson type and student custom pricing
-        let price = existingLesson.price; // Keep existing price by default
-        const student = existingLesson.Student;
+        // Calculate duration in minutes
+        const durationMs = existingLesson.endTime.getTime() - existingLesson.startTime.getTime();
+        const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1);
 
-        if (student.customPricingEnabled) {
-          switch (input.lessonType) {
-            case LessonType.CHOREOGRAPHY:
-              price = student.choreographyPrice ?? 90;
-              break;
-            case LessonType.PRIVATE:
-              price = student.privateLessonPrice ?? 75;
-              break;
-            case LessonType.GROUP:
-              price = student.groupLessonPrice ?? 45;
-              break;
-            case LessonType.COMPETITION_PREP:
-              price = student.competitionPrepPrice ?? 95;
-              break;
-            default:
-              price = student.privateLessonPrice ?? 75;
-          }
-        } else {
-          // Use default pricing from settings
-          const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
-          if (defaultPricing) {
-            switch (input.lessonType) {
-              case LessonType.CHOREOGRAPHY:
-                price = defaultPricing.choreographyPrice;
-                break;
-              case LessonType.PRIVATE:
-                price = defaultPricing.privateLessonPrice;
-                break;
-              case LessonType.GROUP:
-                price = defaultPricing.groupLessonPrice;
-                break;
-              case LessonType.COMPETITION_PREP:
-                price = defaultPricing.competitionPrice;
-                break;
-              default:
-                price = defaultPricing.privateLessonPrice;
-            }
-          }
-        }
+        // Get default pricing from database
+        const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
+
+        // Calculate new price based on lesson type, duration, and student custom pricing
+        const student = existingLesson.Student;
+        const price = calculateLessonPrice(
+          input.lessonType,
+          durationMinutes,
+          student,
+          defaultPricing,
+        );
 
         // Update Google Calendar event if it exists
         if (existingLesson.googleCalendarEventId) {
@@ -587,13 +547,27 @@ ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
           },
         });
 
-        // Update payment amount if payment exists
+        // Update or create payment record
         if (existingLesson.Payment) {
+          // Update existing payment
           await ctx.prisma.payment.update({
             where: { lessonId: input.lessonId },
             data: {
               amount: price,
               updatedAt: new Date(),
+            },
+          });
+        } else {
+          // Create payment if it doesn't exist (for legacy lessons)
+          await ctx.prisma.payment.create({
+            data: {
+              lessonId: input.lessonId,
+              studentId: existingLesson.studentId,
+              amount: price,
+              method: PaymentMethod.VENMO,
+              status: PaymentStatus.PENDING,
+              referenceCode: `PAY-${randomUUID().substring(0, 8)}`,
+              lesson_date: existingLesson.startTime,
             },
           });
         }

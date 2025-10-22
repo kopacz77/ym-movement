@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { sendLessonConfirmationEmail } from "@/lib/email";
 import { googleCalendar } from "@/lib/google/calendar";
+import { calculateLessonPrice } from "@/lib/pricing";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define extended Student type with custom pricing fields
@@ -198,58 +199,24 @@ export const bookingRouter = createTRPCRouter({
           // Continue with booking even if calendar fails
         }
 
-        // 6. Calculate price based on lesson type and student's custom pricing if available
-        // First, get the default pricing
-        const defaultPricing = await ctx.prisma.$queryRaw`
-          SELECT * FROM "DefaultPricing" LIMIT 1
-        `;
+        // 6. Calculate price based on lesson type, duration, and student's custom pricing
+        // Calculate duration in minutes
+        const durationMs = timeSlot.endTime.getTime() - timeSlot.startTime.getTime();
+        const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1);
 
-        const defaultPricingRecord =
-          Array.isArray(defaultPricing) && defaultPricing.length > 0 ? defaultPricing[0] : null;
+        // Get default pricing from database
+        const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        if (!defaultPricingRecord) {
-          console.log("[BOOKING] Default pricing not found, using hardcoded values");
-        }
-
-        // Define default prices (fallback if no DefaultPricing record exists)
-        const defaultPrices = {
-          PRIVATE: defaultPricingRecord?.privateLessonPrice || 75,
-          GROUP: defaultPricingRecord?.groupLessonPrice || 45,
-          CHOREOGRAPHY: defaultPricingRecord?.choreographyPrice || 90,
-          COMPETITION_PREP: defaultPricingRecord?.competitionPrice || 95,
-        };
-
-        // Use custom pricing if enabled for this student
-        let price = defaultPrices[input.type];
-
-        if (student.customPricingEnabled) {
-          // Apply custom pricing based on lesson type if available
-          switch (input.type) {
-            case "PRIVATE":
-              if (student.privateLessonPrice !== null) {
-                price = student.privateLessonPrice;
-              }
-              break;
-            case "GROUP":
-              if (student.groupLessonPrice !== null) {
-                price = student.groupLessonPrice;
-              }
-              break;
-            case "CHOREOGRAPHY":
-              if (student.choreographyPrice !== null) {
-                price = student.choreographyPrice;
-              }
-              break;
-            case "COMPETITION_PREP":
-              if (student.competitionPrepPrice !== null) {
-                price = student.competitionPrepPrice;
-              }
-              break;
-          }
-        }
+        // Calculate price using the new pricing helper
+        const price = calculateLessonPrice(
+          input.type,
+          durationMinutes,
+          student,
+          defaultPricing,
+        );
 
         console.log(
-          `[BOOKING] Calculated price: $${price} for lesson type ${input.type}${
+          `[BOOKING] Calculated price: $${price} for ${durationMinutes}min ${input.type} lesson${
             student.customPricingEnabled ? " (custom pricing)" : " (default pricing)"
           }`,
         );
