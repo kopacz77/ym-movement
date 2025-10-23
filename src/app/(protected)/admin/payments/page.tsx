@@ -2,12 +2,21 @@
 "use client";
 
 import type { PaymentStatus } from "@prisma/client";
-import { Search } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, Search } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,17 +62,21 @@ const PaymentTable = dynamic(
   },
 );
 
+type SortOption = "date-desc" | "date-asc" | "name-asc" | "name-desc" | "amount-desc" | "amount-asc";
+
 export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | "ALL">("ALL");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const utils = api.useUtils();
 
   // Fetch payments with filters
   const { data: payments, isLoading } = api.admin.payment.getPayments.useQuery({
     search: searchQuery || undefined,
     status: statusFilter !== "ALL" ? statusFilter : undefined,
+    sortBy,
   });
 
   // Get selected payment details
@@ -148,14 +161,82 @@ export default function PaymentsPage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by student name or reference code..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by student name or reference code..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto">
+                {sortBy === "date-desc" && (
+                  <>
+                    <ArrowDownAZ className="mr-2 h-4 w-4" />
+                    Newest First
+                  </>
+                )}
+                {sortBy === "date-asc" && (
+                  <>
+                    <ArrowUpAZ className="mr-2 h-4 w-4" />
+                    Oldest First
+                  </>
+                )}
+                {sortBy === "name-asc" && (
+                  <>
+                    <ArrowUpAZ className="mr-2 h-4 w-4" />
+                    Name A-Z
+                  </>
+                )}
+                {sortBy === "name-desc" && (
+                  <>
+                    <ArrowDownAZ className="mr-2 h-4 w-4" />
+                    Name Z-A
+                  </>
+                )}
+                {sortBy === "amount-desc" && (
+                  <>
+                    <ArrowDownAZ className="mr-2 h-4 w-4" />
+                    Amount High-Low
+                  </>
+                )}
+                {sortBy === "amount-asc" && (
+                  <>
+                    <ArrowUpAZ className="mr-2 h-4 w-4" />
+                    Amount Low-High
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSortBy("date-desc")}>
+                Newest First
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("date-asc")}>
+                Oldest First
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSortBy("name-asc")}>
+                Name A-Z
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("name-desc")}>
+                Name Z-A
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSortBy("amount-desc")}>
+                Amount High-Low
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("amount-asc")}>
+                Amount Low-High
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="self-start">
           <PaymentFilter currentFilter={statusFilter} onFilterChange={setStatusFilter} />

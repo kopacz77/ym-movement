@@ -18,6 +18,9 @@ export const paymentRouter = createTRPCRouter({
           endDate: z.date().optional(),
           page: z.number().min(1).optional(),
           limit: z.number().min(1).max(100).optional(),
+          sortBy: z
+            .enum(["date-desc", "date-asc", "name-asc", "name-desc", "amount-desc", "amount-asc"])
+            .optional(),
         })
         .optional(),
     )
@@ -45,6 +48,32 @@ export const paymentRouter = createTRPCRouter({
           where.createdAt = { gte: input.startDate };
           if (input?.endDate) {
             where.createdAt.lte = input.endDate;
+          }
+        }
+
+        // Determine orderBy based on sortBy parameter
+        let orderBy: Prisma.PaymentOrderByWithRelationInput = { lesson_date: "desc" };
+
+        if (input?.sortBy) {
+          switch (input.sortBy) {
+            case "date-desc":
+              orderBy = { lesson_date: "desc" };
+              break;
+            case "date-asc":
+              orderBy = { lesson_date: "asc" };
+              break;
+            case "name-asc":
+              orderBy = { Student: { User: { name: "asc" } } };
+              break;
+            case "name-desc":
+              orderBy = { Student: { User: { name: "desc" } } };
+              break;
+            case "amount-desc":
+              orderBy = { amount: "desc" };
+              break;
+            case "amount-asc":
+              orderBy = { amount: "asc" };
+              break;
           }
         }
 
@@ -86,9 +115,7 @@ export const paymentRouter = createTRPCRouter({
                 },
               },
             },
-            orderBy: {
-              createdAt: "desc",
-            },
+            orderBy,
             skip: input?.page ? (input.page - 1) * (input.limit ?? 10) : undefined,
             take: input?.limit ?? 100,
           }),
