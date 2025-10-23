@@ -20,6 +20,7 @@ interface Payment {
   referenceCode: string;
   status: PaymentStatus;
   createdAt: string | Date;
+  lesson_date: string | Date;
   Student?: {
     User?: {
       name?: string | null;
@@ -110,7 +111,7 @@ export const PaymentTable = ({
               <TableCell className="font-medium">
                 {payment.Student?.User?.name || "Unknown"}
               </TableCell>
-              <TableCell>{format(new Date(payment.createdAt), "PP")}</TableCell>
+              <TableCell>{format(new Date(payment.lesson_date), "PP")}</TableCell>
               <TableCell className="font-medium">{formatCurrency(payment.amount)}</TableCell>
               <TableCell>{payment.method}</TableCell>
               <TableCell>

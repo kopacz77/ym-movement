@@ -51,7 +51,14 @@ export const paymentRouter = createTRPCRouter({
         const [payments, total] = await Promise.all([
           ctx.prisma.payment.findMany({
             where,
-            include: {
+            select: {
+              id: true,
+              amount: true,
+              method: true,
+              referenceCode: true,
+              status: true,
+              createdAt: true,
+              lesson_date: true,
               Student: {
                 include: {
                   User: {
