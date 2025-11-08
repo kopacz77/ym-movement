@@ -498,13 +498,21 @@ const ScheduleManagerComponent = () => {
       const [endHours, endMinutes] = bookingData.endTime.split(":").map(Number);
       endDateTime.setHours(endHours, endMinutes, 0, 0);
 
-      createTimeSlot.mutate({
-        rinkId: bookingData.rinkId,
-        startTime: startDateTime,
-        endTime: endDateTime,
-        maxStudents: bookingData.maxStudents,
-        isActive: true,
-      });
+      createTimeSlot.mutate(
+        {
+          rinkId: bookingData.rinkId,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          maxStudents: bookingData.maxStudents,
+          isActive: true,
+        },
+        {
+          onSuccess: () => {
+            // Close the dialog on successful creation
+            setIsCreateDialogOpen(false);
+          },
+        },
+      );
     },
     [createTimeSlot],
   );

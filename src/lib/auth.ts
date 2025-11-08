@@ -47,9 +47,27 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           return null;
+        }
+
+        // Dynamic import to avoid circular dependency
+        const { isAccountLockedOut, recordLoginAttempt, clearLoginAttempts, getLockoutExpiry } =
+          await import("@/lib/account-lockout");
+
+        // Check if account is locked out
+        const isLocked = await isAccountLockedOut(credentials.email);
+        if (isLocked) {
+          const lockExpiry = await getLockoutExpiry(credentials.email);
+          if (lockExpiry) {
+            const minutesRemaining = Math.ceil(
+              (lockExpiry.getTime() - new Date().getTime()) / (1000 * 60),
+            );
+            throw new Error(
+              `Account temporarily locked due to too many failed login attempts. Please try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? "s" : ""}.`,
+            );
+          }
         }
 
         const user = await prisma.user.findUnique({
@@ -57,14 +75,39 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
+          // Record failed attempt
+          await recordLoginAttempt({
+            email: credentials.email,
+            success: false,
+            ipAddress: (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
+            userAgent: (req as any)?.headers?.["user-agent"],
+          });
           return null;
         }
 
         const isPasswordValid = await compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
+          // Record failed attempt
+          await recordLoginAttempt({
+            email: credentials.email,
+            success: false,
+            ipAddress: (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
+            userAgent: (req as any)?.headers?.["user-agent"],
+          });
           return null;
         }
+
+        // Successful login - clear failed attempts
+        await clearLoginAttempts(credentials.email);
+
+        // Record successful attempt
+        await recordLoginAttempt({
+          email: credentials.email,
+          success: true,
+          ipAddress: (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
+          userAgent: (req as any)?.headers?.["user-agent"],
+        });
 
         return {
           id: user.id,

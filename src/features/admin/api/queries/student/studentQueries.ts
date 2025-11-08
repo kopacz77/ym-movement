@@ -72,11 +72,37 @@ export const studentQueries = createTRPCRouter({
         const [students, total] = await Promise.all([
           ctx.prisma.student.findMany({
             where,
-            include: {
-              User: true,
-              Lesson: {
-                orderBy: { startTime: "desc" },
-                take: 1,
+            select: {
+              id: true,
+              userId: true,
+              phone: true,
+              level: true,
+              isApproved: true,
+              approvedAt: true,
+              maxLessonsPerWeek: true,
+              createdAt: true,
+              customPricingEnabled: true,
+              privateLessonPrice: true,
+              groupLessonPrice: true,
+              choreographyPrice: true,
+              competitionPrepPrice: true,
+              User: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                  createdAt: true,
+                  // Explicitly exclude: password, emailVerified, updatedAt
+                },
+              },
+              // Replace full Lesson loading with just a count
+              _count: {
+                select: {
+                  Lesson: {
+                    where: { status: "SCHEDULED" },
+                  },
+                },
               },
             },
             orderBy: {
@@ -480,15 +506,31 @@ export const studentQueries = createTRPCRouter({
         console.log(`Deleting student with ID: ${input.studentId}`);
 
         // Find the student first to get user details and check for related data
-        const student = await ctx.prisma.student.findUnique({
-          where: { id: input.studentId },
-          include: {
-            User: true,
-            Lesson: { select: { id: true } },
-            Payment: { select: { id: true } },
-            StudentNote: { select: { id: true } },
-          },
-        });
+        const [student, counts] = await Promise.all([
+          ctx.prisma.student.findUnique({
+            where: { id: input.studentId },
+            select: {
+              id: true,
+              userId: true,
+              User: {
+                select: {
+                  email: true,
+                  name: true,
+                },
+              },
+            },
+          }),
+          // Get counts instead of loading all IDs
+          Promise.all([
+            ctx.prisma.lesson.count({ where: { studentId: input.studentId } }),
+            ctx.prisma.payment.count({ where: { studentId: input.studentId } }),
+            ctx.prisma.studentNote.count({ where: { studentId: input.studentId } }),
+          ]).then(([lessonCount, paymentCount, noteCount]) => ({
+            lessons: lessonCount,
+            payments: paymentCount,
+            notes: noteCount,
+          })),
+        ]);
 
         if (!student) {
           throw new TRPCError({
@@ -498,7 +540,7 @@ export const studentQueries = createTRPCRouter({
         }
 
         console.log(
-          `Found student with ${student.Lesson.length} lessons, ${student.Payment.length} payments, ${student.StudentNote.length} notes`,
+          `Found student with ${counts.lessons} lessons, ${counts.payments} payments, ${counts.notes} notes`,
         );
 
         // Log security event
@@ -514,24 +556,24 @@ export const studentQueries = createTRPCRouter({
           console.log("Starting transaction to delete student and related records...");
 
           // 1. Delete student notes first
-          if (student.StudentNote.length > 0) {
-            console.log(`Deleting ${student.StudentNote.length} student notes...`);
+          if (counts.notes > 0) {
+            console.log(`Deleting ${counts.notes} student notes...`);
             await tx.studentNote.deleteMany({
               where: { studentId: input.studentId },
             });
           }
 
           // 2. Delete payments (these reference lessons, so delete before lessons)
-          if (student.Payment.length > 0) {
-            console.log(`Deleting ${student.Payment.length} payments...`);
+          if (counts.payments > 0) {
+            console.log(`Deleting ${counts.payments} payments...`);
             await tx.payment.deleteMany({
               where: { studentId: input.studentId },
             });
           }
 
           // 3. Delete lessons
-          if (student.Lesson.length > 0) {
-            console.log(`Deleting ${student.Lesson.length} lessons...`);
+          if (counts.lessons > 0) {
+            console.log(`Deleting ${counts.lessons} lessons...`);
             await tx.lesson.deleteMany({
               where: { studentId: input.studentId },
             });

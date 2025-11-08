@@ -24,6 +24,7 @@ export const profileRouter = createTRPCRouter({
           include: {
             User: {
               select: {
+                id: true,
                 name: true,
                 email: true,
                 createdAt: true,
@@ -36,6 +37,17 @@ export const profileRouter = createTRPCRouter({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",
+          });
+        }
+
+        // Authorization check: Verify student ownership or admin access
+        const isOwner = student.User.id === ctx.session.user.id;
+        const isAdmin = ctx.session.user.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You do not have permission to access this student profile",
           });
         }
 
@@ -69,6 +81,30 @@ export const profileRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // First, fetch the student to verify ownership
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          select: { userId: true },
+        });
+
+        if (!student) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Authorization check: Verify student ownership or admin access
+        const isOwner = student.userId === ctx.session.user.id;
+        const isAdmin = ctx.session.user.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You do not have permission to update this student profile",
+          });
+        }
+
         const updatedStudent = await ctx.prisma.student.update({
           where: { id: input.studentId },
           data: {
@@ -107,6 +143,30 @@ export const profileRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
+        // First, verify student ownership
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.studentId },
+          select: { userId: true },
+        });
+
+        if (!student) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Authorization check: Verify student ownership or admin access
+        const isOwner = student.userId === ctx.session.user.id;
+        const isAdmin = ctx.session.user.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You do not have permission to access these lessons",
+          });
+        }
+
         const where: LessonQueryFilters = {
           studentId: input.studentId,
         };
@@ -157,6 +217,7 @@ export const profileRouter = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           select: {
+            userId: true,
             customPricingEnabled: true,
             privateLessonPrice: true,
             choreographyPrice: true,
@@ -169,6 +230,17 @@ export const profileRouter = createTRPCRouter({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",
+          });
+        }
+
+        // Authorization check: Verify student ownership or admin access
+        const isOwner = student.userId === ctx.session.user.id;
+        const isAdmin = ctx.session.user.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You do not have permission to access this pricing information",
           });
         }
 
@@ -200,15 +272,10 @@ export const profileRouter = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        // Get all student lessons
-        const allLessons = await ctx.prisma.lesson.findMany({
-          where: { studentId: input.studentId },
-        });
-
-        // Get student info for max lessons
+        // Get student info for max lessons and verify ownership
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
-          select: { maxLessonsPerWeek: true },
+          select: { userId: true, maxLessonsPerWeek: true },
         });
 
         if (!student) {
@@ -217,6 +284,22 @@ export const profileRouter = createTRPCRouter({
             message: "Student not found",
           });
         }
+
+        // Authorization check: Verify student ownership or admin access
+        const isOwner = student.userId === ctx.session.user.id;
+        const isAdmin = ctx.session.user.role === "ADMIN";
+
+        if (!isOwner && !isAdmin) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You do not have permission to access these statistics",
+          });
+        }
+
+        // Get all student lessons
+        const allLessons = await ctx.prisma.lesson.findMany({
+          where: { studentId: input.studentId },
+        });
 
         // Get current week's lessons
         const now = new Date();

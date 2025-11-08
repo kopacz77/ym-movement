@@ -5,10 +5,10 @@ import { PaymentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { sendPaymentReminderEmail } from "@/lib/email";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 export const paymentRouter = createTRPCRouter({
-  getPayments: protectedProcedure
+  getPayments: adminProcedure
     .input(
       z
         .object({
@@ -140,7 +140,7 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  getPaymentById: protectedProcedure
+  getPaymentById: adminProcedure
     .input(z.object({ paymentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
@@ -181,7 +181,7 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  verifyPayment: protectedProcedure
+  verifyPayment: adminProcedure
     .input(z.object({ paymentId: z.string(), verifiedBy: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -238,7 +238,7 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  addPaymentNote: protectedProcedure
+  addPaymentNote: adminProcedure
     .input(z.object({ paymentId: z.string(), notes: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -275,7 +275,7 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  sendPaymentReminder: protectedProcedure
+  sendPaymentReminder: adminProcedure
     .input(z.object({ paymentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -342,7 +342,7 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  getPaymentStats: protectedProcedure.query(async ({ ctx }) => {
+  getPaymentStats: adminProcedure.query(async ({ ctx }) => {
     try {
       const [totalPayments, pendingAmount, completedAmount] = await Promise.all([
         ctx.prisma.payment.count(),

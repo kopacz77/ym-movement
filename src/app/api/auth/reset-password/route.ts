@@ -43,15 +43,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find the reset token using raw query to avoid type issues
-    const tokenResults = await prisma.$queryRaw`
-      SELECT t.id, t."userId" 
-      FROM "PasswordResetToken" t
-      WHERE t.token = ${token}
-    `;
-
-    const passwordResetToken =
-      Array.isArray(tokenResults) && tokenResults.length > 0 ? tokenResults[0] : null;
+    // Find the reset token using Prisma's type-safe query builder
+    const passwordResetToken = await prisma.passwordResetToken.findUnique({
+      where: { token },
+      select: { id: true, userId: true, expires: true },
+    });
 
     // Check if token exists and is valid
     if (!passwordResetToken) {
@@ -59,30 +55,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if token is expired
-    const tokenWithExpiry = await prisma.$queryRaw`
-      SELECT t.expires
-      FROM "PasswordResetToken" t
-      WHERE t.id = ${passwordResetToken.id}
-    `;
-
     const now = new Date();
-    const tokenExpiry =
-      Array.isArray(tokenWithExpiry) && tokenWithExpiry.length > 0
-        ? new Date(tokenWithExpiry[0].expires)
-        : null;
-
-    if (tokenExpiry && now > tokenExpiry) {
+    if (now > passwordResetToken.expires) {
       // Delete the expired token
-      await prisma.$executeRaw`
-        DELETE FROM "PasswordResetToken" 
-        WHERE id = ${passwordResetToken.id}
-      `;
+      await prisma.passwordResetToken.delete({
+        where: { id: passwordResetToken.id },
+      });
 
       return NextResponse.json({ error: "Reset token has expired" }, { status: 400 });
     }
 
-    // Hash the new password
-    const hashedPassword = await hash(password, 10);
+    // Hash the new password with increased work factor
+    const hashedPassword = await hash(password, 12);
 
     // Update user's password
     await prisma.user.update({
@@ -91,10 +75,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Delete the used token
-    await prisma.$executeRaw`
-      DELETE FROM "PasswordResetToken" 
-      WHERE id = ${passwordResetToken.id}
-    `;
+    await prisma.passwordResetToken.delete({
+      where: { id: passwordResetToken.id },
+    });
 
     return NextResponse.json({ message: "Password has been reset successfully" }, { status: 200 });
   } catch (error) {

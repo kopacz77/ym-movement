@@ -15,8 +15,13 @@ export function useScheduleActions() {
       utils.admin.schedule.getTimeSlots.invalidate();
     },
     onError: (err) => {
-      toast.error("Error", {
-        description: err.message,
+      console.error("Failed to create time slot:", {
+        message: err.message,
+        code: err.data?.code,
+        error: err,
+      });
+      toast.error("Failed to create time slot", {
+        description: err.message || "An unexpected error occurred",
       });
     },
   });

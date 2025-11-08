@@ -33,7 +33,7 @@ export const timeSlotRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.prisma.rinkTimeSlot.findMany({
+        const timeSlots = await ctx.prisma.rinkTimeSlot.findMany({
           where: {
             rinkId: input.rinkId,
             startTime: input.startDate
@@ -44,8 +44,23 @@ export const timeSlotRouter = createTRPCRouter({
               : undefined,
             isActive: true,
           },
-          include: {
-            Rink: true,
+          select: {
+            id: true,
+            rinkId: true,
+            startTime: true,
+            endTime: true,
+            maxStudents: true,
+            isActive: true,
+            createdAt: true,
+            Rink: {
+              select: {
+                id: true,
+                name: true,
+                timezone: true,
+                address: true,
+                // Exclude: maxCapacity, createdAt, updatedAt
+              },
+            },
             Lesson: {
               select: {
                 id: true,

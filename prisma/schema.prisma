@@ -48,6 +48,9 @@ model Lesson {
   @@index([studentId])
   @@index([studentId, startTime])
   @@index([timeSlotId])
+  // Performance optimization indexes
+  @@index([timeSlotId, status])
+  @@index([studentId, status, startTime])
 }
 
 model Notification {
@@ -64,6 +67,7 @@ model Notification {
 
   @@index([createdAt])
   @@index([userId])
+  @@index([userId, isRead, createdAt])
 }
 
 model PendingEmailNotification {
@@ -92,6 +96,18 @@ model PasswordResetToken {
 
   @@index([token])
   @@index([userId])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  success   Boolean  @default(false)
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([email, success, createdAt])
 }
 
 model Payment {
@@ -170,6 +186,11 @@ model RinkTimeSlot {
   @@index([rinkId, isActive])
   @@index([rinkId, startTime])
   @@index([startTime])
+  // Performance optimization indexes
+  @@index([rinkId, isActive, startTime])
+  @@index([rinkId, startTime, endTime])
+  @@index([isActive, startTime, endTime])
+  @@index([startTime, endTime])
 }
 
 model Settings {
@@ -244,6 +265,7 @@ model User {
   @@index([createdAt])
   @@index([emailVerified])
   @@index([role])
+  @@index([name])
 }
 
 enum LessonStatus {
@@ -309,6 +331,7 @@ model BlockedDateRange {
   @@index([endDate])
   @@index([startDate, endDate])
   @@index([createdById])
+  @@index([type, startDate, endDate])
 }
 
 enum BlockedDateType {

@@ -69,8 +69,8 @@ export const authRouter = createTRPCRouter({
           });
         }
 
-        // Hash new password
-        const hashedPassword = await hash(input.newPassword, 10);
+        // Hash new password with increased work factor
+        const hashedPassword = await hash(input.newPassword, 12);
 
         // Update password
         await ctx.prisma.user.update({
@@ -161,8 +161,8 @@ export const authRouter = createTRPCRouter({
           });
         }
 
-        // Hash the new password
-        const hashedPassword = await hash(password, 10);
+        // Hash the new password with increased work factor
+        const hashedPassword = await hash(password, 12);
 
         // Update the user's password and name if provided
         await ctx.prisma.user.update({

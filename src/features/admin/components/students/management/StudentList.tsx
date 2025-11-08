@@ -151,7 +151,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                       <Badge variant="default">Active</Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
-                      {student.Lesson?.length || 0} Lesson
+                      {student._count?.Lesson || 0} Lesson
                     </TableCell>
                     <TableCell className="sticky right-0 bg-background">
                       <DropdownMenu>

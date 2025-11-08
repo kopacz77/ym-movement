@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
+import { getLessonTypePrice } from "@/lib/pricing-utils";
 
 interface EditLessonTypeDialogProps {
   lessonId: string;
@@ -78,36 +79,8 @@ export function EditLessonTypeDialog({
     });
   };
 
-  // Get pricing information for display based on student's custom pricing
-  const getLessonTypePrice = (type: LessonType) => {
-    const defaultPrices = {
-      PRIVATE: 75,
-      GROUP: 45,
-      CHOREOGRAPHY: 90,
-      COMPETITION_PREP: 95,
-    };
-
-    // If we have student pricing data, use it
-    if (studentPricing) {
-      switch (type) {
-        case LessonType.PRIVATE:
-          return studentPricing.privateLessonPrice;
-        case LessonType.CHOREOGRAPHY:
-          return studentPricing.choreographyPrice;
-        case LessonType.GROUP:
-          return studentPricing.groupLessonPrice;
-        case LessonType.COMPETITION_PREP:
-          return studentPricing.competitionPrepPrice;
-        default:
-          return defaultPrices[type];
-      }
-    }
-
-    return defaultPrices[type];
-  };
-
   const priceWillChange = lessonType !== currentType;
-  const estimatedNewPrice = getLessonTypePrice(lessonType);
+  const estimatedNewPrice = getLessonTypePrice(lessonType, studentPricing);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

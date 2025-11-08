@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
+import { getLessonTypePrice } from "@/lib/pricing-utils";
 
 interface TimeSlot {
   id: string;
@@ -102,33 +103,6 @@ export function AdminAssignmentDialog({
     });
   };
 
-  // Get lesson type price based on student's custom pricing if available
-  const getLessonTypePrice = (type: LessonType) => {
-    const defaultPrices = {
-      PRIVATE: 75,
-      GROUP: 45,
-      CHOREOGRAPHY: 90,
-      COMPETITION_PREP: 95,
-    };
-
-    // If we have student pricing data with custom pricing
-    if (studentPricing?.customPricingEnabled) {
-      switch (type) {
-        case LessonType.PRIVATE:
-          return studentPricing.privateLessonPrice ?? defaultPrices.PRIVATE;
-        case LessonType.CHOREOGRAPHY:
-          return studentPricing.choreographyPrice ?? defaultPrices.CHOREOGRAPHY;
-        case LessonType.GROUP:
-          return studentPricing.groupLessonPrice ?? defaultPrices.GROUP;
-        case LessonType.COMPETITION_PREP:
-          return studentPricing.competitionPrepPrice ?? defaultPrices.COMPETITION_PREP;
-        default:
-          return defaultPrices[type];
-      }
-    }
-
-    return defaultPrices[type];
-  };
 
   const selectedStudent = studentsData?.students?.find((s) => s.id === selectedStudentId);
 

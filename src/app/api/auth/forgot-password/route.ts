@@ -41,8 +41,10 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      // Delete any existing reset tokens for this user
-      await prisma.$executeRaw`DELETE FROM "PasswordResetToken" WHERE "userId" = ${user.id}`;
+      // Delete any existing reset tokens for this user using Prisma's type-safe query
+      await prisma.passwordResetToken.deleteMany({
+        where: { userId: user.id },
+      });
 
       // Generate reset token
       const token = generateResetToken();
@@ -51,11 +53,14 @@ export async function POST(req: NextRequest) {
       const expires = new Date();
       expires.setHours(expires.getHours() + 24);
 
-      // Create password reset token in database
-      await prisma.$executeRaw`
-        INSERT INTO "PasswordResetToken" ("id", "userId", "token", "expires", "createdAt")
-        VALUES (gen_random_uuid(), ${user.id}, ${token}, ${expires}, NOW())
-      `;
+      // Create password reset token in database using Prisma's type-safe query
+      await prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          token,
+          expires,
+        },
+      });
 
       // Construct reset URL
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -71,8 +76,10 @@ export async function POST(req: NextRequest) {
     } catch (emailError) {
       console.error("Failed to send password reset email:", emailError);
 
-      // Delete the token if email sending fails
-      await prisma.$executeRaw`DELETE FROM "PasswordResetToken" WHERE "userId" = ${user.id}`;
+      // Delete the token if email sending fails using Prisma's type-safe query
+      await prisma.passwordResetToken.deleteMany({
+        where: { userId: user.id },
+      });
 
       return NextResponse.json({ error: "Failed to send password reset email" }, { status: 500 });
     }

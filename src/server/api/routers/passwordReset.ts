@@ -57,8 +57,8 @@ export const passwordResetRouter = createTRPCRouter({
           });
         }
 
-        // Hash the new password
-        const hashedPassword = await hash(password, 10);
+        // Hash the new password with increased work factor
+        const hashedPassword = await hash(password, 12);
 
         // Update the user's password
         await ctx.prisma.user.update({
