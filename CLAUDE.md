@@ -217,6 +217,17 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 - `src/hooks/`: Custom React hooks
 - `prisma/`: Database schema and migrations
 
+## Claude Code Agent Configuration
+
+**Subagents Directory**: `.claude/agents/`
+
+This project includes specialized Claude Code subagents for focused development tasks:
+- Custom agent configurations stored in `.claude/agents/` directory
+- Agents provide specialized capabilities for specific development workflows
+- See individual agent files for specific capabilities and usage instructions
+
+**Note**: Subagent configurations are project-specific and automatically loaded by Claude Code when working in this repository.
+
 ## Key Features
 
 - **Role-based dashboards**: Separate admin and student interfaces
