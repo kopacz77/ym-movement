@@ -17,13 +17,6 @@ const nextConfig = {
   compiler: {
     removeConsole: false, // Keep all console logs temporarily
   },
-  // API route configuration - request size limits
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb', // Prevent large payload DoS attacks
-    },
-    responseLimit: '4mb',
-  },
   // Security configuration for CVE-2025-48068
   allowedDevOrigins: process.env.NODE_ENV === "development" ? ["localhost"] : [],
   typescript: {
