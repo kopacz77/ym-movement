@@ -110,9 +110,11 @@ export default function SignupPage() {
 
     console.log("🎨 Rendering Turnstile widget...");
 
-    // Render visible widget that user must click
+    // Render visible widget that user must click - ALWAYS requires fresh interaction
     turnstileWidgetId.current = window.turnstile.render(container, {
       sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
+      // Force manual execution - widget won't auto-verify
+      execution: "render",
       callback: (token: string) => {
         console.log("✅ Turnstile verification successful");
         setTurnstileToken(token);
@@ -135,10 +137,21 @@ export default function SignupPage() {
 
     console.log("🎨 Turnstile widget ID:", turnstileWidgetId.current);
 
+    // CRITICAL: Reset immediately after render to clear any cached state
+    if (turnstileWidgetId.current) {
+      setTimeout(() => {
+        if (turnstileWidgetId.current && window.turnstile) {
+          console.log("🔄 Resetting Turnstile to clear cache...");
+          window.turnstile.reset(turnstileWidgetId.current);
+        }
+      }, 100);
+    }
+
     return () => {
       if (turnstileWidgetId.current && window.turnstile) {
         console.log("🧹 Cleaning up Turnstile widget");
         window.turnstile.remove(turnstileWidgetId.current);
+        setTurnstileToken(null);
       }
     };
   }, [turnstileReady]);
@@ -160,6 +173,11 @@ export default function SignupPage() {
 
     // Layer 2 Check: Ensure user completed verification
     if (!turnstileToken) {
+      // Execute the Turnstile widget to show the challenge
+      if (turnstileWidgetId.current && window.turnstile) {
+        console.log("🎯 Triggering Turnstile challenge...");
+        window.turnstile.execute(turnstileWidgetId.current);
+      }
       toast.error("Verification Required", {
         description: "Please complete the security check above before submitting.",
       });
