@@ -64,50 +64,35 @@ export default function SignupPage() {
 
   // Layer 2: Cloudflare Turnstile token
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetId = useRef<string | null>(null);
 
-  // Initialize Turnstile on mount with EXPLICIT rendering (no auto-execute)
+  // Initialize Turnstile on mount - VISIBLE checkbox style
   useEffect(() => {
     if (typeof window === "undefined" || !window.turnstile) return;
 
     const container = turnstileContainerRef.current;
     if (!container) return;
 
-    // Render widget with execution: "render" (no auto-execute)
+    // Render visible widget that user must click
     turnstileWidgetId.current = window.turnstile.render(container, {
       sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
-      execution: "render", // KEY: Don't auto-execute
-      appearance: "interaction-only", // Only show when needed
       callback: (token: string) => {
         console.log("✅ Turnstile verification successful");
         setTurnstileToken(token);
-        setIsVerifying(false);
-        toast.success("Verification Complete", {
-          description: "You've been verified! Submitting your registration...",
-        });
-        // Auto-submit after verification
-        setTimeout(() => {
-          document.getElementById("signup-form")?.dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true })
-          );
-        }, 500);
       },
       "error-callback": () => {
         console.error("❌ Turnstile verification failed");
         setTurnstileToken(null);
-        setIsVerifying(false);
         toast.error("Verification Failed", {
-          description: "Please try again or refresh the page.",
+          description: "Please try refreshing the page.",
         });
       },
       "expired-callback": () => {
         console.warn("⚠️ Turnstile token expired");
         setTurnstileToken(null);
-        setIsVerifying(false);
         toast("Verification Expired", {
-          description: "Please submit again to re-verify.",
+          description: "Please verify again before submitting.",
         });
       },
     });
@@ -134,31 +119,10 @@ export default function SignupPage() {
       return;
     }
 
-    // Layer 2 Check: Trigger Turnstile verification if not already verified
-    if (!turnstileToken && !isVerifying) {
-      setIsVerifying(true);
-      toast("Security Verification", {
-        description: "Please wait while we verify you're human...",
-      });
-      // Manually execute Turnstile challenge
-      if (turnstileWidgetId.current && window.turnstile) {
-        window.turnstile.execute(turnstileWidgetId.current);
-      }
-      return;
-    }
-
-    // Layer 2 Check: Wait for verification to complete
-    if (isVerifying && !turnstileToken) {
-      toast("Verification in Progress", {
-        description: "Please wait for verification to complete.",
-      });
-      return;
-    }
-
-    // Layer 2 Check: Ensure token exists
+    // Layer 2 Check: Ensure user completed verification
     if (!turnstileToken) {
       toast.error("Verification Required", {
-        description: "Please complete the security verification.",
+        description: "Please complete the security check above before submitting.",
       });
       return;
     }
@@ -341,15 +305,13 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Hidden container, explicit rendering */}
-            <div
-              ref={turnstileContainerRef}
-              style={{ position: "absolute", left: "-9999px", opacity: 0 }}
-              aria-hidden="true"
-            />
+            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Visible checkbox */}
+            <div className="flex justify-center">
+              <div ref={turnstileContainerRef} />
+            </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Submitting..." : isVerifying ? "Verifying..." : "Submit Registration"}
+            <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
+              {isLoading ? "Submitting..." : "Submit Registration"}
             </Button>
           </form>
         </CardContent>
