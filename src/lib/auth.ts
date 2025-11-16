@@ -79,7 +79,8 @@ export const authOptions: NextAuthOptions = {
           await recordLoginAttempt({
             email: credentials.email,
             success: false,
-            ipAddress: (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
+            ipAddress:
+              (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
             userAgent: (req as any)?.headers?.["user-agent"],
           });
           return null;
@@ -92,7 +93,8 @@ export const authOptions: NextAuthOptions = {
           await recordLoginAttempt({
             email: credentials.email,
             success: false,
-            ipAddress: (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
+            ipAddress:
+              (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
             userAgent: (req as any)?.headers?.["user-agent"],
           });
           return null;
@@ -105,7 +107,8 @@ export const authOptions: NextAuthOptions = {
         await recordLoginAttempt({
           email: credentials.email,
           success: true,
-          ipAddress: (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
+          ipAddress:
+            (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
           userAgent: (req as any)?.headers?.["user-agent"],
         });
 

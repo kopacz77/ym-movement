@@ -1,22 +1,9 @@
 // src/app/(protected)/student/guide/page.tsx
 "use client";
 
-import {
-  BookOpen,
-  Calendar,
-  CreditCard,
-  HelpCircle,
-  Plus,
-  Settings,
-  User,
-  X,
-} from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { BookOpen, Calendar, CreditCard, HelpCircle, Plus, Settings, User, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 
 export default function StudentGuidePage() {

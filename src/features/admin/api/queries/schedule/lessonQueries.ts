@@ -537,7 +537,12 @@ ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
           data: {
             type: input.lessonType,
             price,
-            notes: input.notes !== undefined ? (input.notes ? sanitizeInput(input.notes) : null) : undefined,
+            notes:
+              input.notes !== undefined
+                ? input.notes
+                  ? sanitizeInput(input.notes)
+                  : null
+                : undefined,
             updatedAt: new Date(),
           },
           include: {

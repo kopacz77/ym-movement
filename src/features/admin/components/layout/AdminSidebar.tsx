@@ -1,7 +1,15 @@
 // src/features/admin/components/layout/AdminSidebar.tsx
 "use client";
 
-import { BarChart2, BookOpen, Calendar, CreditCard, LayoutDashboard, Settings, Users } from "lucide-react";
+import {
+  BarChart2,
+  BookOpen,
+  Calendar,
+  CreditCard,
+  LayoutDashboard,
+  Settings,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useIsMobile } from "@/hooks/useMediaQuery";

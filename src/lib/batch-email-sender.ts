@@ -1,7 +1,7 @@
 // src/lib/batch-email-sender.ts
 
-import { prisma } from "@/lib/prisma";
 import { sendScheduleChangesEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 /**
  * Process and send batch email notifications for all users with pending notifications

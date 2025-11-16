@@ -12,12 +12,8 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 
 export default function AdminGuidePage() {
@@ -202,7 +198,7 @@ export default function AdminGuidePage() {
               title="Editing Lesson Types"
               steps={[
                 "Click on a time slot with assigned student",
-                'Click the pencil ✏️ icon next to student name',
+                "Click the pencil ✏️ icon next to student name",
                 "Change lesson type from dropdown",
                 "Review price preview (updates automatically)",
                 'Click "Save Changes"',
@@ -300,7 +296,7 @@ export default function AdminGuidePage() {
                 "Go to Payments page to see all payment records",
                 "Payments are automatically created when lessons are assigned",
                 'Status shows "Pending", "Paid", or "Cancelled"',
-                'Use filters to find specific payments (student, status, date)',
+                "Use filters to find specific payments (student, status, date)",
                 "Payment amount reflects lesson type and custom pricing",
               ]}
             />

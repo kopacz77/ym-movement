@@ -35,17 +35,19 @@ export const createTRPCContext = async (
  * Removes file paths, database details, and other sensitive information
  */
 function sanitizeErrorMessage(message: string): string {
-  return message
-    // Remove file paths (Unix and Windows)
-    .replace(/\/[^\s]+\.(ts|js|tsx|jsx)/gi, '[file]')
-    .replace(/[A-Z]:\\[^\s]+\.(ts|js|tsx|jsx)/gi, '[file]')
-    // Remove database errors
-    .replace(/prisma[^\s]*/gi, 'database')
-    .replace(/postgres[^\s]*/gi, 'database')
-    // Remove stack traces
-    .replace(/at\s+[^\n]+/g, '')
-    // Remove sensitive paths
-    .replace(/node_modules[^\s]*/gi, '[package]');
+  return (
+    message
+      // Remove file paths (Unix and Windows)
+      .replace(/\/[^\s]+\.(ts|js|tsx|jsx)/gi, "[file]")
+      .replace(/[A-Z]:\\[^\s]+\.(ts|js|tsx|jsx)/gi, "[file]")
+      // Remove database errors
+      .replace(/prisma[^\s]*/gi, "database")
+      .replace(/postgres[^\s]*/gi, "database")
+      // Remove stack traces
+      .replace(/at\s+[^\n]+/g, "")
+      // Remove sensitive paths
+      .replace(/node_modules[^\s]*/gi, "[package]")
+  );
 }
 
 const t = initTRPC.context<TRPCContext>().create({

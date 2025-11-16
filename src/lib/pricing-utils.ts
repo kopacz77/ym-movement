@@ -32,10 +32,7 @@ export interface StudentPricing {
  * @param studentPricing - Optional student-specific pricing configuration
  * @returns The calculated price for the lesson
  */
-export function getLessonTypePrice(
-  type: LessonType,
-  studentPricing?: StudentPricing,
-): number {
+export function getLessonTypePrice(type: LessonType, studentPricing?: StudentPricing): number {
   // If student has custom pricing enabled, use their custom rates
   if (studentPricing?.customPricingEnabled) {
     switch (type) {

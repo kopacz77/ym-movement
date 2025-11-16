@@ -103,7 +103,6 @@ export function AdminAssignmentDialog({
     });
   };
 
-
   const selectedStudent = studentsData?.students?.find((s) => s.id === selectedStudentId);
 
   return (
@@ -111,9 +110,7 @@ export function AdminAssignmentDialog({
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Assign Student to Time Slot</DialogTitle>
-          <DialogDescription>
-            Select a student and lesson type for this time slot
-          </DialogDescription>
+          <DialogDescription>Select a student and lesson type for this time slot</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -217,10 +214,7 @@ export function AdminAssignmentDialog({
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleAssign}
-            disabled={!selectedStudentId || assignStudent.isPending}
-          >
+          <Button onClick={handleAssign} disabled={!selectedStudentId || assignStudent.isPending}>
             {assignStudent.isPending ? "Assigning..." : "Assign Student"}
           </Button>
         </div>

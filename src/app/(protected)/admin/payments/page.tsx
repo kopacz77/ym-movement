@@ -62,7 +62,13 @@ const PaymentTable = dynamic(
   },
 );
 
-type SortOption = "date-desc" | "date-asc" | "name-asc" | "name-desc" | "amount-desc" | "amount-asc";
+type SortOption =
+  | "date-desc"
+  | "date-asc"
+  | "name-asc"
+  | "name-desc"
+  | "amount-desc"
+  | "amount-asc";
 
 export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -222,12 +228,8 @@ export default function PaymentsPage() {
                 Oldest First
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSortBy("name-asc")}>
-                Name A-Z
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("name-desc")}>
-                Name Z-A
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("name-asc")}>Name A-Z</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("name-desc")}>Name Z-A</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setSortBy("amount-desc")}>
                 Amount High-Low

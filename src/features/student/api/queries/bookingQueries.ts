@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek } from "date-fns";
+import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek, format } from "date-fns";
 // src/features/student/api/queries/bookingQueries.ts
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
@@ -208,12 +208,7 @@ export const bookingRouter = createTRPCRouter({
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
         // Calculate price using the new pricing helper
-        const price = calculateLessonPrice(
-          input.type,
-          durationMinutes,
-          student,
-          defaultPricing,
-        );
+        const price = calculateLessonPrice(input.type, durationMinutes, student, defaultPricing);
 
         console.log(
           `[BOOKING] Calculated price: $${price} for ${durationMinutes}min ${input.type} lesson${
@@ -295,7 +290,44 @@ export const bookingRouter = createTRPCRouter({
           // Continue even if notification fails - the booking itself was successful
         }
 
-        // 9. Send confirmation email to the student with fixed timezone information
+        // 9. Create notification for admin users
+        try {
+          // Find all admin users
+          const adminUsers = await ctx.prisma.user.findMany({
+            where: { role: "ADMIN" },
+            select: { id: true },
+          });
+
+          // Format the date nicely
+          const formattedDate = format(timeSlot.startTime, "MMMM d, yyyy 'at' h:mm a");
+
+          // Format lesson type (e.g., PRIVATE → Private, GROUP → Group)
+          const lessonType = input.type
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(" ");
+
+          // Create notification for each admin
+          const notificationPromises = adminUsers.map((admin) =>
+            createNotification({
+              userId: admin.id,
+              title: "New Lesson Booking",
+              message: `New booking: ${student.User.name} booked ${lessonType} lesson on ${formattedDate}`,
+              type: "SUCCESS",
+              link: "/admin/schedule",
+            }),
+          );
+
+          await Promise.all(notificationPromises);
+          console.log(
+            `[BOOKING] Created admin notifications for ${adminUsers.length} admin user(s)`,
+          );
+        } catch (adminNotificationError) {
+          console.error("[BOOKING] Error creating admin notifications:", adminNotificationError);
+          // Continue even if admin notification fails - the booking itself was successful
+        }
+
+        // 10. Send confirmation email to the student with fixed timezone information
         if (student.User?.email && student.User?.name) {
           try {
             console.log(`[BOOKING] Sending confirmation email to ${student.User.email}`);

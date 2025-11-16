@@ -31,11 +31,56 @@ const signupSchema = z.object({
     })
     .optional(),
   parentConsent: z.boolean().default(false),
+  // Layer 1: Honeypot field (should always be empty)
+  honeypot: z.string().optional(),
+  // Layer 2: Cloudflare Turnstile token (required for verification)
+  turnstileToken: z.string().optional(),
 });
+
+/**
+ * Layer 2: Verify Cloudflare Turnstile token with Cloudflare API
+ * @param token - The Turnstile token from the client
+ * @param clientIP - The client's IP address
+ * @returns True if token is valid
+ */
+async function verifyTurnstileToken(token: string, clientIP: string): Promise<boolean> {
+  try {
+    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+
+    // In development, allow bypass if no secret key is configured
+    if (!secretKey && process.env.NODE_ENV === "development") {
+      console.warn("⚠️  TURNSTILE_SECRET_KEY not configured - bypassing in development");
+      return true;
+    }
+
+    if (!secretKey) {
+      console.error("❌ TURNSTILE_SECRET_KEY not configured");
+      return false;
+    }
+
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        secret: secretKey,
+        response: token,
+        remoteip: clientIP,
+      }),
+    });
+
+    const data = await response.json();
+    console.log("Turnstile verification result:", data.success);
+
+    return data.success === true;
+  } catch (error) {
+    console.error("Turnstile verification error:", error);
+    return false;
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
-    // Rate limiting
+    // Layer 3: Rate limiting (5 signups per IP per hour)
     const clientIP =
       req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     if (!authRateLimiter.isAllowed(clientIP)) {
@@ -44,7 +89,7 @@ export async function POST(req: NextRequest) {
         ip: clientIP,
       });
       return NextResponse.json(
-        { message: "Too many signup attempts. Please try again later." },
+        { message: "Too many signup attempts. Please try again in an hour." },
         { status: 429 },
       );
     }
@@ -66,6 +111,49 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json(
         { message: "Invalid data", errors: result.error.format() },
+        { status: 400 },
+      );
+    }
+
+    // Layer 1 Verification: Honeypot field should be empty (server-side check)
+    if (result.data.honeypot && result.data.honeypot.length > 0) {
+      console.warn("🤖 Bot detected via honeypot field:", {
+        ip: clientIP,
+        honeypot: result.data.honeypot,
+      });
+      logSecurityEvent("BOT_DETECTED_HONEYPOT", {
+        ip: clientIP,
+        honeypot: result.data.honeypot,
+      });
+      // Return a generic error to not reveal the honeypot mechanism
+      return NextResponse.json(
+        { message: "Invalid form submission. Please try again." },
+        { status: 400 },
+      );
+    }
+
+    // Layer 2 Verification: Verify Cloudflare Turnstile token (server-side check)
+    if (result.data.turnstileToken) {
+      const isValidToken = await verifyTurnstileToken(result.data.turnstileToken, clientIP);
+      if (!isValidToken) {
+        console.warn("🚫 Invalid Turnstile token:", { ip: clientIP });
+        logSecurityEvent("INVALID_TURNSTILE_TOKEN", {
+          ip: clientIP,
+        });
+        return NextResponse.json(
+          { message: "Security verification failed. Please try again." },
+          { status: 400 },
+        );
+      }
+      console.log("✅ Turnstile token verified successfully");
+    } else if (process.env.NODE_ENV === "production") {
+      // In production, require Turnstile token
+      console.warn("❌ Missing Turnstile token in production:", { ip: clientIP });
+      logSecurityEvent("MISSING_TURNSTILE_TOKEN", {
+        ip: clientIP,
+      });
+      return NextResponse.json(
+        { message: "Security verification required. Please complete the CAPTCHA." },
         { status: 400 },
       );
     }

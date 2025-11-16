@@ -22,7 +22,7 @@ import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
 import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { AdminAssignmentDialog } from "./AdminAssignmentDialog";
-import { type Lesson, type TimeSlot } from "./calendarUtils";
+import type { Lesson, TimeSlot } from "./calendarUtils";
 import { EditLessonTypeDialog } from "./EditLessonTypeDialog";
 
 // Define interfaces for the data structures
@@ -264,7 +264,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                     ? selectedEvent.event.extendedProps.Lesson
                     : selectedSlot?.Lesson;
 
-                  const lessons = rawLessons?.filter((lesson) => lesson?.id && lesson?.Student) || [];
+                  const lessons =
+                    rawLessons?.filter((lesson) => lesson?.id && lesson?.Student) || [];
 
                   return lessons.length > 0 ? (
                     lessons.map((lesson) => (

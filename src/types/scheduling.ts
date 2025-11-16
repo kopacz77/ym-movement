@@ -1,5 +1,5 @@
 // src/types/scheduling.ts
-import { type LessonStatus, type LessonType } from "@prisma/client";
+import type { LessonStatus, LessonType } from "@prisma/client";
 
 /**
  * Represents a lesson for a student

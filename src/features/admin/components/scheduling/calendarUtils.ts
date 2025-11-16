@@ -1,5 +1,5 @@
 // src/features/admin/components/scheduling/calendarUtils.ts
-import { type LessonStatus, type LessonType } from "@prisma/client";
+import type { LessonStatus, LessonType } from "@prisma/client";
 import { parseISO } from "date-fns";
 import { DateTime } from "luxon";
 

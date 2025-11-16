@@ -1,6 +1,7 @@
 // src/app/auth/signup/page.tsx
 "use client";
 
+import { Turnstile } from "@marsidev/react-turnstile";
 import { Level } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,10 +37,34 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  // Layer 1: Honeypot field (invisible to humans, bots auto-fill it)
+  const [honeypot, setHoneypot] = useState("");
+
+  // Layer 2: Cloudflare Turnstile token
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
   // REMOVED: Password validation - passwords are set during registration completion after approval
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Layer 1 Check: Honeypot validation (client-side first line of defense)
+    if (honeypot) {
+      console.warn("Bot detected via honeypot field");
+      toast.error("Error", {
+        description: "Invalid form submission. Please try again.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Layer 2 Check: Turnstile token validation (client-side)
+    if (!turnstileToken) {
+      toast.error("Verification Required", {
+        description: "Please complete the security verification.",
+      });
+      return;
+    }
 
     setIsLoading(true);
 
@@ -54,6 +79,8 @@ export default function SignupPage() {
           level,
           parentConsent,
           maxLessonsPerWeek: 3, // Default value
+          honeypot, // Layer 1: Send honeypot to server for verification
+          turnstileToken, // Layer 2: Send Turnstile token to server for verification
         }),
       });
 
@@ -165,6 +192,32 @@ export default function SignupPage() {
               </Select>
             </div>
 
+            {/* Layer 1: Honeypot field - invisible to humans, bots auto-fill it */}
+            <div
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                opacity: 0,
+                pointerEvents: "none",
+                height: 0,
+                overflow: "hidden",
+              }}
+              aria-hidden="true"
+            >
+              <Label htmlFor="website" className="sr-only">
+                Leave this field blank
+              </Label>
+              <Input
+                id="website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </div>
+
             {/* Parental Consent Checkbox */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
@@ -186,7 +239,27 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            {/* Layer 2: Cloudflare Turnstile CAPTCHA */}
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                onSuccess={(token: string) => setTurnstileToken(token)}
+                onError={() => {
+                  setTurnstileToken(null);
+                  toast.error("Verification Failed", {
+                    description: "Please try refreshing the page.",
+                  });
+                }}
+                onExpire={() => {
+                  setTurnstileToken(null);
+                  toast("Verification Expired", {
+                    description: "Please verify again.",
+                  });
+                }}
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
               {isLoading ? "Submitting..." : "Submit Registration"}
             </Button>
           </form>

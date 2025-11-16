@@ -133,8 +133,18 @@ class RateLimiter {
 }
 
 // Export rate limiter instances for different use cases
-export const authRateLimiter = new RateLimiter(5, 15 * 60 * 1000); // 5 attempts per 15 minutes
+// Layer 3: Signup rate limiter - strict limits to prevent bot spam
+export const authRateLimiter = new RateLimiter(5, 60 * 60 * 1000); // 5 signups per hour per IP
 export const apiRateLimiter = new RateLimiter(100, 60 * 1000); // 100 requests per minute
+
+// Cleanup old rate limit entries every hour
+setInterval(
+  () => {
+    authRateLimiter.cleanup();
+    apiRateLimiter.cleanup();
+  },
+  60 * 60 * 1000,
+); // 1 hour
 
 /**
  * Security logging function
