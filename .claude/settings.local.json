@@ -51,7 +51,10 @@
       "Bash(tree:*)",
       "Bash(cat:*)",
       "Bash(awk:*)",
-      "Bash(pnpm lint:fix:*)"
+      "Bash(pnpm lint:fix:*)",
+      "Bash(git log:*)",
+      "Bash(env)",
+      "Bash(pnpm list:*)"
     ],
     "deny": []
   }
