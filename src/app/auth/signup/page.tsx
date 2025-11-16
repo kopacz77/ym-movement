@@ -1,11 +1,11 @@
 // src/app/auth/signup/page.tsx
 "use client";
 
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Level } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,8 @@ export default function SignupPage() {
 
   // Layer 2: Cloudflare Turnstile token
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [showTurnstile, setShowTurnstile] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   // REMOVED: Password validation - passwords are set during registration completion after approval
 
@@ -59,16 +60,26 @@ export default function SignupPage() {
       return;
     }
 
-    // Layer 2 Check: Show Turnstile on first submit attempt
-    if (!turnstileToken && !showTurnstile) {
-      setShowTurnstile(true);
-      toast("Security Verification Required", {
-        description: "Please complete the verification to continue.",
+    // Layer 2 Check: Trigger Turnstile verification if not already verified
+    if (!turnstileToken && !isVerifying) {
+      setIsVerifying(true);
+      toast("Security Verification", {
+        description: "Please wait while we verify you're human...",
+      });
+      // Trigger Turnstile challenge
+      turnstileRef.current?.execute();
+      return;
+    }
+
+    // Layer 2 Check: Wait for verification to complete
+    if (isVerifying && !turnstileToken) {
+      toast("Verification in Progress", {
+        description: "Please wait for verification to complete.",
       });
       return;
     }
 
-    // Layer 2 Check: Turnstile token validation (client-side)
+    // Layer 2 Check: Ensure token exists
     if (!turnstileToken) {
       toast.error("Verification Required", {
         description: "Please complete the security verification.",
@@ -148,7 +159,7 @@ export default function SignupPage() {
           <CardDescription>Submit your registration for admin approval</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form id="signup-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -249,30 +260,50 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Only shown after first submit attempt */}
-            {showTurnstile && (
-              <div className="flex justify-center">
-                <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                  onSuccess={(token: string) => setTurnstileToken(token)}
-                  onError={() => {
-                    setTurnstileToken(null);
-                    toast.error("Verification Failed", {
-                      description: "Please try refreshing the page.",
-                    });
-                  }}
-                  onExpire={() => {
-                    setTurnstileToken(null);
-                    toast("Verification Expired", {
-                      description: "Please verify again.",
-                    });
-                  }}
-                />
-              </div>
-            )}
+            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Invisible mode with manual execution */}
+            <div style={{ display: "none" }}>
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                options={{
+                  size: "invisible",
+                  execution: "execute",
+                }}
+                onSuccess={(token: string) => {
+                  console.log("✅ Turnstile verification successful");
+                  setTurnstileToken(token);
+                  setIsVerifying(false);
+                  toast.success("Verification Complete", {
+                    description: "You've been verified! Submitting your registration...",
+                  });
+                  // Auto-submit after verification
+                  setTimeout(() => {
+                    document.getElementById("signup-form")?.dispatchEvent(
+                      new Event("submit", { bubbles: true, cancelable: true })
+                    );
+                  }, 500);
+                }}
+                onError={() => {
+                  console.error("❌ Turnstile verification failed");
+                  setTurnstileToken(null);
+                  setIsVerifying(false);
+                  toast.error("Verification Failed", {
+                    description: "Please try again or refresh the page.",
+                  });
+                }}
+                onExpire={() => {
+                  console.warn("⚠️ Turnstile token expired");
+                  setTurnstileToken(null);
+                  setIsVerifying(false);
+                  toast("Verification Expired", {
+                    description: "Please submit again to re-verify.",
+                  });
+                }}
+              />
+            </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading || (showTurnstile && !turnstileToken)}>
-              {isLoading ? "Submitting..." : showTurnstile && !turnstileToken ? "Complete Verification" : "Submit Registration"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Submitting..." : isVerifying ? "Verifying..." : "Submit Registration"}
             </Button>
           </form>
         </CardContent>
