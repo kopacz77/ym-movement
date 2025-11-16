@@ -54,7 +54,8 @@
       "Bash(pnpm lint:fix:*)",
       "Bash(git log:*)",
       "Bash(env)",
-      "Bash(pnpm list:*)"
+      "Bash(pnpm list:*)",
+      "Bash(xargs:*)"
     ],
     "deny": []
   }

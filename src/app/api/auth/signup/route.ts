@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-import { authRateLimiter, logSecurityEvent } from "@/lib/security";
+import { authRateLimiter, getClientIP, logSecurityEvent, turnstileTokenTracker } from "@/lib/security";
 import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 
 const signupSchema = z.object({
@@ -80,9 +80,8 @@ async function verifyTurnstileToken(token: string, clientIP: string): Promise<bo
 
 export async function POST(req: NextRequest) {
   try {
-    // Layer 3: Rate limiting (5 signups per IP per hour)
-    const clientIP =
-      req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    // Layer 3: Rate limiting (5 signups per IP per hour) - using secure IP extraction
+    const clientIP = getClientIP(req.headers);
     if (!authRateLimiter.isAllowed(clientIP)) {
       logSecurityEvent("RATE_LIMIT_EXCEEDED", {
         endpoint: "/api/auth/signup",
@@ -134,6 +133,19 @@ export async function POST(req: NextRequest) {
 
     // Layer 2 Verification: Verify Cloudflare Turnstile token (server-side check)
     if (result.data.turnstileToken) {
+      // Check for token replay attack
+      if (turnstileTokenTracker.isUsed(result.data.turnstileToken)) {
+        console.warn("🚫 Token replay attack detected:", { ip: clientIP });
+        logSecurityEvent("TOKEN_REPLAY_ATTACK", {
+          ip: clientIP,
+          token: result.data.turnstileToken.substring(0, 20) + "...",
+        });
+        return NextResponse.json(
+          { message: "Security token has already been used. Please refresh and try again." },
+          { status: 400 },
+        );
+      }
+
       const isValidToken = await verifyTurnstileToken(result.data.turnstileToken, clientIP);
       if (!isValidToken) {
         console.warn("🚫 Invalid Turnstile token:", { ip: clientIP });
@@ -145,6 +157,19 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
       }
+
+      // Mark token as used to prevent replay
+      if (!turnstileTokenTracker.markUsed(result.data.turnstileToken)) {
+        console.warn("🚫 Failed to mark token as used (race condition):", { ip: clientIP });
+        logSecurityEvent("TOKEN_MARKING_RACE_CONDITION", {
+          ip: clientIP,
+        });
+        return NextResponse.json(
+          { message: "Security verification error. Please try again." },
+          { status: 400 },
+        );
+      }
+
       console.log("✅ Turnstile token verified successfully");
     } else if (process.env.NODE_ENV === "production") {
       // In production, require Turnstile token

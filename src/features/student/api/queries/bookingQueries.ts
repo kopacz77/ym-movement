@@ -312,16 +312,26 @@ export const bookingRouter = createTRPCRouter({
             createNotification({
               userId: admin.id,
               title: "New Lesson Booking",
-              message: `New booking: ${student.User.name} booked ${lessonType} lesson on ${formattedDate}`,
+              message: `New booking: ${student.User.name || student.User.email || "Unknown Student"} booked ${lessonType} lesson on ${formattedDate}`,
               type: "SUCCESS",
               link: "/admin/schedule",
             }),
           );
 
-          await Promise.all(notificationPromises);
-          console.log(
-            `[BOOKING] Created admin notifications for ${adminUsers.length} admin user(s)`,
-          );
+          // Use Promise.allSettled for partial success tolerance
+          const results = await Promise.allSettled(notificationPromises);
+          const successCount = results.filter((r) => r.status === "fulfilled").length;
+          const failureCount = results.filter((r) => r.status === "rejected").length;
+
+          if (failureCount > 0) {
+            console.warn(
+              `[BOOKING] ${successCount} notifications sent, ${failureCount} failed`,
+            );
+          } else {
+            console.log(
+              `[BOOKING] Created admin notifications for ${adminUsers.length} admin user(s)`,
+            );
+          }
         } catch (adminNotificationError) {
           console.error("[BOOKING] Error creating admin notifications:", adminNotificationError);
           // Continue even if admin notification fails - the booking itself was successful

@@ -9,6 +9,16 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+  // Enforce HTTPS in production
+  if (
+    process.env.NODE_ENV === "production" &&
+    request.headers.get("x-forwarded-proto") !== "https"
+  ) {
+    const httpsUrl = new URL(request.url);
+    httpsUrl.protocol = "https:";
+    return NextResponse.redirect(httpsUrl, 301);
+  }
+
   // Immediately skip processing for static assets and API routes
   if (path.startsWith("/_next/") || path.startsWith("/api/") || path.includes(".")) {
     return NextResponse.next();

@@ -42,6 +42,7 @@ export default function SignupPage() {
 
   // Layer 2: Cloudflare Turnstile token
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showTurnstile, setShowTurnstile] = useState(false);
 
   // REMOVED: Password validation - passwords are set during registration completion after approval
 
@@ -55,6 +56,15 @@ export default function SignupPage() {
         description: "Invalid form submission. Please try again.",
       });
       setIsLoading(false);
+      return;
+    }
+
+    // Layer 2 Check: Show Turnstile on first submit attempt
+    if (!turnstileToken && !showTurnstile) {
+      setShowTurnstile(true);
+      toast("Security Verification Required", {
+        description: "Please complete the verification to continue.",
+      });
       return;
     }
 
@@ -239,28 +249,30 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Layer 2: Cloudflare Turnstile CAPTCHA */}
-            <div className="flex justify-center">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                onSuccess={(token: string) => setTurnstileToken(token)}
-                onError={() => {
-                  setTurnstileToken(null);
-                  toast.error("Verification Failed", {
-                    description: "Please try refreshing the page.",
-                  });
-                }}
-                onExpire={() => {
-                  setTurnstileToken(null);
-                  toast("Verification Expired", {
-                    description: "Please verify again.",
-                  });
-                }}
-              />
-            </div>
+            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Only shown after first submit attempt */}
+            {showTurnstile && (
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                  onSuccess={(token: string) => setTurnstileToken(token)}
+                  onError={() => {
+                    setTurnstileToken(null);
+                    toast.error("Verification Failed", {
+                      description: "Please try refreshing the page.",
+                    });
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken(null);
+                    toast("Verification Expired", {
+                      description: "Please verify again.",
+                    });
+                  }}
+                />
+              </div>
+            )}
 
-            <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
-              {isLoading ? "Submitting..." : "Submit Registration"}
+            <Button type="submit" className="w-full" disabled={isLoading || (showTurnstile && !turnstileToken)}>
+              {isLoading ? "Submitting..." : showTurnstile && !turnstileToken ? "Complete Verification" : "Submit Registration"}
             </Button>
           </form>
         </CardContent>

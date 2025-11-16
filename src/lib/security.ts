@@ -83,10 +83,11 @@ export function sanitizeInput(input: string): string {
 }
 
 /**
- * Rate limiting utility using in-memory store
+ * Rate limiting utility using in-memory store with memory leak protection
  */
 class RateLimiter {
   private requests: Map<string, { count: number; resetTime: number }> = new Map();
+  private readonly MAX_ENTRIES = 10000; // Prevent unbounded memory growth
 
   constructor(
     private maxRequests = 5,
@@ -101,6 +102,11 @@ class RateLimiter {
   isAllowed(identifier: string): boolean {
     const now = Date.now();
     const record = this.requests.get(identifier);
+
+    // Inline cleanup to prevent memory leaks in high-traffic scenarios
+    if (this.requests.size > this.MAX_ENTRIES) {
+      this.cleanup();
+    }
 
     if (!record || now > record.resetTime) {
       // First request or window expired
@@ -137,14 +143,84 @@ class RateLimiter {
 export const authRateLimiter = new RateLimiter(5, 60 * 60 * 1000); // 5 signups per hour per IP
 export const apiRateLimiter = new RateLimiter(100, 60 * 1000); // 100 requests per minute
 
-// Cleanup old rate limit entries every hour
+// Cleanup old rate limit entries every 5 minutes (more aggressive for high traffic)
 setInterval(
   () => {
     authRateLimiter.cleanup();
     apiRateLimiter.cleanup();
   },
-  60 * 60 * 1000,
-); // 1 hour
+  5 * 60 * 1000,
+); // 5 minutes
+
+/**
+ * Token tracking to prevent replay attacks
+ */
+class TokenTracker {
+  private usedTokens: Map<string, number> = new Map();
+  private readonly MAX_TOKENS = 50000; // Prevent unbounded growth
+  private readonly TOKEN_EXPIRY = 5 * 60 * 1000; // Tokens expire after 5 minutes
+
+  /**
+   * Mark a token as used
+   * @param token - The token to mark
+   * @returns True if token was newly marked (not previously used)
+   */
+  markUsed(token: string): boolean {
+    // Cleanup if we're approaching memory limits
+    if (this.usedTokens.size > this.MAX_TOKENS) {
+      this.cleanup();
+    }
+
+    // Check if token was already used
+    if (this.usedTokens.has(token)) {
+      return false;
+    }
+
+    // Mark as used with expiry time
+    this.usedTokens.set(token, Date.now() + this.TOKEN_EXPIRY);
+    return true;
+  }
+
+  /**
+   * Check if a token has been used
+   * @param token - The token to check
+   * @returns True if token has been used
+   */
+  isUsed(token: string): boolean {
+    const expiry = this.usedTokens.get(token);
+    if (!expiry) {
+      return false;
+    }
+
+    // Remove if expired
+    if (Date.now() > expiry) {
+      this.usedTokens.delete(token);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Clean up expired tokens
+   */
+  cleanup(): void {
+    const now = Date.now();
+    for (const [token, expiry] of this.usedTokens.entries()) {
+      if (now > expiry) {
+        this.usedTokens.delete(token);
+      }
+    }
+  }
+}
+
+// Export token tracker instance
+export const turnstileTokenTracker = new TokenTracker();
+
+// Cleanup expired tokens every 5 minutes
+setInterval(() => {
+  turnstileTokenTracker.cleanup();
+}, 5 * 60 * 1000);
 
 /**
  * Security logging function
@@ -242,4 +318,42 @@ export function validateSecurityHeaders(headers: Record<string, string>): boolea
   ];
 
   return requiredHeaders.every((header) => headers[header] || headers[header.toLowerCase()]);
+}
+
+/**
+ * Extract client IP from request headers with trusted proxy validation
+ * Only trusts Netlify and Cloudflare headers
+ * @param headers - Request headers
+ * @returns Client IP address or 'unknown'
+ */
+export function getClientIP(headers: Headers): string {
+  // Netlify-specific headers (most reliable for Netlify deployments)
+  const netlifyIP = headers.get("x-nf-client-connection-ip");
+  if (netlifyIP) {
+    return netlifyIP;
+  }
+
+  // Cloudflare-specific header
+  const cfConnectingIP = headers.get("cf-connecting-ip");
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+
+  // X-Forwarded-For (only trust if from known proxy)
+  const xForwardedFor = headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    // Take the first IP (client IP) from the chain
+    const firstIP = xForwardedFor.split(",")[0]?.trim();
+    if (firstIP) {
+      return firstIP;
+    }
+  }
+
+  // Fallback to x-real-ip
+  const xRealIP = headers.get("x-real-ip");
+  if (xRealIP) {
+    return xRealIP;
+  }
+
+  return "unknown";
 }
