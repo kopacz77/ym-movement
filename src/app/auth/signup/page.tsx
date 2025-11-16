@@ -1,11 +1,33 @@
 // src/app/auth/signup/page.tsx
 "use client";
 
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Level } from "@prisma/client";
+
+// Cloudflare Turnstile global type
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          execution?: "render" | "execute";
+          appearance?: "always" | "execute" | "interaction-only";
+          callback?: (token: string) => void;
+          "error-callback"?: () => void;
+          "expired-callback"?: () => void;
+        }
+      ) => string;
+      execute: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+      reset: (widgetId: string) => void;
+    };
+  }
+}
 import Link from "next/link";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +65,59 @@ export default function SignupPage() {
   // Layer 2: Cloudflare Turnstile token
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const turnstileRef = useRef<TurnstileInstance>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+
+  // Initialize Turnstile on mount with EXPLICIT rendering (no auto-execute)
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.turnstile) return;
+
+    const container = turnstileContainerRef.current;
+    if (!container) return;
+
+    // Render widget with execution: "render" (no auto-execute)
+    turnstileWidgetId.current = window.turnstile.render(container, {
+      sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
+      execution: "render", // KEY: Don't auto-execute
+      appearance: "interaction-only", // Only show when needed
+      callback: (token: string) => {
+        console.log("✅ Turnstile verification successful");
+        setTurnstileToken(token);
+        setIsVerifying(false);
+        toast.success("Verification Complete", {
+          description: "You've been verified! Submitting your registration...",
+        });
+        // Auto-submit after verification
+        setTimeout(() => {
+          document.getElementById("signup-form")?.dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+          );
+        }, 500);
+      },
+      "error-callback": () => {
+        console.error("❌ Turnstile verification failed");
+        setTurnstileToken(null);
+        setIsVerifying(false);
+        toast.error("Verification Failed", {
+          description: "Please try again or refresh the page.",
+        });
+      },
+      "expired-callback": () => {
+        console.warn("⚠️ Turnstile token expired");
+        setTurnstileToken(null);
+        setIsVerifying(false);
+        toast("Verification Expired", {
+          description: "Please submit again to re-verify.",
+        });
+      },
+    });
+
+    return () => {
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetId.current);
+      }
+    };
+  }, []);
 
   // REMOVED: Password validation - passwords are set during registration completion after approval
 
@@ -66,7 +140,10 @@ export default function SignupPage() {
       toast("Security Verification", {
         description: "Please wait while we verify you're human...",
       });
-      // Turnstile will auto-run when component mounts (when isVerifying becomes true)
+      // Manually execute Turnstile challenge
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.execute(turnstileWidgetId.current);
+      }
       return;
     }
 
@@ -151,8 +228,13 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <Card className="w-full max-w-md">
+    <>
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="afterInteractive"
+      />
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Join YM Movement</CardTitle>
           <CardDescription>Submit your registration for admin approval</CardDescription>
@@ -259,45 +341,12 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Only mounts when user clicks submit */}
-            {isVerifying && (
-              <div style={{ position: "absolute", left: "-9999px", opacity: 0 }}>
-                <Turnstile
-                  ref={turnstileRef}
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                  onSuccess={(token: string) => {
-                    console.log("✅ Turnstile verification successful");
-                    setTurnstileToken(token);
-                    setIsVerifying(false);
-                    toast.success("Verification Complete", {
-                      description: "You've been verified! Submitting your registration...",
-                    });
-                    // Auto-submit after verification
-                    setTimeout(() => {
-                      document.getElementById("signup-form")?.dispatchEvent(
-                        new Event("submit", { bubbles: true, cancelable: true })
-                      );
-                    }, 500);
-                  }}
-                  onError={() => {
-                    console.error("❌ Turnstile verification failed");
-                    setTurnstileToken(null);
-                    setIsVerifying(false);
-                    toast.error("Verification Failed", {
-                      description: "Please try again or refresh the page.",
-                    });
-                  }}
-                  onExpire={() => {
-                    console.warn("⚠️ Turnstile token expired");
-                    setTurnstileToken(null);
-                    setIsVerifying(false);
-                    toast("Verification Expired", {
-                      description: "Please submit again to re-verify.",
-                    });
-                  }}
-                />
-              </div>
-            )}
+            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Hidden container, explicit rendering */}
+            <div
+              ref={turnstileContainerRef}
+              style={{ position: "absolute", left: "-9999px", opacity: 0 }}
+              aria-hidden="true"
+            />
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Submitting..." : isVerifying ? "Verifying..." : "Submit Registration"}
@@ -324,5 +373,6 @@ export default function SignupPage() {
         </CardFooter>
       </Card>
     </div>
+    </>
   );
 }
