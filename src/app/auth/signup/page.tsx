@@ -66,8 +66,7 @@ export default function SignupPage() {
       toast("Security Verification", {
         description: "Please wait while we verify you're human...",
       });
-      // Trigger Turnstile challenge
-      turnstileRef.current?.execute();
+      // Turnstile will auto-run when component mounts (when isVerifying becomes true)
       return;
     }
 
@@ -260,47 +259,45 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Invisible mode with manual execution */}
-            <div style={{ display: "none" }}>
-              <Turnstile
-                ref={turnstileRef}
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                options={{
-                  size: "invisible",
-                  execution: "execute",
-                }}
-                onSuccess={(token: string) => {
-                  console.log("✅ Turnstile verification successful");
-                  setTurnstileToken(token);
-                  setIsVerifying(false);
-                  toast.success("Verification Complete", {
-                    description: "You've been verified! Submitting your registration...",
-                  });
-                  // Auto-submit after verification
-                  setTimeout(() => {
-                    document.getElementById("signup-form")?.dispatchEvent(
-                      new Event("submit", { bubbles: true, cancelable: true })
-                    );
-                  }, 500);
-                }}
-                onError={() => {
-                  console.error("❌ Turnstile verification failed");
-                  setTurnstileToken(null);
-                  setIsVerifying(false);
-                  toast.error("Verification Failed", {
-                    description: "Please try again or refresh the page.",
-                  });
-                }}
-                onExpire={() => {
-                  console.warn("⚠️ Turnstile token expired");
-                  setTurnstileToken(null);
-                  setIsVerifying(false);
-                  toast("Verification Expired", {
-                    description: "Please submit again to re-verify.",
-                  });
-                }}
-              />
-            </div>
+            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Only mounts when user clicks submit */}
+            {isVerifying && (
+              <div style={{ position: "absolute", left: "-9999px", opacity: 0 }}>
+                <Turnstile
+                  ref={turnstileRef}
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                  onSuccess={(token: string) => {
+                    console.log("✅ Turnstile verification successful");
+                    setTurnstileToken(token);
+                    setIsVerifying(false);
+                    toast.success("Verification Complete", {
+                      description: "You've been verified! Submitting your registration...",
+                    });
+                    // Auto-submit after verification
+                    setTimeout(() => {
+                      document.getElementById("signup-form")?.dispatchEvent(
+                        new Event("submit", { bubbles: true, cancelable: true })
+                      );
+                    }, 500);
+                  }}
+                  onError={() => {
+                    console.error("❌ Turnstile verification failed");
+                    setTurnstileToken(null);
+                    setIsVerifying(false);
+                    toast.error("Verification Failed", {
+                      description: "Please try again or refresh the page.",
+                    });
+                  }}
+                  onExpire={() => {
+                    console.warn("⚠️ Turnstile token expired");
+                    setTurnstileToken(null);
+                    setIsVerifying(false);
+                    toast("Verification Expired", {
+                      description: "Please submit again to re-verify.",
+                    });
+                  }}
+                />
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Submitting..." : isVerifying ? "Verifying..." : "Submit Registration"}
