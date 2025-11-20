@@ -36,8 +36,23 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
       // Get associated lessons (use PascalCase to match database relations)
       const associatedLessons = slot.Lesson || [];
 
-      // Build event title
-      const title = `${slot.Rink.name} (${associatedLessons.length}/${slot.maxStudents})`;
+      // Build event title with rink name, student names, and count
+      let title = slot.Rink.name;
+
+      // Add student names if any lessons are assigned
+      if (associatedLessons.length > 0) {
+        const studentNames = associatedLessons
+          .map((lesson) => lesson.Student?.User?.name || "Unknown")
+          .filter((name) => name !== "Unknown")
+          .join(", ");
+
+        if (studentNames) {
+          title += ` - ${studentNames}`;
+        }
+      }
+
+      // Add student count
+      title += ` (${associatedLessons.length}/${slot.maxStudents})`;
 
       // Determine color based on slot status
       let backgroundColor = "#22c55e"; // green-500 (default/available)
