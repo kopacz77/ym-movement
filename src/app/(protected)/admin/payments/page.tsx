@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
+import { showPaymentConfirmation } from "@/lib/toast-confirmations";
 
 const PaymentDetail = dynamic(
   () =>
@@ -143,10 +144,38 @@ export default function PaymentsPage() {
   });
 
   const handleVerifyPayment = (paymentId: string) => {
-    verifyPayment.mutate({
-      paymentId,
-      verifiedBy: "admin", // In a real app, use the current user's ID
-    });
+    // Find the payment to get details for confirmation
+    const payment = payments?.payments.find((p) => p.id === paymentId);
+    if (!payment) {
+      toast.error("Payment not found", {
+        description: "Unable to verify payment. Please try again.",
+      });
+      return;
+    }
+
+    const studentName = payment.Student?.User?.name || "Unknown Student";
+    const paymentMethod = payment.method;
+    const amount = payment.amount;
+
+    // Show confirmation before verifying
+    showPaymentConfirmation(
+      amount,
+      studentName,
+      paymentMethod,
+      () => {
+        // User confirmed - proceed with verification
+        verifyPayment.mutate({
+          paymentId,
+          verifiedBy: "admin", // In a real app, use the current user's ID
+        });
+      },
+      () => {
+        // User cancelled - show cancellation message
+        toast.info("Payment verification cancelled", {
+          description: "The payment was not marked as paid.",
+        });
+      },
+    );
   };
 
   const handleSendReminder = (paymentId: string) => {

@@ -72,3 +72,30 @@ export function showRemoveConfirmation(
     onCancel,
   });
 }
+
+/**
+ * Payment verification confirmation toast
+ * Prevents accidental marking of payments as paid
+ */
+export function showPaymentConfirmation(
+  amount: number,
+  studentName: string,
+  paymentMethod: string,
+  onConfirm: () => void,
+  onCancel?: () => void,
+) {
+  const formattedAmount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+
+  showConfirmationToast({
+    title: "Confirm Payment Verification",
+    description: `Mark ${formattedAmount} payment from ${studentName} as paid via ${paymentMethod}?`,
+    confirmLabel: "Verify Payment",
+    cancelLabel: "Cancel",
+    onConfirm,
+    onCancel,
+    duration: 15000, // 15 seconds for payment confirmations
+  });
+}
