@@ -273,6 +273,7 @@ const ScheduleManagerComponent = () => {
 
   const goToToday = useCallback(() => {
     setDate(new Date());
+    setCalendarView("day"); // Switch to day view for focused viewing
   }, []);
 
   // Format the date range text for display

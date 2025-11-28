@@ -4,7 +4,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-import { authRateLimiter, getClientIP, logSecurityEvent, turnstileTokenTracker } from "@/lib/security";
+import {
+  authRateLimiter,
+  getClientIP,
+  logSecurityEvent,
+  turnstileTokenTracker,
+} from "@/lib/security";
 import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 
 const signupSchema = z.object({

@@ -218,9 +218,12 @@ class TokenTracker {
 export const turnstileTokenTracker = new TokenTracker();
 
 // Cleanup expired tokens every 5 minutes
-setInterval(() => {
-  turnstileTokenTracker.cleanup();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    turnstileTokenTracker.cleanup();
+  },
+  5 * 60 * 1000,
+);
 
 /**
  * Security logging function

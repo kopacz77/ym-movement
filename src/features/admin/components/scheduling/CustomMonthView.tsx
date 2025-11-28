@@ -154,9 +154,9 @@ export function CustomMonthView({
 
   return (
     <div className="w-full">
-      {/* Header with day names */}
+      {/* Header with day names - Monday first */}
       <div className="grid grid-cols-7 border-b border-gray-200">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <div
             key={day}
             className="p-2 text-center font-semibold text-gray-700 border-r border-gray-200 last:border-r-0"

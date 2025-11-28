@@ -307,24 +307,6 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         );
       }
 
-      // Get both local and rink formatted times
-      const start = new Date(event.start);
-      const end = new Date(event.end);
-
-      let localTimeStr = "N/A";
-      let rinkTimeStr = "N/A";
-
-      try {
-        const startTimeObj = formatTimeWithTimezone(start, timezone, "h:mm a");
-        const endTimeObj = formatTimeWithTimezone(end, timezone, "h:mm a");
-
-        // Format the times for display
-        localTimeStr = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
-        rinkTimeStr = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
-      } catch (error) {
-        console.error("Error formatting time for event:", event, error);
-      }
-
       // For month view, show daily summary information with day detail popover
       if (calendarView === "month") {
         const eventDate = new Date(event.start);
@@ -399,14 +381,6 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
             </div>
           )}
           <div className="font-medium">{event.title}</div>
-          <div className="text-xs whitespace-normal">
-            {localTimeStr}
-            {timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone && (
-              <span className="block text-xs opacity-80">
-                ({rinkTimeStr} {rinkName} time)
-              </span>
-            )}
-          </div>
         </div>
       );
     },

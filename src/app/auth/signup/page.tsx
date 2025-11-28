@@ -16,7 +16,7 @@ declare global {
           callback?: (token: string) => void;
           "error-callback"?: () => void;
           "expired-callback"?: () => void;
-        }
+        },
       ) => string;
       execute: (widgetId: string) => void;
       remove: (widgetId: string) => void;
@@ -256,142 +256,142 @@ export default function SignupPage() {
       />
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
         <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Join YM Movement</CardTitle>
-          <CardDescription>Submit your registration for admin approval</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form id="signup-form" onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onBlur={(e) => setName(toProperCase(e.target.value))}
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={(e) => setEmail(formatEmail(e.target.value))}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone (optional)</Label>
-              <Input
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onBlur={(e) => setPhone(formatPhoneNumber(e.target.value))}
-                placeholder="Enter your phone number"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="level">Skating Level</Label>
-              <Select value={level} onValueChange={(value: Level) => setLevel(value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select your level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(Level).map((lvl) => (
-                    <SelectItem
-                      key={lvl}
-                      value={lvl}
-                      style={{ whiteSpace: "nowrap", width: "100%", minWidth: "300px" }}
-                    >
-                      {lvl.replace("_", " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Layer 1: Honeypot field - invisible to humans, bots auto-fill it */}
-            <div
-              style={{
-                position: "absolute",
-                left: "-9999px",
-                opacity: 0,
-                pointerEvents: "none",
-                height: 0,
-                overflow: "hidden",
-              }}
-              aria-hidden="true"
-            >
-              <Label htmlFor="website" className="sr-only">
-                Leave this field blank
-              </Label>
-              <Input
-                id="website"
-                name="website"
-                type="text"
-                tabIndex={-1}
-                autoComplete="off"
-                value={honeypot}
-                onChange={(e) => setHoneypot(e.target.value)}
-              />
-            </div>
-
-            {/* Parental Consent Checkbox */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="parentConsent"
-                  checked={parentConsent}
-                  onCheckedChange={(checked) => setParentConsent(checked === true)}
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Join YM Movement</CardTitle>
+            <CardDescription>Submit your registration for admin approval</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form id="signup-form" onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={(e) => setName(toProperCase(e.target.value))}
+                  placeholder="Enter your full name"
+                  required
                 />
-                <Label
-                  htmlFor="parentConsent"
-                  className="text-sm font-medium leading-none cursor-pointer"
-                >
-                  I am a parent/legal guardian creating this account for my child
-                </Label>
               </div>
-              <p className="text-xs text-muted-foreground">
-                For students under 13, accounts must be created and managed by a parent or legal
-                guardian.
-              </p>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={(e) => setEmail(formatEmail(e.target.value))}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone (optional)</Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onBlur={(e) => setPhone(formatPhoneNumber(e.target.value))}
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="level">Skating Level</Label>
+                <Select value={level} onValueChange={(value: Level) => setLevel(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(Level).map((lvl) => (
+                      <SelectItem
+                        key={lvl}
+                        value={lvl}
+                        style={{ whiteSpace: "nowrap", width: "100%", minWidth: "300px" }}
+                      >
+                        {lvl.replace("_", " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Layer 2: Cloudflare Turnstile CAPTCHA - Visible checkbox */}
-            <div className="flex justify-center">
-              <div ref={turnstileContainerRef} />
-            </div>
+              {/* Layer 1: Honeypot field - invisible to humans, bots auto-fill it */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: "-9999px",
+                  opacity: 0,
+                  pointerEvents: "none",
+                  height: 0,
+                  overflow: "hidden",
+                }}
+                aria-hidden="true"
+              >
+                <Label htmlFor="website" className="sr-only">
+                  Leave this field blank
+                </Label>
+                <Input
+                  id="website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
-              {isLoading ? "Submitting..." : "Submit Registration"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-2">
-          <p className="text-sm text-center text-gray-500">
-            Already have an account?{" "}
-            <Link href="/auth/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </p>
-          <p className="text-xs text-center text-gray-400 mt-2">
-            By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-500 hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-blue-500 hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+              {/* Parental Consent Checkbox */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="parentConsent"
+                    checked={parentConsent}
+                    onCheckedChange={(checked) => setParentConsent(checked === true)}
+                  />
+                  <Label
+                    htmlFor="parentConsent"
+                    className="text-sm font-medium leading-none cursor-pointer"
+                  >
+                    I am a parent/legal guardian creating this account for my child
+                  </Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  For students under 13, accounts must be created and managed by a parent or legal
+                  guardian.
+                </p>
+              </div>
+
+              {/* Layer 2: Cloudflare Turnstile CAPTCHA - Visible checkbox */}
+              <div className="flex justify-center">
+                <div ref={turnstileContainerRef} />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
+                {isLoading ? "Submitting..." : "Submit Registration"}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2">
+            <p className="text-sm text-center text-gray-500">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="text-blue-600 hover:underline">
+                Login
+              </Link>
+            </p>
+            <p className="text-xs text-center text-gray-400 mt-2">
+              By signing up, you agree to our{" "}
+              <Link href="/terms" className="text-blue-500 hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-blue-500 hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </>
   );
 }

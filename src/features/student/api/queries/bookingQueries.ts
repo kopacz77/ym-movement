@@ -324,9 +324,7 @@ export const bookingRouter = createTRPCRouter({
           const failureCount = results.filter((r) => r.status === "rejected").length;
 
           if (failureCount > 0) {
-            console.warn(
-              `[BOOKING] ${successCount} notifications sent, ${failureCount} failed`,
-            );
+            console.warn(`[BOOKING] ${successCount} notifications sent, ${failureCount} failed`);
           } else {
             console.log(
               `[BOOKING] Created admin notifications for ${adminUsers.length} admin user(s)`,
