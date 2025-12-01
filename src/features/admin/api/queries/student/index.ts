@@ -26,6 +26,7 @@ export const studentRouter = createTRPCRouter({
   // Note operations
   getStudentNotes: noteQueries.getStudentNotes,
   addStudentNote: noteQueries.addStudentNote,
+  deleteStudentNote: noteQueries.deleteStudentNote,
 
   // Pricing operations
   getDefaultPricing: pricingQueries.getDefaultPricing,

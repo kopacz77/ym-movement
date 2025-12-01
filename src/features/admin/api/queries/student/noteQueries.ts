@@ -78,4 +78,36 @@ export const noteQueries = createTRPCRouter({
         });
       }
     }),
+
+  // Mutation: Delete student note
+  deleteStudentNote: protectedProcedure
+    .input(
+      z.object({
+        noteId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Log security event for note deletion
+        logSecurityEvent("STUDENT_NOTE_DELETED", {
+          userId: ctx.session?.user?.id,
+          noteId: input.noteId,
+        });
+
+        await ctx.prisma.studentNote.delete({
+          where: {
+            id: input.noteId,
+          },
+        });
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error deleting note:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete note",
+          cause: error,
+        });
+      }
+    }),
 });

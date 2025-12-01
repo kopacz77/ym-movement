@@ -2,7 +2,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useSanitizedInput } from "@/hooks/useSanitizedInput";
 import { api } from "@/lib/api";
+import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 
 interface StudentNotesProps {
   studentId: string;
@@ -61,6 +62,19 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
     },
   });
 
+  const deleteNote = api.admin.student.deleteStudentNote.useMutation({
+    onSuccess: () => {
+      toast("Note deleted successfully");
+      // Invalidate and refetch notes
+      utils.admin.student.getStudentNotes.invalidate({ studentId });
+    },
+    onError: (error) => {
+      toast.error("Error deleting note", {
+        description: error.message,
+      });
+    },
+  });
+
   const handleAddNote = () => {
     const sanitizedContent = sanitizeTextArea(newNote);
     if (!sanitizedContent.trim()) {
@@ -73,6 +87,18 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
       content: sanitizedContent,
       type: "ADMIN",
     });
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    showDeleteConfirmation(
+      "note",
+      () => {
+        deleteNote.mutate({ noteId });
+      },
+      () => {
+        toast.info("Note deletion cancelled");
+      },
+    );
   };
 
   return (
@@ -107,7 +133,18 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
                       {format(new Date(note.createdAt), "PPp")}
                     </p>
                   </div>
-                  <span className="text-xs bg-muted px-2 py-1 rounded-full">{note.type}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs bg-muted px-2 py-1 rounded-full">{note.type}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteNote(note.id)}
+                      disabled={deleteNote.isPending}
+                      className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{note.content}</p>
               </div>
