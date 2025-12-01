@@ -3,6 +3,17 @@ import type { LessonStatus, LessonType } from "@prisma/client";
 import { parseISO } from "date-fns";
 import { DateTime } from "luxon";
 
+// Define StudentNote interface
+export interface StudentNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  type: string;
+  User: {
+    name: string | null;
+  };
+}
+
 // Define Lesson interface for TimeSlot
 export interface Lesson {
   id: string;
@@ -12,6 +23,8 @@ export interface Lesson {
   notes: string | null;
   Student: {
     id: string;
+    notes: string | null;
+    StudentNote?: StudentNote[];
     User: {
       id: string;
       name: string | null;

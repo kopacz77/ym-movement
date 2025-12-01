@@ -19,18 +19,22 @@ interface Note {
   id: string;
   content: string;
   createdAt: Date;
-  createdBy: {
-    name: string;
+  type: string;
+  User: {
+    name: string | null;
   };
-  type: "ADMIN" | "INSTRUCTOR";
 }
 
 export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
   const [newNote, setNewNote] = React.useState("");
   const { sanitizeTextArea } = useSanitizedInput();
 
-  // Using useEffect to handle errors instead of onError in the query options
-  const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
+  // Fetch student notes from StudentNote table
+  const {
+    data: notes,
+    isLoading,
+    error,
+  } = api.admin.student.getStudentNotes.useQuery({ studentId });
 
   useEffect(() => {
     if (error) {
@@ -40,28 +44,14 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
     }
   }, [error]);
 
-  // Access notes directly from student
-  const notes = React.useMemo(() => {
-    if (!student?.notes) {
-      return [];
-    }
-
-    // Convert the single notes field to an array of note objects
-    return [
-      {
-        id: "1",
-        content: student.notes,
-        createdAt: student.createdAt,
-        createdBy: { name: "System" },
-        type: "ADMIN" as const,
-      },
-    ];
-  }, [student]);
+  const utils = api.useUtils();
 
   const addNote = api.admin.student.addStudentNote.useMutation({
     onSuccess: () => {
       toast("Note added successfully");
       setNewNote("");
+      // Invalidate and refetch notes
+      utils.admin.student.getStudentNotes.invalidate({ studentId });
     },
     // Fixed: Use the correct type for the error parameter
     onError: (error) => {
@@ -112,7 +102,7 @@ export const StudentNotes: React.FC<StudentNotesProps> = ({ studentId }) => {
               <div key={note.id} className="border rounded-lg p-4 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium">{note.createdBy.name}</p>
+                    <p className="text-sm font-medium">{note.User?.name || "Unknown"}</p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(note.createdAt), "PPp")}
                     </p>

@@ -3,11 +3,26 @@ import type { FC } from "react";
 import type { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
 import { TimeSlotDialog } from "./TimeSlotDialog";
 
+// Define the StudentNote interface matching Prisma schema
+interface StudentNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  type: string;
+  User: {
+    name: string | null;
+  };
+}
+
 // Define the Student interface matching Prisma schema
 interface Student {
   id: string;
+  notes: string | null;
+  StudentNote?: StudentNote[];
   User: {
+    id: string;
     name: string | null;
+    email: string;
   };
 }
 
@@ -71,8 +86,18 @@ function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
       price?: number;
       status?: string;
       notes?: string | null;
-      student?: { id?: string; user?: { name?: string | null } };
-      Student?: { id?: string; User?: { name?: string | null } };
+      student?: {
+        id?: string;
+        notes?: string | null;
+        StudentNote?: unknown[];
+        user?: { id?: string; name?: string | null; email?: string };
+      };
+      Student?: {
+        id?: string;
+        notes?: string | null;
+        StudentNote?: unknown[];
+        User?: { id?: string; name?: string | null; email?: string };
+      };
     };
     return {
       id: unknownLesson.id || "unknown",
@@ -82,8 +107,24 @@ function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
       notes: unknownLesson.notes || null,
       Student: {
         id: unknownLesson.Student?.id || unknownLesson.student?.id || "unknown",
+        notes: unknownLesson.Student?.notes || unknownLesson.student?.notes || null,
+        StudentNote: (
+          unknownLesson.Student?.StudentNote ||
+          unknownLesson.student?.StudentNote ||
+          []
+        ).map((note: any) => ({
+          id: note?.id || "",
+          content: note?.content || "",
+          createdAt: note?.createdAt ? new Date(note.createdAt) : new Date(),
+          type: note?.type || "GENERAL",
+          User: {
+            name: note?.User?.name || null,
+          },
+        })),
         User: {
+          id: unknownLesson.Student?.User?.id || unknownLesson.student?.user?.id || "unknown",
           name: unknownLesson.Student?.User?.name || unknownLesson.student?.user?.name || null,
+          email: unknownLesson.Student?.User?.email || unknownLesson.student?.user?.email || "",
         },
       },
     };

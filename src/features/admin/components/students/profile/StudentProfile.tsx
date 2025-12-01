@@ -19,6 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import { StudentPricingForm } from "../StudentPricingForm";
+import { StudentNotes } from "./StudentNotes";
 
 // Define types to replace 'any'
 interface User {
@@ -51,7 +52,7 @@ interface EmergencyContact {
 }
 
 interface StudentData {
-  user: User;
+  User: User; // Use PascalCase to match Prisma relation
   phone: string | null;
   level: string;
   maxLessonsPerWeek: number;
@@ -121,11 +122,11 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-2xl">{typedStudent.user?.name}</CardTitle>
+            <CardTitle className="text-2xl">{typedStudent.User?.name}</CardTitle>
             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4" />
-                {typedStudent.user?.email}
+                {typedStudent.User?.email}
               </div>
               {student.phone && (
                 <div className="flex items-center gap-1">
@@ -165,9 +166,10 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="lessons">Lessons</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
@@ -275,6 +277,11 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Notes Tab */}
+        <TabsContent value="notes" className="space-y-4">
+          <StudentNotes studentId={student.id} />
         </TabsContent>
 
         {/* Progress Tab */}

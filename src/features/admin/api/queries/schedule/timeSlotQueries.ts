@@ -71,6 +71,24 @@ export const timeSlotRouter = createTRPCRouter({
                 Student: {
                   select: {
                     id: true,
+                    notes: true,
+                    StudentNote: {
+                      select: {
+                        id: true,
+                        content: true,
+                        createdAt: true,
+                        type: true,
+                        User: {
+                          select: {
+                            name: true,
+                          },
+                        },
+                      },
+                      orderBy: {
+                        createdAt: "desc",
+                      },
+                      take: 3, // Get the 3 most recent notes
+                    },
                     User: {
                       select: {
                         id: true,

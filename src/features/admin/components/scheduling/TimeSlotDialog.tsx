@@ -1,9 +1,12 @@
 import { LessonType } from "@prisma/client";
-import { Edit, X } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Edit, ExternalLink, Info, X } from "lucide-react";
+import Link from "next/link";
 import { type FC, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -274,8 +277,60 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                         className="flex items-start justify-between p-3 border rounded-lg bg-muted/30"
                       >
                         <div className="flex-1 space-y-1">
-                          <div className="font-medium">
-                            {lesson.Student?.User?.name || "Unnamed Student"}
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {lesson.Student?.User?.name || "Unnamed Student"}
+                            </span>
+                            {lesson.Student?.StudentNote &&
+                              lesson.Student.StudentNote.length > 0 && (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-5 w-5 p-0 hover:bg-blue-100"
+                                      title="View student notes"
+                                    >
+                                      <Info className="h-4 w-4 text-blue-600" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-96" align="start">
+                                    <div className="space-y-3">
+                                      <div className="flex items-center justify-between">
+                                        <h4 className="font-semibold text-sm">Recent Notes</h4>
+                                        <Link
+                                          href={`/admin/students/${lesson.Student.id}`}
+                                          className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                                        >
+                                          View all
+                                          <ExternalLink className="h-3 w-3" />
+                                        </Link>
+                                      </div>
+                                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                                        {lesson.Student.StudentNote.map((note) => (
+                                          <div
+                                            key={note.id}
+                                            className="p-2 border rounded-md bg-muted/30"
+                                          >
+                                            <p className="text-sm whitespace-pre-wrap">
+                                              {note.content}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                              <span>{note.User?.name || "Unknown"}</span>
+                                              <span>•</span>
+                                              <span>
+                                                {formatDistanceToNow(new Date(note.createdAt), {
+                                                  addSuffix: true,
+                                                })}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              )}
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge

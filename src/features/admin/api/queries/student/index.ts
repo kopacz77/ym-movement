@@ -24,6 +24,7 @@ export const studentRouter = createTRPCRouter({
   rejectStudent: approvalQueries.rejectStudent,
 
   // Note operations
+  getStudentNotes: noteQueries.getStudentNotes,
   addStudentNote: noteQueries.addStudentNote,
 
   // Pricing operations

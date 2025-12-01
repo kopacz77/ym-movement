@@ -5,6 +5,42 @@ import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const noteQueries = createTRPCRouter({
+  // Query: Get student notes
+  getStudentNotes: protectedProcedure
+    .input(
+      z.object({
+        studentId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const notes = await ctx.prisma.studentNote.findMany({
+          where: {
+            studentId: input.studentId,
+          },
+          include: {
+            User: {
+              select: {
+                name: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        return notes;
+      } catch (error) {
+        console.error("Error fetching student notes:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch student notes",
+          cause: error,
+        });
+      }
+    }),
+
   // Mutation: Add student note
   addStudentNote: protectedProcedure
     .input(

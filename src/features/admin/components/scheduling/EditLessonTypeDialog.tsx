@@ -81,6 +81,7 @@ export function EditLessonTypeDialog({
 
   const priceWillChange = lessonType !== currentType;
   const estimatedNewPrice = getLessonTypePrice(lessonType, studentPricing);
+  const hasChanges = lessonType !== currentType || notes.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,10 +149,7 @@ export function EditLessonTypeDialog({
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={updateLessonType.isPending || lessonType === currentType}
-          >
+          <Button onClick={handleSubmit} disabled={updateLessonType.isPending || !hasChanges}>
             {updateLessonType.isPending ? "Updating..." : "Update Lesson Type"}
           </Button>
         </DialogFooter>
