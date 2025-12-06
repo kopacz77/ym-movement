@@ -1,5 +1,6 @@
 // src/features/admin/components/scheduling/TimeSlotDialogAdapter.tsx
 import type { FC } from "react";
+import type { LessonStatus, LessonType } from "@prisma/client";
 import type { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
 import { TimeSlotDialog } from "./TimeSlotDialog";
 
@@ -29,9 +30,9 @@ interface Student {
 // Define the Lesson interface matching Prisma schema
 interface Lesson {
   id: string;
-  type: string;
+  type: LessonType;
   price: number;
-  status: string;
+  status: LessonStatus;
   notes: string | null;
   Student: Student;
 }
@@ -101,9 +102,9 @@ function castToLessons(unknownLessons: unknown[] | undefined): Lesson[] {
     };
     return {
       id: unknownLesson.id || "unknown",
-      type: unknownLesson.type || "PRIVATE",
+      type: (unknownLesson.type || "PRIVATE") as LessonType,
       price: unknownLesson.price || 0,
-      status: unknownLesson.status || "CONFIRMED",
+      status: (unknownLesson.status || "CONFIRMED") as LessonStatus,
       notes: unknownLesson.notes || null,
       Student: {
         id: unknownLesson.Student?.id || unknownLesson.student?.id || "unknown",

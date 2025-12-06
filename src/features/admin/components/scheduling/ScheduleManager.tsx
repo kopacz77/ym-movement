@@ -431,46 +431,7 @@ const ScheduleManagerComponent = () => {
         return;
       }
 
-      // Immediately update the selected slot/event in the dialog
-      if (selectedSlot) {
-        const updatedSlot = {
-          ...selectedSlot,
-          Lesson: [
-            ...(selectedSlot.Lesson || []),
-            {
-              id: `optimistic-${Date.now()}`,
-              Student: student,
-              timeSlotId: timeSlotId,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-        };
-        setSelectedSlot(updatedSlot);
-      }
-
-      if (selectedEvent) {
-        const updatedEvent = {
-          ...selectedEvent,
-          schedule: {
-            ...selectedEvent.schedule,
-            raw: {
-              ...selectedEvent.schedule.raw,
-              lessons: [
-                ...(selectedEvent.schedule.raw.lessons || []),
-                {
-                  id: `optimistic-${Date.now()}`,
-                  Student: student,
-                  timeSlotId: timeSlotId,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              ],
-            },
-          },
-        };
-        setSelectedEvent(updatedEvent);
-      }
+      // Note: UI updates are handled by the query invalidation after mutation success
 
       // The optimistic update will handle cache updates
       assignStudent.mutate({

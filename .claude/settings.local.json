@@ -56,7 +56,8 @@
       "Bash(env)",
       "Bash(pnpm list:*)",
       "Bash(xargs:*)",
-      "Bash(pnpm exec tsc:*)"
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm update:*)"
     ],
     "deny": []
   }

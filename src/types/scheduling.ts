@@ -2,6 +2,19 @@
 import type { LessonStatus, LessonType } from "@prisma/client";
 
 /**
+ * Represents a student note
+ */
+export interface StudentNote {
+  id: string;
+  content: string;
+  createdAt: Date;
+  type: string;
+  User: {
+    name: string | null;
+  };
+}
+
+/**
  * Represents a lesson for a student
  */
 export interface Lesson {
@@ -12,6 +25,8 @@ export interface Lesson {
   notes: string | null;
   Student: {
     id: string;
+    notes: string | null;
+    StudentNote?: StudentNote[];
     User: {
       id: string;
       name: string | null;
