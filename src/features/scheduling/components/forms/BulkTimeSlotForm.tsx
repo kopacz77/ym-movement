@@ -89,7 +89,7 @@ const bulkTimeSlotSchema = z
 type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>;
 
 interface BulkTimeSlotFormProps {
-  rinks: Array<{ id: string; name: string }>;
+  rinks: Array<{ id: string; name: string; timezone?: string }>;
   onSubmitAction: () => void;
 }
 
@@ -302,12 +302,17 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                       ) : (
                         rinks.map((rink) => (
                           <SelectItem key={rink.id} value={rink.id} className="w-full">
-                            {rink.name}
+                            {rink.name} ({rink.timezone?.split("/").pop()?.replace("_", " ") || "No timezone"})
                           </SelectItem>
                         ))
                       )}
                     </SelectContent>
                   </Select>
+                  {selectedRink?.timezone && (
+                    <FormDescription className="text-blue-600 font-medium">
+                      ⏰ All times will be created in {selectedRink.timezone} timezone
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -352,7 +357,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                     <FormControl>
                       <Input type="time" {...field} />
                     </FormControl>
-                    <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
+                    <FormDescription>
+                      {selectedRink?.timezone
+                        ? `Time in ${selectedRink.timezone.split("/").pop()?.replace("_", " ")} (rink local time)`
+                        : "Select a rink to see timezone"}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -366,7 +375,11 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                     <FormControl>
                       <Input type="time" {...field} />
                     </FormControl>
-                    <FormDescription>Exact time as shown - no timezone conversion</FormDescription>
+                    <FormDescription>
+                      {selectedRink?.timezone
+                        ? `Time in ${selectedRink.timezone.split("/").pop()?.replace("_", " ")} (rink local time)`
+                        : "Select a rink to see timezone"}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

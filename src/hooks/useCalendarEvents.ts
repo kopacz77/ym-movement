@@ -20,6 +20,24 @@ interface ProcessedEvents {
   slots: TimeSlot[];
 }
 
+/**
+ * Convert a UTC time to a "fake" local Date that displays as rink local time
+ * React Big Calendar displays Date objects in the browser's local timezone.
+ * To show times in the rink's timezone, we create a Date where the local
+ * hours/minutes match what the time would be in the rink's timezone.
+ */
+function convertToRinkLocalDisplay(utcTime: Date | string, rinkTimezone: string): Date {
+  // Parse the UTC time and convert to rink timezone
+  const dt =
+    typeof utcTime === "string"
+      ? DateTime.fromISO(utcTime, { zone: "utc" }).setZone(rinkTimezone)
+      : DateTime.fromJSDate(utcTime, { zone: "utc" }).setZone(rinkTimezone);
+
+  // Create a new Date using the rink-local components
+  // This "fakes" the local time so React Big Calendar displays it correctly
+  return new Date(dt.year, dt.month - 1, dt.day, dt.hour, dt.minute, dt.second);
+}
+
 export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
   // Convert time slots to React Big Calendar events
   const events = useMemo<ExtendedCalendarEvent[]>(() => {
@@ -28,10 +46,13 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
     }
 
     return timeSlots.map((slot) => {
-      // Convert startTime and endTime to Date objects
-      const start = typeof slot.startTime === "string" ? new Date(slot.startTime) : slot.startTime;
+      // Get the rink timezone for this slot
+      const rinkTimezone = slot.Rink?.timezone || "America/Los_Angeles";
 
-      const end = typeof slot.endTime === "string" ? new Date(slot.endTime) : slot.endTime;
+      // Convert times to display in rink's local timezone
+      // This creates "fake" Date objects where the local time matches rink time
+      const start = convertToRinkLocalDisplay(slot.startTime, rinkTimezone);
+      const end = convertToRinkLocalDisplay(slot.endTime, rinkTimezone);
 
       // Get associated lessons (use PascalCase to match database relations)
       const associatedLessons = slot.Lesson || [];
