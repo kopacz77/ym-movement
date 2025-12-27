@@ -20,8 +20,9 @@ interface Rink {
   timezone: string;
 }
 
-// Common US timezones for the display selector
-const DISPLAY_TIMEZONES = [
+// Common US timezones for filtering rinks
+const TIMEZONE_FILTERS = [
+  { value: "all", label: "All Timezones" },
   { value: "America/Los_Angeles", label: "Pacific Time" },
   { value: "America/Denver", label: "Mountain Time" },
   { value: "America/Chicago", label: "Central Time" },
@@ -119,17 +120,17 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
               </SelectContent>
             </Select>
 
-            {/* Display Timezone Selector - Only shown when "All Rinks" is selected */}
+            {/* Timezone Filter - Only shown when "All Rinks" is selected */}
             {isAllRinksSelected && onDisplayTimezoneChange && (
               <Select value={displayTimezone} onValueChange={onDisplayTimezoneChange}>
-                <SelectTrigger className="w-full sm:w-[180px] bg-white shadow-sm">
+                <SelectTrigger className="w-full sm:w-[200px] bg-white shadow-sm">
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="Display in..." />
+                    <SelectValue placeholder="Filter by timezone..." />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {DISPLAY_TIMEZONES.map((tz) => (
+                  {TIMEZONE_FILTERS.map((tz) => (
                     <SelectItem key={tz.value} value={tz.value}>
                       {tz.label}
                     </SelectItem>

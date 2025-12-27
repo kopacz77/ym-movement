@@ -87,8 +87,8 @@ const ScheduleManagerComponent = () => {
   const [date, setDate] = useState(initialDate);
   const [calendarView, setCalendarView] = useState("week");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
-  // Display timezone for "All Rinks" view - defaults to Pacific
-  const [displayTimezone, setDisplayTimezone] = useState("America/Los_Angeles");
+  // Timezone filter for "All Rinks" view - "all" shows all timezones, or filter by specific timezone
+  const [timezoneFilter, setTimezoneFilter] = useState("all");
 
   // Access bulk operations context
   useBulkOperations();
@@ -162,7 +162,27 @@ const ScheduleManagerComponent = () => {
     endDate: dateRange.end,
   });
 
-  // Get current rink timezone
+  // Filter time slots by timezone when viewing "All Rinks" with a timezone filter
+  const filteredTimeSlots = useMemo(() => {
+    if (!timeSlots) {
+      return undefined;
+    }
+
+    // If a specific rink is selected, no additional filtering needed
+    if (selectedRink) {
+      return timeSlots;
+    }
+
+    // If "all" timezones selected, show all slots
+    if (timezoneFilter === "all") {
+      return timeSlots;
+    }
+
+    // Filter slots to only show rinks matching the selected timezone
+    return timeSlots.filter((slot) => slot.Rink?.timezone === timezoneFilter);
+  }, [timeSlots, selectedRink, timezoneFilter]);
+
+  // Get current rink timezone for display
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
       const selectedRinkData = rinks.find(
@@ -170,14 +190,15 @@ const ScheduleManagerComponent = () => {
       );
       return selectedRinkData?.timezone || "America/Los_Angeles";
     }
-    // When viewing all rinks, use the display timezone selector value
-    return displayTimezone;
-  }, [selectedRink, rinks, displayTimezone]);
+    // When viewing all rinks with a specific timezone filter, use that timezone
+    // Otherwise default to Pacific
+    return timezoneFilter !== "all" ? timezoneFilter : "America/Los_Angeles";
+  }, [selectedRink, rinks, timezoneFilter]);
 
-  // Use calendar events hook
-  // Pass displayTimezone override when viewing "All Rinks" so all slots display in the same timezone
-  const displayTimezoneOverride = selectedRink ? undefined : displayTimezone;
-  const { events, processedEvents } = useCalendarEvents(timeSlots, displayTimezoneOverride);
+  // Use calendar events hook with filtered time slots
+  // When filtering by timezone, all displayed slots are in that timezone, so use it as the display timezone
+  const displayTimezoneOverride = selectedRink ? undefined : (timezoneFilter !== "all" ? timezoneFilter : undefined);
+  const { events, processedEvents } = useCalendarEvents(filteredTimeSlots, displayTimezoneOverride);
 
   // Handle user interactions
   const handleSelectSlot = useCallback(
@@ -567,8 +588,8 @@ const ScheduleManagerComponent = () => {
       <ScheduleHeader
         selectedRink={selectedRink}
         onRinkSelect={setSelectedRink}
-        displayTimezone={displayTimezone}
-        onDisplayTimezoneChange={setDisplayTimezone}
+        displayTimezone={timezoneFilter}
+        onDisplayTimezoneChange={setTimezoneFilter}
         createTimeSlotButton={
           <CompactTimeSlotDialog
             open={isCreateDialogOpen}
