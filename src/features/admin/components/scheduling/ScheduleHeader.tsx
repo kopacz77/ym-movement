@@ -1,6 +1,6 @@
 // src/features/admin/components/scheduling/ScheduleHeader.tsx
 
-import { CheckSquare, Filter, Plane } from "lucide-react";
+import { CheckSquare, Filter, Globe, Plane } from "lucide-react";
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,12 +20,23 @@ interface Rink {
   timezone: string;
 }
 
+// Common US timezones for the display selector
+const DISPLAY_TIMEZONES = [
+  { value: "America/Los_Angeles", label: "Pacific Time" },
+  { value: "America/Denver", label: "Mountain Time" },
+  { value: "America/Chicago", label: "Central Time" },
+  { value: "America/New_York", label: "Eastern Time" },
+];
+
 interface ScheduleHeaderProps {
   selectedRink: string | undefined;
   onRinkSelect: (rinkId: string | undefined) => void;
   createTimeSlotButton: React.ReactNode;
   bulkCreateButton: React.ReactNode;
   rinks: Rink[];
+  // Display timezone for "All Rinks" view
+  displayTimezone?: string;
+  onDisplayTimezoneChange?: (timezone: string) => void;
   // Bulk actions props
   isSelectionMode?: boolean;
   onToggleSelectionMode?: () => void;
@@ -41,11 +52,15 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
   createTimeSlotButton,
   bulkCreateButton,
   rinks,
+  displayTimezone = "America/Los_Angeles",
+  onDisplayTimezoneChange,
   isSelectionMode,
   onToggleSelectionMode,
   dateRangeFilter,
   travelDateBlocker,
 }) => {
+  // Check if "All Rinks" is selected (no specific rink)
+  const isAllRinksSelected = !selectedRink;
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Page Header */}
@@ -83,25 +98,46 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
         </div>
 
         <div className="flex flex-col gap-3">
-          {/* Rink Selector */}
-          <Select
-            value={selectedRink}
-            onValueChange={(value) => onRinkSelect(value === "all_rinks" ? undefined : value)}
-          >
-            <SelectTrigger className="w-full bg-white shadow-sm">
-              <SelectValue placeholder="All Rinks" />
-            </SelectTrigger>
-            <SelectContent className="max-w-sm">
-              <SelectItem value="all_rinks">All Rinks</SelectItem>
-              {rinks?.map((rink: Rink) => (
-                <SelectItem key={rink.id} value={rink.id} className="whitespace-normal">
-                  <span className="block" suppressHydrationWarning>
-                    {rink.name} ({rink.timezone.split("/").pop()?.replace("_", " ")})
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Rink Selector and Display Timezone */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Select
+              value={selectedRink || "all_rinks"}
+              onValueChange={(value) => onRinkSelect(value === "all_rinks" ? undefined : value)}
+            >
+              <SelectTrigger className="w-full sm:flex-1 bg-white shadow-sm">
+                <SelectValue placeholder="All Rinks" />
+              </SelectTrigger>
+              <SelectContent className="max-w-sm">
+                <SelectItem value="all_rinks">All Rinks</SelectItem>
+                {rinks?.map((rink: Rink) => (
+                  <SelectItem key={rink.id} value={rink.id} className="whitespace-normal">
+                    <span className="block" suppressHydrationWarning>
+                      {rink.name} ({rink.timezone.split("/").pop()?.replace("_", " ")})
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Display Timezone Selector - Only shown when "All Rinks" is selected */}
+            {isAllRinksSelected && onDisplayTimezoneChange && (
+              <Select value={displayTimezone} onValueChange={onDisplayTimezoneChange}>
+                <SelectTrigger className="w-full sm:w-[180px] bg-white shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Display in..." />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {DISPLAY_TIMEZONES.map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-2">

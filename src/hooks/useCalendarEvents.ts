@@ -38,7 +38,16 @@ function convertToRinkLocalDisplay(utcTime: Date | string, rinkTimezone: string)
   return new Date(dt.year, dt.month - 1, dt.day, dt.hour, dt.minute, dt.second);
 }
 
-export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
+/**
+ * Hook to convert time slots to calendar events
+ * @param timeSlots - Array of time slots from the database
+ * @param displayTimezoneOverride - Optional timezone to display ALL slots in (used for "All Rinks" view)
+ *                                  If not provided, each slot displays in its own rink's timezone
+ */
+export function useCalendarEvents(
+  timeSlots: TimeSlot[] | undefined,
+  displayTimezoneOverride?: string
+) {
   // Convert time slots to React Big Calendar events
   const events = useMemo<ExtendedCalendarEvent[]>(() => {
     if (!timeSlots) {
@@ -46,13 +55,14 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
     }
 
     return timeSlots.map((slot) => {
-      // Get the rink timezone for this slot
-      const rinkTimezone = slot.Rink?.timezone || "America/Los_Angeles";
+      // Use the override timezone if provided, otherwise use the slot's rink timezone
+      // This allows "All Rinks" view to display all slots in a consistent timezone
+      const displayTimezone = displayTimezoneOverride || slot.Rink?.timezone || "America/Los_Angeles";
 
-      // Convert times to display in rink's local timezone
-      // This creates "fake" Date objects where the local time matches rink time
-      const start = convertToRinkLocalDisplay(slot.startTime, rinkTimezone);
-      const end = convertToRinkLocalDisplay(slot.endTime, rinkTimezone);
+      // Convert times to display in the chosen timezone
+      // This creates "fake" Date objects where the local time matches the display timezone
+      const start = convertToRinkLocalDisplay(slot.startTime, displayTimezone);
+      const end = convertToRinkLocalDisplay(slot.endTime, displayTimezone);
 
       // Get associated lessons (use PascalCase to match database relations)
       const associatedLessons = slot.Lesson || [];
@@ -98,7 +108,7 @@ export function useCalendarEvents(timeSlots: TimeSlot[] | undefined) {
         slot, // Store the original slot for reference
       };
     });
-  }, [timeSlots]);
+  }, [timeSlots, displayTimezoneOverride]);
 
   // Process events for the mobile list view
   const processedEvents = useMemo<ProcessedEvents[]>(() => {

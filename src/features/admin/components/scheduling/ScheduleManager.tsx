@@ -87,6 +87,8 @@ const ScheduleManagerComponent = () => {
   const [date, setDate] = useState(initialDate);
   const [calendarView, setCalendarView] = useState("week");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
+  // Display timezone for "All Rinks" view - defaults to Pacific
+  const [displayTimezone, setDisplayTimezone] = useState("America/Los_Angeles");
 
   // Access bulk operations context
   useBulkOperations();
@@ -168,12 +170,14 @@ const ScheduleManagerComponent = () => {
       );
       return selectedRinkData?.timezone || "America/Los_Angeles";
     }
-    // Default timezone if no rink is selected
-    return "America/Los_Angeles";
-  }, [selectedRink, rinks]);
+    // When viewing all rinks, use the display timezone selector value
+    return displayTimezone;
+  }, [selectedRink, rinks, displayTimezone]);
 
   // Use calendar events hook
-  const { events, processedEvents } = useCalendarEvents(timeSlots);
+  // Pass displayTimezone override when viewing "All Rinks" so all slots display in the same timezone
+  const displayTimezoneOverride = selectedRink ? undefined : displayTimezone;
+  const { events, processedEvents } = useCalendarEvents(timeSlots, displayTimezoneOverride);
 
   // Handle user interactions
   const handleSelectSlot = useCallback(
@@ -563,6 +567,8 @@ const ScheduleManagerComponent = () => {
       <ScheduleHeader
         selectedRink={selectedRink}
         onRinkSelect={setSelectedRink}
+        displayTimezone={displayTimezone}
+        onDisplayTimezoneChange={setDisplayTimezone}
         createTimeSlotButton={
           <CompactTimeSlotDialog
             open={isCreateDialogOpen}

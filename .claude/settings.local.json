@@ -63,7 +63,10 @@
       "Bash(source ~/.bashrc)",
       "Bash(bun --version:*)",
       "Bash(~/.bun/bin/bun:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(export PATH=\"$HOME/.bun/bin:$PATH\")",
+      "Bash(bun:*)"
     ],
     "deny": []
   }
