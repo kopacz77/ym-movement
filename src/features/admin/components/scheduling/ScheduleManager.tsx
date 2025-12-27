@@ -87,8 +87,8 @@ const ScheduleManagerComponent = () => {
   const [date, setDate] = useState(initialDate);
   const [calendarView, setCalendarView] = useState("week");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
-  // Timezone filter for "All Rinks" view - "all" shows all timezones, or filter by specific timezone
-  const [timezoneFilter, setTimezoneFilter] = useState("all");
+  // Timezone filter for "All Rinks" view - filters rinks by timezone (defaults to Pacific)
+  const [timezoneFilter, setTimezoneFilter] = useState("America/Los_Angeles");
 
   // Access bulk operations context
   useBulkOperations();
@@ -173,11 +173,6 @@ const ScheduleManagerComponent = () => {
       return timeSlots;
     }
 
-    // If "all" timezones selected, show all slots
-    if (timezoneFilter === "all") {
-      return timeSlots;
-    }
-
     // Filter slots to only show rinks matching the selected timezone
     return timeSlots.filter((slot) => slot.Rink?.timezone === timezoneFilter);
   }, [timeSlots, selectedRink, timezoneFilter]);
@@ -190,14 +185,13 @@ const ScheduleManagerComponent = () => {
       );
       return selectedRinkData?.timezone || "America/Los_Angeles";
     }
-    // When viewing all rinks with a specific timezone filter, use that timezone
-    // Otherwise default to Pacific
-    return timezoneFilter !== "all" ? timezoneFilter : "America/Los_Angeles";
+    // When viewing all rinks, use the timezone filter (defaults to Pacific)
+    return timezoneFilter;
   }, [selectedRink, rinks, timezoneFilter]);
 
   // Use calendar events hook with filtered time slots
   // When filtering by timezone, all displayed slots are in that timezone, so use it as the display timezone
-  const displayTimezoneOverride = selectedRink ? undefined : (timezoneFilter !== "all" ? timezoneFilter : undefined);
+  const displayTimezoneOverride = selectedRink ? undefined : timezoneFilter;
   const { events, processedEvents } = useCalendarEvents(filteredTimeSlots, displayTimezoneOverride);
 
   // Handle user interactions
@@ -479,7 +473,9 @@ const ScheduleManagerComponent = () => {
       maxStudents: number;
     }) => {
       // Get the selected rink's timezone
-      const selectedRinkData = rinks?.find((r: { id: string; timezone: string }) => r.id === bookingData.rinkId);
+      const selectedRinkData = rinks?.find(
+        (r: { id: string; timezone: string }) => r.id === bookingData.rinkId,
+      );
       const rinkTimezone = selectedRinkData?.timezone || "America/Los_Angeles";
 
       // Parse the date components from the "fake local" date
@@ -495,13 +491,17 @@ const ScheduleManagerComponent = () => {
       // Create DateTime objects in the RINK's timezone, then convert to UTC
       const startDateTime = DateTime.fromObject(
         { year, month, day, hour: startHours, minute: startMinutes },
-        { zone: rinkTimezone }
-      ).toUTC().toJSDate();
+        { zone: rinkTimezone },
+      )
+        .toUTC()
+        .toJSDate();
 
       const endDateTime = DateTime.fromObject(
         { year, month, day, hour: endHours, minute: endMinutes },
-        { zone: rinkTimezone }
-      ).toUTC().toJSDate();
+        { zone: rinkTimezone },
+      )
+        .toUTC()
+        .toJSDate();
 
       createTimeSlot.mutate(
         {

@@ -24,9 +24,10 @@ declare global {
     };
   }
 }
+
 import Link from "next/link";
-import Script from "next/script";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";

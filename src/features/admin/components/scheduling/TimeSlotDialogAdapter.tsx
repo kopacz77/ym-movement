@@ -1,6 +1,7 @@
 // src/features/admin/components/scheduling/TimeSlotDialogAdapter.tsx
-import type { FC } from "react";
+
 import type { LessonStatus, LessonType } from "@prisma/client";
+import type { FC } from "react";
 import type { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
 import { TimeSlotDialog } from "./TimeSlotDialog";
 

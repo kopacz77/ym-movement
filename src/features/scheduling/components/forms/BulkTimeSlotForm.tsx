@@ -302,7 +302,8 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
                       ) : (
                         rinks.map((rink) => (
                           <SelectItem key={rink.id} value={rink.id} className="w-full">
-                            {rink.name} ({rink.timezone?.split("/").pop()?.replace("_", " ") || "No timezone"})
+                            {rink.name} (
+                            {rink.timezone?.split("/").pop()?.replace("_", " ") || "No timezone"})
                           </SelectItem>
                         ))
                       )}

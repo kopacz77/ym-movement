@@ -20,9 +20,8 @@ interface Rink {
   timezone: string;
 }
 
-// Common US timezones for filtering rinks
+// US timezones for filtering rinks (no "All" option - would be visually chaotic)
 const TIMEZONE_FILTERS = [
-  { value: "all", label: "All Timezones" },
   { value: "America/Los_Angeles", label: "Pacific Time" },
   { value: "America/Denver", label: "Mountain Time" },
   { value: "America/Chicago", label: "Central Time" },

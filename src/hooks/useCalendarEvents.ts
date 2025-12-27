@@ -46,7 +46,7 @@ function convertToRinkLocalDisplay(utcTime: Date | string, rinkTimezone: string)
  */
 export function useCalendarEvents(
   timeSlots: TimeSlot[] | undefined,
-  displayTimezoneOverride?: string
+  displayTimezoneOverride?: string,
 ) {
   // Convert time slots to React Big Calendar events
   const events = useMemo<ExtendedCalendarEvent[]>(() => {
@@ -57,7 +57,8 @@ export function useCalendarEvents(
     return timeSlots.map((slot) => {
       // Use the override timezone if provided, otherwise use the slot's rink timezone
       // This allows "All Rinks" view to display all slots in a consistent timezone
-      const displayTimezone = displayTimezoneOverride || slot.Rink?.timezone || "America/Los_Angeles";
+      const displayTimezone =
+        displayTimezoneOverride || slot.Rink?.timezone || "America/Los_Angeles";
 
       // Convert times to display in the chosen timezone
       // This creates "fake" Date objects where the local time matches the display timezone
