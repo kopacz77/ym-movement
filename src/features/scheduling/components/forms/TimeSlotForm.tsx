@@ -42,17 +42,25 @@ interface TimeSlotFormProps {
   onSubmitAction?: () => void;
 }
 
-// Format the initial time in the rink's timezone for datetime-local input
-const formatInitialStartTime = (date: Date | null, timezone = "America/New_York") => {
+// Format the initial time for datetime-local input
+// Note: The date passed here is already in "fake local" format (representing rink local time)
+// because the calendar displays times in rink timezone using local Date objects
+const formatInitialStartTime = (date: Date | null, _timezone = "America/New_York") => {
   if (!date) {
     return "";
   }
 
-  // Convert UTC time to rink's local timezone
-  const localDateTime = DateTime.fromJSDate(date, { zone: "utc" }).setZone(timezone);
+  // The date already has the correct hours/minutes for the rink's timezone
+  // (thanks to convertToRinkLocalDisplay in useCalendarEvents)
+  // Just format it directly without timezone conversion
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
 
   // Format for datetime-local input (YYYY-MM-DDTHH:MM)
-  return localDateTime.toFormat("yyyy-MM-dd'T'HH:mm");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 export const TimeSlotForm = ({
