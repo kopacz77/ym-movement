@@ -57,7 +57,8 @@
       "Bash(pnpm list:*)",
       "Bash(xargs:*)",
       "Bash(pnpm exec tsc:*)",
-      "Bash(pnpm update:*)"
+      "Bash(pnpm update:*)",
+      "Bash(claude /plugin marketplace add thedotmack/claude-mem)"
     ],
     "deny": []
   }

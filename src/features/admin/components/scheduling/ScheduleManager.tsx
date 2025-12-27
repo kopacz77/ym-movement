@@ -111,9 +111,11 @@ const ScheduleManagerComponent = () => {
   const [dateRangeTo, setDateRangeTo] = useState<Date | undefined>();
 
   // Calculate date range for fetching data
+  // NOTE: Data fetching is device-agnostic - mobile and desktop fetch the same data
+  // The mobile view handles display differently via processedEvents (grouped by day, stacked)
   const dateRange = useMemo(() => {
-    // For mobile week view, only fetch the current week's data
-    if (isMobile && calendarView === "week") {
+    // For week view, fetch the current week's data
+    if (calendarView === "week") {
       const dateTime = DateTime.fromJSDate(date);
       const currentWeekday = dateTime.weekday;
       const daysToSubtract = currentWeekday === 1 ? 0 : currentWeekday - 1;
@@ -126,15 +128,15 @@ const ScheduleManagerComponent = () => {
       };
     }
 
-    // For mobile day view, only fetch the current day's data
-    if (isMobile && calendarView === "day") {
+    // For day view, fetch the current day's data
+    if (calendarView === "day") {
       return {
         start: startOfDay(date),
         end: endOfDay(date),
       };
     }
 
-    // For desktop or mobile month view, fetch the entire month
+    // For month view, fetch the entire month
     const year = date.getFullYear();
     const month = date.getMonth();
 
@@ -147,7 +149,7 @@ const ScheduleManagerComponent = () => {
       start: startOfDay(firstDay),
       end: endOfDay(lastDay),
     };
-  }, [date, isMobile, calendarView]);
+  }, [date, calendarView]);
 
   // Use the timeSlots hook to fetch data
   const { rinks, students, timeSlots } = useTimeSlots(dateRange, selectedRink);
