@@ -1,7 +1,7 @@
 "use client";
 
 import { LessonType } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ interface EditLessonTypeDialogProps {
   lessonId: string;
   currentType: LessonType;
   currentPrice: number;
+  currentNotes: string | null;
   studentId: string;
   studentName: string;
   open: boolean;
@@ -38,15 +39,24 @@ export function EditLessonTypeDialog({
   lessonId,
   currentType,
   currentPrice,
+  currentNotes,
   studentId,
   studentName,
   open,
   onOpenChange,
 }: EditLessonTypeDialogProps) {
   const [lessonType, setLessonType] = useState<LessonType>(currentType);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(currentNotes || "");
 
   const utils = api.useUtils();
+
+  // Reset form when dialog opens with new lesson data
+  useEffect(() => {
+    if (open) {
+      setLessonType(currentType);
+      setNotes(currentNotes || "");
+    }
+  }, [open, currentType, currentNotes]);
 
   // Fetch student pricing information
   const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
@@ -81,7 +91,8 @@ export function EditLessonTypeDialog({
 
   const priceWillChange = lessonType !== currentType;
   const estimatedNewPrice = getLessonTypePrice(lessonType, studentPricing);
-  const hasChanges = lessonType !== currentType || notes.trim().length > 0;
+  const notesChanged = notes.trim() !== (currentNotes || "").trim();
+  const hasChanges = lessonType !== currentType || notesChanged;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

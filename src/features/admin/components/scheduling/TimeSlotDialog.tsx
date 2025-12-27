@@ -343,6 +343,12 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                               ${lesson.price?.toFixed(2) || "0.00"}
                             </span>
                           </div>
+                          {/* Lesson Notes */}
+                          {lesson.notes && (
+                            <p className="text-xs text-muted-foreground italic mt-1 line-clamp-2">
+                              {lesson.notes}
+                            </p>
+                          )}
                         </div>
                         <div className="flex gap-1">
                           <Button
@@ -442,6 +448,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
           lessonId={selectedLesson.id}
           currentType={selectedLesson.type || LessonType.PRIVATE}
           currentPrice={selectedLesson.price || 0}
+          currentNotes={selectedLesson.notes}
           studentId={selectedLesson.Student.id}
           studentName={selectedLesson.Student?.User?.name || "Student"}
           open={showEditLessonTypeDialog}
