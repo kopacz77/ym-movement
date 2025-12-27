@@ -59,7 +59,11 @@
       "Bash(pnpm exec tsc:*)",
       "Bash(pnpm update:*)",
       "Bash(claude /plugin marketplace add thedotmack/claude-mem)",
-      "Bash(bash)"
+      "Bash(bash)",
+      "Bash(source ~/.bashrc)",
+      "Bash(bun --version:*)",
+      "Bash(~/.bun/bin/bun:*)",
+      "Bash(npm install)"
     ],
     "deny": []
   }

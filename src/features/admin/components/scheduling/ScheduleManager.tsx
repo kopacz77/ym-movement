@@ -453,14 +453,30 @@ const ScheduleManagerComponent = () => {
       rinkId: string;
       maxStudents: number;
     }) => {
-      // Convert time strings to full Date objects
-      const startDateTime = new Date(bookingData.date);
-      const [startHours, startMinutes] = bookingData.startTime.split(":").map(Number);
-      startDateTime.setHours(startHours, startMinutes, 0, 0);
+      // Get the selected rink's timezone
+      const selectedRinkData = rinks?.find((r: { id: string; timezone: string }) => r.id === bookingData.rinkId);
+      const rinkTimezone = selectedRinkData?.timezone || "America/Los_Angeles";
 
-      const endDateTime = new Date(bookingData.date);
+      // Parse the date components from the "fake local" date
+      // (the date was created from calendar click which uses rink-local display)
+      const year = bookingData.date.getFullYear();
+      const month = bookingData.date.getMonth() + 1;
+      const day = bookingData.date.getDate();
+
+      // Parse time strings
+      const [startHours, startMinutes] = bookingData.startTime.split(":").map(Number);
       const [endHours, endMinutes] = bookingData.endTime.split(":").map(Number);
-      endDateTime.setHours(endHours, endMinutes, 0, 0);
+
+      // Create DateTime objects in the RINK's timezone, then convert to UTC
+      const startDateTime = DateTime.fromObject(
+        { year, month, day, hour: startHours, minute: startMinutes },
+        { zone: rinkTimezone }
+      ).toUTC().toJSDate();
+
+      const endDateTime = DateTime.fromObject(
+        { year, month, day, hour: endHours, minute: endMinutes },
+        { zone: rinkTimezone }
+      ).toUTC().toJSDate();
 
       createTimeSlot.mutate(
         {
@@ -478,7 +494,7 @@ const ScheduleManagerComponent = () => {
         },
       );
     },
-    [createTimeSlot],
+    [createTimeSlot, rinks],
   );
 
   // Handle dialog close actions
