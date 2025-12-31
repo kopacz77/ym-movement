@@ -31,7 +31,7 @@
     "url": "https://github.com/your-username/yura-scheduler-v3/issues"
   },
   "scripts": {
-    "dev": "next dev -p 3100",
+    "dev": "next dev -p 3100 --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "biome check ./src",
