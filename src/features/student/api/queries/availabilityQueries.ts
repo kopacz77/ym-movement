@@ -66,11 +66,13 @@ export const availabilityRouter = createTRPCRouter({
         );
 
         // Create where clause with all matching slots in the date range (excluding past slots)
+        // Only show active slots to students
         const whereClause: WhereClause = {
           startTime: {
             gte: effectiveStartDate,
             lte: endDate,
           },
+          isActive: true,
         };
 
         // Only add rinkId filter if it is provided and not "all_rinks"
