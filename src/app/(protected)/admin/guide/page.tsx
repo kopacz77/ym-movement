@@ -195,13 +195,15 @@ export default function AdminGuidePage() {
 
             <SubSection
               icon={<FileText className="h-4 w-4" />}
-              title="Editing Lesson Types"
+              title="Editing Lesson Types & Notes"
               steps={[
                 "Click on a time slot with assigned student",
                 "Click the pencil ✏️ icon next to student name",
                 "Change lesson type from dropdown",
                 "Review price preview (updates automatically)",
-                'Click "Save Changes"',
+                "Edit lesson notes (previous notes are pre-filled)",
+                'Click "Update Lesson Type" to save changes',
+                "Notes appear below the lesson type badge in the slot view",
                 "Payment record and Google Calendar update automatically",
               ]}
             />

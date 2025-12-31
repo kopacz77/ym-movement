@@ -141,6 +141,8 @@ function MyLessonComponent() {
       lessonId="lesson-123"
       currentType={LessonType.PRIVATE}
       currentPrice={75}
+      currentNotes="Working on axel jumps"
+      studentId="student-456"
       studentName="John Doe"
       open={open}
       onOpenChange={setOpen}
@@ -152,7 +154,8 @@ function MyLessonComponent() {
 **Features:**
 - Shows current lesson type and price
 - Displays price change preview
-- Notes field for change justification
+- Notes field pre-filled with existing lesson notes
+- Edit and update notes - displayed in time slot view
 - Disabled submit if no changes made
 - Toast notifications for success/error
 
@@ -249,18 +252,20 @@ All notes and text inputs are sanitized using the `sanitizeInput()` function to 
 ### Admin Workflow: Change Lesson Type
 
 1. Admin views lesson details (in calendar or list)
-2. Clicks "Edit Lesson Type" button
-3. `EditLessonTypeDialog` opens
+2. Clicks "Edit Lesson Type" button (pencil icon)
+3. `EditLessonTypeDialog` opens with current notes pre-filled
 4. Admin selects new lesson type
 5. System shows price change preview
-6. Admin adds optional notes explaining change
+6. Admin edits notes (previous notes are visible and editable)
 7. Admin clicks "Update Lesson Type"
 8. System:
    - Updates lesson type and price
+   - Updates lesson notes
    - Updates Google Calendar event
    - Updates payment amount
    - Sends notification to student
    - Logs audit event
+9. Notes are displayed in the time slot view below the lesson type badge
 
 ### Student Workflow: Book with Lesson Type
 
@@ -360,6 +365,6 @@ For questions or issues with lesson type functionality:
 
 ---
 
-**Last Updated:** 2025-10-14
-**Version:** 3.2.1
-**Feature:** Lesson Type Management with Choreography Support
+**Last Updated:** 2025-12-27
+**Version:** 3.2.2
+**Feature:** Lesson Type Management with Notes Persistence
