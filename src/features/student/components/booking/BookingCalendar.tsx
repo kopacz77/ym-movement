@@ -105,14 +105,19 @@ function BookingCalendarComponent() {
   }, [studentId]);
 
   // Calculate date range based on month for efficient data loading
+  // Include 6-day buffer to handle week views that span across months
+  // (e.g., viewing Dec 30 shows Dec 30 - Jan 5, needing 6 days into January)
   const dateRange = useMemo(() => {
     const year = date.getFullYear();
     const month = date.getMonth();
 
-    // First day of month
+    // First day of month minus 6 days (for week views starting in prev month)
     const firstDay = new Date(year, month, 1);
-    // Last day of month
+    firstDay.setDate(firstDay.getDate() - 6);
+
+    // Last day of month plus 6 days (for week views ending in next month)
     const lastDay = new Date(year, month + 1, 0);
+    lastDay.setDate(lastDay.getDate() + 6);
 
     return {
       start: startOfDay(firstDay),
@@ -129,22 +134,9 @@ function BookingCalendarComponent() {
   }, [dateRange.start, dateRange.end, selectedRink]);
 
   // Fetch rinks
-  const { data: rinks, error: rinksError } = api.student.availability.getRinks.useQuery(undefined, {
+  const { data: rinks } = api.student.availability.getRinks.useQuery(undefined, {
     enabled: isReady,
   });
-
-  // Debug logging for rinks
-  useEffect(() => {
-    if (rinksError) {
-      console.error("[BookingCalendar] Error fetching rinks:", rinksError);
-    }
-    if (rinks) {
-      console.log("[BookingCalendar] Rinks loaded:", rinks.length, "rinks found");
-      rinks.forEach((rink: Rink) => {
-        console.log(`[BookingCalendar] Rink: ${rink.name} (${rink.id})`);
-      });
-    }
-  }, [rinks, rinksError]);
 
   // Set the first rink as default if not already set
   useEffect(() => {
@@ -167,7 +159,7 @@ function BookingCalendarComponent() {
   }, [selectedRink, rinks]);
 
   // Fetch time slots - only enable when a rink is selected
-  const { data: availableSlots, isLoading, error: slotsError } =
+  const { data: availableSlots, isLoading } =
     api.student.availability.getAvailableTimeSlots.useQuery(
       {
         startDate: dateRange.start,
@@ -181,26 +173,6 @@ function BookingCalendarComponent() {
         staleTime: 30000,
       },
     );
-
-  // Debug logging for time slots
-  useEffect(() => {
-    console.log("[BookingCalendar] Query state:", {
-      isReady,
-      selectedRink,
-      dateRangeStart: dateRange.start.toISOString(),
-      dateRangeEnd: dateRange.end.toISOString(),
-      queryEnabled: isReady && !!selectedRink,
-    });
-    if (slotsError) {
-      console.error("[BookingCalendar] Error fetching slots:", slotsError);
-    }
-    if (availableSlots) {
-      console.log("[BookingCalendar] Slots loaded:", availableSlots.length, "slots found");
-      if (availableSlots.length > 0) {
-        console.log("[BookingCalendar] First slot:", availableSlots[0]);
-      }
-    }
-  }, [isReady, selectedRink, dateRange.start, dateRange.end, availableSlots, slotsError]);
 
   // Format the date range for display
   const dateRangeText = useMemo(() => {
