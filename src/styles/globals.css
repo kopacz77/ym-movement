@@ -269,6 +269,14 @@
 
 /* Minimal React Big Calendar styling - let it work as designed */
 
+/* Fix: Scrollbar-induced column misalignment between header and time grid
+   The header row and time slot grid use separate flex containers. When the
+   time grid scrolls vertically, the scrollbar steals width causing columns
+   to misalign. scrollbar-gutter reserves space for the scrollbar consistently. */
+.rbc-time-content {
+  scrollbar-gutter: stable;
+}
+
 /* Week and Day view optimizations */
 .rbc-time-view {
   .rbc-event {
@@ -276,7 +284,7 @@
     font-size: 12px;
     border-radius: 4px;
   }
-  
+
   .rbc-event-content {
     white-space: normal;
     overflow: visible;
