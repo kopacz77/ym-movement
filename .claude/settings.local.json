@@ -68,7 +68,9 @@
       "Bash(export PATH=\"$HOME/.bun/bin:$PATH\")",
       "Bash(bun:*)",
       "Bash(gh api:*)",
-      "Bash(pnpm view:*)"
+      "Bash(pnpm view:*)",
+      "Bash(gh run view:*)",
+      "Bash(pnpm install:*)"
     ],
     "deny": []
   }
