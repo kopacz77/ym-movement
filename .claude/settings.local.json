@@ -70,7 +70,8 @@
       "Bash(gh api:*)",
       "Bash(pnpm view:*)",
       "Bash(gh run view:*)",
-      "Bash(pnpm install:*)"
+      "Bash(pnpm install:*)",
+      "Bash(pnpm why:*)"
     ],
     "deny": []
   }
