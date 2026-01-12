@@ -2,7 +2,7 @@
 
 import { LessonType, PaymentMethod } from "@prisma/client";
 import { format } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, DollarSign, MapPin } from "lucide-react";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -88,9 +88,19 @@ export function BookingDialog({
     });
   };
 
-  // Get lesson type price based on student's custom pricing if available
-  const getLessonTypePrice = (type: LessonType) => {
-    // Default prices if no student profile is loaded yet
+  // Calculate slot duration in minutes
+  const getSlotDurationMinutes = () => {
+    const start =
+      typeof slot.startTime === "string" ? new Date(slot.startTime) : slot.startTime;
+    const end = typeof slot.endTime === "string" ? new Date(slot.endTime) : slot.endTime;
+    return Math.max(1, Math.round((end.getTime() - start.getTime()) / 60000));
+  };
+
+  const slotDurationMinutes = getSlotDurationMinutes();
+
+  // Get hourly rate based on student's custom pricing if available
+  const getHourlyRate = (type: LessonType) => {
+    // Default hourly prices if no student profile is loaded yet
     const defaultPrices = {
       PRIVATE: 75,
       GROUP: 45,
@@ -111,6 +121,20 @@ export function BookingDialog({
     }
 
     return defaultPrices[type];
+  };
+
+  // Calculate pro-rated price based on slot duration
+  const getLessonTypePrice = (type: LessonType) => {
+    const hourlyRate = getHourlyRate(type);
+    // Pro-rate: (hourlyRate / 60) * durationMinutes
+    const proratedPrice = (hourlyRate / 60) * slotDurationMinutes;
+    // Round to 2 decimal places
+    return Math.round(proratedPrice * 100) / 100;
+  };
+
+  // Format price for display (remove .00 if whole number)
+  const formatPrice = (price: number) => {
+    return price % 1 === 0 ? price.toString() : price.toFixed(2);
   };
 
   // Convert UTC time to AM/PM format in the rink's timezone
@@ -149,12 +173,18 @@ export function BookingDialog({
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>
-                {formatAMPM(slot.startTime)} - {formatAMPM(slot.endTime)}
+                {formatAMPM(slot.startTime)} - {formatAMPM(slot.endTime)} ({slotDurationMinutes} min)
               </span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <span>{slot.rink.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Price: ${formatPrice(getLessonTypePrice(lessonType))}
+              </span>
             </div>
           </div>
 
@@ -170,10 +200,10 @@ export function BookingDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={LessonType.PRIVATE}>
-                    Private Lesson - ${getLessonTypePrice(LessonType.PRIVATE)}
+                    Private Lesson - ${formatPrice(getLessonTypePrice(LessonType.PRIVATE))}
                   </SelectItem>
                   <SelectItem value={LessonType.CHOREOGRAPHY}>
-                    Choreography - ${getLessonTypePrice(LessonType.CHOREOGRAPHY)}
+                    Choreography - ${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY))}
                   </SelectItem>
                 </SelectContent>
               </Select>
