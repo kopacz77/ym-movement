@@ -5,6 +5,9 @@ node_modules/
 .pnp.js
 .pnpm-store/
 
+# npm lockfile (this project uses pnpm)
+package-lock.json
+
 # Environment Variables
 .env
 .env.*

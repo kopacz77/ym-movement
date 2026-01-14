@@ -98,29 +98,35 @@ export function BookingDialog({
 
   const slotDurationMinutes = getSlotDurationMinutes();
 
-  // Get hourly rate based on student's custom pricing if available
+  // Get hourly rate for the lesson type
+  // The API already handles fallback logic (custom price -> default pricing -> hardcoded)
   const getHourlyRate = (type: LessonType) => {
-    // Default hourly prices if no student profile is loaded yet
-    const defaultPrices = {
+    // Fallback prices only used while API data is loading
+    const fallbackPrices = {
       PRIVATE: 75,
       GROUP: 45,
       CHOREOGRAPHY: 90,
       COMPETITION_PREP: 95,
     };
 
-    // If we have student pricing data with custom pricing
-    if (studentPricing?.customPricingEnabled) {
-      switch (type) {
-        case LessonType.PRIVATE:
-          return studentPricing.privateLessonPrice ?? defaultPrices.PRIVATE;
-        case LessonType.CHOREOGRAPHY:
-          return studentPricing.choreographyPrice ?? defaultPrices.CHOREOGRAPHY;
-        default:
-          return defaultPrices[type];
-      }
+    // If pricing data hasn't loaded yet, use fallbacks
+    if (!studentPricing) {
+      return fallbackPrices[type];
     }
 
-    return defaultPrices[type];
+    // Use API-provided prices (already handles custom vs default logic)
+    switch (type) {
+      case LessonType.PRIVATE:
+        return studentPricing.privateLessonPrice;
+      case LessonType.CHOREOGRAPHY:
+        return studentPricing.choreographyPrice;
+      case LessonType.GROUP:
+        return studentPricing.groupLessonPrice;
+      case LessonType.COMPETITION_PREP:
+        return studentPricing.competitionPrepPrice;
+      default:
+        return fallbackPrices[type];
+    }
   };
 
   // Calculate pro-rated price based on slot duration
