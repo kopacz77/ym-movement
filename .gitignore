@@ -21,6 +21,8 @@ package-lock.json
 # Testing
 /coverage
 coverage/
+playwright-report/
+test-results/
 
 # Production & Build
 /build
