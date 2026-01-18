@@ -25,6 +25,7 @@ interface Athlete {
   photo: string;
   bio?: string;
   videos: AthleteVideo[];
+  imagePosition?: "top" | "center" | "bottom"; // Control how the photo is cropped
 }
 
 // Athlete data with real YouTube links
@@ -34,6 +35,7 @@ const athletes: Athlete[] = [
     name: "Hannah Kim",
     discipline: "Solo Ice Dance",
     photo: "/images/athletes/hannah-kim.jpeg",
+    imagePosition: "top",
     bio: "Multi-season solo ice dancer with programs choreographed by Yura from 2022-2025.",
     videos: [
       {
@@ -289,7 +291,13 @@ function AthleteCard({ athlete, onClick }: { athlete: Athlete; onClick: () => vo
             src={athlete.photo}
             alt={athlete.name}
             fill
-            className="object-cover object-bottom transition-transform duration-300 group-hover:scale-105"
+            className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
+              athlete.imagePosition === "top"
+                ? "object-top"
+                : athlete.imagePosition === "center"
+                  ? "object-center"
+                  : "object-bottom"
+            }`}
             onError={() => setImageError(true)}
           />
         )}
