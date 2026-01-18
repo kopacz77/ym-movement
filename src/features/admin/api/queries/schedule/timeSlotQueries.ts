@@ -160,10 +160,11 @@ export const timeSlotRouter = createTRPCRouter({
           utcEnd: input.endTime.toISOString(),
         });
 
-        // Check for overlapping time slots
+        // Check for overlapping time slots (only check against active slots)
         const overlapping = await ctx.prisma.rinkTimeSlot.findFirst({
           where: {
             rinkId: input.rinkId,
+            isActive: true, // Only check overlap with active slots
             OR: [
               {
                 AND: [
@@ -181,9 +182,16 @@ export const timeSlotRouter = createTRPCRouter({
           },
         });
         if (overlapping) {
+          console.log("Found overlapping slot:", {
+            existingSlotId: overlapping.id,
+            existingStart: overlapping.startTime.toISOString(),
+            existingEnd: overlapping.endTime.toISOString(),
+            attemptedStart: input.startTime.toISOString(),
+            attemptedEnd: input.endTime.toISOString(),
+          });
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Time slot overlaps with existing slot",
+            message: `Time slot overlaps with existing slot (ID: ${overlapping.id})`,
           });
         }
         return await ctx.prisma.rinkTimeSlot.create({
@@ -196,9 +204,14 @@ export const timeSlotRouter = createTRPCRouter({
         });
       } catch (error) {
         console.error("Error creating time slot:", error);
+        // Re-throw TRPCErrors (like CONFLICT) directly to preserve the error code
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        // Only wrap non-TRPCErrors as INTERNAL_SERVER_ERROR
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: error instanceof TRPCError ? error.message : "Failed to create time slot",
+          message: "Failed to create time slot",
           cause: error,
         });
       }

@@ -165,16 +165,22 @@ const ScheduleManagerComponent = () => {
   // Filter time slots by timezone when viewing "All Rinks" with a timezone filter
   const filteredTimeSlots = useMemo(() => {
     if (!timeSlots) {
+      console.log("[ScheduleManager] No timeSlots data yet");
       return undefined;
     }
 
+    console.log(`[ScheduleManager] Raw timeSlots count: ${timeSlots.length}, selectedRink: ${selectedRink}, timezoneFilter: ${timezoneFilter}`);
+
     // If a specific rink is selected, no additional filtering needed
     if (selectedRink) {
+      console.log(`[ScheduleManager] Rink selected, returning all ${timeSlots.length} slots`);
       return timeSlots;
     }
 
     // Filter slots to only show rinks matching the selected timezone
-    return timeSlots.filter((slot) => slot.Rink?.timezone === timezoneFilter);
+    const filtered = timeSlots.filter((slot) => slot.Rink?.timezone === timezoneFilter);
+    console.log(`[ScheduleManager] Filtered by timezone ${timezoneFilter}: ${filtered.length} of ${timeSlots.length} slots`);
+    return filtered;
   }, [timeSlots, selectedRink, timezoneFilter]);
 
   // Get current rink timezone for display
