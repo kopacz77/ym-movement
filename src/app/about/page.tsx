@@ -17,28 +17,14 @@ export default function AboutPage() {
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             {/* Photo */}
             <div className="relative order-2 lg:order-1">
-              <div className="relative aspect-[4/5] w-full max-w-md mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-2xl">
-                {/* Placeholder for Yura's photo */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="w-16 h-16 text-primary/40" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">Photo of Yura Min</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      (Replace with actual image)
-                    </p>
-                  </div>
-                </div>
-                {/* Uncomment and update when you have the actual image:
+              <div className="relative aspect-[2/3] w-full max-w-md mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-2xl">
                 <Image
-                  src="/images/yura-min.jpg"
+                  src="/images/yura-min1.jpeg"
                   alt="Yura Min - Olympic Ice Dancer"
                   fill
                   className="object-cover"
                   priority
                 />
-                */}
               </div>
               {/* Decorative elements */}
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
@@ -80,8 +66,9 @@ export default function AboutPage() {
       {/* Story Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-8 text-center">The Journey</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">The Journey</h2>
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center max-w-6xl mx-auto">
+            {/* Text content - Left side */}
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
               <p>
                 Yura Min&apos;s skating journey began at a young age, driven by an unwavering
@@ -101,6 +88,21 @@ export default function AboutPage() {
                 for greatness, and her mission is to help them discover and develop their unique
                 abilities on the ice.
               </p>
+            </div>
+
+            {/* Photo - Right side */}
+            <div className="relative">
+              <div className="relative aspect-[4/5] w-full max-w-md mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-2xl">
+                <Image
+                  src="/images/yura-min2.jpeg"
+                  alt="Yura Min performing on ice"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
             </div>
           </div>
         </div>
