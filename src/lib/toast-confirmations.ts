@@ -49,16 +49,8 @@ export function showConfirmationToast({
           className:
             "bg-background text-foreground border border-border shadow-lg rounded-lg p-4 w-[356px]",
         },
-        createElement(
-          "div",
-          { className: "font-semibold" },
-          title
-        ),
-        createElement(
-          "div",
-          { className: "text-sm text-muted-foreground mt-1" },
-          description
-        ),
+        createElement("div", { className: "font-semibold" }, title),
+        createElement("div", { className: "text-sm text-muted-foreground mt-1" }, description),
         createElement(
           "div",
           { className: "flex gap-2 mt-3 justify-end" },
@@ -70,7 +62,7 @@ export function showConfirmationToast({
                 "px-3 py-1.5 text-sm font-medium bg-muted text-muted-foreground rounded-md hover:bg-muted/80",
               onClick: handleCancel,
             },
-            cancelLabel
+            cancelLabel,
           ),
           createElement(
             "button",
@@ -80,14 +72,14 @@ export function showConfirmationToast({
                 "px-3 py-1.5 text-sm font-medium bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90",
               onClick: handleConfirm,
             },
-            confirmLabel
-          )
-        )
+            confirmLabel,
+          ),
+        ),
       ),
     {
       id: toastId,
       duration,
-    }
+    },
   );
 }
 
@@ -121,6 +113,29 @@ export function showRemoveConfirmation(
     title: `Remove ${itemType}?`,
     description: "The item will be removed from this context.",
     confirmLabel: "Remove",
+    cancelLabel: "Cancel",
+    onConfirm,
+    onCancel,
+  });
+}
+
+/**
+ * Standardized status toggle confirmation toast
+ * For deactivating/reactivating users while preserving their data
+ */
+export function showStatusToggleConfirmation(
+  action: "deactivate" | "reactivate",
+  itemName: string,
+  onConfirm: () => void,
+  onCancel?: () => void,
+) {
+  const isDeactivate = action === "deactivate";
+  showConfirmationToast({
+    title: `${isDeactivate ? "Deactivate" : "Reactivate"} ${itemName}?`,
+    description: isDeactivate
+      ? "This will prevent them from accessing their account. Their data will be preserved."
+      : "This will restore their access to their account.",
+    confirmLabel: isDeactivate ? "Deactivate" : "Reactivate",
     cancelLabel: "Cancel",
     onConfirm,
     onCancel,

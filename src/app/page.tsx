@@ -19,17 +19,17 @@ export default function LandingPage() {
           {/* Center: Navigation Links */}
           <div className="hidden md:block">
             <div className="flex space-x-8">
-              <Link href="#about" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
                 About
               </Link>
               <Link
-                href="#programs"
+                href="/programs"
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 Programs
               </Link>
               <Link
-                href="#testimonials"
+                href="/testimonials"
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 Testimonials
@@ -167,17 +167,17 @@ export default function LandingPage() {
               <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="#about" className="hover:text-foreground">
+                  <Link href="/about" className="hover:text-foreground">
                     About
                   </Link>
                 </li>
                 <li>
-                  <Link href="#programs" className="hover:text-foreground">
+                  <Link href="/programs" className="hover:text-foreground">
                     Programs
                   </Link>
                 </li>
                 <li>
-                  <Link href="#testimonials" className="hover:text-foreground">
+                  <Link href="/testimonials" className="hover:text-foreground">
                     Testimonials
                   </Link>
                 </li>

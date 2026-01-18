@@ -1,8 +1,9 @@
 // src/features/admin/components/students/profile/StudentProfile.tsx
 "use client";
 import type { LessonStatus, PaymentMethod, PaymentStatus } from "@prisma/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Award, Loader2, Mail, Pencil, Phone } from "lucide-react";
+import { Award, Loader2, Mail, Pencil, Phone, UserCheck, UserX } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
+import { showStatusToggleConfirmation } from "@/lib/toast-confirmations";
 import { StudentPricingForm } from "../StudentPricingForm";
 import { StudentNotes } from "./StudentNotes";
 
@@ -65,6 +67,8 @@ interface StudentData {
   groupLessonPrice: number | null;
   choreographyPrice: number | null;
   competitionPrepPrice: number | null;
+  isActive: boolean;
+  deactivatedAt: string | Date | null;
 }
 
 interface StudentProfileProps {
@@ -74,6 +78,7 @@ interface StudentProfileProps {
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEditAction }) => {
   const [activeTab, setActiveTab] = React.useState("overview");
+  const queryClient = useQueryClient();
 
   // Get student data
   const { data: student, isLoading, error } = api.admin.student.getStudent.useQuery({ studentId });
@@ -81,6 +86,35 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
   // Add queries for pricing data (only fetch when pricing tab is active)
   const { data: defaultPricing, isLoading: isDefaultPricingLoading } =
     api.admin.student.getDefaultPricing.useQuery(undefined, { enabled: activeTab === "pricing" });
+
+  // Toggle status mutation
+  const toggleStatusMutation = api.admin.student.toggleStatus.useMutation({
+    onSuccess: (data) => {
+      const isNowActive = data.isActive;
+      toast.success(isNowActive ? "Student reactivated" : "Student deactivated", {
+        description: `${data.User.name}'s account has been ${isNowActive ? "reactivated" : "deactivated"}.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to update student status", {
+        description: error.message,
+      });
+    },
+  });
+
+  // Handle toggle status
+  const handleToggleStatus = () => {
+    if (!student) {
+      return;
+    }
+    const isActive = student.isActive ?? true;
+    const studentName = student.User?.name || "Student";
+
+    showStatusToggleConfirmation(isActive ? "deactivate" : "reactivate", studentName, () => {
+      toggleStatusMutation.mutate({ studentId, active: !isActive });
+    });
+  };
 
   // Handle errors with useEffect
   useEffect(() => {
@@ -136,10 +170,35 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
               )}
             </div>
           </div>
-          <Button onClick={onEditAction} variant="outline" size="sm">
-            <Pencil className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={onEditAction} variant="outline" size="sm">
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Button>
+            <Button
+              onClick={handleToggleStatus}
+              variant="outline"
+              size="sm"
+              disabled={toggleStatusMutation.isPending}
+              className={
+                (student.isActive ?? true)
+                  ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  : "text-green-600 hover:text-green-700 hover:bg-green-50"
+              }
+            >
+              {(student.isActive ?? true) ? (
+                <>
+                  <UserX className="h-4 w-4 mr-2" />
+                  Deactivate
+                </>
+              ) : (
+                <>
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  Reactivate
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
@@ -149,8 +208,11 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
             </div>
             <div>
               <p className="text-sm font-medium">Status</p>
-              <Badge variant="default" className="mt-1">
-                Active
+              <Badge
+                variant={(student.isActive ?? true) ? "default" : "secondary"}
+                className="mt-1"
+              >
+                {(student.isActive ?? true) ? "Active" : "Inactive"}
               </Badge>
             </div>
             <div>

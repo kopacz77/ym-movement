@@ -90,8 +90,7 @@ export function BookingDialog({
 
   // Calculate slot duration in minutes
   const getSlotDurationMinutes = () => {
-    const start =
-      typeof slot.startTime === "string" ? new Date(slot.startTime) : slot.startTime;
+    const start = typeof slot.startTime === "string" ? new Date(slot.startTime) : slot.startTime;
     const end = typeof slot.endTime === "string" ? new Date(slot.endTime) : slot.endTime;
     return Math.max(1, Math.round((end.getTime() - start.getTime()) / 60000));
   };
@@ -179,7 +178,8 @@ export function BookingDialog({
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>
-                {formatAMPM(slot.startTime)} - {formatAMPM(slot.endTime)} ({slotDurationMinutes} min)
+                {formatAMPM(slot.startTime)} - {formatAMPM(slot.endTime)} ({slotDurationMinutes}{" "}
+                min)
               </span>
             </div>
             <div className="flex items-center gap-2">

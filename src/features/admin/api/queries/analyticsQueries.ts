@@ -54,7 +54,7 @@ export const analyticsRouter = createTRPCRouter({
         ctx.prisma.payment.aggregate({
           where: {
             status: PaymentStatus.COMPLETED,
-            createdAt: {
+            lesson_date: {
               gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
             },
           },
@@ -178,7 +178,7 @@ export const analyticsRouter = createTRPCRouter({
         }
         const payments = await ctx.prisma.payment.findMany({
           where: {
-            createdAt: { gte: startDate },
+            lesson_date: { gte: startDate },
             status: PaymentStatus.COMPLETED,
           },
           include: {
@@ -189,15 +189,15 @@ export const analyticsRouter = createTRPCRouter({
               },
             },
           },
-          orderBy: { createdAt: "asc" },
+          orderBy: { lesson_date: "asc" },
         });
 
-        // Group by date
+        // Group by lesson date (when the lesson was delivered, not when payment was collected)
         const revenueByDate: Record<string, RevenueData> = {};
 
         // Replace forEach with for...of loop
         for (const payment of payments) {
-          const date = payment.createdAt.toISOString().split("T")[0];
+          const date = payment.lesson_date.toISOString().split("T")[0];
 
           if (!revenueByDate[date]) {
             revenueByDate[date] = {

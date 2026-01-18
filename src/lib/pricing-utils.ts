@@ -73,7 +73,7 @@ export function getHourlyRate(type: LessonType, studentPricing?: StudentPricing)
 export function getLessonTypePrice(
   type: LessonType,
   studentPricing?: StudentPricing,
-  durationMinutes = 60
+  durationMinutes = 60,
 ): number {
   const hourlyRate = getHourlyRate(type, studentPricing);
   const duration = Math.max(1, durationMinutes);

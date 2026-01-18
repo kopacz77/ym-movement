@@ -1,7 +1,7 @@
 // src/components/ApprovalGuard.tsx
 "use client";
 
-import { Clock, UserCheck } from "lucide-react";
+import { Clock, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -17,10 +17,10 @@ export function ApprovalGuard({
   fallbackTitle = "Account Approval Required",
   fallbackMessage = "Your account is currently pending approval by our administrators.",
 }: ApprovalGuardProps) {
-  const { isApproved, isStudent } = useCurrentUser();
+  const { isApproved, isActive, isStudent } = useCurrentUser();
 
-  // Show loading state while checking approval status
-  if (isStudent && isApproved === null) {
+  // Show loading state while checking approval/active status
+  if (isStudent && (isApproved === null || isActive === null)) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="text-center">
@@ -31,9 +31,53 @@ export function ApprovalGuard({
     );
   }
 
-  // If user is not a student or is approved, show the protected content
-  if (!isStudent || isApproved === true) {
+  // If user is not a student, or is both approved AND active, show the protected content
+  if (!isStudent || (isApproved === true && isActive === true)) {
     return <>{children}</>;
+  }
+
+  // Show deactivated message for inactive students
+  if (isActive === false) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px] p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+              <UserX className="h-6 w-6 text-red-600" />
+            </div>
+            <CardTitle className="text-xl">Account Deactivated</CardTitle>
+            <CardDescription>
+              Your account has been deactivated by an administrator.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h4 className="font-semibold text-red-800 mb-2">What does this mean?</h4>
+              <ul className="text-sm text-red-700 space-y-1">
+                <li>• Your account access has been temporarily suspended</li>
+                <li>• Your lesson history and data remain preserved</li>
+                <li>• You cannot book new lessons at this time</li>
+              </ul>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-800 mb-2">Need to reactivate?</h4>
+              <p className="text-sm text-blue-700">
+                Contact us at{" "}
+                <a href="mailto:info@ym-movement.com" className="underline hover:no-underline">
+                  info@ym-movement.com
+                </a>{" "}
+                to discuss reactivating your account.
+              </p>
+            </div>
+
+            <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
+              Refresh Status
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Show approval pending message for unapproved students

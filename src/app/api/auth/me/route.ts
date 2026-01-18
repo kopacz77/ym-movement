@@ -28,7 +28,8 @@ export async function GET(_req: NextRequest) {
                   id: true,
                   level: true,
                   maxLessonsPerWeek: true,
-                  isApproved: true, // FIXED: Include approval status
+                  isApproved: true,
+                  isActive: true,
                 },
               }
             : undefined,

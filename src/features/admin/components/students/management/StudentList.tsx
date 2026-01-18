@@ -2,7 +2,7 @@
 "use client";
 import type { Level } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal, Search, UserCheck, UserX } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -11,9 +11,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -23,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import { showDeleteConfirmation } from "@/lib/toast-confirmations";
+import { showDeleteConfirmation, showStatusToggleConfirmation } from "@/lib/toast-confirmations";
 
 interface StudentListProps {
   onEditAction: (studentId: string) => void;
@@ -32,14 +40,29 @@ interface StudentListProps {
 
 export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewProfileAction }) => {
   const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const queryClient = useQueryClient();
+
+  // Determine the active filter value based on statusFilter
+  const getActiveFilter = () => {
+    if (statusFilter === "active") {
+      return true;
+    }
+    if (statusFilter === "inactive") {
+      return false;
+    }
+    return undefined; // "all" - don't filter by active status
+  };
 
   // Add proper input object to fix the null/undefined issue
   const {
     data: studentsData,
     isLoading,
     error,
-  } = api.admin.student.getStudents.useQuery({ search: search || undefined });
+  } = api.admin.student.getStudents.useQuery({
+    search: search || undefined,
+    active: getActiveFilter(),
+  });
 
   const deleteStudentMutation = api.admin.student.deleteStudent.useMutation({
     onSuccess: (data) => {
@@ -58,6 +81,23 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
     },
   });
 
+  const toggleStatusMutation = api.admin.student.toggleStatus.useMutation({
+    onSuccess: (data) => {
+      const isNowActive = data.isActive;
+      toast.success(isNowActive ? "Student reactivated" : "Student deactivated", {
+        description: `${data.User.name}'s account has been ${isNowActive ? "reactivated" : "deactivated"}.`,
+      });
+
+      // Invalidate queries to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to update student status", {
+        description: error.message,
+      });
+    },
+  });
+
   useEffect(() => {
     if (error) {
       toast.error("Error loading students", {
@@ -72,6 +112,13 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
   const handleDeleteStudent = (studentId: string, studentName: string) => {
     showDeleteConfirmation(`student "${studentName}"`, () => {
       deleteStudentMutation.mutate({ studentId });
+    });
+  };
+
+  // Toggle status handler
+  const handleToggleStatus = (studentId: string, studentName: string, currentlyActive: boolean) => {
+    showStatusToggleConfirmation(currentlyActive ? "deactivate" : "reactivate", studentName, () => {
+      toggleStatusMutation.mutate({ studentId, active: !currentlyActive });
     });
   };
 
@@ -101,6 +148,16 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Students</SelectItem>
+            <SelectItem value="active">Active Only</SelectItem>
+            <SelectItem value="inactive">Inactive Only</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-md border overflow-x-auto">
@@ -124,10 +181,10 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
               </TableRow>
             ) : students?.length ? (
               students.map((student) => {
-                // Fix: Add safe check for active property
+                const isActive = student.isActive ?? true;
 
                 return (
-                  <TableRow key={student.id}>
+                  <TableRow key={student.id} className={isActive ? "" : "opacity-60"}>
                     <TableCell className="font-medium sticky left-0 bg-background">
                       <div className="min-w-0">
                         <button
@@ -148,7 +205,9 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="default">Active</Badge>
+                      <Badge variant={isActive ? "default" : "secondary"}>
+                        {isActive ? "Active" : "Inactive"}
+                      </Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       {student._count?.Lesson || 0} Lesson
@@ -172,6 +231,30 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                             className="w-full"
                           >
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleToggleStatus(
+                                student.id,
+                                student.User.name || "Student",
+                                isActive,
+                              )
+                            }
+                            className={`w-full ${isActive ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
+                            disabled={toggleStatusMutation.isPending}
+                          >
+                            {isActive ? (
+                              <>
+                                <UserX className="h-4 w-4 mr-2" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="h-4 w-4 mr-2" />
+                                Reactivate
+                              </>
+                            )}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>

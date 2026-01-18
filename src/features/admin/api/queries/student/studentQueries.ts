@@ -52,6 +52,8 @@ export const studentQueries = createTRPCRouter({
           ...(input?.approved !== undefined
             ? { isApproved: input.approved }
             : { isApproved: true }),
+          // Apply active filter if specified (undefined = show all, true = active only, false = inactive only)
+          ...(input?.active !== undefined ? { isActive: input.active } : {}),
           OR: input?.search
             ? [
                 {
@@ -79,6 +81,8 @@ export const studentQueries = createTRPCRouter({
               level: true,
               isApproved: true,
               approvedAt: true,
+              isActive: true,
+              deactivatedAt: true,
               maxLessonsPerWeek: true,
               createdAt: true,
               customPricingEnabled: true,
@@ -434,17 +438,55 @@ export const studentQueries = createTRPCRouter({
       }
     }),
 
-  // Mutation: Toggle student status
+  // Mutation: Toggle student active status (deactivate/reactivate)
   toggleStatus: protectedProcedure
     .input(z.object({ studentId: z.string(), active: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        // Since there's no active field, we'll just return the student for now
-        return await ctx.prisma.student.findUnique({
+        console.log(`Toggling student ${input.studentId} active status to: ${input.active}`);
+
+        // Find the student first
+        const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
+          include: { User: true },
         });
+
+        if (!student) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student not found",
+          });
+        }
+
+        // Update the student's active status
+        const updatedStudent = await ctx.prisma.student.update({
+          where: { id: input.studentId },
+          data: {
+            isActive: input.active,
+            deactivatedAt: input.active ? null : new Date(),
+            deactivatedById: input.active ? null : ctx.session?.user?.id,
+          },
+          include: { User: true },
+        });
+
+        // Log security event
+        logSecurityEvent(input.active ? "STUDENT_REACTIVATED" : "STUDENT_DEACTIVATED", {
+          userId: ctx.session?.user?.id,
+          studentId: input.studentId,
+          studentEmail: student.User.email,
+          studentName: student.User.name,
+        });
+
+        console.log(
+          `Student ${student.User.name} (${student.User.email}) has been ${input.active ? "reactivated" : "deactivated"}`,
+        );
+
+        return updatedStudent;
       } catch (error) {
         console.error("Error toggling student status:", error);
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update student status",

@@ -169,7 +169,9 @@ const ScheduleManagerComponent = () => {
       return undefined;
     }
 
-    console.log(`[ScheduleManager] Raw timeSlots count: ${timeSlots.length}, selectedRink: ${selectedRink}, timezoneFilter: ${timezoneFilter}`);
+    console.log(
+      `[ScheduleManager] Raw timeSlots count: ${timeSlots.length}, selectedRink: ${selectedRink}, timezoneFilter: ${timezoneFilter}`,
+    );
 
     // If a specific rink is selected, no additional filtering needed
     if (selectedRink) {
@@ -179,7 +181,9 @@ const ScheduleManagerComponent = () => {
 
     // Filter slots to only show rinks matching the selected timezone
     const filtered = timeSlots.filter((slot) => slot.Rink?.timezone === timezoneFilter);
-    console.log(`[ScheduleManager] Filtered by timezone ${timezoneFilter}: ${filtered.length} of ${timeSlots.length} slots`);
+    console.log(
+      `[ScheduleManager] Filtered by timezone ${timezoneFilter}: ${filtered.length} of ${timeSlots.length} slots`,
+    );
     return filtered;
   }, [timeSlots, selectedRink, timezoneFilter]);
 

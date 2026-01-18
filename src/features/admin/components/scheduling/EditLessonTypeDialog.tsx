@@ -121,23 +121,40 @@ export function EditLessonTypeDialog({
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 <SelectItem value={LessonType.PRIVATE}>
-                  Private Lesson - ${formatPrice(getLessonTypePrice(LessonType.PRIVATE, studentPricing, durationMinutes))}
+                  Private Lesson - $
+                  {formatPrice(
+                    getLessonTypePrice(LessonType.PRIVATE, studentPricing, durationMinutes),
+                  )}
                 </SelectItem>
                 <SelectItem value={LessonType.CHOREOGRAPHY}>
-                  Choreography - ${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY, studentPricing, durationMinutes))}
+                  Choreography - $
+                  {formatPrice(
+                    getLessonTypePrice(LessonType.CHOREOGRAPHY, studentPricing, durationMinutes),
+                  )}
                 </SelectItem>
                 <SelectItem value={LessonType.GROUP}>
-                  Group Lesson - ${formatPrice(getLessonTypePrice(LessonType.GROUP, studentPricing, durationMinutes))}
+                  Group Lesson - $
+                  {formatPrice(
+                    getLessonTypePrice(LessonType.GROUP, studentPricing, durationMinutes),
+                  )}
                 </SelectItem>
                 <SelectItem value={LessonType.COMPETITION_PREP}>
-                  Competition Prep - ${formatPrice(getLessonTypePrice(LessonType.COMPETITION_PREP, studentPricing, durationMinutes))}
+                  Competition Prep - $
+                  {formatPrice(
+                    getLessonTypePrice(
+                      LessonType.COMPETITION_PREP,
+                      studentPricing,
+                      durationMinutes,
+                    ),
+                  )}
                 </SelectItem>
               </SelectContent>
             </Select>
 
             {priceWillChange && (
               <p className="text-sm text-muted-foreground">
-                Price will change from ${formatPrice(currentPrice)} to ${formatPrice(estimatedNewPrice)}
+                Price will change from ${formatPrice(currentPrice)} to $
+                {formatPrice(estimatedNewPrice)}
               </p>
             )}
             {studentPricing?.customPricingEnabled && (

@@ -108,7 +108,7 @@ export function AdminAssignmentDialog({
   // Calculate slot duration in minutes for pro-rated pricing
   const slotDurationMinutes = Math.max(
     1,
-    Math.round((timeSlot.endTime.getTime() - timeSlot.startTime.getTime()) / 60000)
+    Math.round((timeSlot.endTime.getTime() - timeSlot.startTime.getTime()) / 60000),
   );
 
   // Format price for display (remove .00 if whole number)
@@ -134,7 +134,8 @@ export function AdminAssignmentDialog({
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>
-                {format(timeSlot.startTime, "h:mm a")} - {format(timeSlot.endTime, "h:mm a")} ({slotDurationMinutes} min)
+                {format(timeSlot.startTime, "h:mm a")} - {format(timeSlot.endTime, "h:mm a")} (
+                {slotDurationMinutes} min)
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -184,16 +185,36 @@ export function AdminAssignmentDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={LessonType.PRIVATE}>
-                  Private Lesson - ${formatPrice(getLessonTypePrice(LessonType.PRIVATE, studentPricing, slotDurationMinutes))}
+                  Private Lesson - $
+                  {formatPrice(
+                    getLessonTypePrice(LessonType.PRIVATE, studentPricing, slotDurationMinutes),
+                  )}
                 </SelectItem>
                 <SelectItem value={LessonType.CHOREOGRAPHY}>
-                  Choreography - ${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY, studentPricing, slotDurationMinutes))}
+                  Choreography - $
+                  {formatPrice(
+                    getLessonTypePrice(
+                      LessonType.CHOREOGRAPHY,
+                      studentPricing,
+                      slotDurationMinutes,
+                    ),
+                  )}
                 </SelectItem>
                 <SelectItem value={LessonType.GROUP}>
-                  Group Lesson - ${formatPrice(getLessonTypePrice(LessonType.GROUP, studentPricing, slotDurationMinutes))}
+                  Group Lesson - $
+                  {formatPrice(
+                    getLessonTypePrice(LessonType.GROUP, studentPricing, slotDurationMinutes),
+                  )}
                 </SelectItem>
                 <SelectItem value={LessonType.COMPETITION_PREP}>
-                  Competition Prep - ${formatPrice(getLessonTypePrice(LessonType.COMPETITION_PREP, studentPricing, slotDurationMinutes))}
+                  Competition Prep - $
+                  {formatPrice(
+                    getLessonTypePrice(
+                      LessonType.COMPETITION_PREP,
+                      studentPricing,
+                      slotDurationMinutes,
+                    ),
+                  )}
                 </SelectItem>
               </SelectContent>
             </Select>

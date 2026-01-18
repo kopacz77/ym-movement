@@ -162,8 +162,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
         1,
         Math.round(
           (timeSlotForAssignment.endTime.getTime() - timeSlotForAssignment.startTime.getTime()) /
-            60000
-        )
+            60000,
+        ),
       )
     : 60;
 
