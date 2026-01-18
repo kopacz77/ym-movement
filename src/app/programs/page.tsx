@@ -232,6 +232,21 @@ const athletes: Athlete[] = [
       },
     ],
   },
+  {
+    id: 9,
+    name: "Ice Explosion 2023",
+    discipline: "Group Choreography",
+    photo: "/images/athletes/black-ping.jpeg",
+    bio: "Group choreography created by Yura Min for the Ice Explosion 2023 event.",
+    videos: [
+      {
+        id: "9-1",
+        title: "Group Performance",
+        year: 2023,
+        videoUrl: "https://www.youtube.com/watch?v=X6jCOZGm4ys",
+      },
+    ],
+  },
 ];
 
 // Helper to group videos by year
