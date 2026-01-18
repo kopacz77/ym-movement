@@ -33,7 +33,7 @@ const athletes: Athlete[] = [
     id: 1,
     name: "Hannah Kim",
     discipline: "Solo Ice Dance",
-    photo: "/images/athletes/hannah-kim.jpg",
+    photo: "/images/athletes/hannah-kim.jpeg",
     bio: "Multi-season solo ice dancer with programs choreographed by Yura from 2022-2025.",
     videos: [
       {
@@ -90,7 +90,7 @@ const athletes: Athlete[] = [
     id: 2,
     name: "Qihan Zhao",
     discipline: "Singles",
-    photo: "/images/athletes/qihan-zhao.jpg",
+    photo: "/images/athletes/qihan-zhao.jpeg",
     videos: [
       {
         id: "2-1",
@@ -152,7 +152,7 @@ const athletes: Athlete[] = [
     id: 5,
     name: "Anastasia Balinsky",
     discipline: "Singles",
-    photo: "/images/athletes/anastasia-balinsky.jpg",
+    photo: "/images/athletes/anastasia-balinsky.jpeg",
     bio: "Novice level competitor.",
     videos: [
       {
