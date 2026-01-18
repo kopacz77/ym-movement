@@ -110,7 +110,7 @@ const athletes: Athlete[] = [
     id: 3,
     name: "Krystal Yeuk Kwan Zhu",
     discipline: "Singles",
-    photo: "/images/athletes/krystal-zhu.jpg",
+    photo: "/images/athletes/krystal-zhu.jpeg",
     bio: "Junior level competitor.",
     videos: [
       {
