@@ -3,6 +3,16 @@ import { formatDistanceToNow } from "date-fns";
 import { Edit, ExternalLink, Info, X } from "lucide-react";
 import Link from "next/link";
 import { type FC, useEffect, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 // src/features/admin/components/scheduling/TimeSlotDialog.tsx
 import { Button } from "@/components/ui/button";
@@ -23,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
-import { showDeleteConfirmation, showRemoveConfirmation } from "@/lib/toast-confirmations";
+import { showRemoveConfirmation } from "@/lib/toast-confirmations";
 import { AdminAssignmentDialog } from "./AdminAssignmentDialog";
 import type { Lesson, TimeSlot } from "./calendarUtils";
 import { EditLessonTypeDialog } from "./EditLessonTypeDialog";
@@ -93,6 +103,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [showAdminAssignmentDialog, setShowAdminAssignmentDialog] = useState(false);
   const [showEditLessonTypeDialog, setShowEditLessonTypeDialog] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
   // Debug: Get student stats (currently unused but kept for future features)
@@ -106,6 +117,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
       setSelectedStudentId("");
       setShowAdminAssignmentDialog(false);
       setShowEditLessonTypeDialog(false);
+      setShowDeleteConfirmation(false);
       setSelectedLesson(null);
     }
   }, [isOpen]);
@@ -421,21 +433,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
               <Button
                 variant="destructive"
                 className="w-full md:w-auto"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log("Delete button clicked in TimeSlotDialog");
-                  showDeleteConfirmation(
-                    "time slot",
-                    () => {
-                      console.log("Delete action confirmed, calling onDelete");
-                      onDelete();
-                    },
-                    () => {
-                      console.log("Delete cancelled");
-                    },
-                  );
-                }}
+                onClick={() => setShowDeleteConfirmation(true)}
               >
                 Delete
               </Button>
@@ -467,6 +465,30 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
           onOpenChange={setShowEditLessonTypeDialog}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete time slot?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the time slot.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowDeleteConfirmation(false);
+                onDelete();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };

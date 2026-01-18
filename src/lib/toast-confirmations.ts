@@ -1,4 +1,5 @@
 // src/lib/toast-confirmations.ts
+import { createElement } from "react";
 import { toast } from "sonner";
 
 interface ConfirmationToastOptions {
@@ -13,6 +14,7 @@ interface ConfirmationToastOptions {
 
 /**
  * Shows a standardized confirmation toast with consistent styling
+ * Uses custom JSX to ensure single-click dismissal works properly
  */
 export function showConfirmationToast({
   title,
@@ -23,18 +25,70 @@ export function showConfirmationToast({
   onCancel,
   duration = 10000,
 }: ConfirmationToastOptions) {
-  toast(title, {
-    description,
-    action: {
-      label: confirmLabel,
-      onClick: onConfirm,
-    },
-    cancel: {
-      label: cancelLabel,
-      onClick: onCancel || (() => {}),
-    },
-    duration,
-  });
+  // Generate a unique ID upfront
+  const toastId = `confirm-${Date.now()}`;
+
+  const handleConfirm = () => {
+    toast.dismiss(toastId);
+    // Small delay to ensure toast is dismissed before action runs
+    setTimeout(() => onConfirm(), 10);
+  };
+
+  const handleCancel = () => {
+    toast.dismiss(toastId);
+    if (onCancel) {
+      setTimeout(() => onCancel(), 10);
+    }
+  };
+
+  toast.custom(
+    () =>
+      createElement(
+        "div",
+        {
+          className:
+            "bg-background text-foreground border border-border shadow-lg rounded-lg p-4 w-[356px]",
+        },
+        createElement(
+          "div",
+          { className: "font-semibold" },
+          title
+        ),
+        createElement(
+          "div",
+          { className: "text-sm text-muted-foreground mt-1" },
+          description
+        ),
+        createElement(
+          "div",
+          { className: "flex gap-2 mt-3 justify-end" },
+          createElement(
+            "button",
+            {
+              type: "button",
+              className:
+                "px-3 py-1.5 text-sm font-medium bg-muted text-muted-foreground rounded-md hover:bg-muted/80",
+              onClick: handleCancel,
+            },
+            cancelLabel
+          ),
+          createElement(
+            "button",
+            {
+              type: "button",
+              className:
+                "px-3 py-1.5 text-sm font-medium bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90",
+              onClick: handleConfirm,
+            },
+            confirmLabel
+          )
+        )
+      ),
+    {
+      id: toastId,
+      duration,
+    }
+  );
 }
 
 /**
