@@ -138,17 +138,11 @@ const nextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains; preload",
           },
-          {
-            key: "Cross-Origin-Embedder-Policy",
-            value: "credentialless",
-          },
+          // Note: Cross-Origin-Embedder-Policy removed to allow YouTube embeds
+          // COEP blocks third-party content that doesn't explicitly opt-in via CORP headers
           {
             key: "Cross-Origin-Opener-Policy",
-            value: "same-origin",
-          },
-          {
-            key: "Cross-Origin-Resource-Policy",
-            value: "same-origin",
+            value: "same-origin-allow-popups",
           },
         ],
       },
