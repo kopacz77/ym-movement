@@ -37,6 +37,7 @@ export function VideoModal({ isOpen, onClose, videoUrl, title }: VideoModalProps
       <DialogContent
         className="sm:max-w-4xl p-0 overflow-hidden bg-black border-none"
         showCloseButton={false}
+        aria-describedby={undefined}
       >
         <DialogHeader className="sr-only">
           <DialogTitle>{title}</DialogTitle>

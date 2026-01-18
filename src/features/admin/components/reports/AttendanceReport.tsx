@@ -15,6 +15,8 @@ import { api } from "@/lib/api";
 
 interface AttendanceReportProps {
   period: "week" | "month" | "year";
+  startDate?: Date;
+  endDate?: Date;
 }
 
 // Define types based on the API response structure
@@ -32,11 +34,11 @@ interface ActivityDataWithAttendanceRate extends ActivityData {
   attendanceRate: number;
 }
 
-export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period }) => {
-  // Fetch student activity data using your analytics endpoint
-  const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery({
-    period,
-  });
+export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period, startDate, endDate }) => {
+  // Fetch student activity data using date range if provided, otherwise fall back to period
+  const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery(
+    startDate && endDate ? { startDate, endDate } : { period },
+  );
 
   // Calculate averages with explicit type handling
   const averageAttendance = React.useMemo(() => {

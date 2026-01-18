@@ -1,8 +1,8 @@
 // src/app/(protected)/admin/reports/page.tsx
 "use client";
 
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import { Download, FileText } from "lucide-react";
+import { addMonths, endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { ChevronLeft, ChevronRight, Download, FileText } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,41 +35,68 @@ import { formatCurrency } from "@/lib/utils";
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");
+  // For month selection - start with current month
+  const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()));
 
-  // Fetch overview data for summary
-  const { data: overviewData, isLoading: isLoadingOverview } =
-    api.admin.analytics.getOverview.useQuery();
-
-  // Fetch report data for exports
-  const { data: revenueData } = api.admin.analytics.getRevenueReport.useQuery({ period });
-  const { data: attendanceData } = api.admin.analytics.getStudentActivity.useQuery({ period });
-
-  // Calculate date range based on period
+  // Calculate the actual date range based on period and selected month
   const getDateRange = () => {
-    const now = new Date();
     switch (period) {
-      case "week":
+      case "week": {
+        // Last 7 days from today
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
         return {
-          start: new Date(now.setDate(now.getDate() - 7)),
+          start: weekAgo,
           end: new Date(),
         };
+      }
       case "month":
+        // Selected calendar month
         return {
-          start: startOfMonth(new Date()),
-          end: endOfMonth(new Date()),
+          start: startOfMonth(selectedMonth),
+          end: endOfMonth(selectedMonth),
         };
       case "year":
+        // Last 12 months from today
         return {
           start: subMonths(new Date(), 12),
           end: new Date(),
         };
       default:
         return {
-          start: startOfMonth(new Date()),
-          end: endOfMonth(new Date()),
+          start: startOfMonth(selectedMonth),
+          end: endOfMonth(selectedMonth),
         };
     }
   };
+
+  const dateRange = getDateRange();
+
+  // Fetch overview data for summary
+  const { data: overviewData, isLoading: isLoadingOverview } =
+    api.admin.analytics.getOverview.useQuery();
+
+  // Fetch report data using actual date ranges
+  const { data: revenueData } = api.admin.analytics.getRevenueReport.useQuery({
+    startDate: dateRange.start,
+    endDate: dateRange.end,
+  });
+  const { data: attendanceData } = api.admin.analytics.getStudentActivity.useQuery({
+    startDate: dateRange.start,
+    endDate: dateRange.end,
+  });
+
+  // Navigation handlers for month picker
+  const goToPreviousMonth = () => {
+    setSelectedMonth((prev) => subMonths(prev, 1));
+  };
+
+  const goToNextMonth = () => {
+    setSelectedMonth((prev) => addMonths(prev, 1));
+  };
+
+  // Check if we can go to next month (don't allow future months)
+  const canGoNext = startOfMonth(addMonths(selectedMonth, 1)) <= startOfMonth(new Date());
 
   // Export handlers
   const handleExportCSV = (type: "revenue" | "attendance" | "combined") => {
@@ -198,21 +225,49 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-          <span className="text-sm text-muted-foreground">Period:</span>
-          <Select
-            value={period}
-            onValueChange={(value: "week" | "month" | "year") => setPeriod(value)}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Last 7 days</SelectItem>
-              <SelectItem value="month">This month</SelectItem>
-              <SelectItem value="year">Last 12 months</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Period:</span>
+            <Select
+              value={period}
+              onValueChange={(value: "week" | "month" | "year") => setPeriod(value)}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Last 7 days</SelectItem>
+                <SelectItem value="month">Select month</SelectItem>
+                <SelectItem value="year">Last 12 months</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Month picker - only shown when "month" period is selected */}
+          {period === "month" && (
+            <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-2 py-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={goToPreviousMonth}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm font-medium min-w-[120px] text-center">
+                {format(selectedMonth, "MMMM yyyy")}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={goToNextMonth}
+                disabled={!canGoNext}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -233,7 +288,7 @@ export default function ReportsPage() {
               <CardTitle>Revenue Report</CardTitle>
             </CardHeader>
             <CardContent>
-              <RevenueReport period={period} />
+              <RevenueReport period={period} startDate={dateRange.start} endDate={dateRange.end} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -244,7 +299,7 @@ export default function ReportsPage() {
               <CardTitle>Attendance Report</CardTitle>
             </CardHeader>
             <CardContent>
-              <AttendanceReport period={period} />
+              <AttendanceReport period={period} startDate={dateRange.start} endDate={dateRange.end} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -260,7 +315,7 @@ export default function ReportsPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Report Period</p>
                 <p className="text-lg">
-                  {format(getDateRange().start, "PP")} - {format(getDateRange().end, "PP")}
+                  {format(dateRange.start, "PP")} - {format(dateRange.end, "PP")}
                 </p>
               </div>
 

@@ -81,25 +81,43 @@ export const analyticsRouter = createTRPCRouter({
   getStudentActivity: publicProcedure
     .input(
       z.object({
-        period: z.enum(["week", "month", "year"]),
+        period: z.enum(["week", "month", "year"]).optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
-        const startDate = new Date();
-        switch (input.period) {
-          case "week":
-            startDate.setDate(startDate.getDate() - 7);
-            break;
-          case "month":
-            startDate.setMonth(startDate.getMonth() - 1);
-            break;
-          case "year":
-            startDate.setFullYear(startDate.getFullYear() - 1);
-            break;
+        let queryStartDate: Date;
+        let queryEndDate: Date | undefined;
+
+        // If explicit dates provided, use them; otherwise fall back to period-based calculation
+        if (input.startDate && input.endDate) {
+          queryStartDate = input.startDate;
+          queryEndDate = input.endDate;
+        } else {
+          queryStartDate = new Date();
+          const period = input.period || "month";
+          switch (period) {
+            case "week":
+              queryStartDate.setDate(queryStartDate.getDate() - 7);
+              break;
+            case "month":
+              queryStartDate.setMonth(queryStartDate.getMonth() - 1);
+              break;
+            case "year":
+              queryStartDate.setFullYear(queryStartDate.getFullYear() - 1);
+              break;
+          }
         }
+
         const lessons = await ctx.prisma.lesson.findMany({
-          where: { startTime: { gte: startDate } },
+          where: {
+            startTime: {
+              gte: queryStartDate,
+              ...(queryEndDate && { lte: queryEndDate }),
+            },
+          },
           select: { startTime: true, status: true, type: true, area: true },
           orderBy: { startTime: "asc" },
         });
@@ -159,26 +177,42 @@ export const analyticsRouter = createTRPCRouter({
   getRevenueReport: publicProcedure
     .input(
       z.object({
-        period: z.enum(["week", "month", "year"]),
+        period: z.enum(["week", "month", "year"]).optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
-        const startDate = new Date();
-        switch (input.period) {
-          case "week":
-            startDate.setDate(startDate.getDate() - 7);
-            break;
-          case "month":
-            startDate.setMonth(startDate.getMonth() - 1);
-            break;
-          case "year":
-            startDate.setFullYear(startDate.getFullYear() - 1);
-            break;
+        let queryStartDate: Date;
+        let queryEndDate: Date | undefined;
+
+        // If explicit dates provided, use them; otherwise fall back to period-based calculation
+        if (input.startDate && input.endDate) {
+          queryStartDate = input.startDate;
+          queryEndDate = input.endDate;
+        } else {
+          queryStartDate = new Date();
+          const period = input.period || "month";
+          switch (period) {
+            case "week":
+              queryStartDate.setDate(queryStartDate.getDate() - 7);
+              break;
+            case "month":
+              queryStartDate.setMonth(queryStartDate.getMonth() - 1);
+              break;
+            case "year":
+              queryStartDate.setFullYear(queryStartDate.getFullYear() - 1);
+              break;
+          }
         }
+
         const payments = await ctx.prisma.payment.findMany({
           where: {
-            lesson_date: { gte: startDate },
+            lesson_date: {
+              gte: queryStartDate,
+              ...(queryEndDate && { lte: queryEndDate }),
+            },
             status: PaymentStatus.COMPLETED,
           },
           include: {

@@ -16,6 +16,8 @@ import { formatCurrency } from "@/lib/utils";
 
 interface RevenueReportProps {
   period: "week" | "month" | "year";
+  startDate?: Date;
+  endDate?: Date;
 }
 
 // Define types for the API response data
@@ -24,11 +26,11 @@ interface RevenueDataItem {
   totalRevenue: number;
 }
 
-export const RevenueReport: React.FC<RevenueReportProps> = ({ period }) => {
-  // Fetch revenue data using your analytics endpoint
-  const { data, isLoading, error } = api.admin.analytics.getRevenueReport.useQuery({
-    period,
-  });
+export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate, endDate }) => {
+  // Fetch revenue data using date range if provided, otherwise fall back to period
+  const { data, isLoading, error } = api.admin.analytics.getRevenueReport.useQuery(
+    startDate && endDate ? { startDate, endDate } : { period },
+  );
 
   // Calculate totals and averages with very explicit type handling
   const totalRevenue = React.useMemo(() => {
