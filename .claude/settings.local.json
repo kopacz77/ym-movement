@@ -71,7 +71,9 @@
       "Bash(pnpm view:*)",
       "Bash(gh run view:*)",
       "Bash(pnpm install:*)",
-      "Bash(pnpm why:*)"
+      "Bash(pnpm why:*)",
+      "Bash(nslookup:*)",
+      "Bash(ping:*)"
     ],
     "deny": []
   }
