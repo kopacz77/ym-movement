@@ -144,6 +144,17 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
         }
       : null;
 
+  // Calculate slot duration in minutes for pro-rated pricing
+  const slotDurationMinutes = timeSlotForAssignment
+    ? Math.max(
+        1,
+        Math.round(
+          (timeSlotForAssignment.endTime.getTime() - timeSlotForAssignment.startTime.getTime()) /
+            60000
+        )
+      )
+    : 60;
+
   const formatLessonType = (type: LessonType | undefined) => {
     if (!type) return "Private"; // Default fallback
     return type.replace(/_/g, " ");
@@ -451,6 +462,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
           currentNotes={selectedLesson.notes}
           studentId={selectedLesson.Student.id}
           studentName={selectedLesson.Student?.User?.name || "Student"}
+          durationMinutes={slotDurationMinutes}
           open={showEditLessonTypeDialog}
           onOpenChange={setShowEditLessonTypeDialog}
         />

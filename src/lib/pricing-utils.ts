@@ -3,8 +3,8 @@
 import type { LessonType } from "@prisma/client";
 
 /**
- * Default pricing for each lesson type
- * Single source of truth for lesson pricing across the application
+ * Default HOURLY pricing for each lesson type
+ * These are rates per 60 minutes - actual prices are pro-rated by duration
  */
 export const DEFAULT_LESSON_PRICES = {
   PRIVATE: 75,
@@ -25,14 +25,14 @@ export interface StudentPricing {
 }
 
 /**
- * Get the price for a specific lesson type
+ * Get the HOURLY rate for a specific lesson type
  * Considers student custom pricing if available, otherwise uses defaults
  *
  * @param type - The lesson type
  * @param studentPricing - Optional student-specific pricing configuration
- * @returns The calculated price for the lesson
+ * @returns The hourly rate for the lesson type
  */
-export function getLessonTypePrice(type: LessonType, studentPricing?: StudentPricing): number {
+export function getHourlyRate(type: LessonType, studentPricing?: StudentPricing): number {
   // If student has custom pricing enabled, use their custom rates
   if (studentPricing?.customPricingEnabled) {
     switch (type) {
@@ -51,6 +51,35 @@ export function getLessonTypePrice(type: LessonType, studentPricing?: StudentPri
 
   // Use default pricing
   return DEFAULT_LESSON_PRICES[type] ?? DEFAULT_LESSON_PRICES.PRIVATE;
+}
+
+/**
+ * Get the price for a specific lesson type, pro-rated by duration
+ *
+ * @param type - The lesson type
+ * @param studentPricing - Optional student-specific pricing configuration
+ * @param durationMinutes - Duration in minutes (defaults to 60 for backward compatibility)
+ * @returns The calculated pro-rated price for the lesson
+ *
+ * @example
+ * // 60-minute private lesson at default $75/hr = $75
+ * getLessonTypePrice("PRIVATE") // Returns 75
+ *
+ * @example
+ * // 30-minute private lesson with $50/hr custom rate = $25
+ * getLessonTypePrice("PRIVATE", { customPricingEnabled: true, privateLessonPrice: 50 }, 30)
+ * // Returns 25
+ */
+export function getLessonTypePrice(
+  type: LessonType,
+  studentPricing?: StudentPricing,
+  durationMinutes = 60
+): number {
+  const hourlyRate = getHourlyRate(type, studentPricing);
+  const duration = Math.max(1, durationMinutes);
+  const proratedPrice = (hourlyRate / 60) * duration;
+  // Round to 2 decimal places
+  return Math.round(proratedPrice * 100) / 100;
 }
 
 /**

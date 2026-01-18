@@ -31,6 +31,7 @@ interface EditLessonTypeDialogProps {
   currentNotes: string | null;
   studentId: string;
   studentName: string;
+  durationMinutes: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -42,6 +43,7 @@ export function EditLessonTypeDialog({
   currentNotes,
   studentId,
   studentName,
+  durationMinutes,
   open,
   onOpenChange,
 }: EditLessonTypeDialogProps) {
@@ -90,9 +92,14 @@ export function EditLessonTypeDialog({
   };
 
   const priceWillChange = lessonType !== currentType;
-  const estimatedNewPrice = getLessonTypePrice(lessonType, studentPricing);
+  const estimatedNewPrice = getLessonTypePrice(lessonType, studentPricing, durationMinutes);
   const notesChanged = notes.trim() !== (currentNotes || "").trim();
   const hasChanges = lessonType !== currentType || notesChanged;
+
+  // Format price for display (remove .00 if whole number)
+  const formatPrice = (price: number) => {
+    return price % 1 === 0 ? price.toString() : price.toFixed(2);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,23 +121,23 @@ export function EditLessonTypeDialog({
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 <SelectItem value={LessonType.PRIVATE}>
-                  Private Lesson - ${getLessonTypePrice(LessonType.PRIVATE)}
+                  Private Lesson - ${formatPrice(getLessonTypePrice(LessonType.PRIVATE, studentPricing, durationMinutes))}
                 </SelectItem>
                 <SelectItem value={LessonType.CHOREOGRAPHY}>
-                  Choreography - ${getLessonTypePrice(LessonType.CHOREOGRAPHY)}
+                  Choreography - ${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY, studentPricing, durationMinutes))}
                 </SelectItem>
                 <SelectItem value={LessonType.GROUP}>
-                  Group Lesson - ${getLessonTypePrice(LessonType.GROUP)}
+                  Group Lesson - ${formatPrice(getLessonTypePrice(LessonType.GROUP, studentPricing, durationMinutes))}
                 </SelectItem>
                 <SelectItem value={LessonType.COMPETITION_PREP}>
-                  Competition Prep - ${getLessonTypePrice(LessonType.COMPETITION_PREP)}
+                  Competition Prep - ${formatPrice(getLessonTypePrice(LessonType.COMPETITION_PREP, studentPricing, durationMinutes))}
                 </SelectItem>
               </SelectContent>
             </Select>
 
             {priceWillChange && (
               <p className="text-sm text-muted-foreground">
-                Price will change from ${currentPrice.toFixed(2)} to ${estimatedNewPrice.toFixed(2)}
+                Price will change from ${formatPrice(currentPrice)} to ${formatPrice(estimatedNewPrice)}
               </p>
             )}
             {studentPricing?.customPricingEnabled && (
