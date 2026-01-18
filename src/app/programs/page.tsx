@@ -259,7 +259,7 @@ function AthleteCard({ athlete, onClick }: { athlete: Athlete; onClick: () => vo
       className="group relative w-full text-left rounded-xl overflow-hidden bg-white border border-gray-200/60 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
     >
       {/* Thumbnail */}
-      <div className="relative aspect-[4/5] w-full bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
+      <div className="relative aspect-[3/4] w-full bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
         {imageError ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
@@ -274,7 +274,7 @@ function AthleteCard({ athlete, onClick }: { athlete: Athlete; onClick: () => vo
             src={athlete.photo}
             alt={athlete.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover object-bottom transition-transform duration-300 group-hover:scale-105"
             onError={() => setImageError(true)}
           />
         )}
