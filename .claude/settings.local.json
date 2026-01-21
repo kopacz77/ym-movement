@@ -73,7 +73,8 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm why:*)",
       "Bash(nslookup:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": []
   }

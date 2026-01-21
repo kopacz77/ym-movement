@@ -196,7 +196,7 @@ const athletes: Athlete[] = [
     id: 7,
     name: "Allison Yoon",
     discipline: "Singles",
-    photo: "/images/athletes/allison-yoon.jpg",
+    photo: "/images/athletes/allison-yoon.jpeg",
     bio: "Rising skater progressing through the levels.",
     videos: [
       {
