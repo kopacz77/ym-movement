@@ -69,23 +69,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Usage**: Particularly useful for calendar component development, UI consistency, and accessing latest shadcn/ui patterns.
 
-**Playwright MCP Server**: Configured for automated browser testing and web automation.
-
-**Current Setup Status**: ✅ **CONFIGURED AND CONNECTED**
-- Server: `@executeautomation/playwright-mcp-server`
-- Status: Connected (verified with `claude mcp list`)
-- Added with: `claude mcp add playwright npx @executeautomation/playwright-mcp-server`
-
-**Available Testing Capabilities**:
-- Browser automation for end-to-end testing
-- Web page navigation and form interaction
-- Screenshot capture and visual testing
-- Data extraction from web pages
-- Automated testing of signup/login flows
-- Performance and accessibility testing
-
-**Usage**: Essential for comprehensive testing of the YM Movement application, particularly for testing the student signup flow, admin dashboard functionality, and cross-browser compatibility.
-
 ## Docker Commands (Recommended for Local Development)
 
 **Docker Development Environment**: Containerized Next.js app using Neon cloud database with optional Redis caching.

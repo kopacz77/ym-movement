@@ -74,7 +74,8 @@
       "Bash(pnpm why:*)",
       "Bash(nslookup:*)",
       "Bash(ping:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(python3:*)"
     ],
     "deny": []
   }
