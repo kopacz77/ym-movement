@@ -85,7 +85,15 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate,
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="date"
-            tickFormatter={(date) => {
+            tickFormatter={(date: string) => {
+              // Monthly aggregation keys are YYYY-MM (length 7)
+              if (date.length === 7) {
+                const [year, month] = date.split("-");
+                return new Date(Number(year), Number(month) - 1).toLocaleDateString("en-US", {
+                  month: "short",
+                  year: "2-digit",
+                });
+              }
               return new Date(date).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
@@ -98,13 +106,20 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate,
               `$${Number(value).toFixed(2)}`,
               name === "totalRevenue" ? "Revenue" : name,
             ]}
-            labelFormatter={(label) =>
-              new Date(label).toLocaleDateString("en-US", {
+            labelFormatter={(label: string) => {
+              if (label.length === 7) {
+                const [year, month] = label.split("-");
+                return new Date(Number(year), Number(month) - 1).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                });
+              }
+              return new Date(label).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-              })
-            }
+              });
+            }}
           />
           <Legend />
           <Bar dataKey="totalRevenue" name="Revenue" fill="#8884d8" />

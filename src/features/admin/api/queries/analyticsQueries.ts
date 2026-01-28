@@ -122,16 +122,23 @@ export const analyticsRouter = createTRPCRouter({
           orderBy: { startTime: "asc" },
         });
 
-        // Group by date and calculate statistics
+        // Determine if we should aggregate by month (for ranges > 31 days)
+        const effectiveEnd = queryEndDate || new Date();
+        const rangeMs = effectiveEnd.getTime() - queryStartDate.getTime();
+        const rangeDays = rangeMs / (1000 * 60 * 60 * 24);
+        const aggregateByMonth = rangeDays > 31;
+
+        // Group by date or month depending on range
         const activityByDate: Record<string, ActivityData> = {};
 
-        // Replace forEach with for...of loop
         for (const lesson of lessons) {
-          const date = lesson.startTime.toISOString().split("T")[0];
+          const dateKey = aggregateByMonth
+            ? lesson.startTime.toISOString().slice(0, 7) // YYYY-MM
+            : lesson.startTime.toISOString().split("T")[0]; // YYYY-MM-DD
 
-          if (!activityByDate[date]) {
-            activityByDate[date] = {
-              date,
+          if (!activityByDate[dateKey]) {
+            activityByDate[dateKey] = {
+              date: dateKey,
               totalLessons: 0,
               completedLessons: 0,
               cancelledLessons: 0,
@@ -140,27 +147,27 @@ export const analyticsRouter = createTRPCRouter({
             };
           }
 
-          activityByDate[date].totalLessons++;
+          activityByDate[dateKey].totalLessons++;
 
           if (lesson.status === LessonStatus.COMPLETED) {
-            activityByDate[date].completedLessons++;
+            activityByDate[dateKey].completedLessons++;
           } else if (lesson.status === LessonStatus.CANCELLED) {
-            activityByDate[date].cancelledLessons++;
+            activityByDate[dateKey].cancelledLessons++;
           }
 
           // Track by lesson type
           const lessonType = lesson.type as string;
-          if (!activityByDate[date].byType[lessonType]) {
-            activityByDate[date].byType[lessonType] = 0;
+          if (!activityByDate[dateKey].byType[lessonType]) {
+            activityByDate[dateKey].byType[lessonType] = 0;
           }
-          activityByDate[date].byType[lessonType]++;
+          activityByDate[dateKey].byType[lessonType]++;
 
           // Track by area
           const areaType = lesson.area as string;
-          if (!activityByDate[date].byArea[areaType]) {
-            activityByDate[date].byArea[areaType] = 0;
+          if (!activityByDate[dateKey].byArea[areaType]) {
+            activityByDate[dateKey].byArea[areaType] = 0;
           }
-          activityByDate[date].byArea[areaType]++;
+          activityByDate[dateKey].byArea[areaType]++;
         }
 
         return Object.values(activityByDate);
@@ -226,16 +233,23 @@ export const analyticsRouter = createTRPCRouter({
           orderBy: { lesson_date: "asc" },
         });
 
-        // Group by lesson date (when the lesson was delivered, not when payment was collected)
+        // Determine if we should aggregate by month (for ranges > 31 days)
+        const effectiveEnd = queryEndDate || new Date();
+        const rangeMs = effectiveEnd.getTime() - queryStartDate.getTime();
+        const rangeDays = rangeMs / (1000 * 60 * 60 * 24);
+        const aggregateByMonth = rangeDays > 31;
+
+        // Group by date or month depending on range
         const revenueByDate: Record<string, RevenueData> = {};
 
-        // Replace forEach with for...of loop
         for (const payment of payments) {
-          const date = payment.lesson_date.toISOString().split("T")[0];
+          const dateKey = aggregateByMonth
+            ? payment.lesson_date.toISOString().slice(0, 7) // YYYY-MM
+            : payment.lesson_date.toISOString().split("T")[0]; // YYYY-MM-DD
 
-          if (!revenueByDate[date]) {
-            revenueByDate[date] = {
-              date,
+          if (!revenueByDate[dateKey]) {
+            revenueByDate[dateKey] = {
+              date: dateKey,
               totalRevenue: 0,
               byMethod: {},
               byLessonType: {},
@@ -243,31 +257,31 @@ export const analyticsRouter = createTRPCRouter({
             };
           }
 
-          revenueByDate[date].totalRevenue += payment.amount;
+          revenueByDate[dateKey].totalRevenue += payment.amount;
 
           // Group by payment method
           const paymentMethod = payment.method as string;
-          if (!revenueByDate[date].byMethod[paymentMethod]) {
-            revenueByDate[date].byMethod[paymentMethod] = 0;
+          if (!revenueByDate[dateKey].byMethod[paymentMethod]) {
+            revenueByDate[dateKey].byMethod[paymentMethod] = 0;
           }
-          revenueByDate[date].byMethod[paymentMethod] += payment.amount;
+          revenueByDate[dateKey].byMethod[paymentMethod] += payment.amount;
 
           // Group by lesson type
           if (payment.Lesson?.type) {
             const lessonType = payment.Lesson.type as string;
-            if (!revenueByDate[date].byLessonType[lessonType]) {
-              revenueByDate[date].byLessonType[lessonType] = 0;
+            if (!revenueByDate[dateKey].byLessonType[lessonType]) {
+              revenueByDate[dateKey].byLessonType[lessonType] = 0;
             }
-            revenueByDate[date].byLessonType[lessonType] += payment.amount;
+            revenueByDate[dateKey].byLessonType[lessonType] += payment.amount;
           }
 
           // Group by student level
           if (payment.Lesson?.Student?.level) {
             const studentLevel = payment.Lesson.Student.level as string;
-            if (!revenueByDate[date].byStudentLevel[studentLevel]) {
-              revenueByDate[date].byStudentLevel[studentLevel] = 0;
+            if (!revenueByDate[dateKey].byStudentLevel[studentLevel]) {
+              revenueByDate[dateKey].byStudentLevel[studentLevel] = 0;
             }
-            revenueByDate[date].byStudentLevel[studentLevel] += payment.amount;
+            revenueByDate[dateKey].byStudentLevel[studentLevel] += payment.amount;
           }
         }
 
