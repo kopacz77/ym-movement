@@ -2,6 +2,7 @@
 "use client";
 
 import { Clock, DollarSign, Edit, Lock, MapPin, Save, Trash2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,8 @@ interface ApiError {
 }
 
 export default function SettingsPage() {
+  const { status: sessionStatus } = useSession();
+  const isAuthenticated = sessionStatus === "authenticated";
   const [isSaving, setIsSaving] = useState(false);
   const [isRinkDialogOpen, setIsRinkDialogOpen] = useState(false);
   const [editingRink, setEditingRink] = useState<Rink | null>(null);
@@ -133,8 +136,11 @@ export default function SettingsPage() {
     { name: "Dance Studio", active: true, default: false },
   ]);
 
-  // Fetch rinks data
-  const { data: rinks, isLoading: isLoadingRinks } = api.admin.schedule.getRinks.useQuery();
+  // Fetch rinks data - only when authenticated to prevent 401 race condition
+  const { data: rinks, isLoading: isLoadingRinks } = api.admin.schedule.getRinks.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  );
 
   // Delete rink mutation
   const deleteRinkMutation = api.admin.schedule.deleteRink.useMutation({
@@ -166,8 +172,10 @@ export default function SettingsPage() {
     },
   });
 
-  // Fetch settings from API
-  const { data: savedSettings } = api.admin.settings.getSettings.useQuery();
+  // Fetch settings from API - only when authenticated to prevent 401 race condition
+  const { data: savedSettings } = api.admin.settings.getSettings.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   // Update settings when data is loaded - only set once API data arrives
   useEffect(() => {

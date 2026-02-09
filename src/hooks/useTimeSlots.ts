@@ -1,3 +1,4 @@
+import { useSession } from "next-auth/react";
 import { useMemo } from "react";
 import { api } from "@/lib/api";
 import type { TimeSlot } from "@/types/scheduling";
@@ -35,10 +36,14 @@ interface UseTimeSlotsResult {
 }
 
 export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTimeSlotsResult {
-  // Get rinks data with error handling
+  const { status: sessionStatus } = useSession();
+  const isAuthenticated = sessionStatus === "authenticated";
+
+  // Get rinks data with error handling - only when authenticated
   const { data: rinks } = api.admin.schedule.getRinks.useQuery(undefined, {
     retry: 2,
     retryDelay: 1000,
+    enabled: isAuthenticated,
   } as any);
 
   // Get students data with error handling - fetch approved students for assignment
@@ -50,13 +55,14 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
     {
       retry: 2,
       retryDelay: 1000,
+      enabled: isAuthenticated,
     } as any,
   );
 
   // Extract students array from paginated response
   const students = studentsResponse?.students;
 
-  // Get time slots data with error handling
+  // Get time slots data with error handling - only when authenticated
   const { data: timeSlots } = api.admin.schedule.getTimeSlots.useQuery(
     {
       startDate: dateRange.start,
@@ -68,6 +74,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
       staleTime: 0,
       retry: 2,
       retryDelay: 1000,
+      enabled: isAuthenticated,
     } as any,
   );
 

@@ -3,6 +3,7 @@
 
 import type { PaymentStatus } from "@prisma/client";
 import { ArrowDownAZ, ArrowUpAZ, Search } from "lucide-react";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -72,6 +73,7 @@ type SortOption =
   | "amount-asc";
 
 export default function PaymentsPage() {
+  const { status: sessionStatus } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | "ALL">("ALL");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
@@ -79,12 +81,17 @@ export default function PaymentsPage() {
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const utils = api.useUtils();
 
-  // Fetch payments with filters
-  const { data: payments, isLoading } = api.admin.payment.getPayments.useQuery({
-    search: searchQuery || undefined,
-    status: statusFilter !== "ALL" ? statusFilter : undefined,
-    sortBy,
-  });
+  // Fetch payments with filters - only when authenticated to prevent 401 race condition
+  const { data: payments, isLoading } = api.admin.payment.getPayments.useQuery(
+    {
+      search: searchQuery || undefined,
+      status: statusFilter !== "ALL" ? statusFilter : undefined,
+      sortBy,
+    },
+    {
+      enabled: sessionStatus === "authenticated",
+    }
+  );
 
   // Get selected payment details
   const { data: selectedPayment } = api.admin.payment.getPaymentById.useQuery(

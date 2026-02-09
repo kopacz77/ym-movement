@@ -3,6 +3,7 @@
 
 import { addMonths, endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight, Download, FileText } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,8 @@ import {
 import { formatCurrency } from "@/lib/utils";
 
 export default function ReportsPage() {
+  const { status: sessionStatus } = useSession();
+  const isAuthenticated = sessionStatus === "authenticated";
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");
   // For month selection - start with current month
   const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()));
@@ -72,19 +75,25 @@ export default function ReportsPage() {
 
   const dateRange = getDateRange();
 
-  // Fetch overview data for summary
+  // Fetch overview data for summary - only when authenticated to prevent 401 race condition
   const { data: overviewData, isLoading: isLoadingOverview } =
-    api.admin.analytics.getOverview.useQuery();
+    api.admin.analytics.getOverview.useQuery(undefined, { enabled: isAuthenticated });
 
-  // Fetch report data using actual date ranges
-  const { data: revenueData } = api.admin.analytics.getRevenueReport.useQuery({
-    startDate: dateRange.start,
-    endDate: dateRange.end,
-  });
-  const { data: attendanceData } = api.admin.analytics.getStudentActivity.useQuery({
-    startDate: dateRange.start,
-    endDate: dateRange.end,
-  });
+  // Fetch report data using actual date ranges - only when authenticated
+  const { data: revenueData } = api.admin.analytics.getRevenueReport.useQuery(
+    {
+      startDate: dateRange.start,
+      endDate: dateRange.end,
+    },
+    { enabled: isAuthenticated }
+  );
+  const { data: attendanceData } = api.admin.analytics.getStudentActivity.useQuery(
+    {
+      startDate: dateRange.start,
+      endDate: dateRange.end,
+    },
+    { enabled: isAuthenticated }
+  );
 
   // Navigation handlers for month picker
   const goToPreviousMonth = () => {
