@@ -298,6 +298,7 @@ enum Level {
 enum PaymentMethod {
   VENMO
   ZELLE
+  CASH
 }
 
 enum PaymentStatus {

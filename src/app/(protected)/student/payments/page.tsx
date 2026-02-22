@@ -167,10 +167,10 @@ export default function StudentPaymentsPage() {
         <CardContent>
           <div className="space-y-4">
             <p>
-              We accept payments via Venmo and Zelle. Please make payments within 24 hours of
+              We accept payments via Venmo, Zelle, or Cash. Please make payments within 24 hours of
               booking your lesson to avoid automatic cancellation.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="border rounded-lg p-4">
                 <h3 className="font-medium">Venmo</h3>
                 <p className="text-sm mt-1">@yura-min</p>
@@ -178,6 +178,10 @@ export default function StudentPaymentsPage() {
               <div className="border rounded-lg p-4">
                 <h3 className="font-medium">Zelle</h3>
                 <p className="text-sm mt-1">+1 (714) 743-7071</p>
+              </div>
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium">Cash</h3>
+                <p className="text-sm mt-1">Bring exact amount to lesson</p>
               </div>
             </div>
             <div className="bg-blue-50 border border-blue-100 rounded-md p-4">

@@ -171,6 +171,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
                 <SelectContent className="min-w-[240px]">
                   <SelectItem value={PaymentMethod.VENMO}>Venmo</SelectItem>
                   <SelectItem value={PaymentMethod.ZELLE}>Zelle</SelectItem>
+                  <SelectItem value={PaymentMethod.CASH}>Cash</SelectItem>
                 </SelectContent>
               </Select>
             </div>

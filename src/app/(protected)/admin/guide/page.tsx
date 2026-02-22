@@ -309,7 +309,7 @@ export default function AdminGuidePage() {
               steps={[
                 "Find the payment in the Payments table",
                 'Click "Mark as Paid" button',
-                "Confirm payment was received (Venmo/Zelle)",
+                "Confirm payment was received (Venmo/Zelle/Cash)",
                 "Payment status updates to Paid",
                 "Optional: Add notes about payment method",
               ]}
@@ -324,7 +324,7 @@ export default function AdminGuidePage() {
                 'Click "Send Reminder" button',
                 "Student receives email with:",
                 "  • Amount due and lesson details",
-                "  • Payment instructions (Venmo/Zelle)",
+                "  • Payment instructions (Venmo/Zelle/Cash)",
                 "  • Your contact information",
               ]}
             />
@@ -337,6 +337,9 @@ export default function AdminGuidePage() {
                 </p>
                 <p>
                   <strong>Zelle:</strong> (714) 743-7071
+                </p>
+                <p>
+                  <strong>Cash:</strong> In person at lesson
                 </p>
                 <p className="mt-2 text-xs">
                   Payment instructions are automatically included in reminder emails

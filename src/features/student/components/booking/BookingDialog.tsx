@@ -229,6 +229,7 @@ export function BookingDialog({
                 <SelectContent>
                   <SelectItem value={PaymentMethod.VENMO}>Venmo</SelectItem>
                   <SelectItem value={PaymentMethod.ZELLE}>Zelle</SelectItem>
+                  <SelectItem value={PaymentMethod.CASH}>Cash</SelectItem>
                 </SelectContent>
               </Select>
             </div>

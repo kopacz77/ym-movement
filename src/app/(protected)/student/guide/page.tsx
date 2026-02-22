@@ -262,9 +262,10 @@ export default function StudentGuidePage() {
               steps={[
                 "Find the payment marked as 'Pending'",
                 "Note the amount due and lesson details",
-                "Send payment via Venmo or Zelle:",
+                "Send payment via Venmo, Zelle, or Cash:",
                 "  • Venmo: @yura-min",
                 "  • Zelle: (714) 743-7071",
+                "  • Cash: Bring exact amount to your lesson",
                 "Include your name and lesson date in the payment note",
                 "Your instructor will mark it as paid once received",
               ]}
@@ -285,6 +286,13 @@ export default function StudentGuidePage() {
                   <p>Send to: (714) 743-7071</p>
                   <p className="text-xs mt-1">
                     Include your name and lesson date in the payment note
+                  </p>
+                </div>
+                <div className="mt-3">
+                  <p className="font-semibold">Cash</p>
+                  <p>Bring exact amount to your lesson</p>
+                  <p className="text-xs mt-1">
+                    Hand payment directly to your instructor at the rink
                   </p>
                 </div>
               </div>

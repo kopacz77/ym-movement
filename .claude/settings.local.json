@@ -75,7 +75,9 @@
       "Bash(nslookup:*)",
       "Bash(ping:*)",
       "Bash(npm audit:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(grep -rn \"VENMO\\\\|ZELLE\\\\|venmo\\\\|zelle\\\\|Venmo\\\\|Zelle\\\\|PaymentMethod\\\\|paymentMethod\\\\|payment_method\" /home/kopacz/projects/yura-scheduler-v3/src/ 2>/dev/null | grep -v \"node_modules\" | grep -v \".next\" | sort -t: -k1,1)",
+      "Bash(npx prisma generate)"
     ],
     "deny": []
   }

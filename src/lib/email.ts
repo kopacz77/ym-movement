@@ -217,7 +217,7 @@ export async function sendApprovalEmail(email: string, name: string, token: stri
       <ul style="margin-left: 20px; color: #059669;">
         <li>📅 <strong>Book ice dance lessons</strong> with available time slots</li>
         <li>🏆 <strong>Track your progress</strong> and lesson history</li>
-        <li>💳 <strong>Manage payments</strong> via Venmo or Zelle</li>
+        <li>💳 <strong>Manage payments</strong> via Venmo, Zelle, or Cash</li>
         <li>⚙️ <strong>Update account settings</strong> and preferences</li>
       </ul>
       
@@ -307,7 +307,9 @@ export async function sendLessonConfirmationEmail(
         ${
           paymentMethod.toLowerCase() === "venmo"
             ? `<p style="margin-bottom: 15px;"><strong>Venmo:</strong> @yura-min</p>`
-            : `<p style="margin-bottom: 15px;"><strong>Zelle:</strong> 714-743-7071</p>`
+            : paymentMethod.toLowerCase() === "zelle"
+              ? `<p style="margin-bottom: 15px;"><strong>Zelle:</strong> 714-743-7071</p>`
+              : `<p style="margin-bottom: 15px;"><strong>Cash:</strong> Cash payment accepted - please bring exact amount to your lesson.</p>`
         }
         
         <div style="background-color: #fff; padding: 15px; border-radius: 4px; margin-top: 10px;">
@@ -411,11 +413,17 @@ export async function sendPaymentReminderEmail(
           details: "@yura-min",
           instructions: "Send payment to @yura-min via Venmo",
         }
-      : {
-          method: "Zelle",
-          details: "(714) 743-7071",
-          instructions: "Send payment to (714) 743-7071 via Zelle",
-        };
+      : paymentDetails.paymentMethod.toLowerCase() === "zelle"
+        ? {
+            method: "Zelle",
+            details: "(714) 743-7071",
+            instructions: "Send payment to (714) 743-7071 via Zelle",
+          }
+        : {
+            method: "Cash",
+            details: "In person",
+            instructions: "Please bring cash payment to your next lesson",
+          };
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
