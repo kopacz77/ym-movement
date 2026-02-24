@@ -133,7 +133,7 @@ const athletes: Athlete[] = [
     id: 4,
     name: "Candice Leung",
     discipline: "Singles",
-    photo: "/images/athletes/candice-leung.jpg",
+    photo: "/images/athletes/candice-leung.jpeg",
     bio: "Novice level competitor.",
     videos: [
       {
@@ -221,21 +221,36 @@ const athletes: Athlete[] = [
   },
   {
     id: 8,
-    name: "Emily Hu",
-    discipline: "Singles",
-    photo: "/images/athletes/emily-hu.jpg",
-    bio: "Juvenile level competitor.",
+    name: "Chelsea Liu & Ryan Bedard",
+    discipline: "Pairs",
+    photo: "/images/athletes/chelsea-liu_ryan-bedard.jpeg",
+    bio: "Pairs team coached by Yura Min.",
     videos: [
       {
         id: "8-1",
-        title: "Juvenile Free Skate",
+        title: "Pairs Performance",
         year: 2025,
-        videoUrl: "https://www.youtube.com/watch?v=b38Bwglo2RQ",
+        videoUrl: "https://www.youtube.com/watch?v=_XB11lm8dlU&t=52s",
       },
     ],
   },
   {
     id: 9,
+    name: "Katie McBeath & Daniil Parkman",
+    discipline: "Pairs",
+    photo: "/images/athletes/katie-mcbeath_daniil-parkman.jpeg",
+    bio: "Pairs team coached by Yura Min.",
+    videos: [
+      {
+        id: "9-1",
+        title: "Pairs Performance",
+        year: 2025,
+        videoUrl: "https://www.youtube.com/watch?v=y4KWwWKpDCw",
+      },
+    ],
+  },
+  {
+    id: 10,
     name: "Ice Explosion 2023",
     discipline: "Group Choreography",
     photo: "/images/athletes/black-pink.jpeg",
