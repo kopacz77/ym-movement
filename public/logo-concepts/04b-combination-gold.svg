@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="comb-bg-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="comb-gold2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c09a3e"/>
+      <stop offset="50%" stop-color="#dfc478"/>
+      <stop offset="100%" stop-color="#c09a3e"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#comb-bg-g)"/>
+  <path d="M155 155 C190 110, 270 90, 360 120 C380 127, 385 135, 375 140"
+        stroke="url(#comb-gold2)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M375 140 C365 145, 350 146, 340 143"
+        stroke="url(#comb-gold2)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <text x="256" y="290" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="140" font-weight="bold" letter-spacing="5" fill="white">YM</text>
+  <line x1="160" y1="315" x2="352" y2="315" stroke="url(#comb-gold2)" stroke-width="1.5" opacity="0.6"/>
+  <text x="256" y="360" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="32" font-weight="300" letter-spacing="16" fill="url(#comb-gold2)">MOVEMENT</text>
+  <circle cx="138" cy="352" r="3" fill="url(#comb-gold2)" opacity="0.5"/>
+  <circle cx="374" cy="352" r="3" fill="url(#comb-gold2)" opacity="0.5"/>
+</svg>

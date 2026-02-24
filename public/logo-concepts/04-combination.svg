@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="comb-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <!-- Blue gradient background -->
+  <rect width="512" height="512" rx="96" fill="url(#comb-bg)"/>
+  <!-- Blade/swoosh mark above YM - suggests movement and skating -->
+  <path d="M155 155 C190 110, 270 90, 360 120 C380 127, 385 135, 375 140"
+        stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Trailing ice dust -->
+  <path d="M375 140 C365 145, 350 146, 340 143"
+        stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.35"/>
+  <!-- YM large monogram -->
+  <text x="256" y="290" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="140" font-weight="bold" letter-spacing="5" fill="white">YM</text>
+  <!-- Thin separator line -->
+  <line x1="160" y1="315" x2="352" y2="315" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <!-- MOVEMENT subtitle -->
+  <text x="256" y="360" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="32" font-weight="300" letter-spacing="16" fill="white" opacity="0.85">MOVEMENT</text>
+  <!-- Small accent dots flanking -->
+  <circle cx="138" cy="352" r="3" fill="white" opacity="0.35"/>
+  <circle cx="374" cy="352" r="3" fill="white" opacity="0.35"/>
+</svg>

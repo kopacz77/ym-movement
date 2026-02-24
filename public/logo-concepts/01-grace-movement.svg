@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg1)"/>
+  <!-- Single confident ribbon stroke — a skater's spiral trace on ice -->
+  <!-- One continuous flowing form, no literal figure. Think Olympic-level restraint. -->
+  <path d="M140 340
+           C140 240, 180 160, 256 130
+           C332 100, 380 160, 360 220
+           C340 280, 280 300, 256 280
+           C232 260, 220 220, 250 190
+           C280 160, 330 180, 320 220
+           C310 260, 270 280, 256 270"
+        stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Trailing blade whisper -->
+  <path d="M140 340 C120 360, 130 380, 160 385"
+        stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <!-- Tiny ice crystal at the spiral center -->
+  <circle cx="256" cy="270" r="4" fill="white" opacity="0.8"/>
+  <!-- YM MOVEMENT — wide-tracked, light weight -->
+  <text x="256" y="440" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="26" font-weight="300" letter-spacing="14" fill="white" opacity="0.9">YM MOVEMENT</text>
+</svg>

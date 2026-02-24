@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg3)"/>
+  <!-- Three rising arcs — like blades carving ice in sequence, each lighter -->
+  <!-- Suggests upward momentum, progression, excellence -->
+  <!-- Arc 1 — the foundation, boldest -->
+  <path d="M120 330 C160 200, 260 140, 390 180"
+        stroke="white" stroke-width="7" fill="none" stroke-linecap="round" opacity="1"/>
+  <!-- Arc 2 — the rise -->
+  <path d="M145 290 C185 180, 275 125, 380 150"
+        stroke="white" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.65"/>
+  <!-- Arc 3 — the aspiration, lightest -->
+  <path d="M175 255 C210 165, 290 115, 370 125"
+        stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.35"/>
+  <!-- Small blade accent at the peak of momentum -->
+  <line x1="375" y1="120" x2="395" y2="110" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <!-- YM MOVEMENT -->
+  <text x="256" y="420" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="26" font-weight="300" letter-spacing="14" fill="white" opacity="0.9">YM MOVEMENT</text>
+</svg>
