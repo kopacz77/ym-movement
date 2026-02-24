@@ -175,7 +175,7 @@ const athletes: Athlete[] = [
     id: 6,
     name: "Iris Huang",
     discipline: "Singles",
-    photo: "/images/athletes/iris-huang.jpg",
+    photo: "/images/athletes/iris-huang.jpeg",
     bio: "Progressing from Juvenile to Intermediate level.",
     videos: [
       {
