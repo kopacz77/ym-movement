@@ -78,6 +78,9 @@ export default function LandingPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
+                <Link href="/programs">See Our Programs</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
                 <Link href="/auth/login">Already a Student? Login</Link>
               </Button>
             </div>
