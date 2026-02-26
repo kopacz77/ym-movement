@@ -79,7 +79,10 @@
       "Bash(grep -rn \"VENMO\\\\|ZELLE\\\\|venmo\\\\|zelle\\\\|Venmo\\\\|Zelle\\\\|PaymentMethod\\\\|paymentMethod\\\\|payment_method\" /home/kopacz/projects/yura-scheduler-v3/src/ 2>/dev/null | grep -v \"node_modules\" | grep -v \".next\" | sort -t: -k1,1)",
       "Bash(npx prisma generate)",
       "Bash(which potrace vtracer autotrace inkscape convert 2>/dev/null; echo \"---\"; dpkg -l | grep -i potrace 2>/dev/null; echo \"---\"; pip list 2>/dev/null | grep -i svg)",
-      "Bash(which python3 && python3 -c \"import PIL; print\\('Pillow:', PIL.__version__\\)\" 2>/dev/null; echo \"---\"; which magick || which convert 2>/dev/null; echo \"---\"; apt list --installed 2>/dev/null | grep -E \"potrace|imagemagick|inkscape\" 2>/dev/null)"
+      "Bash(which python3 && python3 -c \"import PIL; print\\('Pillow:', PIL.__version__\\)\" 2>/dev/null; echo \"---\"; which magick || which convert 2>/dev/null; echo \"---\"; apt list --installed 2>/dev/null | grep -E \"potrace|imagemagick|inkscape\" 2>/dev/null)",
+      "Bash(pnpm list next axios lodash lodash-es ajv minimatch qs @isaacs/brace-expansion 2>/dev/null || npm ls next axios lodash lodash-es ajv minimatch qs @isaacs/brace-expansion 2>/dev/null)",
+      "Bash(pnpm outdated next 2>/dev/null)",
+      "Bash(git add package.json pnpm-lock.yaml && git commit -m \"$\\(cat <<'EOF'\nfix security vulnerabilities flagged by dependabot\n\nBump next 16.1.1 → 16.1.6 and add pnpm overrides for transitive deps\n\\(lodash, axios, minimatch, @isaacs/brace-expansion, ajv, rollup, qs\\).\nResolves all 12 known CVEs \\(6 high, 5 moderate, 1 low\\).\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git status)"
     ],
     "deny": []
   }
