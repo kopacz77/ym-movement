@@ -10,11 +10,8 @@ if [ -n "$WINDIR" ] || [ -n "$SYSTEMROOT" ] || echo "$PWD" | grep -q "wsl.localh
   exit 0
 fi
 
-# We're in a proper Unix environment, run checks
-echo "⏭️ Skipping lint-staged (too strict for timezone fixes)"
-echo "⏭️ Skipping security audit (has known Next.js vulnerabilities)"
-
-# Temporarily skip type check while fixing test infrastructure
-echo "⚠️ Skipping type check - working on test fixes"
+# Run lint-staged (biome check on staged files)
+echo "📋 Running lint-staged..."
+pnpm lint-staged
 
 echo "✅ Pre-commit checks completed successfully!"

@@ -10,7 +10,7 @@ if [ -n "$WINDIR" ] || [ -n "$SYSTEMROOT" ] || echo "$PWD" | grep -q "wsl.localh
   exit 0
 fi
 
-# Temporarily skip commitlint while working on test fixes
-echo "⚠️ Skipping commitlint - working on test fixes"
+# Validate commit message follows conventional commits format
+pnpm commitlint --edit "$1"
 
 echo "✅ Commit message validation completed!"

@@ -4,7 +4,7 @@ import withDragAndDrop, {
   type EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop";
 import { toast } from "sonner";
-import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
+import { TimezoneNotice } from "@/components/TimezoneNotice";
 import { useOperationalSettings } from "@/hooks/useOperationalSettings";
 import { CalendarErrorBoundary } from "./CalendarErrorBoundary";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";

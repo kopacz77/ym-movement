@@ -462,7 +462,7 @@ export default function ProgramsPage() {
       !athlete.name.toLowerCase().includes("athlete name") &&
       athlete.videos &&
       athlete.videos.length > 0 &&
-      athlete.videos.some((v) => v.videoUrl && v.videoUrl.trim() !== "")
+      athlete.videos.some((v) => v.videoUrl && v.videoUrl.trim() !== ""),
   );
 
   const handlePlayVideo = (video: AthleteVideo) => {
@@ -502,7 +502,6 @@ export default function ProgramsPage() {
               />
             ))}
           </div>
-
         </div>
       </section>
 

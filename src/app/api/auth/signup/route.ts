@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
         console.warn("🚫 Token replay attack detected:", { ip: clientIP });
         logSecurityEvent("TOKEN_REPLAY_ATTACK", {
           ip: clientIP,
-          token: result.data.turnstileToken.substring(0, 20) + "...",
+          token: `${result.data.turnstileToken.substring(0, 20)}...`,
         });
         return NextResponse.json(
           { message: "Security token has already been used. Please refresh and try again." },

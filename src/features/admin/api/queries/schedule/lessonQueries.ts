@@ -393,7 +393,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         }
 
         // Create the lesson and payment in a transaction
-        const { lesson, payment } = await ctx.prisma.$transaction(async (prisma) => {
+        const { lesson } = await ctx.prisma.$transaction(async (prisma) => {
           // Create the lesson
           const lesson = await prisma.lesson.create({
             data: {

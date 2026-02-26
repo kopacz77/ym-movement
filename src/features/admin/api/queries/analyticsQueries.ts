@@ -133,7 +133,9 @@ export const analyticsRouter = createTRPCRouter({
 
         for (const lesson of lessons) {
           const dateKey = aggregateByMonth
-            ? lesson.startTime.toISOString().slice(0, 7) // YYYY-MM
+            ? lesson.startTime
+                .toISOString()
+                .slice(0, 7) // YYYY-MM
             : lesson.startTime.toISOString().split("T")[0]; // YYYY-MM-DD
 
           if (!activityByDate[dateKey]) {
@@ -244,7 +246,9 @@ export const analyticsRouter = createTRPCRouter({
 
         for (const payment of payments) {
           const dateKey = aggregateByMonth
-            ? payment.lesson_date.toISOString().slice(0, 7) // YYYY-MM
+            ? payment.lesson_date
+                .toISOString()
+                .slice(0, 7) // YYYY-MM
             : payment.lesson_date.toISOString().split("T")[0]; // YYYY-MM-DD
 
           if (!revenueByDate[dateKey]) {

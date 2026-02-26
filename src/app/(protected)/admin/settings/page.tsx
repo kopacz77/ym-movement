@@ -139,7 +139,7 @@ export default function SettingsPage() {
   // Fetch rinks data - only when authenticated to prevent 401 race condition
   const { data: rinks, isLoading: isLoadingRinks } = api.admin.schedule.getRinks.useQuery(
     undefined,
-    { enabled: isAuthenticated }
+    { enabled: isAuthenticated },
   );
 
   // Delete rink mutation

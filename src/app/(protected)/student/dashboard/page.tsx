@@ -85,8 +85,8 @@ export default function StudentDashboardPage() {
           <CardContent>
             <div className="flex flex-col gap-4">
               <p>
-                We accept payments via Venmo, Zelle, or Cash. Please make payments within 24 hours of
-                booking your lesson to avoid automatic cancellation.
+                We accept payments via Venmo, Zelle, or Cash. Please make payments within 24 hours
+                of booking your lesson to avoid automatic cancellation.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="border rounded-lg p-4">

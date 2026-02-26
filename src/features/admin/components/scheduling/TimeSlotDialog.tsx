@@ -24,13 +24,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
 import { showRemoveConfirmation } from "@/lib/toast-confirmations";
@@ -100,7 +93,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
   isAssigning = false,
   isUnassigning = false,
 }) => {
-  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [_selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [showAdminAssignmentDialog, setShowAdminAssignmentDialog] = useState(false);
   const [showEditLessonTypeDialog, setShowEditLessonTypeDialog] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -168,12 +161,16 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
     : 60;
 
   const formatLessonType = (type: LessonType | undefined) => {
-    if (!type) return "Private"; // Default fallback
+    if (!type) {
+      return "Private"; // Default fallback
+    }
     return type.replace(/_/g, " ");
   };
 
   const getLessonTypeBadgeColor = (type: LessonType | undefined) => {
-    if (!type) return "bg-blue-100 text-blue-700 border-blue-300"; // Default to private styling
+    if (!type) {
+      return "bg-blue-100 text-blue-700 border-blue-300"; // Default to private styling
+    }
 
     switch (type) {
       case LessonType.CHOREOGRAPHY:

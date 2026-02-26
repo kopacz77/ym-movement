@@ -113,7 +113,9 @@ export const PaymentTable = ({
               </TableCell>
               <TableCell>{format(new Date(payment.lesson_date), "PP")}</TableCell>
               <TableCell className="font-medium">{formatCurrency(payment.amount)}</TableCell>
-              <TableCell>{payment.method.charAt(0).toUpperCase() + payment.method.slice(1).toLowerCase()}</TableCell>
+              <TableCell>
+                {payment.method.charAt(0).toUpperCase() + payment.method.slice(1).toLowerCase()}
+              </TableCell>
               <TableCell>
                 <code className="bg-gray-100 px-2 py-1 rounded text-xs">
                   {payment.referenceCode}

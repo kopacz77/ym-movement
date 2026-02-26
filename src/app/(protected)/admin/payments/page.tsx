@@ -3,8 +3,8 @@
 
 import type { PaymentStatus } from "@prisma/client";
 import { ArrowDownAZ, ArrowUpAZ, Search } from "lucide-react";
-import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,7 @@ export default function PaymentsPage() {
     },
     {
       enabled: sessionStatus === "authenticated",
-    }
+    },
   );
 
   // Get selected payment details

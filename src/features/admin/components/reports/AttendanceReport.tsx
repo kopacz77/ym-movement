@@ -34,7 +34,11 @@ interface ActivityDataWithAttendanceRate extends ActivityData {
   attendanceRate: number;
 }
 
-export const AttendanceReport: React.FC<AttendanceReportProps> = ({ period, startDate, endDate }) => {
+export const AttendanceReport: React.FC<AttendanceReportProps> = ({
+  period,
+  startDate,
+  endDate,
+}) => {
   // Fetch student activity data using date range if provided, otherwise fall back to period
   const { data, isLoading, error } = api.admin.analytics.getStudentActivity.useQuery(
     startDate && endDate ? { startDate, endDate } : { period },

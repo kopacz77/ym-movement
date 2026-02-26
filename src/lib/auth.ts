@@ -61,9 +61,7 @@ export const authOptions: NextAuthOptions = {
         if (isLocked) {
           const lockExpiry = await getLockoutExpiry(credentials.email);
           if (lockExpiry) {
-            const minutesRemaining = Math.ceil(
-              (lockExpiry.getTime() - new Date().getTime()) / (1000 * 60),
-            );
+            const minutesRemaining = Math.ceil((lockExpiry.getTime() - Date.now()) / (1000 * 60));
             throw new Error(
               `Account temporarily locked due to too many failed login attempts. Please try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? "s" : ""}.`,
             );
