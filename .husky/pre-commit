@@ -1,17 +1,8 @@
 #!/usr/bin/env sh
 
-echo "🔍 Running pre-commit checks..."
-
-# Detect if we're running in Windows/VS Code context
+# Skip in Windows/VS Code native context
 if [ -n "$WINDIR" ] || [ -n "$SYSTEMROOT" ] || echo "$PWD" | grep -q "wsl.localhost"; then
-  echo "⚠️ Detected Windows/VS Code environment - skipping Node.js commands"
-  echo "💡 For full pre-commit checks, commit from within WSL terminal"
-  echo "✅ Pre-commit checks completed (Windows mode)"
   exit 0
 fi
 
-# Run lint-staged (biome check on staged files)
-echo "📋 Running lint-staged..."
 pnpm lint-staged
-
-echo "✅ Pre-commit checks completed successfully!"

@@ -1,16 +1,8 @@
 #!/usr/bin/env sh
 
-echo "📝 Validating commit message format..."
-
-# Detect if we're running in Windows/VS Code context
+# Skip in Windows/VS Code native context
 if [ -n "$WINDIR" ] || [ -n "$SYSTEMROOT" ] || echo "$PWD" | grep -q "wsl.localhost"; then
-  echo "⚠️ Detected Windows/VS Code environment - skipping commitlint"
-  echo "💡 For commit message validation, commit from within WSL terminal"
-  echo "✅ Commit message validation completed (Windows mode)"
   exit 0
 fi
 
-# Validate commit message follows conventional commits format
 pnpm commitlint --edit "$1"
-
-echo "✅ Commit message validation completed!"
