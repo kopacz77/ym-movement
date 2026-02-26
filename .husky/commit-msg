@@ -1,8 +1,7 @@
 #!/usr/bin/env sh
 
-# Skip in Windows/VS Code native context
-if [ -n "$WINDIR" ] || [ -n "$SYSTEMROOT" ] || echo "$PWD" | grep -q "wsl.localhost"; then
-  exit 0
-fi
+# Skip in VS Code git UI (runs checks on terminal commits only)
+[ -n "$VSCODE_GIT_ASKPASS_NODE" ] && exit 0
+[ -n "$WINDIR" ] && exit 0
 
 pnpm commitlint --edit "$1"
