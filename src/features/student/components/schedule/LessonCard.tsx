@@ -3,6 +3,7 @@
 import { LessonStatus } from "@prisma/client";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { LessonStatusBadge, LessonStatusIndicator } from "@/components/ui/lesson
 import type { LessonWithDetails } from "@/features/student/types";
 import { formatUtcDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
+import { CancellationDialog } from "./CancellationDialog";
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -17,6 +19,13 @@ interface LessonCardProps {
 }
 
 export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+
+  const now = new Date();
+  const isUpcoming = lesson.startTime > now && lesson.status === "SCHEDULED";
+  const hoursUntilLesson = (lesson.startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+  const isLateCancellation = hoursUntilLesson < 24;
+
   return (
     <Card
       className={cn("overflow-hidden", lesson.status === LessonStatus.CANCELLED && "opacity-75")}
@@ -53,11 +62,31 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
         </div>
 
         {showActions && (
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-end gap-2">
+            {isUpcoming && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => setCancelDialogOpen(true)}
+              >
+                Cancel
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link href={`/student/schedule/${lesson.id}`}>View Details</Link>
             </Button>
           </div>
+        )}
+
+        {isUpcoming && (
+          <CancellationDialog
+            lessonId={lesson.id}
+            open={cancelDialogOpen}
+            onCloseAction={() => setCancelDialogOpen(false)}
+            isLateCancellation={isLateCancellation}
+            lessonPrice={lesson.price}
+          />
         )}
       </CardContent>
     </Card>
