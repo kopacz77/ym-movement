@@ -380,7 +380,6 @@ export const bookingRouter = createTRPCRouter({
       }
     }),
 
-  // The cancel lesson functionality remains unchanged
   cancelLesson: protectedProcedure
     .input(
       z.object({
@@ -390,86 +389,49 @@ export const bookingRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`[CANCEL] Starting cancellation process for lesson ${input.lessonId}`);
-
-        // 1. Find the lesson
+        // 1. Find the lesson with student info for notification
         const lesson = await ctx.prisma.lesson.findUnique({
-          where: {
-            id: input.lessonId,
-          },
+          where: { id: input.lessonId },
           include: {
-            TimeSlot: true,
-          } as any,
+            Student: {
+              include: { User: true },
+            },
+            Rink: true,
+          },
         });
 
         if (!lesson) {
-          console.log(`[CANCEL] Lesson ${input.lessonId} not found`);
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Lesson not found",
           });
         }
 
-        // 2. Check if the lesson can be cancelled (not in the past)
+        // 2. Cannot cancel past lessons
         const now = new Date();
         if (lesson.startTime < now) {
-          console.log(`[CANCEL] Cannot cancel past lesson ${input.lessonId}`);
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "Cannot cancel past lessons",
           });
         }
 
-        // 3. Check cancellation policy - example: 24 hours notice
-        const cancellationDeadline = 24; // hours
+        // 3. Determine if this is a late cancellation (within 24 hours)
         const hoursUntilLesson = (lesson.startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-        console.log(
-          `[CANCEL] Lesson starts in ${hoursUntilLesson.toFixed(
-            1,
-          )} hours, deadline is ${cancellationDeadline} hours`,
-        );
-
-        if (hoursUntilLesson < cancellationDeadline) {
-          console.log(
-            `[CANCEL] Too late to cancel lesson ${input.lessonId} (${hoursUntilLesson.toFixed(
-              1,
-            )}h < ${cancellationDeadline}h)`,
-          );
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: `Lessons must be cancelled at least ${cancellationDeadline} hours in advance`,
-          });
-        }
+        const isLateCancellation = hoursUntilLesson < 24;
 
         // 4. Delete Google Calendar event if it exists
         if (lesson.googleCalendarEventId) {
           try {
-            console.log(
-              `[CANCEL] Attempting to delete Google Calendar event: ${lesson.googleCalendarEventId}`,
-            );
-            const deleted = await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
-            if (deleted) {
-              console.log(
-                `[CANCEL] Deleted Google Calendar event: ${lesson.googleCalendarEventId}`,
-              );
-            } else {
-              console.log(
-                `[CANCEL] Failed to delete Google Calendar event: ${lesson.googleCalendarEventId}`,
-              );
-            }
+            await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
           } catch (error) {
             console.error("[CANCEL] Error deleting Google Calendar event:", error);
-            // Continue with cancellation even if calendar deletion fails
           }
         }
 
         // 5. Update the lesson status
-        console.log(`[CANCEL] Updating lesson ${input.lessonId} status to CANCELLED`);
         const updatedLesson = await ctx.prisma.lesson.update({
-          where: {
-            id: input.lessonId,
-          },
+          where: { id: input.lessonId },
           data: {
             status: LessonStatus.CANCELLED,
             cancellationReason: input.reason,
@@ -478,15 +440,31 @@ export const bookingRouter = createTRPCRouter({
           },
         });
 
-        console.log(`[CANCEL] Successfully cancelled lesson ${input.lessonId}`);
-        return updatedLesson;
-      } catch (error) {
-        console.error("[CANCEL] Error cancelling lesson:", error);
+        // 6. Notify all admin users
+        const adminUsers = await ctx.prisma.user.findMany({
+          where: { role: "ADMIN" },
+          select: { id: true },
+        });
 
-        if (error instanceof TRPCError) {
-          throw error;
+        const studentName = lesson.Student.User.name || "A student";
+        const lessonDate = format(lesson.startTime, "MMM d, yyyy");
+        const lessonTime = format(lesson.startTime, "h:mm a");
+        const lessonType = lesson.type.replace("_", " ");
+        const lateTag = isLateCancellation ? " (Late cancellation - within 24 hours)" : "";
+
+        for (const admin of adminUsers) {
+          await createNotification({
+            userId: admin.id,
+            title: "Lesson Cancelled by Student",
+            message: `${studentName} cancelled their ${lessonType} lesson on ${lessonDate} at ${lessonTime}${lateTag}`,
+            type: "WARNING",
+          });
         }
 
+        return { ...updatedLesson, isLateCancellation };
+      } catch (error) {
+        console.error("[CANCEL] Error cancelling lesson:", error);
+        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to cancel lesson",
