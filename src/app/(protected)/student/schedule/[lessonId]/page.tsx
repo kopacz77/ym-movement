@@ -8,6 +8,7 @@ import { TimezoneAwareLessonTime } from "@/components/TimezoneAwareLessonTime";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatRinkTime } from "@/lib/timezone";
+import { LessonCancelAction } from "./client";
 
 export const metadata: Metadata = {
   title: "Lesson Details",
@@ -77,7 +78,15 @@ export default async function LessonDetailsPage({
           </Link>
         </div>
 
-        <h1 className="text-2xl font-bold">Lesson Details</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Lesson Details</h1>
+          <LessonCancelAction
+            lessonId={lesson.id}
+            lessonPrice={lesson.price}
+            lessonStartTime={lesson.startTime.toISOString()}
+            lessonStatus={lesson.status}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-lg border p-4">
