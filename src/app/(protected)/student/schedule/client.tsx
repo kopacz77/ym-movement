@@ -134,7 +134,10 @@ export default function StudentScheduleClient() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">My Schedule</h1>
       </div>
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "upcoming" | "past" | "policies")}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as "upcoming" | "past" | "policies")}
+      >
         <div className="flex justify-between items-center">
           <TabsList>
             <TabsTrigger value="upcoming">Upcoming ({upcomingLessons.length})</TabsTrigger>
@@ -198,13 +201,13 @@ export default function StudentScheduleClient() {
                       before the lesson are free of charge.
                     </li>
                     <li>
-                      Cancellations made <span className="font-medium">within 24 hours</span> of
-                      the lesson are considered late cancellations. You will be{" "}
+                      Cancellations made <span className="font-medium">within 24 hours</span> of the
+                      lesson are considered late cancellations. You will be{" "}
                       <span className="font-medium">responsible for the full lesson fee</span>.
                     </li>
                     <li>
-                      To cancel a lesson, use the <span className="font-medium">Cancel</span>{" "}
-                      button on your lesson card or lesson details page.
+                      To cancel a lesson, use the <span className="font-medium">Cancel</span> button
+                      on your lesson card or lesson details page.
                     </li>
                   </ul>
                 </div>

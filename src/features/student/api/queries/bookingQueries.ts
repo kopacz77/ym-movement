@@ -464,7 +464,9 @@ export const bookingRouter = createTRPCRouter({
         return { ...updatedLesson, isLateCancellation };
       } catch (error) {
         console.error("[CANCEL] Error cancelling lesson:", error);
-        if (error instanceof TRPCError) throw error;
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to cancel lesson",

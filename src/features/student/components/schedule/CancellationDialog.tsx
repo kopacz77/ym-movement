@@ -91,10 +91,12 @@ export function CancellationDialog({
             <div className="flex items-start gap-2 p-4 bg-red-50 rounded-lg border border-red-200">
               <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-2">
-                <p className="font-semibold text-red-800">Late Cancellation — You Will Be Charged</p>
+                <p className="font-semibold text-red-800">
+                  Late Cancellation — You Will Be Charged
+                </p>
                 <p className="text-sm text-red-700">
-                  This lesson is within 24 hours. Per our cancellation policy, you are
-                  responsible for the full lesson fee of{" "}
+                  This lesson is within 24 hours. Per our cancellation policy, you are responsible
+                  for the full lesson fee of{" "}
                   <span className="font-semibold">${lessonPrice.toFixed(2)}</span>.
                 </p>
               </div>
@@ -105,8 +107,8 @@ export function CancellationDialog({
               <div>
                 <p className="font-medium text-yellow-800">Cancellation Policy</p>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Lessons must be cancelled at least 24 hours in advance. Late cancellations may still
-                  be charged. Frequent cancellations may affect your booking privileges.
+                  Lessons must be cancelled at least 24 hours in advance. Late cancellations may
+                  still be charged. Frequent cancellations may affect your booking privileges.
                 </p>
               </div>
             </div>
@@ -152,9 +154,7 @@ export function CancellationDialog({
               variant="destructive"
               onClick={handleCancellation}
               disabled={
-                isSubmitting ||
-                cancelLesson.isPending ||
-                (isLateCancellation && !feeAcknowledged)
+                isSubmitting || cancelLesson.isPending || (isLateCancellation && !feeAcknowledged)
               }
             >
               {isSubmitting || cancelLesson.isPending ? "Cancelling..." : "Confirm Cancellation"}

@@ -20,9 +20,13 @@ export function LessonCancelAction({
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   // Only show cancel button for scheduled lessons that haven't started
-  if (lessonStatus !== "SCHEDULED") return null;
+  if (lessonStatus !== "SCHEDULED") {
+    return null;
+  }
   const startTime = new Date(lessonStartTime);
-  if (startTime < new Date()) return null;
+  if (startTime < new Date()) {
+    return null;
+  }
 
   const hoursUntilLesson = (startTime.getTime() - Date.now()) / (1000 * 60 * 60);
   const isLateCancellation = hoursUntilLesson < 24;
