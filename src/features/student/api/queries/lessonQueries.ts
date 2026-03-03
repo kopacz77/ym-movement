@@ -40,38 +40,4 @@ export const lessonRouter = createTRPCRouter({
         });
       }
     }),
-
-  cancelLesson: protectedProcedure
-    .input(
-      z.object({
-        lessonId: z.string(),
-        reason: z.string().optional().default("No reason provided"),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      try {
-        // Update the lesson status to cancelled
-        const result = await ctx.prisma.lesson.update({
-          where: { id: input.lessonId },
-          data: {
-            status: "CANCELLED",
-            cancellationReason: input.reason,
-            cancellationTime: new Date(),
-          },
-        });
-
-        return result;
-      } catch (error) {
-        console.error("Error cancelling lesson:", error);
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to cancel lesson",
-          cause: error,
-        });
-      }
-    }),
 });
