@@ -216,7 +216,7 @@ export default function StudentScheduleClient() {
                   <h3 className="font-semibold text-base">Payment Policy</h3>
                   <ul className="list-disc list-inside text-sm text-gray-700 space-y-1.5">
                     <li>Payment is expected for each scheduled lesson.</li>
-                    <li>Accepted payment methods: Venmo and Zelle.</li>
+                    <li>Accepted payment methods: Venmo, Zelle, and Cash.</li>
                     <li>
                       Your payment reference code is provided after booking — include it with your
                       payment for tracking purposes.

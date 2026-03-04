@@ -384,10 +384,14 @@ export default function SignupPage() {
               By signing up, you agree to our{" "}
               <Link href="/terms" className="text-blue-500 hover:underline">
                 Terms of Service
-              </Link>{" "}
-              and{" "}
+              </Link>
+              ,{" "}
               <Link href="/privacy" className="text-blue-500 hover:underline">
                 Privacy Policy
+              </Link>
+              , and{" "}
+              <Link href="/policies" className="text-blue-500 hover:underline">
+                Lesson Policies
               </Link>
             </p>
           </CardFooter>
