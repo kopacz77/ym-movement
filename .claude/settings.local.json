@@ -95,7 +95,18 @@
       "Bash(env | grep -i \"VSCODE\\\\|TERM_PROGRAM\\\\|GIT_EXEC\" 2>/dev/null; echo \"---\"; git config --list | grep -i hook 2>/dev/null)",
       "Bash(git add .husky/pre-commit .husky/commit-msg && git commit -m \"fix: skip git hooks in VS Code UI, run on terminal only\" 2>&1)",
       "Bash(git:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_close",
+      "Bash(pkill:*)",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_console_messages"
     ],
     "deny": []
   }

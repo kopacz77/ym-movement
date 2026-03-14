@@ -133,7 +133,7 @@ export default function StudentPaymentsPage() {
                   <TableHead>Date</TableHead>
                   <TableHead>Lesson</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Reference</TableHead>
+                  <TableHead className="hidden sm:table-cell">Reference</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead />
                 </TableRow>
@@ -141,10 +141,16 @@ export default function StudentPaymentsPage() {
               <TableBody>
                 {filteredPayments.map((lesson) => (
                   <TableRow key={lesson.id}>
-                    <TableCell>{formatUtcDate(lesson.startTime)}</TableCell>
-                    <TableCell>{lesson.type.replace("_", " ")} Lesson</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {formatUtcDate(lesson.startTime)}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {lesson.type.replace("_", " ")} Lesson
+                    </TableCell>
                     <TableCell>${lesson.payment?.amount.toFixed(2)}</TableCell>
-                    <TableCell>{lesson.payment?.referenceCode}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {lesson.payment?.referenceCode}
+                    </TableCell>
                     <TableCell>{getStatusBadge(lesson.payment?.status || "")}</TableCell>
                     <TableCell>
                       <Link href={`/student/schedule/${lesson.id}`}>

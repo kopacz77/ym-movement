@@ -6,6 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 
+function scrollToSection(id: string, buttonEl: HTMLElement) {
+  // AppLayout renders children in both desktop and mobile containers,
+  // creating duplicate IDs. Scope search to the same <main> as the button.
+  const container = buttonEl.closest("main") || document;
+  const el = container.querySelector(`[id="${id}"]`);
+  if (el instanceof HTMLElement) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 export default function StudentGuidePage() {
   return (
     <div className="space-y-6">
@@ -28,48 +38,54 @@ export default function StudentGuidePage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            <a
-              href="#getting-started"
-              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+            <button
+              type="button"
+              onClick={(e) => scrollToSection("getting-started", e.currentTarget)}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <User className="h-4 w-4 text-blue-600" />
               <span className="font-medium">Getting Started</span>
-            </a>
-            <a
-              href="#booking"
-              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={(e) => scrollToSection("booking", e.currentTarget)}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Calendar className="h-4 w-4 text-green-600" />
               <span className="font-medium">Booking Lessons</span>
-            </a>
-            <a
-              href="#schedule"
-              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={(e) => scrollToSection("schedule", e.currentTarget)}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Calendar className="h-4 w-4 text-purple-600" />
               <span className="font-medium">My Schedule</span>
-            </a>
-            <a
-              href="#payments"
-              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={(e) => scrollToSection("payments", e.currentTarget)}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <CreditCard className="h-4 w-4 text-orange-600" />
               <span className="font-medium">Payments</span>
-            </a>
-            <a
-              href="#profile"
-              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={(e) => scrollToSection("profile", e.currentTarget)}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Settings className="h-4 w-4 text-gray-600" />
               <span className="font-medium">Profile & Settings</span>
-            </a>
-            <a
-              href="#faq"
-              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={(e) => scrollToSection("faq", e.currentTarget)}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <HelpCircle className="h-4 w-4 text-pink-600" />
               <span className="font-medium">Common Questions</span>
-            </a>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -432,27 +448,29 @@ function GuideSection({
   children: React.ReactNode;
 }) {
   return (
-    <Collapsible defaultOpen className="group" id={id}>
-      <Card>
-        <CollapsibleTrigger className="w-full">
-          <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
-            <CardTitle className="flex items-center justify-between text-left">
-              <span className="flex items-center gap-2">
-                {icon}
-                {title}
-              </span>
-              <span className="text-sm text-muted-foreground group-data-[state=open]:rotate-180 transition-transform">
-                ▼
-              </span>
-            </CardTitle>
-            <CardDescription className="text-left">{description}</CardDescription>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <CardContent className="pt-0">{children}</CardContent>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+    <div id={id} className="scroll-mt-4 lg:scroll-mt-28">
+      <Collapsible defaultOpen className="group">
+        <Card>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+              <CardTitle className="flex items-center justify-between text-left">
+                <span className="flex items-center gap-2">
+                  {icon}
+                  {title}
+                </span>
+                <span className="text-sm text-muted-foreground group-data-[state=open]:rotate-180 transition-transform">
+                  ▼
+                </span>
+              </CardTitle>
+              <CardDescription className="text-left">{description}</CardDescription>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">{children}</CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+    </div>
   );
 }
 
