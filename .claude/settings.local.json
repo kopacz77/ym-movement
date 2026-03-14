@@ -106,7 +106,10 @@
       "mcp__playwright__browser_close",
       "Bash(pkill:*)",
       "mcp__playwright__browser_press_key",
-      "mcp__playwright__browser_console_messages"
+      "mcp__playwright__browser_console_messages",
+      "Skill(gsd:new-project)",
+      "Bash(lsof:*)",
+      "Bash(fuser:*)"
     ],
     "deny": []
   }

@@ -2,21 +2,24 @@
 "use client";
 
 import { BookOpen, Calendar, CreditCard, HelpCircle, Plus, Settings, User, X } from "lucide-react";
+import { useId } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 
-function scrollToSection(id: string, buttonEl: HTMLElement) {
-  // AppLayout renders children in both desktop and mobile containers,
-  // creating duplicate IDs. Scope search to the same <main> as the button.
-  const container = buttonEl.closest("main") || document;
-  const el = container.querySelector(`[id="${id}"]`);
-  if (el instanceof HTMLElement) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
 export default function StudentGuidePage() {
+  // useId() gives each component instance a unique prefix, solving the
+  // duplicate-ID problem caused by AppLayout rendering children twice
+  // (desktop + mobile containers).
+  const uid = useId();
+
+  function scrollToSection(id: string) {
+    const el = document.getElementById(`${uid}-${id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -40,7 +43,7 @@ export default function StudentGuidePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <button
               type="button"
-              onClick={(e) => scrollToSection("getting-started", e.currentTarget)}
+              onClick={() => scrollToSection("getting-started")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <User className="h-4 w-4 text-blue-600" />
@@ -48,7 +51,7 @@ export default function StudentGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("booking", e.currentTarget)}
+              onClick={() => scrollToSection("booking")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Calendar className="h-4 w-4 text-green-600" />
@@ -56,7 +59,7 @@ export default function StudentGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("schedule", e.currentTarget)}
+              onClick={() => scrollToSection("schedule")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Calendar className="h-4 w-4 text-purple-600" />
@@ -64,7 +67,7 @@ export default function StudentGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("payments", e.currentTarget)}
+              onClick={() => scrollToSection("payments")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <CreditCard className="h-4 w-4 text-orange-600" />
@@ -72,7 +75,7 @@ export default function StudentGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("profile", e.currentTarget)}
+              onClick={() => scrollToSection("profile")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Settings className="h-4 w-4 text-gray-600" />
@@ -80,7 +83,7 @@ export default function StudentGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("faq", e.currentTarget)}
+              onClick={() => scrollToSection("faq")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <HelpCircle className="h-4 w-4 text-pink-600" />
@@ -94,6 +97,7 @@ export default function StudentGuidePage() {
       <div className="space-y-4">
         {/* Getting Started Section */}
         <GuideSection
+          uid={uid}
           id="getting-started"
           icon={<User className="h-5 w-5" />}
           title="Getting Started"
@@ -139,6 +143,7 @@ export default function StudentGuidePage() {
 
         {/* Booking Lessons Section */}
         <GuideSection
+          uid={uid}
           id="booking"
           icon={<Calendar className="h-5 w-5" />}
           title="Booking Lessons"
@@ -197,6 +202,7 @@ export default function StudentGuidePage() {
 
         {/* Schedule Section */}
         <GuideSection
+          uid={uid}
           id="schedule"
           icon={<Calendar className="h-5 w-5" />}
           title="My Schedule"
@@ -252,6 +258,7 @@ export default function StudentGuidePage() {
 
         {/* Payments Section */}
         <GuideSection
+          uid={uid}
           id="payments"
           icon={<CreditCard className="h-5 w-5" />}
           title="Payments"
@@ -329,6 +336,7 @@ export default function StudentGuidePage() {
 
         {/* Profile & Settings Section */}
         <GuideSection
+          uid={uid}
           id="profile"
           icon={<Settings className="h-5 w-5" />}
           title="Profile & Settings"
@@ -375,6 +383,7 @@ export default function StudentGuidePage() {
 
         {/* FAQ Section */}
         <GuideSection
+          uid={uid}
           id="faq"
           icon={<HelpCircle className="h-5 w-5" />}
           title="Common Questions"
@@ -435,12 +444,14 @@ export default function StudentGuidePage() {
 
 // Helper Components
 function GuideSection({
+  uid,
   id,
   icon,
   title,
   description,
   children,
 }: {
+  uid: string;
   id: string;
   icon: React.ReactNode;
   title: string;
@@ -448,7 +459,7 @@ function GuideSection({
   children: React.ReactNode;
 }) {
   return (
-    <div id={id} className="scroll-mt-4 lg:scroll-mt-28">
+    <div id={`${uid}-${id}`} className="scroll-mt-4 lg:scroll-mt-28">
       <Collapsible defaultOpen className="group">
         <Card>
           <CollapsibleTrigger className="w-full">

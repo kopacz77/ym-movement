@@ -12,21 +12,24 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import { useId } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 
-function scrollToSection(id: string, buttonEl: HTMLElement) {
-  // AppLayout renders children in both desktop and mobile containers,
-  // creating duplicate IDs. Scope search to the same <main> as the button.
-  const container = buttonEl.closest("main") || document;
-  const el = container.querySelector(`[id="${id}"]`);
-  if (el instanceof HTMLElement) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
 export default function AdminGuidePage() {
+  // useId() gives each component instance a unique prefix, solving the
+  // duplicate-ID problem caused by AppLayout rendering children twice
+  // (desktop + mobile containers).
+  const uid = useId();
+
+  function scrollToSection(id: string) {
+    const el = document.getElementById(`${uid}-${id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -50,7 +53,7 @@ export default function AdminGuidePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <button
               type="button"
-              onClick={(e) => scrollToSection("students", e.currentTarget)}
+              onClick={() => scrollToSection("students")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Users className="h-4 w-4 text-blue-600" />
@@ -58,7 +61,7 @@ export default function AdminGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("scheduling", e.currentTarget)}
+              onClick={() => scrollToSection("scheduling")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Calendar className="h-4 w-4 text-green-600" />
@@ -66,7 +69,7 @@ export default function AdminGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("payments", e.currentTarget)}
+              onClick={() => scrollToSection("payments")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <CreditCard className="h-4 w-4 text-purple-600" />
@@ -74,7 +77,7 @@ export default function AdminGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("lesson-types", e.currentTarget)}
+              onClick={() => scrollToSection("lesson-types")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <FileText className="h-4 w-4 text-orange-600" />
@@ -82,7 +85,7 @@ export default function AdminGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("settings", e.currentTarget)}
+              onClick={() => scrollToSection("settings")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <Settings className="h-4 w-4 text-gray-600" />
@@ -90,7 +93,7 @@ export default function AdminGuidePage() {
             </button>
             <button
               type="button"
-              onClick={(e) => scrollToSection("tips", e.currentTarget)}
+              onClick={() => scrollToSection("tips")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
               <BookOpen className="h-4 w-4 text-pink-600" />
@@ -104,6 +107,7 @@ export default function AdminGuidePage() {
       <div className="space-y-4">
         {/* Students Section */}
         <GuideSection
+          uid={uid}
           id="students"
           icon={<Users className="h-5 w-5" />}
           title="Managing Students"
@@ -164,6 +168,7 @@ export default function AdminGuidePage() {
 
         {/* Scheduling Section */}
         <GuideSection
+          uid={uid}
           id="scheduling"
           icon={<Calendar className="h-5 w-5" />}
           title="Scheduling Lessons"
@@ -252,6 +257,7 @@ export default function AdminGuidePage() {
 
         {/* Lesson Types Section */}
         <GuideSection
+          uid={uid}
           id="lesson-types"
           icon={<FileText className="h-5 w-5" />}
           title="Lesson Types & Pricing"
@@ -301,6 +307,7 @@ export default function AdminGuidePage() {
 
         {/* Payments Section */}
         <GuideSection
+          uid={uid}
           id="payments"
           icon={<CreditCard className="h-5 w-5" />}
           title="Payment Tracking"
@@ -369,6 +376,7 @@ export default function AdminGuidePage() {
 
         {/* Settings Section */}
         <GuideSection
+          uid={uid}
           id="settings"
           icon={<Settings className="h-5 w-5" />}
           title="Settings & Configuration"
@@ -418,6 +426,7 @@ export default function AdminGuidePage() {
 
         {/* Tips & Tricks Section */}
         <GuideSection
+          uid={uid}
           id="tips"
           icon={<BookOpen className="h-5 w-5" />}
           title="Tips & Best Practices"
@@ -481,12 +490,14 @@ export default function AdminGuidePage() {
 
 // Helper Components
 function GuideSection({
+  uid,
   id,
   icon,
   title,
   description,
   children,
 }: {
+  uid: string;
   id: string;
   icon: React.ReactNode;
   title: string;
@@ -494,7 +505,7 @@ function GuideSection({
   children: React.ReactNode;
 }) {
   return (
-    <div id={id} className="scroll-mt-4 lg:scroll-mt-28">
+    <div id={`${uid}-${id}`} className="scroll-mt-4 lg:scroll-mt-28">
       <Collapsible defaultOpen className="group">
         <Card>
           <CollapsibleTrigger className="w-full">
