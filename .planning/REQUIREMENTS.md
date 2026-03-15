@@ -31,7 +31,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Scheduling
 
 - [ ] **SCHD-01**: Time slots (RinkTimeSlot) are associated with a specific coach via coachId
-- [ ] **SCHD-02**: Conflict detection is scoped per-coach — different coaches can have overlapping slots at different rinks
+- [ ] **SCHD-02**: Conflict detection is scoped per-coach -- different coaches can have overlapping slots at different rinks
 - [ ] **SCHD-03**: All existing time slots, lessons, and payments are migrated to associate with Yura as coach
 - [ ] **SCHD-04**: Each coach can manage their own blocked dates (travel, competitions) independently
 
@@ -94,38 +94,38 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| AUTH-04 | TBD | Pending |
-| CMGT-01 | TBD | Pending |
-| CMGT-02 | TBD | Pending |
-| CMGT-03 | TBD | Pending |
-| CMGT-04 | TBD | Pending |
-| CDSH-01 | TBD | Pending |
-| CDSH-02 | TBD | Pending |
-| CDSH-03 | TBD | Pending |
-| CDSH-04 | TBD | Pending |
-| SCHD-01 | TBD | Pending |
-| SCHD-02 | TBD | Pending |
-| SCHD-03 | TBD | Pending |
-| SCHD-04 | TBD | Pending |
-| BOOK-01 | TBD | Pending |
-| BOOK-02 | TBD | Pending |
-| BOOK-03 | TBD | Pending |
-| SADM-01 | TBD | Pending |
-| SADM-02 | TBD | Pending |
-| SADM-03 | TBD | Pending |
-| SADM-04 | TBD | Pending |
-| INTG-01 | TBD | Pending |
-| INTG-02 | TBD | Pending |
-| INTG-03 | TBD | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| CMGT-01 | Phase 2 | Pending |
+| CMGT-02 | Phase 2 | Pending |
+| CMGT-03 | Phase 2 | Pending |
+| CMGT-04 | Phase 2 | Pending |
+| CDSH-01 | Phase 2 | Pending |
+| CDSH-02 | Phase 2 | Pending |
+| CDSH-03 | Phase 2 | Pending |
+| CDSH-04 | Phase 2 | Pending |
+| SCHD-01 | Phase 4 | Pending |
+| SCHD-02 | Phase 4 | Pending |
+| SCHD-03 | Phase 1 | Pending |
+| SCHD-04 | Phase 4 | Pending |
+| BOOK-01 | Phase 5 | Pending |
+| BOOK-02 | Phase 5 | Pending |
+| BOOK-03 | Phase 5 | Pending |
+| SADM-01 | Phase 3 | Pending |
+| SADM-02 | Phase 3 | Pending |
+| SADM-03 | Phase 3 | Pending |
+| SADM-04 | Phase 3 | Pending |
+| INTG-01 | Phase 6 | Pending |
+| INTG-02 | Phase 7 | Pending |
+| INTG-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 26 total
-- Mapped to phases: 0
-- Unmapped: 26
+- Mapped to phases: 26
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after roadmap creation*
