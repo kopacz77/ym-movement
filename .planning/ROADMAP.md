@@ -18,9 +18,9 @@ This roadmap transforms the existing single-coach YM Movement scheduling platfor
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Backend auth layer: TRPC middleware update, role helper utility, JWT callback refresh
-- [ ] 01-02-PLAN.md -- Frontend auth layer: Next.js middleware, login redirect, type definitions, auth contexts
-- [ ] 01-03-PLAN.md -- Schema migration and data backfill: Coach/CoachStudent models, coachId columns, migration script
+- [x] 01-01-PLAN.md -- Backend auth layer: TRPC middleware update, role helper utility, JWT callback refresh
+- [x] 01-02-PLAN.md -- Frontend auth layer: Next.js middleware, login redirect, type definitions, auth contexts
+- [x] 01-03-PLAN.md -- Schema migration and data backfill: Coach/CoachStudent models, coachId columns, migration script
 
 **Success Criteria:**
 1. Yura can log in with her existing credentials and access all current admin features without interruption (backward compatibility preserved)
@@ -129,7 +129,7 @@ Plans:
 
 | Phase | Status | Completed |
 |-------|--------|-----------|
-| 1 - Auth, Schema, and Data Migration | Planned | -- |
+| 1 - Auth, Schema, and Data Migration | Complete | 2026-03-15 |
 | 2 - Coach Dashboard, Profile, and Onboarding | Not started | -- |
 | 3 - Query Scoping and Super Admin Dashboard | Not started | -- |
 | 4 - Per-Coach Scheduling | Not started | -- |

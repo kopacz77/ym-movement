@@ -94,9 +94,9 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
 | AUTH-04 | Phase 2 | Pending |
 | CMGT-01 | Phase 2 | Pending |
 | CMGT-02 | Phase 2 | Pending |
@@ -108,7 +108,7 @@ Which phases cover which requirements. Updated by create-roadmap.
 | CDSH-04 | Phase 2 | Pending |
 | SCHD-01 | Phase 4 | Pending |
 | SCHD-02 | Phase 4 | Pending |
-| SCHD-03 | Phase 1 | Pending |
+| SCHD-03 | Phase 1 | Complete |
 | SCHD-04 | Phase 4 | Pending |
 | BOOK-01 | Phase 5 | Pending |
 | BOOK-02 | Phase 5 | Pending |
@@ -128,4 +128,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after roadmap creation*
+*Last updated: 2026-03-15 after Phase 1 completion*
