@@ -28,6 +28,26 @@ const StudentActivityChart = dynamic(
   },
 );
 
+const CoachOverviewCards = dynamic(
+  () =>
+    import("@/features/admin/components/analytics/CoachOverviewCards").then((mod) => ({
+      default: mod.CoachOverviewCards,
+    })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
+const RevenueBreakdownChart = dynamic(
+  () =>
+    import("@/features/admin/components/analytics/RevenueBreakdownChart").then((mod) => ({
+      default: mod.RevenueBreakdownChart,
+    })),
+  {
+    loading: () => <LoadingSkeleton />,
+  },
+);
+
 export default function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-8">
@@ -114,6 +134,30 @@ export default function AdminDashboardPage() {
               <StudentActivityChart />
             </ErrorBoundary>
           </div>
+        </div>
+      </div>
+
+      {/* Coaches Overview Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold tracking-tight">Coaches</h2>
+        </div>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSkeleton />}>
+            <CoachOverviewCards />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+
+      {/* Revenue Breakdown Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold tracking-tight">Revenue Breakdown</h2>
+        </div>
+        <div className="p-2 bg-gradient-to-br from-indigo-100/60 via-blue-50/70 to-slate-100/60 rounded-xl border border-indigo-200/50 shadow-lg">
+          <ErrorBoundary>
+            <RevenueBreakdownChart />
+          </ErrorBoundary>
         </div>
       </div>
     </div>
