@@ -72,6 +72,12 @@ Progress: █████████░░░░░░░░░░░ 46% (12/~
 - [02-06] Approval uses $transaction for atomic RinkTimeSlot creation + proposal status update
 - [02-06] RinkTimeSlot field is isActive (not isAvailable as plan stated) -- corrected to match schema
 - [02-06] Deny flow opens dialog for optional admin notes (coach sees denial reason in their list)
+- [03-02] Payment coachId filtering uses Lesson relation (Lesson: { coachId }) since Payment has no direct coachId column
+- [03-02] Student count in getOverview NOT scoped by coachId (students are shared resources)
+- [03-02] bookingQueries.ts keeps protectedProcedure (student-facing, not admin-only)
+- [03-02] coachId inherited from timeSlot.coachId in lesson creation (not from user input)
+- [03-02] progressQueries.ts excluded (entirely commented-out dead code)
+- [03-02] cache-wrapper.ts deferred (different abstraction level)
 - [03-03] User model has no image field -- removed from getCoachDetail select (plan specified image but schema lacks it)
 - [03-03] Payment scoping always through Lesson relation (Lesson: { coachId }) per research Pitfall 1
 
