@@ -51,12 +51,13 @@ export default function LoginPage() {
 
       const userData = await response.json();
 
-      if (userData.role === "ADMIN") {
+      if (userData.role === "ADMIN" || userData.role === "SUPER_ADMIN") {
         router.push("/admin/dashboard");
+      } else if (userData.role === "COACH") {
+        router.push("/coach/dashboard");
       } else if (userData.role === "STUDENT") {
         router.push("/student/dashboard");
       } else {
-        // Handle unexpected role
         console.error("Unexpected user role:", userData.role);
         toast.error("Login Error", {
           description: "User role not recognized",

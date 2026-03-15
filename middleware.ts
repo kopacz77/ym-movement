@@ -62,7 +62,12 @@ export async function middleware(request: NextRequest) {
   if (isAuthenticated && isPublicPath && path !== "/") {
     // Redirect to the appropriate dashboard based on role
     const role = token?.role as string;
-    const redirectPath = role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
+    const redirectPath =
+      role === "ADMIN" || role === "SUPER_ADMIN"
+        ? "/admin/dashboard"
+        : role === "COACH"
+          ? "/coach/dashboard"
+          : "/student/dashboard";
     const dashboardUrl = new URL(redirectPath, request.url);
     return NextResponse.redirect(dashboardUrl);
   }
@@ -72,24 +77,44 @@ export async function middleware(request: NextRequest) {
     const role = token?.role as string;
 
     // Validate role is one of expected values
-    if (!["ADMIN", "STUDENT"].includes(role)) {
+    if (!["ADMIN", "SUPER_ADMIN", "COACH", "STUDENT"].includes(role)) {
       console.error(`Invalid role detected: ${role} for user ${token.id}`);
       const loginUrl = new URL("/auth/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Prevent students from accessing admin routes
-    if (path.startsWith("/admin") && role !== "ADMIN") {
-      console.warn(`Student ${token.id} attempted to access admin route: ${path}`);
-      const studentDashboard = new URL("/student/dashboard", request.url);
-      return NextResponse.redirect(studentDashboard);
+    // Prevent unauthorized access to admin routes
+    if (path.startsWith("/admin") && role !== "ADMIN" && role !== "SUPER_ADMIN") {
+      console.warn(`User ${token.id} (role: ${role}) attempted to access admin route: ${path}`);
+      const dashboard = new URL(
+        role === "COACH" ? "/coach/dashboard" : "/student/dashboard",
+        request.url,
+      );
+      return NextResponse.redirect(dashboard);
     }
 
-    // Prevent admins from accessing student routes
+    // Prevent unauthorized access to coach routes (SUPER_ADMIN can access coach routes too)
+    if (
+      path.startsWith("/coach") &&
+      role !== "COACH" &&
+      role !== "SUPER_ADMIN" &&
+      role !== "ADMIN"
+    ) {
+      console.warn(`User ${token.id} (role: ${role}) attempted to access coach route: ${path}`);
+      const dashboard = new URL("/student/dashboard", request.url);
+      return NextResponse.redirect(dashboard);
+    }
+
+    // Prevent non-students from accessing student routes
     if (path.startsWith("/student") && role !== "STUDENT") {
-      console.warn(`Admin ${token.id} attempted to access student route: ${path}`);
-      const adminDashboard = new URL("/admin/dashboard", request.url);
-      return NextResponse.redirect(adminDashboard);
+      console.warn(`User ${token.id} (role: ${role}) attempted to access student route: ${path}`);
+      const dashboard = new URL(
+        role === "ADMIN" || role === "SUPER_ADMIN"
+          ? "/admin/dashboard"
+          : "/coach/dashboard",
+        request.url,
+      );
+      return NextResponse.redirect(dashboard);
     }
   }
 
@@ -101,6 +126,7 @@ export const config = {
     // Only match specific routes, completely avoiding static assets
     "/",
     "/admin/:path*",
+    "/coach/:path*",
     "/student/:path*",
     "/auth/:path*",
     "/terms",
