@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/schedule/recurringPatternQueries.ts
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 export const recurringPatternRouter = createTRPCRouter({
-  createRecurringPattern: protectedProcedure
+  createRecurringPattern: adminProcedure
     .input(
       z.object({
         rinkId: z.string(),
@@ -15,6 +15,7 @@ export const recurringPatternRouter = createTRPCRouter({
         duration: z.number().min(30),
         maxStudents: z.number().min(1),
         isActive: z.boolean().default(true),
+        coachId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -46,6 +47,7 @@ export const recurringPatternRouter = createTRPCRouter({
               maxStudents: input.maxStudents,
               isActive: input.isActive,
               recurringId: pattern.id,
+              ...(input.coachId && { coachId: input.coachId }),
             });
           }
 

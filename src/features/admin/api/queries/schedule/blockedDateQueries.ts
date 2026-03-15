@@ -4,7 +4,7 @@
 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 // Input validation schemas
 const createBlockedDateSchema = z
@@ -14,6 +14,7 @@ const createBlockedDateSchema = z
     startDate: z.date(),
     endDate: z.date(),
     type: z.enum(["TRAVEL", "COMPETITION", "OTHER"]).default("TRAVEL"),
+    coachId: z.string().optional(),
   })
   .refine((data) => data.endDate >= data.startDate, {
     message: "End date must be after or equal to start date",
@@ -45,13 +46,19 @@ const updateBlockedDateSchema = z
 const getBlockedDatesSchema = z.object({
   startDate: z.date().optional(),
   endDate: z.date().optional(),
+  coachId: z.string().optional(),
 });
 
 export const blockedDateRouter = createTRPCRouter({
   // Get all blocked date ranges (with optional date filtering)
-  getBlockedDates: protectedProcedure.input(getBlockedDatesSchema).query(async ({ ctx, input }) => {
+  getBlockedDates: adminProcedure.input(getBlockedDatesSchema).query(async ({ ctx, input }) => {
     try {
       const where: any = {};
+
+      // Filter by coachId when provided
+      if (input.coachId) {
+        where.coachId = input.coachId;
+      }
 
       if (input.startDate || input.endDate) {
         where.OR = [
@@ -132,13 +139,14 @@ export const blockedDateRouter = createTRPCRouter({
   }),
 
   // Create a new blocked date range
-  createBlockedDate: protectedProcedure
+  createBlockedDate: adminProcedure
     .input(createBlockedDateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        // Check for overlapping blocked date ranges
+        // Check for overlapping blocked date ranges (scoped per-coach)
         const overlapping = await ctx.prisma.blockedDateRange.findFirst({
           where: {
+            ...(input.coachId && { coachId: input.coachId }),
             OR: [
               // New range starts during existing range
               {
@@ -170,6 +178,7 @@ export const blockedDateRouter = createTRPCRouter({
           data: {
             ...input,
             createdById: ctx.session.user.id,
+            ...(input.coachId && { coachId: input.coachId }),
           },
           include: {
             User: {
@@ -200,7 +209,7 @@ export const blockedDateRouter = createTRPCRouter({
     }),
 
   // Update a blocked date range
-  updateBlockedDate: protectedProcedure
+  updateBlockedDate: adminProcedure
     .input(updateBlockedDateSchema)
     .mutation(async ({ ctx, input }) => {
       try {
@@ -218,7 +227,7 @@ export const blockedDateRouter = createTRPCRouter({
           });
         }
 
-        // Check for overlapping ranges (excluding current one)
+        // Check for overlapping ranges (excluding current one, scoped per-coach)
         if (updateData.startDate || updateData.endDate) {
           const startDate = updateData.startDate || existing.startDate;
           const endDate = updateData.endDate || existing.endDate;
@@ -226,6 +235,7 @@ export const blockedDateRouter = createTRPCRouter({
           const overlapping = await ctx.prisma.blockedDateRange.findFirst({
             where: {
               id: { not: id },
+              ...(existing.coachId && { coachId: existing.coachId }),
               OR: [
                 {
                   startDate: { lte: startDate },
@@ -283,7 +293,7 @@ export const blockedDateRouter = createTRPCRouter({
     }),
 
   // Delete a blocked date range
-  deleteBlockedDate: protectedProcedure
+  deleteBlockedDate: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
