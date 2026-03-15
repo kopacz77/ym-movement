@@ -8,6 +8,7 @@ import { paymentRouter } from "./paymentQueries";
 import { scheduleRouter } from "./schedule"; // Updated import
 import { settingsRouter } from "./settingsQueries";
 import { studentRouter } from "./student"; // Updated import
+import { superAdminDashboardRouter } from "./superAdminQueries";
 
 export const adminRouter = createTRPCRouter({
   analytics: analyticsRouter,
@@ -17,5 +18,6 @@ export const adminRouter = createTRPCRouter({
   schedule: scheduleRouter, // Using the refactored schedule router
   settings: settingsRouter,
   student: studentRouter, // Using the refactored student router
+  superAdmin: superAdminDashboardRouter,
   auth: authRouter,
 });
