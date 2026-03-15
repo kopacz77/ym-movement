@@ -2,12 +2,12 @@
 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 import { defaultPricingSchema, studentPricingSchema } from "./schemas";
 
 export const pricingQueries = createTRPCRouter({
   // Query: Get default pricing
-  getDefaultPricing: protectedProcedure.query(async ({ ctx }) => {
+  getDefaultPricing: adminProcedure.query(async ({ ctx }) => {
     try {
       console.log("Fetching default pricing");
       // Get the first DefaultPricing record
@@ -38,7 +38,7 @@ export const pricingQueries = createTRPCRouter({
   }),
 
   // Mutation: Update default pricing
-  updateDefaultPricing: protectedProcedure
+  updateDefaultPricing: adminProcedure
     .input(defaultPricingSchema)
     .mutation(async ({ ctx, input }) => {
       try {
@@ -69,7 +69,7 @@ export const pricingQueries = createTRPCRouter({
     }),
 
   // Query: Get student-specific pricing
-  getStudentPricing: protectedProcedure
+  getStudentPricing: adminProcedure
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
@@ -120,7 +120,7 @@ export const pricingQueries = createTRPCRouter({
     }),
 
   // Mutation: Update student-specific pricing
-  updateStudentPricing: protectedProcedure
+  updateStudentPricing: adminProcedure
     .input(studentPricingSchema)
     .mutation(async ({ ctx, input }) => {
       try {

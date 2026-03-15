@@ -2,11 +2,11 @@ import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/student/noteQueries.ts
 import { z } from "zod";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 export const noteQueries = createTRPCRouter({
   // Query: Get student notes
-  getStudentNotes: protectedProcedure
+  getStudentNotes: adminProcedure
     .input(
       z.object({
         studentId: z.string(),
@@ -42,7 +42,7 @@ export const noteQueries = createTRPCRouter({
     }),
 
   // Mutation: Add student note
-  addStudentNote: protectedProcedure
+  addStudentNote: adminProcedure
     .input(
       z.object({
         studentId: z.string(),
@@ -80,7 +80,7 @@ export const noteQueries = createTRPCRouter({
     }),
 
   // Mutation: Delete student note
-  deleteStudentNote: protectedProcedure
+  deleteStudentNote: adminProcedure
     .input(
       z.object({
         noteId: z.string(),

@@ -3,11 +3,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendApprovalEmail } from "@/lib/email";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 export const approvalQueries = createTRPCRouter({
   // Query: Get pending approvals
-  getPendingApprovals: protectedProcedure.query(async ({ ctx }) => {
+  getPendingApprovals: adminProcedure.query(async ({ ctx }) => {
     try {
       console.log("Fetching pending approvals");
 
@@ -43,7 +43,7 @@ export const approvalQueries = createTRPCRouter({
   }),
 
   // Mutation: Approve student
-  approveStudent: protectedProcedure
+  approveStudent: adminProcedure
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -134,7 +134,7 @@ export const approvalQueries = createTRPCRouter({
     }),
 
   // Mutation: Approve all students (development helper)
-  approveAllStudents: protectedProcedure.mutation(async ({ ctx }) => {
+  approveAllStudents: adminProcedure.mutation(async ({ ctx }) => {
     try {
       console.log("Approving all unapproved students");
 
@@ -173,7 +173,7 @@ export const approvalQueries = createTRPCRouter({
   }),
 
   // Mutation: Reject student
-  rejectStudent: protectedProcedure
+  rejectStudent: adminProcedure
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {

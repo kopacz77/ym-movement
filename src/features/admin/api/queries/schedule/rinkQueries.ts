@@ -2,7 +2,7 @@
 
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 const createRinkSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
@@ -32,7 +32,7 @@ const deleteRinkSchema = z.object({
 });
 
 export const rinkRouter = createTRPCRouter({
-  getRinks: protectedProcedure.query(async ({ ctx }) => {
+  getRinks: adminProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.prisma.rink.findMany({
         select: {
@@ -56,7 +56,7 @@ export const rinkRouter = createTRPCRouter({
     }
   }),
 
-  createRink: protectedProcedure.input(createRinkSchema).mutation(async ({ ctx, input }) => {
+  createRink: adminProcedure.input(createRinkSchema).mutation(async ({ ctx, input }) => {
     try {
       // Check if rink name already exists
       const existingRink = await ctx.prisma.rink.findFirst({
@@ -97,7 +97,7 @@ export const rinkRouter = createTRPCRouter({
     }
   }),
 
-  updateRink: protectedProcedure.input(updateRinkSchema).mutation(async ({ ctx, input }) => {
+  updateRink: adminProcedure.input(updateRinkSchema).mutation(async ({ ctx, input }) => {
     try {
       // Check if rink exists
       const existingRink = await ctx.prisma.rink.findUnique({
@@ -154,7 +154,7 @@ export const rinkRouter = createTRPCRouter({
     }
   }),
 
-  deleteRink: protectedProcedure.input(deleteRinkSchema).mutation(async ({ ctx, input }) => {
+  deleteRink: adminProcedure.input(deleteRinkSchema).mutation(async ({ ctx, input }) => {
     try {
       // Check if rink exists
       const existingRink = await ctx.prisma.rink.findUnique({

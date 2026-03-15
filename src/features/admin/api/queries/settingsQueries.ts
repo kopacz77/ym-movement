@@ -5,7 +5,7 @@ import type { PrismaClient } from "@prisma/client";
 import { Level, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 // Define zod schema for our settings
 const operationalSettingsSchema = z.object({
@@ -85,7 +85,7 @@ type PrismaWithSettings = PrismaClient & {
 };
 
 export const settingsRouter = createTRPCRouter({
-  saveSettings: protectedProcedure.input(settingsInputSchema).mutation(async ({ ctx, input }) => {
+  saveSettings: adminProcedure.input(settingsInputSchema).mutation(async ({ ctx, input }) => {
     try {
       // Using a transaction to ensure all settings are saved or none
       await ctx.prisma.$transaction(async (prisma) => {
@@ -147,7 +147,7 @@ export const settingsRouter = createTRPCRouter({
     }
   }),
 
-  getSettings: protectedProcedure.query(async ({ ctx }) => {
+  getSettings: adminProcedure.query(async ({ ctx }) => {
     try {
       // Fetch settings from database
       const [operationalSettings, paymentSettings, rinkAreasSettings] = await Promise.all([
@@ -228,7 +228,7 @@ export const settingsRouter = createTRPCRouter({
   }),
 
   // Reset settings to defaults
-  resetSettings: protectedProcedure.mutation(async ({ ctx }) => {
+  resetSettings: adminProcedure.mutation(async ({ ctx }) => {
     try {
       // Delete all settings records
       await (ctx.prisma as PrismaWithSettings).settings.deleteMany({

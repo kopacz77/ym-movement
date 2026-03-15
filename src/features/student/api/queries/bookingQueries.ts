@@ -229,6 +229,7 @@ export const bookingRouter = createTRPCRouter({
               studentId: input.studentId,
               timeSlotId: input.timeSlotId,
               rinkId: timeSlot.rinkId,
+              coachId: timeSlot.coachId || undefined,
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
               duration: Math.round(

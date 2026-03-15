@@ -6,13 +6,13 @@ import { z } from "zod";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendWelcomeEmail } from "@/lib/email";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
 import { type StudentWithInviteStatus, studentFormSchema } from "./schemas";
 
 export const studentQueries = createTRPCRouter({
   // Debug query: Get student count and approval status
-  getStudentStats: protectedProcedure.query(async ({ ctx }) => {
+  getStudentStats: adminProcedure.query(async ({ ctx }) => {
     try {
       const [total, approved, unapproved] = await Promise.all([
         ctx.prisma.student.count(),
@@ -32,7 +32,7 @@ export const studentQueries = createTRPCRouter({
   }),
 
   // Query: Get all students with filters
-  getStudents: protectedProcedure
+  getStudents: adminProcedure
     .input(
       z
         .object({
@@ -137,7 +137,7 @@ export const studentQueries = createTRPCRouter({
     }),
 
   // Query: Get single student details
-  getStudent: protectedProcedure
+  getStudent: adminProcedure
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
@@ -178,7 +178,7 @@ export const studentQueries = createTRPCRouter({
     }),
 
   // Mutation: Create new student - UPDATED with password reset invitation
-  createStudent: protectedProcedure
+  createStudent: adminProcedure
     .input(
       studentFormSchema.extend({
         sendEmail: z.boolean().default(true),
@@ -353,7 +353,7 @@ export const studentQueries = createTRPCRouter({
     }),
 
   // Mutation: Update student
-  updateStudent: protectedProcedure
+  updateStudent: adminProcedure
     .input(studentFormSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { id, name, email, ...studentData } = input;
@@ -439,7 +439,7 @@ export const studentQueries = createTRPCRouter({
     }),
 
   // Mutation: Toggle student active status (deactivate/reactivate)
-  toggleStatus: protectedProcedure
+  toggleStatus: adminProcedure
     .input(z.object({ studentId: z.string(), active: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -496,7 +496,7 @@ export const studentQueries = createTRPCRouter({
     }),
 
   // Mutation: Resend invitation email to student
-  resendInvitation: protectedProcedure
+  resendInvitation: adminProcedure
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
@@ -541,7 +541,7 @@ export const studentQueries = createTRPCRouter({
     }),
 
   // Mutation: Delete student
-  deleteStudent: protectedProcedure
+  deleteStudent: adminProcedure
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
