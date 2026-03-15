@@ -10,16 +10,16 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
-Plan: 5 of 6
-Status: In progress
-Last activity: 2026-03-15 -- Completed 02-05-PLAN.md (admin coach management page with approval, CRUD, status)
+Plan: 6 of 6
+Status: Phase complete
+Last activity: 2026-03-15 -- Completed 02-06-PLAN.md (coach time slot proposals and admin approval)
 
-Progress: ██████░░░░░░░░░░░░░░ 33% (8/~24 plans, phases 3-7 not yet planned)
+Progress: ███████░░░░░░░░░░░░░ 37% (9/~24 plans, phases 3-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 4.6min
 
 **By Phase:**
@@ -27,7 +27,7 @@ Progress: ██████░░░░░░░░░░░░░░ 33% (8/~2
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
-| 02-coach-dashboard-profile | 5/6 | 28min | 5.6min |
+| 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
 
 ## Accumulated Context
 
@@ -67,6 +67,10 @@ Progress: ██████░░░░░░░░░░░░░░ 33% (8/~2
 - [02-05] Coach creation uses $transaction for atomic User+Coach record creation
 - [02-05] All admin coach queries use superAdminProcedure (not protectedProcedure)
 - [02-05] CoachStatusActions renders DropdownMenuItems directly for parent DropdownMenu composition
+- [02-06] getRinks added to proposalRouter (coach-scoped) since existing rink queries are admin-only
+- [02-06] Approval uses $transaction for atomic RinkTimeSlot creation + proposal status update
+- [02-06] RinkTimeSlot field is isActive (not isAvailable as plan stated) -- corrected to match schema
+- [02-06] Deny flow opens dialog for optional admin notes (coach sees denial reason in their list)
 
 ### Pending Todos
 
@@ -82,5 +86,5 @@ Progress: ██████░░░░░░░░░░░░░░ 33% (8/~2
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 02-05-PLAN.md (admin coach management page with approval, CRUD, status)
+Stopped at: Completed 02-06-PLAN.md (coach time slot proposals and admin approval) -- Phase 2 complete
 Resume file: None
