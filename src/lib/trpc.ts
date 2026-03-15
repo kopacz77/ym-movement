@@ -159,7 +159,6 @@ const isCoach = t.middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: "FORBIDDEN", message: "Coach access required" });
   }
 
-  // @ts-expect-error -- Coach model added in Plan 03 migration
   const coach = await ctx.prisma.coach.findUnique({
     where: { userId: ctx.session.user.id },
   });

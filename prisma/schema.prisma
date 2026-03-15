@@ -32,14 +32,17 @@ model Lesson {
   notes                 String?
   price                 Float
   timeSlotId            String?
+  coachId               String?
   googleCalendarEventId String?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
+  Coach                 Coach?        @relation(fields: [coachId], references: [id], onDelete: SetNull)
   Rink                  Rink          @relation(fields: [rinkId], references: [id])
   Student               Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
   RinkTimeSlot          RinkTimeSlot? @relation(fields: [timeSlotId], references: [id])
   Payment               Payment?
 
+  @@index([coachId])
   @@index([endTime])
   @@index([rinkId])
   @@index([rinkId, startTime])
@@ -170,6 +173,7 @@ model Rink {
 model RinkTimeSlot {
   id          String   @id @default(cuid())
   rinkId      String
+  coachId     String?
   startTime   DateTime
   endTime     DateTime
   maxStudents Int      @default(1)
@@ -177,9 +181,11 @@ model RinkTimeSlot {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   recurringId String?
+  Coach       Coach?   @relation(fields: [coachId], references: [id], onDelete: SetNull)
   Lesson      Lesson[]
   Rink        Rink     @relation(fields: [rinkId], references: [id], onDelete: Cascade)
 
+  @@index([coachId])
   @@index([isActive])
   @@index([recurringId])
   @@index([rinkId])
@@ -228,6 +234,7 @@ model Student {
   Payment              Payment[]
   User                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   StudentNote          StudentNote[]
+  CoachStudent         CoachStudent[]
 
   @@index([createdAt])
   @@index([isApproved])
@@ -262,6 +269,7 @@ model User {
   Notification             Notification[]
   PendingEmailNotification PendingEmailNotification[]
   PasswordResetToken       PasswordResetToken[]
+  Coach                    Coach?
   Student                  Student?
   StudentNote              StudentNote[]
 
@@ -314,6 +322,7 @@ enum RinkArea {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   COACH
   STUDENT
@@ -327,10 +336,13 @@ model BlockedDateRange {
   endDate     DateTime
   type        BlockedDateType @default(TRAVEL)
   createdById String
+  coachId     String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+  Coach       Coach?          @relation(fields: [coachId], references: [id], onDelete: SetNull)
   User        User            @relation(fields: [createdById], references: [id])
 
+  @@index([coachId])
   @@index([startDate])
   @@index([endDate])
   @@index([startDate, endDate])
@@ -342,4 +354,53 @@ enum BlockedDateType {
   TRAVEL
   COMPETITION
   OTHER
+}
+
+model Coach {
+  id                   String            @id @default(cuid())
+  userId               String            @unique
+  bio                  String?
+  photoUrl             String?
+  skills               String[]
+  certifications       String?
+  yearsExperience      Int?
+  isApproved           Boolean           @default(false)
+  isActive             Boolean           @default(true)
+  approvedAt           DateTime?
+  approvedById         String?
+  privateLessonPrice   Float?
+  groupLessonPrice     Float?
+  choreographyPrice    Float?
+  competitionPrepPrice Float?
+  revenueSplitPercent  Float             @default(70)
+  googleCalendarId     String?
+  googleAccessToken    String?
+  googleRefreshToken   String?
+  googleTokenExpiresAt DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  User                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Lesson               Lesson[]
+  RinkTimeSlot         RinkTimeSlot[]
+  BlockedDateRange     BlockedDateRange[]
+  CoachStudent         CoachStudent[]
+
+  @@index([userId])
+  @@index([isApproved, isActive])
+}
+
+model CoachStudent {
+  id        String   @id @default(cuid())
+  coachId   String
+  studentId String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  Coach     Coach    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  Student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([coachId, studentId])
+  @@index([coachId])
+  @@index([studentId])
 }
