@@ -10,24 +10,24 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
-Plan: 3 of 6
+Plan: 4 of 6
 Status: In progress
-Last activity: 2026-03-15 -- Completed 02-02-PLAN.md (coach TRPC router and layout)
+Last activity: 2026-03-15 -- Completed 02-04-PLAN.md (coach dashboard, profile, earnings, students, schedule pages)
 
-Progress: █████░░░░░░░░░░░░░░░ 25% (6/~24 plans, phases 3-7 not yet planned)
+Progress: ██████░░░░░░░░░░░░░░ 29% (7/~24 plans, phases 3-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 4.5min
+- Total plans completed: 7
+- Average duration: 4.6min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
-| 02-coach-dashboard-profile | 3/6 | 17min | 5.7min |
+| 02-coach-dashboard-profile | 4/6 | 22min | 5.5min |
 
 ## Accumulated Context
 
@@ -60,6 +60,8 @@ Progress: █████░░░░░░░░░░░░░░░ 25% (6/~2
 - [02-02] Coach profile update excludes pricing fields (coach can view but not edit rates)
 - [02-02] Revenue split applied as revenueSplitPercent / 100 multiplier on earnings aggregations
 - [02-02] Dashboard stats count distinct students via Prisma distinct on studentId
+- [02-04] Payment model field is `method` not `paymentMethod` -- corrected during type-check
+- [02-04] Profile form Zod schema uses required strings (not optional+default) to align with react-hook-form resolver types
 
 ### Pending Todos
 
@@ -75,5 +77,5 @@ Progress: █████░░░░░░░░░░░░░░░ 25% (6/~2
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 02-02-PLAN.md (coach TRPC router and layout shell)
+Stopped at: Completed 02-04-PLAN.md (coach dashboard, profile, earnings, students, schedule pages)
 Resume file: None
