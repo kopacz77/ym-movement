@@ -59,14 +59,19 @@ Plans:
 **Goal:** No coach can see another coach's data, and the super admin has full cross-coach visibility over the entire coaching operation.
 **Depends on:** Phase 1, Phase 2
 **Requirements:** SADM-01, SADM-02, SADM-03, SADM-04
+**Plans:** 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md -- Admin schedule query scoping: timeSlotQueries, lessonQueries, blockedDateQueries, recurringPatternQueries upgraded to adminProcedure with optional coachId filtering, per-coach overlap detection
+- [ ] 03-02-PLAN.md -- Analytics/payment security fix and scoping: analyticsQueries publicProcedure security fix, payment coachId via Lesson relation, settings/rink procedure upgrade, student booking coachId inheritance
+- [ ] 03-03-PLAN.md -- Super admin TRPC queries: coaches overview, coach drill-down, revenue breakdown with payout calculations
+- [ ] 03-04-PLAN.md -- Super admin dashboard UI: CoachOverviewCards, CoachDetailView, RevenueBreakdownChart, enhanced admin dashboard page
 
 **Success Criteria:**
 1. A coach querying lessons, time slots, students, or payments only sees records associated with their own coachId -- never another coach's data
 2. The super admin dashboard shows a coaches overview with each coach's status, total hours booked, and earnings summary
 3. The super admin can drill into any individual coach's calendar, upcoming lessons, and student roster
 4. Revenue reports display platform-wide totals alongside per-coach breakdowns with payout calculations
-
-**Plans:** (created by /gsd:plan-phase)
 
 ---
 
