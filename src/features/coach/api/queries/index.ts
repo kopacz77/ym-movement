@@ -2,6 +2,7 @@ import { createTRPCRouter } from "@/lib/trpc";
 import { dashboardRouter } from "./dashboardQueries";
 import { earningsRouter } from "./earningsQueries";
 import { profileRouter } from "./profileQueries";
+import { proposalRouter } from "./proposalQueries";
 import { coachStudentsRouter } from "./studentQueries";
 
 export const coachRouter = createTRPCRouter({
@@ -9,4 +10,5 @@ export const coachRouter = createTRPCRouter({
   profile: profileRouter,
   earnings: earningsRouter,
   students: coachStudentsRouter,
+  proposals: proposalRouter,
 });
