@@ -4,7 +4,7 @@ import { DateTime } from "luxon"; // Import DateTime for timezone handling
 // src/features/admin/api/queries/schedule/timeSlotQueries.ts
 import { z } from "zod";
 import { logSecurityEvent } from "@/lib/security";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 // Define the TimeSlot interface to fix the implicit any[] errors
 interface TimeSlot {
@@ -13,6 +13,7 @@ interface TimeSlot {
   endTime: Date;
   maxStudents: number;
   isActive: boolean;
+  coachId?: string;
 }
 
 // Define SkippedSlot interface
@@ -23,12 +24,13 @@ interface SkippedSlot {
 }
 
 export const timeSlotRouter = createTRPCRouter({
-  getTimeSlots: protectedProcedure
+  getTimeSlots: adminProcedure
     .input(
       z.object({
         rinkId: z.string().optional(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
+        coachId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -43,6 +45,7 @@ export const timeSlotRouter = createTRPCRouter({
                 }
               : undefined,
             isActive: true,
+            ...(input.coachId && { coachId: input.coachId }),
           },
           select: {
             id: true,
@@ -115,7 +118,7 @@ export const timeSlotRouter = createTRPCRouter({
       }
     }),
 
-  createTimeSlot: protectedProcedure
+  createTimeSlot: adminProcedure
     .input(
       z
         .object({
@@ -124,6 +127,7 @@ export const timeSlotRouter = createTRPCRouter({
           endTime: z.date(),
           maxStudents: z.number().min(1),
           isActive: z.boolean().default(true),
+          coachId: z.string().optional(),
         })
         .refine((data) => data.endTime > data.startTime, {
           message: "End time must be after start time",
@@ -160,11 +164,12 @@ export const timeSlotRouter = createTRPCRouter({
           utcEnd: input.endTime.toISOString(),
         });
 
-        // Check for overlapping time slots (only check against active slots)
+        // Check for overlapping time slots (only check against active slots, scoped per-coach)
         const overlapping = await ctx.prisma.rinkTimeSlot.findFirst({
           where: {
             rinkId: input.rinkId,
             isActive: true, // Only check overlap with active slots
+            ...(input.coachId && { coachId: input.coachId }),
             OR: [
               {
                 AND: [
@@ -198,6 +203,7 @@ export const timeSlotRouter = createTRPCRouter({
           data: {
             ...input,
             id: randomUUID(),
+            ...(input.coachId && { coachId: input.coachId }),
             updatedAt: new Date(),
           },
           include: { Rink: true },
@@ -217,7 +223,7 @@ export const timeSlotRouter = createTRPCRouter({
       }
     }),
 
-  deleteTimeSlot: protectedProcedure
+  deleteTimeSlot: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Log security event
@@ -260,7 +266,7 @@ export const timeSlotRouter = createTRPCRouter({
       }
     }),
 
-  updateTimeSlot: protectedProcedure
+  updateTimeSlot: adminProcedure
     .input(
       z
         .object({
@@ -278,7 +284,7 @@ export const timeSlotRouter = createTRPCRouter({
         // First check if the time slot exists
         const existingSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.id },
-          select: { rinkId: true },
+          select: { rinkId: true, coachId: true },
         });
 
         if (!existingSlot) {
@@ -305,11 +311,12 @@ export const timeSlotRouter = createTRPCRouter({
           end: endTimeInRinkTz.toFormat("yyyy-MM-dd HH:mm"),
         });
 
-        // Check for overlapping time slots
+        // Check for overlapping time slots (scoped per-coach)
         const overlapping = await ctx.prisma.rinkTimeSlot.findFirst({
           where: {
             NOT: { id: input.id },
             rinkId: existingSlot.rinkId,
+            ...(existingSlot.coachId && { coachId: existingSlot.coachId }),
             OR: [
               {
                 AND: [
@@ -352,7 +359,7 @@ export const timeSlotRouter = createTRPCRouter({
       }
     }),
 
-  deleteBulkTimeSlots: protectedProcedure
+  deleteBulkTimeSlots: adminProcedure
     .input(
       z.object({
         ids: z.array(z.string()),
@@ -404,7 +411,7 @@ export const timeSlotRouter = createTRPCRouter({
       }
     }),
 
-  createBulkTimeSlots: protectedProcedure
+  createBulkTimeSlots: adminProcedure
     .input(
       z
         .object({
@@ -425,6 +432,7 @@ export const timeSlotRouter = createTRPCRouter({
           maxStudents: z.number().min(1).max(50), // Reasonable limit
           daysOfWeek: z.array(z.number().min(0).max(6)).min(1), // 0=Sunday, 6=Saturday
           skipOverlapping: z.boolean().optional(), // Option to skip rather than fail on overlap
+          coachId: z.string().optional(),
         })
         .refine(
           (data) => {
@@ -628,6 +636,7 @@ export const timeSlotRouter = createTRPCRouter({
               endTime: slotEnd.toUTC().toJSDate(),
               maxStudents: input.maxStudents,
               isActive: true,
+              ...(input.coachId && { coachId: input.coachId }),
             });
 
             // Advance to the next slot
@@ -674,10 +683,11 @@ export const timeSlotRouter = createTRPCRouter({
             // Create slots one by one and skip overlapping ones
             for (const slot of slots) {
               try {
-                // Check for overlaps
+                // Check for overlaps (scoped per-coach)
                 const overlapping = await tx.rinkTimeSlot.findFirst({
                   where: {
                     rinkId: slot.rinkId,
+                    ...(input.coachId && { coachId: input.coachId }),
                     OR: [
                       {
                         AND: [
@@ -763,6 +773,7 @@ export const timeSlotRouter = createTRPCRouter({
               const recentlyCreatedSlots = await ctx.prisma.rinkTimeSlot.findMany({
                 where: {
                   rinkId: input.rinkId,
+                  ...(input.coachId && { coachId: input.coachId }),
                   startTime: { gte: minStartTime },
                   endTime: { lte: maxEndTime },
                   // Additional filter to match the slot duration

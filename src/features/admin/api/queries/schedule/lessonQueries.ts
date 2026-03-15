@@ -7,10 +7,10 @@ import { createScheduleChangeNotification } from "@/features/notifications/utils
 import { googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 export const lessonRouter = createTRPCRouter({
-  createLesson: protectedProcedure
+  createLesson: adminProcedure
     .input(
       z.object({
         studentId: z.string(),
@@ -19,6 +19,7 @@ export const lessonRouter = createTRPCRouter({
         area: z.nativeEnum(RinkArea),
         price: z.number(),
         notes: z.string().optional(),
+        coachId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -103,6 +104,8 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1); // Ensure at least 1 minute
 
         // Create the lesson with the calendar event ID (if available)
+        // Inherit coachId from input or from the time slot
+        const lessonCoachId = sanitizedInput.coachId || timeSlot.coachId || undefined;
         const lesson = await ctx.prisma.lesson.create({
           data: {
             ...sanitizedInput,
@@ -113,6 +116,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             endTime: timeSlot.endTime,
             duration: durationMinutes,
             googleCalendarEventId: eventId, // May be null if calendar creation failed
+            ...(lessonCoachId && { coachId: lessonCoachId }),
             updatedAt: new Date(),
           },
           include: {
@@ -138,7 +142,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
       }
     }),
 
-  cancelLesson: protectedProcedure
+  cancelLesson: adminProcedure
     .input(
       z.object({
         lessonId: z.string(),
@@ -186,12 +190,13 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
       }
     }),
 
-  getLessonsByDate: protectedProcedure
+  getLessonsByDate: adminProcedure
     .input(
       z.object({
         startDate: z.date(),
         endDate: z.date(),
         rinkId: z.string().optional(),
+        coachId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -208,6 +213,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           where: {
             startTime: { gte: input.startDate, lte: input.endDate },
             rinkId: input.rinkId,
+            ...(input.coachId && { coachId: input.coachId }),
           },
           include: {
             Student: { include: { User: true } },
@@ -227,7 +233,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
       }
     }),
 
-  getStudents: protectedProcedure
+  getStudents: adminProcedure
     .input(
       z
         .object({
@@ -284,7 +290,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
       }
     }),
 
-  assignStudentToTimeSlot: protectedProcedure
+  assignStudentToTimeSlot: adminProcedure
     .input(
       z.object({
         timeSlotId: z.string(),
@@ -394,7 +400,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
 
         // Create the lesson and payment in a transaction
         const { lesson } = await ctx.prisma.$transaction(async (prisma) => {
-          // Create the lesson
+          // Create the lesson (inherit coachId from the time slot)
           const lesson = await prisma.lesson.create({
             data: {
               id: randomUUID(),
@@ -410,6 +416,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
               notes: input.notes ? sanitizeInput(input.notes) : undefined,
               duration: durationMinutes,
               googleCalendarEventId: eventId,
+              ...(timeSlot.coachId && { coachId: timeSlot.coachId }),
               updatedAt: new Date(),
             },
             include: { Student: { include: { User: true } } },
@@ -465,7 +472,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
       }
     }),
 
-  updateLessonType: protectedProcedure
+  updateLessonType: adminProcedure
     .input(
       z.object({
         lessonId: z.string(),
@@ -621,7 +628,7 @@ ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
       }
     }),
 
-  unassignStudent: protectedProcedure
+  unassignStudent: adminProcedure
     .input(z.object({ lessonId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
