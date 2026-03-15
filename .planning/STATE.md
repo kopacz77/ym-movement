@@ -10,23 +10,23 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 1 of 7 (Auth, Schema, and Data Migration)
-Plan: 1 of 3 complete in Phase 1
+Plan: 2 of 3 complete in Phase 1
 Status: In progress
-Last activity: 2026-03-15 -- Completed 01-01-PLAN.md (auth layer SUPER_ADMIN compatibility)
+Last activity: 2026-03-15 -- Completed 01-02-PLAN.md (frontend auth layer for SUPER_ADMIN and COACH)
 
-Progress: █░░░░░░░░░ ~5% (1 plan of ~21 estimated total)
+Progress: ██░░░░░░░░ ~10% (2 plans of ~21 estimated total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 5min
+- Total plans completed: 2
+- Average duration: 6.5min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-auth-schema-foundation | 1/3 | 5min | 5min |
+| 01-auth-schema-foundation | 2/3 | 13min | 6.5min |
 
 ## Accumulated Context
 
@@ -41,6 +41,9 @@ Progress: █░░░░░░░░░ ~5% (1 plan of ~21 estimated total)
 - [01-01] superAdminProcedure uses isAdminRole (accepts both ADMIN and SUPER_ADMIN) during transition -- will be tightened later
 - [01-01] coachProcedure uses @ts-expect-error for prisma.coach until Plan 03 adds Coach model
 - [01-01] isCoachRole includes ADMIN and SUPER_ADMIN in hierarchy -- admins have implicit coach access
+- [01-02] SUPER_ADMIN and ADMIN both access /admin/* routes; COACH, SUPER_ADMIN, and ADMIN access /coach/* routes
+- [01-02] Role union type ordering standardized: SUPER_ADMIN | ADMIN | COACH | STUDENT across all files
+- [01-02] Deferred Coach profile in /api/auth/me to Plan 03 (Coach model does not exist yet)
 
 ### Pending Todos
 
@@ -56,5 +59,5 @@ Progress: █░░░░░░░░░ ~5% (1 plan of ~21 estimated total)
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 01-01-PLAN.md
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
