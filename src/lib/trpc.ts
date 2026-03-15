@@ -6,6 +6,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdminRole, isCoachRole } from "@/lib/roles";
 
 export type TRPCContext = {
   prisma: typeof prisma;
@@ -104,12 +105,13 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 });
 
 // Admin-only middleware for protected admin routes
+// Accepts both ADMIN and SUPER_ADMIN roles via isAdminRole helper
 const isAdmin = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
   }
 
-  if (ctx.session.user.role !== "ADMIN") {
+  if (!isAdminRole(ctx.session.user.role)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
   }
 
@@ -124,7 +126,59 @@ const isAdmin = t.middleware(({ ctx, next }) => {
   });
 });
 
+// Super admin middleware -- functionally identical to isAdmin during the transition period.
+// In the future this can be tightened to SUPER_ADMIN-only.
+const isSuperAdmin = t.middleware(({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+  }
+
+  if (!isAdminRole(ctx.session.user.role)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Super admin access required" });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      session: {
+        ...ctx.session,
+        user: ctx.session.user,
+      },
+    },
+  });
+});
+
+// Coach middleware -- accepts COACH, ADMIN, or SUPER_ADMIN roles.
+// Looks up the Coach record and passes it into the context.
+const isCoach = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+  }
+
+  if (!isCoachRole(ctx.session.user.role)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Coach access required" });
+  }
+
+  // @ts-expect-error -- Coach model added in Plan 03 migration
+  const coach = await ctx.prisma.coach.findUnique({
+    where: { userId: ctx.session.user.id },
+  });
+
+  if (!coach) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Coach profile not found" });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      coach,
+    },
+  });
+});
+
 export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(isAuthed);
 export const adminProcedure = t.procedure.use(isAdmin);
+export const superAdminProcedure = t.procedure.use(isSuperAdmin);
+export const coachProcedure = t.procedure.use(isCoach);

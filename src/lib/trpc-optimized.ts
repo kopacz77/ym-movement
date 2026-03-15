@@ -17,6 +17,7 @@ import { authOptions } from "@/lib/auth";
 import { cacheWrapper } from "@/lib/cache-wrapper";
 import { prisma } from "@/lib/prisma";
 import { CACHE_CONFIG, redis } from "@/lib/redis";
+import { isAdminRole } from "@/lib/roles";
 
 export interface OptimizedTRPCContext {
   prisma: typeof prisma;
@@ -359,13 +360,14 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 
 /**
  * Admin role middleware
+ * Accepts both ADMIN and SUPER_ADMIN roles via isAdminRole helper
  */
 const isAdmin = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
   }
 
-  if (ctx.session.user.role !== "ADMIN") {
+  if (!isAdminRole(ctx.session.user.role)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
   }
 
