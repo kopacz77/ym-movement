@@ -38,12 +38,12 @@ Plans:
 **Plans:** 6 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Schema + auth wiring: suspension fields, ProposedTimeSlot model, /api/auth/me Coach data, useCurrentUser hook
-- [ ] 02-02-PLAN.md -- Coach TRPC router + layout shell: coach API sub-routers, AppLayout/AppSidebar extension, CoachHeader
-- [ ] 02-03-PLAN.md -- Coach signup + registration: coach-signup API endpoint and signup page with Turnstile/honeypot
-- [ ] 02-04-PLAN.md -- Coach pages: dashboard with overview cards/lessons, profile form, earnings summary, students list, schedule placeholder
-- [ ] 02-05-PLAN.md -- Admin coach management: approval queue, coach list, manual creation, status toggle, admin coaches page
-- [ ] 02-06-PLAN.md -- Coach proposals + admin approval: time slot proposal form, proposal list, admin approval queue
+- [x] 02-01-PLAN.md -- Schema + auth wiring: suspension fields, ProposedTimeSlot model, /api/auth/me Coach data, useCurrentUser hook
+- [x] 02-02-PLAN.md -- Coach TRPC router + layout shell: coach API sub-routers, AppLayout/AppSidebar extension, CoachHeader
+- [x] 02-03-PLAN.md -- Coach signup + registration: coach-signup API endpoint and signup page with Turnstile/honeypot
+- [x] 02-04-PLAN.md -- Coach pages: dashboard with overview cards/lessons, profile form, earnings summary, students list, schedule placeholder
+- [x] 02-05-PLAN.md -- Admin coach management: approval queue, coach list, manual creation, status toggle, admin coaches page
+- [x] 02-06-PLAN.md -- Coach proposals + admin approval: time slot proposal form, proposal list, admin approval queue
 
 **Success Criteria:**
 1. A coach can log in and see a dedicated dashboard showing their upcoming lessons, past lessons, and a summary of their students and earnings
@@ -137,7 +137,7 @@ Plans:
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | 1 - Auth, Schema, and Data Migration | Complete | 2026-03-15 |
-| 2 - Coach Dashboard, Profile, and Onboarding | Planned | -- |
+| 2 - Coach Dashboard, Profile, and Onboarding | Complete | 2026-03-15 |
 | 3 - Query Scoping and Super Admin Dashboard | Not started | -- |
 | 4 - Per-Coach Scheduling | Not started | -- |
 | 5 - Student Multi-Coach Booking | Not started | -- |

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** Phase 2 -- Coach Dashboard, Profile, and Onboarding
+**Current focus:** Phase 3 -- Query Scoping and Super Admin Dashboard
 
 ## Current Position
 
-Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
-Plan: 6 of 6
-Status: Phase complete
-Last activity: 2026-03-15 -- Completed 02-06-PLAN.md (coach time slot proposals and admin approval)
+Phase: 3 of 7 (Query Scoping and Super Admin Dashboard)
+Plan: 0 of ? (not yet planned)
+Status: Not started
+Last activity: 2026-03-15 -- Phase 2 verified and completed
 
 Progress: ███████░░░░░░░░░░░░░ 37% (9/~24 plans, phases 3-7 not yet planned)
 
