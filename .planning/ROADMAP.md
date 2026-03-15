@@ -15,14 +15,18 @@ This roadmap transforms the existing single-coach YM Movement scheduling platfor
 **Goal:** The system recognizes SUPER_ADMIN and COACH roles, the Coach entity exists in the database, and all existing production data is associated with Yura as the first coach -- without breaking any current functionality.
 **Depends on:** Nothing (first phase)
 **Requirements:** AUTH-01, AUTH-02, AUTH-03, SCHD-03
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md -- Backend auth layer: TRPC middleware update, role helper utility, JWT callback refresh
+- [ ] 01-02-PLAN.md -- Frontend auth layer: Next.js middleware, login redirect, type definitions, auth contexts
+- [ ] 01-03-PLAN.md -- Schema migration and data backfill: Coach/CoachStudent models, coachId columns, migration script
 
 **Success Criteria:**
 1. Yura can log in with her existing credentials and access all current admin features without interruption (backward compatibility preserved)
 2. The database contains a Coach record for Yura, and every existing lesson, time slot, payment, and blocked date is associated with her coachId
 3. TRPC middleware enforces SUPER_ADMIN, COACH, and STUDENT role guards on protected routes, rejecting unauthorized access
 4. Yura's account is recognized as both SUPER_ADMIN and COACH, and she can access features gated to either role
-
-**Plans:** (created by /gsd:plan-phase)
 
 ---
 
@@ -125,7 +129,7 @@ This roadmap transforms the existing single-coach YM Movement scheduling platfor
 
 | Phase | Status | Completed |
 |-------|--------|-----------|
-| 1 - Auth, Schema, and Data Migration | Not started | -- |
+| 1 - Auth, Schema, and Data Migration | Planned | -- |
 | 2 - Coach Dashboard, Profile, and Onboarding | Not started | -- |
 | 3 - Query Scoping and Super Admin Dashboard | Not started | -- |
 | 4 - Per-Coach Scheduling | Not started | -- |
