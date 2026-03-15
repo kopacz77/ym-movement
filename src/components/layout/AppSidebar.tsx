@@ -37,13 +37,23 @@ const studentNavigation = [
   { name: "Guide", href: "/student/guide", icon: BookOpen },
 ];
 
+const coachNavigation = [
+  { name: "Dashboard", href: "/coach/dashboard", icon: LayoutDashboard },
+  { name: "Schedule", href: "/coach/schedule", icon: Calendar },
+  { name: "Students", href: "/coach/students", icon: Users },
+  { name: "Earnings", href: "/coach/earnings", icon: CreditCard },
+  { name: "Proposals", href: "/coach/proposals", icon: Clock },
+  { name: "Profile", href: "/coach/profile", icon: User },
+];
+
 interface AppSidebarProps {
-  role: "admin" | "student";
+  role: "admin" | "student" | "coach";
 }
 
 export function AppSidebar({ role }: AppSidebarProps) {
   const pathname = usePathname() ?? "";
-  const navigation = role === "admin" ? adminNavigation : studentNavigation;
+  const navigation =
+    role === "admin" ? adminNavigation : role === "coach" ? coachNavigation : studentNavigation;
 
   const SidebarContent = (
     <>
@@ -69,7 +79,11 @@ export function AppSidebar({ role }: AppSidebarProps) {
           <div className="flex flex-col">
             <span className="font-bold text-xl text-foreground">YM Movement</span>
             <span className="text-xs text-muted-foreground">
-              {role === "admin" ? "Admin Dashboard" : "Student Portal"}
+              {role === "admin"
+                ? "Admin Dashboard"
+                : role === "coach"
+                  ? "Coach Portal"
+                  : "Student Portal"}
             </span>
           </div>
         </div>

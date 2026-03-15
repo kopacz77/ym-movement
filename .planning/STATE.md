@@ -10,24 +10,24 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
-Plan: 1 of 6
+Plan: 3 of 6
 Status: In progress
-Last activity: 2026-03-15 -- Completed 02-01-PLAN.md (schema + auth wiring)
+Last activity: 2026-03-15 -- Completed 02-03-PLAN.md (coach signup flow)
 
-Progress: ████░░░░░░░░░░░░░░░░ 17% (4/~24 plans, phases 3-7 not yet planned)
+Progress: █████░░░░░░░░░░░░░░░ 25% (6/~24 plans, phases 3-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 5.5min
+- Total plans completed: 6
+- Average duration: 4.8min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
-| 02-coach-dashboard-profile | 1/6 | 3min | 3min |
+| 02-coach-dashboard-profile | 3/6 | 10min | 3.3min |
 
 ## Accumulated Context
 
@@ -53,6 +53,9 @@ Progress: ████░░░░░░░░░░░░░░░░ 17% (4/~2
 - [02-01] ProposedTimeSlot model placed after CoachStudent following alphabetical convention
 - [02-01] ADMIN/SUPER_ADMIN block in useCurrentUser also fetches Coach profile for coachId (silent fail if no Coach record)
 - [02-01] /api/auth/me returns Coach select for COACH/ADMIN/SUPER_ADMIN (id, isApproved, isActive, suspendedAt, bio, skills)
+- [02-03] Phone collected on coach signup form but not stored (Coach model has no phone column)
+- [02-03] Reused sendWelcomeEmail for coach applications (no coach-specific email template yet)
+- [02-03] Coach record dual gate: isApproved: false AND isActive: false until admin approval
 
 ### Pending Todos
 
@@ -68,5 +71,5 @@ Progress: ████░░░░░░░░░░░░░░░░ 17% (4/~2
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 02-01-PLAN.md, ready for 02-02-PLAN.md
+Stopped at: Completed 02-03-PLAN.md, ready for 02-04-PLAN.md
 Resume file: None

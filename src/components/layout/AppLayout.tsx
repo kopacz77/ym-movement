@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/sidebar";
 import { AdminCommandPalette } from "@/features/admin/components/layout/AdminCommandPalette";
 import { AdminHeader } from "@/features/admin/components/layout/AdminHeader";
+import { CoachCommandPalette } from "@/features/coach/components/layout/CoachCommandPalette";
+import { CoachHeader } from "@/features/coach/components/layout/CoachHeader";
 import { StudentCommandPalette } from "@/features/student/components/layout/StudentCommandPalette";
 import { StudentHeader } from "@/features/student/components/layout/StudentHeader";
 
@@ -55,13 +57,23 @@ const studentNavigation = [
   { name: "Guide", href: "/student/guide", icon: BookOpen },
 ];
 
+const coachNavigation = [
+  { name: "Dashboard", href: "/coach/dashboard", icon: LayoutDashboard },
+  { name: "Schedule", href: "/coach/schedule", icon: Calendar },
+  { name: "Students", href: "/coach/students", icon: Users },
+  { name: "Earnings", href: "/coach/earnings", icon: CreditCard },
+  { name: "Proposals", href: "/coach/proposals", icon: Clock },
+  { name: "Profile", href: "/coach/profile", icon: User },
+];
+
 interface AppLayoutProps {
-  role: "admin" | "student";
+  role: "admin" | "student" | "coach";
   children: React.ReactNode;
 }
 
 export function AppLayout({ role, children }: AppLayoutProps) {
-  const HeaderComponent = role === "admin" ? AdminHeader : StudentHeader;
+  const HeaderComponent =
+    role === "admin" ? AdminHeader : role === "coach" ? CoachHeader : StudentHeader;
   const pathname = usePathname() ?? "";
 
   // Safety check to prevent React #130 errors
@@ -118,7 +130,11 @@ export function AppLayout({ role, children }: AppLayoutProps) {
                 <div className="flex flex-col">
                   <span className="font-bold text-lg text-foreground">YM Movement</span>
                   <span className="text-xs text-muted-foreground">
-                    {role === "admin" ? "Admin Dashboard" : "Student Portal"}
+                    {role === "admin"
+                      ? "Admin Dashboard"
+                      : role === "coach"
+                        ? "Coach Portal"
+                        : "Student Portal"}
                   </span>
                 </div>
               </div>
@@ -128,7 +144,12 @@ export function AppLayout({ role, children }: AppLayoutProps) {
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu className="space-y-1">
-                    {(role === "admin" ? adminNavigation : studentNavigation).map((item) => {
+                    {(role === "admin"
+                      ? adminNavigation
+                      : role === "coach"
+                        ? coachNavigation
+                        : studentNavigation
+                    ).map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.href;
 
@@ -174,7 +195,13 @@ export function AppLayout({ role, children }: AppLayoutProps) {
       </div>
 
       {/* Command Palettes */}
-      {role === "admin" ? <AdminCommandPalette /> : <StudentCommandPalette />}
+      {role === "admin" ? (
+        <AdminCommandPalette />
+      ) : role === "coach" ? (
+        <CoachCommandPalette />
+      ) : (
+        <StudentCommandPalette />
+      )}
     </>
   );
 }
