@@ -12,7 +12,7 @@ See: .planning/PROJECT.md
 Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
 Plan: 3 of 6
 Status: In progress
-Last activity: 2026-03-15 -- Completed 02-03-PLAN.md (coach signup flow)
+Last activity: 2026-03-15 -- Completed 02-02-PLAN.md (coach TRPC router and layout)
 
 Progress: █████░░░░░░░░░░░░░░░ 25% (6/~24 plans, phases 3-7 not yet planned)
 
@@ -20,14 +20,14 @@ Progress: █████░░░░░░░░░░░░░░░ 25% (6/~2
 
 **Velocity:**
 - Total plans completed: 6
-- Average duration: 4.8min
+- Average duration: 4.5min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
-| 02-coach-dashboard-profile | 3/6 | 10min | 3.3min |
+| 02-coach-dashboard-profile | 3/6 | 17min | 5.7min |
 
 ## Accumulated Context
 
@@ -56,6 +56,10 @@ Progress: █████░░░░░░░░░░░░░░░ 25% (6/~2
 - [02-03] Phone collected on coach signup form but not stored (Coach model has no phone column)
 - [02-03] Reused sendWelcomeEmail for coach applications (no coach-specific email template yet)
 - [02-03] Coach record dual gate: isApproved: false AND isActive: false until admin approval
+- [02-02] coachStudentsRouter name avoids collision with existing studentRouter
+- [02-02] Coach profile update excludes pricing fields (coach can view but not edit rates)
+- [02-02] Revenue split applied as revenueSplitPercent / 100 multiplier on earnings aggregations
+- [02-02] Dashboard stats count distinct students via Prisma distinct on studentId
 
 ### Pending Todos
 
@@ -71,5 +75,5 @@ Progress: █████░░░░░░░░░░░░░░░ 25% (6/~2
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 02-03-PLAN.md, ready for 02-04-PLAN.md
+Stopped at: Completed 02-02-PLAN.md (coach TRPC router and layout shell)
 Resume file: None
