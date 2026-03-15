@@ -33,7 +33,18 @@ export async function GET(_req: NextRequest) {
                 },
               }
             : undefined,
-        // TODO (Phase 1, Plan 03): Include Coach profile for SUPER_ADMIN/COACH roles after Coach model exists
+        Coach: ["COACH", "SUPER_ADMIN", "ADMIN"].includes(session.user.role)
+          ? {
+              select: {
+                id: true,
+                isApproved: true,
+                isActive: true,
+                suspendedAt: true,
+                bio: true,
+                skills: true,
+              },
+            }
+          : undefined,
       },
     });
 
