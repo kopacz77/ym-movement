@@ -10,23 +10,24 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-03-15 -- Phase 1 verified and complete (18/18 must-haves passed)
+Plan: 1 of 6
+Status: In progress
+Last activity: 2026-03-15 -- Completed 02-01-PLAN.md (schema + auth wiring)
 
-Progress: █░░░░░░░░░ 14%
+Progress: ████░░░░░░░░░░░░░░░░ 17% (4/~24 plans, phases 3-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 6.3min
+- Total plans completed: 4
+- Average duration: 5.5min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
+| 02-coach-dashboard-profile | 1/6 | 3min | 3min |
 
 ## Accumulated Context
 
@@ -48,6 +49,10 @@ Progress: █░░░░░░░░░ 14%
 - [01-03] Data migration script NOT auto-run -- requires manual `pnpm migrate:coach-data`
 - [01-03] Yura Coach record uses revenueSplitPercent=100 (owner); new coaches default to 70%
 - [01-03] Removed @ts-expect-error from coachProcedure (Coach model now exists in Prisma client)
+- [02-01] Coach suspension fields placed after approvedById, before pricing fields in schema
+- [02-01] ProposedTimeSlot model placed after CoachStudent following alphabetical convention
+- [02-01] ADMIN/SUPER_ADMIN block in useCurrentUser also fetches Coach profile for coachId (silent fail if no Coach record)
+- [02-01] /api/auth/me returns Coach select for COACH/ADMIN/SUPER_ADMIN (id, isApproved, isActive, suspendedAt, bio, skills)
 
 ### Pending Todos
 
@@ -63,5 +68,5 @@ Progress: █░░░░░░░░░ 14%
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Phase 1 verified and complete, ready for Phase 2 planning
+Stopped at: Completed 02-01-PLAN.md, ready for 02-02-PLAN.md
 Resume file: None
