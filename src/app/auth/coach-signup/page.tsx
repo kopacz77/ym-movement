@@ -1,0 +1,403 @@
+// src/app/auth/coach-signup/page.tsx
+"use client";
+
+// Cloudflare Turnstile global type
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          execution?: "render" | "execute";
+          appearance?: "always" | "execute" | "interaction-only";
+          callback?: (token: string) => void;
+          "error-callback"?: () => void;
+          "expired-callback"?: () => void;
+        },
+      ) => string;
+      execute: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+      reset: (widgetId: string) => void;
+    };
+  }
+}
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Script from "next/script";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { formatEmail, toProperCase } from "@/lib/utils";
+
+export default function CoachSignupPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [skillsInput, setSkillsInput] = useState("");
+  const [certifications, setCertifications] = useState("");
+  const [yearsExperience, setYearsExperience] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Layer 1: Honeypot field (invisible to humans, bots auto-fill it)
+  const [honeypot, setHoneypot] = useState("");
+
+  // Layer 2: Cloudflare Turnstile token
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+
+  // Wait for Turnstile script to load
+  useEffect(() => {
+    console.log("Checking if Turnstile is loaded...");
+
+    // Poll for Turnstile availability
+    const checkTurnstile = setInterval(() => {
+      if (typeof window !== "undefined" && window.turnstile) {
+        console.log("Turnstile script loaded successfully");
+        setTurnstileReady(true);
+        clearInterval(checkTurnstile);
+      }
+    }, 100);
+
+    // Cleanup after 10 seconds
+    const timeout = setTimeout(() => {
+      clearInterval(checkTurnstile);
+      if (!window.turnstile) {
+        console.error("Turnstile script failed to load after 10 seconds");
+      }
+    }, 10000);
+
+    return () => {
+      clearInterval(checkTurnstile);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  // Initialize Turnstile widget once script is ready
+  useEffect(() => {
+    if (!turnstileReady || typeof window === "undefined" || !window.turnstile) {
+      console.log("Waiting for Turnstile to be ready...");
+      return;
+    }
+
+    const container = turnstileContainerRef.current;
+    if (!container) {
+      console.error("Turnstile container ref not found");
+      return;
+    }
+
+    console.log("Rendering Turnstile widget...");
+
+    // Render visible widget that user must click - ALWAYS requires fresh interaction
+    turnstileWidgetId.current = window.turnstile.render(container, {
+      sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
+      // Force manual execution - widget won't auto-verify
+      execution: "render",
+      callback: (token: string) => {
+        console.log("Turnstile verification successful");
+        setTurnstileToken(token);
+      },
+      "error-callback": () => {
+        console.error("Turnstile verification failed");
+        setTurnstileToken(null);
+        toast.error("Verification Failed", {
+          description: "Please try refreshing the page.",
+        });
+      },
+      "expired-callback": () => {
+        console.warn("Turnstile token expired");
+        setTurnstileToken(null);
+        toast("Verification Expired", {
+          description: "Please verify again before submitting.",
+        });
+      },
+    });
+
+    console.log("Turnstile widget ID:", turnstileWidgetId.current);
+
+    // CRITICAL: Reset immediately after render to clear any cached state
+    if (turnstileWidgetId.current) {
+      setTimeout(() => {
+        if (turnstileWidgetId.current && window.turnstile) {
+          console.log("Resetting Turnstile to clear cache...");
+          window.turnstile.reset(turnstileWidgetId.current);
+        }
+      }, 100);
+    }
+
+    return () => {
+      if (turnstileWidgetId.current && window.turnstile) {
+        console.log("Cleaning up Turnstile widget");
+        window.turnstile.remove(turnstileWidgetId.current);
+        setTurnstileToken(null);
+      }
+    };
+  }, [turnstileReady]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Layer 1 Check: Honeypot validation (client-side first line of defense)
+    if (honeypot) {
+      console.warn("Bot detected via honeypot field");
+      toast.error("Error", {
+        description: "Invalid form submission. Please try again.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Layer 2 Check: Ensure user completed verification
+    if (!turnstileToken) {
+      // Execute the Turnstile widget to show the challenge
+      if (turnstileWidgetId.current && window.turnstile) {
+        console.log("Triggering Turnstile challenge...");
+        window.turnstile.execute(turnstileWidgetId.current);
+      }
+      toast.error("Verification Required", {
+        description: "Please complete the security check above before submitting.",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Parse skills from comma-separated input
+      const skills = skillsInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const response = await fetch("/api/auth/coach-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone: phone || undefined,
+          bio: bio || undefined,
+          skills,
+          certifications: certifications || undefined,
+          yearsExperience: yearsExperience ? Number.parseInt(yearsExperience, 10) : undefined,
+          honeypot, // Layer 1: Send honeypot to server for verification
+          turnstileToken, // Layer 2: Send Turnstile token to server for verification
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle detailed validation errors
+        if (data.errors) {
+          let errorMessage = data.message || "Validation failed";
+
+          // Format Zod validation errors
+          if (typeof data.errors === "object") {
+            const errorList = [];
+            for (const [field, fieldErrors] of Object.entries(data.errors)) {
+              if (fieldErrors && typeof fieldErrors === "object" && "_errors" in fieldErrors) {
+                const messages = (fieldErrors as { _errors: string[] })._errors;
+                errorList.push(`${field}: ${messages.join(", ")}`);
+              }
+            }
+            if (errorList.length > 0) {
+              errorMessage += `:\n${errorList.join("\n")}`;
+            }
+          }
+
+          throw new Error(errorMessage);
+        }
+        throw new Error(data.message || "Something went wrong");
+      }
+
+      toast("Application Submitted", {
+        description:
+          "Your coaching application has been submitted for review. You'll receive an email when approved.",
+      });
+
+      // Redirect to login page after successful signup
+      router.push("/auth/login");
+    } catch (error) {
+      toast.error("Error", {
+        description:
+          error instanceof Error ? error.message : "An error occurred during application",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="afterInteractive"
+      />
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 py-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Apply to Coach at YM Movement</CardTitle>
+            <CardDescription>Submit your application for admin review</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form id="coach-signup-form" onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={(e) => setName(toProperCase(e.target.value))}
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={(e) => setEmail(formatEmail(e.target.value))}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone (optional)</Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio (optional)</Label>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Tell us about your coaching background"
+                  maxLength={500}
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">{bio.length}/500 characters</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="skills">Skills (optional)</Label>
+                <Input
+                  id="skills"
+                  value={skillsInput}
+                  onChange={(e) => setSkillsInput(e.target.value)}
+                  placeholder="Ice Dance, Freestyle, Dry Land (comma-separated)"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Separate multiple skills with commas
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="certifications">Certifications (optional)</Label>
+                <Textarea
+                  id="certifications"
+                  value={certifications}
+                  onChange={(e) => setCertifications(e.target.value)}
+                  placeholder="List your certifications and qualifications"
+                  maxLength={1000}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yearsExperience">Years of Experience (optional)</Label>
+                <Input
+                  id="yearsExperience"
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={yearsExperience}
+                  onChange={(e) => setYearsExperience(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+
+              {/* Layer 1: Honeypot field - invisible to humans, bots auto-fill it */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: "-9999px",
+                  opacity: 0,
+                  pointerEvents: "none",
+                  height: 0,
+                  overflow: "hidden",
+                }}
+                aria-hidden="true"
+              >
+                <Label htmlFor="website" className="sr-only">
+                  Leave this field blank
+                </Label>
+                <Input
+                  id="website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
+
+              {/* Layer 2: Cloudflare Turnstile CAPTCHA - Visible checkbox */}
+              <div className="flex justify-center">
+                <div ref={turnstileContainerRef} />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading || !turnstileToken}>
+                {isLoading ? "Submitting..." : "Submit Application"}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2">
+            <p className="text-sm text-center text-gray-500">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="text-blue-600 hover:underline">
+                Login
+              </Link>
+            </p>
+            <p className="text-xs text-center text-gray-400 mt-2">
+              By applying, you agree to our{" "}
+              <Link href="/terms" className="text-blue-500 hover:underline">
+                Terms of Service
+              </Link>
+              ,{" "}
+              <Link href="/privacy" className="text-blue-500 hover:underline">
+                Privacy Policy
+              </Link>
+              , and{" "}
+              <Link href="/policies" className="text-blue-500 hover:underline">
+                Lesson Policies
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
+    </>
+  );
+}
