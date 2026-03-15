@@ -10,16 +10,16 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 2 of 7 (Coach Dashboard, Profile, and Onboarding)
-Plan: 4 of 6
+Plan: 5 of 6
 Status: In progress
-Last activity: 2026-03-15 -- Completed 02-04-PLAN.md (coach dashboard, profile, earnings, students, schedule pages)
+Last activity: 2026-03-15 -- Completed 02-05-PLAN.md (admin coach management page with approval, CRUD, status)
 
-Progress: ██████░░░░░░░░░░░░░░ 29% (7/~24 plans, phases 3-7 not yet planned)
+Progress: ██████░░░░░░░░░░░░░░ 33% (8/~24 plans, phases 3-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 4.6min
 
 **By Phase:**
@@ -27,7 +27,7 @@ Progress: ██████░░░░░░░░░░░░░░ 29% (7/~2
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
-| 02-coach-dashboard-profile | 4/6 | 22min | 5.5min |
+| 02-coach-dashboard-profile | 5/6 | 28min | 5.6min |
 
 ## Accumulated Context
 
@@ -62,6 +62,11 @@ Progress: ██████░░░░░░░░░░░░░░ 29% (7/~2
 - [02-02] Dashboard stats count distinct students via Prisma distinct on studentId
 - [02-04] Payment model field is `method` not `paymentMethod` -- corrected during type-check
 - [02-04] Profile form Zod schema uses required strings (not optional+default) to align with react-hook-form resolver types
+- [02-05] GraduationCap icon used for Coaches nav item to differentiate from Students (Users icon)
+- [02-05] Deny flow deletes User (cascades to Coach) matching student rejection pattern
+- [02-05] Coach creation uses $transaction for atomic User+Coach record creation
+- [02-05] All admin coach queries use superAdminProcedure (not protectedProcedure)
+- [02-05] CoachStatusActions renders DropdownMenuItems directly for parent DropdownMenu composition
 
 ### Pending Todos
 
@@ -77,5 +82,5 @@ Progress: ██████░░░░░░░░░░░░░░ 29% (7/~2
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 02-04-PLAN.md (coach dashboard, profile, earnings, students, schedule pages)
+Stopped at: Completed 02-05-PLAN.md (admin coach management page with approval, CRUD, status)
 Resume file: None
