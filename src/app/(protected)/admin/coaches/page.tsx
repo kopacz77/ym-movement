@@ -23,6 +23,14 @@ const CoachPendingApprovals = dynamic(
   { loading: () => <LoadingSkeleton /> },
 );
 
+const CoachProposalQueue = dynamic(
+  () =>
+    import("@/features/admin/components/coaches/proposals/CoachProposalQueue").then((mod) => ({
+      default: mod.CoachProposalQueue,
+    })),
+  { loading: () => <LoadingSkeleton /> },
+);
+
 const NewCoachDialog = dynamic(
   () =>
     import("@/features/admin/components/coaches/management/NewCoachDialog").then((mod) => ({
@@ -44,12 +52,15 @@ export default function AdminCoachesPage() {
       </div>
 
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 lg:w-fit lg:grid-cols-none lg:flex">
+        <TabsList className="grid w-full grid-cols-3 lg:w-fit lg:grid-cols-none lg:flex">
           <TabsTrigger value="all" className="text-sm">
             All Coaches
           </TabsTrigger>
           <TabsTrigger value="pending" className="text-sm">
             Pending Approvals
+          </TabsTrigger>
+          <TabsTrigger value="proposals" className="text-sm">
+            Proposals
           </TabsTrigger>
         </TabsList>
 
@@ -59,6 +70,10 @@ export default function AdminCoachesPage() {
 
         <TabsContent value="pending">
           <CoachPendingApprovals />
+        </TabsContent>
+
+        <TabsContent value="proposals">
+          <CoachProposalQueue />
         </TabsContent>
       </Tabs>
 
