@@ -53,6 +53,7 @@
     "security:audit": "node scripts/security-audit.js",
     "security:fix": "pnpm audit --fix",
     "prisma:migrate": "prisma migrate deploy",
+    "migrate:coach-data": "tsx scripts/migrate-coach-data.ts",
     "migrate:lesson-types": "tsx scripts/migrate-lesson-types.ts",
     "migrate:fix-prices": "tsx scripts/fix-lesson-prices.ts",
     "test:bot-protection": "tsx scripts/test-bot-protection.ts",
