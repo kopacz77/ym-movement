@@ -113,10 +113,10 @@ Which phases cover which requirements. Updated by create-roadmap.
 | BOOK-01 | Phase 5 | Pending |
 | BOOK-02 | Phase 5 | Pending |
 | BOOK-03 | Phase 5 | Pending |
-| SADM-01 | Phase 3 | Pending |
-| SADM-02 | Phase 3 | Pending |
-| SADM-03 | Phase 3 | Pending |
-| SADM-04 | Phase 3 | Pending |
+| SADM-01 | Phase 3 | Complete |
+| SADM-02 | Phase 3 | Complete |
+| SADM-03 | Phase 3 | Complete |
+| SADM-04 | Phase 3 | Complete |
 | INTG-01 | Phase 6 | Pending |
 | INTG-02 | Phase 7 | Pending |
 | INTG-03 | Phase 7 | Pending |
@@ -128,4 +128,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-15 after Phase 2 completion*
+*Last updated: 2026-03-15 after Phase 3 completion*

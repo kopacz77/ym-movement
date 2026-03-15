@@ -62,10 +62,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Admin schedule query scoping: timeSlotQueries, lessonQueries, blockedDateQueries, recurringPatternQueries upgraded to adminProcedure with optional coachId filtering, per-coach overlap detection
-- [ ] 03-02-PLAN.md -- Analytics/payment security fix and scoping: analyticsQueries publicProcedure security fix, payment coachId via Lesson relation, settings/rink procedure upgrade, student booking coachId inheritance
-- [ ] 03-03-PLAN.md -- Super admin TRPC queries: coaches overview, coach drill-down, revenue breakdown with payout calculations
-- [ ] 03-04-PLAN.md -- Super admin dashboard UI: CoachOverviewCards, CoachDetailView, RevenueBreakdownChart, enhanced admin dashboard page
+- [x] 03-01-PLAN.md -- Admin schedule query scoping: timeSlotQueries, lessonQueries, blockedDateQueries, recurringPatternQueries upgraded to adminProcedure with optional coachId filtering, per-coach overlap detection
+- [x] 03-02-PLAN.md -- Analytics/payment security fix and scoping: analyticsQueries publicProcedure security fix, payment coachId via Lesson relation, settings/rink procedure upgrade, student booking coachId inheritance
+- [x] 03-03-PLAN.md -- Super admin TRPC queries: coaches overview, coach drill-down, revenue breakdown with payout calculations
+- [x] 03-04-PLAN.md -- Super admin dashboard UI: CoachOverviewCards, CoachDetailView, RevenueBreakdownChart, enhanced admin dashboard page
 
 **Success Criteria:**
 1. A coach querying lessons, time slots, students, or payments only sees records associated with their own coachId -- never another coach's data
@@ -143,7 +143,7 @@ Plans:
 |-------|--------|-----------|
 | 1 - Auth, Schema, and Data Migration | Complete | 2026-03-15 |
 | 2 - Coach Dashboard, Profile, and Onboarding | Complete | 2026-03-15 |
-| 3 - Query Scoping and Super Admin Dashboard | Not started | -- |
+| 3 - Query Scoping and Super Admin Dashboard | Complete | 2026-03-15 |
 | 4 - Per-Coach Scheduling | Not started | -- |
 | 5 - Student Multi-Coach Booking | Not started | -- |
 | 6 - Per-Coach Google Calendar | Not started | -- |
