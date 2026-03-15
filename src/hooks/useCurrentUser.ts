@@ -39,7 +39,7 @@ export function useCurrentUser() {
           // Don't throw here to prevent React error boundary triggers
           // The components will handle missing studentId gracefully
         });
-    } else if (session?.user?.role === "ADMIN") {
+    } else if (session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN") {
       // Admins are always "approved" and "active"
       setIsApproved(true);
       setIsActive(true);
@@ -59,6 +59,6 @@ export function useCurrentUser() {
     isApproved: isApproved,
     isActive: isActive,
     isStudent: session?.user?.role === "STUDENT",
-    isAdmin: session?.user?.role === "ADMIN",
+    isAdmin: session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN",
   };
 }

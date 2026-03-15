@@ -3,7 +3,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  role: "ADMIN" | "COACH" | "STUDENT";
+  role: "SUPER_ADMIN" | "ADMIN" | "COACH" | "STUDENT";
   emailVerified?: Date;
 }
 

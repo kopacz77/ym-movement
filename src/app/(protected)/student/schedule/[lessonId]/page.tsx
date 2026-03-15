@@ -58,7 +58,11 @@ export default async function LessonDetailsPage({
     }
 
     // Ensure the logged-in user can only see their own lessons
-    if (session.user.role !== "ADMIN" && lesson.Student.userId !== session.user.id) {
+    if (
+      session.user.role !== "ADMIN" &&
+      session.user.role !== "SUPER_ADMIN" &&
+      lesson.Student.userId !== session.user.id
+    ) {
       return notFound();
     }
 

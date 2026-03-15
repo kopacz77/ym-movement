@@ -119,7 +119,7 @@ export interface AuthState {
     id: string;
     name?: string | null;
     email?: string | null;
-    role: "ADMIN" | "COACH" | "STUDENT";
+    role: "SUPER_ADMIN" | "ADMIN" | "COACH" | "STUDENT";
   } | null;
   isLoading: boolean;
   isAuthenticated: boolean;

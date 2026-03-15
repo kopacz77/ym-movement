@@ -33,6 +33,7 @@ export async function GET(_req: NextRequest) {
                 },
               }
             : undefined,
+        // TODO (Phase 1, Plan 03): Include Coach profile for SUPER_ADMIN/COACH roles after Coach model exists
       },
     });
 

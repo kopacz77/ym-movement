@@ -34,6 +34,7 @@ export type UnixTimestamp = Brand<number, "UnixTimestamp">;
 
 // Status enum types with exhaustive checking
 export enum UserRole {
+  SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
   COACH = "COACH",
   STUDENT = "STUDENT",

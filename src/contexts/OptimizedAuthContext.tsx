@@ -11,7 +11,7 @@ interface User {
   id: string;
   name?: string | null;
   email?: string | null;
-  role: "ADMIN" | "COACH" | "STUDENT";
+  role: "SUPER_ADMIN" | "ADMIN" | "COACH" | "STUDENT";
 }
 
 export const OptimizedAuthProvider = ({ children }: { children: ReactNode }) => {
