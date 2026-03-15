@@ -10,16 +10,16 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 3 of 7 (Query Scoping and Super Admin Dashboard)
-Plan: 0 of ? (not yet planned)
-Status: Not started
-Last activity: 2026-03-15 -- Phase 2 verified and completed
+Plan: 3 of 4 in phase
+Status: In progress
+Last activity: 2026-03-15 -- Completed 03-03-PLAN.md (super admin TRPC queries)
 
-Progress: ███████░░░░░░░░░░░░░ 37% (9/~24 plans, phases 3-7 not yet planned)
+Progress: █████████░░░░░░░░░░░ 46% (12/~26 plans, phases 4-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 12
 - Average duration: 4.6min
 
 **By Phase:**
@@ -28,6 +28,7 @@ Progress: ███████░░░░░░░░░░░░░ 37% (9/~2
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
 | 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
+| 03-query-scoping-super-admin | 3/4 | ~9min | ~3min |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Progress: ███████░░░░░░░░░░░░░ 37% (9/~2
 - [02-06] Approval uses $transaction for atomic RinkTimeSlot creation + proposal status update
 - [02-06] RinkTimeSlot field is isActive (not isAvailable as plan stated) -- corrected to match schema
 - [02-06] Deny flow opens dialog for optional admin notes (coach sees denial reason in their list)
+- [03-03] User model has no image field -- removed from getCoachDetail select (plan specified image but schema lacks it)
+- [03-03] Payment scoping always through Lesson relation (Lesson: { coachId }) per research Pitfall 1
 
 ### Pending Todos
 
@@ -86,5 +89,5 @@ Progress: ███████░░░░░░░░░░░░░ 37% (9/~2
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 02-06-PLAN.md (coach time slot proposals and admin approval) -- Phase 2 complete
+Stopped at: Completed 03-03-PLAN.md (super admin TRPC queries)
 Resume file: None
