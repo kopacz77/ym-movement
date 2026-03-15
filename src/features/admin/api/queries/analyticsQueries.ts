@@ -2,7 +2,7 @@ import { LessonStatus, PaymentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 // Define proper type interfaces for our data structures
 interface ActivityData {
@@ -38,18 +38,25 @@ interface AttendanceData {
 }
 
 export const analyticsRouter = createTRPCRouter({
-  getOverview: publicProcedure.query(async ({ ctx }) => {
+  getOverview: adminProcedure
+    .input(z.object({ coachId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
     try {
       const [totalStudents, activeLessons, pendingPayments, monthlyRevenue] = await Promise.all([
+        // Students are shared resources -- do NOT scope by coachId
         ctx.prisma.student.count(),
         ctx.prisma.lesson.count({
           where: {
             status: LessonStatus.SCHEDULED,
             startTime: { gte: new Date() },
+            ...(input?.coachId && { coachId: input.coachId }),
           },
         }),
         ctx.prisma.payment.count({
-          where: { status: PaymentStatus.PENDING },
+          where: {
+            status: PaymentStatus.PENDING,
+            ...(input?.coachId && { Lesson: { coachId: input.coachId } }),
+          },
         }),
         ctx.prisma.payment.aggregate({
           where: {
@@ -57,6 +64,7 @@ export const analyticsRouter = createTRPCRouter({
             lesson_date: {
               gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
             },
+            ...(input?.coachId && { Lesson: { coachId: input.coachId } }),
           },
           _sum: { amount: true },
         }),
@@ -78,12 +86,13 @@ export const analyticsRouter = createTRPCRouter({
     }
   }),
 
-  getStudentActivity: publicProcedure
+  getStudentActivity: adminProcedure
     .input(
       z.object({
         period: z.enum(["week", "month", "year"]).optional(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
+        coachId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -117,6 +126,7 @@ export const analyticsRouter = createTRPCRouter({
               gte: queryStartDate,
               ...(queryEndDate && { lte: queryEndDate }),
             },
+            ...(input.coachId && { coachId: input.coachId }),
           },
           select: { startTime: true, status: true, type: true, area: true },
           orderBy: { startTime: "asc" },
@@ -183,12 +193,13 @@ export const analyticsRouter = createTRPCRouter({
       }
     }),
 
-  getRevenueReport: publicProcedure
+  getRevenueReport: adminProcedure
     .input(
       z.object({
         period: z.enum(["week", "month", "year"]).optional(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
+        coachId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -223,6 +234,7 @@ export const analyticsRouter = createTRPCRouter({
               ...(queryEndDate && { lte: queryEndDate }),
             },
             status: PaymentStatus.COMPLETED,
+            ...(input.coachId && { Lesson: { coachId: input.coachId } }),
           },
           include: {
             Lesson: {
@@ -301,12 +313,13 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   // New endpoint for student attendance
-  getStudentAttendance: protectedProcedure
+  getStudentAttendance: adminProcedure
     .input(
       z.object({
         studentId: z.string(),
         startDate: z.date().optional(),
         endDate: z.date().optional(),
+        coachId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -323,6 +336,7 @@ export const analyticsRouter = createTRPCRouter({
               gte: startDate,
               lte: endDate,
             },
+            ...(input.coachId && { coachId: input.coachId }),
           },
           orderBy: {
             startTime: "asc",

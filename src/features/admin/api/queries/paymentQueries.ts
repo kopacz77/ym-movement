@@ -21,6 +21,7 @@ export const paymentRouter = createTRPCRouter({
           sortBy: z
             .enum(["date-desc", "date-asc", "name-asc", "name-desc", "amount-desc", "amount-asc"])
             .optional(),
+          coachId: z.string().optional(),
         })
         .optional(),
     )
@@ -49,6 +50,11 @@ export const paymentRouter = createTRPCRouter({
           if (input?.endDate) {
             where.createdAt.lte = input.endDate;
           }
+        }
+
+        // Scope by coach via Lesson relation (Payment has no direct coachId)
+        if (input?.coachId) {
+          where.Lesson = { coachId: input.coachId };
         }
 
         // Determine orderBy based on sortBy parameter
@@ -342,16 +348,19 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
-  getPaymentStats: adminProcedure.query(async ({ ctx }) => {
+  getPaymentStats: adminProcedure
+    .input(z.object({ coachId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
     try {
+      const coachFilter = input?.coachId ? { Lesson: { coachId: input.coachId } } : {};
       const [totalPayments, pendingAmount, completedAmount] = await Promise.all([
-        ctx.prisma.payment.count(),
+        ctx.prisma.payment.count({ where: coachFilter }),
         ctx.prisma.payment.aggregate({
-          where: { status: "PENDING" },
+          where: { status: "PENDING", ...coachFilter },
           _sum: { amount: true },
         }),
         ctx.prisma.payment.aggregate({
-          where: { status: "COMPLETED" },
+          where: { status: "COMPLETED", ...coachFilter },
           _sum: { amount: true },
         }),
       ]);
