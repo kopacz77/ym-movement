@@ -168,6 +168,7 @@ model Rink {
   Lesson           Lesson[]
   RecurringPattern RecurringPattern[]
   RinkTimeSlot     RinkTimeSlot[]
+  ProposedTimeSlot ProposedTimeSlot[]
 }
 
 model RinkTimeSlot {
@@ -328,6 +329,12 @@ enum Role {
   STUDENT
 }
 
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
 model BlockedDateRange {
   id          String          @id @default(cuid())
   title       String
@@ -368,6 +375,9 @@ model Coach {
   isActive             Boolean           @default(true)
   approvedAt           DateTime?
   approvedById         String?
+  suspendedAt          DateTime?
+  suspendedById        String?
+  suspendedReason      String?
   privateLessonPrice   Float?
   groupLessonPrice     Float?
   choreographyPrice    Float?
@@ -380,11 +390,12 @@ model Coach {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 
-  User                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   Lesson               Lesson[]
   RinkTimeSlot         RinkTimeSlot[]
   BlockedDateRange     BlockedDateRange[]
   CoachStudent         CoachStudent[]
+  ProposedTimeSlot     ProposedTimeSlot[]
 
   @@index([userId])
   @@index([isApproved, isActive])
@@ -403,4 +414,26 @@ model CoachStudent {
   @@unique([coachId, studentId])
   @@index([coachId])
   @@index([studentId])
+}
+
+model ProposedTimeSlot {
+  id           String         @id @default(cuid())
+  coachId      String
+  rinkId       String
+  startTime    DateTime
+  endTime      DateTime
+  maxStudents  Int            @default(1)
+  status       ProposalStatus @default(PENDING)
+  adminNotes   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  Coach        Coach          @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  Rink         Rink           @relation(fields: [rinkId], references: [id])
+
+  @@index([coachId])
+  @@index([status])
+  @@index([coachId, status])
 }
