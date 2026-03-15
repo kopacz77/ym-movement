@@ -10,9 +10,9 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 3 of 7 (Query Scoping and Super Admin Dashboard)
-Plan: 3 of 4 in phase
+Plan: 3 of 4 in phase (03-01, 03-02, 03-03 complete; 03-04 remaining)
 Status: In progress
-Last activity: 2026-03-15 -- Completed 03-03-PLAN.md (super admin TRPC queries)
+Last activity: 2026-03-15 -- Completed 03-01-PLAN.md (admin schedule query scoping)
 
 Progress: █████████░░░░░░░░░░░ 46% (12/~26 plans, phases 4-7 not yet planned)
 
@@ -28,7 +28,7 @@ Progress: █████████░░░░░░░░░░░ 46% (12/~
 |-------|-------|-------|----------|
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
 | 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
-| 03-query-scoping-super-admin | 3/4 | ~9min | ~3min |
+| 03-query-scoping-super-admin | 3/4 | ~14min | ~4.7min |
 
 ## Accumulated Context
 
@@ -72,6 +72,10 @@ Progress: █████████░░░░░░░░░░░ 46% (12/~
 - [02-06] Approval uses $transaction for atomic RinkTimeSlot creation + proposal status update
 - [02-06] RinkTimeSlot field is isActive (not isAvailable as plan stated) -- corrected to match schema
 - [02-06] Deny flow opens dialog for optional admin notes (coach sees denial reason in their list)
+- [03-01] Students remain shared resource -- getStudents not scoped by coachId
+- [03-01] assignStudentToTimeSlot inherits coachId from timeSlot, not from input
+- [03-01] Delete operations not scoped by coachId (admin can delete any)
+- [03-01] updateTimeSlot overlap check uses existing slot's coachId from DB lookup
 - [03-02] Payment coachId filtering uses Lesson relation (Lesson: { coachId }) since Payment has no direct coachId column
 - [03-02] Student count in getOverview NOT scoped by coachId (students are shared resources)
 - [03-02] bookingQueries.ts keeps protectedProcedure (student-facing, not admin-only)
@@ -95,5 +99,5 @@ Progress: █████████░░░░░░░░░░░ 46% (12/~
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 03-03-PLAN.md (super admin TRPC queries)
+Stopped at: Completed 03-01-PLAN.md (admin schedule query scoping)
 Resume file: None
