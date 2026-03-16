@@ -10,11 +10,11 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 9 of 10 (Coach & Admin Flow Tests)
-Plan: 1 of 2 in phase (09-01 complete)
-Status: In progress
-Last activity: 2026-03-16 — Completed 09-01-PLAN.md (coach flows E2E tests)
+Plan: 2 of 2 in phase (phase complete)
+Status: Phase 9 complete
+Last activity: 2026-03-16 — Completed 09-02-PLAN.md (admin coach management E2E tests)
 
-Progress: ██████░░░░░░░░░░░░░░░░░░░ 23% (3/? plans)
+Progress: ████████░░░░░░░░░░░░░░░░░ 31% (4/? plans)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ██████░░░░░░░░░░░░░░░░░�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 3
-- Average duration: 4.2min
+- Total plans completed: 4
+- Average duration: 3.6min
 
 ## Accumulated Context
 
@@ -43,6 +43,9 @@ Progress: ██████░░░░░░░░░░░░░░░░░�
 - Two pending coaches (coach3, coach4) seeded for independent approve/deny testing
 - deleteMany + create pattern for seed entities without unique constraints (ProposedTimeSlot, Lesson)
 - Deny confirmation uses button:has-text("Delete") matching showDeleteConfirmation() toast pattern
+- Admin coach management tests use default super-admin storageState (no test.use override needed)
+- Revenue split test resets to 70% after edit for idempotent runs
+- Payout report tests handle both data and empty states with .or() pattern
 
 ### Pending Todos
 
@@ -58,5 +61,5 @@ Progress: ██████░░░░░░░░░░░░░░░░░�
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 09-01-PLAN.md — ready for 09-02 (admin coach management tests)
+Stopped at: Completed 09-02-PLAN.md — Phase 9 complete, ready for Phase 10
 Resume file: None
