@@ -101,6 +101,10 @@ Progress: ███████████████████░ 76% (19/~
 - [05-01] getStudentPricing updated to accept optional coachId and apply full waterfall via getHourlyRateForLessonType
 - [05-01] CoachStudent upsert is non-blocking (error logged but booking succeeds)
 - [05-01] Coach name fetched once early in bookLesson and reused for calendar, notifications, and admin alerts
+- [05-02] CoachProfile type exported from CoachProfileCard (not separate types file) for colocation
+- [05-02] BookingCalendar props are required (not optional) since it is only rendered when coach is selected
+- [05-02] BookingDialog coachName and coachId are optional for backward compatibility
+- [05-02] ArrowLeft icon used for Change Coach button for clear back-navigation affordance
 - [05-03] Coach display uses "Instructor" fallback consistently across all student views for legacy lessons without coach data
 - [05-03] UpcomingLessons and payments page use (lesson as any).Coach cast since TRPC return type inference may not include Coach
 - [05-03] Coach column in payments table hidden on small screens (hidden md:table-cell) to preserve mobile layout
@@ -116,7 +120,7 @@ Progress: ███████████████████░ 76% (19/~
 - Google OAuth consent screen may show unverified app warning -- acceptable for small coaching business
 - googleapis version at v150.0.1 (latest v171.4.0) -- consider upgrading before multi-coach work
 - Pre-existing `pnpm build` failure: Next.js 16.1.6 post-build 404 copy error (unrelated to auth changes, compilation succeeds)
-- Pre-existing type error in student/book/page.tsx: BookingCalendar requires coachId/coachName (from 05-02) but page not yet updated
+
 
 ## Session Continuity
 
