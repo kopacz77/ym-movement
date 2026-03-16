@@ -1,6 +1,7 @@
 // src/features/admin/api/queries/coach/coachManagementQueries.ts
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendApprovalEmail } from "@/lib/email";
 import { createTRPCRouter, superAdminProcedure } from "@/lib/trpc";
@@ -235,6 +236,24 @@ export const coachManagementRouter = createTRPCRouter({
             User: { select: { id: true, name: true, email: true } },
           },
         });
+
+        // Notify coach if revenue split was updated
+        if (
+          input.revenueSplitPercent !== undefined &&
+          input.revenueSplitPercent !== coach.revenueSplitPercent
+        ) {
+          try {
+            await createNotification({
+              userId: updatedCoach.User.id,
+              title: "Revenue Split Updated",
+              message: `Your revenue split has been updated from ${coach.revenueSplitPercent}% to ${input.revenueSplitPercent}%`,
+              type: "INFO",
+              link: "/coach/earnings",
+            });
+          } catch (notifError) {
+            console.error("[PRICING] Error creating coach notification:", notifError);
+          }
+        }
 
         return updatedCoach;
       } catch (error) {

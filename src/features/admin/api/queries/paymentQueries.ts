@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { PaymentStatus } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { sendPaymentReminderEmail } from "@/lib/email";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
@@ -227,8 +228,28 @@ export const paymentRouter = createTRPCRouter({
           },
         });
 
-        // Here you could also send a confirmation email to the student
-        // if you have that functionality
+        // Notify the coach if this payment is for one of their lessons
+        if (payment.Lesson?.coachId) {
+          try {
+            const coachRecord = await ctx.prisma.coach.findUnique({
+              where: { id: payment.Lesson.coachId },
+              select: { userId: true },
+            });
+            if (coachRecord) {
+              await createNotification({
+                userId: coachRecord.userId,
+                title: "Payment Verified",
+                message: `Payment of $${payment.amount.toFixed(2)} from ${
+                  payment.Student?.User?.name || "a student"
+                } has been verified`,
+                type: "SUCCESS",
+                link: "/coach/earnings",
+              });
+            }
+          } catch (coachNotifError) {
+            console.error("[PAYMENT] Error creating coach notification:", coachNotifError);
+          }
+        }
 
         return updatedPayment;
       } catch (error) {
@@ -351,32 +372,32 @@ export const paymentRouter = createTRPCRouter({
   getPaymentStats: adminProcedure
     .input(z.object({ coachId: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
-    try {
-      const coachFilter = input?.coachId ? { Lesson: { coachId: input.coachId } } : {};
-      const [totalPayments, pendingAmount, completedAmount] = await Promise.all([
-        ctx.prisma.payment.count({ where: coachFilter }),
-        ctx.prisma.payment.aggregate({
-          where: { status: "PENDING", ...coachFilter },
-          _sum: { amount: true },
-        }),
-        ctx.prisma.payment.aggregate({
-          where: { status: "COMPLETED", ...coachFilter },
-          _sum: { amount: true },
-        }),
-      ]);
+      try {
+        const coachFilter = input?.coachId ? { Lesson: { coachId: input.coachId } } : {};
+        const [totalPayments, pendingAmount, completedAmount] = await Promise.all([
+          ctx.prisma.payment.count({ where: coachFilter }),
+          ctx.prisma.payment.aggregate({
+            where: { status: "PENDING", ...coachFilter },
+            _sum: { amount: true },
+          }),
+          ctx.prisma.payment.aggregate({
+            where: { status: "COMPLETED", ...coachFilter },
+            _sum: { amount: true },
+          }),
+        ]);
 
-      return {
-        totalPayments,
-        pendingAmount: pendingAmount._sum.amount || 0,
-        completedAmount: completedAmount._sum.amount || 0,
-      };
-    } catch (error) {
-      console.error("Error fetching payment stats:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch payment statistics",
-        cause: error,
-      });
-    }
-  }),
+        return {
+          totalPayments,
+          pendingAmount: pendingAmount._sum.amount || 0,
+          completedAmount: completedAmount._sum.amount || 0,
+        };
+      } catch (error) {
+        console.error("Error fetching payment stats:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch payment statistics",
+          cause: error,
+        });
+      }
+    }),
 });
