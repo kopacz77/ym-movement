@@ -64,6 +64,14 @@ export const timeSlotRouter = createTRPCRouter({
                 // Exclude: maxCapacity, createdAt, updatedAt
               },
             },
+            Coach: {
+              select: {
+                id: true,
+                User: {
+                  select: { name: true },
+                },
+              },
+            },
             Lesson: {
               select: {
                 id: true,

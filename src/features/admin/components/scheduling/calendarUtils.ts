@@ -48,6 +48,12 @@ export interface TimeSlot {
     address?: string;
     timezone: string;
   };
+  Coach?: {
+    id: string;
+    User: {
+      name: string | null;
+    };
+  };
 }
 
 // Define the GroupedTimeSlot interface
