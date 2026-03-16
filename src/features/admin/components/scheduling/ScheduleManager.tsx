@@ -4,6 +4,7 @@
 import { endOfDay, startOfDay } from "date-fns";
 import { DateTime } from "luxon";
 import { memo, useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import type { SlotInfo } from "react-big-calendar";
 import type { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,6 +90,19 @@ const ScheduleManagerComponent = () => {
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
   // Timezone filter for "All Rinks" view - filters rinks by timezone (defaults to Pacific)
   const [timezoneFilter, setTimezoneFilter] = useState("America/Los_Angeles");
+  // Coach filter state
+  const [selectedCoach, setSelectedCoach] = useState<string | undefined>(undefined);
+
+  // NOTE: getAllCoaches uses superAdminProcedure which is currently identical to adminProcedure
+  // (both check isAdminRole). Safe for all admins during ADMIN/SUPER_ADMIN transition period.
+  const { data: coachesData } = api.admin.coach.management.getAllCoaches.useQuery();
+  const activeCoaches = useMemo(
+    () =>
+      coachesData?.coaches?.filter(
+        (c: any) => c.isApproved && c.isActive,
+      ),
+    [coachesData],
+  );
 
   // Access bulk operations context
   useBulkOperations();
@@ -154,12 +168,13 @@ const ScheduleManagerComponent = () => {
   }, [date, calendarView]);
 
   // Use the timeSlots hook to fetch data
-  const { rinks, students, timeSlots } = useTimeSlots(dateRange, selectedRink);
+  const { rinks, students, timeSlots } = useTimeSlots(dateRange, selectedRink, selectedCoach);
 
   // Fetch blocked date ranges from database
   const { data: blockedDateRanges = [] } = api.admin.schedule.getBlockedDates.useQuery({
     startDate: dateRange.start,
     endDate: dateRange.end,
+    ...(selectedCoach && { coachId: selectedCoach }),
   });
 
   // Filter time slots by timezone when viewing "All Rinks" with a timezone filter
@@ -481,7 +496,15 @@ const ScheduleManagerComponent = () => {
       endTime: string;
       rinkId: string;
       maxStudents: number;
+      coachId?: string;
     }) => {
+      // Require coach selection before creating a time slot (SCHD-01)
+      const coachId = bookingData.coachId || selectedCoach;
+      if (!coachId) {
+        toast.error("Please select a coach before creating a time slot");
+        return;
+      }
+
       // Get the selected rink's timezone
       const selectedRinkData = rinks?.find(
         (r: { id: string; timezone: string }) => r.id === bookingData.rinkId,
@@ -520,6 +543,7 @@ const ScheduleManagerComponent = () => {
           endTime: endDateTime,
           maxStudents: bookingData.maxStudents,
           isActive: true,
+          coachId,
         },
         {
           onSuccess: () => {
@@ -529,7 +553,7 @@ const ScheduleManagerComponent = () => {
         },
       );
     },
-    [createTimeSlot, rinks],
+    [createTimeSlot, rinks, selectedCoach],
   );
 
   // Handle dialog close actions
@@ -600,6 +624,9 @@ const ScheduleManagerComponent = () => {
         onRinkSelect={setSelectedRink}
         displayTimezone={timezoneFilter}
         onDisplayTimezoneChange={setTimezoneFilter}
+        selectedCoachId={selectedCoach}
+        onCoachSelect={setSelectedCoach}
+        coaches={activeCoaches}
         createTimeSlotButton={
           <CompactTimeSlotDialog
             open={isCreateDialogOpen}

@@ -35,7 +35,7 @@ interface UseTimeSlotsResult {
   processedEventsList: ProcessedEventsList[];
 }
 
-export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTimeSlotsResult {
+export function useTimeSlots(dateRange: DateRange, selectedRink?: string, selectedCoachId?: string): UseTimeSlotsResult {
   const { status: sessionStatus } = useSession();
   const isAuthenticated = sessionStatus === "authenticated";
 
@@ -68,6 +68,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string): UseTi
       startDate: dateRange.start,
       endDate: dateRange.end,
       rinkId: selectedRink,
+      ...(selectedCoachId && { coachId: selectedCoachId }),
     },
     {
       refetchOnWindowFocus: false,

@@ -37,6 +37,10 @@ interface ScheduleHeaderProps {
   // Display timezone for "All Rinks" view
   displayTimezone?: string;
   onDisplayTimezoneChange?: (timezone: string) => void;
+  // Coach selector props
+  selectedCoachId?: string;
+  onCoachSelect?: (coachId: string | undefined) => void;
+  coaches?: Array<{ id: string; user: { name: string | null } }>;
   // Bulk actions props
   isSelectionMode?: boolean;
   onToggleSelectionMode?: () => void;
@@ -54,6 +58,9 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
   rinks,
   displayTimezone = "America/Los_Angeles",
   onDisplayTimezoneChange,
+  selectedCoachId,
+  onCoachSelect,
+  coaches,
   isSelectionMode,
   onToggleSelectionMode,
   dateRangeFilter,
@@ -98,8 +105,30 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
         </div>
 
         <div className="flex flex-col gap-3">
-          {/* Rink Selector and Display Timezone */}
+          {/* Coach Selector, Rink Selector, and Display Timezone */}
           <div className="flex flex-col sm:flex-row gap-2">
+            {/* Coach Selector - Only shown when coaches and onCoachSelect are provided */}
+            {coaches && onCoachSelect && (
+              <Select
+                value={selectedCoachId || "all_coaches"}
+                onValueChange={(value) =>
+                  onCoachSelect(value === "all_coaches" ? undefined : value)
+                }
+              >
+                <SelectTrigger className="w-full sm:flex-1 bg-white shadow-sm">
+                  <SelectValue placeholder="All Coaches" />
+                </SelectTrigger>
+                <SelectContent className="max-w-sm">
+                  <SelectItem value="all_coaches">All Coaches</SelectItem>
+                  {coaches.map((coach) => (
+                    <SelectItem key={coach.id} value={coach.id}>
+                      {coach.user.name || "Unnamed Coach"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
             <Select
               value={selectedRink || "all_rinks"}
               onValueChange={(value) => onRinkSelect(value === "all_rinks" ? undefined : value)}
