@@ -2,6 +2,7 @@
 
 // Navigation configurations for mobile sidebar
 import {
+  ArrowLeftRight,
   BarChart2,
   BookOpen,
   Calendar,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
   Sidebar,
@@ -77,6 +79,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
   const HeaderComponent =
     role === "admin" ? AdminHeader : role === "coach" ? CoachHeader : StudentHeader;
   const pathname = usePathname() ?? "";
+  const currentUser = useCurrentUser();
 
   // Safety check to prevent React #130 errors
   if (!HeaderComponent) {
@@ -176,6 +179,50 @@ export function AppLayout({ role, children }: AppLayoutProps) {
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
+
+              {/* Role Switch Link - Mobile */}
+              {role === "admin" && currentUser.coachId && (
+                <SidebarGroup>
+                  <SidebarGroupContent>
+                    <div className="pt-2 mt-2 border-t border-gray-200">
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild>
+                            <Link
+                              href="/coach/dashboard"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 w-full"
+                            >
+                              <ArrowLeftRight className="h-4 w-4 shrink-0" />
+                              <span className="font-medium">Coach View</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </div>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              )}
+              {role === "coach" && currentUser.isAdmin && (
+                <SidebarGroup>
+                  <SidebarGroupContent>
+                    <div className="pt-2 mt-2 border-t border-gray-200">
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild>
+                            <Link
+                              href="/admin/dashboard"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 w-full"
+                            >
+                              <ArrowLeftRight className="h-4 w-4 shrink-0" />
+                              <span className="font-medium">Admin View</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </div>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              )}
             </SidebarContent>
           </Sidebar>
 
