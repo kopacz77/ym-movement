@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   BarChart2,
   BookOpen,
   Calendar,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // Navigation configurations for each role
 const adminNavigation = [
@@ -56,6 +58,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
   const pathname = usePathname() ?? "";
   const navigation =
     role === "admin" ? adminNavigation : role === "coach" ? coachNavigation : studentNavigation;
+  const currentUser = useCurrentUser();
 
   const SidebarContent = (
     <>
@@ -92,7 +95,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 px-4 py-4 bg-white">
+      <div className="flex-1 px-4 py-4 bg-white flex flex-col">
         <nav className="space-y-2">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
@@ -114,6 +117,30 @@ export function AppSidebar({ role }: AppSidebarProps) {
             );
           })}
         </nav>
+
+        {/* Role Switch Link */}
+        {role === "admin" && currentUser.coachId && (
+          <div className="mt-auto pt-4 border-t border-gray-200">
+            <Link
+              href="/coach/dashboard"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            >
+              <ArrowLeftRight className="h-5 w-5 shrink-0" />
+              <span>Coach View</span>
+            </Link>
+          </div>
+        )}
+        {role === "coach" && currentUser.isAdmin && (
+          <div className="mt-auto pt-4 border-t border-gray-200">
+            <Link
+              href="/admin/dashboard"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            >
+              <ArrowLeftRight className="h-5 w-5 shrink-0" />
+              <span>Admin View</span>
+            </Link>
+          </div>
+        )}
       </div>
     </>
   );
