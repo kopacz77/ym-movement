@@ -122,9 +122,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- Foundation: AES-256-GCM encryption utility, OAuth2 client factory, env var updates, googleapis upgrade
-- [ ] 06-02-PLAN.md -- OAuth routes + calendar refactor: initiation/callback API routes, calendar.ts rewrite to per-coach pattern
-- [ ] 06-03-PLAN.md -- Call site updates + coach UI: update 7 calendar call sites, GoogleCalendarConnect component, disconnect mutation, cleanup
+- [x] 06-01-PLAN.md -- Foundation: AES-256-GCM encryption utility, OAuth2 client factory, env var updates, googleapis upgrade
+- [x] 06-02-PLAN.md -- OAuth routes + calendar refactor: initiation/callback API routes, calendar.ts rewrite to per-coach pattern
+- [x] 06-03-PLAN.md -- Call site updates + coach UI: update 7 calendar call sites, GoogleCalendarConnect component, disconnect mutation, cleanup
 
 **Success Criteria:**
 1. A coach can connect their Google account via an OAuth flow from their settings page, and their authorization persists across sessions
@@ -158,7 +158,7 @@ Plans:
 | 3 - Query Scoping and Super Admin Dashboard | Complete | 2026-03-15 |
 | 4 - Per-Coach Scheduling | Complete | 2026-03-15 |
 | 5 - Student Multi-Coach Booking | Complete | 2026-03-15 |
-| 6 - Per-Coach Google Calendar | Not started | -- |
+| 6 - Per-Coach Google Calendar | Complete | 2026-03-16 |
 | 7 - Revenue Splits, Notifications, and Polish | Not started | -- |
 
 ---

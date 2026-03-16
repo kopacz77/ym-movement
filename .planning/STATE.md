@@ -5,18 +5,16 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** Phase 6 complete -- Per-Coach Google Calendar
+**Current focus:** Phase 7 -- Revenue Splits, Notifications, and Polish
 
 ## Current Position
 
-Phase: 6 of 7 (Per-Coach Google Calendar)
-Plan: 3 of 3 complete
-Status: Phase complete
-Last activity: 2026-03-16 -- Completed 06-03-PLAN.md
+Phase: 7 of 7 (Revenue Splits, Notifications, and Polish)
+Plan: 0 of ? (not yet planned)
+Status: Not started
+Last activity: 2026-03-16 -- Phase 6 verified and completed
 
-Progress: ██████████████████████████████ 100% (22/22 plans)
-
-Note: Phase 7 (Revenue Splits, Notifications, and Polish) has not been planned yet.
+Progress: ██████████████████████░ 85% (22/~25 plans, phase 7 not yet planned)
 
 ## Performance Metrics
 
@@ -137,5 +135,5 @@ Note: Phase 7 (Revenue Splits, Notifications, and Polish) has not been planned y
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 06-03-PLAN.md (Call Site Migration & Coach Calendar UI) -- Phase 6 complete
+Stopped at: Completed Phase 6 (Per-Coach Google Calendar) -- verified and complete
 Resume file: None

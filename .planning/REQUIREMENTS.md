@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated by create-roadmap.
 | SADM-02 | Phase 3 | Complete |
 | SADM-03 | Phase 3 | Complete |
 | SADM-04 | Phase 3 | Complete |
-| INTG-01 | Phase 6 | Pending |
+| INTG-01 | Phase 6 | Complete |
 | INTG-02 | Phase 7 | Pending |
 | INTG-03 | Phase 7 | Pending |
 
@@ -128,4 +128,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-15 after Phase 5 completion*
+*Last updated: 2026-03-16 after Phase 6 completion*
