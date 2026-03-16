@@ -10,16 +10,16 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 7 of 7 (Revenue Splits, Notifications, and Polish)
-Plan: 2 of 3 (07-01 and 07-03 complete, 07-02 remaining)
-Status: In progress
-Last activity: 2026-03-16 -- Completed 07-01-PLAN.md (coach notifications)
+Plan: 3 of 3 (all complete)
+Status: Phase complete
+Last activity: 2026-03-16 -- Completed 07-02-PLAN.md (revenue splits UI and payout report)
 
-Progress: █████████████████████████ 96% (24/25 plans)
+Progress: █████████████████████████ 100% (25/25 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: 3.8min
 
 **By Phase:**
@@ -32,7 +32,7 @@ Progress: ███████████████████████�
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
 | 05-student-multi-coach-booking | 3/3 | 9min | 3min |
 | 06-per-coach-google-calendar | 3/3 | 11min | 3.7min |
-| 07-revenue-splits-polish | 2/3 | 6min | 3min |
+| 07-revenue-splits-polish | 3/3 | 10min | 3.3min |
 
 ## Accumulated Context
 
@@ -125,6 +125,8 @@ Progress: ███████████████████████�
 - [07-01] Variable names differentiated (lessonTypeFormatted, formattedDateForCoach) to avoid shadowing admin notification variables
 - [07-01] Revenue split notification compares old vs new value -- only notifies on actual changes
 - [07-01] Coach notification uses coachRecord.userId (User record ID) NOT coachId (Coach record ID)
+- [07-02] downloadCSV helper exported (was private) from export-utils.ts for reuse by payout export function
+- [07-02] RevenueSplitCell is a file-scoped component inside CoachList.tsx (not a separate file)
 - [07-03] ArrowLeftRight icon used for role-switch links (bidirectional navigation affordance)
 - [07-03] Desktop role-switch uses mt-auto in flex-col container to position at bottom of nav area
 - [07-03] Mobile role-switch uses Radix SidebarMenu components matching existing mobile nav pattern
@@ -143,5 +145,5 @@ Progress: ███████████████████████�
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 07-01-PLAN.md (coach notifications)
+Stopped at: Completed 07-02-PLAN.md (revenue splits UI and payout report) -- ALL 25 PLANS COMPLETE
 Resume file: None
