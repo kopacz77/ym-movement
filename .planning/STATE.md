@@ -10,17 +10,17 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 6 of 7 (Per-Coach Google Calendar)
-Plan: 0 of ? (not yet planned)
-Status: Not started
-Last activity: 2026-03-15 -- Phase 5 verified and completed
+Plan: 1 of 3 complete
+Status: In progress
+Last activity: 2026-03-16 -- Completed 06-01-PLAN.md
 
-Progress: ███████████████████░ 76% (19/~25 plans, phases 6-7 not yet planned)
+Progress: ████████████████████░ 80% (20/25 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: 4.1min
+- Total plans completed: 20
+- Average duration: 4.0min
 
 **By Phase:**
 
@@ -31,6 +31,7 @@ Progress: ███████████████████░ 76% (19/~
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
 | 05-student-multi-coach-booking | 3/3 | 9min | 3min |
+| 06-per-coach-google-calendar | 1/3 | 3min | 3min |
 
 ## Accumulated Context
 
@@ -109,6 +110,9 @@ Progress: ███████████████████░ 76% (19/~
 - [05-03] UpcomingLessons and payments page use (lesson as any).Coach cast since TRPC return type inference may not include Coach
 - [05-03] Coach column in payments table hidden on small screens (hidden md:table-cell) to preserve mobile layout
 - [05-03] Lesson details page uses direct Prisma Coach include with User.name select (server component, not TRPC)
+- [06-01] googleapis upgraded from v150.0.1 to v171.4.0 (no breaking changes, clears tech debt)
+- [06-01] GOOGLE_REFRESH_TOKEN removed from env.d.ts (unused leftover from old service account pattern)
+- [06-01] Old service account vars removed from .env.example; INSTRUCTOR_EMAIL kept in env.d.ts until Plan 03
 
 ### Pending Todos
 
@@ -118,12 +122,11 @@ Progress: ███████████████████░ 76% (19/~
 
 - trpc.ts and trpc-optimized.ts duplication must be consolidated before adding new middleware (Phase 1)
 - Google OAuth consent screen may show unverified app warning -- acceptable for small coaching business
-- googleapis version at v150.0.1 (latest v171.4.0) -- consider upgrading before multi-coach work
 - Pre-existing `pnpm build` failure: Next.js 16.1.6 post-build 404 copy error (unrelated to auth changes, compilation succeeds)
 
 
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed Phase 5 (Student Multi-Coach Booking) -- verified and complete
+Stopped at: Completed 06-01-PLAN.md (OAuth Foundation Utilities)
 Resume file: None
