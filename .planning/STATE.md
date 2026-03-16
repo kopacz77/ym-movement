@@ -9,12 +9,12 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 8 complete, 9-10 ready to plan (parallel)
-Plan: —
-Status: Phase 8 verified, ready to plan Phase 9 or 10
-Last activity: 2026-03-16 — Phase 8 verified (11/11 must-haves passed)
+Phase: 9 of 10 (Coach & Admin Flow Tests)
+Plan: 1 of 2 in phase (09-01 complete)
+Status: In progress
+Last activity: 2026-03-16 — Completed 09-01-PLAN.md (coach flows E2E tests)
 
-Progress: █████░░░░░░░░░░░░░░░░░░░░ 20% (2/? plans)
+Progress: ██████░░░░░░░░░░░░░░░░░░░ 23% (3/? plans)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: █████░░░░░░░░░░░░░░░░░░�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 2
-- Average duration: 3.5min
+- Total plans completed: 3
+- Average duration: 4.2min
 
 ## Accumulated Context
 
@@ -40,6 +40,9 @@ Progress: █████░░░░░░░░░░░░░░░░░░�
 - Seed coach2 data now so Phase 9 multi-coach tests have data ready
 - Only swap credential sources in legacy specs; do not change test logic or assertions
 - Keep explicit loginAsAdmin() calls in beforeEach (storageState migration is future work)
+- Two pending coaches (coach3, coach4) seeded for independent approve/deny testing
+- deleteMany + create pattern for seed entities without unique constraints (ProposedTimeSlot, Lesson)
+- Deny confirmation uses button:has-text("Delete") matching showDeleteConfirmation() toast pattern
 
 ### Pending Todos
 
@@ -55,5 +58,5 @@ Progress: █████░░░░░░░░░░░░░░░░░░�
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Phase 8 complete and verified — ready to plan Phase 9 or 10
+Stopped at: Completed 09-01-PLAN.md — ready for 09-02 (admin coach management tests)
 Resume file: None
