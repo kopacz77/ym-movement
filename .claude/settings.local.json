@@ -109,7 +109,9 @@
       "mcp__playwright__browser_console_messages",
       "Skill(gsd:new-project)",
       "Bash(lsof:*)",
-      "Bash(fuser:*)"
+      "Bash(fuser:*)",
+      "Skill(gsd:audit-milestone)",
+      "Skill(gsd:complete-milestone)"
     ],
     "deny": []
   }
