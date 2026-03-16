@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 
 const SUPER_ADMIN_AUTH = path.join(__dirname, "../playwright/.auth/super-admin.json");
 const COACH_AUTH = path.join(__dirname, "../playwright/.auth/coach.json");
+const COACH2_AUTH = path.join(__dirname, "../playwright/.auth/coach2.json");
 const STUDENT_AUTH = path.join(__dirname, "../playwright/.auth/student.json");
 
 setup("seed test data", async () => {
@@ -26,6 +27,15 @@ setup("authenticate as coach", async ({ page }) => {
   await page.click('button[type="submit"]');
   await page.waitForURL("/coach/dashboard", { timeout: 15000 });
   await page.context().storageState({ path: COACH_AUTH });
+});
+
+setup("authenticate as coach2", async ({ page }) => {
+  await page.goto("/auth/login");
+  await page.fill('input[id="email"]', "coach2@test.com");
+  await page.fill('input[id="password"]', "COACH2PASS2025!");
+  await page.click('button[type="submit"]');
+  await page.waitForURL("/coach/dashboard", { timeout: 15000 });
+  await page.context().storageState({ path: COACH2_AUTH });
 });
 
 setup("authenticate as student", async ({ page }) => {

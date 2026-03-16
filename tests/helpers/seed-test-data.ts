@@ -303,6 +303,97 @@ async function seedTestData() {
   });
   console.log("  Completed lesson + payment created for payout reports");
 
+  // 12. Create an unbooked time slot for student booking test (STST-02)
+  // Clean up prior unbooked slots to prevent accumulation
+  const bookableCleanupStart = new Date();
+  bookableCleanupStart.setDate(bookableCleanupStart.getDate() + 9);
+  bookableCleanupStart.setHours(0, 0, 0, 0);
+  const bookableCleanupEnd = new Date();
+  bookableCleanupEnd.setDate(bookableCleanupEnd.getDate() + 11);
+  bookableCleanupEnd.setHours(23, 59, 59, 999);
+
+  await prisma.rinkTimeSlot.deleteMany({
+    where: {
+      coachId: coach.id,
+      startTime: { gte: bookableCleanupStart, lte: bookableCleanupEnd },
+      Lesson: { none: {} },
+    },
+  });
+
+  const bookableStart = new Date();
+  bookableStart.setDate(bookableStart.getDate() + 10);
+  bookableStart.setHours(14, 0, 0, 0);
+  const bookableEnd = new Date(bookableStart);
+  bookableEnd.setHours(15, 0, 0, 0);
+
+  await prisma.rinkTimeSlot.create({
+    data: {
+      rinkId: rink.id,
+      coachId: coach.id,
+      startTime: bookableStart,
+      endTime: bookableEnd,
+      maxStudents: 1,
+      isActive: true,
+    },
+  });
+  console.log("  Unbooked time slot created for booking tests");
+
+  // 13. Coach2 time slot, lesson, and payment (SECT-01 data isolation)
+  await prisma.payment.deleteMany({
+    where: { referenceCode: "TEST-COACH2-001" },
+  });
+  await prisma.lesson.deleteMany({
+    where: { coachId: coach2.id, notes: "E2E test coach2 lesson" },
+  });
+
+  const coach2SlotStart = new Date();
+  coach2SlotStart.setDate(coach2SlotStart.getDate() + 7);
+  coach2SlotStart.setHours(12, 0, 0, 0);
+  const coach2SlotEnd = new Date(coach2SlotStart);
+  coach2SlotEnd.setHours(13, 0, 0, 0);
+
+  const coach2TimeSlot = await prisma.rinkTimeSlot.create({
+    data: {
+      rinkId: rink.id,
+      coachId: coach2.id,
+      startTime: coach2SlotStart,
+      endTime: coach2SlotEnd,
+      maxStudents: 1,
+      isActive: true,
+    },
+  });
+
+  const coach2Lesson = await prisma.lesson.create({
+    data: {
+      studentId: student.id,
+      rinkId: rink.id,
+      coachId: coach2.id,
+      startTime: coach2SlotStart,
+      endTime: coach2SlotEnd,
+      duration: 60,
+      type: "CHOREOGRAPHY",
+      status: "COMPLETED",
+      price: 90.0,
+      timeSlotId: coach2TimeSlot.id,
+      notes: "E2E test coach2 lesson",
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      lessonId: coach2Lesson.id,
+      studentId: student.id,
+      amount: 90.0,
+      method: "ZELLE",
+      status: "COMPLETED",
+      referenceCode: "TEST-COACH2-001",
+      lesson_date: coach2SlotStart,
+      verifiedAt: new Date(),
+      verifiedBy: adminUser.id,
+    },
+  });
+  console.log("  Coach2 time slot, lesson, and payment created for isolation tests");
+
   console.log("\nTest data seeded successfully!");
   await prisma.$disconnect();
 }
