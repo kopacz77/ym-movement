@@ -29,6 +29,7 @@ export async function middleware(request: NextRequest) {
     path === "/" ||
     path === "/auth/login" ||
     path === "/auth/signup" ||
+    path === "/auth/coach-signup" ||
     path.startsWith("/api/auth");
 
   // Get the token and check if the user is authenticated
