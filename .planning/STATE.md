@@ -10,17 +10,17 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 6 of 7 (Per-Coach Google Calendar)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-03-16 -- Completed 06-01-PLAN.md
+Last activity: 2026-03-16 -- Completed 06-02-PLAN.md
 
-Progress: ████████████████████░ 80% (20/25 plans)
+Progress: █████████████████████ 84% (21/25 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 4.0min
+- Total plans completed: 21
+- Average duration: 3.9min
 
 **By Phase:**
 
@@ -31,7 +31,7 @@ Progress: ████████████████████░ 80% (2
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
 | 05-student-multi-coach-booking | 3/3 | 9min | 3min |
-| 06-per-coach-google-calendar | 1/3 | 3min | 3min |
+| 06-per-coach-google-calendar | 2/3 | 6min | 3min |
 
 ## Accumulated Context
 
@@ -113,6 +113,10 @@ Progress: ████████████████████░ 80% (2
 - [06-01] googleapis upgraded from v150.0.1 to v171.4.0 (no breaking changes, clears tech debt)
 - [06-01] GOOGLE_REFRESH_TOKEN removed from env.d.ts (unused leftover from old service account pattern)
 - [06-01] Old service account vars removed from .env.example; INSTRUCTOR_EMAIL kept in env.d.ts until Plan 03
+- [06-02] CSRF validation uses coachId in state param verified against session user's Coach record
+- [06-02] Calendar methods return null/false gracefully when coach has no tokens (no crash)
+- [06-02] Coach is inherently calendar owner/organizer -- no INSTRUCTOR_EMAIL in attendees (Research Pitfall 5)
+- [06-02] Token refresh listener uses fire-and-forget .catch() to avoid blocking calendar operations
 
 ### Pending Todos
 
@@ -128,5 +132,5 @@ Progress: ████████████████████░ 80% (2
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 06-01-PLAN.md (OAuth Foundation Utilities)
+Stopped at: Completed 06-02-PLAN.md (OAuth Routes & Calendar Refactor)
 Resume file: None
