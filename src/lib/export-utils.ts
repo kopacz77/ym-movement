@@ -133,7 +133,7 @@ export const exportToPDF = async (
 };
 
 // Helper function to download CSV
-const downloadCSV = (csvContent: string, filename: string): void => {
+export const downloadCSV = (csvContent: string, filename: string): void => {
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
 
@@ -147,6 +147,49 @@ const downloadCSV = (csvContent: string, filename: string): void => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }
+};
+
+// Payout Report CSV Export
+export const exportPayoutReportToCSV = (
+  coaches: Array<{
+    name: string | null;
+    revenueSplitPercent: number;
+    totalRevenue: number;
+    coachPayout: number;
+    platformRevenue: number;
+    lessonCount: number;
+  }>,
+  totals: { totalRevenue: number; totalCoachPayouts: number; totalPlatformRevenue: number },
+  periodLabel: string,
+): void => {
+  const csvHeaders = [
+    "Coach",
+    "Split %",
+    "Gross Revenue",
+    "Coach Payout",
+    "Platform Share",
+    "Lessons",
+  ];
+  const csvRows = coaches.map((c) => [
+    c.name ?? "Unknown",
+    c.revenueSplitPercent.toString(),
+    c.totalRevenue.toFixed(2),
+    c.coachPayout.toFixed(2),
+    c.platformRevenue.toFixed(2),
+    c.lessonCount.toString(),
+  ]);
+
+  csvRows.push([
+    "TOTAL",
+    "",
+    totals.totalRevenue.toFixed(2),
+    totals.totalCoachPayouts.toFixed(2),
+    totals.totalPlatformRevenue.toFixed(2),
+    "",
+  ]);
+
+  const csvContent = [csvHeaders.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
+  downloadCSV(csvContent, `payout-report-${periodLabel}.csv`);
 };
 
 // Generate HTML content for PDF printing

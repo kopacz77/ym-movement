@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceReport } from "@/features/admin/components/reports/AttendanceReport";
+import { PayoutReport } from "@/features/admin/components/reports/PayoutReport";
 import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
 import { api } from "@/lib/api";
 import {
@@ -277,12 +278,15 @@ export default function ReportsPage() {
 
       {/* Properly nested Tabs structure */}
       <Tabs defaultValue="revenue">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-[400px] lg:grid-cols-auto">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 lg:w-[600px] lg:grid-cols-auto">
           <TabsTrigger value="revenue" className="text-sm">
             Revenue
           </TabsTrigger>
           <TabsTrigger value="attendance" className="text-sm">
             Attendance
+          </TabsTrigger>
+          <TabsTrigger value="payouts" className="text-sm">
+            Payouts
           </TabsTrigger>
         </TabsList>
 
@@ -304,6 +308,21 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <AttendanceReport
+                period={period}
+                startDate={dateRange.start}
+                endDate={dateRange.end}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payouts">
+          <Card>
+            <CardHeader>
+              <CardTitle>Payout Report</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PayoutReport
                 period={period}
                 startDate={dateRange.start}
                 endDate={dateRange.end}
