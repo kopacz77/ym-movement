@@ -11,6 +11,7 @@ interface WhereClause {
   };
   isActive?: boolean;
   rinkId?: string;
+  coachId?: string;
 }
 
 export const availabilityRouter = createTRPCRouter({
@@ -20,6 +21,7 @@ export const availabilityRouter = createTRPCRouter({
         startDate: z.date().optional(),
         endDate: z.date().optional(),
         rinkId: z.string().optional(),
+        coachId: z.string().optional(),
         _cache: z.number().optional(), // Cache-busting parameter
       }),
     )
@@ -80,6 +82,11 @@ export const availabilityRouter = createTRPCRouter({
           whereClause.rinkId = input.rinkId;
         }
 
+        // Filter by coachId if provided
+        if (input.coachId) {
+          whereClause.coachId = input.coachId;
+        }
+
         console.log("[DEBUG] Where clause:", JSON.stringify(whereClause));
 
         // Run the query with the modified where clause
@@ -95,6 +102,12 @@ export const availabilityRouter = createTRPCRouter({
               },
             },
             Lesson: true, // Include ALL lessons to properly calculate availability
+            Coach: {
+              select: {
+                id: true,
+                User: { select: { name: true } },
+              },
+            },
           },
           orderBy: {
             startTime: "asc",

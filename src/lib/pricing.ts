@@ -65,8 +65,14 @@ export function getHourlyRateForLessonType(
     choreographyPrice: number;
     competitionPrice: number;
   } | null,
+  coach?: {
+    privateLessonPrice?: number | null;
+    groupLessonPrice?: number | null;
+    choreographyPrice?: number | null;
+    competitionPrepPrice?: number | null;
+  } | null,
 ): number {
-  // Check if student has custom pricing enabled and specific price set
+  // 1. Student custom pricing (highest priority)
   if (student.customPricingEnabled) {
     switch (lessonType) {
       case LessonType.PRIVATE:
@@ -92,7 +98,33 @@ export function getHourlyRateForLessonType(
     }
   }
 
-  // Use default pricing from database if available
+  // 2. Coach-specific pricing
+  if (coach) {
+    switch (lessonType) {
+      case LessonType.PRIVATE:
+        if (coach.privateLessonPrice !== null && coach.privateLessonPrice !== undefined) {
+          return coach.privateLessonPrice;
+        }
+        break;
+      case LessonType.CHOREOGRAPHY:
+        if (coach.choreographyPrice !== null && coach.choreographyPrice !== undefined) {
+          return coach.choreographyPrice;
+        }
+        break;
+      case LessonType.GROUP:
+        if (coach.groupLessonPrice !== null && coach.groupLessonPrice !== undefined) {
+          return coach.groupLessonPrice;
+        }
+        break;
+      case LessonType.COMPETITION_PREP:
+        if (coach.competitionPrepPrice !== null && coach.competitionPrepPrice !== undefined) {
+          return coach.competitionPrepPrice;
+        }
+        break;
+    }
+  }
+
+  // 3. Default pricing from database
   if (defaultPricing) {
     switch (lessonType) {
       case LessonType.PRIVATE:
@@ -106,7 +138,7 @@ export function getHourlyRateForLessonType(
     }
   }
 
-  // Fallback to hardcoded defaults
+  // 4. Hardcoded fallback defaults
   return DEFAULT_HOURLY_PRICES[lessonType];
 }
 
@@ -144,7 +176,13 @@ export function calculateLessonPrice(
     choreographyPrice: number;
     competitionPrice: number;
   } | null,
+  coach?: {
+    privateLessonPrice?: number | null;
+    groupLessonPrice?: number | null;
+    choreographyPrice?: number | null;
+    competitionPrepPrice?: number | null;
+  } | null,
 ): number {
-  const hourlyRate = getHourlyRateForLessonType(lessonType, student, defaultPricing);
+  const hourlyRate = getHourlyRateForLessonType(lessonType, student, defaultPricing, coach);
   return calculateProratedPrice(hourlyRate, durationMinutes);
 }
