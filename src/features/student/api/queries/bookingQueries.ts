@@ -6,7 +6,7 @@ import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek, format } fr
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { sendLessonConfirmationEmail } from "@/lib/email";
-import { googleCalendar } from "@/lib/google/calendar";
+import { type CoachWithTokens, googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
@@ -153,7 +153,7 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
-        // 4b. Fetch coach name and pricing if the time slot has a coach
+        // 4b. Fetch coach name, pricing, and calendar tokens if the time slot has a coach
         let coachName: string | null = null;
         let coachPricing: {
           privateLessonPrice: number | null;
@@ -161,15 +161,21 @@ export const bookingRouter = createTRPCRouter({
           choreographyPrice: number | null;
           competitionPrepPrice: number | null;
         } | null = null;
+        let coachWithTokens: CoachWithTokens | null = null;
 
         if (timeSlot.coachId) {
           const coach = await ctx.prisma.coach.findUnique({
             where: { id: timeSlot.coachId },
             select: {
+              id: true,
               privateLessonPrice: true,
               groupLessonPrice: true,
               choreographyPrice: true,
               competitionPrepPrice: true,
+              googleAccessToken: true,
+              googleRefreshToken: true,
+              googleTokenExpiresAt: true,
+              googleCalendarId: true,
               User: { select: { name: true } },
             },
           });
@@ -180,6 +186,13 @@ export const bookingRouter = createTRPCRouter({
               groupLessonPrice: coach.groupLessonPrice,
               choreographyPrice: coach.choreographyPrice,
               competitionPrepPrice: coach.competitionPrepPrice,
+            };
+            coachWithTokens = {
+              id: coach.id,
+              googleAccessToken: coach.googleAccessToken,
+              googleRefreshToken: coach.googleRefreshToken,
+              googleTokenExpiresAt: coach.googleTokenExpiresAt,
+              googleCalendarId: coach.googleCalendarId,
             };
           }
         }
@@ -198,25 +211,25 @@ export const bookingRouter = createTRPCRouter({
 
             const calendarSummary = `${input.type} Lesson with ${student.User.name}${coachName ? ` [${coachName}]` : ""}`;
 
-            googleEventId = await googleCalendar.createEvent({
-              summary: calendarSummary,
-              description: `
+            if (coachWithTokens) {
+              googleEventId = await googleCalendar.createEvent(coachWithTokens, {
+                summary: calendarSummary,
+                description: `
                 Student: ${student.User.name}
                 ${coachName ? `Coach: ${coachName}` : ""}
                 Lesson Type: ${input.type}
                 Area: ${input.area || "MAIN_RINK"}
                 ${input.notes ? `Notes: ${input.notes}` : ""}
               `,
-              startTime: timeSlot.startTime,
-              endTime: timeSlot.endTime,
-              attendees: [
-                { email: student.User.email, name: student.User.name },
-                // Include instructor email as in the older version
-                { email: process.env.INSTRUCTOR_EMAIL || "yuraxmin@gmail.com" },
-              ],
-              location: timeSlot.Rink.address,
-              timeZone: timezone, // Explicitly pass the timezone
-            });
+                startTime: timeSlot.startTime,
+                endTime: timeSlot.endTime,
+                attendees: [
+                  { email: student.User.email, name: student.User.name },
+                ],
+                location: timeSlot.Rink.address,
+                timeZone: timezone,
+              });
+            }
 
             if (googleEventId) {
               console.log(`[BOOKING] Created Google Calendar event with ID: ${googleEventId}`);
@@ -490,9 +503,15 @@ export const bookingRouter = createTRPCRouter({
         const isLateCancellation = hoursUntilLesson < 24;
 
         // 4. Delete Google Calendar event if it exists
-        if (lesson.googleCalendarEventId) {
+        if (lesson.googleCalendarEventId && lesson.coachId) {
           try {
-            await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
+            const coach = await ctx.prisma.coach.findUnique({
+              where: { id: lesson.coachId },
+              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+            });
+            if (coach) {
+              await googleCalendar.deleteEvent(coach, lesson.googleCalendarEventId);
+            }
           } catch (error) {
             console.error("[CANCEL] Error deleting Google Calendar event:", error);
           }

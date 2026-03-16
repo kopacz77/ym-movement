@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
 import { createScheduleChangeNotification } from "@/features/notifications/utils/notificationHelpers";
-import { googleCalendar } from "@/lib/google/calendar";
+import { type CoachWithTokens, googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
@@ -77,23 +77,32 @@ export const lessonRouter = createTRPCRouter({
         // Default to a safe timezone if not specified
         const timezone = timeSlot.Rink.timezone || "America/Toronto";
 
+        // Look up coach with calendar tokens
+        const coachForCalendar: CoachWithTokens | null = timeSlot.coachId
+          ? await ctx.prisma.coach.findUnique({
+              where: { id: timeSlot.coachId },
+              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+            })
+          : null;
+
         // Create Google Calendar event with improved error handling
         let eventId: string | null = null;
         try {
-          eventId = await googleCalendar.createEvent({
-            summary: `${sanitizedInput.type} Lesson with ${student.User.name || "Student"}`,
-            description: `Lesson Type: ${sanitizedInput.type}
+          if (coachForCalendar) {
+            eventId = await googleCalendar.createEvent(coachForCalendar, {
+              summary: `${sanitizedInput.type} Lesson with ${student.User.name || "Student"}`,
+              description: `Lesson Type: ${sanitizedInput.type}
 Area: ${sanitizedInput.area}
 ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
-            startTime: timeSlot.startTime,
-            endTime: timeSlot.endTime,
-            attendees: [
-              { email: student.User.email, name: student.User.name || undefined },
-              { email: process.env.INSTRUCTOR_EMAIL || "" },
-            ],
-            location: timeSlot.Rink.address || "",
-            timeZone: timezone,
-          });
+              startTime: timeSlot.startTime,
+              endTime: timeSlot.endTime,
+              attendees: [
+                { email: student.User.email, name: student.User.name || undefined },
+              ],
+              location: timeSlot.Rink.address || "",
+              timeZone: timezone,
+            });
+          }
         } catch (calendarError) {
           console.error("Google Calendar Error:", calendarError);
           // We'll continue and create the lesson without calendar event
@@ -162,9 +171,15 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         }
 
         // Delete Google Calendar event if it exists
-        if (lesson.googleCalendarEventId) {
+        if (lesson.googleCalendarEventId && lesson.coachId) {
           try {
-            await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
+            const coach = await ctx.prisma.coach.findUnique({
+              where: { id: lesson.coachId },
+              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+            });
+            if (coach) {
+              await googleCalendar.deleteEvent(coach, lesson.googleCalendarEventId);
+            }
           } catch (calendarError) {
             console.error("Error deleting Google Calendar event:", calendarError);
             // Continue with lesson cancellation even if calendar deletion fails
@@ -377,22 +392,31 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           defaultPricing,
         );
 
+        // Look up coach with calendar tokens for assign
+        const assignCoach: CoachWithTokens | null = timeSlot.coachId
+          ? await ctx.prisma.coach.findUnique({
+              where: { id: timeSlot.coachId },
+              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+            })
+          : null;
+
         // Create Google Calendar event
         let eventId: string | null = null;
         try {
-          eventId = await googleCalendar.createEvent({
-            summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
-            description: `Lesson Type: ${input.lessonType}
+          if (assignCoach) {
+            eventId = await googleCalendar.createEvent(assignCoach, {
+              summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
+              description: `Lesson Type: ${input.lessonType}
 ${input.notes ? `Notes: ${input.notes}` : ""}`,
-            startTime: timeSlot.startTime,
-            endTime: timeSlot.endTime,
-            attendees: [
-              { email: student.User.email, name: student.User.name || undefined },
-              { email: process.env.INSTRUCTOR_EMAIL || "" },
-            ],
-            location: timeSlot.Rink.address || "",
-            timeZone: timezone,
-          });
+              startTime: timeSlot.startTime,
+              endTime: timeSlot.endTime,
+              attendees: [
+                { email: student.User.email, name: student.User.name || undefined },
+              ],
+              location: timeSlot.Rink.address || "",
+              timeZone: timezone,
+            });
+          }
         } catch (calendarError) {
           console.error("Google Calendar Error:", calendarError);
           // Continue without calendar event
@@ -516,22 +540,27 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         );
 
         // Update Google Calendar event if it exists
-        if (existingLesson.googleCalendarEventId) {
+        if (existingLesson.googleCalendarEventId && existingLesson.coachId) {
           try {
-            await googleCalendar.updateEvent({
-              eventId: existingLesson.googleCalendarEventId,
-              summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
-              description: `Lesson Type: ${input.lessonType}
-${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
-              startTime: existingLesson.startTime,
-              endTime: existingLesson.endTime,
-              attendees: [
-                { email: student.User.email, name: student.User.name || undefined },
-                { email: process.env.INSTRUCTOR_EMAIL || "" },
-              ],
-              location: existingLesson.Rink.address || "",
-              timeZone: existingLesson.Rink.timezone || "America/Toronto",
+            const updateCoach = await ctx.prisma.coach.findUnique({
+              where: { id: existingLesson.coachId },
+              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
             });
+            if (updateCoach) {
+              await googleCalendar.updateEvent(updateCoach, {
+                eventId: existingLesson.googleCalendarEventId,
+                summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
+                description: `Lesson Type: ${input.lessonType}
+${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
+                startTime: existingLesson.startTime,
+                endTime: existingLesson.endTime,
+                attendees: [
+                  { email: student.User.email, name: student.User.name || undefined },
+                ],
+                location: existingLesson.Rink.address || "",
+                timeZone: existingLesson.Rink.timezone || "America/Toronto",
+              });
+            }
           } catch (calendarError) {
             console.error("Error updating Google Calendar event:", calendarError);
             // Continue with lesson update even if calendar update fails
@@ -645,9 +674,15 @@ ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
         }
 
         // Delete Google Calendar event if it exists
-        if (lesson.googleCalendarEventId) {
+        if (lesson.googleCalendarEventId && lesson.coachId) {
           try {
-            await googleCalendar.deleteEvent(lesson.googleCalendarEventId);
+            const unassignCoach = await ctx.prisma.coach.findUnique({
+              where: { id: lesson.coachId },
+              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+            });
+            if (unassignCoach) {
+              await googleCalendar.deleteEvent(unassignCoach, lesson.googleCalendarEventId);
+            }
           } catch (calendarError) {
             console.error("Error deleting Google Calendar event:", calendarError);
             // Continue with lesson deletion even if calendar deletion fails
