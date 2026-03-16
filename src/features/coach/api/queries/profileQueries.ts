@@ -48,4 +48,28 @@ export const profileRouter = createTRPCRouter({
         },
       });
     }),
+
+  getCalendarStatus: coachProcedure.query(async ({ ctx }) => {
+    const coach = await ctx.prisma.coach.findUniqueOrThrow({
+      where: { id: ctx.coach.id },
+      select: { googleCalendarId: true, googleAccessToken: true },
+    });
+    return {
+      isConnected: !!(coach.googleCalendarId && coach.googleAccessToken),
+      calendarId: coach.googleCalendarId,
+    };
+  }),
+
+  disconnectCalendar: coachProcedure.mutation(async ({ ctx }) => {
+    await ctx.prisma.coach.update({
+      where: { id: ctx.coach.id },
+      data: {
+        googleAccessToken: null,
+        googleRefreshToken: null,
+        googleTokenExpiresAt: null,
+        googleCalendarId: null,
+      },
+    });
+    return { success: true };
+  }),
 });
