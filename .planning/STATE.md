@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** Phase 10 verified — ready to plan Phase 11
+**Current focus:** Phase 11 stabilization — fixing test failures, targeting green CI
 
 ## Current Position
 
-Phase: 10 complete, 11 ready to plan
-Plan: —
-Status: Phase 10 verified, ready to plan Phase 11
-Last activity: 2026-03-16 — Phase 10 verified (9/9 must-haves passed)
+Phase: 11 of 11 (stabilization)
+Plan: 01 of ? in phase
+Status: In progress
+Last activity: 2026-03-16 — Completed 11-01-PLAN.md (ESM fix + baseline capture)
 
-Progress: ██████████████████████░░░ 75% (6/? plans)
+Progress: ███████████████████████░░ 78% (7/? plans)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ██████████████████████░�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 6
-- Average duration: 3.0min
+- Total plans completed: 7
+- Average duration: 6.7min
 
 ## Accumulated Context
 
@@ -51,6 +51,9 @@ Progress: ██████████████████████░�
 - Booking test uses graceful test.skip() when calendar slot not visible after navigation attempts
 - Payment method (VENMO/ZELLE) and reference strings used as cross-coach data leak indicators
 - Dual-role test verifies full round-trip: admin -> coach view -> admin view
+- Auth setup runs serially to avoid overwhelming dev server during cold compilation
+- CI reporter uses list + html; local development keeps html only
+- Baseline: 92/222 pass (41%), 130 fail (59%) -- strict mode violations are #1 issue
 
 ### Pending Todos
 
@@ -61,10 +64,12 @@ Progress: ██████████████████████░�
 ### Blockers/Concerns
 
 - Pre-existing `pnpm build` failure: Next.js post-build 404 copy error (unrelated, compilation succeeds)
-- Existing tests may need database seeding changes for SUPER_ADMIN role (seed script now handles this)
+- 130/222 tests failing -- strict mode violations (35), toBeVisible (49), toHaveURL (13) are top failure categories
+- Phase 9-10 tests: 30/32 failing despite being written against current codebase (selector scoping issues)
+- student-signup.spec.ts needs full rewrite (form structure completely changed)
 
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Phase 10 complete and verified — ready to plan Phase 11
+Stopped at: Completed 11-01-PLAN.md (ESM fix + baseline capture)
 Resume file: None
