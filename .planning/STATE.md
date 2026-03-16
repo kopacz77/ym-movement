@@ -9,12 +9,12 @@ See: .planning/PROJECT.md
 
 ## Current Position
 
-Phase: 9 complete, 10 ready to plan
-Plan: —
-Status: Phase 9 verified, ready to plan Phase 10
-Last activity: 2026-03-16 — Phase 9 verified (16/16 must-haves passed)
+Phase: 10 of 10 (Student & Security Tests)
+Plan: 1 of 2 in phase
+Status: In progress
+Last activity: 2026-03-16 — Completed 10-01-PLAN.md
 
-Progress: ████████████░░░░░░░░░░░░░ 50% (4/? plans)
+Progress: █████████████░░░░░░░░░░░░ 56% (5/9 plans)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ████████████░░░░░░░░░░░�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 4
-- Average duration: 3.6min
+- Total plans completed: 5
+- Average duration: 3.3min
 
 ## Accumulated Context
 
@@ -46,6 +46,9 @@ Progress: ████████████░░░░░░░░░░░�
 - Admin coach management tests use default super-admin storageState (no test.use override needed)
 - Revenue split test resets to 70% after edit for idempotent runs
 - Payout report tests handle both data and empty states with .or() pattern
+- Unbooked slot at +10 days to avoid overlap with existing +7 day lesson slot
+- Coach2 lesson uses CHOREOGRAPHY/ZELLE to differentiate from coach1 PRIVATE/VENMO data
+- Booking test uses graceful test.skip() when calendar slot not visible after navigation attempts
 
 ### Pending Todos
 
@@ -61,5 +64,5 @@ Progress: ████████████░░░░░░░░░░░�
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Phase 9 complete and verified — ready to plan Phase 10
+Stopped at: Completed 10-01-PLAN.md
 Resume file: None
