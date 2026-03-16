@@ -138,14 +138,18 @@ Plans:
 **Goal:** The platform tracks per-coach revenue with configurable split percentages, coaches receive relevant notifications, and the dual-role owner experience is polished.
 **Depends on:** Phase 3, Phase 5
 **Requirements:** INTG-02, INTG-03
+**Plans:** 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md -- Coach notifications: booking, cancellation, payment verification, and revenue split change notification triggers
+- [ ] 07-02-PLAN.md -- Revenue split config + payout report: inline split editor on coach list, PayoutReport tab on reports page with CSV export
+- [ ] 07-03-PLAN.md -- Dual-role navigation: role-switch links in desktop and mobile sidebars for SUPER_ADMIN/coach users
 
 **Success Criteria:**
 1. The super admin can configure a revenue split percentage for each coach, and the system calculates platform fee vs. coach earnings on every payment
 2. Coaches receive booking confirmation, cancellation, and payment notifications specifically for their own lessons
 3. Yura's dual-role experience is seamless -- she can switch between super admin oversight and her own coach dashboard without friction
 4. Payout reports show each coach's total earnings, platform fees deducted, and amounts owed for a given period
-
-**Plans:** (created by /gsd:plan-phase)
 
 ---
 
