@@ -10,11 +10,11 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 8 of 11 (Test Infrastructure & Legacy Updates)
-Plan: 1 of 2 complete in phase 8
-Status: In progress
-Last activity: 2026-03-16 — Completed 08-01-PLAN.md (test infrastructure foundation)
+Plan: 2 of 2 complete in phase 8
+Status: Phase complete
+Last activity: 2026-03-16 — Completed 08-02-PLAN.md (legacy spec credential consolidation)
 
-Progress: █████████████████████████░░ 96% (26/27 plans)
+Progress: ███████████████████████████ 100% (27/27 plans)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ███████████████████████�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 1
-- Average duration: 5min
+- Total plans completed: 2
+- Average duration: 3.5min
 
 ## Accumulated Context
 
@@ -38,6 +38,8 @@ Progress: ███████████████████████�
 - Default storageState is super-admin.json; tests override with test.use() for other roles
 - loginAsAdmin kept as backward compat alias for loginAsSuperAdmin
 - Seed coach2 data now so Phase 9 multi-coach tests have data ready
+- Only swap credential sources in legacy specs; do not change test logic or assertions
+- Keep explicit loginAsAdmin() calls in beforeEach (storageState migration is future work)
 
 ### Pending Todos
 
@@ -52,6 +54,6 @@ Progress: ███████████████████████�
 
 ## Session Continuity
 
-Last session: 2026-03-16T18:20:07Z
-Stopped at: Completed 08-01-PLAN.md (test infrastructure foundation)
+Last session: 2026-03-16T18:24:37Z
+Stopped at: Completed 08-02-PLAN.md (legacy spec credential consolidation) — Phase 8 complete
 Resume file: None
