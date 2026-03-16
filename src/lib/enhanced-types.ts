@@ -490,9 +490,10 @@ export interface EnvironmentConfig {
   readonly REDIS_HOST?: string;
   readonly REDIS_PORT?: string;
   readonly REDIS_PASSWORD?: string;
-  readonly GOOGLE_CLIENT_EMAIL?: string;
-  readonly GOOGLE_PRIVATE_KEY?: string;
-  readonly GOOGLE_CALENDAR_ID?: string;
+  readonly GOOGLE_CLIENT_ID?: string;
+  readonly GOOGLE_CLIENT_SECRET?: string;
+  readonly GOOGLE_REDIRECT_URI?: string;
+  readonly TOKEN_ENCRYPTION_KEY?: string;
 }
 
 export function validateEnvironment(): Result<EnvironmentConfig, string[]> {

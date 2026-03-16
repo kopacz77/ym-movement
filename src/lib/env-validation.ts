@@ -16,10 +16,11 @@ const envSchema = z.object({
   // Email service
   RESEND_API_KEY: z.string().optional(),
 
-  // Google Calendar API
-  GOOGLE_CLIENT_EMAIL: z.string().email().optional(),
-  GOOGLE_PRIVATE_KEY: z.string().optional(),
-  GOOGLE_CALENDAR_ID: z.string().email().optional(),
+  // Google Calendar OAuth
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().url().optional(),
+  TOKEN_ENCRYPTION_KEY: z.string().optional(),
 
   // Application settings
   NODE_ENV: z.enum(["development", "production", "test"]),
