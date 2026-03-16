@@ -23,9 +23,9 @@ Requirements for test and stabilization release. Each maps to roadmap phases.
 
 ### Student Booking Tests
 
-- [ ] **STST-01**: E2E test verifies student browse-by-coach flow (coach grid, profile viewing, coach selection)
-- [ ] **STST-02**: E2E test verifies two-step booking (select coach, view availability, book lesson, confirmation)
-- [ ] **STST-03**: E2E test verifies coach name displays in lesson cards, schedule views, and payment records
+- [x] **STST-01**: E2E test verifies student browse-by-coach flow (coach grid, profile viewing, coach selection)
+- [x] **STST-02**: E2E test verifies two-step booking (select coach, view availability, book lesson, confirmation)
+- [x] **STST-03**: E2E test verifies coach name displays in lesson cards, schedule views, and payment records
 
 ### Admin & Revenue Tests
 
@@ -35,9 +35,9 @@ Requirements for test and stabilization release. Each maps to roadmap phases.
 
 ### Security & Isolation Tests
 
-- [ ] **SECT-01**: E2E test verifies coach A cannot see coach B's lessons, students, or earnings
-- [ ] **SECT-02**: E2E test verifies role guards prevent unauthorized route access (student to admin, coach to admin, etc.)
-- [ ] **SECT-03**: E2E test verifies dual-role navigation (admin to coach view and back) works correctly
+- [x] **SECT-01**: E2E test verifies coach A cannot see coach B's lessons, students, or earnings
+- [x] **SECT-02**: E2E test verifies role guards prevent unauthorized route access (student to admin, coach to admin, etc.)
+- [x] **SECT-03**: E2E test verifies dual-role navigation (admin to coach view and back) works correctly
 
 ### Stabilization
 
@@ -79,15 +79,15 @@ Which phases cover which requirements. Updated by create-roadmap.
 | CTST-03 | Phase 9 | Complete |
 | CTST-04 | Phase 9 | Complete |
 | CTST-05 | Phase 9 | Complete |
-| STST-01 | Phase 10 | Pending |
-| STST-02 | Phase 10 | Pending |
-| STST-03 | Phase 10 | Pending |
+| STST-01 | Phase 10 | Complete |
+| STST-02 | Phase 10 | Complete |
+| STST-03 | Phase 10 | Complete |
 | ATST-01 | Phase 9 | Complete |
 | ATST-02 | Phase 9 | Complete |
 | ATST-03 | Phase 9 | Complete |
-| SECT-01 | Phase 10 | Pending |
-| SECT-02 | Phase 10 | Pending |
-| SECT-03 | Phase 10 | Pending |
+| SECT-01 | Phase 10 | Complete |
+| SECT-02 | Phase 10 | Complete |
+| SECT-03 | Phase 10 | Complete |
 | STAB-01 | Phase 11 | Pending |
 | STAB-02 | Phase 11 | Pending |
 

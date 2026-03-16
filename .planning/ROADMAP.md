@@ -56,8 +56,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Extend seed data + coach2 auth + student-booking-flow.spec.ts (STST-01, STST-02, STST-03)
-- [ ] 10-02-PLAN.md — data-isolation.spec.ts (SECT-01) + role-guards.spec.ts (SECT-02, SECT-03)
+- [x] 10-01-PLAN.md — Extend seed data + coach2 auth + student-booking-flow.spec.ts (STST-01, STST-02, STST-03)
+- [x] 10-02-PLAN.md — data-isolation.spec.ts (SECT-01) + role-guards.spec.ts (SECT-02, SECT-03)
 
 **Success Criteria:**
 1. Student browse-by-coach and two-step booking flow verified by passing E2E tests
@@ -86,7 +86,7 @@ Plans:
 |-------|--------|-----------|
 | 8 - Test Infrastructure & Legacy Updates | Complete | 2026-03-16 |
 | 9 - Coach & Admin Flow Tests | Complete | 2026-03-16 |
-| 10 - Student & Security Tests | Not started | — |
+| 10 - Student & Security Tests | Complete | 2026-03-16 |
 | 11 - Stabilization | Not started | — |
 
 ---
