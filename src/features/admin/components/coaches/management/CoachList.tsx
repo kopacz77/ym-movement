@@ -2,10 +2,13 @@
 "use client";
 
 import { format } from "date-fns";
-import { MoreHorizontal } from "lucide-react";
+import { Check, MoreHorizontal, Pencil, X } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +59,78 @@ function getStatusBadge(coach: {
   }
 
   return <Badge variant="secondary">Inactive</Badge>;
+}
+
+function RevenueSplitCell({ coachId, currentSplit }: { coachId: string; currentSplit: number }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState(currentSplit);
+  const utils = api.useUtils();
+
+  const updateSplit = api.admin.coach.management.updateCoachPricing.useMutation({
+    onSuccess: () => {
+      toast.success("Revenue split updated");
+      utils.admin.coach.management.getAllCoaches.invalidate();
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      toast.error("Failed to update revenue split", { description: error.message });
+      setValue(currentSplit);
+      setIsEditing(false);
+    },
+  });
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center gap-1">
+        <span>{currentSplit}%</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6"
+          onClick={() => {
+            setValue(currentSplit);
+            setIsEditing(true);
+          }}
+        >
+          <Pencil className="h-3 w-3" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <Input
+        type="number"
+        min={0}
+        max={100}
+        value={value}
+        onChange={(e) => setValue(Number(e.target.value))}
+        className="w-16 h-7 text-sm"
+      />
+      <span className="text-xs text-muted-foreground">%</span>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 text-green-600 hover:text-green-700"
+        disabled={value === currentSplit || updateSplit.isPending}
+        onClick={() => updateSplit.mutate({ coachId, revenueSplitPercent: value })}
+      >
+        <Check className="h-3 w-3" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 text-red-600 hover:text-red-700"
+        onClick={() => {
+          setValue(currentSplit);
+          setIsEditing(false);
+        }}
+      >
+        <X className="h-3 w-3" />
+      </Button>
+    </div>
+  );
 }
 
 export const CoachList: React.FC = () => {
@@ -128,7 +203,9 @@ export const CoachList: React.FC = () => {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="hidden lg:table-cell">{coach.revenueSplitPercent}%</TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  <RevenueSplitCell coachId={coach.id} currentSplit={coach.revenueSplitPercent} />
+                </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {formatDate(coach.createdAt)}
                 </TableCell>
