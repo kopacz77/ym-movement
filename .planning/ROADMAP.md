@@ -72,7 +72,12 @@ Plans:
 **Goal:** All bugs discovered during test writing are fixed, and the complete E2E test suite passes in CI-compatible headless mode.
 **Depends on:** Phase 9, Phase 10
 **Requirements:** STAB-01, STAB-02
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Fix __dirname ESM blocker, CI reporter config, capture baseline test results
+- [ ] 11-02-PLAN.md — Rewrite student-signup tests, fix auth/e2e-flow bugs (B-002 through B-006)
+- [ ] 11-03-PLAN.md — Fix remaining failures, triage legacy tests, final zero-failure verification
 
 **Success Criteria:**
 1. All bugs discovered during test writing in Phases 8-10 are fixed and verified
@@ -87,7 +92,7 @@ Plans:
 | 8 - Test Infrastructure & Legacy Updates | Complete | 2026-03-16 |
 | 9 - Coach & Admin Flow Tests | Complete | 2026-03-16 |
 | 10 - Student & Security Tests | Complete | 2026-03-16 |
-| 11 - Stabilization | Not started | — |
+| 11 - Stabilization | Planned | — |
 
 ---
 
