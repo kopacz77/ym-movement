@@ -35,7 +35,11 @@ Plans:
 **Goal:** E2E tests verify all coach lifecycle flows (signup, approval, dashboard, profile, proposals) and admin management flows (coach overview, revenue splits, payout reports).
 **Depends on:** Phase 8
 **Requirements:** CTST-01, CTST-02, CTST-03, CTST-04, CTST-05, ATST-01, ATST-02, ATST-03
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Extend seed data + coach-flows.spec.ts (CTST-01 through CTST-05)
+- [ ] 09-02-PLAN.md — Admin coach management spec (ATST-01, ATST-02, ATST-03)
 
 **Success Criteria:**
 1. Coach signup, admin approval/denial, and coach dashboard flows verified by passing E2E tests
