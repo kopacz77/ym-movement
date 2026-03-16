@@ -53,7 +53,11 @@ Plans:
 **Goal:** E2E tests verify student browse-by-coach booking flow, coach name display across all views, data isolation between coaches, and role guard enforcement.
 **Depends on:** Phase 8
 **Requirements:** STST-01, STST-02, STST-03, SECT-01, SECT-02, SECT-03
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Extend seed data + coach2 auth + student-booking-flow.spec.ts (STST-01, STST-02, STST-03)
+- [ ] 10-02-PLAN.md — data-isolation.spec.ts (SECT-01) + role-guards.spec.ts (SECT-02, SECT-03)
 
 **Success Criteria:**
 1. Student browse-by-coach and two-step booking flow verified by passing E2E tests
