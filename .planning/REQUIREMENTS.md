@@ -71,31 +71,31 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TINF-01 | — | Pending |
-| TINF-02 | — | Pending |
-| TINF-03 | — | Pending |
-| CTST-01 | — | Pending |
-| CTST-02 | — | Pending |
-| CTST-03 | — | Pending |
-| CTST-04 | — | Pending |
-| CTST-05 | — | Pending |
-| STST-01 | — | Pending |
-| STST-02 | — | Pending |
-| STST-03 | — | Pending |
-| ATST-01 | — | Pending |
-| ATST-02 | — | Pending |
-| ATST-03 | — | Pending |
-| SECT-01 | — | Pending |
-| SECT-02 | — | Pending |
-| SECT-03 | — | Pending |
-| STAB-01 | — | Pending |
-| STAB-02 | — | Pending |
+| TINF-01 | Phase 8 | Pending |
+| TINF-02 | Phase 8 | Pending |
+| TINF-03 | Phase 8 | Pending |
+| CTST-01 | Phase 9 | Pending |
+| CTST-02 | Phase 9 | Pending |
+| CTST-03 | Phase 9 | Pending |
+| CTST-04 | Phase 9 | Pending |
+| CTST-05 | Phase 9 | Pending |
+| STST-01 | Phase 10 | Pending |
+| STST-02 | Phase 10 | Pending |
+| STST-03 | Phase 10 | Pending |
+| ATST-01 | Phase 9 | Pending |
+| ATST-02 | Phase 9 | Pending |
+| ATST-03 | Phase 9 | Pending |
+| SECT-01 | Phase 10 | Pending |
+| SECT-02 | Phase 10 | Pending |
+| SECT-03 | Phase 10 | Pending |
+| STAB-01 | Phase 11 | Pending |
+| STAB-02 | Phase 11 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after initial definition*
+*Last updated: 2026-03-16 after roadmap creation*
