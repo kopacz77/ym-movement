@@ -50,6 +50,11 @@ export default async function LessonDetailsPage({
         },
         Rink: true,
         Payment: true,
+        Coach: {
+          include: {
+            User: { select: { name: true } },
+          },
+        },
       },
     });
 
@@ -115,6 +120,11 @@ export default async function LessonDetailsPage({
               <div>
                 <h3 className="font-medium">Lesson Type</h3>
                 <p className="text-gray-600">{lesson.type}</p>
+              </div>
+
+              <div>
+                <h3 className="font-medium">Coach</h3>
+                <p className="text-gray-600">{lesson.Coach?.User?.name || "Instructor"}</p>
               </div>
 
               <div>

@@ -132,6 +132,7 @@ export default function StudentPaymentsPage() {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Lesson</TableHead>
+                  <TableHead className="hidden md:table-cell">Coach</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead className="hidden sm:table-cell">Reference</TableHead>
                   <TableHead>Status</TableHead>
@@ -146,6 +147,9 @@ export default function StudentPaymentsPage() {
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {lesson.type.replace("_", " ")} Lesson
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell whitespace-nowrap">
+                      {(lesson as any).Coach?.User?.name || "Instructor"}
                     </TableCell>
                     <TableCell>${lesson.payment?.amount.toFixed(2)}</TableCell>
                     <TableCell className="hidden sm:table-cell">
