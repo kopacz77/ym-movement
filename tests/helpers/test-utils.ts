@@ -20,6 +20,16 @@ export const testData = {
     password: "COACH2PASS2025!",
     name: "Test Coach 2",
   },
+  coach3: {
+    email: "coach3@test.com",
+    password: "COACH3PASS2025!",
+    name: "Pending Coach",
+  },
+  coach4: {
+    email: "coach4@test.com",
+    password: "COACH4PASS2025!",
+    name: "Deny Test Coach",
+  },
   student: {
     email: "test.student@example.com",
     password: "TestPassword123!",

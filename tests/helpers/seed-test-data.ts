@@ -158,8 +158,8 @@ async function seedTestData() {
   });
   console.log("  CoachStudent relationship created/updated: coach2 -> student");
 
-  // 7. Create/upsert Rink
-  await prisma.rink.upsert({
+  // 7. Create/upsert Rink (capture return value for later use)
+  const rink = await prisma.rink.upsert({
     where: { name: "Test Ice Rink" },
     update: {},
     create: {
@@ -169,6 +169,139 @@ async function seedTestData() {
     },
   });
   console.log("  Rink created/updated: Test Ice Rink");
+
+  // 8. Create unapproved coach3 for approval tests (CTST-02)
+  const coach3Hash = await bcrypt.hash("COACH3PASS2025!", 10);
+  const coach3User = await prisma.user.upsert({
+    where: { email: "coach3@test.com" },
+    update: { password: coach3Hash, role: "COACH", name: "Pending Coach" },
+    create: {
+      email: "coach3@test.com",
+      password: coach3Hash,
+      name: "Pending Coach",
+      role: "COACH",
+      emailVerified: new Date(),
+    },
+  });
+  await prisma.coach.upsert({
+    where: { userId: coach3User.id },
+    update: { isApproved: false, isActive: false },
+    create: {
+      userId: coach3User.id,
+      isApproved: false,
+      isActive: false,
+      bio: "Pending coach for approval tests",
+      skills: ["Ice Dance"],
+      revenueSplitPercent: 70,
+    },
+  });
+  console.log("  Pending COACH 3 created/updated:", coach3User.email);
+
+  // 9. Create unapproved coach4 for denial tests (CTST-02)
+  const coach4Hash = await bcrypt.hash("COACH4PASS2025!", 10);
+  const coach4User = await prisma.user.upsert({
+    where: { email: "coach4@test.com" },
+    update: { password: coach4Hash, role: "COACH", name: "Deny Test Coach" },
+    create: {
+      email: "coach4@test.com",
+      password: coach4Hash,
+      name: "Deny Test Coach",
+      role: "COACH",
+      emailVerified: new Date(),
+    },
+  });
+  await prisma.coach.upsert({
+    where: { userId: coach4User.id },
+    update: { isApproved: false, isActive: false },
+    create: {
+      userId: coach4User.id,
+      isApproved: false,
+      isActive: false,
+      bio: "Coach for denial test",
+      skills: ["Freestyle"],
+      revenueSplitPercent: 70,
+    },
+  });
+  console.log("  Pending COACH 4 created/updated:", coach4User.email);
+
+  // 10. Create a PENDING ProposedTimeSlot for coach (CTST-05 admin approval test)
+  await prisma.proposedTimeSlot.deleteMany({
+    where: { coachId: coach.id, status: "PENDING" },
+  });
+  const proposalStart = new Date();
+  proposalStart.setDate(proposalStart.getDate() + 14);
+  proposalStart.setHours(10, 0, 0, 0);
+  const proposalEnd = new Date(proposalStart);
+  proposalEnd.setHours(11, 0, 0, 0);
+  await prisma.proposedTimeSlot.create({
+    data: {
+      coachId: coach.id,
+      rinkId: rink.id,
+      startTime: proposalStart,
+      endTime: proposalEnd,
+      maxStudents: 1,
+      status: "PENDING",
+    },
+  });
+  console.log("  PENDING ProposedTimeSlot created for:", coachUser.email);
+
+  // 11. Create a completed lesson + payment for payout report (ATST-03)
+  // Clean up prior E2E test lesson data
+  await prisma.payment.deleteMany({
+    where: { referenceCode: "TEST-PAYOUT-001" },
+  });
+  await prisma.lesson.deleteMany({
+    where: { coachId: coach.id, status: "COMPLETED", notes: "E2E test lesson" },
+  });
+
+  // Create a time slot for the lesson
+  const lessonStart = new Date();
+  lessonStart.setDate(lessonStart.getDate() + 7);
+  lessonStart.setHours(10, 0, 0, 0);
+  const lessonEnd = new Date(lessonStart);
+  lessonEnd.setHours(11, 0, 0, 0);
+
+  const testTimeSlot = await prisma.rinkTimeSlot.create({
+    data: {
+      rinkId: rink.id,
+      coachId: coach.id,
+      startTime: lessonStart,
+      endTime: lessonEnd,
+      maxStudents: 1,
+      isActive: true,
+    },
+  });
+
+  const testLesson = await prisma.lesson.create({
+    data: {
+      studentId: student.id,
+      rinkId: rink.id,
+      coachId: coach.id,
+      startTime: lessonStart,
+      endTime: lessonEnd,
+      duration: 60,
+      type: "PRIVATE",
+      status: "COMPLETED",
+      price: 120.0,
+      timeSlotId: testTimeSlot.id,
+      notes: "E2E test lesson",
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      lessonId: testLesson.id,
+      studentId: student.id,
+      amount: 120.0,
+      method: "VENMO",
+      status: "COMPLETED",
+      referenceCode: "TEST-PAYOUT-001",
+      lesson_date: lessonStart,
+      verifiedAt: new Date(),
+      verifiedBy: adminUser.id,
+    },
+  });
+  console.log("  Completed lesson + payment created for payout reports");
 
   console.log("\nTest data seeded successfully!");
   await prisma.$disconnect();
