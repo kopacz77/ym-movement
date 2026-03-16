@@ -20,8 +20,8 @@
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Seed script, auth setup project, test-utils extensions, Playwright config update
-- [ ] 08-02-PLAN.md — Update 5 spec files with inline/hardcoded credentials to use shared helpers
+- [x] 08-01-PLAN.md — Seed script, auth setup project, test-utils extensions, Playwright config update
+- [x] 08-02-PLAN.md — Update 5 spec files with inline/hardcoded credentials to use shared helpers
 
 **Success Criteria:**
 1. Test seed script creates coach accounts with multi-coach scenarios and student-coach relationships
@@ -76,7 +76,7 @@ Plans:
 
 | Phase | Status | Completed |
 |-------|--------|-----------|
-| 8 - Test Infrastructure & Legacy Updates | Planned | — |
+| 8 - Test Infrastructure & Legacy Updates | Complete | 2026-03-16 |
 | 9 - Coach & Admin Flow Tests | Not started | — |
 | 10 - Student & Security Tests | Not started | — |
 | 11 - Stabilization | Not started | — |

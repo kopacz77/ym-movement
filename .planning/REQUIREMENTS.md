@@ -9,9 +9,9 @@ Requirements for test and stabilization release. Each maps to roadmap phases.
 
 ### Test Infrastructure
 
-- [ ] **TINF-01**: Test data seeding script creates coach accounts, multi-coach scenarios, and student-coach relationships for E2E tests
-- [ ] **TINF-02**: Test helper utilities extended with coach login, coach creation, coach approval, and coach-specific booking functions
-- [ ] **TINF-03**: Existing 13 E2E test files updated to work with SUPER_ADMIN role system (previously ADMIN) without breaking
+- [x] **TINF-01**: Test data seeding script creates coach accounts, multi-coach scenarios, and student-coach relationships for E2E tests
+- [x] **TINF-02**: Test helper utilities extended with coach login, coach creation, coach approval, and coach-specific booking functions
+- [x] **TINF-03**: Existing 13 E2E test files updated to work with SUPER_ADMIN role system (previously ADMIN) without breaking
 
 ### Coach Flow Tests
 
@@ -71,9 +71,9 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TINF-01 | Phase 8 | Pending |
-| TINF-02 | Phase 8 | Pending |
-| TINF-03 | Phase 8 | Pending |
+| TINF-01 | Phase 8 | Complete |
+| TINF-02 | Phase 8 | Complete |
+| TINF-03 | Phase 8 | Complete |
 | CTST-01 | Phase 9 | Pending |
 | CTST-02 | Phase 9 | Pending |
 | CTST-03 | Phase 9 | Pending |
