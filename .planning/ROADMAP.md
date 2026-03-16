@@ -17,7 +17,11 @@
 **Goal:** Test helpers, seed scripts, and all 13 existing E2E tests updated to work with the multi-coach role system, providing the foundation for all new test authoring.
 **Depends on:** Nothing (first phase of v1.1)
 **Requirements:** TINF-01, TINF-02, TINF-03
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Seed script, auth setup project, test-utils extensions, Playwright config update
+- [ ] 08-02-PLAN.md — Update 5 spec files with inline/hardcoded credentials to use shared helpers
 
 **Success Criteria:**
 1. Test seed script creates coach accounts with multi-coach scenarios and student-coach relationships
@@ -72,7 +76,7 @@
 
 | Phase | Status | Completed |
 |-------|--------|-----------|
-| 8 - Test Infrastructure & Legacy Updates | Not started | — |
+| 8 - Test Infrastructure & Legacy Updates | Planned | — |
 | 9 - Coach & Admin Flow Tests | Not started | — |
 | 10 - Student & Security Tests | Not started | — |
 | 11 - Stabilization | Not started | — |
