@@ -11,16 +11,16 @@ See: .planning/PROJECT.md
 
 Phase: 4 of 7 (Per-Coach Scheduling)
 Plan: 3 of 3
-Status: In progress (Plan 2 remaining)
-Last activity: 2026-03-16 -- Completed 04-03-PLAN.md (coach schedule UI with calendar and blocked dates)
+Status: In progress
+Last activity: 2026-03-15 -- Completed 04-02-PLAN.md (admin calendar coach filtering)
 
-Progress: ███████████████░░░░░ 58% (15/~26 plans, phases 5-7 not yet planned)
+Progress: ████████████████░░░░ 62% (16/~26 plans, phases 5-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: 4.3min
+- Total plans completed: 16
+- Average duration: 4.2min
 
 **By Phase:**
 
@@ -88,6 +88,9 @@ Progress: ███████████████░░░░░ 58% (15/~
 - [04-01] Non-null assertion (ctx.session!) for createdById in coach schedule -- coachProcedure guarantees session but TS cannot narrow
 - [04-01] Coach field on TimeSlot interface is optional (Coach?) for backward compatibility
 - [04-01] getRinks in scheduleRouter includes address field (proposalQueries omits it) for schedule display
+- [04-02] getAllCoaches (superAdminProcedure) used in ScheduleManager -- functionally identical to adminProcedure during transition
+- [04-02] Coach selection enforced via toast validation in handleEnhancedBookingSubmit (not disabled button)
+- [04-02] Coach name appended to calendar event title in brackets [Coach Name] after student count
 - [04-03] Coach schedule is read-only for time slots -- no-op callbacks for DesktopCalendarView required props (onSelectSlot, onEventDrop)
 - [04-03] Reused admin DesktopCalendarView/MobileCalendarView/TimeSlotDialogAdapter for coach calendar (no coach-specific calendar components)
 - [04-03] CoachBlockedDates uses shadcn/ui components (Button, Input, Select) unlike admin WorkingBlockedDatesManager inline styles
@@ -106,6 +109,6 @@ Progress: ███████████████░░░░░ 58% (15/~
 
 ## Session Continuity
 
-Last session: 2026-03-16
-Stopped at: Completed 04-03-PLAN.md (coach schedule UI with calendar and blocked dates)
+Last session: 2026-03-15
+Stopped at: Completed 04-02-PLAN.md (admin calendar coach filtering)
 Resume file: None
