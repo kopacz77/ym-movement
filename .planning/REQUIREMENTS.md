@@ -118,8 +118,8 @@ Which phases cover which requirements. Updated by create-roadmap.
 | SADM-03 | Phase 3 | Complete |
 | SADM-04 | Phase 3 | Complete |
 | INTG-01 | Phase 6 | Complete |
-| INTG-02 | Phase 7 | Pending |
-| INTG-03 | Phase 7 | Pending |
+| INTG-02 | Phase 7 | Complete |
+| INTG-03 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 26 total
@@ -128,4 +128,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-16 after Phase 6 completion*
+*Last updated: 2026-03-16 after Phase 7 completion*
