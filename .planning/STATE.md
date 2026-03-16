@@ -10,16 +10,16 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 5 of 7 (Student Multi-Coach Booking)
-Plan: 0 of ? (not yet planned)
-Status: Not started
-Last activity: 2026-03-15 -- Phase 4 verified and completed
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-03-16 -- Completed 05-01-PLAN.md
 
-Progress: ████████████████░░░░ 65% (16/~26 plans, phases 5-7 not yet planned)
+Progress: █████████████████░░░ 68% (17/~25 plans, phases 6-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 4.1min
 
 **By Phase:**
@@ -30,6 +30,7 @@ Progress: ████████████████░░░░ 65% (16/~
 | 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
+| 05-student-multi-coach-booking | 1/3 | 5min | 5min |
 
 ## Accumulated Context
 
@@ -95,6 +96,11 @@ Progress: ████████████████░░░░ 65% (16/~
 - [04-03] Reused admin DesktopCalendarView/MobileCalendarView/TimeSlotDialogAdapter for coach calendar (no coach-specific calendar components)
 - [04-03] CoachBlockedDates uses shadcn/ui components (Button, Input, Select) unlike admin WorkingBlockedDatesManager inline styles
 - [04-03] Empty students array and no-op handlers passed to TimeSlotDialogAdapter for read-only slot viewing
+- [05-01] coachBrowseRouter uses protectedProcedure (not adminProcedure) since students call it
+- [05-01] Coach pricing parameter added as LAST optional argument to pricing functions for backward compatibility
+- [05-01] getStudentPricing updated to accept optional coachId and apply full waterfall via getHourlyRateForLessonType
+- [05-01] CoachStudent upsert is non-blocking (error logged but booking succeeds)
+- [05-01] Coach name fetched once early in bookLesson and reused for calendar, notifications, and admin alerts
 
 ### Pending Todos
 
@@ -109,6 +115,6 @@ Progress: ████████████████░░░░ 65% (16/~
 
 ## Session Continuity
 
-Last session: 2026-03-15
-Stopped at: Completed 04-03-PLAN.md (coach schedule page UI) -- Phase 04 complete
+Last session: 2026-03-16
+Stopped at: Completed 05-01-PLAN.md (student multi-coach booking backend)
 Resume file: None
