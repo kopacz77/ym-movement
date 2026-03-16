@@ -29,6 +29,11 @@ interface Lesson {
     address: string;
     timezone: string;
   };
+  Coach?: {
+    User: {
+      name: string | null;
+    };
+  };
   cancellationReason?: string;
   cancellationTime?: string | Date;
   Payment?: {
@@ -122,6 +127,11 @@ export default function StudentScheduleClient() {
         method: lesson.Payment.method,
         referenceCode: lesson.Payment.referenceCode,
       };
+    }
+
+    // Add coach info if it exists
+    if (lesson.Coach) {
+      result.Coach = lesson.Coach;
     }
 
     return result;

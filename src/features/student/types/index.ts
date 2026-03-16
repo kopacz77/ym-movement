@@ -34,6 +34,11 @@ export interface LessonWithDetails {
     address: string;
     timezone: string;
   };
+  Coach?: {
+    User: {
+      name: string | null;
+    };
+  };
   Payment?: {
     id: string;
     status: PaymentStatus;

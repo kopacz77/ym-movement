@@ -31,6 +31,11 @@ interface Lesson {
     address: string;
     timezone: string;
   };
+  Coach?: {
+    User: {
+      name: string | null;
+    };
+  };
   cancellationReason?: string;
   cancellationTime?: string | Date;
   [key: string]: unknown;
@@ -53,6 +58,11 @@ interface LessonWithDetails {
     name: string;
     address: string;
     timezone: string;
+  };
+  Coach?: {
+    User: {
+      name: string | null;
+    };
   };
   cancellationReason?: string;
   cancellationTime?: Date;
@@ -174,6 +184,11 @@ export default function StudentSchedulePage() {
 
     if (lesson.cancellationTime) {
       result.cancellationTime = new Date(lesson.cancellationTime);
+    }
+
+    // Add coach info if it exists
+    if (lesson.Coach) {
+      result.Coach = lesson.Coach;
     }
 
     return result;
