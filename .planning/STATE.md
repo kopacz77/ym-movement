@@ -10,17 +10,17 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 4 of 7 (Per-Coach Scheduling)
-Plan: 0 of ? (not yet planned)
-Status: Not started
-Last activity: 2026-03-15 -- Phase 3 verified and completed
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-03-15 -- Completed 04-01-PLAN.md (coach schedule API endpoints)
 
-Progress: █████████████░░░░░░░ 50% (13/~26 plans, phases 4-7 not yet planned)
+Progress: ██████████████░░░░░░ 54% (14/~26 plans, phases 5-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 4.5min
+- Total plans completed: 14
+- Average duration: 4.4min
 
 **By Phase:**
 
@@ -29,6 +29,7 @@ Progress: █████████████░░░░░░░ 50% (13/~
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
 | 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
+| 04-per-coach-scheduling | 1/3 | 3min | 3min |
 
 ## Accumulated Context
 
@@ -84,6 +85,9 @@ Progress: █████████████░░░░░░░ 50% (13/~
 - [03-02] cache-wrapper.ts deferred (different abstraction level)
 - [03-03] User model has no image field -- removed from getCoachDetail select (plan specified image but schema lacks it)
 - [03-03] Payment scoping always through Lesson relation (Lesson: { coachId }) per research Pitfall 1
+- [04-01] Non-null assertion (ctx.session!) for createdById in coach schedule -- coachProcedure guarantees session but TS cannot narrow
+- [04-01] Coach field on TimeSlot interface is optional (Coach?) for backward compatibility
+- [04-01] getRinks in scheduleRouter includes address field (proposalQueries omits it) for schedule display
 
 ### Pending Todos
 
@@ -99,5 +103,5 @@ Progress: █████████████░░░░░░░ 50% (13/~
 ## Session Continuity
 
 Last session: 2026-03-15
-Stopped at: Completed 03-04-PLAN.md (super admin dashboard UI) -- Phase 03 complete
+Stopped at: Completed 04-01-PLAN.md (coach schedule API endpoints)
 Resume file: None
