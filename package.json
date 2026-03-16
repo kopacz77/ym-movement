@@ -110,7 +110,7 @@
     "critters": "^0.0.25",
     "date-fns": "4.1.0",
     "geist": "^1.5.1",
-    "googleapis": "^150.0.1",
+    "googleapis": "^171.4.0",
     "ioredis": "^5.8.2",
     "lucide-react": "^0.522.0",
     "luxon": "^3.7.2",
