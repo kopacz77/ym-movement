@@ -153,6 +153,37 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
+        // 4b. Fetch coach name and pricing if the time slot has a coach
+        let coachName: string | null = null;
+        let coachPricing: {
+          privateLessonPrice: number | null;
+          groupLessonPrice: number | null;
+          choreographyPrice: number | null;
+          competitionPrepPrice: number | null;
+        } | null = null;
+
+        if (timeSlot.coachId) {
+          const coach = await ctx.prisma.coach.findUnique({
+            where: { id: timeSlot.coachId },
+            select: {
+              privateLessonPrice: true,
+              groupLessonPrice: true,
+              choreographyPrice: true,
+              competitionPrepPrice: true,
+              User: { select: { name: true } },
+            },
+          });
+          if (coach) {
+            coachName = coach.User?.name ?? null;
+            coachPricing = {
+              privateLessonPrice: coach.privateLessonPrice,
+              groupLessonPrice: coach.groupLessonPrice,
+              choreographyPrice: coach.choreographyPrice,
+              competitionPrepPrice: coach.competitionPrepPrice,
+            };
+          }
+        }
+
         // 5. Try to create Google Calendar event
         let googleEventId = null;
 
@@ -165,10 +196,13 @@ export const bookingRouter = createTRPCRouter({
             // Make sure we have a valid timezone
             const timezone = timeSlot.Rink.timezone || "America/Los_Angeles"; // Fallback timezone
 
+            const calendarSummary = `${input.type} Lesson with ${student.User.name}${coachName ? ` [${coachName}]` : ""}`;
+
             googleEventId = await googleCalendar.createEvent({
-              summary: `${input.type} Lesson with ${student.User.name}`,
-              description: ` 
+              summary: calendarSummary,
+              description: `
                 Student: ${student.User.name}
+                ${coachName ? `Coach: ${coachName}` : ""}
                 Lesson Type: ${input.type}
                 Area: ${input.area || "MAIN_RINK"}
                 ${input.notes ? `Notes: ${input.notes}` : ""}
@@ -199,7 +233,7 @@ export const bookingRouter = createTRPCRouter({
           // Continue with booking even if calendar fails
         }
 
-        // 6. Calculate price based on lesson type, duration, and student's custom pricing
+        // 6. Calculate price based on lesson type, duration, and student's/coach's pricing
         // Calculate duration in minutes
         const durationMs = timeSlot.endTime.getTime() - timeSlot.startTime.getTime();
         const durationMinutes = Math.max(Math.floor(durationMs / 60000), 1);
@@ -207,12 +241,18 @@ export const bookingRouter = createTRPCRouter({
         // Get default pricing from database
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        // Calculate price using the new pricing helper
-        const price = calculateLessonPrice(input.type, durationMinutes, student, defaultPricing);
+        // Calculate price using the pricing waterfall (student > coach > global > hardcoded)
+        const price = calculateLessonPrice(
+          input.type,
+          durationMinutes,
+          student,
+          defaultPricing,
+          coachPricing,
+        );
 
         console.log(
           `[BOOKING] Calculated price: $${price} for ${durationMinutes}min ${input.type} lesson${
-            student.customPricingEnabled ? " (custom pricing)" : " (default pricing)"
+            student.customPricingEnabled ? " (custom pricing)" : coachPricing ? " (coach pricing)" : " (default pricing)"
           }`,
         );
 
@@ -272,12 +312,38 @@ export const bookingRouter = createTRPCRouter({
           `[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`,
         );
 
+        // 7b. Upsert CoachStudent junction record if the lesson has a coach
+        if (timeSlot.coachId) {
+          try {
+            await ctx.prisma.coachStudent.upsert({
+              where: {
+                coachId_studentId: {
+                  coachId: timeSlot.coachId,
+                  studentId: input.studentId,
+                },
+              },
+              create: {
+                coachId: timeSlot.coachId,
+                studentId: input.studentId,
+              },
+              update: {},
+            });
+            console.log(
+              `[BOOKING] Upserted CoachStudent record for coach ${timeSlot.coachId} and student ${input.studentId}`,
+            );
+          } catch (coachStudentError) {
+            console.error("[BOOKING] Error upserting CoachStudent record:", coachStudentError);
+            // Non-blocking: the booking itself succeeded
+          }
+        }
+
         // 8. Create notification for the student
         try {
+          const coachSuffix = coachName ? ` with ${coachName}` : "";
           await createNotification({
             userId: (student as any).User?.id || (student as any).userId,
             title: "Lesson Booked Successfully",
-            message: `Your ${input.type} lesson has been scheduled for ${new Date(
+            message: `Your ${input.type} lesson${coachSuffix} has been scheduled for ${new Date(
               timeSlot.startTime,
             ).toLocaleDateString()} at ${timeSlot.Rink.name}`,
             type: "SUCCESS",
@@ -302,18 +368,20 @@ export const bookingRouter = createTRPCRouter({
           // Format the date nicely
           const formattedDate = format(timeSlot.startTime, "MMMM d, yyyy 'at' h:mm a");
 
-          // Format lesson type (e.g., PRIVATE → Private, GROUP → Group)
+          // Format lesson type (e.g., PRIVATE -> Private, GROUP -> Group)
           const lessonType = input.type
             .split("_")
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(" ");
+
+          const coachSuffix = coachName ? ` with ${coachName}` : "";
 
           // Create notification for each admin
           const notificationPromises = adminUsers.map((admin) =>
             createNotification({
               userId: admin.id,
               title: "New Lesson Booking",
-              message: `New booking: ${student.User.name || student.User.email || "Unknown Student"} booked ${lessonType} lesson on ${formattedDate}`,
+              message: `New booking: ${student.User.name || student.User.email || "Unknown Student"} booked ${lessonType} lesson${coachSuffix} on ${formattedDate}`,
               type: "SUCCESS",
               link: "/admin/schedule",
             }),

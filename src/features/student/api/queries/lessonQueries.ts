@@ -16,6 +16,7 @@ export const lessonRouter = createTRPCRouter({
           include: {
             Payment: true,
             Rink: true,
+            Coach: { include: { User: { select: { name: true } } } },
           },
         });
 

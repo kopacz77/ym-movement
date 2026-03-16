@@ -1,7 +1,8 @@
-import { LessonStatus } from "@prisma/client";
+import { LessonStatus, LessonType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/profileQueries.ts
 import { z } from "zod";
+import { getHourlyRateForLessonType } from "@/lib/pricing";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define a proper type for the query filters
@@ -193,6 +194,7 @@ export const profileRouter = createTRPCRouter({
           include: {
             Rink: true,
             Payment: true,
+            Coach: { include: { User: { select: { name: true } } } },
           },
           orderBy: {
             startTime: "asc",
@@ -211,7 +213,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   getStudentPricing: protectedProcedure
-    .input(z.object({ studentId: z.string() }))
+    .input(z.object({ studentId: z.string(), coachId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
       try {
         const student = await ctx.prisma.student.findUnique({
@@ -247,14 +249,47 @@ export const profileRouter = createTRPCRouter({
         // Get default pricing for reference
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
+        // Fetch coach pricing if coachId is provided
+        let coachPricing = null;
+        if (input.coachId) {
+          coachPricing = await ctx.prisma.coach.findUnique({
+            where: { id: input.coachId },
+            select: {
+              privateLessonPrice: true,
+              groupLessonPrice: true,
+              choreographyPrice: true,
+              competitionPrepPrice: true,
+            },
+          });
+        }
+
+        // Apply the full pricing waterfall for each lesson type
         return {
           customPricingEnabled: student.customPricingEnabled,
-          privateLessonPrice:
-            student.privateLessonPrice ?? defaultPricing?.privateLessonPrice ?? 75,
-          choreographyPrice: student.choreographyPrice ?? defaultPricing?.choreographyPrice ?? 90,
-          groupLessonPrice: student.groupLessonPrice ?? defaultPricing?.groupLessonPrice ?? 45,
-          competitionPrepPrice:
-            student.competitionPrepPrice ?? defaultPricing?.competitionPrice ?? 95,
+          privateLessonPrice: getHourlyRateForLessonType(
+            LessonType.PRIVATE,
+            student,
+            defaultPricing,
+            coachPricing,
+          ),
+          choreographyPrice: getHourlyRateForLessonType(
+            LessonType.CHOREOGRAPHY,
+            student,
+            defaultPricing,
+            coachPricing,
+          ),
+          groupLessonPrice: getHourlyRateForLessonType(
+            LessonType.GROUP,
+            student,
+            defaultPricing,
+            coachPricing,
+          ),
+          competitionPrepPrice: getHourlyRateForLessonType(
+            LessonType.COMPETITION_PREP,
+            student,
+            defaultPricing,
+            coachPricing,
+          ),
         };
       } catch (error) {
         if (error instanceof TRPCError) {
