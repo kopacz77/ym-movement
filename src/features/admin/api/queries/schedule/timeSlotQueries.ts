@@ -61,7 +61,7 @@ export const timeSlotRouter = createTRPCRouter({
                 name: true,
                 timezone: true,
                 address: true,
-                // Exclude: maxCapacity, createdAt, updatedAt
+                isVirtual: true,
               },
             },
             Coach: {

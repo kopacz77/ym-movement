@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { AlertTriangle, Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -38,8 +38,9 @@ interface CompactTimeSlotDialogProps {
     maxStudents: number;
     coachId?: string;
   }) => void;
-  rinks: Array<{ id: string; name: string; timezone: string }>;
+  rinks: Array<{ id: string; name: string; timezone: string; isVirtual?: boolean }>;
   isLoading?: boolean;
+  isBlockedDate?: boolean;
 }
 
 export function CompactTimeSlotDialog({
@@ -52,6 +53,7 @@ export function CompactTimeSlotDialog({
   onBookingSubmit,
   rinks,
   isLoading = false,
+  isBlockedDate = false,
 }: CompactTimeSlotDialogProps) {
   const [startTime, setStartTime] = React.useState<string>("");
   const [endTime, setEndTime] = React.useState<string>("");
@@ -60,6 +62,12 @@ export function CompactTimeSlotDialog({
 
   // Use operational settings for dynamic time slot generation
   const { businessHours, validateTimeSlot, isDayActive } = useOperationalSettings();
+
+  // On blocked dates, only show virtual rinks
+  const availableRinks = React.useMemo(
+    () => (isBlockedDate ? rinks.filter((r) => r.isVirtual) : rinks),
+    [rinks, isBlockedDate],
+  );
 
   // Generate time slots based on operational hours in 15-minute intervals
   const timeSlots = React.useMemo(() => {
@@ -103,11 +111,15 @@ export function CompactTimeSlotDialog({
       setStartTime(selectedStartTime || "");
       setEndTime(""); // Will be auto-calculated
 
-      // Pre-fill rink if provided or use first available
-      setRinkId(selectedRinkId || rinks[0]?.id || "");
+      // On blocked dates, auto-select the virtual rink; otherwise use selected or first available
+      if (isBlockedDate && availableRinks.length > 0) {
+        setRinkId(availableRinks[0].id);
+      } else {
+        setRinkId(selectedRinkId || availableRinks[0]?.id || "");
+      }
       setMaxStudents(1);
     }
-  }, [open, selectedStartTime, selectedRinkId, rinks]);
+  }, [open, selectedStartTime, selectedRinkId, availableRinks, isBlockedDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,6 +197,13 @@ export function CompactTimeSlotDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isBlockedDate && (
+            <div className="flex items-center gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+              <span>This date is blocked. Only Video Lesson is available.</span>
+            </div>
+          )}
+
           {/* Start Time */}
           <div className="space-y-2">
             <Label htmlFor="start-time">Start Time</Label>
@@ -227,7 +246,7 @@ export function CompactTimeSlotDialog({
                 <SelectValue placeholder="Select rink" />
               </SelectTrigger>
               <SelectContent>
-                {rinks.map((rink) => (
+                {availableRinks.map((rink) => (
                   <SelectItem key={rink.id} value={rink.id}>
                     {rink.name}
                   </SelectItem>

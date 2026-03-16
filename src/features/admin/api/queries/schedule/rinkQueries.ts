@@ -41,6 +41,7 @@ export const rinkRouter = createTRPCRouter({
           address: true,
           timezone: true,
           maxCapacity: true,
+          isVirtual: true,
           createdAt: true,
           updatedAt: true,
         },

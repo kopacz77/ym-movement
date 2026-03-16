@@ -115,7 +115,10 @@
       "Bash(kill 1001921:*)",
       "Skill(gsd:new-milestone)",
       "Skill(gsd:define-requirements)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Skill(gsd:create-roadmap)",
+      "Skill(gsd:plan-phase)",
+      "Bash(npx tsx:*)"
     ],
     "deny": []
   }

@@ -47,7 +47,7 @@ interface DesktopCalendarViewProps {
   events: ExtendedCalendarEvent[];
   date: Date;
   calendarView: string;
-  onSelectSlot: (slotInfo: SlotInfo) => void;
+  onSelectSlot: (slotInfo: SlotInfo, options?: { isBlockedDate?: boolean }) => void;
   onSelectEvent: (event: ExtendedCalendarEvent) => void;
   onEventDrop: (eventData: EventInteractionArgs<ExtendedCalendarEvent>) => void;
   dateRangeText: string;
@@ -453,32 +453,11 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
   // Wrapper function to handle slot selection with blocked date checking
   const handleSelectSlot = useCallback(
     (slotInfo: SlotInfo) => {
-      // Check if the selected date is blocked
-      if (isDateBlocked(slotInfo.start)) {
-        // Find which blocked range this date falls into
-        const blockedRange = blockedDateRanges.find((range) => {
-          const start = new Date(range.startDate);
-          const end = new Date(range.endDate);
-          const checkDate = new Date(
-            slotInfo.start.getFullYear(),
-            slotInfo.start.getMonth(),
-            slotInfo.start.getDate(),
-          );
-          start.setHours(0, 0, 0, 0);
-          end.setHours(23, 59, 59, 999);
-          return checkDate >= start && checkDate <= end;
-        });
-
-        // Show a message about the blocked date
-        const rangeTitle = blockedRange?.title || "blocked period";
-        toast.error("Cannot create time slot", {
-          description: `${slotInfo.start.toLocaleDateString()} is blocked for ${rangeTitle}`,
-        });
-        return;
-      }
+      // Check if the selected date is blocked — allow it but pass flag for virtual rink filtering
+      const blocked = isDateBlocked(slotInfo.start);
 
       // Check if the selected day is active according to operational settings
-      if (!isDayActive(slotInfo.start)) {
+      if (!blocked && !isDayActive(slotInfo.start)) {
         const dayNames = [
           "Sunday",
           "Monday",
@@ -495,19 +474,21 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
         return;
       }
 
-      // Validate the time slot against operational hours
-      const validation = validateTimeSlot(slotInfo.start, slotInfo.end);
-      if (!validation.isValid) {
-        toast.error("Invalid time slot", {
-          description: validation.message,
-        });
-        return;
+      // Validate the time slot against operational hours (skip for blocked dates — virtual lessons have flexible hours)
+      if (!blocked) {
+        const validation = validateTimeSlot(slotInfo.start, slotInfo.end);
+        if (!validation.isValid) {
+          toast.error("Invalid time slot", {
+            description: validation.message,
+          });
+          return;
+        }
       }
 
-      // Date is not blocked and passes all validations, proceed with normal slot creation
-      onSelectSlot(slotInfo);
+      // Proceed with slot creation, passing blocked date flag
+      onSelectSlot(slotInfo, { isBlockedDate: blocked });
     },
-    [onSelectSlot, isDateBlocked, blockedDateRanges, isDayActive, validateTimeSlot],
+    [onSelectSlot, isDateBlocked, isDayActive, validateTimeSlot],
   );
 
   return (

@@ -219,15 +219,19 @@ const ScheduleManagerComponent = () => {
   const displayTimezoneOverride = selectedRink ? undefined : timezoneFilter;
   const { events, processedEvents } = useCalendarEvents(filteredTimeSlots, displayTimezoneOverride);
 
+  // Track whether the create dialog was opened on a blocked date
+  const [isBlockedDateSlot, setIsBlockedDateSlot] = useState(false);
+
   // Handle user interactions
   const handleSelectSlot = useCallback(
-    (slotInfo: SlotInfo) => {
+    (slotInfo: SlotInfo, options?: { isBlockedDate?: boolean }) => {
       // Extract date and time from calendar click for compact form
       const clickedDate = slotInfo.start;
       const clickedTime = `${clickedDate.getHours().toString().padStart(2, "0")}:${clickedDate.getMinutes().toString().padStart(2, "0")}`;
 
       setSelectedCalendarDate(clickedDate);
       setSelectedCalendarTime(clickedTime);
+      setIsBlockedDateSlot(options?.isBlockedDate ?? false);
       setTimeSlotFormData({
         startTime: slotInfo.start,
         endTime: slotInfo.end,
@@ -638,6 +642,7 @@ const ScheduleManagerComponent = () => {
             onBookingSubmit={handleEnhancedBookingSubmit}
             rinks={rinks || []}
             isLoading={createTimeSlot.isPending}
+            isBlockedDate={isBlockedDateSlot}
           />
         }
         bulkCreateButton={

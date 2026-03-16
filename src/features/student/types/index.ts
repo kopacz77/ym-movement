@@ -33,6 +33,7 @@ export interface LessonWithDetails {
     name: string;
     address: string;
     timezone: string;
+    isVirtual?: boolean;
   };
   Coach?: {
     User: {

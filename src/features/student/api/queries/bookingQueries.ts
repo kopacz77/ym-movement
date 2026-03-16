@@ -80,6 +80,29 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
+        // 2b. Block student self-booking of virtual rink slots on blocked dates
+        if (timeSlot.Rink.isVirtual) {
+          const slotDate = new Date(timeSlot.startTime);
+          slotDate.setHours(0, 0, 0, 0);
+          const slotDateEnd = new Date(slotDate);
+          slotDateEnd.setHours(23, 59, 59, 999);
+
+          const overlappingBlock = await ctx.prisma.blockedDateRange.findFirst({
+            where: {
+              startDate: { lte: slotDateEnd },
+              endDate: { gte: slotDate },
+            },
+          });
+
+          if (overlappingBlock) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message:
+                "Video lessons on blocked dates are only available by coach assignment.",
+            });
+          }
+        }
+
         // 3. Check if slot is available
         if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
           console.log(`[BOOKING] Time slot ${input.timeSlotId} is fully booked`);

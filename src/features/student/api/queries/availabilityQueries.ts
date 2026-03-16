@@ -99,6 +99,7 @@ export const availabilityRouter = createTRPCRouter({
                 name: true,
                 address: true,
                 timezone: true,
+                isVirtual: true,
               },
             },
             Lesson: true, // Include ALL lessons to properly calculate availability
@@ -116,7 +117,43 @@ export const availabilityRouter = createTRPCRouter({
 
         console.log(`[DEBUG] Found ${timeSlots.length} time slots for the queried date range`);
 
-        if (timeSlots.length === 0) {
+        // Filter out virtual rink slots on blocked dates (students cannot self-book these)
+        const hasVirtualSlots = timeSlots.some((slot) => slot.Rink.isVirtual);
+        let filteredTimeSlots = timeSlots;
+
+        if (hasVirtualSlots) {
+          // Query blocked date ranges that overlap with our date window
+          const blockedRanges = await ctx.prisma.blockedDateRange.findMany({
+            where: {
+              startDate: { lte: endDate },
+              endDate: { gte: effectiveStartDate },
+            },
+            select: { startDate: true, endDate: true },
+          });
+
+          if (blockedRanges.length > 0) {
+            filteredTimeSlots = timeSlots.filter((slot) => {
+              // Non-virtual rinks are never filtered
+              if (!slot.Rink.isVirtual) return true;
+              // Check if this slot's date falls within any blocked range
+              const slotDate = new Date(slot.startTime);
+              slotDate.setHours(0, 0, 0, 0);
+              const isBlocked = blockedRanges.some((range) => {
+                const start = new Date(range.startDate);
+                const end = new Date(range.endDate);
+                start.setHours(0, 0, 0, 0);
+                end.setHours(23, 59, 59, 999);
+                return slotDate >= start && slotDate <= end;
+              });
+              return !isBlocked;
+            });
+            console.log(
+              `[DEBUG] Filtered ${timeSlots.length - filteredTimeSlots.length} virtual slots on blocked dates`,
+            );
+          }
+        }
+
+        if (filteredTimeSlots.length === 0) {
           // Enhanced debugging for no results case
           const allSlots = await ctx.prisma.rinkTimeSlot.findMany({
             take: 5,
@@ -135,7 +172,7 @@ export const availabilityRouter = createTRPCRouter({
         }
 
         // Process slots to include availability information
-        const enhancedTimeSlots = timeSlots.map((slot) => {
+        const enhancedTimeSlots = filteredTimeSlots.map((slot) => {
           // Count only non-canceled lessons for availability calculation
           const activeLesson = slot.Lesson.filter((lesson) => lesson.status !== "CANCELLED");
 
@@ -191,6 +228,7 @@ export const availabilityRouter = createTRPCRouter({
           address: true,
           timezone: true,
           maxCapacity: true,
+          isVirtual: true,
           createdAt: true,
           updatedAt: true,
         },
