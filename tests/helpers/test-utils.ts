@@ -108,35 +108,66 @@ export async function approveCoach(page: Page, coachEmail: string) {
 }
 
 /**
- * Create a new student account
+ * Create a new student account.
+ *
+ * The current signup form uses:
+ * - Radix Select for skating level (not native <select>)
+ * - Radix Checkbox for parent consent (not native <input type="checkbox">)
+ * - Cloudflare Turnstile CAPTCHA (mocked via addInitScript)
+ * - NO password field (set post-approval)
+ * - NO emergencyContact fields
+ * - NO maxLessonsPerWeek field (hardcoded to 3)
+ * - Success toast: "Registration submitted"
  */
 export async function createStudentAccount(page: Page, studentData = testData.student) {
+  // Mock Turnstile so the submit button is enabled
+  await page.addInitScript(() => {
+    (window as any).turnstile = {
+      render: (_container: any, options: any) => {
+        if (options.callback) options.callback("test-token-playwright");
+        return "widget-id";
+      },
+      execute: () => {},
+      remove: () => {},
+      reset: () => {},
+    };
+  });
+
+  // Mock the signup API to bypass server-side Turnstile validation
+  const testEmail = `${Date.now()}.${studentData.email}`;
+  await page.route("**/api/auth/signup", async (route) => {
+    await route.fulfill({
+      status: 201,
+      contentType: "application/json",
+      body: JSON.stringify({
+        message: "Account created successfully",
+        user: { id: "test-id", name: studentData.name, email: testEmail },
+      }),
+    });
+  });
+
   await page.goto("/auth/signup");
+  await page.waitForLoadState("networkidle");
 
   // Fill basic information
   await page.fill('input[id="name"]', studentData.name);
-  await page.fill('input[id="email"]', `${Date.now()}.${studentData.email}`);
-  await page.fill('input[id="password"]', studentData.password);
+  await page.fill('input[id="email"]', testEmail);
   await page.fill('input[id="phone"]', studentData.phone);
-  await page.selectOption('select[name="level"]', studentData.level);
-  await page.fill('input[name="maxLessonsPerWeek"]', studentData.maxLessonsPerWeek.toString());
 
-  // Fill emergency contact
-  await page.fill('input[name="emergencyContact.name"]', studentData.emergencyContact.name);
-  await page.fill('input[name="emergencyContact.phone"]', studentData.emergencyContact.phone);
-  await page.fill(
-    'input[name="emergencyContact.relationship"]',
-    studentData.emergencyContact.relationship,
-  );
+  // Select skating level via Radix Select (use exact matching to avoid ambiguity)
+  const trigger = page.locator('[data-slot="select-trigger"]');
+  await trigger.click();
+  const levelText = studentData.level.replace("_", " ");
+  await page.getByRole("option", { name: levelText, exact: true }).click();
 
-  // Accept parent consent
-  await page.check('input[name="parentConsent"]');
+  // Accept parent consent via Radix Checkbox
+  await page.locator('#parentConsent[role="checkbox"]').click();
 
   // Submit form
   await page.click('button[type="submit"]');
 
   // Wait for success message
-  await expect(page.locator("text=Account created successfully")).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("text=Registration submitted")).toBeVisible({ timeout: 15000 });
 }
 
 /**

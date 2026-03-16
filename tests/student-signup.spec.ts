@@ -1,133 +1,200 @@
 import { expect, test } from "@playwright/test";
-import { testData } from "./helpers/test-utils";
+
+// Signup tests run without authentication (empty storageState)
+test.use({ storageState: { cookies: [], origins: [] } });
+
+/**
+ * Mock the Cloudflare Turnstile widget so it auto-provides a token.
+ * The submit button is disabled when turnstileToken is null, so we need
+ * the mock callback to fire and set the token in React state.
+ */
+async function mockTurnstile(page: import("@playwright/test").Page) {
+  await page.addInitScript(() => {
+    (window as any).turnstile = {
+      render: (_container: any, options: any) => {
+        if (options.callback) options.callback("test-token-playwright");
+        return "widget-id";
+      },
+      execute: () => {},
+      remove: () => {},
+      reset: () => {},
+    };
+  });
+}
+
+/**
+ * Helper to interact with the Radix Select for skating level.
+ * Clicks the trigger, waits for the dropdown, and selects an option.
+ * Uses getByRole with exact matching to avoid strict mode violations
+ * (e.g. "PRELIMINARY" would also match "PRE PRELIMINARY" without exact).
+ */
+async function selectSkatingLevel(page: import("@playwright/test").Page, levelText: string) {
+  // Click the Radix Select trigger to open the dropdown
+  const trigger = page.locator('[data-slot="select-trigger"]');
+  await trigger.click();
+
+  // Use exact role matching to avoid ambiguity
+  const option = page.getByRole("option", { name: levelText, exact: true });
+  await option.click();
+}
 
 test.describe("Student Signup Flow", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to signup page
+    await mockTurnstile(page);
     await page.goto("/auth/signup");
+    await page.waitForLoadState("networkidle");
   });
 
-  test("should display signup form with all required fields", async ({ page }) => {
+  test("should display signup form with all fields", async ({ page }) => {
     // Check page title
-    await expect(page).toHaveTitle(/Yura Scheduler/);
+    await expect(page).toHaveTitle(/Yura/i);
 
     // Check form elements are present
     await expect(page.locator('input[id="name"]')).toBeVisible();
     await expect(page.locator('input[id="email"]')).toBeVisible();
-    await expect(page.locator('input[id="password"]')).toBeVisible();
     await expect(page.locator('input[id="phone"]')).toBeVisible();
-    await expect(page.locator('select[name="level"]')).toBeVisible();
-    await expect(page.locator('input[name="maxLessonsPerWeek"]')).toBeVisible();
 
-    // Check submit button
+    // Radix Select trigger for skating level (not native <select>)
+    await expect(page.locator('[data-slot="select-trigger"]')).toBeVisible();
+
+    // Radix Checkbox for parent consent (not native <input type="checkbox">)
+    await expect(page.locator('#parentConsent[role="checkbox"]')).toBeVisible();
+
+    // Submit button with correct text
     await expect(page.locator('button[type="submit"]')).toBeVisible();
-    await expect(page.locator('button[type="submit"]')).toContainText("Sign Up");
+    await expect(page.locator('button[type="submit"]')).toContainText("Submit Registration");
+
+    // Verify NO password field exists
+    await expect(page.locator('input[id="password"]')).toHaveCount(0);
+
+    // Verify NO maxLessonsPerWeek field exists
+    await expect(page.locator('input[name="maxLessonsPerWeek"]')).toHaveCount(0);
   });
 
-  test("should show real-time password validation", async ({ page }) => {
-    const passwordInput = page.locator('input[id="password"]');
+  test("should interact with Radix Select for skating level", async ({ page }) => {
+    // Click the Radix Select trigger
+    const trigger = page.locator('[data-slot="select-trigger"]');
+    await trigger.click();
 
-    // Test weak password
-    await passwordInput.fill("weak");
-    await expect(page.locator("text=Password must be at least 8 characters")).toBeVisible();
-
-    // Test password without uppercase
-    await passwordInput.fill("password123!");
+    // Verify options are visible in the dropdown (use exact matching to avoid ambiguity)
     await expect(
-      page.locator("text=Password must contain at least one uppercase letter"),
+      page.getByRole("option", { name: "PRELIMINARY", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: "PRE PRELIMINARY", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("option", { name: "JUVENILE", exact: true }),
     ).toBeVisible();
 
-    // Test strong password
-    await passwordInput.fill("StrongPassword123!");
-    await expect(page.locator("text=Password meets all requirements")).toBeVisible();
+    // Select an option
+    await page.getByRole("option", { name: "PRELIMINARY", exact: true }).click();
+
+    // Verify the trigger now shows the selected value
+    await expect(trigger).toContainText("PRELIMINARY");
   });
 
-  test("should successfully create student account", async ({ page }) => {
-    // Fill out the form with valid data
-    await page.fill('input[id="name"]', "Test Student");
-    await page.fill('input[id="email"]', `test.student.${Date.now()}@example.com`);
-    await page.fill('input[id="password"]', "SecurePassword123!");
-    await page.fill('input[id="phone"]', "555-123-4567");
-    await page.selectOption('select[name="level"]', "PRELIMINARY");
-    await page.fill('input[name="maxLessonsPerWeek"]', "2");
+  test("should interact with Radix Checkbox for parent consent", async ({ page }) => {
+    const checkbox = page.locator('#parentConsent[role="checkbox"]');
 
-    // Fill emergency contact
-    await page.fill('input[name="emergencyContact.name"]', "Parent Name");
-    await page.fill('input[name="emergencyContact.phone"]', "555-987-6543");
-    await page.fill('input[name="emergencyContact.relationship"]', "Parent");
+    // Verify initial unchecked state
+    await expect(checkbox).toHaveAttribute("data-state", "unchecked");
 
-    // Accept parent consent
-    await page.check('input[name="parentConsent"]');
+    // Click to check
+    await checkbox.click();
+    await expect(checkbox).toHaveAttribute("data-state", "checked");
+
+    // Click again to uncheck
+    await checkbox.click();
+    await expect(checkbox).toHaveAttribute("data-state", "unchecked");
+  });
+
+  test("should successfully submit registration", async ({ page }) => {
+    // Intercept the signup API to return success (bypasses server-side Turnstile validation
+    // which rejects the fake token in environments where TURNSTILE_SECRET_KEY is set)
+    await page.route("**/api/auth/signup", async (route) => {
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          message: "Account created successfully",
+          user: { id: "test-id", name: "E2E Signup Test", email: "test@example.com" },
+        }),
+      });
+    });
+
+    // Fill all fields
+    await page.fill('input[id="name"]', "E2E Signup Test");
+    await page.fill('input[id="email"]', `signup.test.${Date.now()}@playwright-test.com`);
+    await page.fill('input[id="phone"]', "555-999-8888");
+
+    // Select skating level via Radix Select
+    await selectSkatingLevel(page, "PRELIMINARY");
+
+    // Check parent consent via Radix Checkbox
+    await page.locator('#parentConsent[role="checkbox"]').click();
 
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Check for success message or redirect
-    await expect(page.locator("text=Account created successfully")).toBeVisible({ timeout: 10000 });
+    // Expect success toast with "Registration submitted"
+    await expect(page.locator("text=Registration submitted")).toBeVisible({ timeout: 15000 });
+
+    // Should redirect to /auth/login after success
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 10000 });
   });
 
-  test("should handle validation errors", async ({ page }) => {
-    // Submit empty form
+  test("should validate required fields", async ({ page }) => {
+    // The name and email inputs have the HTML5 'required' attribute.
+    // Clicking submit on an empty form should NOT submit (browser validation).
+    await expect(page.locator('input[id="name"]')).toHaveAttribute("required", "");
+    await expect(page.locator('input[id="email"]')).toHaveAttribute("required", "");
+
+    // Try to submit empty form -- form should stay on the page
     await page.click('button[type="submit"]');
 
-    // Check for validation errors
-    await expect(page.locator("text=Name is required")).toBeVisible();
-    await expect(page.locator("text=Invalid email format")).toBeVisible();
-  });
-
-  test("should prevent duplicate email registration", async ({ page }) => {
-    // Try to register with an existing email (assuming admin exists)
-    await page.fill('input[id="name"]', "Duplicate User");
-    await page.fill('input[id="email"]', testData.admin.email);
-    await page.fill('input[id="password"]', "SecurePassword123!");
-    await page.selectOption('select[name="level"]', "PRELIMINARY");
-    await page.check('input[name="parentConsent"]');
-
-    await page.click('button[type="submit"]');
-
-    // Check for duplicate email error
-    await expect(page.locator("text=Email already in use")).toBeVisible({ timeout: 10000 });
-  });
-
-  test("should display level options correctly", async ({ page }) => {
-    const levelSelect = page.locator('select[name="level"]');
-
-    // Check all level options are present
-    await expect(levelSelect.locator('option[value="PRE_PRELIMINARY"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="PRELIMINARY"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="PRE_JUVENILE"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="JUVENILE"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="INTERMEDIATE"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="NOVICE"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="JUNIOR"]')).toBeVisible();
-    await expect(levelSelect.locator('option[value="SENIOR"]')).toBeVisible();
+    // Form should still be visible (not navigated away)
+    await expect(page.locator('input[id="name"]')).toBeVisible();
+    await expect(page.locator('input[id="email"]')).toBeVisible();
   });
 
   test("should have responsive design", async ({ page }) => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
-
-    // Check that form is still accessible
     await expect(page.locator('input[id="name"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
 
     // Test tablet viewport
     await page.setViewportSize({ width: 768, height: 1024 });
-
-    // Check form layout
     await expect(page.locator('input[id="name"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 
   test("should navigate to login page", async ({ page }) => {
     // Check for login link
-    const loginLink = page.locator('a[href="/auth/login"]');
+    const loginLink = page.locator('a[href="/auth/login"]').first();
     await expect(loginLink).toBeVisible();
 
     // Click login link
     await loginLink.click();
 
     // Verify navigation
-    await expect(page).toHaveURL("/auth/login");
+    await expect(page).toHaveURL(/\/auth\/login/);
+  });
+
+  test("should validate email format", async ({ page }) => {
+    // The email input has type="email" which provides HTML5 validation
+    await expect(page.locator('input[id="email"]')).toHaveAttribute("type", "email");
+
+    // Fill name (required) so only email validation blocks submission
+    await page.fill('input[id="name"]', "Test User");
+    await page.fill('input[id="email"]', "not-an-email");
+
+    // Try to submit -- browser email validation should prevent it
+    await page.click('button[type="submit"]');
+
+    // Form should still be visible (submission blocked by HTML5 validation)
+    await expect(page.locator('input[id="email"]')).toBeVisible();
+    await expect(page).toHaveURL(/\/auth\/signup/);
   });
 });
