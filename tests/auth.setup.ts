@@ -11,42 +11,50 @@ const COACH_AUTH = path.join(__dirname, "../playwright/.auth/coach.json");
 const COACH2_AUTH = path.join(__dirname, "../playwright/.auth/coach2.json");
 const STUDENT_AUTH = path.join(__dirname, "../playwright/.auth/student.json");
 
+// Run setup steps serially to avoid overwhelming the dev server during cold compilation
+setup.describe.configure({ mode: "serial" });
+
+async function login(
+  page: import("@playwright/test").Page,
+  email: string,
+  password: string,
+  expectedUrl: string,
+  storagePath: string,
+) {
+  await page.goto("/auth/login");
+  await page.waitForLoadState("networkidle");
+  const emailInput = page.locator('input[id="email"]');
+  await emailInput.waitFor({ state: "visible", timeout: 10000 });
+  await emailInput.fill(email);
+  await page.locator('input[id="password"]').fill(password);
+  await page.locator('button[type="submit"]').click();
+  // Allow 30s for first-time route compilation in dev server
+  await page.waitForURL(expectedUrl, { timeout: 30000 });
+  await page.context().storageState({ path: storagePath });
+}
+
 setup("seed test data", async () => {
   execSync("npx tsx tests/helpers/seed-test-data.ts", { stdio: "inherit" });
 });
 
 setup("authenticate as super admin", async ({ page }) => {
-  await page.goto("/auth/login");
-  await page.fill('input[id="email"]', "admin@test.com");
-  await page.fill('input[id="password"]', "ADMINPASS2025!");
-  await page.click('button[type="submit"]');
-  await page.waitForURL("/admin/dashboard", { timeout: 15000 });
-  await page.context().storageState({ path: SUPER_ADMIN_AUTH });
+  await login(page, "admin@test.com", "ADMINPASS2025!", "/admin/dashboard", SUPER_ADMIN_AUTH);
 });
 
 setup("authenticate as coach", async ({ page }) => {
-  await page.goto("/auth/login");
-  await page.fill('input[id="email"]', "coach@test.com");
-  await page.fill('input[id="password"]', "COACHPASS2025!");
-  await page.click('button[type="submit"]');
-  await page.waitForURL("/coach/dashboard", { timeout: 15000 });
-  await page.context().storageState({ path: COACH_AUTH });
+  await login(page, "coach@test.com", "COACHPASS2025!", "/coach/dashboard", COACH_AUTH);
 });
 
 setup("authenticate as coach2", async ({ page }) => {
-  await page.goto("/auth/login");
-  await page.fill('input[id="email"]', "coach2@test.com");
-  await page.fill('input[id="password"]', "COACH2PASS2025!");
-  await page.click('button[type="submit"]');
-  await page.waitForURL("/coach/dashboard", { timeout: 15000 });
-  await page.context().storageState({ path: COACH2_AUTH });
+  await login(page, "coach2@test.com", "COACH2PASS2025!", "/coach/dashboard", COACH2_AUTH);
 });
 
 setup("authenticate as student", async ({ page }) => {
-  await page.goto("/auth/login");
-  await page.fill('input[id="email"]', "test.student@example.com");
-  await page.fill('input[id="password"]', "TestPassword123!");
-  await page.click('button[type="submit"]');
-  await page.waitForURL("/student/dashboard", { timeout: 15000 });
-  await page.context().storageState({ path: STUDENT_AUTH });
+  await login(
+    page,
+    "test.student@example.com",
+    "TestPassword123!",
+    "/student/dashboard",
+    STUDENT_AUTH,
+  );
 });
