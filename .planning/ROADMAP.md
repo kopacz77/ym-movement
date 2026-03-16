@@ -119,13 +119,17 @@ Plans:
 **Goal:** Each coach connects their own Google Calendar so lesson events appear on their personal calendar, replacing the single-admin calendar model.
 **Depends on:** Phase 4
 **Requirements:** INTG-01
+**Plans:** 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md -- Foundation: AES-256-GCM encryption utility, OAuth2 client factory, env var updates, googleapis upgrade
+- [ ] 06-02-PLAN.md -- OAuth routes + calendar refactor: initiation/callback API routes, calendar.ts rewrite to per-coach pattern
+- [ ] 06-03-PLAN.md -- Call site updates + coach UI: update 7 calendar call sites, GoogleCalendarConnect component, disconnect mutation, cleanup
 
 **Success Criteria:**
 1. A coach can connect their Google account via an OAuth flow from their settings page, and their authorization persists across sessions
 2. When a lesson is booked with a coach who has connected their calendar, the event appears on that coach's Google Calendar automatically
 3. If a coach has not connected their Google Calendar, the system gracefully degrades -- lessons still work, but no calendar event is created for that coach
-
-**Plans:** (created by /gsd:plan-phase)
 
 ---
 
