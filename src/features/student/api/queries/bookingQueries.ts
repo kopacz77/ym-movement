@@ -417,6 +417,32 @@ export const bookingRouter = createTRPCRouter({
           // Continue even if admin notification fails - the booking itself was successful
         }
 
+        // 9b. Notify the coach (if time slot has a coach)
+        if (timeSlot.coachId) {
+          try {
+            const coachRecord = await ctx.prisma.coach.findUnique({
+              where: { id: timeSlot.coachId },
+              select: { userId: true },
+            });
+            if (coachRecord) {
+              const lessonTypeFormatted = input.type
+                .split("_")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(" ");
+              const formattedDateForCoach = format(timeSlot.startTime, "MMM d, yyyy 'at' h:mm a");
+              await createNotification({
+                userId: coachRecord.userId,
+                title: "New Lesson Booked",
+                message: `${student.User.name || "A student"} booked a ${lessonTypeFormatted} lesson on ${formattedDateForCoach}`,
+                type: "SUCCESS",
+                link: "/coach/schedule",
+              });
+            }
+          } catch (coachNotifError) {
+            console.error("[BOOKING] Error creating coach notification:", coachNotifError);
+          }
+        }
+
         // 10. Send confirmation email to the student with fixed timezone information
         if (student.User?.email && student.User?.name) {
           try {
@@ -547,6 +573,27 @@ export const bookingRouter = createTRPCRouter({
             message: `${studentName} cancelled their ${lessonType} lesson on ${lessonDate} at ${lessonTime}${lateTag}`,
             type: "WARNING",
           });
+        }
+
+        // 6b. Notify the coach (if lesson has a coach)
+        if (lesson.coachId) {
+          try {
+            const coachRecord = await ctx.prisma.coach.findUnique({
+              where: { id: lesson.coachId },
+              select: { userId: true },
+            });
+            if (coachRecord) {
+              await createNotification({
+                userId: coachRecord.userId,
+                title: "Lesson Cancelled",
+                message: `${studentName} cancelled their ${lessonType} lesson on ${lessonDate} at ${lessonTime}${lateTag}`,
+                type: "WARNING",
+                link: "/coach/schedule",
+              });
+            }
+          } catch (coachNotifError) {
+            console.error("[CANCEL] Error creating coach notification:", coachNotifError);
+          }
         }
 
         return { ...updatedLesson, isLateCancellation };
