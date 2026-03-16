@@ -80,14 +80,18 @@ Plans:
 **Goal:** Time slots are owned by individual coaches, conflict detection respects coach boundaries, and each coach independently manages their own blocked dates.
 **Depends on:** Phase 1, Phase 3
 **Requirements:** SCHD-01, SCHD-02, SCHD-04
+**Plans:** 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md -- Coach schedule TRPC endpoints + TypeScript interface updates
+- [ ] 04-02-PLAN.md -- Admin calendar coach filter + coachId threading through mutations
+- [ ] 04-03-PLAN.md -- Coach schedule page UI + coach blocked dates management
 
 **Success Criteria:**
 1. Every time slot in the system is associated with a specific coach, and the creation UI requires coach assignment
 2. Two different coaches can have overlapping time slots at different rinks without triggering a conflict
 3. Each coach can create, edit, and delete their own blocked dates (travel, competitions) without affecting other coaches' availability
 4. The super admin can view and manage time slots across all coaches from the admin calendar
-
-**Plans:** (created by /gsd:plan-phase)
 
 ---
 
@@ -144,7 +148,7 @@ Plans:
 | 1 - Auth, Schema, and Data Migration | Complete | 2026-03-15 |
 | 2 - Coach Dashboard, Profile, and Onboarding | Complete | 2026-03-15 |
 | 3 - Query Scoping and Super Admin Dashboard | Complete | 2026-03-15 |
-| 4 - Per-Coach Scheduling | Not started | -- |
+| 4 - Per-Coach Scheduling | Planned | -- |
 | 5 - Student Multi-Coach Booking | Not started | -- |
 | 6 - Per-Coach Google Calendar | Not started | -- |
 | 7 - Revenue Splits, Notifications, and Polish | Not started | -- |
