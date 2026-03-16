@@ -4,13 +4,16 @@
 
 YM Movement is a multi-coach ice dance lesson scheduling platform for coach Yura Min. It supports SUPER_ADMIN, COACH, and STUDENT roles. Coaches have dedicated dashboards to manage availability, view students, and track earnings. Students browse and book lessons by coach. The super admin (Yura) manages the coaching operation including onboarding, scheduling oversight, and revenue splits, while also coaching her own students.
 
-## Current State
+## Current Milestone: v1.1 Test & Stabilize
+
+**Goal:** Write comprehensive E2E tests for all v1.0 multi-coach features, update existing tests for the new role system, and fix any bugs discovered — making v1.0 production-ready.
 
 **Shipped:** v1.0 Multi-Coach (2026-03-16)
 
-The platform is a fully functional multi-coach marketplace. All 26 v1 requirements are satisfied across auth, coach management, coach dashboard, scheduling, student booking, super admin oversight, and integrations.
+The platform is a fully functional multi-coach marketplace. All 26 v1 requirements are satisfied across auth, coach management, coach dashboard, scheduling, student booking, super admin oversight, and integrations. No automated tests exist for multi-coach features.
 
 **Codebase:** ~64,864 lines TypeScript across 194+ modified files
+**Test suite:** 13 E2E test files (~5,000 lines) covering pre-multi-coach features only
 
 ## Core Value
 
@@ -51,7 +54,16 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 
 ### Active
 
-(None yet — define requirements for next milestone)
+- [ ] E2E tests for coach onboarding flow (self-registration, admin approval/denial, manual creation)
+- [ ] E2E tests for coach dashboard (schedule view, students list, earnings summary, profile edit)
+- [ ] E2E tests for student browse-by-coach booking flow (coach browse, selection, calendar, booking)
+- [ ] E2E tests for revenue splits and payout reports (inline editor, payout calculations, CSV export)
+- [ ] E2E tests for per-coach scheduling (conflict detection, blocked dates, time slot proposals)
+- [ ] E2E tests for data isolation (coach A cannot see coach B's data, role guard enforcement)
+- [ ] E2E tests for dual-role navigation (admin ↔ coach switching)
+- [ ] Update 13 existing E2E test files for SUPER_ADMIN role system (backward compatibility)
+- [ ] Test data seeding infrastructure (coach accounts, multi-coach test scenarios)
+- [ ] Bug fixes for issues discovered during testing
 
 ### Out of Scope
 
@@ -91,6 +103,8 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 | Per-coach Google Calendar (not master calendar) | Each coach owns their schedule, simpler OAuth | ✓ Shipped v1.0 |
 | Shared rink pool managed by super admin | Centralized venue management, coaches pick from existing rinks | ✓ Shipped v1.0 |
 | Yura is both super admin and coach | Preserves existing coaching relationship, dog-foods the coach experience | ✓ Shipped v1.0 |
+| Playwright E2E for test coverage (not unit tests) | E2E tests verify real user flows, existing infra is mature | — Pending |
+| Extend existing test helpers (not rewrite) | test-utils.ts has proven patterns for auth, booking, etc. | — Pending |
 
 ---
-*Last updated: 2026-03-16 after v1.0 milestone completion*
+*Last updated: 2026-03-16 after v1.1 milestone start*
