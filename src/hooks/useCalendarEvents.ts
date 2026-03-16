@@ -86,6 +86,11 @@ export function useCalendarEvents(
       // Add student count
       title += ` (${associatedLessons.length}/${slot.maxStudents})`;
 
+      // Add coach name for multi-coach view (when Coach data is available)
+      if (slot.Coach?.User?.name) {
+        title += ` [${slot.Coach.User.name}]`;
+      }
+
       // Determine color based on slot status
       let backgroundColor = "#22c55e"; // green-500 (default/available)
 

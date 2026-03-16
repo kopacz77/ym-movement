@@ -29,12 +29,14 @@ interface CompactTimeSlotDialogProps {
   selectedDate?: Date;
   selectedStartTime?: string;
   selectedRinkId?: string;
+  selectedCoachId?: string;
   onBookingSubmit: (bookingData: {
     date: Date;
     startTime: string;
     endTime: string;
     rinkId: string;
     maxStudents: number;
+    coachId?: string;
   }) => void;
   rinks: Array<{ id: string; name: string; timezone: string }>;
   isLoading?: boolean;
@@ -46,6 +48,7 @@ export function CompactTimeSlotDialog({
   selectedDate,
   selectedStartTime,
   selectedRinkId,
+  selectedCoachId,
   onBookingSubmit,
   rinks,
   isLoading = false,
@@ -156,6 +159,7 @@ export function CompactTimeSlotDialog({
       endTime,
       rinkId,
       maxStudents,
+      coachId: selectedCoachId,
     });
   };
 

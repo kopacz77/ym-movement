@@ -634,6 +634,7 @@ const ScheduleManagerComponent = () => {
             selectedDate={selectedCalendarDate || undefined}
             selectedStartTime={selectedCalendarTime || undefined}
             selectedRinkId={selectedRink}
+            selectedCoachId={selectedCoach}
             onBookingSubmit={handleEnhancedBookingSubmit}
             rinks={rinks || []}
             isLoading={createTimeSlot.isPending}
@@ -658,7 +659,7 @@ const ScheduleManagerComponent = () => {
             onDateToChange={setDateRangeTo}
           />
         }
-        travelDateBlocker={<WorkingBlockedDatesManager />}
+        travelDateBlocker={<WorkingBlockedDatesManager coachId={selectedCoach} />}
       />
 
       {/* Timezone Information Banner */}

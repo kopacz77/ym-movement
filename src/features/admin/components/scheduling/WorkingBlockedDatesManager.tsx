@@ -9,9 +9,10 @@ import { showDeleteConfirmation } from "@/lib/toast-confirmations";
 
 interface BlockedDatesManagerProps {
   className?: string;
+  coachId?: string;
 }
 
-export function WorkingBlockedDatesManager({ className }: BlockedDatesManagerProps) {
+export function WorkingBlockedDatesManager({ className, coachId }: BlockedDatesManagerProps) {
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -25,7 +26,9 @@ export function WorkingBlockedDatesManager({ className }: BlockedDatesManagerPro
   const utils = api.useContext();
 
   // Fetch blocked dates
-  const { data: blockedDates, refetch } = api.admin.schedule.getBlockedDates.useQuery({});
+  const { data: blockedDates, refetch } = api.admin.schedule.getBlockedDates.useQuery({
+    ...(coachId && { coachId }),
+  });
 
   // Create mutation
   const createMutation = api.admin.schedule.createBlockedDate.useMutation({
@@ -80,6 +83,7 @@ export function WorkingBlockedDatesManager({ className }: BlockedDatesManagerPro
       startDate,
       endDate,
       type: formData.type,
+      ...(coachId && { coachId }),
     });
   };
 
