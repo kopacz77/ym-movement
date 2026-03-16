@@ -1,13 +1,5 @@
 import { expect, test } from "@playwright/test";
-
-// Helper function to login as admin
-async function loginAsAdmin(page: any) {
-  await page.goto("/auth/login");
-  await page.fill('input[id="email"]', "admin@test.com");
-  await page.fill('input[id="password"]', "ADMINPASS2025!");
-  await page.click('button[type="submit"]');
-  await page.waitForURL("/admin/dashboard", { timeout: 10000 });
-}
+import { loginAsAdmin } from "./helpers/test-utils";
 
 test.describe("Admin Dashboard", () => {
   test.beforeEach(async ({ page }) => {
