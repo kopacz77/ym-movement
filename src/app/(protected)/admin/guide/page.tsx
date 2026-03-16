@@ -11,6 +11,7 @@ import {
   UserCheck,
   UserPlus,
   Users,
+  Video,
 } from "lucide-react";
 import { useId } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,6 +91,22 @@ export default function AdminGuidePage() {
             >
               <Settings className="h-4 w-4 text-gray-600" />
               <span className="font-medium">Settings & Pricing</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("coaches")}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
+            >
+              <Users className="h-4 w-4 text-indigo-600" />
+              <span className="font-medium">Coach Management</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("video-lessons")}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
+            >
+              <Video className="h-4 w-4 text-teal-600" />
+              <span className="font-medium">Video Lessons</span>
             </button>
             <button
               type="button"
@@ -424,6 +441,115 @@ export default function AdminGuidePage() {
 
         <Separator />
 
+        {/* Coach Management Section */}
+        <GuideSection
+          uid={uid}
+          id="coaches"
+          icon={<Users className="h-5 w-5" />}
+          title="Coach Management"
+          description="Managing coaches on your platform"
+        >
+          <div className="space-y-6">
+            <SubSection
+              icon={<UserPlus className="h-4 w-4" />}
+              title="Adding & Approving Coaches"
+              steps={[
+                "Go to Coaches page from the sidebar",
+                'Click "Add Coach" to create a new coach account',
+                "Enter coach details: name, email, bio, skills, certifications",
+                "Set lesson pricing for each type (Private, Choreography, Group, Competition Prep)",
+                "Set revenue split percentage (default: 70%)",
+                "New coaches appear in Pending tab until approved",
+                "Approved coaches receive email and can access their Coach Portal",
+              ]}
+            />
+
+            <SubSection
+              icon={<Settings className="h-4 w-4" />}
+              title="Managing Coach Status"
+              steps={[
+                "Go to Coaches page and select a coach",
+                "View coach profile, students, lessons, and earnings",
+                "Activate or suspend a coach as needed",
+                "Suspended coaches lose portal access immediately",
+                "Reactivate suspended coaches to restore access",
+                "Adjust lesson pricing or revenue split anytime",
+              ]}
+            />
+
+            <SubSection
+              icon={<Calendar className="h-4 w-4" />}
+              title="Coach Proposals"
+              steps={[
+                "Coaches submit time slot proposals from their portal",
+                "Proposals appear in the Coach Proposals queue",
+                "Review proposed date, time, rink, and capacity",
+                "Approve to create the time slot on the calendar",
+                "Deny with optional notes explaining why",
+              ]}
+            />
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-blue-900">💡 Multi-Coach Scheduling</p>
+              <p className="text-sm text-blue-800 mt-1">
+                Each coach manages their own schedule independently. Time slots are scoped per-coach,
+                so multiple coaches can have overlapping slots at the same rink. Use the coach filter
+                on the Schedule page to view individual coach calendars.
+              </p>
+            </div>
+          </div>
+        </GuideSection>
+
+        <Separator />
+
+        {/* Video Lessons Section */}
+        <GuideSection
+          uid={uid}
+          id="video-lessons"
+          icon={<Video className="h-5 w-5" />}
+          title="Video Lessons"
+          description="Teaching remotely with virtual rink slots"
+        >
+          <div className="space-y-6">
+            <SubSection
+              icon={<Video className="h-4 w-4" />}
+              title="Creating Video Lesson Slots"
+              steps={[
+                "Video Lesson is a special virtual rink (already set up)",
+                'On normal days, create slots and select "Video Lesson" as the rink',
+                "On blocked travel/competition dates, click the calendar date",
+                "Only Video Lesson will appear as a rink option",
+                'An amber banner confirms: "This date is blocked. Only Video Lesson is available."',
+                "Create the slot and assign students as usual",
+              ]}
+            />
+
+            <SubSection
+              icon={<Users className="h-4 w-4" />}
+              title="How Students See Video Lessons"
+              steps={[
+                "On normal days, students can browse and book Video Lesson slots themselves",
+                "On blocked dates, Video Lesson slots are hidden from student browsing",
+                "Students cannot self-book Video Lesson slots on blocked dates",
+                "You must manually assign students to Video Lesson slots on blocked dates",
+                "Assigned students see the lesson on their schedule with a video camera icon",
+                "Students receive normal booking notifications",
+              ]}
+            />
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-green-900">✅ Travel Teaching</p>
+              <p className="text-sm text-green-800 mt-1">
+                Block your travel dates, then create Video Lesson slots on those dates for students
+                who need to continue training. Assign them manually - they'll see the lesson on their
+                schedule and get notified.
+              </p>
+            </div>
+          </div>
+        </GuideSection>
+
+        <Separator />
+
         {/* Tips & Tricks Section */}
         <GuideSection
           uid={uid}
@@ -467,6 +593,16 @@ export default function AdminGuidePage() {
               emoji="🎯"
               title="Calendar Navigation"
               tip="Desktop: Use drag-and-drop to reschedule lessons. Mobile: Tap time slots to view/edit details. Both sync to Google Calendar automatically!"
+            />
+            <TipCard
+              emoji="👥"
+              title="Coach Oversight"
+              tip="Use the Dashboard's coach overview cards to monitor each coach's hours, students, and earnings at a glance. Click into any coach for detailed statistics."
+            />
+            <TipCard
+              emoji="🎥"
+              title="Video Lessons"
+              tip="Traveling but still want to teach? Block your dates for travel, then create Video Lesson slots on those dates. Only virtual rink options appear on blocked dates!"
             />
           </div>
         </GuideSection>

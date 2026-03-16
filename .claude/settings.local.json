@@ -118,7 +118,8 @@
       "Bash(npx prisma:*)",
       "Skill(gsd:create-roadmap)",
       "Skill(gsd:plan-phase)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Skill(gsd:execute-phase)"
     ],
     "deny": []
   }

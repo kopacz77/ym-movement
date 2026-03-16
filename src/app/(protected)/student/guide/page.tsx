@@ -1,7 +1,7 @@
 // src/app/(protected)/student/guide/page.tsx
 "use client";
 
-import { BookOpen, Calendar, CreditCard, HelpCircle, Plus, Settings, User, X } from "lucide-react";
+import { BookOpen, Calendar, CreditCard, HelpCircle, Plus, Settings, User, Video, X } from "lucide-react";
 import { useId } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -67,6 +67,14 @@ export default function StudentGuidePage() {
             </button>
             <button
               type="button"
+              onClick={() => scrollToSection("coaches")}
+              className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
+            >
+              <User className="h-4 w-4 text-indigo-600" />
+              <span className="font-medium">Choosing a Coach</span>
+            </button>
+            <button
+              type="button"
               onClick={() => scrollToSection("payments")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
@@ -126,6 +134,7 @@ export default function StudentGuidePage() {
                 "👤 Update your profile and contact information",
                 "📧 Receive notifications about lessons and payments",
                 "❌ Cancel lessons if needed (with advance notice)",
+                "👩‍🏫 Choose from multiple coaches for different lesson types",
               ]}
             />
 
@@ -133,7 +142,8 @@ export default function StudentGuidePage() {
               <p className="text-sm font-medium text-blue-900">✨ Your Dashboard</p>
               <p className="text-sm text-blue-800 mt-1">
                 The Dashboard is your home base - it shows upcoming lessons, recent activity, and
-                payment status. Check it regularly to stay on top of your schedule!
+                payment status. You can also browse coaches to find the right instructor for your
+                needs!
               </p>
             </div>
           </div>
@@ -200,6 +210,52 @@ export default function StudentGuidePage() {
 
         <Separator />
 
+        {/* Choosing a Coach Section */}
+        <GuideSection
+          uid={uid}
+          id="coaches"
+          icon={<User className="h-5 w-5" />}
+          title="Choosing a Coach"
+          description="Finding the right instructor for your lessons"
+        >
+          <div className="space-y-6">
+            <SubSection
+              icon={<User className="h-4 w-4" />}
+              title="Browsing Coaches"
+              steps={[
+                "When booking a lesson, you can filter by coach",
+                "Each coach has their own schedule and availability",
+                "Different coaches may specialize in different lesson types",
+                "Coach names appear on available time slots",
+                "Select a coach to see only their available times",
+              ]}
+            />
+
+            <SubSection
+              icon={<Video className="h-4 w-4" />}
+              title="Video Lessons"
+              steps={[
+                "Some lessons are offered via video call instead of at the rink",
+                "Video lessons show a camera icon instead of a map pin on your schedule",
+                "On normal days, you can browse and book Video Lesson slots yourself",
+                "During instructor travel periods, video lessons may be assigned to you directly",
+                "You'll receive a notification when assigned to a video lesson",
+                "Check your schedule for video lesson details and timing",
+              ]}
+            />
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-blue-900">👩‍🏫 Multiple Coaches</p>
+              <p className="text-sm text-blue-800 mt-1">
+                YM Movement works with multiple coaches! Each coach sets their own schedule and
+                pricing. Browse available time slots to find the right coach and time for you.
+              </p>
+            </div>
+          </div>
+        </GuideSection>
+
+        <Separator />
+
         {/* Schedule Section */}
         <GuideSection
           uid={uid}
@@ -242,13 +298,19 @@ export default function StudentGuidePage() {
                 color="bg-orange-100 text-orange-700 border-orange-300"
                 description="Intensive preparation for upcoming competitions"
               />
+              <LessonTypeCard
+                title="Video Lessons"
+                color="bg-teal-100 text-teal-700 border-teal-300"
+                description="Remote instruction via video call — look for the camera icon"
+              />
             </div>
 
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-4">
               <p className="text-sm font-medium text-purple-900">🎯 Lesson Types</p>
               <p className="text-sm text-purple-800 mt-1">
                 Your instructor assigns the lesson type when scheduling. Each type focuses on
-                different aspects of your skating development and may have different pricing.
+                different aspects of your skating development and may have different pricing. Video
+                lessons show a camera icon on your lesson card.
               </p>
             </div>
           </div>
@@ -421,6 +483,14 @@ export default function StudentGuidePage() {
             <FAQCard
               question="Can I use the app on my phone?"
               answer="Absolutely! The app works great on mobile. For the best experience on your phone, use the Week view when booking lessons."
+            />
+            <FAQCard
+              question="Can I choose which coach I want?"
+              answer="Yes! When booking lessons, you can filter available time slots by coach. Each coach has their own schedule and availability, so browse to find the best fit for you."
+            />
+            <FAQCard
+              question="What are Video Lessons?"
+              answer="Video Lessons are remote sessions conducted via video call. They appear on your schedule with a camera icon instead of a map pin. During instructor travel periods, your coach may assign you a video lesson directly."
             />
           </div>
         </GuideSection>

@@ -48,6 +48,7 @@ const coachNavigation = [
   { name: "Earnings", href: "/coach/earnings", icon: CreditCard },
   { name: "Proposals", href: "/coach/proposals", icon: Clock },
   { name: "Profile", href: "/coach/profile", icon: User },
+  { name: "Guide", href: "/coach/guide", icon: BookOpen },
 ];
 
 interface AppSidebarProps {
