@@ -1,45 +1,15 @@
-import { JWT } from "google-auth-library";
-// src/lib/google/calendar.ts
 import { google } from "googleapis";
+import { decrypt, encrypt } from "@/lib/encryption";
+import { createOAuth2Client } from "@/lib/google/oauth";
+import { prisma } from "@/lib/prisma";
 
-// Initialize Google Auth client with service account credentials
-const getAuthClient = () => {
-  try {
-    const credentials = {
-      client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    };
-
-    if (!credentials.client_email || !credentials.private_key) {
-      console.error("Missing Google API credentials");
-      return null;
-    }
-
-    // Log only non-sensitive information for debugging
-    console.log(`Google Calendar API initialized for: ${credentials.client_email}`);
-
-    const client = new JWT({
-      email: credentials.client_email,
-      key: credentials.private_key,
-      scopes: ["https://www.googleapis.com/auth/calendar"],
-      // Use the calendar owner's email from env variable
-      subject: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
-    });
-
-    return client;
-  } catch (error) {
-    console.error("Error initializing Google Auth client:", error);
-    return null;
-  }
-};
-
-// Get Google Calendar API client
-const getCalendarApi = () => {
-  const auth = getAuthClient();
-  if (!auth) {
-    return null;
-  }
-  return google.calendar({ version: "v3", auth });
+// Type for a Coach record with Google Calendar token fields
+export type CoachWithTokens = {
+  id: string;
+  googleAccessToken: string | null;
+  googleRefreshToken: string | null;
+  googleTokenExpiresAt: Date | null;
+  googleCalendarId: string | null;
 };
 
 // Format attendee for Google Calendar API
@@ -51,77 +21,117 @@ const formatAttendee = (email: string, displayName?: string) => {
   };
 };
 
-// Google Calendar integration functions
+/**
+ * Creates a Google Calendar API client for a specific coach using their OAuth2 tokens.
+ * Returns null if the coach has no tokens (graceful degradation).
+ * Auto-persists refreshed tokens when Google issues new ones.
+ */
+function getCoachCalendarApi(coach: CoachWithTokens) {
+  if (!coach.googleAccessToken || !coach.googleRefreshToken) {
+    console.warn(`[CALENDAR] Coach ${coach.id} has no Google Calendar tokens`);
+    return null;
+  }
+
+  const oauth2Client = createOAuth2Client();
+  oauth2Client.setCredentials({
+    access_token: decrypt(coach.googleAccessToken),
+    refresh_token: decrypt(coach.googleRefreshToken),
+    expiry_date: coach.googleTokenExpiresAt?.getTime(),
+  });
+
+  // Auto-persist refreshed tokens when Google issues new ones
+  oauth2Client.on("tokens", (tokens) => {
+    const updateData: Record<string, unknown> = {};
+
+    if (tokens.access_token) {
+      updateData.googleAccessToken = encrypt(tokens.access_token);
+    }
+    if (tokens.refresh_token) {
+      updateData.googleRefreshToken = encrypt(tokens.refresh_token);
+    }
+    if (tokens.expiry_date) {
+      updateData.googleTokenExpiresAt = new Date(tokens.expiry_date);
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      prisma.coach
+        .update({
+          where: { id: coach.id },
+          data: updateData,
+        })
+        .catch((err) => {
+          console.error(`[CALENDAR] Failed to persist refreshed tokens for coach ${coach.id}:`, err);
+        });
+    }
+  });
+
+  return google.calendar({ version: "v3", auth: oauth2Client });
+}
+
+// Google Calendar integration functions (per-coach)
 export const googleCalendar = {
   /**
-   * Creates a calendar event with proper timezone handling
+   * Creates a calendar event on the coach's Google Calendar
    */
-  createEvent: async ({
-    summary,
-    description,
-    startTime,
-    endTime,
-    attendees = [],
-    location,
-    timeZone, // Required parameter for timezone handling
-  }: {
-    summary: string;
-    description?: string;
-    startTime: Date;
-    endTime: Date;
-    attendees?: Array<{ email: string; name?: string }>;
-    location?: string;
-    timeZone: string; // Rink's timezone
-  }): Promise<string | null> => {
+  createEvent: async (
+    coach: CoachWithTokens,
+    {
+      summary,
+      description,
+      startTime,
+      endTime,
+      attendees = [],
+      location,
+      timeZone,
+    }: {
+      summary: string;
+      description?: string;
+      startTime: Date;
+      endTime: Date;
+      attendees?: Array<{ email: string; name?: string }>;
+      location?: string;
+      timeZone: string;
+    },
+  ): Promise<string | null> => {
     try {
-      console.log(`[CALENDAR] Creating event: ${summary}`);
-      console.log(`[CALENDAR] Using timezone: ${timeZone}`);
+      console.log(`[CALENDAR] Creating event for coach ${coach.id}: ${summary}`);
 
-      const calendar = getCalendarApi();
+      const calendar = getCoachCalendarApi(coach);
       if (!calendar) {
-        console.error("[CALENDAR] Failed to initialize Google Calendar API");
+        console.warn(`[CALENDAR] No calendar API available for coach ${coach.id}`);
         return null;
       }
 
-      // Format attendees for Google Calendar API
       const formattedAttendees = attendees.map((attendee) =>
         formatAttendee(attendee.email, attendee.name),
       );
 
-      // Create the event with explicit timezone handling
       const event = {
         summary,
         description,
         start: {
           dateTime: startTime.toISOString(),
-          timeZone: timeZone, // Use the rink's timezone for start time
+          timeZone,
         },
         end: {
           dateTime: endTime.toISOString(),
-          timeZone: timeZone, // Use the rink's timezone for end time
+          timeZone,
         },
         location,
         attendees: formattedAttendees,
         reminders: {
           useDefault: false,
           overrides: [
-            { method: "email", minutes: 60 },
-            { method: "popup", minutes: 30 },
+            { method: "email" as const, minutes: 60 },
+            { method: "popup" as const, minutes: 30 },
           ],
         },
       };
 
-      console.log(
-        `[CALENDAR] Creating event from ${startTime.toISOString()} to ${endTime.toISOString()}`,
-      );
-      console.log(`[CALENDAR] Event timezone: ${timeZone}`);
-
-      // Insert the event directly into Yura's calendar and send notifications
       const response = await calendar.events.insert({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
+        calendarId: coach.googleCalendarId || "primary",
         requestBody: event,
-        sendUpdates: "all", // Make sure to send email notifications
-        supportsAttachments: false,
+        sendUpdates: "all",
       });
 
       if (response.data.id) {
@@ -138,20 +148,20 @@ export const googleCalendar = {
   },
 
   /**
-   * Deletes a calendar event by ID
+   * Deletes a calendar event from the coach's Google Calendar
    */
-  deleteEvent: async (eventId: string): Promise<boolean> => {
+  deleteEvent: async (coach: CoachWithTokens, eventId: string): Promise<boolean> => {
     try {
-      console.log(`[CALENDAR] Deleting event: ${eventId}`);
+      console.log(`[CALENDAR] Deleting event ${eventId} for coach ${coach.id}`);
 
-      const calendar = getCalendarApi();
+      const calendar = getCoachCalendarApi(coach);
       if (!calendar) {
-        console.error("[CALENDAR] Failed to initialize Google Calendar API");
+        console.warn(`[CALENDAR] No calendar API available for coach ${coach.id}`);
         return false;
       }
 
       await calendar.events.delete({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
+        calendarId: coach.googleCalendarId || "primary",
         eventId,
       });
 
@@ -164,62 +174,63 @@ export const googleCalendar = {
   },
 
   /**
-   * Updates a calendar event
+   * Updates a calendar event on the coach's Google Calendar
    */
-  updateEvent: async ({
-    eventId,
-    summary,
-    description,
-    startTime,
-    endTime,
-    attendees = [],
-    location,
-    timeZone,
-  }: {
-    eventId: string;
-    summary: string;
-    description?: string;
-    startTime: Date;
-    endTime: Date;
-    attendees?: Array<{ email: string; name?: string }>;
-    location?: string;
-    timeZone: string;
-  }): Promise<string | null> => {
+  updateEvent: async (
+    coach: CoachWithTokens,
+    {
+      eventId,
+      summary,
+      description,
+      startTime,
+      endTime,
+      attendees = [],
+      location,
+      timeZone,
+    }: {
+      eventId: string;
+      summary: string;
+      description?: string;
+      startTime: Date;
+      endTime: Date;
+      attendees?: Array<{ email: string; name?: string }>;
+      location?: string;
+      timeZone: string;
+    },
+  ): Promise<string | null> => {
     try {
-      console.log(`[CALENDAR] Updating event: ${eventId}`);
+      console.log(`[CALENDAR] Updating event ${eventId} for coach ${coach.id}`);
 
-      const calendar = getCalendarApi();
+      const calendar = getCoachCalendarApi(coach);
       if (!calendar) {
-        console.error("[CALENDAR] Failed to initialize Google Calendar API");
+        console.warn(`[CALENDAR] No calendar API available for coach ${coach.id}`);
         return null;
       }
 
-      // Format attendees for Google Calendar API
       const formattedAttendees = attendees.map((attendee) =>
         formatAttendee(attendee.email, attendee.name),
       );
 
-      // Update the event
       const event = {
         summary,
         description,
         start: {
           dateTime: startTime.toISOString(),
-          timeZone: timeZone, // Use the rink's timezone for start time
+          timeZone,
         },
         end: {
           dateTime: endTime.toISOString(),
-          timeZone: timeZone, // Use the rink's timezone for end time
+          timeZone,
         },
         location,
         attendees: formattedAttendees,
       };
 
       const response = await calendar.events.update({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || "yuraxmin@gmail.com",
+        calendarId: coach.googleCalendarId || "primary",
         eventId,
         requestBody: event,
-        sendUpdates: "all", // Make sure to send email notifications
+        sendUpdates: "all",
       });
 
       if (response.data.id) {
