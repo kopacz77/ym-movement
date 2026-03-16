@@ -10,6 +10,16 @@ export const testData = {
     email: "admin@test.com",
     password: "ADMINPASS2025!",
   },
+  coach: {
+    email: "coach@test.com",
+    password: "COACHPASS2025!",
+    name: "Test Coach",
+  },
+  coach2: {
+    email: "coach2@test.com",
+    password: "COACH2PASS2025!",
+    name: "Test Coach 2",
+  },
   student: {
     email: "test.student@example.com",
     password: "TestPassword123!",
@@ -31,15 +41,18 @@ export const testData = {
 };
 
 /**
- * Login as admin user
+ * Login as super admin (SUPER_ADMIN role) - primary admin login
  */
-export async function loginAsAdmin(page: Page) {
+export async function loginAsSuperAdmin(page: Page) {
   await page.goto("/auth/login");
   await page.fill('input[id="email"]', testData.admin.email);
   await page.fill('input[id="password"]', testData.admin.password);
   await page.click('button[type="submit"]');
   await page.waitForURL("/admin/dashboard", { timeout: 10000 });
 }
+
+// Backward compat alias -- existing tests import this name
+export const loginAsAdmin = loginAsSuperAdmin;
 
 /**
  * Login as student user
@@ -50,6 +63,38 @@ export async function loginAsStudent(page: Page, email?: string, password?: stri
   await page.fill('input[id="password"]', password || testData.student.password);
   await page.click('button[type="submit"]');
   await page.waitForURL("/student/dashboard", { timeout: 10000 });
+}
+
+/**
+ * Login as coach user
+ */
+export async function loginAsCoach(page: Page, email?: string, password?: string) {
+  await page.goto("/auth/login");
+  await page.fill('input[id="email"]', email || testData.coach.email);
+  await page.fill('input[id="password"]', password || testData.coach.password);
+  await page.click('button[type="submit"]');
+  await page.waitForURL("/coach/dashboard", { timeout: 10000 });
+}
+
+/**
+ * Navigate to a specific coach page
+ */
+export async function navigateToCoachPage(page: Page, section: string) {
+  await page.click(`a[href="/coach/${section}"], a:has-text("${section}")`);
+  await page.waitForURL(`/coach/${section}`);
+}
+
+/**
+ * Approve a coach (super admin only)
+ */
+export async function approveCoach(page: Page, coachEmail: string) {
+  await navigateToAdminPage(page, "coaches");
+  const coachRow = page.locator(`tr:has-text("${coachEmail}")`);
+  const approveButton = coachRow.locator('button:has-text("Approve")');
+  if (await approveButton.isVisible()) {
+    await approveButton.click();
+    await expect(page.locator("text=Coach approved")).toBeVisible({ timeout: 10000 });
+  }
 }
 
 /**
