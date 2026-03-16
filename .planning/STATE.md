@@ -10,17 +10,17 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 7 of 7 (Revenue Splits, Notifications, and Polish)
-Plan: 0 of ? (not yet planned)
-Status: Not started
-Last activity: 2026-03-16 -- Phase 6 verified and completed
+Plan: 3 of 3
+Status: In progress (07-03 complete, 07-01 and 07-02 parallel)
+Last activity: 2026-03-16 -- Completed 07-03-PLAN.md (role-switch sidebar navigation)
 
-Progress: ██████████████████████░ 85% (22/~25 plans, phase 7 not yet planned)
+Progress: █████████████████████████ 92% (23/25 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: 3.9min
+- Total plans completed: 23
+- Average duration: 3.8min
 
 **By Phase:**
 
@@ -32,6 +32,7 @@ Progress: ██████████████████████░ 
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
 | 05-student-multi-coach-booking | 3/3 | 9min | 3min |
 | 06-per-coach-google-calendar | 3/3 | 11min | 3.7min |
+| 07-revenue-splits-polish | 1/3 | 2min | 2min |
 
 ## Accumulated Context
 
@@ -120,6 +121,9 @@ Progress: ██████████████████████░ 
 - [06-03] CoachWithTokens lookup reuses existing coach query in bookingQueries (extended select) to avoid duplicate DB call
 - [06-03] Calendar operations skipped entirely when coachId is null or coach has no tokens (graceful degradation)
 - [06-03] Old service account env vars cleaned from enhanced-types.ts and env-validation.ts (straggler references)
+- [07-03] ArrowLeftRight icon used for role-switch links (bidirectional navigation affordance)
+- [07-03] Desktop role-switch uses mt-auto in flex-col container to position at bottom of nav area
+- [07-03] Mobile role-switch uses Radix SidebarMenu components matching existing mobile nav pattern
 
 ### Pending Todos
 
@@ -135,5 +139,5 @@ Progress: ██████████████████████░ 
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed Phase 6 (Per-Coach Google Calendar) -- verified and complete
+Stopped at: Completed 07-03-PLAN.md (role-switch sidebar navigation)
 Resume file: None
