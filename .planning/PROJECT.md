@@ -2,7 +2,15 @@
 
 ## What This Is
 
-YM Movement is an existing ice dance lesson scheduling platform built for coach Yura Min. It currently supports a single-coach model with admin and student roles. This project evolves it into a multi-coach marketplace where Yura becomes a "super admin" who manages a roster of coaches across multiple disciplines (ice dance, dry land dance, off-ice conditioning, etc.), while also continuing to coach her own students. Coaches get their own dashboards to manage availability, view students, and track earnings. Students browse and book by coach.
+YM Movement is a multi-coach ice dance lesson scheduling platform for coach Yura Min. It supports SUPER_ADMIN, COACH, and STUDENT roles. Coaches have dedicated dashboards to manage availability, view students, and track earnings. Students browse and book lessons by coach. The super admin (Yura) manages the coaching operation including onboarding, scheduling oversight, and revenue splits, while also coaching her own students.
+
+## Current State
+
+**Shipped:** v1.0 Multi-Coach (2026-03-16)
+
+The platform is a fully functional multi-coach marketplace. All 26 v1 requirements are satisfied across auth, coach management, coach dashboard, scheduling, student booking, super admin oversight, and integrations.
+
+**Codebase:** ~64,864 lines TypeScript across 194+ modified files
 
 ## Core Value
 
@@ -26,23 +34,24 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 - ✓ Rink/venue management — existing
 - ✓ Student guide and admin guide pages — existing
 - ✓ Lesson policies (public + student-facing) — existing
+- ✓ SUPER_ADMIN/COACH/STUDENT role hierarchy with route guards and TRPC middleware — v1.0
+- ✓ Coach self-registration with admin approval queue — v1.0
+- ✓ Coach profile system (bio, skills, rates, certifications) — v1.0
+- ✓ Coach dashboard (schedule, students, earnings, proposals) — v1.0
+- ✓ Per-coach time slot ownership and conflict detection — v1.0
+- ✓ Student browse-by-coach booking flow — v1.0
+- ✓ Per-coach Google Calendar OAuth integration — v1.0
+- ✓ Configurable revenue splits with payout reports — v1.0
+- ✓ Super admin cross-coach visibility and management — v1.0
+- ✓ Dual-role navigation (super admin + coach) — v1.0
+- ✓ Data migration (existing data associated with Yura as coach) — v1.0
+- ✓ Per-coach data isolation (179+ queries scoped) — v1.0
+- ✓ Coach notifications (booking, cancellation, payment, revenue split changes) — v1.0
+- ✓ Coach account lifecycle (create, approve, suspend, activate, deactivate) — v1.0
 
 ### Active
 
-- [ ] New COACH role with dedicated dashboard (schedule, students, earnings)
-- [ ] Coach self-registration flow (signup, profile creation, submit for approval)
-- [ ] Super admin coach invitation/manual creation
-- [ ] Coach approval queue for super admin
-- [ ] Coach profile system (bio, photo, skills/disciplines, rates, certifications/experience)
-- [ ] Coach availability management (propose time slots, super admin approve/override)
-- [ ] Per-coach revenue split configuration (negotiated individually)
-- [ ] Student browse-by-coach booking flow
-- [ ] Per-coach Google Calendar integration (each coach connects own calendar)
-- [ ] Super admin coaches overview dashboard (all coaches, hours, earnings, status)
-- [ ] Super admin cross-coach schedule visibility
-- [ ] Super admin revenue reports with per-coach breakdowns and payout tracking
-- [ ] Yura dual-role support (super admin + active coach with own students)
-- [ ] Existing data migration (current lessons/students assigned to Yura as coach)
+(None yet — define requirements for next milestone)
 
 ### Out of Scope
 
@@ -56,21 +65,18 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 ## Context
 
 - **Existing codebase**: Next.js 15 + React 19 + TypeScript + TRPC v11 + Prisma + PostgreSQL (Neon)
-- **Auth**: NextAuth.js with currently two roles (ADMIN, STUDENT) — needs COACH and SUPER_ADMIN roles
-- **Database**: Prisma ORM with existing User, Student, Lesson, Payment, Rink, RinkTimeSlot, RecurringPattern entities
-- **Calendar**: Google Calendar API integration currently tied to a single admin account
+- **Auth**: NextAuth.js with SUPER_ADMIN, COACH, and STUDENT roles
+- **Database**: Prisma ORM with User, Student, Lesson, Payment, Rink, RinkTimeSlot, Coach, CoachStudent, ProposedTimeSlot, and more
+- **Calendar**: Per-coach Google Calendar OAuth with AES-256-GCM encrypted token storage
 - **UI**: Tailwind CSS + Radix UI + shadcn/ui components, fixed sidebar layout architecture
-- **Current state**: 28 pages (8 public, 5 auth, 10 admin, 10 student), 324 source files, 0 TS errors, 0 lint issues
 - **Deployment**: Production on Vercel with Neon PostgreSQL
-- **The admin (Yura) is also the product owner** — she will continue coaching while managing other coaches
+- **The admin (Yura) is also the product owner** — she coaches while managing other coaches
 
 ## Constraints
 
 - **Tech stack**: Must extend existing Next.js/TRPC/Prisma stack — no rewrites
 - **Backward compatibility**: All existing student and admin functionality must continue working
-- **Database**: Must migrate existing data (lessons, students, payments) to associate with Yura as coach
-- **Layout architecture**: Sidebar and layout system is locked per CLAUDE.md — new coach dashboard must follow same patterns
-- **Google Calendar**: Per-coach calendar integration requires OAuth flow for each coach
+- **Layout architecture**: Sidebar and layout system is locked per CLAUDE.md — new features must follow same patterns
 - **Biome**: All code must pass Biome linting (not ESLint)
 - **Prisma relations**: Must use PascalCase relation names per project convention
 
@@ -78,13 +84,13 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Add COACH and SUPER_ADMIN roles (not reuse ADMIN) | Clean separation of concerns, existing ADMIN behavior preserved during migration | — Pending |
-| Coaches self-manage availability with super admin override | Balances coach autonomy with platform control | — Pending |
-| Students browse by coach (not by discipline/unified calendar) | Simpler UX, coach-centric relationship model | — Pending |
-| Per-coach negotiated revenue splits | Flexibility for different coach arrangements | — Pending |
-| Per-coach Google Calendar (not master calendar) | Each coach owns their schedule, simpler OAuth | — Pending |
-| Shared rink pool managed by super admin | Centralized venue management, coaches pick from existing rinks | — Pending |
-| Yura is both super admin and coach | Preserves existing coaching relationship, dog-foods the coach experience | — Pending |
+| Add COACH and SUPER_ADMIN roles (not reuse ADMIN) | Clean separation of concerns, existing ADMIN behavior preserved during migration | ✓ Shipped v1.0 |
+| Coaches self-manage availability with super admin override | Balances coach autonomy with platform control | ✓ Shipped v1.0 |
+| Students browse by coach (not by discipline/unified calendar) | Simpler UX, coach-centric relationship model | ✓ Shipped v1.0 |
+| Per-coach negotiated revenue splits | Flexibility for different coach arrangements | ✓ Shipped v1.0 |
+| Per-coach Google Calendar (not master calendar) | Each coach owns their schedule, simpler OAuth | ✓ Shipped v1.0 |
+| Shared rink pool managed by super admin | Centralized venue management, coaches pick from existing rinks | ✓ Shipped v1.0 |
+| Yura is both super admin and coach | Preserves existing coaching relationship, dog-foods the coach experience | ✓ Shipped v1.0 |
 
 ---
-*Last updated: 2026-03-14 after initialization*
+*Last updated: 2026-03-16 after v1.0 milestone completion*
