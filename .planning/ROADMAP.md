@@ -100,13 +100,17 @@ Plans:
 **Goal:** Students can discover coaches, view their profiles, and book lessons with any approved coach -- seeing which coach each lesson is with throughout their experience.
 **Depends on:** Phase 2, Phase 4
 **Requirements:** BOOK-01, BOOK-02, BOOK-03
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md -- Backend: coach browse endpoints, pricing waterfall update, coachId availability filter, Coach includes on lesson queries, booking coach pricing + CoachStudent upsert
+- [ ] 05-02-PLAN.md -- Frontend: coach browse UI, two-step booking flow (coach selection then calendar), BookingDialog coach display
+- [ ] 05-03-PLAN.md -- Frontend: coach name display in all student views (LessonCard, UpcomingLessons, schedule, lesson details, payments)
 
 **Success Criteria:**
 1. A student can browse a list of available coaches, view their profiles (bio, specialties, rates), and select a coach to see their available time slots
 2. Every lesson card, schedule view, and payment record a student sees displays which coach the lesson is with
 3. A single student can book lessons with multiple different coaches and see all bookings unified on their dashboard
-
-**Plans:** (created by /gsd:plan-phase)
 
 ---
 
