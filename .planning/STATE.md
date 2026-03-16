@@ -10,16 +10,16 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 5 of 7 (Student Multi-Coach Booking)
-Plan: 1 of 3
-Status: In progress
-Last activity: 2026-03-16 -- Completed 05-01-PLAN.md
+Plan: 3 of 3
+Status: Phase complete
+Last activity: 2026-03-16 -- Completed 05-03-PLAN.md
 
-Progress: █████████████████░░░ 68% (17/~25 plans, phases 6-7 not yet planned)
+Progress: ███████████████████░ 76% (19/~25 plans, phases 6-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 19
 - Average duration: 4.1min
 
 **By Phase:**
@@ -30,7 +30,7 @@ Progress: █████████████████░░░ 68% (17/~
 | 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
-| 05-student-multi-coach-booking | 1/3 | 5min | 5min |
+| 05-student-multi-coach-booking | 3/3 | 9min | 3min |
 
 ## Accumulated Context
 
@@ -101,6 +101,10 @@ Progress: █████████████████░░░ 68% (17/~
 - [05-01] getStudentPricing updated to accept optional coachId and apply full waterfall via getHourlyRateForLessonType
 - [05-01] CoachStudent upsert is non-blocking (error logged but booking succeeds)
 - [05-01] Coach name fetched once early in bookLesson and reused for calendar, notifications, and admin alerts
+- [05-03] Coach display uses "Instructor" fallback consistently across all student views for legacy lessons without coach data
+- [05-03] UpcomingLessons and payments page use (lesson as any).Coach cast since TRPC return type inference may not include Coach
+- [05-03] Coach column in payments table hidden on small screens (hidden md:table-cell) to preserve mobile layout
+- [05-03] Lesson details page uses direct Prisma Coach include with User.name select (server component, not TRPC)
 
 ### Pending Todos
 
@@ -112,9 +116,10 @@ Progress: █████████████████░░░ 68% (17/~
 - Google OAuth consent screen may show unverified app warning -- acceptable for small coaching business
 - googleapis version at v150.0.1 (latest v171.4.0) -- consider upgrading before multi-coach work
 - Pre-existing `pnpm build` failure: Next.js 16.1.6 post-build 404 copy error (unrelated to auth changes, compilation succeeds)
+- Pre-existing type error in student/book/page.tsx: BookingCalendar requires coachId/coachName (from 05-02) but page not yet updated
 
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 05-01-PLAN.md (student multi-coach booking backend)
+Stopped at: Completed 05-03-PLAN.md (coach display in all student views -- Phase 5 complete)
 Resume file: None
