@@ -2,7 +2,7 @@
 
 import { LessonType, PaymentMethod } from "@prisma/client";
 import { format } from "date-fns";
-import { Calendar, Clock, DollarSign, MapPin } from "lucide-react";
+import { Calendar, Clock, DollarSign, MapPin, User } from "lucide-react";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,6 +33,8 @@ interface BookingDialogProps {
   slot: TimeSlot;
   studentId: string;
   rinkTimezone: string; // ADDED: Timezone for proper time formatting
+  coachName?: string;
+  coachId?: string;
   onCloseAction: () => void;
 }
 
@@ -40,6 +42,8 @@ export function BookingDialog({
   slot,
   studentId,
   rinkTimezone,
+  coachName,
+  coachId,
   onCloseAction,
 }: BookingDialogProps) {
   const [lessonType, setLessonType] = useState<LessonType>(LessonType.PRIVATE);
@@ -50,7 +54,7 @@ export function BookingDialog({
 
   // Fix Error 1: Use only the pricing endpoint and remove the unused studentProfile
   const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
-    { studentId },
+    { studentId, coachId },
     { enabled: !!studentId },
   );
 
@@ -186,6 +190,12 @@ export function BookingDialog({
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <span>{slot.rink.name}</span>
             </div>
+            {coachName && (
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span>Coach: {coachName}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">

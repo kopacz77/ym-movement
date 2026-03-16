@@ -83,7 +83,12 @@ interface CalendarEvent {
 // Define a type for view
 type View = typeof Views.WEEK | typeof Views.MONTH;
 
-function BookingCalendarComponent() {
+interface BookingCalendarProps {
+  coachId: string;
+  coachName: string;
+}
+
+function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) {
   const { id: studentId } = useCurrentUser();
   const isMobile = useIsMobile();
 
@@ -127,11 +132,11 @@ function BookingCalendarComponent() {
 
   // Generate a stable cache key
   const cacheKey = useMemo(() => {
-    const hashStr = `${dateRange.start.getTime()}-${dateRange.end.getTime()}-${selectedRink}`;
+    const hashStr = `${dateRange.start.getTime()}-${dateRange.end.getTime()}-${selectedRink}-${coachId}`;
     return hashStr.split("").reduce((acc, char) => {
       return ((acc << 5) - acc + char.charCodeAt(0)) & 0xffffffff;
     }, 0);
-  }, [dateRange.start, dateRange.end, selectedRink]);
+  }, [dateRange.start, dateRange.end, selectedRink, coachId]);
 
   // Fetch rinks
   const { data: rinks } = api.student.availability.getRinks.useQuery(undefined, {
@@ -165,6 +170,7 @@ function BookingCalendarComponent() {
         startDate: dateRange.start,
         endDate: dateRange.end,
         rinkId: selectedRink,
+        coachId,
         _cache: cacheKey,
       },
       {
@@ -734,6 +740,8 @@ function BookingCalendarComponent() {
             slot={selectedSlot}
             studentId={studentId}
             rinkTimezone={rinkTimezone}
+            coachName={coachName}
+            coachId={coachId}
             onCloseAction={() => {
               setIsBookingDialogOpen(false);
               setSelectedSlot(null);
