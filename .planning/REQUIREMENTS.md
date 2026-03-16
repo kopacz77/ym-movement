@@ -110,9 +110,9 @@ Which phases cover which requirements. Updated by create-roadmap.
 | SCHD-02 | Phase 4 | Complete |
 | SCHD-03 | Phase 1 | Complete |
 | SCHD-04 | Phase 4 | Complete |
-| BOOK-01 | Phase 5 | Pending |
-| BOOK-02 | Phase 5 | Pending |
-| BOOK-03 | Phase 5 | Pending |
+| BOOK-01 | Phase 5 | Complete |
+| BOOK-02 | Phase 5 | Complete |
+| BOOK-03 | Phase 5 | Complete |
 | SADM-01 | Phase 3 | Complete |
 | SADM-02 | Phase 3 | Complete |
 | SADM-03 | Phase 3 | Complete |
@@ -128,4 +128,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-15 after Phase 4 completion*
+*Last updated: 2026-03-15 after Phase 5 completion*

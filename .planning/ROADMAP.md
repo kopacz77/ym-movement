@@ -103,9 +103,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Backend: coach browse endpoints, pricing waterfall update, coachId availability filter, Coach includes on lesson queries, booking coach pricing + CoachStudent upsert
-- [ ] 05-02-PLAN.md -- Frontend: coach browse UI, two-step booking flow (coach selection then calendar), BookingDialog coach display
-- [ ] 05-03-PLAN.md -- Frontend: coach name display in all student views (LessonCard, UpcomingLessons, schedule, lesson details, payments)
+- [x] 05-01-PLAN.md -- Backend: coach browse endpoints, pricing waterfall update, coachId availability filter, Coach includes on lesson queries, booking coach pricing + CoachStudent upsert
+- [x] 05-02-PLAN.md -- Frontend: coach browse UI, two-step booking flow (coach selection then calendar), BookingDialog coach display
+- [x] 05-03-PLAN.md -- Frontend: coach name display in all student views (LessonCard, UpcomingLessons, schedule, lesson details, payments)
 
 **Success Criteria:**
 1. A student can browse a list of available coaches, view their profiles (bio, specialties, rates), and select a coach to see their available time slots
@@ -153,7 +153,7 @@ Plans:
 | 2 - Coach Dashboard, Profile, and Onboarding | Complete | 2026-03-15 |
 | 3 - Query Scoping and Super Admin Dashboard | Complete | 2026-03-15 |
 | 4 - Per-Coach Scheduling | Complete | 2026-03-15 |
-| 5 - Student Multi-Coach Booking | Not started | -- |
+| 5 - Student Multi-Coach Booking | Complete | 2026-03-15 |
 | 6 - Per-Coach Google Calendar | Not started | -- |
 | 7 - Revenue Splits, Notifications, and Polish | Not started | -- |
 

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** Phase 5 -- Student Multi-Coach Booking
+**Current focus:** Phase 6 -- Per-Coach Google Calendar
 
 ## Current Position
 
-Phase: 5 of 7 (Student Multi-Coach Booking)
-Plan: 3 of 3
-Status: Phase complete
-Last activity: 2026-03-16 -- Completed 05-03-PLAN.md
+Phase: 6 of 7 (Per-Coach Google Calendar)
+Plan: 0 of ? (not yet planned)
+Status: Not started
+Last activity: 2026-03-15 -- Phase 5 verified and completed
 
 Progress: ███████████████████░ 76% (19/~25 plans, phases 6-7 not yet planned)
 
@@ -125,5 +125,5 @@ Progress: ███████████████████░ 76% (19/~
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 05-03-PLAN.md (coach display in all student views -- Phase 5 complete)
+Stopped at: Completed Phase 5 (Student Multi-Coach Booking) -- verified and complete
 Resume file: None
