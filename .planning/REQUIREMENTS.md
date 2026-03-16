@@ -15,11 +15,11 @@ Requirements for test and stabilization release. Each maps to roadmap phases.
 
 ### Coach Flow Tests
 
-- [ ] **CTST-01**: E2E test verifies coach self-registration flow (signup form, submission, pending status)
-- [ ] **CTST-02**: E2E test verifies admin coach approval and denial flow (approve/deny from queue, coach account activation)
-- [ ] **CTST-03**: E2E test verifies coach dashboard displays upcoming lessons, past lessons, student list, and earnings summary
-- [ ] **CTST-04**: E2E test verifies coach profile editing persists changes (bio, skills, certifications)
-- [ ] **CTST-05**: E2E test verifies coach time slot proposal and admin approval/denial flow
+- [x] **CTST-01**: E2E test verifies coach self-registration flow (signup form, submission, pending status)
+- [x] **CTST-02**: E2E test verifies admin coach approval and denial flow (approve/deny from queue, coach account activation)
+- [x] **CTST-03**: E2E test verifies coach dashboard displays upcoming lessons, past lessons, student list, and earnings summary
+- [x] **CTST-04**: E2E test verifies coach profile editing persists changes (bio, skills, certifications)
+- [x] **CTST-05**: E2E test verifies coach time slot proposal and admin approval/denial flow
 
 ### Student Booking Tests
 
@@ -29,9 +29,9 @@ Requirements for test and stabilization release. Each maps to roadmap phases.
 
 ### Admin & Revenue Tests
 
-- [ ] **ATST-01**: E2E test verifies super admin can view all coaches with status, hours, and earnings
-- [ ] **ATST-02**: E2E test verifies inline revenue split editor updates coach split percentage
-- [ ] **ATST-03**: E2E test verifies payout report shows per-coach breakdown with correct calculations and CSV export
+- [x] **ATST-01**: E2E test verifies super admin can view all coaches with status, hours, and earnings
+- [x] **ATST-02**: E2E test verifies inline revenue split editor updates coach split percentage
+- [x] **ATST-03**: E2E test verifies payout report shows per-coach breakdown with correct calculations and CSV export
 
 ### Security & Isolation Tests
 
@@ -74,17 +74,17 @@ Which phases cover which requirements. Updated by create-roadmap.
 | TINF-01 | Phase 8 | Complete |
 | TINF-02 | Phase 8 | Complete |
 | TINF-03 | Phase 8 | Complete |
-| CTST-01 | Phase 9 | Pending |
-| CTST-02 | Phase 9 | Pending |
-| CTST-03 | Phase 9 | Pending |
-| CTST-04 | Phase 9 | Pending |
-| CTST-05 | Phase 9 | Pending |
+| CTST-01 | Phase 9 | Complete |
+| CTST-02 | Phase 9 | Complete |
+| CTST-03 | Phase 9 | Complete |
+| CTST-04 | Phase 9 | Complete |
+| CTST-05 | Phase 9 | Complete |
 | STST-01 | Phase 10 | Pending |
 | STST-02 | Phase 10 | Pending |
 | STST-03 | Phase 10 | Pending |
-| ATST-01 | Phase 9 | Pending |
-| ATST-02 | Phase 9 | Pending |
-| ATST-03 | Phase 9 | Pending |
+| ATST-01 | Phase 9 | Complete |
+| ATST-02 | Phase 9 | Complete |
+| ATST-03 | Phase 9 | Complete |
 | SECT-01 | Phase 10 | Pending |
 | SECT-02 | Phase 10 | Pending |
 | SECT-03 | Phase 10 | Pending |

@@ -38,8 +38,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Extend seed data + coach-flows.spec.ts (CTST-01 through CTST-05)
-- [ ] 09-02-PLAN.md — Admin coach management spec (ATST-01, ATST-02, ATST-03)
+- [x] 09-01-PLAN.md — Extend seed data + coach-flows.spec.ts (CTST-01 through CTST-05)
+- [x] 09-02-PLAN.md — Admin coach management spec (ATST-01, ATST-02, ATST-03)
 
 **Success Criteria:**
 1. Coach signup, admin approval/denial, and coach dashboard flows verified by passing E2E tests
@@ -81,7 +81,7 @@ Plans:
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | 8 - Test Infrastructure & Legacy Updates | Complete | 2026-03-16 |
-| 9 - Coach & Admin Flow Tests | Not started | — |
+| 9 - Coach & Admin Flow Tests | Complete | 2026-03-16 |
 | 10 - Student & Security Tests | Not started | — |
 | 11 - Stabilization | Not started | — |
 
