@@ -5,21 +5,23 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** Phase 6 -- Per-Coach Google Calendar
+**Current focus:** Phase 6 complete -- Per-Coach Google Calendar
 
 ## Current Position
 
 Phase: 6 of 7 (Per-Coach Google Calendar)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-03-16 -- Completed 06-02-PLAN.md
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-03-16 -- Completed 06-03-PLAN.md
 
-Progress: █████████████████████ 84% (21/25 plans)
+Progress: ██████████████████████████████ 100% (22/22 plans)
+
+Note: Phase 7 (Revenue Splits, Notifications, and Polish) has not been planned yet.
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 3.9min
 
 **By Phase:**
@@ -31,7 +33,7 @@ Progress: █████████████████████ 84% (2
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
 | 04-per-coach-scheduling | 3/3 | ~9min | ~3min |
 | 05-student-multi-coach-booking | 3/3 | 9min | 3min |
-| 06-per-coach-google-calendar | 2/3 | 6min | 3min |
+| 06-per-coach-google-calendar | 3/3 | 11min | 3.7min |
 
 ## Accumulated Context
 
@@ -117,6 +119,9 @@ Progress: █████████████████████ 84% (2
 - [06-02] Calendar methods return null/false gracefully when coach has no tokens (no crash)
 - [06-02] Coach is inherently calendar owner/organizer -- no INSTRUCTOR_EMAIL in attendees (Research Pitfall 5)
 - [06-02] Token refresh listener uses fire-and-forget .catch() to avoid blocking calendar operations
+- [06-03] CoachWithTokens lookup reuses existing coach query in bookingQueries (extended select) to avoid duplicate DB call
+- [06-03] Calendar operations skipped entirely when coachId is null or coach has no tokens (graceful degradation)
+- [06-03] Old service account env vars cleaned from enhanced-types.ts and env-validation.ts (straggler references)
 
 ### Pending Todos
 
@@ -132,5 +137,5 @@ Progress: █████████████████████ 84% (2
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Completed 06-02-PLAN.md (OAuth Routes & Calendar Refactor)
+Stopped at: Completed 06-03-PLAN.md (Call Site Migration & Coach Calendar UI) -- Phase 6 complete
 Resume file: None
