@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { testData } from "./helpers/test-utils";
 
 test.describe("Authentication Flow", () => {
   test.describe("Login Page", () => {
@@ -74,8 +75,8 @@ test.describe("Authentication Flow", () => {
       await page.goto("/auth/login");
 
       // Login with admin credentials (assuming admin@test.com exists)
-      await page.fill('input[id="email"]', "admin@test.com");
-      await page.fill('input[id="password"]', "ADMINPASS2025!"); // This should be the actual admin password
+      await page.fill('input[id="email"]', testData.admin.email);
+      await page.fill('input[id="password"]', testData.admin.password);
       await page.click('button[type="submit"]');
 
       // Should redirect to admin dashboard
@@ -113,8 +114,8 @@ test.describe("Authentication Flow", () => {
 
       // If redirected to login, login first
       if (page.url().includes("/auth/login")) {
-        await page.fill('input[id="email"]', "admin@test.com");
-        await page.fill('input[id="password"]', "ADMINPASS2025!");
+        await page.fill('input[id="email"]', testData.admin.email);
+        await page.fill('input[id="password"]', testData.admin.password);
         await page.click('button[type="submit"]');
         await page.waitForURL("/admin/dashboard");
       }
@@ -165,8 +166,8 @@ test.describe("Authentication Flow", () => {
     test("should maintain session across page refreshes", async ({ page }) => {
       // Login first
       await page.goto("/auth/login");
-      await page.fill('input[id="email"]', "admin@test.com");
-      await page.fill('input[id="password"]', "ADMINPASS2025!");
+      await page.fill('input[id="email"]', testData.admin.email);
+      await page.fill('input[id="password"]', testData.admin.password);
       await page.click('button[type="submit"]');
 
       // Wait for redirect

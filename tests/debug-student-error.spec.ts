@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { testData } from "./helpers/test-utils";
 
 test.describe("Student Dashboard Error Debug", () => {
   test("reproduce student dashboard error", async ({ page }) => {
@@ -22,7 +23,7 @@ test.describe("Student Dashboard Error Debug", () => {
     });
 
     console.log("🔍 Navigating to the app...");
-    await page.goto("http://localhost:3000");
+    await page.goto("/");
 
     // Take screenshot of initial state
     await page.screenshot({ path: "debug-01-home.png" });
@@ -32,7 +33,7 @@ test.describe("Student Dashboard Error Debug", () => {
 
     // Try to navigate directly to student dashboard to trigger the error
     console.log("🎓 Navigating to student dashboard...");
-    await page.goto("http://localhost:3000/student/dashboard");
+    await page.goto("/student/dashboard");
 
     // Wait for React to mount and potential errors
     await page.waitForTimeout(3000);
@@ -53,12 +54,12 @@ test.describe("Student Dashboard Error Debug", () => {
         console.log("📧 Found email input, attempting login...");
 
         // Use a test email that should exist
-        await emailInput.fill("admin@test.com"); // Start with admin login to see if auth works
+        await emailInput.fill(testData.admin.email); // Start with admin login to see if auth works
 
         const passwordInput = await page
           .locator('input[type="password"], input[id="password"]')
           .first();
-        await passwordInput.fill("ADMINPASS2025!");
+        await passwordInput.fill(testData.admin.password);
 
         await page.screenshot({ path: "debug-03-login-form.png" });
 
@@ -93,7 +94,7 @@ test.describe("Student Dashboard Error Debug", () => {
     console.log("🎓 Trying to access student-specific routes...");
 
     // First check if there's a way to register as student or if we need to access the student area
-    await page.goto("http://localhost:3000/student/dashboard");
+    await page.goto("/student/dashboard");
     await page.waitForTimeout(2000);
     await page.screenshot({ path: "debug-05-student-access-attempt.png" });
 

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { testData } from "./helpers/test-utils";
 
 test.describe("Student Signup Flow", () => {
   test.beforeEach(async ({ page }) => {
@@ -77,7 +78,7 @@ test.describe("Student Signup Flow", () => {
   test("should prevent duplicate email registration", async ({ page }) => {
     // Try to register with an existing email (assuming admin exists)
     await page.fill('input[id="name"]', "Duplicate User");
-    await page.fill('input[id="email"]', "admin@test.com");
+    await page.fill('input[id="email"]', testData.admin.email);
     await page.fill('input[id="password"]', "SecurePassword123!");
     await page.selectOption('select[name="level"]', "PRELIMINARY");
     await page.check('input[name="parentConsent"]');
