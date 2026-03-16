@@ -106,10 +106,10 @@ Which phases cover which requirements. Updated by create-roadmap.
 | CDSH-02 | Phase 2 | Complete |
 | CDSH-03 | Phase 2 | Complete |
 | CDSH-04 | Phase 2 | Complete |
-| SCHD-01 | Phase 4 | Pending |
-| SCHD-02 | Phase 4 | Pending |
+| SCHD-01 | Phase 4 | Complete |
+| SCHD-02 | Phase 4 | Complete |
 | SCHD-03 | Phase 1 | Complete |
-| SCHD-04 | Phase 4 | Pending |
+| SCHD-04 | Phase 4 | Complete |
 | BOOK-01 | Phase 5 | Pending |
 | BOOK-02 | Phase 5 | Pending |
 | BOOK-03 | Phase 5 | Pending |
@@ -128,4 +128,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-15 after Phase 3 completion*
+*Last updated: 2026-03-15 after Phase 4 completion*
