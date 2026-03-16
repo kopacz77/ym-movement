@@ -10,11 +10,11 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 8 of 11 (Test Infrastructure & Legacy Updates)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-03-16 — Roadmap created for v1.1 Test & Stabilize
+Plan: 1 of 2 complete in phase 8
+Status: In progress
+Last activity: 2026-03-16 — Completed 08-01-PLAN.md (test infrastructure foundation)
 
-Progress: ░░░░░░░░░░░░░░░░░░░░░░░░░ 0% (0/? plans)
+Progress: █████████████████████████░░ 96% (26/27 plans)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ░░░░░░░░░░░░░░░░░░░░░░░�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 0
-- Average duration: —
+- Total plans completed: 1
+- Average duration: 5min
 
 ## Accumulated Context
 
@@ -34,6 +34,10 @@ Progress: ░░░░░░░░░░░░░░░░░░░░░░░�
 - Extend existing test helpers (not rewrite) — test-utils.ts has proven patterns
 - Google Calendar OAuth tests excluded — cannot test real OAuth in automated tests
 - Phases 9 and 10 can run in parallel (both depend only on Phase 8)
+- Use project dependencies pattern (not globalSetup) for Playwright setup ordering
+- Default storageState is super-admin.json; tests override with test.use() for other roles
+- loginAsAdmin kept as backward compat alias for loginAsSuperAdmin
+- Seed coach2 data now so Phase 9 multi-coach tests have data ready
 
 ### Pending Todos
 
@@ -44,10 +48,10 @@ Progress: ░░░░░░░░░░░░░░░░░░░░░░░�
 ### Blockers/Concerns
 
 - Pre-existing `pnpm build` failure: Next.js post-build 404 copy error (unrelated, compilation succeeds)
-- Existing tests may need database seeding changes for SUPER_ADMIN role
+- Existing tests may need database seeding changes for SUPER_ADMIN role (seed script now handles this)
 
 ## Session Continuity
 
-Last session: 2026-03-16
-Stopped at: v1.1 roadmap created, ready to plan Phase 8
+Last session: 2026-03-16T18:20:07Z
+Stopped at: Completed 08-01-PLAN.md (test infrastructure foundation)
 Resume file: None
