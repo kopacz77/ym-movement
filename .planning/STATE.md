@@ -10,17 +10,17 @@ See: .planning/PROJECT.md
 ## Current Position
 
 Phase: 4 of 7 (Per-Coach Scheduling)
-Plan: 1 of 3
-Status: In progress
-Last activity: 2026-03-15 -- Completed 04-01-PLAN.md (coach schedule API endpoints)
+Plan: 3 of 3
+Status: In progress (Plan 2 remaining)
+Last activity: 2026-03-16 -- Completed 04-03-PLAN.md (coach schedule UI with calendar and blocked dates)
 
-Progress: ██████████████░░░░░░ 54% (14/~26 plans, phases 5-7 not yet planned)
+Progress: ███████████████░░░░░ 58% (15/~26 plans, phases 5-7 not yet planned)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 4.4min
+- Total plans completed: 15
+- Average duration: 4.3min
 
 **By Phase:**
 
@@ -29,7 +29,7 @@ Progress: ██████████████░░░░░░ 54% (14/~
 | 01-auth-schema-foundation | 3/3 | 19min | 6.3min |
 | 02-coach-dashboard-profile | 6/6 | 33min | 5.5min |
 | 03-query-scoping-super-admin | 4/4 | ~17min | ~4.3min |
-| 04-per-coach-scheduling | 1/3 | 3min | 3min |
+| 04-per-coach-scheduling | 2/3 | 6min | 3min |
 
 ## Accumulated Context
 
@@ -88,6 +88,10 @@ Progress: ██████████████░░░░░░ 54% (14/~
 - [04-01] Non-null assertion (ctx.session!) for createdById in coach schedule -- coachProcedure guarantees session but TS cannot narrow
 - [04-01] Coach field on TimeSlot interface is optional (Coach?) for backward compatibility
 - [04-01] getRinks in scheduleRouter includes address field (proposalQueries omits it) for schedule display
+- [04-03] Coach schedule is read-only for time slots -- no-op callbacks for DesktopCalendarView required props (onSelectSlot, onEventDrop)
+- [04-03] Reused admin DesktopCalendarView/MobileCalendarView/TimeSlotDialogAdapter for coach calendar (no coach-specific calendar components)
+- [04-03] CoachBlockedDates uses shadcn/ui components (Button, Input, Select) unlike admin WorkingBlockedDatesManager inline styles
+- [04-03] Empty students array and no-op handlers passed to TimeSlotDialogAdapter for read-only slot viewing
 
 ### Pending Todos
 
@@ -102,6 +106,6 @@ Progress: ██████████████░░░░░░ 54% (14/~
 
 ## Session Continuity
 
-Last session: 2026-03-15
-Stopped at: Completed 04-01-PLAN.md (coach schedule API endpoints)
+Last session: 2026-03-16
+Stopped at: Completed 04-03-PLAN.md (coach schedule UI with calendar and blocked dates)
 Resume file: None
