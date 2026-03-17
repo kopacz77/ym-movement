@@ -93,8 +93,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 12-01-PLAN.md — Migrate middleware.ts to proxy.ts (Next.js 16) + add Sign Out button to sidebars
-- [ ] 12-02-PLAN.md — Clean up test-utils.ts orphaned exports + unfixme 9 deferred tests
+- [x] 12-01-PLAN.md — Migrate middleware.ts to proxy.ts (Next.js 16) + add Sign Out button to sidebars
+- [x] 12-02-PLAN.md — Clean up test-utils.ts orphaned exports + unfixme 9 deferred tests
 
 **Success Criteria:**
 1. Next.js middleware correctly redirects unauthenticated requests to /auth/login and unauthorized requests to their role-appropriate dashboard
@@ -112,7 +112,7 @@ Plans:
 | 9 - Coach & Admin Flow Tests | Complete | 2026-03-16 |
 | 10 - Student & Security Tests | Complete | 2026-03-16 |
 | 11 - Stabilization | Complete | 2026-03-16 |
-| 12 - Tech Debt Cleanup | Planned | — |
+| 12 - Tech Debt Cleanup | Complete | 2026-03-17 |
 
 ---
 
