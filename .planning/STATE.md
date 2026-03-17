@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** v1.1 milestone complete — all phases verified
+**Current focus:** v1.1 tech debt cleanup — Phase 12 planned
 
 ## Current Position
 
-Phase: 11 complete (last phase of v1.1)
+Phase: 12 planned (gap closure from audit)
 Plan: —
-Status: All 4 phases verified, milestone ready for audit
-Last activity: 2026-03-16 — Phase 11 verified (10/10 must-haves passed)
+Status: Phase 12 added to roadmap, needs planning
+Last activity: 2026-03-17 — Gap closure phase created from audit tech debt
 
-Progress: █████████████████████████ 100% (9/9 plans)
+Progress: █████████████████████████░░ 90% (9/9 plans + 1 phase planned)
 
 ## Performance Metrics
 
@@ -70,7 +70,7 @@ Progress: ███████████████████████�
 - Run `pnpm migrate:coach-data` before production deployment
 - Set up Google OAuth credentials for production
 - 21-item human verification checklist from v1.0 audit informs test scenarios
-- Investigate middleware redirect failure in Next.js 16 (3 tests marked fixme)
+- Investigate middleware redirect failure in Next.js 16 (8 tests marked fixme) → Phase 12
 
 ### Blockers/Concerns
 

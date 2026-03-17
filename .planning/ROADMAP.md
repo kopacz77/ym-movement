@@ -85,6 +85,21 @@ Plans:
 
 ---
 
+### Phase 12: Tech Debt Cleanup
+
+**Goal:** Fix middleware redirect bug so role guard tests pass, add sign-out button to sidebar, and clean up orphaned test utility exports — closing all tech debt from the v1.1 audit.
+**Depends on:** Phase 11
+**Gap Closure:** Closes tech debt items from v1.1 milestone audit
+**Plans:** TBD
+
+**Success Criteria:**
+1. Next.js middleware correctly redirects unauthenticated requests to /auth/login and unauthorized requests to their role-appropriate dashboard
+2. All 8 middleware redirect tests in role-guards.spec.ts and authentication.spec.ts pass (unfixme'd)
+3. Sign-out button visible and functional in sidebar layout; skipped test passes
+4. test-utils.ts contains only actively-used exports (no orphaned functions or stubs)
+
+---
+
 ## Progress
 
 | Phase | Status | Completed |
@@ -93,6 +108,7 @@ Plans:
 | 9 - Coach & Admin Flow Tests | Complete | 2026-03-16 |
 | 10 - Student & Security Tests | Complete | 2026-03-16 |
 | 11 - Stabilization | Complete | 2026-03-16 |
+| 12 - Tech Debt Cleanup | Planned | — |
 
 ---
 
