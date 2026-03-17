@@ -41,8 +41,8 @@ Requirements for test and stabilization release. Each maps to roadmap phases.
 
 ### Stabilization
 
-- [ ] **STAB-01**: All bugs discovered during test writing are fixed and verified
-- [ ] **STAB-02**: All E2E tests pass in CI-compatible headless mode
+- [x] **STAB-01**: All bugs discovered during test writing are fixed and verified
+- [x] **STAB-02**: All E2E tests pass in CI-compatible headless mode
 
 ## v2 Requirements
 
@@ -88,8 +88,8 @@ Which phases cover which requirements. Updated by create-roadmap.
 | SECT-01 | Phase 10 | Complete |
 | SECT-02 | Phase 10 | Complete |
 | SECT-03 | Phase 10 | Complete |
-| STAB-01 | Phase 11 | Pending |
-| STAB-02 | Phase 11 | Pending |
+| STAB-01 | Phase 11 | Complete |
+| STAB-02 | Phase 11 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 19 total
