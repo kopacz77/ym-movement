@@ -7,8 +7,8 @@ vi.mock("next-auth/jwt", () => ({
   getToken: vi.fn(),
 }));
 
-// Import middleware after mocking
-import { middleware } from "../middleware";
+// Import proxy after mocking (renamed from middleware in Next.js 16 migration)
+import { proxy as middleware } from "../proxy";
 
 // Helper to create mock request
 const createMockRequest = (url: string) => {
