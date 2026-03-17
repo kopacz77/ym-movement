@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** v1.1 tech debt cleanup — Phase 12 planned
+**Current focus:** v1.1 tech debt cleanup — Phase 12 in progress
 
 ## Current Position
 
-Phase: 12 planned (gap closure from audit)
-Plan: —
-Status: Phase 12 added to roadmap, needs planning
-Last activity: 2026-03-17 — Gap closure phase created from audit tech debt
+Phase: 12 of 12 (tech-debt-cleanup)
+Plan: 01 of 2 in phase
+Status: In progress
+Last activity: 2026-03-17 — Completed 12-01-PLAN.md (middleware-to-proxy + sidebar sign-out)
 
-Progress: █████████████████████████░░ 90% (9/9 plans + 1 phase planned)
+Progress: █████████████████████████░░ 91% (10/11 plans complete)
 
 ## Performance Metrics
 
@@ -55,7 +55,10 @@ Progress: ███████████████████████�
 - CI reporter uses list + html; local development keeps html only
 - Baseline: 92/222 pass (41%), 130 fail (59%) -- strict mode violations are #1 issue
 - Turnstile bypass: mock both client-side (addInitScript) and server-side (page.route) because TURNSTILE_SECRET_KEY is set
-- Middleware redirect tests marked fixme: Next.js 16 middleware not redirecting unauthenticated/unauthorized requests
+- Middleware redirect tests marked fixme: Next.js 16 middleware not redirecting unauthenticated/unauthorized requests -- ROOT CAUSE FIXED: renamed to proxy.ts
+- proxy.ts replaces middleware.ts for Next.js 16 (function renamed from middleware to proxy)
+- Sign Out button text must be exactly "Sign Out" to match test selector button:has-text("Sign Out")
+- Red hover styling (hover:bg-red-50) for sign-out to distinguish destructive action from navigation
 - Use exact role matching for Radix Select options to avoid strict mode violations
 - Mock /api/auth/signup response for tests since real Turnstile validation rejects fake tokens
 - Use domcontentloaded instead of networkidle to avoid cold-compilation timeouts
@@ -70,16 +73,16 @@ Progress: ███████████████████████�
 - Run `pnpm migrate:coach-data` before production deployment
 - Set up Google OAuth credentials for production
 - 21-item human verification checklist from v1.0 audit informs test scenarios
-- Investigate middleware redirect failure in Next.js 16 (8 tests marked fixme) → Phase 12
+- RESOLVED: middleware redirect failure fixed by renaming to proxy.ts (Phase 12-01)
 
 ### Blockers/Concerns
 
 - Pre-existing `pnpm build` failure: Next.js post-build 404 copy error (unrelated, compilation succeeds)
-- Middleware not redirecting unauthenticated requests (pre-existing issue, 3 tests fixme'd)
+- RESOLVED: Middleware not redirecting -- renamed to proxy.ts in 12-01 (tests still need unfixme in 12-02)
 - RESOLVED: All 130 test failures from baseline eliminated (115 pass, 13 intentional skips, 0 failures)
 
 ## Session Continuity
 
-Last session: 2026-03-16
-Stopped at: Phase 11 complete and verified — milestone v1.1 ready for audit
+Last session: 2026-03-17
+Stopped at: Completed 12-01-PLAN.md (middleware-to-proxy migration + sidebar sign-out)
 Resume file: None
