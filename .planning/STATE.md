@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md
 
 **Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** v1.1 tech debt cleanup — Phase 12 in progress
+**Current focus:** v1.1 tech debt cleanup — Phase 12 complete
 
 ## Current Position
 
 Phase: 12 of 12 (tech-debt-cleanup)
-Plan: 01 of 2 in phase
-Status: In progress
-Last activity: 2026-03-17 — Completed 12-01-PLAN.md (middleware-to-proxy + sidebar sign-out)
+Plan: 02 of 2 in phase
+Status: Phase complete
+Last activity: 2026-03-17 — Completed 12-02-PLAN.md (test unfixme + test-utils cleanup)
 
-Progress: █████████████████████████░░ 91% (10/11 plans complete)
+Progress: ███████████████████████████ 100% (11/11 plans complete)
 
 ## Performance Metrics
 
@@ -23,8 +23,8 @@ Progress: ███████████████████████�
 - Average duration: 3.8min
 
 **v1.1 Test & Stabilize:**
-- Total plans completed: 8
-- Average duration: 11.4min
+- Total plans completed: 9
+- Average duration: 10.5min
 
 ## Accumulated Context
 
@@ -55,7 +55,7 @@ Progress: ███████████████████████�
 - CI reporter uses list + html; local development keeps html only
 - Baseline: 92/222 pass (41%), 130 fail (59%) -- strict mode violations are #1 issue
 - Turnstile bypass: mock both client-side (addInitScript) and server-side (page.route) because TURNSTILE_SECRET_KEY is set
-- Middleware redirect tests marked fixme: Next.js 16 middleware not redirecting unauthenticated/unauthorized requests -- ROOT CAUSE FIXED: renamed to proxy.ts
+- Middleware redirect tests marked fixme: Next.js 16 middleware not redirecting unauthenticated/unauthorized requests -- ROOT CAUSE FIXED: renamed to proxy.ts -- TESTS UNFIXME'd in 12-02
 - proxy.ts replaces middleware.ts for Next.js 16 (function renamed from middleware to proxy)
 - Sign Out button text must be exactly "Sign Out" to match test selector button:has-text("Sign Out")
 - Red hover styling (hover:bg-red-50) for sign-out to distinguish destructive action from navigation
@@ -67,6 +67,8 @@ Progress: ███████████████████████�
 - Use Ctrl+A + keyboard.type() for React controlled inputs (fill() doesn't trigger onChange)
 - Reduce workers to 2 for local dev server testing (prevents compilation overload)
 - Use specific button text selectors to avoid matching disabled button variants
+- Removed 18 orphaned test-utils exports -- only keep functions with active importers
+- Replaced FIXME block comments with brief proxy.ts reference notes after unfixme
 
 ### Pending Todos
 
@@ -78,11 +80,12 @@ Progress: ███████████████████████�
 ### Blockers/Concerns
 
 - Pre-existing `pnpm build` failure: Next.js post-build 404 copy error (unrelated, compilation succeeds)
-- RESOLVED: Middleware not redirecting -- renamed to proxy.ts in 12-01 (tests still need unfixme in 12-02)
+- RESOLVED: Middleware not redirecting -- renamed to proxy.ts in 12-01, tests unfixme'd in 12-02
 - RESOLVED: All 130 test failures from baseline eliminated (115 pass, 13 intentional skips, 0 failures)
+- RESOLVED: 9 fixme'd/skipped tests re-enabled in 12-02 (6 role-guards + 3 authentication)
 
 ## Session Continuity
 
 Last session: 2026-03-17
-Stopped at: Completed 12-01-PLAN.md (middleware-to-proxy migration + sidebar sign-out)
+Stopped at: Completed 12-02-PLAN.md (test unfixme + test-utils cleanup) -- Phase 12 complete
 Resume file: None
