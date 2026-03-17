@@ -4,16 +4,15 @@
 
 YM Movement is a multi-coach ice dance lesson scheduling platform for coach Yura Min. It supports SUPER_ADMIN, COACH, and STUDENT roles. Coaches have dedicated dashboards to manage availability, view students, and track earnings. Students browse and book lessons by coach. The super admin (Yura) manages the coaching operation including onboarding, scheduling oversight, and revenue splits, while also coaching her own students.
 
-## Current Milestone: v1.1 Test & Stabilize
+## Current State
 
-**Goal:** Write comprehensive E2E tests for all v1.0 multi-coach features, update existing tests for the new role system, and fix any bugs discovered — making v1.0 production-ready.
+**Shipped:** v1.1 Test & Stabilize (2026-03-17)
+**Previous:** v1.0 Multi-Coach (2026-03-16)
 
-**Shipped:** v1.0 Multi-Coach (2026-03-16)
+The platform is a fully functional, tested multi-coach marketplace. All 26 v1.0 requirements are satisfied and verified by 128 E2E tests with zero failures. The test suite covers coach onboarding, admin management, student booking, data isolation, role guards, and dual-role navigation. Next.js 16 compatibility is ensured via proxy.ts migration.
 
-The platform is a fully functional multi-coach marketplace. All 26 v1 requirements are satisfied across auth, coach management, coach dashboard, scheduling, student booking, super admin oversight, and integrations. No automated tests exist for multi-coach features.
-
-**Codebase:** ~64,864 lines TypeScript across 194+ modified files
-**Test suite:** 13 E2E test files (~5,000 lines) covering pre-multi-coach features only
+**Codebase:** ~80,000+ lines TypeScript
+**Test suite:** 128 E2E tests across 12 spec files (zero failures)
 
 ## Core Value
 
@@ -51,19 +50,12 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 - ✓ Per-coach data isolation (179+ queries scoped) — v1.0
 - ✓ Coach notifications (booking, cancellation, payment, revenue split changes) — v1.0
 - ✓ Coach account lifecycle (create, approve, suspend, activate, deactivate) — v1.0
+- ✓ E2E test coverage for all multi-coach features (128 tests, zero failures) — v1.1
+- ✓ Next.js 16 proxy.ts migration for middleware compatibility — v1.1
 
 ### Active
 
-- [ ] E2E tests for coach onboarding flow (self-registration, admin approval/denial, manual creation)
-- [ ] E2E tests for coach dashboard (schedule view, students list, earnings summary, profile edit)
-- [ ] E2E tests for student browse-by-coach booking flow (coach browse, selection, calendar, booking)
-- [ ] E2E tests for revenue splits and payout reports (inline editor, payout calculations, CSV export)
-- [ ] E2E tests for per-coach scheduling (conflict detection, blocked dates, time slot proposals)
-- [ ] E2E tests for data isolation (coach A cannot see coach B's data, role guard enforcement)
-- [ ] E2E tests for dual-role navigation (admin ↔ coach switching)
-- [ ] Update 13 existing E2E test files for SUPER_ADMIN role system (backward compatibility)
-- [ ] Test data seeding infrastructure (coach accounts, multi-coach test scenarios)
-- [ ] Bug fixes for issues discovered during testing
+(None — run `/gsd:new-milestone` to define next goals)
 
 ### Out of Scope
 
@@ -103,8 +95,9 @@ Students can discover, browse, and book lessons from multiple coaches across dif
 | Per-coach Google Calendar (not master calendar) | Each coach owns their schedule, simpler OAuth | ✓ Shipped v1.0 |
 | Shared rink pool managed by super admin | Centralized venue management, coaches pick from existing rinks | ✓ Shipped v1.0 |
 | Yura is both super admin and coach | Preserves existing coaching relationship, dog-foods the coach experience | ✓ Shipped v1.0 |
-| Playwright E2E for test coverage (not unit tests) | E2E tests verify real user flows, existing infra is mature | — Pending |
-| Extend existing test helpers (not rewrite) | test-utils.ts has proven patterns for auth, booking, etc. | — Pending |
+| Playwright E2E for test coverage (not unit tests) | E2E tests verify real user flows, existing infra is mature | ✓ Shipped v1.1 |
+| Extend existing test helpers (not rewrite) | test-utils.ts has proven patterns for auth, booking, etc. | ✓ Shipped v1.1 |
+| Next.js 16 proxy.ts (not middleware.ts) | Next.js 16 deprecated middleware in favor of proxy convention | ✓ Shipped v1.1 |
 
 ---
-*Last updated: 2026-03-16 after v1.1 milestone start*
+*Last updated: 2026-03-17 after v1.1 milestone completion*
