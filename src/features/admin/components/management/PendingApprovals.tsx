@@ -184,30 +184,28 @@ export const PendingApprovals = () => {
           {pendingStudents.map((student: Student) => (
             <div
               key={student.id}
-              className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl hover:shadow-md transition-all duration-200"
+              className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl hover:shadow-md transition-all duration-200"
             >
-              <div className="space-y-1 flex-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {(student.user?.name || "U").charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{student.user?.name || "Unnamed"}</p>
-                    <p className="text-sm text-gray-600">{student.user?.email || "No email"}</p>
-                  </div>
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  {(student.user?.name || "U").charAt(0).toUpperCase()}
                 </div>
-                <div className="flex items-center gap-2 ml-12">
-                  <Badge variant="secondary" className="text-xs bg-orange-200 text-orange-800">
-                    New Registration
-                  </Badge>
-                  <p className="text-xs text-gray-500">{formatDate(new Date(student.createdAt))}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 truncate">{student.user?.name || "Unnamed"}</p>
+                  <p className="text-sm text-gray-600 truncate">{student.user?.email || "No email"}</p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2 mt-2 ml-12">
+                <Badge variant="secondary" className="text-xs bg-orange-200 text-orange-800 shrink-0">
+                  New Registration
+                </Badge>
+                <p className="text-xs text-gray-500 truncate">{formatDate(new Date(student.createdAt))}</p>
+              </div>
+              <div className="flex gap-2 mt-3">
                 <Button
                   onClick={() => handleApprove(student.id, student.user?.name || "Student")}
                   disabled={approveStudent.isPending || rejectStudent.isPending}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg"
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg flex-1"
                   size="sm"
                 >
                   {approveStudent.isPending ? (
@@ -238,6 +236,7 @@ export const PendingApprovals = () => {
                   onClick={() => handleReject(student.id, student.user?.name || "Student")}
                   disabled={approveStudent.isPending || rejectStudent.isPending}
                   variant="destructive"
+                  className="flex-1"
                   size="sm"
                 >
                   {rejectStudent.isPending ? (

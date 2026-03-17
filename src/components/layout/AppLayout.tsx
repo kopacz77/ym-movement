@@ -100,8 +100,8 @@ export function AppLayout({ role, children }: AppLayoutProps) {
 
         {/* Main content area - offset by sidebar width on desktop */}
         <div className="flex-1 pl-64">
-          {/* Beautiful Header with proper styling */}
-          <header className="sticky top-0 z-10 border-b bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 px-6 py-4">
+          {/* Header - h-24 matches sidebar header for border alignment */}
+          <header className="sticky top-0 z-10 h-24 border-b bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 px-6 flex items-center">
             <HeaderComponent />
           </header>
 
