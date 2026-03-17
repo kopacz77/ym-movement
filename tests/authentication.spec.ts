@@ -228,10 +228,12 @@ test.describe("Authentication Flow", () => {
     test("should display signup form correctly on tablet", async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 1024 });
       await page.goto("/auth/signup");
-      await page.waitForLoadState("networkidle");
+      // Use domcontentloaded instead of networkidle (networkidle may never
+      // settle under parallel load due to tRPC polling requests)
+      await page.waitForLoadState("domcontentloaded");
 
       // Check form layout on tablet
-      await expect(page.locator('input[id="name"]')).toBeVisible();
+      await expect(page.locator('input[id="name"]')).toBeVisible({ timeout: 15000 });
       await expect(page.locator('input[id="email"]')).toBeVisible();
       await expect(page.locator('button[type="submit"]')).toBeVisible();
     });

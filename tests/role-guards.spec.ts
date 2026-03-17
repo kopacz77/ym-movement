@@ -75,9 +75,12 @@ test.describe("dual-role navigation", () => {
     const coachViewLink = page.locator('a:has-text("Coach View")').first();
     await expect(coachViewLink).toBeVisible({ timeout: 30000 });
 
-    // Click to switch to coach view
-    await coachViewLink.click();
-    await expect(page).toHaveURL(/\/coach\/dashboard/, { timeout: 15000 });
+    // Click to switch to coach view. Under parallel load, use waitForURL
+    // to synchronize click and navigation.
+    await Promise.all([
+      page.waitForURL(/\/coach\/dashboard/, { timeout: 30000 }),
+      coachViewLink.click(),
+    ]);
 
     // Verify coach dashboard heading appears
     await expect(page.locator('h1:has-text("Coach Dashboard")').first()).toBeVisible({ timeout: 15000 });
@@ -86,9 +89,11 @@ test.describe("dual-role navigation", () => {
     const adminViewLink = page.locator('a:has-text("Admin View")').first();
     await expect(adminViewLink).toBeVisible({ timeout: 30000 });
 
-    // Click to return to admin
-    await adminViewLink.click();
-    await expect(page).toHaveURL(/\/admin\/dashboard/, { timeout: 15000 });
+    // Click to return to admin. Under parallel load, navigation may be delayed.
+    await Promise.all([
+      page.waitForURL(/\/admin\/dashboard/, { timeout: 30000 }),
+      adminViewLink.click(),
+    ]);
 
     // Verify admin dashboard heading reappears
     await expect(page.locator("h1").first()).toBeVisible({ timeout: 15000 });

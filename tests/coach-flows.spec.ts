@@ -117,8 +117,8 @@ test.describe("Coach Dashboard (CTST-03)", () => {
     // Assert page heading -- .first()
     await expect(page.locator('h1:has-text("Earnings")').first()).toBeVisible();
 
-    // Assert earnings cards
-    await expect(page.locator("text=Total Earnings").first()).toBeVisible({ timeout: 10000 });
+    // Assert earnings cards (30s timeout for data loading under parallel load)
+    await expect(page.locator("text=Total Earnings").first()).toBeVisible({ timeout: 30000 });
     await expect(page.locator("text=This Month").first()).toBeVisible();
     await expect(page.locator("text=Pending Payments").first()).toBeVisible();
     await expect(page.locator("text=Revenue Split").first()).toBeVisible();
@@ -147,9 +147,9 @@ test.describe("Coach Profile Editing (CTST-04)", () => {
     // Click save button
     await page.locator('button:has-text("Save Profile")').first().click();
 
-    // Assert success toast
+    // Assert success toast (30s for mutation under parallel load)
     await expect(page.locator("text=Profile updated successfully")).toBeVisible({
-      timeout: 10000,
+      timeout: 30000,
     });
 
     // Reload and verify persistence

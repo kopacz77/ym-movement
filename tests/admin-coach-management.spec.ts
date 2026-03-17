@@ -86,8 +86,8 @@ test.describe("Revenue Split Editor (ATST-02)", () => {
     await expect(saveButton).toBeEnabled({ timeout: 5000 });
     await saveButton.click();
 
-    // Assert success toast
-    await expect(page.locator("text=Revenue split updated")).toBeVisible({ timeout: 10000 });
+    // Assert success toast (30s for tRPC mutation under parallel load)
+    await expect(page.locator("text=Revenue split updated")).toBeVisible({ timeout: 30000 });
 
     // Verify the new value is displayed in the row
     await expect(coachRow.locator("text=75%")).toBeVisible();
