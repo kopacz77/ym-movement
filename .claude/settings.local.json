@@ -119,7 +119,8 @@
       "Skill(gsd:create-roadmap)",
       "Skill(gsd:plan-phase)",
       "Bash(npx tsx:*)",
-      "Skill(gsd:execute-phase)"
+      "Skill(gsd:execute-phase)",
+      "Skill(gsd:plan-milestone-gaps)"
     ],
     "deny": []
   }
