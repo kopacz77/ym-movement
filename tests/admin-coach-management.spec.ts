@@ -76,11 +76,14 @@ test.describe("Revenue Split Editor (ATST-02)", () => {
     const splitInput = coachRow.locator('input[type="number"]');
     await expect(splitInput).toBeVisible();
 
-    // Change the value to 75
-    await splitInput.fill("75");
+    // Select all text, then type new value to trigger React onChange
+    await splitInput.click();
+    await page.keyboard.press("Control+a");
+    await page.keyboard.type("75");
 
-    // Click the green check/save button
+    // Wait for save button to be enabled (React state update after onChange)
     const saveButton = coachRow.locator("button.text-green-600");
+    await expect(saveButton).toBeEnabled({ timeout: 5000 });
     await saveButton.click();
 
     // Assert success toast
@@ -97,9 +100,12 @@ test.describe("Revenue Split Editor (ATST-02)", () => {
 
     const splitInput2 = coachRow.locator('input[type="number"]');
     await expect(splitInput2).toBeVisible();
-    await splitInput2.fill("70");
+    await splitInput2.click();
+    await page.keyboard.press("Control+a");
+    await page.keyboard.type("70");
 
     const saveButton2 = coachRow.locator("button.text-green-600");
+    await expect(saveButton2).toBeEnabled({ timeout: 5000 });
     await saveButton2.click();
 
     await expect(page.locator("text=Revenue split updated")).toBeVisible({ timeout: 10000 });

@@ -54,7 +54,7 @@ async function seedTestData() {
   // Create Coach record for primary coach
   const coach = await prisma.coach.upsert({
     where: { userId: coachUser.id },
-    update: { isApproved: true, isActive: true },
+    update: { isApproved: true, isActive: true, revenueSplitPercent: 70 },
     create: {
       userId: coachUser.id,
       isApproved: true,
