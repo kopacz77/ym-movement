@@ -90,7 +90,11 @@ Plans:
 **Goal:** Fix middleware redirect bug so role guard tests pass, add sign-out button to sidebar, and clean up orphaned test utility exports — closing all tech debt from the v1.1 audit.
 **Depends on:** Phase 11
 **Gap Closure:** Closes tech debt items from v1.1 milestone audit
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Migrate middleware.ts to proxy.ts (Next.js 16) + add Sign Out button to sidebars
+- [ ] 12-02-PLAN.md — Clean up test-utils.ts orphaned exports + unfixme 9 deferred tests
 
 **Success Criteria:**
 1. Next.js middleware correctly redirects unauthenticated requests to /auth/login and unauthorized requests to their role-appropriate dashboard
