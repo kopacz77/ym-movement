@@ -158,29 +158,25 @@ test.describe("Authentication Flow", () => {
   });
 
   test.describe("Protected Routes", () => {
-    // FIXME: Middleware in Next.js 16 is not redirecting unauthenticated requests.
-    // The admin/student dashboard pages render without auth (showing error states
-    // for data, but the page itself loads). This appears to be a pre-existing
-    // middleware issue. These tests should be re-enabled when middleware is fixed.
+    // Verifies proxy.ts redirects unauthenticated users to login page.
     test.use({ storageState: "playwright/.auth/unauthenticated.json" });
 
-    test.fixme("should redirect unauthenticated users to login from admin", async ({ page }) => {
+    test("should redirect unauthenticated users to login from admin", async ({ page }) => {
       await page.goto("/admin/dashboard");
       await expect(page).toHaveURL(/\/auth\/login/, { timeout: 15000 });
     });
 
-    test.fixme("should redirect unauthenticated users from student dashboard", async ({ page }) => {
+    test("should redirect unauthenticated users from student dashboard", async ({ page }) => {
       await page.goto("/student/dashboard");
       await expect(page).toHaveURL(/\/auth\/login/, { timeout: 15000 });
     });
   });
 
   test.describe("Role-based Access", () => {
-    // FIXME: Same middleware issue as Protected Routes -- student accessing
-    // /admin/dashboard is not being redirected to /student/dashboard.
+    // Verifies proxy.ts redirects students away from admin routes.
     test.use({ storageState: "playwright/.auth/student.json" });
 
-    test.fixme("should prevent student from accessing admin dashboard", async ({ page }) => {
+    test("should prevent student from accessing admin dashboard", async ({ page }) => {
       await page.goto("/admin/dashboard");
       await expect(page).toHaveURL(/\/student\/dashboard/, { timeout: 15000 });
     });
