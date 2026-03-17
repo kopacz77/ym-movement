@@ -11,6 +11,7 @@ import {
   FileText,
   GraduationCap,
   LayoutDashboard,
+  LogOut,
   Settings,
   User,
   Users,
@@ -18,6 +19,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { signOut } from "next-auth/react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
   Sidebar,
@@ -223,6 +225,26 @@ export function AppLayout({ role, children }: AppLayoutProps) {
                   </SidebarGroupContent>
                 </SidebarGroup>
               )}
+              {/* Sign Out - Mobile */}
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <div className="pt-2 mt-2 border-t border-gray-200">
+                    <SidebarMenu>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <button
+                            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700 transition-all duration-200 w-full"
+                          >
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            <span className="font-medium">Sign Out</span>
+                          </button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </div>
+                </SidebarGroupContent>
+              </SidebarGroup>
             </SidebarContent>
           </Sidebar>
 

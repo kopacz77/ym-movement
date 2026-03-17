@@ -10,6 +10,7 @@ import {
   FileText,
   GraduationCap,
   LayoutDashboard,
+  LogOut,
   Settings,
   User,
   Users,
@@ -17,6 +18,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { signOut } from "next-auth/react";
 
 // Navigation configurations for each role
 const adminNavigation = [
@@ -142,6 +144,18 @@ export function AppSidebar({ role }: AppSidebarProps) {
             </Link>
           </div>
         )}
+        {/* Sign Out */}
+        <div
+          className={`${!(role === "admin" && currentUser.coachId) && !(role === "coach" && currentUser.isAdmin) ? "mt-auto" : ""} pt-4 border-t border-gray-200`}
+        >
+          <button
+            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700 transition-all duration-200 w-full"
+          >
+            <LogOut className="h-5 w-5 shrink-0" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </div>
     </>
   );
