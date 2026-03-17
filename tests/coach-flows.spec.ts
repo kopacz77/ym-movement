@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+// All selectors use .first() to avoid strict mode violations caused by duplicate
+// DOM elements (desktop layout + hidden mobile layout both render the same content).
+
 // CTST-01: Coach Signup Page Rendering
 test.describe("Coach Signup Page (CTST-01)", () => {
   // No auth needed -- public page
@@ -21,7 +24,7 @@ test.describe("Coach Signup Page (CTST-01)", () => {
     await expect(page.locator("textarea#certifications")).toBeVisible();
     await expect(page.locator("input#yearsExperience")).toBeVisible();
 
-    // Verify submit button exists (will be disabled due to Turnstile -- just check visibility)
+    // Verify submit button exists
     await expect(
       page.locator('button[type="submit"]:has-text("Submit Application")'),
     ).toBeVisible();
@@ -33,41 +36,41 @@ test.describe("Coach Signup Page (CTST-01)", () => {
 
 // CTST-02: Admin Coach Approval and Denial
 test.describe("Admin Coach Approval (CTST-02)", () => {
-  // Runs as super-admin
   test.use({ storageState: "playwright/.auth/super-admin.json" });
 
   test("admin can approve a pending coach", async ({ page }) => {
     await page.goto("/admin/coaches");
 
-    // Click "Pending Approvals" tab
-    await page.click('[role="tab"]:has-text("Pending Approvals")');
+    // Click "Pending Approvals" tab -- use .first() for strict mode safety
+    await page.locator('[role="tab"]:has-text("Pending Approvals")').first().click();
 
-    // Wait for "Pending Coach" to appear (coach3)
-    await expect(page.locator("text=Pending Coach")).toBeVisible({ timeout: 10000 });
+    // Wait for "Pending Coach" to appear (coach3) -- use .first()
+    // 30s timeout: dev server may be compiling routes for parallel tests
+    await expect(page.locator("text=Pending Coach").first()).toBeVisible({ timeout: 30000 });
 
     // Find row with "Pending Coach", click Approve button
-    const coachRow = page.locator('tr:has-text("Pending Coach")');
+    const coachRow = page.locator('tr:has-text("Pending Coach")').first();
     await coachRow.locator('button:has-text("Approve")').click();
 
     // Assert success toast
-    await expect(page.locator("text=Coach approved")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=Coach approved")).toBeVisible({ timeout: 15000 });
   });
 
   test("admin can deny a pending coach", async ({ page }) => {
     await page.goto("/admin/coaches");
 
     // Click "Pending Approvals" tab
-    await page.click('[role="tab"]:has-text("Pending Approvals")');
+    await page.locator('[role="tab"]:has-text("Pending Approvals")').first().click();
 
-    // Wait for "Deny Test Coach" to appear (coach4)
-    await expect(page.locator("text=Deny Test Coach")).toBeVisible({ timeout: 10000 });
+    // Wait for "Deny Test Coach" to appear (coach4) -- use .first()
+    // 30s timeout: dev server may be compiling routes for parallel tests
+    await expect(page.locator("text=Deny Test Coach").first()).toBeVisible({ timeout: 30000 });
 
     // Find row with "Deny Test Coach", click Deny button
-    const coachRow = page.locator('tr:has-text("Deny Test Coach")');
+    const coachRow = page.locator('tr:has-text("Deny Test Coach")').first();
     await coachRow.locator('button:has-text("Deny")').click();
 
     // Deny uses showDeleteConfirmation() which renders a custom toast with a "Delete" button
-    // Wait for the confirmation toast to appear and click the "Delete" button
     await page.locator('button:has-text("Delete")').click();
 
     // Assert denial toast
@@ -82,43 +85,43 @@ test.describe("Coach Dashboard (CTST-03)", () => {
   test("displays overview cards and lesson sections", async ({ page }) => {
     await page.goto("/coach/dashboard");
 
-    // Assert page heading
-    await expect(page.locator('h1:has-text("Coach Dashboard")')).toBeVisible();
+    // Assert page heading -- .first() for desktop/mobile duplicate
+    await expect(page.locator('h1:has-text("Coach Dashboard")').first()).toBeVisible({ timeout: 15000 });
 
-    // Assert overview cards (wait for first card to confirm data loaded)
-    await expect(page.locator("text=Total Students")).toBeVisible({ timeout: 10000 });
-    await expect(page.locator("text=Upcoming Lessons")).toBeVisible();
-    await expect(page.locator("text=Completed This Month")).toBeVisible();
-    await expect(page.locator("text=Monthly Earnings")).toBeVisible();
+    // Assert overview cards (wait for TRPC data to load)
+    // 30s timeout: parallel tests can overload dev server compilation
+    await expect(page.locator("text=Total Students").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.locator("text=Upcoming Lessons").first()).toBeVisible();
+    await expect(page.locator("text=Completed This Month").first()).toBeVisible();
+    await expect(page.locator("text=Monthly Earnings").first()).toBeVisible();
 
     // Assert lesson sections
-    await expect(page.locator("text=Upcoming Lessons")).toBeVisible();
-    await expect(page.locator("text=Past Lessons")).toBeVisible();
+    await expect(page.locator("text=Past Lessons").first()).toBeVisible();
   });
 
   test("displays student list on students page", async ({ page }) => {
     await page.goto("/coach/students");
 
-    // Assert page heading
-    await expect(page.locator('h1:has-text("My Students")')).toBeVisible();
+    // Assert page heading -- .first()
+    await expect(page.locator('h1:has-text("My Students")').first()).toBeVisible();
 
     // Assert either a table element OR the empty state message
-    const table = page.locator("table");
-    const emptyMessage = page.locator("text=No students have booked lessons with you yet");
+    const table = page.locator("table").first();
+    const emptyMessage = page.locator("text=No students have booked lessons with you yet").first();
     await expect(table.or(emptyMessage)).toBeVisible({ timeout: 10000 });
   });
 
   test("displays earnings summary", async ({ page }) => {
     await page.goto("/coach/earnings");
 
-    // Assert page heading
-    await expect(page.locator('h1:has-text("Earnings")')).toBeVisible();
+    // Assert page heading -- .first()
+    await expect(page.locator('h1:has-text("Earnings")').first()).toBeVisible();
 
-    // Assert earnings cards (wait for first card to confirm data loaded)
-    await expect(page.locator("text=Total Earnings")).toBeVisible({ timeout: 10000 });
-    await expect(page.locator("text=This Month")).toBeVisible();
-    await expect(page.locator("text=Pending Payments")).toBeVisible();
-    await expect(page.locator("text=Revenue Split")).toBeVisible();
+    // Assert earnings cards
+    await expect(page.locator("text=Total Earnings").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=This Month").first()).toBeVisible();
+    await expect(page.locator("text=Pending Payments").first()).toBeVisible();
+    await expect(page.locator("text=Revenue Split").first()).toBeVisible();
   });
 });
 
@@ -129,20 +132,20 @@ test.describe("Coach Profile Editing (CTST-04)", () => {
   test("profile editing persists changes", async ({ page }) => {
     await page.goto("/coach/profile");
 
-    // Assert page heading
-    await expect(page.locator('h1:has-text("My Profile")')).toBeVisible();
+    // Assert page heading -- .first()
+    await expect(page.locator('h1:has-text("My Profile")').first()).toBeVisible();
 
     // Wait for profile form to load
-    await expect(page.locator("text=Profile Details")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=Profile Details").first()).toBeVisible({ timeout: 10000 });
 
-    // Fill profile fields
-    await page.locator("textarea#bio").fill("Updated bio for E2E testing");
-    await page.locator("input#skills").fill("Figure Skating, Ice Dance, Freestyle");
-    await page.locator("textarea#certifications").fill("PSA Master Rated");
-    await page.locator("input#yearsExperience").fill("10");
+    // Fill profile fields -- .first() for desktop/mobile duplicate
+    await page.locator("textarea#bio").first().fill("Updated bio for E2E testing");
+    await page.locator("input#skills").first().fill("Figure Skating, Ice Dance, Freestyle");
+    await page.locator("textarea#certifications").first().fill("PSA Master Rated");
+    await page.locator("input#yearsExperience").first().fill("10");
 
     // Click save button
-    await page.click('button:has-text("Save Profile")');
+    await page.locator('button:has-text("Save Profile")').first().click();
 
     // Assert success toast
     await expect(page.locator("text=Profile updated successfully")).toBeVisible({
@@ -151,15 +154,15 @@ test.describe("Coach Profile Editing (CTST-04)", () => {
 
     // Reload and verify persistence
     await page.reload();
-    await expect(page.locator("text=Profile Details")).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("text=Profile Details").first()).toBeVisible({ timeout: 10000 });
 
-    // Assert values persisted
-    await expect(page.locator("textarea#bio")).toHaveValue("Updated bio for E2E testing");
-    await expect(page.locator("input#skills")).toHaveValue(
+    // Assert values persisted -- .first() for desktop/mobile duplicate
+    await expect(page.locator("textarea#bio").first()).toHaveValue("Updated bio for E2E testing");
+    await expect(page.locator("input#skills").first()).toHaveValue(
       "Figure Skating, Ice Dance, Freestyle",
     );
-    await expect(page.locator("textarea#certifications")).toHaveValue("PSA Master Rated");
-    await expect(page.locator("input#yearsExperience")).toHaveValue("10");
+    await expect(page.locator("textarea#certifications").first()).toHaveValue("PSA Master Rated");
+    await expect(page.locator("input#yearsExperience").first()).toHaveValue("10");
   });
 });
 
@@ -171,34 +174,34 @@ test.describe("Coach Proposal Flow (CTST-05)", () => {
     test("coach can submit a time slot proposal", async ({ page }) => {
       await page.goto("/coach/proposals");
 
-      // Assert page heading
-      await expect(page.locator('h1:has-text("Time Slot Proposals")')).toBeVisible();
+      // Assert page heading -- .first()
+      await expect(page.locator('h1:has-text("Time Slot Proposals")').first()).toBeVisible();
 
       // Wait for form to load
-      await expect(page.locator("text=Propose Time Slot")).toBeVisible({ timeout: 10000 });
+      await expect(page.locator("text=Propose Time Slot").first()).toBeVisible({ timeout: 10000 });
 
       // Select rink using shadcn Select (NOT native select)
-      await page.click('button:has-text("Select a rink")');
-      await page.click('[role="option"]:has-text("Test Ice Rink")');
+      await page.locator('button:has-text("Select a rink")').first().click();
+      await page.locator('[role="option"]:has-text("Test Ice Rink")').click();
 
       // Select date via Popover Calendar
-      await page.click('button:has-text("Pick a date")');
+      await page.locator('button:has-text("Pick a date")').first().click();
       // Click a future, non-disabled date -- use .last() to pick a later date
       const futureDate = page.locator('[role="gridcell"] button:not([disabled])').last();
       await futureDate.click();
 
-      // Fill start and end time (native HTML time inputs)
-      await page.fill("input#startTime", "10:00");
-      await page.fill("input#endTime", "11:00");
+      // Fill start and end time (native HTML time inputs) -- .first() for dual layout
+      await page.locator("input#startTime").first().fill("10:00");
+      await page.locator("input#endTime").first().fill("11:00");
 
       // Submit the proposal
-      await page.click('button:has-text("Propose Time Slot")');
+      await page.locator('button:has-text("Propose Time Slot")').first().click();
 
       // Assert success toast
       await expect(page.locator("text=Proposal submitted")).toBeVisible({ timeout: 10000 });
 
       // Assert "Pending" status badge visible in proposals list
-      await expect(page.locator("text=Pending")).toBeVisible();
+      await expect(page.locator("text=Pending").first()).toBeVisible();
     });
   });
 
@@ -208,11 +211,11 @@ test.describe("Coach Proposal Flow (CTST-05)", () => {
     test("admin can approve a pending proposal", async ({ page }) => {
       await page.goto("/admin/coaches");
 
-      // Click "Proposals" tab
-      await page.click('[role="tab"]:has-text("Proposals")');
+      // Click "Proposals" tab -- .first()
+      await page.locator('[role="tab"]:has-text("Proposals")').first().click();
 
-      // Wait for "Test Coach" to appear in proposal queue
-      await expect(page.locator("text=Test Coach")).toBeVisible({ timeout: 10000 });
+      // Wait for "Test Coach" to appear in proposal queue -- use .first()
+      await expect(page.locator("text=Test Coach").first()).toBeVisible({ timeout: 10000 });
 
       // Find proposal row with "Test Coach", click Approve
       const proposalRow = page.locator('tr:has-text("Test Coach")').first();

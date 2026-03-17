@@ -14,6 +14,9 @@ const STUDENT_AUTH = path.join(__dirname, "../playwright/.auth/student.json");
 // Run setup steps serially to avoid overwhelming the dev server during cold compilation
 setup.describe.configure({ mode: "serial" });
 
+// Increase timeout for auth setup -- dev server cold compilation can take 60s+
+setup.setTimeout(90000);
+
 async function login(
   page: import("@playwright/test").Page,
   email: string,
@@ -22,14 +25,14 @@ async function login(
   storagePath: string,
 ) {
   await page.goto("/auth/login");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
   const emailInput = page.locator('input[id="email"]');
-  await emailInput.waitFor({ state: "visible", timeout: 10000 });
+  await emailInput.waitFor({ state: "visible", timeout: 15000 });
   await emailInput.fill(email);
   await page.locator('input[id="password"]').fill(password);
   await page.locator('button[type="submit"]').click();
-  // Allow 30s for first-time route compilation in dev server
-  await page.waitForURL(expectedUrl, { timeout: 30000 });
+  // Allow 60s for first-time route compilation in dev server (cold start)
+  await page.waitForURL(expectedUrl, { timeout: 60000 });
   await page.context().storageState({ path: storagePath });
 }
 
