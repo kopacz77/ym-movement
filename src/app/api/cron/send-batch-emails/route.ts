@@ -3,6 +3,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { sendBatchEmailNotifications } from "@/lib/batch-email-sender";
+import { safeCompare } from "@/lib/security";
 
 /**
  * API endpoint for sending batch email notifications
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Cron secret not configured" }, { status: 500 });
       }
 
-      if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+      if (!authHeader || !safeCompare(authHeader, `Bearer ${cronSecret}`)) {
         console.error("[CRON] Invalid or missing authorization");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }

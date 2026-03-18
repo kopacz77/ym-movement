@@ -46,7 +46,7 @@ export const noteQueries = createTRPCRouter({
     .input(
       z.object({
         studentId: z.string(),
-        content: z.string(),
+        content: z.string().max(2000),
         type: z.enum(["ADMIN", "INSTRUCTOR"]),
       }),
     )

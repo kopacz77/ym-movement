@@ -10,7 +10,7 @@ import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 const createBlockedDateSchema = z
   .object({
     title: z.string().min(1, "Title is required").max(100, "Title too long"),
-    description: z.string().optional(),
+    description: z.string().max(500).optional(),
     startDate: z.date(),
     endDate: z.date(),
     type: z.enum(["TRAVEL", "COMPETITION", "OTHER"]).default("TRAVEL"),
@@ -25,7 +25,7 @@ const updateBlockedDateSchema = z
   .object({
     id: z.string(),
     title: z.string().min(1, "Title is required").max(100, "Title too long").optional(),
-    description: z.string().optional(),
+    description: z.string().max(500).optional(),
     startDate: z.date().optional(),
     endDate: z.date().optional(),
     type: z.enum(["TRAVEL", "COMPETITION", "OTHER"]).optional(),

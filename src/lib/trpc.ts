@@ -7,27 +7,38 @@ import { ZodError } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAdminRole, isCoachRole } from "@/lib/roles";
+import { authRateLimiter, getClientIP, logSecurityEvent } from "@/lib/security";
 
 export type TRPCContext = {
   prisma: typeof prisma;
   session: Session | null;
+  clientIP: string;
 };
 
 export const createTRPCContext = async (
   opts: CreateNextContextOptions | { headers: Headers },
 ): Promise<TRPCContext> => {
   let session = null;
+  let clientIP = "unknown";
 
   // Handle both Next.js Pages Router and App Router
   if ("req" in opts && "res" in opts) {
     session = await getServerSession(opts.req, opts.res, authOptions);
+    clientIP =
+      (opts.req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      (opts.req.headers["x-real-ip"] as string) ||
+      "unknown";
   } else {
     session = await getServerSession(authOptions);
+    if ("headers" in opts && opts.headers instanceof Headers) {
+      clientIP = getClientIP(opts.headers);
+    }
   }
 
   return {
     prisma,
     session,
+    clientIP,
   };
 };
 
@@ -175,8 +186,24 @@ const isCoach = t.middleware(async ({ ctx, next }) => {
   });
 });
 
+// Rate-limiting middleware for public procedures (password reset, signup, etc.)
+const isRateLimited = t.middleware(({ ctx, next }) => {
+  if (!authRateLimiter.isAllowed(ctx.clientIP)) {
+    logSecurityEvent("RATE_LIMIT_EXCEEDED", {
+      endpoint: "trpc-public",
+      ip: ctx.clientIP,
+    });
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Too many requests. Please try again later.",
+    });
+  }
+  return next({ ctx });
+});
+
 export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
+export const rateLimitedPublicProcedure = t.procedure.use(isRateLimited);
 export const protectedProcedure = t.procedure.use(isAuthed);
 export const adminProcedure = t.procedure.use(isAdmin);
 export const superAdminProcedure = t.procedure.use(isSuperAdmin);

@@ -7,11 +7,11 @@ import {
   createPasswordResetToken,
   verifyPasswordResetToken,
 } from "@/lib/auth-tokens";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc";
+import { createTRPCRouter, rateLimitedPublicProcedure } from "@/lib/trpc";
 
 export const passwordResetRouter = createTRPCRouter({
   // Verify a password reset token
-  verifyToken: publicProcedure
+  verifyToken: rateLimitedPublicProcedure
     .input(z.object({ token: z.string() }))
     .mutation(async ({ input }) => {
       try {
@@ -25,6 +25,7 @@ export const passwordResetRouter = createTRPCRouter({
           valid: true,
           email: user.email,
           userId: user.id,
+          name: user.name,
         };
       } catch (error) {
         console.error("Error verifying reset token:", error);
@@ -36,15 +37,16 @@ export const passwordResetRouter = createTRPCRouter({
     }),
 
   // Reset password with token
-  resetPassword: publicProcedure
+  resetPassword: rateLimitedPublicProcedure
     .input(
       z.object({
         token: z.string(),
         password: z.string().min(8, "Password must be at least 8 characters"),
+        name: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { token, password } = input;
+      const { token, password, name } = input;
 
       try {
         // Verify and consume the token
@@ -60,12 +62,13 @@ export const passwordResetRouter = createTRPCRouter({
         // Hash the new password with increased work factor
         const hashedPassword = await hash(password, 12);
 
-        // Update the user's password
+        // Update the user's password and name if provided
         await ctx.prisma.user.update({
           where: { id: userId },
           data: {
             password: hashedPassword,
             emailVerified: new Date(), // Mark email as verified since they accessed it
+            ...(name && { name }),
           },
         });
 
@@ -85,7 +88,7 @@ export const passwordResetRouter = createTRPCRouter({
     }),
 
   // Request password reset email
-  requestReset: publicProcedure
+  requestReset: rateLimitedPublicProcedure
     .input(z.object({ email: z.string().email() }))
     .mutation(async ({ ctx, input }) => {
       try {

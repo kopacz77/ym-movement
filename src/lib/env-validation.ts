@@ -25,9 +25,6 @@ const envSchema = z.object({
   // Application settings
   NODE_ENV: z.enum(["development", "production", "test"]),
   NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
-
-  // Security settings
-  ENABLE_AUTH_BYPASS: z.enum(["true", "false"]).optional(),
 });
 
 type EnvVars = z.infer<typeof envSchema>;
@@ -48,10 +45,6 @@ export function validateEnvironment(): EnvVars {
   // Additional security checks
   if (result.data.NODE_ENV === "production") {
     // Production-specific validations
-    if (result.data.ENABLE_AUTH_BYPASS === "true") {
-      throw new Error("ENABLE_AUTH_BYPASS must not be enabled in production");
-    }
-
     if (
       !result.data.DATABASE_URL.includes("sslmode=require") &&
       !result.data.DATABASE_URL.includes("ssl=true")

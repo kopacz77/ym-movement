@@ -200,7 +200,7 @@ export function CompleteRegistrationForm() {
   const hasVerifiedToken = useRef(false);
 
   // Verify token mutation
-  const verifyTokenMutation = api.admin.auth.verifyResetToken.useMutation({
+  const verifyTokenMutation = api.passwordReset.verifyToken.useMutation({
     onSuccess: (result) => {
       if (result?.valid) {
         setIsValidToken(true);
@@ -224,7 +224,7 @@ export function CompleteRegistrationForm() {
   });
 
   // Complete registration mutation
-  const completeRegistrationMutation = api.admin.auth.resetPassword.useMutation({
+  const completeRegistrationMutation = api.passwordReset.resetPassword.useMutation({
     onSuccess: () => {
       toast.success("Registration completed successfully!", {
         description: "You can now log in with your credentials",

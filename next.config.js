@@ -20,11 +20,7 @@ const nextConfig = {
   // Security configuration for CVE-2025-48068
   allowedDevOrigins: process.env.NODE_ENV === "development" ? ["localhost"] : [],
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // This is temporary to fix deployment issues - should be removed after fixing type errors
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   experimental: {
     optimizeCss: true,

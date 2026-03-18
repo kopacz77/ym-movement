@@ -120,7 +120,9 @@
       "Skill(gsd:plan-phase)",
       "Bash(npx tsx:*)",
       "Skill(gsd:execute-phase)",
-      "Skill(gsd:plan-milestone-gaps)"
+      "Skill(gsd:plan-milestone-gaps)",
+      "Bash(pnpm biome:*)",
+      "Bash(pnpm test:e2e:*)"
     ],
     "deny": []
   }

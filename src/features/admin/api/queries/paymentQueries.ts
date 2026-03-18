@@ -266,7 +266,7 @@ export const paymentRouter = createTRPCRouter({
     }),
 
   addPaymentNote: adminProcedure
-    .input(z.object({ paymentId: z.string(), notes: z.string() }))
+    .input(z.object({ paymentId: z.string(), notes: z.string().max(1000) }))
     .mutation(async ({ ctx, input }) => {
       try {
         const payment = await ctx.prisma.payment.findUnique({

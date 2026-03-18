@@ -18,7 +18,7 @@ export const lessonRouter = createTRPCRouter({
         type: z.nativeEnum(LessonType),
         area: z.nativeEnum(RinkArea),
         price: z.number(),
-        notes: z.string().optional(),
+        notes: z.string().max(1000).optional(),
         coachId: z.string().optional(),
       }),
     )
@@ -155,7 +155,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
     .input(
       z.object({
         lessonId: z.string(),
-        reason: z.string(),
+        reason: z.string().max(1000),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -311,7 +311,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         timeSlotId: z.string(),
         studentId: z.string(),
         lessonType: z.nativeEnum(LessonType).optional().default(LessonType.PRIVATE),
-        notes: z.string().optional(),
+        notes: z.string().max(1000).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -501,7 +501,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
       z.object({
         lessonId: z.string(),
         lessonType: z.nativeEnum(LessonType),
-        notes: z.string().optional(),
+        notes: z.string().max(1000).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

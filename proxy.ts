@@ -30,6 +30,8 @@ export async function proxy(request: NextRequest) {
     path === "/auth/login" ||
     path === "/auth/signup" ||
     path === "/auth/coach-signup" ||
+    path === "/auth/forgot-password" ||
+    path === "/auth/reset-password" ||
     path.startsWith("/api/auth");
 
   // Get the token and check if the user is authenticated
@@ -60,7 +62,14 @@ export async function proxy(request: NextRequest) {
   }
 
   // Redirect authenticated users away from login/signup pages
-  if (isAuthenticated && isPublicPath && path !== "/") {
+  // But allow access to forgot/reset-password even when logged in
+  if (
+    isAuthenticated &&
+    isPublicPath &&
+    path !== "/" &&
+    path !== "/auth/forgot-password" &&
+    path !== "/auth/reset-password"
+  ) {
     // Redirect to the appropriate dashboard based on role
     const role = token?.role as string;
     const redirectPath =
@@ -110,9 +119,7 @@ export async function proxy(request: NextRequest) {
     if (path.startsWith("/student") && role !== "STUDENT") {
       console.warn(`User ${token.id} (role: ${role}) attempted to access student route: ${path}`);
       const dashboard = new URL(
-        role === "ADMIN" || role === "SUPER_ADMIN"
-          ? "/admin/dashboard"
-          : "/coach/dashboard",
+        role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard" : "/coach/dashboard",
         request.url,
       );
       return NextResponse.redirect(dashboard);

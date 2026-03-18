@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/lessonQueries.ts
 import { z } from "zod";
+import { isAdminRole, isCoachRole } from "@/lib/roles";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const lessonRouter = createTRPCRouter({
@@ -14,6 +15,7 @@ export const lessonRouter = createTRPCRouter({
             id: input.id,
           },
           include: {
+            Student: { select: { userId: true } },
             Payment: true,
             Rink: true,
             Coach: { include: { User: { select: { name: true } } } },
@@ -25,6 +27,17 @@ export const lessonRouter = createTRPCRouter({
             code: "NOT_FOUND",
             message: "Lesson not found",
           });
+        }
+
+        // SECURITY: Ownership check — non-admin/coach users can only view their own lessons
+        const userRole = ctx.session.user.role;
+        if (!isAdminRole(userRole) && !isCoachRole(userRole)) {
+          if (lesson.Student.userId !== ctx.session.user.id) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "You do not have permission to view this lesson",
+            });
+          }
         }
 
         return lesson;

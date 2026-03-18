@@ -275,7 +275,7 @@ export const coachManagementRouter = createTRPCRouter({
       z.object({
         coachId: z.string(),
         action: z.enum(["activate", "deactivate", "suspend"]),
-        reason: z.string().optional(),
+        reason: z.string().max(1000).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

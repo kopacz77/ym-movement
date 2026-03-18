@@ -70,7 +70,7 @@ export const proposalApprovalRouter = createTRPCRouter({
     .input(
       z.object({
         proposalId: z.string(),
-        notes: z.string().optional(),
+        notes: z.string().max(1000).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

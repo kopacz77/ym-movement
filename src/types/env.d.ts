@@ -10,7 +10,7 @@ declare namespace NodeJS {
     TOKEN_ENCRYPTION_KEY?: string;
     RESEND_API_KEY?: string;
     NEXT_PUBLIC_BASE_URL?: string;
-    ENABLE_AUTH_BYPASS?: string;
+
     ANALYZE?: string;
   }
 }

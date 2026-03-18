@@ -8,6 +8,7 @@ import { createNotification } from "@/features/notifications/utils/notificationH
 import { sendLessonConfirmationEmail } from "@/lib/email";
 import { type CoachWithTokens, googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
+import { isAdminRole, isCoachRole } from "@/lib/roles";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define extended Student type with custom pricing fields
@@ -36,11 +37,26 @@ export const bookingRouter = createTRPCRouter({
         type: z.nativeEnum(LessonType),
         area: z.nativeEnum(RinkArea).optional(),
         paymentMethod: z.nativeEnum(PaymentMethod),
-        notes: z.string().optional(),
+        notes: z.string().max(1000).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // SECURITY: Ownership check — non-admin/coach users can only book for themselves
+        const userRole = ctx.session.user.role;
+        if (!isAdminRole(userRole) && !isCoachRole(userRole)) {
+          const requestingStudent = await ctx.prisma.student.findUnique({
+            where: { userId: ctx.session.user.id },
+            select: { id: true },
+          });
+          if (!requestingStudent || requestingStudent.id !== input.studentId) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "You can only book lessons for yourself",
+            });
+          }
+        }
+
         console.log(`[BOOKING] Starting booking process for student ${input.studentId}`);
 
         // 1. Get the time slot to check availability
@@ -97,8 +113,7 @@ export const bookingRouter = createTRPCRouter({
           if (overlappingBlock) {
             throw new TRPCError({
               code: "FORBIDDEN",
-              message:
-                "Video lessons on blocked dates are only available by coach assignment.",
+              message: "Video lessons on blocked dates are only available by coach assignment.",
             });
           }
         }
@@ -246,9 +261,7 @@ export const bookingRouter = createTRPCRouter({
               `,
                 startTime: timeSlot.startTime,
                 endTime: timeSlot.endTime,
-                attendees: [
-                  { email: student.User.email, name: student.User.name },
-                ],
+                attendees: [{ email: student.User.email, name: student.User.name }],
                 location: timeSlot.Rink.address,
                 timeZone: timezone,
               });
@@ -288,7 +301,11 @@ export const bookingRouter = createTRPCRouter({
 
         console.log(
           `[BOOKING] Calculated price: $${price} for ${durationMinutes}min ${input.type} lesson${
-            student.customPricingEnabled ? " (custom pricing)" : coachPricing ? " (coach pricing)" : " (default pricing)"
+            student.customPricingEnabled
+              ? " (custom pricing)"
+              : coachPricing
+                ? " (coach pricing)"
+                : " (default pricing)"
           }`,
         );
 
@@ -515,7 +532,7 @@ export const bookingRouter = createTRPCRouter({
     .input(
       z.object({
         lessonId: z.string(),
-        reason: z.string(),
+        reason: z.string().max(1000),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -538,6 +555,17 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
+        // SECURITY: Ownership check — non-admin/coach users can only cancel their own lessons
+        const cancelUserRole = ctx.session.user.role;
+        if (!isAdminRole(cancelUserRole) && !isCoachRole(cancelUserRole)) {
+          if (lesson.Student.User.id !== ctx.session.user.id) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "You can only cancel your own lessons",
+            });
+          }
+        }
+
         // 2. Cannot cancel past lessons
         const now = new Date();
         if (lesson.startTime < now) {
@@ -556,7 +584,13 @@ export const bookingRouter = createTRPCRouter({
           try {
             const coach = await ctx.prisma.coach.findUnique({
               where: { id: lesson.coachId },
-              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+              select: {
+                id: true,
+                googleAccessToken: true,
+                googleRefreshToken: true,
+                googleTokenExpiresAt: true,
+                googleCalendarId: true,
+              },
             });
             if (coach) {
               await googleCalendar.deleteEvent(coach, lesson.googleCalendarEventId);
