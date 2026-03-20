@@ -78,6 +78,7 @@ interface BulkCreateSlotsDialogProps {
   onOpenChange: (open: boolean) => void;
   rinks: Rink[]; // Use the Rink interface instead of any[]
   onSubmitAction: () => void;
+  coachId?: string;
 }
 
 export const BulkCreateSlotsDialog: FC<BulkCreateSlotsDialogProps> = ({
@@ -85,6 +86,7 @@ export const BulkCreateSlotsDialog: FC<BulkCreateSlotsDialogProps> = ({
   onOpenChange,
   rinks,
   onSubmitAction,
+  coachId,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -100,7 +102,7 @@ export const BulkCreateSlotsDialog: FC<BulkCreateSlotsDialogProps> = ({
           <DialogTitle>Bulk Create Time Slots</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
-          <BulkTimeSlotForm rinks={rinks || []} onSubmitAction={onSubmitAction} />
+          <BulkTimeSlotForm rinks={rinks || []} onSubmitAction={onSubmitAction} coachId={coachId} />
         </div>
       </DialogContent>
     </Dialog>

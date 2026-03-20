@@ -41,6 +41,7 @@ interface ScheduleHeaderProps {
   selectedCoachId?: string;
   onCoachSelect?: (coachId: string | undefined) => void;
   coaches?: Array<{ id: string; user: { name: string | null } }>;
+  currentUserCoachId?: string;
   // Bulk actions props
   isSelectionMode?: boolean;
   onToggleSelectionMode?: () => void;
@@ -61,6 +62,7 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
   selectedCoachId,
   onCoachSelect,
   coaches,
+  currentUserCoachId,
   isSelectionMode,
   onToggleSelectionMode,
   dateRangeFilter,
@@ -123,6 +125,7 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
                   {coaches.map((coach) => (
                     <SelectItem key={coach.id} value={coach.id}>
                       {coach.user.name || "Unnamed Coach"}
+                      {currentUserCoachId && coach.id === currentUserCoachId ? " (You)" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>

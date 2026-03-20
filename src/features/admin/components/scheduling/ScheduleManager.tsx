@@ -3,13 +3,14 @@
 
 import { endOfDay, startOfDay } from "date-fns";
 import { DateTime } from "luxon";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { SlotInfo } from "react-big-calendar";
 import type { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBulkOperations } from "@/contexts/BulkOperationsContext";
 import { type ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
@@ -92,6 +93,14 @@ const ScheduleManagerComponent = () => {
   const [timezoneFilter, setTimezoneFilter] = useState("America/Los_Angeles");
   // Coach filter state
   const [selectedCoach, setSelectedCoach] = useState<string | undefined>(undefined);
+
+  // Auto-select current user's coach profile (e.g., Super Admin who is also a coach)
+  const { coachId: currentUserCoachId } = useCurrentUser();
+  useEffect(() => {
+    if (currentUserCoachId && !selectedCoach) {
+      setSelectedCoach(currentUserCoachId);
+    }
+  }, [currentUserCoachId]); // intentionally exclude selectedCoach to only run on initial load
 
   // NOTE: getAllCoaches uses superAdminProcedure which is currently identical to adminProcedure
   // (both check isAdminRole). Safe for all admins during ADMIN/SUPER_ADMIN transition period.
@@ -631,6 +640,7 @@ const ScheduleManagerComponent = () => {
         selectedCoachId={selectedCoach}
         onCoachSelect={setSelectedCoach}
         coaches={activeCoaches}
+        currentUserCoachId={currentUserCoachId || undefined}
         createTimeSlotButton={
           <CompactTimeSlotDialog
             open={isCreateDialogOpen}
@@ -651,6 +661,7 @@ const ScheduleManagerComponent = () => {
             onOpenChange={setIsBulkCreateOpen}
             rinks={rinks || []}
             onSubmitAction={handleBulkCreateClose}
+            coachId={selectedCoach}
           />
         }
         rinks={rinks || []}

@@ -91,9 +91,10 @@ type BulkTimeSlotFormValues = z.infer<typeof bulkTimeSlotSchema>;
 interface BulkTimeSlotFormProps {
   rinks: Array<{ id: string; name: string; timezone?: string }>;
   onSubmitAction: () => void;
+  coachId?: string;
 }
 
-export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAction }) => {
+export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAction, coachId }) => {
   const utils = api.useUtils();
   const { setLastBulkCreation } = useBulkOperations();
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -234,6 +235,7 @@ export const BulkTimeSlotForm: FC<BulkTimeSlotFormProps> = ({ rinks, onSubmitAct
       breaks: confirmationData.breaks,
       maxStudents: confirmationData.maxStudents,
       daysOfWeek: confirmationData.daysOfWeek,
+      ...(coachId && { coachId }),
     };
 
     toast.info("Creating slots", {
