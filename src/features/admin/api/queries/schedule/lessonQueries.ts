@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { format } from "date-fns";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
 import { createScheduleChangeNotification } from "@/features/notifications/utils/notificationHelpers";
@@ -71,6 +72,24 @@ export const lessonRouter = createTRPCRouter({
           throw new TRPCError({
             code: "CONFLICT",
             message: "Student already has a lesson in this time slot",
+          });
+        }
+
+        // Check for overlapping lessons — prevent student from double-booking across coaches
+        const overlappingLesson = await ctx.prisma.lesson.findFirst({
+          where: {
+            studentId: sanitizedInput.studentId,
+            status: LessonStatus.SCHEDULED,
+            startTime: { lt: timeSlot.endTime },
+            endTime: { gt: timeSlot.startTime },
+          },
+        });
+
+        if (overlappingLesson) {
+          const overlapTime = format(overlappingLesson.startTime, "h:mm a");
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: `Student already has a lesson at ${overlapTime} that overlaps with this time slot`,
           });
         }
 
@@ -358,6 +377,24 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Student is already assigned to this time slot",
+          });
+        }
+
+        // Check for overlapping lessons — prevent student from double-booking across coaches
+        const overlappingLesson = await ctx.prisma.lesson.findFirst({
+          where: {
+            studentId: input.studentId,
+            status: LessonStatus.SCHEDULED,
+            startTime: { lt: timeSlot.endTime },
+            endTime: { gt: timeSlot.startTime },
+          },
+        });
+
+        if (overlappingLesson) {
+          const overlapTime = format(overlappingLesson.startTime, "h:mm a");
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: `Student already has a lesson at ${overlapTime} that overlaps with this time slot`,
           });
         }
 

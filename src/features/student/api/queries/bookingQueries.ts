@@ -191,6 +191,28 @@ export const bookingRouter = createTRPCRouter({
           });
         }
 
+        // 4a. Check for overlapping lessons — prevent student from double-booking across coaches
+        const overlappingLesson = await ctx.prisma.lesson.findFirst({
+          where: {
+            studentId: input.studentId,
+            status: LessonStatus.SCHEDULED,
+            startTime: { lt: timeSlot.endTime },
+            endTime: { gt: timeSlot.startTime },
+          },
+          include: { Rink: true },
+        });
+
+        if (overlappingLesson) {
+          const overlapTime = format(overlappingLesson.startTime, "h:mm a");
+          console.log(
+            `[BOOKING] Student ${input.studentId} has overlapping lesson at ${overlapTime}`,
+          );
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: `You already have a lesson scheduled at ${overlapTime} that overlaps with this time slot`,
+          });
+        }
+
         // 4b. Fetch coach name, pricing, and calendar tokens if the time slot has a coach
         let coachName: string | null = null;
         let coachPricing: {
