@@ -12,6 +12,7 @@ interface WhereClause {
   isActive?: boolean;
   rinkId?: string;
   coachId?: string;
+  OR?: Array<{ coachId: string | null }>;
 }
 
 export const availabilityRouter = createTRPCRouter({
@@ -82,9 +83,9 @@ export const availabilityRouter = createTRPCRouter({
           whereClause.rinkId = input.rinkId;
         }
 
-        // Filter by coachId if provided
+        // Filter by coachId if provided — also include unassigned (null) slots
         if (input.coachId) {
-          whereClause.coachId = input.coachId;
+          whereClause.OR = [{ coachId: input.coachId }, { coachId: null }];
         }
 
         console.log("[DEBUG] Where clause:", JSON.stringify(whereClause));

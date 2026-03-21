@@ -123,7 +123,9 @@
       "Skill(gsd:plan-milestone-gaps)",
       "Bash(pnpm biome:*)",
       "Bash(pnpm test:e2e:*)",
-      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run:*)"
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run:*)",
+      "Bash(docker images:*)",
+      "Bash(docker system:*)"
     ],
     "deny": []
   }

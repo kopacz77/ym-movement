@@ -45,7 +45,9 @@ export const timeSlotRouter = createTRPCRouter({
                 }
               : undefined,
             isActive: true,
-            ...(input.coachId && { coachId: input.coachId }),
+            ...(input.coachId && {
+              OR: [{ coachId: input.coachId }, { coachId: null }],
+            }),
           },
           select: {
             id: true,
