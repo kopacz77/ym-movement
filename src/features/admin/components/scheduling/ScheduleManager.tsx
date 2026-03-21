@@ -512,7 +512,8 @@ const ScheduleManagerComponent = () => {
       coachId?: string;
     }) => {
       // Require coach selection before creating a time slot (SCHD-01)
-      const coachId = bookingData.coachId || selectedCoach;
+      // Fall back to current user's coach profile (e.g., Super Admin who is also a coach)
+      const coachId = bookingData.coachId || selectedCoach || currentUserCoachId;
       if (!coachId) {
         toast.error("Please select a coach before creating a time slot");
         return;
@@ -566,7 +567,7 @@ const ScheduleManagerComponent = () => {
         },
       );
     },
-    [createTimeSlot, rinks, selectedCoach],
+    [createTimeSlot, rinks, selectedCoach, currentUserCoachId],
   );
 
   // Handle dialog close actions
@@ -651,6 +652,8 @@ const ScheduleManagerComponent = () => {
             selectedCoachId={selectedCoach}
             onBookingSubmit={handleEnhancedBookingSubmit}
             rinks={rinks || []}
+            coaches={activeCoaches}
+            currentUserCoachId={currentUserCoachId || undefined}
             isLoading={createTimeSlot.isPending}
             isBlockedDate={isBlockedDateSlot}
           />

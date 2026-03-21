@@ -39,6 +39,8 @@ interface CompactTimeSlotDialogProps {
     coachId?: string;
   }) => void;
   rinks: Array<{ id: string; name: string; timezone: string; isVirtual?: boolean }>;
+  coaches?: Array<{ id: string; user: { name: string | null } }>;
+  currentUserCoachId?: string;
   isLoading?: boolean;
   isBlockedDate?: boolean;
 }
@@ -52,6 +54,8 @@ export function CompactTimeSlotDialog({
   selectedCoachId,
   onBookingSubmit,
   rinks,
+  coaches,
+  currentUserCoachId,
   isLoading = false,
   isBlockedDate = false,
 }: CompactTimeSlotDialogProps) {
@@ -59,6 +63,7 @@ export function CompactTimeSlotDialog({
   const [endTime, setEndTime] = React.useState<string>("");
   const [rinkId, setRinkId] = React.useState<string>("");
   const [maxStudents, setMaxStudents] = React.useState<number>(1);
+  const [coachId, setCoachId] = React.useState<string>("");
 
   // Use operational settings for dynamic time slot generation
   const { businessHours, validateTimeSlot, isDayActive } = useOperationalSettings();
@@ -118,8 +123,9 @@ export function CompactTimeSlotDialog({
         setRinkId(selectedRinkId || availableRinks[0]?.id || "");
       }
       setMaxStudents(1);
+      setCoachId(selectedCoachId || "");
     }
-  }, [open, selectedStartTime, selectedRinkId, availableRinks, isBlockedDate]);
+  }, [open, selectedStartTime, selectedRinkId, selectedCoachId, availableRinks, isBlockedDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +177,7 @@ export function CompactTimeSlotDialog({
       endTime,
       rinkId,
       maxStudents,
-      coachId: selectedCoachId,
+      coachId: coachId || selectedCoachId,
     });
   };
 
@@ -254,6 +260,26 @@ export function CompactTimeSlotDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Coach */}
+          {coaches && coaches.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="coach">Coach</Label>
+              <Select value={coachId} onValueChange={setCoachId}>
+                <SelectTrigger id="coach">
+                  <SelectValue placeholder="Select coach" />
+                </SelectTrigger>
+                <SelectContent>
+                  {coaches.map((coach) => (
+                    <SelectItem key={coach.id} value={coach.id}>
+                      {coach.user.name || "Unnamed Coach"}
+                      {coach.id === currentUserCoachId ? " (You)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Max Students */}
           <div className="space-y-2">
