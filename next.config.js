@@ -21,7 +21,8 @@ const nextConfig = {
   // Security configuration for CVE-2025-48068
   allowedDevOrigins: process.env.NODE_ENV === "development" ? ["localhost"] : [],
   typescript: {
-    ignoreBuildErrors: false,
+    // Type-check locally with `pnpm type-check`. Netlify's 2GB heap can't handle tsc on this codebase.
+    ignoreBuildErrors: process.env.NETLIFY === "true",
   },
   experimental: {
     optimizeCss: true,
