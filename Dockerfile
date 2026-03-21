@@ -30,6 +30,7 @@ RUN npx prisma generate
 # Build the application
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
+ENV NEXT_OUTPUT standalone
 
 RUN corepack enable pnpm && pnpm build
 
