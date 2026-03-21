@@ -12,8 +12,9 @@ const withBundleAnalyzer = BundleAnalyzer({
 
 const nextConfig = {
   reactStrictMode: true,
-  // Enable standalone output for Docker containerization
-  output: "standalone",
+  // Note: "standalone" output removed — Netlify uses its own adapter via @netlify/plugin-nextjs.
+  // For Docker, set NEXT_OUTPUT=standalone in the Docker build environment if needed.
+  ...(process.env.NEXT_OUTPUT === "standalone" ? { output: "standalone" } : {}),
   compiler: {
     removeConsole: false, // Keep all console logs temporarily
   },

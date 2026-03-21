@@ -122,7 +122,8 @@
       "Skill(gsd:execute-phase)",
       "Skill(gsd:plan-milestone-gaps)",
       "Bash(pnpm biome:*)",
-      "Bash(pnpm test:e2e:*)"
+      "Bash(pnpm test:e2e:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run:*)"
     ],
     "deny": []
   }
