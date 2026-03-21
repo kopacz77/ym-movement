@@ -125,7 +125,8 @@
       "Bash(pnpm test:e2e:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run:*)",
       "Bash(docker images:*)",
-      "Bash(docker system:*)"
+      "Bash(docker system:*)",
+      "Bash(docker rmi:*)"
     ],
     "deny": []
   }

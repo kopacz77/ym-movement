@@ -155,6 +155,18 @@ export const timeSlotRouter = createTRPCRouter({
       });
 
       try {
+        // Resolve coachId: use provided value, or fall back to calling user's coach profile
+        let resolvedCoachId = input.coachId;
+        if (!resolvedCoachId && ctx.session?.user?.id) {
+          const coach = await ctx.prisma.coach.findUnique({
+            where: { userId: ctx.session.user.id },
+            select: { id: true },
+          });
+          if (coach) {
+            resolvedCoachId = coach.id;
+          }
+        }
+
         // Get the rink timezone
         const rink = await ctx.prisma.rink.findUnique({
           where: { id: input.rinkId },
@@ -179,7 +191,7 @@ export const timeSlotRouter = createTRPCRouter({
           where: {
             rinkId: input.rinkId,
             isActive: true, // Only check overlap with active slots
-            ...(input.coachId && { coachId: input.coachId }),
+            ...(resolvedCoachId && { coachId: resolvedCoachId }),
             OR: [
               {
                 AND: [
@@ -213,7 +225,7 @@ export const timeSlotRouter = createTRPCRouter({
           data: {
             ...input,
             id: randomUUID(),
-            ...(input.coachId && { coachId: input.coachId }),
+            ...(resolvedCoachId && { coachId: resolvedCoachId }),
             updatedAt: new Date(),
           },
           include: { Rink: true },
@@ -507,6 +519,18 @@ export const timeSlotRouter = createTRPCRouter({
 
       console.log("Creating bulk time slots with input:", input);
 
+      // Resolve coachId: use provided value, or fall back to calling user's coach profile
+      let resolvedCoachId = input.coachId;
+      if (!resolvedCoachId && ctx.session?.user?.id) {
+        const coach = await ctx.prisma.coach.findUnique({
+          where: { userId: ctx.session.user.id },
+          select: { id: true },
+        });
+        if (coach) {
+          resolvedCoachId = coach.id;
+        }
+      }
+
       // Get the rink to access its timezone
       const rink = await ctx.prisma.rink.findUnique({
         where: { id: input.rinkId },
@@ -646,7 +670,7 @@ export const timeSlotRouter = createTRPCRouter({
               endTime: slotEnd.toUTC().toJSDate(),
               maxStudents: input.maxStudents,
               isActive: true,
-              ...(input.coachId && { coachId: input.coachId }),
+              ...(resolvedCoachId && { coachId: resolvedCoachId }),
             });
 
             // Advance to the next slot
@@ -697,7 +721,7 @@ export const timeSlotRouter = createTRPCRouter({
                 const overlapping = await tx.rinkTimeSlot.findFirst({
                   where: {
                     rinkId: slot.rinkId,
-                    ...(input.coachId && { coachId: input.coachId }),
+                    ...(resolvedCoachId && { coachId: resolvedCoachId }),
                     OR: [
                       {
                         AND: [
@@ -783,7 +807,7 @@ export const timeSlotRouter = createTRPCRouter({
               const recentlyCreatedSlots = await ctx.prisma.rinkTimeSlot.findMany({
                 where: {
                   rinkId: input.rinkId,
-                  ...(input.coachId && { coachId: input.coachId }),
+                  ...(resolvedCoachId && { coachId: resolvedCoachId }),
                   startTime: { gte: minStartTime },
                   endTime: { lte: maxEndTime },
                   // Additional filter to match the slot duration
