@@ -43,7 +43,7 @@ export const lessonRouter = createTRPCRouter({
         const [timeSlot, student] = await Promise.all([
           ctx.prisma.rinkTimeSlot.findUnique({
             where: { id: sanitizedInput.timeSlotId },
-            include: { Rink: true, Lesson: true },
+            include: { Rink: true, Lesson: { where: { status: LessonStatus.SCHEDULED } } },
           }),
           ctx.prisma.student.findUnique({
             where: { id: sanitizedInput.studentId },
@@ -76,10 +76,12 @@ export const lessonRouter = createTRPCRouter({
         }
 
         // Check for overlapping lessons — prevent student from double-booking across coaches
+        // Exclude lessons on this same time slot (already handled by the check above)
         const overlappingLesson = await ctx.prisma.lesson.findFirst({
           where: {
             studentId: sanitizedInput.studentId,
             status: LessonStatus.SCHEDULED,
+            timeSlotId: { not: sanitizedInput.timeSlotId },
             startTime: { lt: timeSlot.endTime },
             endTime: { gt: timeSlot.startTime },
           },
@@ -349,7 +351,9 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
           include: {
-            Lesson: true,
+            Lesson: {
+              where: { status: LessonStatus.SCHEDULED },
+            },
             Rink: true,
           },
         });
@@ -381,10 +385,12 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         }
 
         // Check for overlapping lessons — prevent student from double-booking across coaches
+        // Exclude lessons on this same time slot (already handled by the check above)
         const overlappingLesson = await ctx.prisma.lesson.findFirst({
           where: {
             studentId: input.studentId,
             status: LessonStatus.SCHEDULED,
+            timeSlotId: { not: input.timeSlotId },
             startTime: { lt: timeSlot.endTime },
             endTime: { gt: timeSlot.startTime },
           },

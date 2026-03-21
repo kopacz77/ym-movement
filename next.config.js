@@ -25,7 +25,6 @@ const nextConfig = {
     ignoreBuildErrors: process.env.NETLIFY === "true",
   },
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: [
       "@radix-ui/react-dialog",
       "@radix-ui/react-tabs",

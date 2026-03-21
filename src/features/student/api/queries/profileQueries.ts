@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 // src/features/student/api/queries/profileQueries.ts
 import { z } from "zod";
 import { getHourlyRateForLessonType } from "@/lib/pricing";
+import { isAdminRole } from "@/lib/roles";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define a proper type for the query filters
@@ -43,7 +44,7 @@ export const profileRouter = createTRPCRouter({
 
         // Authorization check: Verify student ownership or admin access
         const isOwner = student.User.id === ctx.session.user.id;
-        const isAdmin = ctx.session.user.role === "ADMIN";
+        const isAdmin = isAdminRole(ctx.session.user.role);
 
         if (!isOwner && !isAdmin) {
           throw new TRPCError({
@@ -97,7 +98,7 @@ export const profileRouter = createTRPCRouter({
 
         // Authorization check: Verify student ownership or admin access
         const isOwner = student.userId === ctx.session.user.id;
-        const isAdmin = ctx.session.user.role === "ADMIN";
+        const isAdmin = isAdminRole(ctx.session.user.role);
 
         if (!isOwner && !isAdmin) {
           throw new TRPCError({
@@ -159,7 +160,7 @@ export const profileRouter = createTRPCRouter({
 
         // Authorization check: Verify student ownership or admin access
         const isOwner = student.userId === ctx.session.user.id;
-        const isAdmin = ctx.session.user.role === "ADMIN";
+        const isAdmin = isAdminRole(ctx.session.user.role);
 
         if (!isOwner && !isAdmin) {
           throw new TRPCError({
@@ -237,7 +238,7 @@ export const profileRouter = createTRPCRouter({
 
         // Authorization check: Verify student ownership or admin access
         const isOwner = student.userId === ctx.session.user.id;
-        const isAdmin = ctx.session.user.role === "ADMIN";
+        const isAdmin = isAdminRole(ctx.session.user.role);
 
         if (!isOwner && !isAdmin) {
           throw new TRPCError({
@@ -322,7 +323,7 @@ export const profileRouter = createTRPCRouter({
 
         // Authorization check: Verify student ownership or admin access
         const isOwner = student.userId === ctx.session.user.id;
-        const isAdmin = ctx.session.user.role === "ADMIN";
+        const isAdmin = isAdminRole(ctx.session.user.role);
 
         if (!isOwner && !isAdmin) {
           throw new TRPCError({

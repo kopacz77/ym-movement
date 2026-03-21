@@ -1,10 +1,10 @@
 // src/app/(protected)/admin/reports/page.tsx
 "use client";
 
-import { addMonths, endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { addMonths, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight, Download, FileText } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,29 +42,27 @@ export default function ReportsPage() {
   // For month selection - start with current month
   const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()));
 
+  // Stable "today" reference that only changes when the period or selectedMonth changes
+  // (prevents new Date() from creating unstable query keys on every render)
+  const today = useMemo(() => new Date(), [period]);
+
   // Calculate the actual date range based on period and selected month
-  const getDateRange = () => {
+  const dateRange = useMemo(() => {
     switch (period) {
-      case "week": {
-        // Last 7 days from today
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
+      case "week":
         return {
-          start: weekAgo,
-          end: new Date(),
+          start: startOfDay(subDays(today, 7)),
+          end: endOfDay(today),
         };
-      }
       case "month":
-        // Selected calendar month
         return {
           start: startOfMonth(selectedMonth),
           end: endOfMonth(selectedMonth),
         };
       case "year":
-        // Last 12 months from today
         return {
-          start: subMonths(new Date(), 12),
-          end: new Date(),
+          start: startOfDay(subMonths(today, 12)),
+          end: endOfDay(today),
         };
       default:
         return {
@@ -72,9 +70,7 @@ export default function ReportsPage() {
           end: endOfMonth(selectedMonth),
         };
     }
-  };
-
-  const dateRange = getDateRange();
+  }, [period, selectedMonth, today]);
 
   // Fetch overview data for summary - only when authenticated to prevent 401 race condition
   const { data: overviewData, isLoading: isLoadingOverview } =
