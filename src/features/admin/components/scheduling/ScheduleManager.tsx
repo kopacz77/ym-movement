@@ -211,6 +211,12 @@ const ScheduleManagerComponent = () => {
     return filtered;
   }, [timeSlots, selectedRink, timezoneFilter]);
 
+  // Count draft (unpublished) slots in current view
+  const draftCount = useMemo(() => {
+    if (!filteredTimeSlots) return 0;
+    return filteredTimeSlots.filter((slot) => !slot.isActive).length;
+  }, [filteredTimeSlots]);
+
   // Get current rink timezone for display
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
@@ -556,7 +562,6 @@ const ScheduleManagerComponent = () => {
           startTime: startDateTime,
           endTime: endDateTime,
           maxStudents: bookingData.maxStudents,
-          isActive: true,
           coachId,
         },
         {
@@ -569,6 +574,38 @@ const ScheduleManagerComponent = () => {
     },
     [createTimeSlot, rinks, selectedCoach, currentUserCoachId],
   );
+
+  // Handle publishing all draft slots in current view
+  const publishMutation = api.admin.schedule.publishTimeSlots.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Published ${data.publishedCount} time slot${data.publishedCount !== 1 ? "s" : ""}`);
+    },
+    onError: (error) => {
+      toast.error("Failed to publish time slots", {
+        description: error.message,
+      });
+    },
+  });
+
+  const handlePublishDrafts = useCallback(() => {
+    toast(`Publish ${draftCount} draft${draftCount !== 1 ? "s" : ""}?`, {
+      description: "This will make them visible to students for booking.",
+      action: {
+        label: "Publish",
+        onClick: () => {
+          publishMutation.mutate({
+            startDate: dateRange.start,
+            endDate: dateRange.end,
+            ...(selectedCoach && { coachId: selectedCoach }),
+          });
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  }, [publishMutation, dateRange, selectedCoach, draftCount]);
 
   // Handle dialog close actions
   // const handleCreateDialogClose = useCallback(() => {
@@ -679,6 +716,9 @@ const ScheduleManagerComponent = () => {
           />
         }
         travelDateBlocker={<WorkingBlockedDatesManager coachId={selectedCoach} />}
+        draftCount={draftCount}
+        onPublishDrafts={handlePublishDrafts}
+        isPublishing={publishMutation.isPending}
       />
 
       {/* Timezone Information Banner */}

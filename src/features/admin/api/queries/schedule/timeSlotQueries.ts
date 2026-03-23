@@ -44,7 +44,6 @@ export const timeSlotRouter = createTRPCRouter({
                   ...(input.endDate && { lte: input.endDate }),
                 }
               : undefined,
-            isActive: true,
             ...(input.coachId && {
               OR: [{ coachId: input.coachId }, { coachId: null }],
             }),
@@ -136,7 +135,7 @@ export const timeSlotRouter = createTRPCRouter({
           startTime: z.date(),
           endTime: z.date(),
           maxStudents: z.number().min(1),
-          isActive: z.boolean().default(true),
+          isActive: z.boolean().default(false),
           coachId: z.string().optional(),
         })
         .refine((data) => data.endTime > data.startTime, {
@@ -669,7 +668,7 @@ export const timeSlotRouter = createTRPCRouter({
               startTime: slotStart.toUTC().toJSDate(),
               endTime: slotEnd.toUTC().toJSDate(),
               maxStudents: input.maxStudents,
-              isActive: true,
+              isActive: false,
               ...(resolvedCoachId && { coachId: resolvedCoachId }),
             });
 
@@ -853,5 +852,39 @@ export const timeSlotRouter = createTRPCRouter({
               }))
             : [],
       };
+    }),
+
+  publishTimeSlots: adminProcedure
+    .input(
+      z.object({
+        startDate: z.date(),
+        endDate: z.date(),
+        coachId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.prisma.rinkTimeSlot.updateMany({
+          where: {
+            isActive: false,
+            startTime: { gte: input.startDate },
+            endTime: { lte: input.endDate },
+            ...(input.coachId && { coachId: input.coachId }),
+          },
+          data: {
+            isActive: true,
+            updatedAt: new Date(),
+          },
+        });
+
+        return { publishedCount: result.count };
+      } catch (error) {
+        console.error("Error publishing time slots:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to publish time slots",
+          cause: error,
+        });
+      }
     }),
 });

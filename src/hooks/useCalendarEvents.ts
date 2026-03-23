@@ -91,6 +91,11 @@ export function useCalendarEvents(
         title += ` [${slot.Coach.User.name}]`;
       }
 
+      // Prefix draft indicator for unpublished slots
+      if (!slot.isActive) {
+        title = `[DRAFT] ${title}`;
+      }
+
       // Determine color based on slot status
       let backgroundColor = "#22c55e"; // green-500 (default/available)
 

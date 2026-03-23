@@ -1,6 +1,6 @@
 // src/features/admin/components/scheduling/ScheduleHeader.tsx
 
-import { CheckSquare, Filter, Globe, Plane } from "lucide-react";
+import { CheckSquare, Filter, Globe, Plane, Send } from "lucide-react";
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -49,6 +49,10 @@ interface ScheduleHeaderProps {
   dateRangeFilter?: React.ReactNode;
   // Travel dates blocker
   travelDateBlocker?: React.ReactNode;
+  // Draft publish props
+  draftCount?: number;
+  onPublishDrafts?: () => void;
+  isPublishing?: boolean;
 }
 
 export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
@@ -67,6 +71,9 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
   onToggleSelectionMode,
   dateRangeFilter,
   travelDateBlocker,
+  draftCount = 0,
+  onPublishDrafts,
+  isPublishing = false,
 }) => {
   // Check if "All Rinks" is selected (no specific rink)
   const isAllRinksSelected = !selectedRink;
@@ -173,6 +180,23 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-2">
+            {draftCount > 0 && onPublishDrafts && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onPublishDrafts}
+                disabled={isPublishing}
+                className="flex items-center gap-2 text-xs sm:text-sm bg-green-600 hover:bg-green-700"
+              >
+                <Send className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">
+                  {isPublishing ? "Publishing..." : `Publish ${draftCount} Draft${draftCount !== 1 ? "s" : ""}`}
+                </span>
+                <span className="sm:hidden">
+                  {isPublishing ? "..." : `Publish (${draftCount})`}
+                </span>
+              </Button>
+            )}
             <UndoBulkCreationButton />
             {onToggleSelectionMode && (
               <Button

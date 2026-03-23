@@ -22,6 +22,7 @@ export const scheduleRouter = createTRPCRouter({
   deleteBulkTimeSlots: timeSlotRouter.deleteBulkTimeSlots, // Add the new procedure
   updateTimeSlot: timeSlotRouter.updateTimeSlot,
   createBulkTimeSlots: timeSlotRouter.createBulkTimeSlots,
+  publishTimeSlots: timeSlotRouter.publishTimeSlots,
 
   // Include all procedures from the lessonRouter
   createLesson: lessonRouter.createLesson,
