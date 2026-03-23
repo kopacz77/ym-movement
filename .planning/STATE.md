@@ -40,9 +40,13 @@ Last activity: 2026-03-17 — Completed v1.1 Test & Stabilize milestone
 
 ### Pending Todos
 
-- Run `pnpm migrate:coach-data` before production deployment
-- Set up Google OAuth credentials for production
-- Pre-existing `pnpm build` failure: Next.js post-build 404 copy error (unrelated, compilation succeeds)
+(None)
+
+### Completed Todos
+
+- ~~Set up Google OAuth credentials for production~~ — Configured in GCP project `yuras-app` with redirect URI `https://ym-movement.com/api/auth/google-calendar/callback`, env vars added to Netlify
+- ~~Run `pnpm migrate:coach-data` before production deployment~~ — Verified applied (5 coaches, 0 null coachIds, 67 CoachStudent links)
+- ~~Pre-existing `pnpm build` failure: Next.js post-build 404 copy error~~ — Resolved by Next.js 16.1.1 → 16.1.6 upgrade
 
 ### Blockers/Concerns
 

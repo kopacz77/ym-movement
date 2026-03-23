@@ -126,7 +126,11 @@
       "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run:*)",
       "Bash(docker images:*)",
       "Bash(docker system:*)",
-      "Bash(docker rmi:*)"
+      "Bash(docker rmi:*)",
+      "Bash(openssl rand:*)",
+      "Bash(gcloud:*)",
+      "Bash(/home/kopacz/projects/yura-scheduler-v3/.env:*)",
+      "Skill(gsd:resume-work)"
     ],
     "deny": []
   }
