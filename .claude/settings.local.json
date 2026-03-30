@@ -131,7 +131,9 @@
       "Bash(gcloud:*)",
       "Bash(/home/kopacz/projects/yura-scheduler-v3/.env:*)",
       "Skill(gsd:resume-work)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(pnpm outdated:*)",
+      "Bash(do if:*)"
     ],
     "deny": []
   }

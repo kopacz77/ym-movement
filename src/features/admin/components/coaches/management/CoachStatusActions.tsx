@@ -2,7 +2,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Ban, Power, PowerOff, ShieldAlert, Trash2 } from "lucide-react";
+import { AlertTriangle, Ban, MoreHorizontal, Power, PowerOff, ShieldAlert, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 
-interface CoachStatusActionsProps {
+interface CoachActionsProps {
   coachId: string;
   coachName: string;
   isActive: boolean;
@@ -27,13 +32,19 @@ interface CoachStatusActionsProps {
   suspendedAt: Date | string | null;
 }
 
-export function CoachStatusActions({
+/**
+ * Self-contained coach actions cell: dropdown trigger + menu items + dialogs.
+ * Dialogs are rendered as siblings of (not inside) the DropdownMenu,
+ * preventing the Radix unmount-on-close issue.
+ */
+export function CoachActionsCell({
   coachId,
   coachName,
   isActive,
   isApproved,
   suspendedAt,
-}: CoachStatusActionsProps) {
+}: CoachActionsProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [showActivateDialog, setShowActivateDialog] = useState(false);
@@ -107,63 +118,95 @@ export function CoachStatusActions({
     deleteCoachMutation.mutate({ coachId });
   };
 
-  if (!isApproved) {
-    return null;
-  }
+  const openDialog = (setter: (v: boolean) => void) => {
+    setDropdownOpen(false);
+    // Small delay to let dropdown close animation finish before opening dialog
+    setTimeout(() => setter(true), 10);
+  };
 
   return (
     <>
-      {isActive && !isSuspended && (
-        <>
-          <DropdownMenuItem
-            onClick={() => setShowDeactivateDialog(true)}
-            className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-            disabled={toggleStatusMutation.isPending}
-          >
-            <PowerOff className="h-4 w-4 mr-2" />
-            Deactivate
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setShowSuspendDialog(true)}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            disabled={toggleStatusMutation.isPending}
-          >
-            <Ban className="h-4 w-4 mr-2" />
-            Suspend
-          </DropdownMenuItem>
-        </>
-      )}
+      {/* Dropdown menu */}
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {isApproved && (
+            <>
+              {isActive && !isSuspended && (
+                <>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      openDialog(setShowDeactivateDialog);
+                    }}
+                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                    disabled={toggleStatusMutation.isPending}
+                  >
+                    <PowerOff className="h-4 w-4 mr-2" />
+                    Deactivate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      openDialog(setShowSuspendDialog);
+                    }}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    disabled={toggleStatusMutation.isPending}
+                  >
+                    <Ban className="h-4 w-4 mr-2" />
+                    Suspend
+                  </DropdownMenuItem>
+                </>
+              )}
 
-      {!isActive && !isSuspended && (
-        <DropdownMenuItem
-          onClick={() => setShowActivateDialog(true)}
-          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-          disabled={toggleStatusMutation.isPending}
-        >
-          <Power className="h-4 w-4 mr-2" />
-          Activate
-        </DropdownMenuItem>
-      )}
+              {!isActive && !isSuspended && (
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    openDialog(setShowActivateDialog);
+                  }}
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  disabled={toggleStatusMutation.isPending}
+                >
+                  <Power className="h-4 w-4 mr-2" />
+                  Activate
+                </DropdownMenuItem>
+              )}
 
-      {isSuspended && (
-        <DropdownMenuItem
-          onClick={() => setShowActivateDialog(true)}
-          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-          disabled={toggleStatusMutation.isPending}
-        >
-          <ShieldAlert className="h-4 w-4 mr-2" />
-          Reactivate
-        </DropdownMenuItem>
-      )}
+              {isSuspended && (
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    openDialog(setShowActivateDialog);
+                  }}
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  disabled={toggleStatusMutation.isPending}
+                >
+                  <ShieldAlert className="h-4 w-4 mr-2" />
+                  Reactivate
+                </DropdownMenuItem>
+              )}
 
-      {/* Delete option - always available for approved coaches */}
-      <DropdownMenuItem
-        onClick={() => setShowDeleteDialog(true)}
-        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-      >
-        <Trash2 className="h-4 w-4 mr-2" />
-        Delete Coach
-      </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  openDialog(setShowDeleteDialog);
+                }}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Coach
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Dialogs rendered OUTSIDE the dropdown so they don't unmount when dropdown closes */}
 
       {/* Deactivate Confirmation Dialog */}
       <Dialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>

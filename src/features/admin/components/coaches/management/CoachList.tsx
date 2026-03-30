@@ -2,17 +2,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { Check, MoreHorizontal, Pencil, X } from "lucide-react";
+import { Check, Pencil, X } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -24,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { api } from "@/lib/api";
-import { CoachStatusActions } from "./CoachStatusActions";
+import { CoachActionsCell } from "./CoachStatusActions";
 
 function getStatusBadge(coach: {
   isApproved: boolean;
@@ -209,22 +204,13 @@ export const CoachList: React.FC = () => {
                   {formatDate(coach.createdAt)}
                 </TableCell>
                 <TableCell className="sticky right-0 bg-background">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <CoachStatusActions
-                        coachId={coach.id}
-                        coachName={coach.user.name || "Coach"}
-                        isActive={coach.isActive}
-                        isApproved={coach.isApproved}
-                        suspendedAt={coach.suspendedAt}
-                      />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <CoachActionsCell
+                    coachId={coach.id}
+                    coachName={coach.user.name || "Coach"}
+                    isActive={coach.isActive}
+                    isApproved={coach.isApproved}
+                    suspendedAt={coach.suspendedAt}
+                  />
                 </TableCell>
               </TableRow>
             ))}
