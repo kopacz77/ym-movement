@@ -130,7 +130,8 @@
       "Bash(openssl rand:*)",
       "Bash(gcloud:*)",
       "Bash(/home/kopacz/projects/yura-scheduler-v3/.env:*)",
-      "Skill(gsd:resume-work)"
+      "Skill(gsd:resume-work)",
+      "Bash(npx next:*)"
     ],
     "deny": []
   }

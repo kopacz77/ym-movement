@@ -269,6 +269,98 @@ export const coachManagementRouter = createTRPCRouter({
       }
     }),
 
+  // Mutation: Delete coach permanently
+  deleteCoach: superAdminProcedure
+    .input(
+      z.object({
+        coachId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const coach = await ctx.prisma.coach.findUnique({
+          where: { id: input.coachId },
+          include: {
+            User: { select: { id: true, name: true } },
+            _count: {
+              select: {
+                Lesson: true,
+                RinkTimeSlot: true,
+                CoachStudent: true,
+                ProposedTimeSlot: true,
+                BlockedDateRange: true,
+              },
+            },
+          },
+        });
+
+        if (!coach) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Coach not found",
+          });
+        }
+
+        // Delete the User record — Coach cascades via onDelete: Cascade
+        // Lessons and RinkTimeSlots will have coachId set to null (onDelete: SetNull)
+        // CoachStudent and ProposedTimeSlot records cascade delete
+        await ctx.prisma.user.delete({
+          where: { id: coach.userId },
+        });
+
+        return {
+          deletedCoachName: coach.User.name,
+          affectedLessons: coach._count.Lesson,
+          affectedTimeSlots: coach._count.RinkTimeSlot,
+          deletedStudentLinks: coach._count.CoachStudent,
+          deletedProposals: coach._count.ProposedTimeSlot,
+        };
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error("Error deleting coach:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete coach",
+          cause: error,
+        });
+      }
+    }),
+
+  // Query: Get coach deletion impact (for confirmation dialog)
+  getCoachDeletionImpact: superAdminProcedure
+    .input(z.object({ coachId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const coach = await ctx.prisma.coach.findUnique({
+        where: { id: input.coachId },
+        include: {
+          _count: {
+            select: {
+              Lesson: true,
+              RinkTimeSlot: true,
+              CoachStudent: true,
+              ProposedTimeSlot: true,
+            },
+          },
+        },
+      });
+
+      if (!coach) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Coach not found",
+        });
+      }
+
+      return {
+        lessonCount: coach._count.Lesson,
+        timeSlotCount: coach._count.RinkTimeSlot,
+        studentCount: coach._count.CoachStudent,
+        proposalCount: coach._count.ProposedTimeSlot,
+      };
+    }),
+
   // Mutation: Toggle coach status (activate/deactivate/suspend)
   toggleCoachStatus: superAdminProcedure
     .input(

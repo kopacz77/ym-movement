@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -217,7 +216,6 @@ export const CoachList: React.FC = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuSeparator />
                       <CoachStatusActions
                         coachId={coach.id}
                         coachName={coach.user.name || "Coach"}
