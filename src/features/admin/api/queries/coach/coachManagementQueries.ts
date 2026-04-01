@@ -41,6 +41,7 @@ export const coachManagementRouter = createTRPCRouter({
           groupLessonPrice: coach.groupLessonPrice,
           choreographyPrice: coach.choreographyPrice,
           competitionPrepPrice: coach.competitionPrepPrice,
+          offIceDancePrice: coach.offIceDancePrice,
           revenueSplitPercent: coach.revenueSplitPercent,
           createdAt: coach.createdAt,
         })),
@@ -114,6 +115,7 @@ export const coachManagementRouter = createTRPCRouter({
         groupLessonPrice: z.number().min(0).optional(),
         choreographyPrice: z.number().min(0).optional(),
         competitionPrepPrice: z.number().min(0).optional(),
+        offIceDancePrice: z.number().min(0).optional(),
         revenueSplitPercent: z.number().min(0).max(100).optional().default(70),
       }),
     )
@@ -155,6 +157,7 @@ export const coachManagementRouter = createTRPCRouter({
               groupLessonPrice: input.groupLessonPrice ?? null,
               choreographyPrice: input.choreographyPrice ?? null,
               competitionPrepPrice: input.competitionPrepPrice ?? null,
+              offIceDancePrice: input.offIceDancePrice ?? null,
               revenueSplitPercent: input.revenueSplitPercent,
               isApproved: true,
               isActive: true,
@@ -211,6 +214,7 @@ export const coachManagementRouter = createTRPCRouter({
         groupLessonPrice: z.number().min(0).optional(),
         choreographyPrice: z.number().min(0).optional(),
         competitionPrepPrice: z.number().min(0).optional(),
+        offIceDancePrice: z.number().min(0).optional(),
         revenueSplitPercent: z.number().min(0).max(100).optional(),
       }),
     )

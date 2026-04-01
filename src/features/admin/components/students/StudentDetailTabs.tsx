@@ -23,6 +23,7 @@ interface StudentDetailTabsProps {
     groupLessonPrice: number | null;
     choreographyPrice: number | null;
     competitionPrepPrice: number | null;
+    offIceDancePrice: number | null;
   };
 }
 
@@ -83,12 +84,14 @@ export function StudentDetailTabs({ student }: StudentDetailTabsProps) {
               groupLessonPrice: student.groupLessonPrice, // Keep as null instead of converting to undefined
               choreographyPrice: student.choreographyPrice, // Keep as null instead of converting to undefined
               competitionPrepPrice: student.competitionPrepPrice, // Keep as null instead of converting to undefined
+              offIceDancePrice: student.offIceDancePrice ?? null,
             }}
             defaultPrices={{
               privateLessonPrice: pricingData.privateLessonPrice,
               groupLessonPrice: pricingData.groupLessonPrice,
               choreographyPrice: pricingData.choreographyPrice,
               competitionPrice: pricingData.competitionPrice,
+              offIceDancePrice: pricingData.offIceDancePrice ?? 75,
             }}
           />
         ) : (

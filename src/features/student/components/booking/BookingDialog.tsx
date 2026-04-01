@@ -110,6 +110,7 @@ export function BookingDialog({
       GROUP: 45,
       CHOREOGRAPHY: 90,
       COMPETITION_PREP: 95,
+      OFF_ICE_DANCE: 75,
     };
 
     // If pricing data hasn't loaded yet, use fallbacks
@@ -127,6 +128,8 @@ export function BookingDialog({
         return studentPricing.groupLessonPrice;
       case LessonType.COMPETITION_PREP:
         return studentPricing.competitionPrepPrice;
+      case LessonType.OFF_ICE_DANCE:
+        return studentPricing.offIceDancePrice;
       default:
         return fallbackPrices[type];
     }
@@ -220,6 +223,9 @@ export function BookingDialog({
                   </SelectItem>
                   <SelectItem value={LessonType.CHOREOGRAPHY}>
                     Choreography - ${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY))}
+                  </SelectItem>
+                  <SelectItem value={LessonType.OFF_ICE_DANCE}>
+                    Off-Ice Dance - ${formatPrice(getLessonTypePrice(LessonType.OFF_ICE_DANCE))}
                   </SelectItem>
                 </SelectContent>
               </Select>

@@ -92,7 +92,8 @@ export function AppLayout({ role, children }: AppLayoutProps) {
   return (
     <>
       {/* Desktop Layout - Beautiful fixed sidebar (NEVER CHANGE) */}
-      <div className="hidden lg:flex min-h-screen bg-background">
+      {/* Breakpoint at 1300px: above half-screen on 2560px displays (1280px) */}
+      <div className="hidden min-[1300px]:flex min-h-screen bg-background">
         {/* Sidebar - Fixed width, always visible on desktop */}
         <div className="w-64 flex-col fixed inset-y-0">
           <AppSidebar role={role} />
@@ -111,9 +112,9 @@ export function AppLayout({ role, children }: AppLayoutProps) {
         </div>
       </div>
 
-      {/* Mobile Layout - Full width with overlay sidebar */}
-      <div className="lg:hidden min-h-screen bg-background">
-        <SidebarProvider>
+      {/* Mobile/Split-screen Layout - Full width with overlay sidebar */}
+      <div className="min-[1300px]:hidden min-h-screen bg-background">
+        <SidebarProvider defaultOpen={false}>
           {/* Mobile Sidebar - Overlay only */}
           <Sidebar collapsible="offcanvas" className="border-r bg-white">
             <SidebarHeader className="h-16 px-4 border-b flex items-center bg-white">

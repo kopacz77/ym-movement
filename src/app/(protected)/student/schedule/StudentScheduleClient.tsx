@@ -11,7 +11,7 @@ import { api } from "@/lib/api";
 
 // Define the type that exactly matches what LessonCard expects
 type LessonStatus = "SCHEDULED" | "CANCELLED" | "COMPLETED";
-type LessonType = "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP";
+type LessonType = "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP" | "OFF_ICE_DANCE";
 type RinkArea = "MAIN_RINK" | "PRACTICE_RINK" | "DANCE_STUDIO";
 
 // This is the raw data shape from the API

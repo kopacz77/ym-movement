@@ -84,6 +84,7 @@ export const pricingQueries = createTRPCRouter({
             groupLessonPrice: true,
             choreographyPrice: true,
             competitionPrepPrice: true,
+            offIceDancePrice: true,
           },
         });
 
@@ -100,6 +101,7 @@ export const pricingQueries = createTRPCRouter({
           groupLessonPrice: 45,
           choreographyPrice: 90,
           competitionPrice: 95,
+          offIceDancePrice: 75,
         };
 
         return {
@@ -148,6 +150,7 @@ export const pricingQueries = createTRPCRouter({
             groupLessonPrice: input.groupLessonPrice,
             choreographyPrice: input.choreographyPrice,
             competitionPrepPrice: input.competitionPrepPrice,
+            offIceDancePrice: input.offIceDancePrice,
           },
         });
 

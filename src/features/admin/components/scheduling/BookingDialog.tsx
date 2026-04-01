@@ -90,6 +90,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
       GROUP: 45,
       CHOREOGRAPHY: 90,
       COMPETITION_PREP: 95,
+      OFF_ICE_DANCE: 75,
     };
     return prices[type];
   };

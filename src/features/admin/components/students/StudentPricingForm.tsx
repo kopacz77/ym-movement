@@ -21,12 +21,14 @@ interface StudentPricingFormProps {
     groupLessonPrice: number | null;
     choreographyPrice: number | null;
     competitionPrepPrice: number | null;
+    offIceDancePrice: number | null;
   };
   defaultPrices: {
     privateLessonPrice: number;
     groupLessonPrice: number;
     choreographyPrice: number;
     competitionPrice: number;
+    offIceDancePrice: number;
   };
 }
 
@@ -48,6 +50,9 @@ export function StudentPricingForm({
   );
   const [competitionPrice, setCompetitionPrice] = useState(
     initialData.competitionPrepPrice?.toString() || defaultPrices.competitionPrice.toString(),
+  );
+  const [offIceDancePrice, setOffIceDancePrice] = useState(
+    initialData.offIceDancePrice?.toString() || defaultPrices.offIceDancePrice.toString(),
   );
   const [activeTab, setActiveTab] = useState("pricing");
 
@@ -74,14 +79,15 @@ export function StudentPricingForm({
         !privatePrice.trim() ||
         !groupPrice.trim() ||
         !choreographyPrice.trim() ||
-        !competitionPrice.trim()
+        !competitionPrice.trim() ||
+        !offIceDancePrice.trim()
       ) {
         toast.error("Price fields cannot be empty when custom pricing is enabled");
         return;
       }
 
       // Check for valid numbers
-      const prices = [privatePrice, groupPrice, choreographyPrice, competitionPrice];
+      const prices = [privatePrice, groupPrice, choreographyPrice, competitionPrice, offIceDancePrice];
       for (const price of prices) {
         const parsed = Number.parseFloat(price);
         if (Number.isNaN(parsed) || parsed < 0) {
@@ -98,6 +104,7 @@ export function StudentPricingForm({
       groupLessonPrice: isEnabled ? Number.parseFloat(groupPrice) : null,
       choreographyPrice: isEnabled ? Number.parseFloat(choreographyPrice) : null,
       competitionPrepPrice: isEnabled ? Number.parseFloat(competitionPrice) : null,
+      offIceDancePrice: isEnabled ? Number.parseFloat(offIceDancePrice) : null,
     };
 
     updatePricing.mutate(data);
@@ -327,6 +334,55 @@ export function StudentPricingForm({
                             ? `$${calculateDifference(
                                 competitionPrice,
                                 defaultPrices.competitionPrice,
+                              ).toFixed(2)} additional`
+                            : "Same as default"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="off-ice-dance-price">Off-Ice Dance Price ($)</Label>
+                    <div className="flex items-center">
+                      <Input
+                        id="off-ice-dance-price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={offIceDancePrice}
+                        onChange={(e) => setOffIceDancePrice(e.target.value)}
+                        disabled={!isEnabled}
+                        required={isEnabled}
+                      />
+                    </div>
+                    {!isEnabled && (
+                      <p className="text-xs text-muted-foreground">
+                        Default: ${defaultPrices.offIceDancePrice}
+                      </p>
+                    )}
+                    {isEnabled && (
+                      <p
+                        className={`text-xs ${
+                          calculateDifference(offIceDancePrice, defaultPrices.offIceDancePrice) < 0
+                            ? "text-green-600"
+                            : calculateDifference(
+                                  offIceDancePrice,
+                                  defaultPrices.offIceDancePrice,
+                                ) > 0
+                              ? "text-orange-600"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        {calculateDifference(offIceDancePrice, defaultPrices.offIceDancePrice) < 0
+                          ? `$${Math.abs(
+                              calculateDifference(offIceDancePrice, defaultPrices.offIceDancePrice),
+                            ).toFixed(2)} discount`
+                          : calculateDifference(
+                                offIceDancePrice,
+                                defaultPrices.offIceDancePrice,
+                              ) > 0
+                            ? `$${calculateDifference(
+                                offIceDancePrice,
+                                defaultPrices.offIceDancePrice,
                               ).toFixed(2)} additional`
                             : "Same as default"}
                       </p>

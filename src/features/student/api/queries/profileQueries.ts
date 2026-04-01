@@ -226,6 +226,7 @@ export const profileRouter = createTRPCRouter({
             choreographyPrice: true,
             groupLessonPrice: true,
             competitionPrepPrice: true,
+            offIceDancePrice: true,
           },
         });
 
@@ -260,6 +261,7 @@ export const profileRouter = createTRPCRouter({
               groupLessonPrice: true,
               choreographyPrice: true,
               competitionPrepPrice: true,
+              offIceDancePrice: true,
             },
           });
         }
@@ -287,6 +289,12 @@ export const profileRouter = createTRPCRouter({
           ),
           competitionPrepPrice: getHourlyRateForLessonType(
             LessonType.COMPETITION_PREP,
+            student,
+            defaultPricing,
+            coachPricing,
+          ),
+          offIceDancePrice: getHourlyRateForLessonType(
+            LessonType.OFF_ICE_DANCE,
             student,
             defaultPricing,
             coachPricing,

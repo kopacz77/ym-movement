@@ -90,6 +90,7 @@ export const studentQueries = createTRPCRouter({
               groupLessonPrice: true,
               choreographyPrice: true,
               competitionPrepPrice: true,
+              offIceDancePrice: true,
               User: {
                 select: {
                   id: true,

@@ -27,6 +27,7 @@ export const defaultPricingSchema = z.object({
   groupLessonPrice: z.number().min(0),
   choreographyPrice: z.number().min(0),
   competitionPrice: z.number().min(0),
+  offIceDancePrice: z.number().min(0),
 });
 
 export const studentPricingSchema = z.object({
@@ -36,6 +37,7 @@ export const studentPricingSchema = z.object({
   groupLessonPrice: z.number().nullable(),
   choreographyPrice: z.number().nullable(),
   competitionPrepPrice: z.number().nullable(),
+  offIceDancePrice: z.number().nullable(),
 });
 
 // Type for student response that includes invitation flag

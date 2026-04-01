@@ -18,6 +18,10 @@ const lessonTypeConfig: Record<string, { label: string; className: string }> = {
     label: "Competition Prep",
     className: "bg-orange-100 text-orange-800 border-orange-200",
   },
+  OFF_ICE_DANCE: {
+    label: "Off-Ice Dance",
+    className: "bg-pink-100 text-pink-800 border-pink-200",
+  },
 };
 
 function getLessonTypeBadge(type: string | null | undefined) {

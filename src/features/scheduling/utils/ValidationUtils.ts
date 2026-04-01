@@ -58,6 +58,7 @@ export const validateLessonTypeForLevel = (
     GROUP: Object.values(Level), // All levels allowed
     CHOREOGRAPHY: [Level.JUVENILE, Level.INTERMEDIATE, Level.NOVICE, Level.JUNIOR, Level.SENIOR],
     COMPETITION_PREP: [Level.INTERMEDIATE, Level.NOVICE, Level.JUNIOR, Level.SENIOR],
+    OFF_ICE_DANCE: Object.values(Level), // All levels allowed
   };
 
   const allowed = requirements[lessonType].includes(studentLevel);

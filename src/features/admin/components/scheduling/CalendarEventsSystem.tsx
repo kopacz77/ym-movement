@@ -36,7 +36,7 @@ interface CalendarEvent {
   maxStudents: number;
   currentStudents: number;
   color?: string;
-  type: "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP";
+  type: "PRIVATE" | "GROUP" | "CHOREOGRAPHY" | "COMPETITION_PREP" | "OFF_ICE_DANCE";
   extendedProps?: Record<string, unknown>;
 }
 

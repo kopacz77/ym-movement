@@ -10,6 +10,7 @@ export const DEFAULT_HOURLY_PRICES = {
   [LessonType.CHOREOGRAPHY]: 150,
   [LessonType.GROUP]: 80,
   [LessonType.COMPETITION_PREP]: 180,
+  [LessonType.OFF_ICE_DANCE]: 100,
 } as const;
 
 /**
@@ -58,18 +59,21 @@ export function getHourlyRateForLessonType(
     groupLessonPrice?: number | null;
     choreographyPrice?: number | null;
     competitionPrepPrice?: number | null;
+    offIceDancePrice?: number | null;
   },
   defaultPricing?: {
     privateLessonPrice: number;
     groupLessonPrice: number;
     choreographyPrice: number;
     competitionPrice: number;
+    offIceDancePrice: number;
   } | null,
   coach?: {
     privateLessonPrice?: number | null;
     groupLessonPrice?: number | null;
     choreographyPrice?: number | null;
     competitionPrepPrice?: number | null;
+    offIceDancePrice?: number | null;
   } | null,
 ): number {
   // 1. Student custom pricing (highest priority)
@@ -93,6 +97,11 @@ export function getHourlyRateForLessonType(
       case LessonType.COMPETITION_PREP:
         if (student.competitionPrepPrice !== null && student.competitionPrepPrice !== undefined) {
           return student.competitionPrepPrice;
+        }
+        break;
+      case LessonType.OFF_ICE_DANCE:
+        if (student.offIceDancePrice !== null && student.offIceDancePrice !== undefined) {
+          return student.offIceDancePrice;
         }
         break;
     }
@@ -121,6 +130,11 @@ export function getHourlyRateForLessonType(
           return coach.competitionPrepPrice;
         }
         break;
+      case LessonType.OFF_ICE_DANCE:
+        if (coach.offIceDancePrice !== null && coach.offIceDancePrice !== undefined) {
+          return coach.offIceDancePrice;
+        }
+        break;
     }
   }
 
@@ -135,6 +149,8 @@ export function getHourlyRateForLessonType(
         return defaultPricing.groupLessonPrice;
       case LessonType.COMPETITION_PREP:
         return defaultPricing.competitionPrice;
+      case LessonType.OFF_ICE_DANCE:
+        return defaultPricing.offIceDancePrice;
     }
   }
 
@@ -169,18 +185,21 @@ export function calculateLessonPrice(
     groupLessonPrice?: number | null;
     choreographyPrice?: number | null;
     competitionPrepPrice?: number | null;
+    offIceDancePrice?: number | null;
   },
   defaultPricing?: {
     privateLessonPrice: number;
     groupLessonPrice: number;
     choreographyPrice: number;
     competitionPrice: number;
+    offIceDancePrice: number;
   } | null,
   coach?: {
     privateLessonPrice?: number | null;
     groupLessonPrice?: number | null;
     choreographyPrice?: number | null;
     competitionPrepPrice?: number | null;
+    offIceDancePrice?: number | null;
   } | null,
 ): number {
   const hourlyRate = getHourlyRateForLessonType(lessonType, student, defaultPricing, coach);

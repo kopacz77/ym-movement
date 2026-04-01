@@ -100,6 +100,7 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
       CHOREOGRAPHY: { label: "Choreography", className: "bg-purple-100 text-purple-700 border-purple-200" },
       GROUP: { label: "Group", className: "bg-green-100 text-green-700 border-green-200" },
       COMPETITION_PREP: { label: "Competition", className: "bg-orange-100 text-orange-700 border-orange-200" },
+      OFF_ICE_DANCE: { label: "Off-Ice Dance", className: "bg-pink-100 text-pink-700 border-pink-200" },
     };
     const config = typeMap[type] ?? { label: type ?? "Private", className: "bg-gray-100 text-gray-700 border-gray-200" };
     return <Badge className={`text-xs ${config.className}`}>{config.label}</Badge>;

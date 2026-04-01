@@ -294,7 +294,7 @@ export const openApiDocument = {
                 type: "object",
                 properties: {
                   timeSlotId: { type: "string" },
-                  lessonType: { type: "string", enum: ["PRIVATE", "SEMI_PRIVATE", "GROUP"] },
+                  lessonType: { type: "string", enum: ["PRIVATE", "SEMI_PRIVATE", "GROUP", "CHOREOGRAPHY", "COMPETITION_PREP", "OFF_ICE_DANCE"] },
                 },
                 required: ["timeSlotId", "lessonType"],
               },
@@ -358,7 +358,7 @@ export const openApiDocument = {
     schemas: {
       LessonType: {
         type: "string",
-        enum: ["PRIVATE", "SEMI_PRIVATE", "GROUP"],
+        enum: ["PRIVATE", "SEMI_PRIVATE", "GROUP", "CHOREOGRAPHY", "COMPETITION_PREP", "OFF_ICE_DANCE"],
       },
       LessonStatus: {
         type: "string",

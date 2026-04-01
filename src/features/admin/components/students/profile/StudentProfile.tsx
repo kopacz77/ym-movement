@@ -67,6 +67,7 @@ interface StudentData {
   groupLessonPrice: number | null;
   choreographyPrice: number | null;
   competitionPrepPrice: number | null;
+  offIceDancePrice: number | null;
   isActive: boolean;
   deactivatedAt: string | Date | null;
 }
@@ -474,12 +475,14 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                     groupLessonPrice: typedStudent.groupLessonPrice,
                     choreographyPrice: typedStudent.choreographyPrice,
                     competitionPrepPrice: typedStudent.competitionPrepPrice,
+                    offIceDancePrice: typedStudent.offIceDancePrice ?? null,
                   }}
                   defaultPrices={{
                     privateLessonPrice: defaultPricing.privateLessonPrice || 75,
                     groupLessonPrice: defaultPricing.groupLessonPrice || 45,
                     choreographyPrice: defaultPricing.choreographyPrice || 90,
                     competitionPrice: defaultPricing.competitionPrice || 95,
+                    offIceDancePrice: defaultPricing.offIceDancePrice || 75,
                   }}
                 />
               ) : (

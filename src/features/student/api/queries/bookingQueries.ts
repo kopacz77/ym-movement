@@ -26,6 +26,7 @@ interface ExtendedStudent {
   groupLessonPrice: number | null;
   choreographyPrice: number | null;
   competitionPrepPrice: number | null;
+  offIceDancePrice: number | null;
 }
 
 export const bookingRouter = createTRPCRouter({
@@ -220,6 +221,7 @@ export const bookingRouter = createTRPCRouter({
           groupLessonPrice: number | null;
           choreographyPrice: number | null;
           competitionPrepPrice: number | null;
+          offIceDancePrice: number | null;
         } | null = null;
         let coachWithTokens: CoachWithTokens | null = null;
 
@@ -232,6 +234,7 @@ export const bookingRouter = createTRPCRouter({
               groupLessonPrice: true,
               choreographyPrice: true,
               competitionPrepPrice: true,
+              offIceDancePrice: true,
               googleAccessToken: true,
               googleRefreshToken: true,
               googleTokenExpiresAt: true,
@@ -246,6 +249,7 @@ export const bookingRouter = createTRPCRouter({
               groupLessonPrice: coach.groupLessonPrice,
               choreographyPrice: coach.choreographyPrice,
               competitionPrepPrice: coach.competitionPrepPrice,
+              offIceDancePrice: coach.offIceDancePrice,
             };
             coachWithTokens = {
               id: coach.id,

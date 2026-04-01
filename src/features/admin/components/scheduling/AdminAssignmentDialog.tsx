@@ -216,6 +216,16 @@ export function AdminAssignmentDialog({
                     ),
                   )}
                 </SelectItem>
+                <SelectItem value={LessonType.OFF_ICE_DANCE}>
+                  Off-Ice Dance - $
+                  {formatPrice(
+                    getLessonTypePrice(
+                      LessonType.OFF_ICE_DANCE,
+                      studentPricing,
+                      slotDurationMinutes,
+                    ),
+                  )}
+                </SelectItem>
               </SelectContent>
             </Select>
             {selectedStudent?.customPricingEnabled && (

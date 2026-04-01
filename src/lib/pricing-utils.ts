@@ -11,6 +11,7 @@ export const DEFAULT_LESSON_PRICES = {
   GROUP: 45,
   CHOREOGRAPHY: 90,
   COMPETITION_PREP: 95,
+  OFF_ICE_DANCE: 75,
 } as const;
 
 /**
@@ -22,6 +23,7 @@ export interface StudentPricing {
   choreographyPrice?: number | null;
   groupLessonPrice?: number | null;
   competitionPrepPrice?: number | null;
+  offIceDancePrice?: number | null;
 }
 
 /**
@@ -44,6 +46,8 @@ export function getHourlyRate(type: LessonType, studentPricing?: StudentPricing)
         return studentPricing.groupLessonPrice ?? DEFAULT_LESSON_PRICES.GROUP;
       case "COMPETITION_PREP":
         return studentPricing.competitionPrepPrice ?? DEFAULT_LESSON_PRICES.COMPETITION_PREP;
+      case "OFF_ICE_DANCE":
+        return studentPricing.offIceDancePrice ?? DEFAULT_LESSON_PRICES.OFF_ICE_DANCE;
       default:
         return DEFAULT_LESSON_PRICES.PRIVATE;
     }
@@ -107,6 +111,7 @@ export function getLessonTypeLabel(type: LessonType): string {
     CHOREOGRAPHY: "Choreography",
     GROUP: "Group Lesson",
     COMPETITION_PREP: "Competition Prep",
+    OFF_ICE_DANCE: "Off-Ice Dance",
   };
 
   return labels[type] ?? "Unknown";

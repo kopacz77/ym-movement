@@ -24,6 +24,9 @@ export function DefaultPricingSettings() {
   const [competitionPrice, setCompetitionPrice] = useState(
     defaultPricing?.competitionPrice.toString() || "95",
   );
+  const [offIceDancePrice, setOffIceDancePrice] = useState(
+    defaultPricing?.offIceDancePrice.toString() || "75",
+  );
 
   // Get mutation function
   const updateDefaultPricing = api.admin.student.updateDefaultPricing.useMutation({
@@ -44,6 +47,7 @@ export function DefaultPricingSettings() {
       setGroupPrice(defaultPricing.groupLessonPrice.toString());
       setChoreographyPrice(defaultPricing.choreographyPrice.toString());
       setCompetitionPrice(defaultPricing.competitionPrice.toString());
+      setOffIceDancePrice(defaultPricing.offIceDancePrice.toString());
     }
   }, [defaultPricing]);
 
@@ -56,6 +60,7 @@ export function DefaultPricingSettings() {
       groupLessonPrice: Number.parseFloat(groupPrice),
       choreographyPrice: Number.parseFloat(choreographyPrice),
       competitionPrice: Number.parseFloat(competitionPrice),
+      offIceDancePrice: Number.parseFloat(offIceDancePrice),
     };
 
     updateDefaultPricing.mutate(data);
@@ -122,6 +127,18 @@ export function DefaultPricingSettings() {
                 min="0"
                 value={competitionPrice}
                 onChange={(e) => setCompetitionPrice(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="default-off-ice-dance-price">Off-Ice Dance Price ($)</Label>
+              <Input
+                id="default-off-ice-dance-price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={offIceDancePrice}
+                onChange={(e) => setOffIceDancePrice(e.target.value)}
               />
             </div>
           </div>

@@ -181,6 +181,8 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
         return "bg-green-100 text-green-700 border-green-300";
       case LessonType.COMPETITION_PREP:
         return "bg-orange-100 text-orange-700 border-orange-300";
+      case LessonType.OFF_ICE_DANCE:
+        return "bg-pink-100 text-pink-700 border-pink-300";
       default:
         return "bg-gray-100 text-gray-700 border-gray-300";
     }
