@@ -19,6 +19,7 @@ export const lessonRouter = createTRPCRouter({
             Payment: true,
             Rink: true,
             Coach: { include: { User: { select: { name: true } } } },
+            RinkTimeSlot: { select: { isActive: true } },
           },
         });
 
@@ -36,6 +37,14 @@ export const lessonRouter = createTRPCRouter({
             throw new TRPCError({
               code: "FORBIDDEN",
               message: "You do not have permission to view this lesson",
+            });
+          }
+
+          // Hide lessons on draft (unpublished) time slots from students
+          if (lesson.RinkTimeSlot && !lesson.RinkTimeSlot.isActive) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Lesson not found",
             });
           }
         }
