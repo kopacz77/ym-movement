@@ -394,13 +394,20 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             startTime: { lt: timeSlot.endTime },
             endTime: { gt: timeSlot.startTime },
           },
+          include: {
+            Coach: { include: { User: { select: { name: true } } } },
+            Rink: { select: { name: true } },
+          },
         });
 
         if (overlappingLesson) {
           const overlapTime = format(overlappingLesson.startTime, "h:mm a");
+          const overlapEnd = format(overlappingLesson.endTime, "h:mm a");
+          const coachName = overlappingLesson.Coach?.User?.name || "another coach";
+          const rinkName = overlappingLesson.Rink?.name || "";
           throw new TRPCError({
             code: "CONFLICT",
-            message: `Student already has a lesson at ${overlapTime} that overlaps with this time slot`,
+            message: `This student already has a lesson with ${coachName} from ${overlapTime}–${overlapEnd}${rinkName ? ` at ${rinkName}` : ""}. A student cannot be in two lessons at the same time.`,
           });
         }
 
