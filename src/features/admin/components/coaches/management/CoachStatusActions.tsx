@@ -2,7 +2,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Ban, MoreHorizontal, Power, PowerOff, ShieldAlert, Trash2 } from "lucide-react";
+import { AlertTriangle, Ban, DollarSign, MoreHorizontal, Power, PowerOff, ShieldAlert, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
+import { EditCoachPricingDialog } from "./EditCoachPricingDialog";
 
 interface CoachActionsProps {
   coachId: string;
@@ -30,6 +31,14 @@ interface CoachActionsProps {
   isActive: boolean;
   isApproved: boolean;
   suspendedAt: Date | string | null;
+  pricing: {
+    privateLessonPrice: number | null;
+    groupLessonPrice: number | null;
+    choreographyPrice: number | null;
+    competitionPrepPrice: number | null;
+    offIceDancePrice: number | null;
+    revenueSplitPercent: number;
+  };
 }
 
 /**
@@ -43,8 +52,10 @@ export function CoachActionsCell({
   isActive,
   isApproved,
   suspendedAt,
+  pricing,
 }: CoachActionsProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showPricingDialog, setShowPricingDialog] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [showActivateDialog, setShowActivateDialog] = useState(false);
@@ -136,6 +147,15 @@ export function CoachActionsCell({
         <DropdownMenuContent align="end">
           {isApproved && (
             <>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  openDialog(setShowPricingDialog);
+                }}
+              >
+                <DollarSign className="h-4 w-4 mr-2" />
+                Edit Pricing
+              </DropdownMenuItem>
               {isActive && !isSuspended && (
                 <>
                   <DropdownMenuItem
@@ -207,6 +227,15 @@ export function CoachActionsCell({
       </DropdownMenu>
 
       {/* Dialogs rendered OUTSIDE the dropdown so they don't unmount when dropdown closes */}
+
+      {/* Edit Pricing Dialog */}
+      <EditCoachPricingDialog
+        open={showPricingDialog}
+        onOpenChange={setShowPricingDialog}
+        coachId={coachId}
+        coachName={coachName}
+        currentPricing={pricing}
+      />
 
       {/* Deactivate Confirmation Dialog */}
       <Dialog open={showDeactivateDialog} onOpenChange={setShowDeactivateDialog}>

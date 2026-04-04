@@ -210,6 +210,14 @@ export const CoachList: React.FC = () => {
                     isActive={coach.isActive}
                     isApproved={coach.isApproved}
                     suspendedAt={coach.suspendedAt}
+                    pricing={{
+                      privateLessonPrice: coach.privateLessonPrice,
+                      groupLessonPrice: coach.groupLessonPrice,
+                      choreographyPrice: coach.choreographyPrice,
+                      competitionPrepPrice: coach.competitionPrepPrice,
+                      offIceDancePrice: coach.offIceDancePrice,
+                      revenueSplitPercent: coach.revenueSplitPercent,
+                    }}
                   />
                 </TableCell>
               </TableRow>

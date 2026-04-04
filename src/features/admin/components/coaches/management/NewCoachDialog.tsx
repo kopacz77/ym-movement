@@ -32,6 +32,7 @@ const newCoachSchema = z.object({
   groupLessonPrice: z.string().optional().or(z.literal("")),
   choreographyPrice: z.string().optional().or(z.literal("")),
   competitionPrepPrice: z.string().optional().or(z.literal("")),
+  offIceDancePrice: z.string().optional().or(z.literal("")),
   revenueSplitPercent: z.string().optional().or(z.literal("")),
 });
 
@@ -58,6 +59,7 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
       groupLessonPrice: "",
       choreographyPrice: "",
       competitionPrepPrice: "",
+      offIceDancePrice: "",
       revenueSplitPercent: "70",
     },
   });
@@ -100,6 +102,9 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
         : undefined,
       competitionPrepPrice: data.competitionPrepPrice
         ? Number.parseFloat(data.competitionPrepPrice)
+        : undefined,
+      offIceDancePrice: data.offIceDancePrice
+        ? Number.parseFloat(data.offIceDancePrice)
         : undefined,
       revenueSplitPercent: data.revenueSplitPercent
         ? Number.parseFloat(data.revenueSplitPercent)
@@ -226,6 +231,17 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
                   step="0.01"
                   placeholder="0.00"
                   {...form.register("competitionPrepPrice")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="offIceDancePrice">Off-Ice Dance ($)</Label>
+                <Input
+                  id="offIceDancePrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  {...form.register("offIceDancePrice")}
                 />
               </div>
             </div>

@@ -427,21 +427,50 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         // Get default pricing from database
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        // Calculate price based on lesson type, duration, and student custom pricing
+        // Fetch coach with both pricing fields and calendar tokens
+        const assignCoach: (CoachWithTokens & {
+          privateLessonPrice: number | null;
+          groupLessonPrice: number | null;
+          choreographyPrice: number | null;
+          competitionPrepPrice: number | null;
+          offIceDancePrice: number | null;
+        }) | null = timeSlot.coachId
+          ? await ctx.prisma.coach.findUnique({
+              where: { id: timeSlot.coachId },
+              select: {
+                id: true,
+                googleAccessToken: true,
+                googleRefreshToken: true,
+                googleTokenExpiresAt: true,
+                googleCalendarId: true,
+                privateLessonPrice: true,
+                groupLessonPrice: true,
+                choreographyPrice: true,
+                competitionPrepPrice: true,
+                offIceDancePrice: true,
+              },
+            })
+          : null;
+
+        // Build coach pricing for the price calculator
+        const coachPricing = assignCoach
+          ? {
+              privateLessonPrice: assignCoach.privateLessonPrice,
+              groupLessonPrice: assignCoach.groupLessonPrice,
+              choreographyPrice: assignCoach.choreographyPrice,
+              competitionPrepPrice: assignCoach.competitionPrepPrice,
+              offIceDancePrice: assignCoach.offIceDancePrice,
+            }
+          : undefined;
+
+        // Calculate price based on lesson type, duration, student custom pricing, and coach pricing
         const price = calculateLessonPrice(
           input.lessonType || LessonType.PRIVATE,
           durationMinutes,
           student,
           defaultPricing,
+          coachPricing,
         );
-
-        // Look up coach with calendar tokens for assign
-        const assignCoach: CoachWithTokens | null = timeSlot.coachId
-          ? await ctx.prisma.coach.findUnique({
-              where: { id: timeSlot.coachId },
-              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
-            })
-          : null;
 
         // Create Google Calendar event
         let eventId: string | null = null;
@@ -573,37 +602,61 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // Get default pricing from database
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        // Calculate new price based on lesson type, duration, and student custom pricing
+        // Fetch coach pricing and calendar tokens
+        const updateCoach = existingLesson.coachId
+          ? await ctx.prisma.coach.findUnique({
+              where: { id: existingLesson.coachId },
+              select: {
+                id: true,
+                googleAccessToken: true,
+                googleRefreshToken: true,
+                googleTokenExpiresAt: true,
+                googleCalendarId: true,
+                privateLessonPrice: true,
+                groupLessonPrice: true,
+                choreographyPrice: true,
+                competitionPrepPrice: true,
+                offIceDancePrice: true,
+              },
+            })
+          : null;
+
+        const updateCoachPricing = updateCoach
+          ? {
+              privateLessonPrice: updateCoach.privateLessonPrice,
+              groupLessonPrice: updateCoach.groupLessonPrice,
+              choreographyPrice: updateCoach.choreographyPrice,
+              competitionPrepPrice: updateCoach.competitionPrepPrice,
+              offIceDancePrice: updateCoach.offIceDancePrice,
+            }
+          : undefined;
+
+        // Calculate new price based on lesson type, duration, student custom pricing, and coach pricing
         const student = existingLesson.Student;
         const price = calculateLessonPrice(
           input.lessonType,
           durationMinutes,
           student,
           defaultPricing,
+          updateCoachPricing,
         );
 
         // Update Google Calendar event if it exists
-        if (existingLesson.googleCalendarEventId && existingLesson.coachId) {
+        if (existingLesson.googleCalendarEventId && updateCoach) {
           try {
-            const updateCoach = await ctx.prisma.coach.findUnique({
-              where: { id: existingLesson.coachId },
-              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
-            });
-            if (updateCoach) {
-              await googleCalendar.updateEvent(updateCoach, {
-                eventId: existingLesson.googleCalendarEventId,
-                summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
-                description: `Lesson Type: ${input.lessonType}
+            await googleCalendar.updateEvent(updateCoach, {
+              eventId: existingLesson.googleCalendarEventId,
+              summary: `${input.lessonType} Lesson with ${student.User.name || "Student"}`,
+              description: `Lesson Type: ${input.lessonType}
 ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
-                startTime: existingLesson.startTime,
-                endTime: existingLesson.endTime,
-                attendees: [
-                  { email: student.User.email, name: student.User.name || undefined },
-                ],
-                location: existingLesson.Rink.address || "",
-                timeZone: existingLesson.Rink.timezone || "America/Toronto",
-              });
-            }
+              startTime: existingLesson.startTime,
+              endTime: existingLesson.endTime,
+              attendees: [
+                { email: student.User.email, name: student.User.name || undefined },
+              ],
+              location: existingLesson.Rink.address || "",
+              timeZone: existingLesson.Rink.timezone || "America/Toronto",
+            });
           } catch (calendarError) {
             console.error("Error updating Google Calendar event:", calendarError);
             // Continue with lesson update even if calendar update fails
