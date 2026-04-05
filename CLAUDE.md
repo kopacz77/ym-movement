@@ -308,7 +308,51 @@ After ANY changes to TimeSlotDialogAdapter.tsx:
 - `timeSlotQueries.ts` - Database query with Lesson selection (lines 47-72)
 - `calendarUtils.ts` - TypeScript interface definitions for Lesson/TimeSlot
 
-## Recent Major Updates (2025-10-14)
+## Recent Major Updates (2026-04-05)
+
+### Security Audit & Hardening
+
+Comprehensive security audit and remediation covering dependencies, API routes, middleware, data exposure, and logging hygiene.
+
+#### New: HTTP-Level Route Protection
+- **`src/middleware.ts`** (new file): Next.js middleware enforcing role-based access on `/admin/*`, `/student/*`, `/coach/*` routes using JWT token inspection via `getToken` from `next-auth/jwt`
+- Gracefully handles stale sessions (missing `role` in token) by deferring to TRPC-layer auth
+- Redirects unauthenticated users to `/auth/login` with `callbackUrl` preserved
+
+#### Dependency Security
+- Removed `trpc-openapi` (unused, brought 4 transitive vulnerabilities via h3)
+- Removed `node-mock-http` (potential typosquat risk)
+- Updated `next` to 16.1.7 (CSRF bypass + HTTP smuggling fixes)
+- Added pnpm overrides for 8 transitive dependency vulnerabilities: `dompurify`, `h3`, `effect`, `defu`, `immutable`, `picomatch`, `yaml`, `brace-expansion`
+
+#### Password Hash Exposure Prevention
+- Replaced `include: { User: true }` with explicit `User: { select: { id, name, email, role } }` across 14+ Prisma queries to prevent password hashes from reaching API responses
+- **Files**: `approvalQueries.ts`, `lessonQueries.ts`, `bookingQueries.ts`, `auth-tokens.ts`
+
+#### API Response Hardening
+- Removed raw error details from 500 responses in signup, coach-signup, health check, and cron endpoints (prevents stack trace / internal info leakage)
+- Updated CORS config in `next.config.js` with proper production domain (`ym-movement.com`)
+
+#### Authentication & Authorization Fixes
+- **`src/lib/security.ts`**: Replaced length-leaking `safeCompare` with HMAC-based timing-safe comparison
+- **`src/server/api/routers/passwordReset.ts`**: Added password complexity validation (`validatePasswordStrength`) before allowing password resets
+- **`src/lib/trpc.ts`**: Tightened `superAdminProcedure` to exclusively require `SUPER_ADMIN` role (was accepting `ADMIN`)
+- **`src/lib/account-lockout.ts`**: Changed to fail-closed on DB errors (locked out instead of allowing through)
+- **`src/features/admin/api/queries/student/approvalQueries.ts`**: Removed hardcoded `"admin001"` fallback IDs
+
+#### Logging Cleanup (~138 statements removed)
+- Removed API key prefix logging, PII exposure, email body dumps from server utilities
+- Removed all emoji-prefixed debug logs from admin components and hooks
+- Removed Turnstile widget debug logs from auth pages
+- Removed form data dumps, render count tracking, and mutation callback debug logs
+- Retained only `console.error` for actual failures and `logSecurityEvent` for security-relevant events
+
+#### Student Schedule Visibility Fix
+- **Bug**: Students couldn't see their booked lessons because `getStudentLessons` in `profileQueries.ts` filtered by `RinkTimeSlot.isActive`, hiding lessons on unpublished (draft) time slots
+- **Fix**: Removed `isActive` filter from student's own lesson queries (`getStudentLessons`, `getStudentLessonStats`). The `isActive` filter remains correctly applied in `availabilityQueries.ts` to prevent students from browsing/booking unpublished slots
+- **Design**: Draft time slots are hidden from the booking page but booked lessons always appear in the student's schedule
+
+## Previous Major Updates (2025-10-14)
 
 ### ✅ **Comprehensive Lesson Type Management System**
 - **Calendar Integration**: Complete lesson type workflow directly in admin calendar
