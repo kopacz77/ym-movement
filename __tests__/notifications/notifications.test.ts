@@ -210,7 +210,7 @@ describe("Notification System Tests", () => {
       // Email content should be sanitized
       await mockEmailService.sendEmail({
         to: student.email,
-        subject: "Welcome to Yura Scheduler",
+        subject: "Welcome to YM Movement",
         template: "welcome",
         data: {
           studentName: sanitizeInput(student.name),

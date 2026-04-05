@@ -136,7 +136,11 @@
       "Bash(do if:*)",
       "Bash(pnpm test:run:*)",
       "Bash(pnpm vitest:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "Bash(source .env:*)",
+      "WebFetch(domain:neon.com)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm db:check:*)"
     ],
     "deny": []
   }

@@ -1,4 +1,4 @@
-# Yura Scheduler v3 - Figure Skating Management Platform
+# YM Movement - Figure Skating Management Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.2.1-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -8,26 +8,26 @@
 
 > **Modern figure skating lesson scheduling platform with optimized performance and comprehensive management tools.**
 
-## 🌟 Overview
+## Overview
 
-Yura Scheduler v3 is a high-performance, full-stack application designed for professional figure skating instruction management. Built with modern React patterns and enterprise-grade optimizations, it delivers exceptional performance for managing thousands of students, lessons, and complex scheduling scenarios.
+YM Movement is a high-performance, full-stack application designed for professional figure skating instruction management. Built with modern React patterns and enterprise-grade optimizations, it delivers exceptional performance for managing thousands of students, lessons, and complex scheduling scenarios.
 
-### ⚡ **Performance Highlights**
+### **Performance Highlights**
 - **90% reduction** in context re-renders through optimized React patterns
 - **95% improvement** in large list rendering with virtualization
 - **90% fewer API calls** with intelligent debouncing
 - **Zero known security vulnerabilities** with comprehensive monitoring
 - **Sub-16ms render times** for all critical components
 
-## 🚀 Features
+## Features
 
-### 📊 **Admin Dashboard & Analytics**
+### **Admin Dashboard & Analytics**
 - Real-time performance metrics and student activity charts
 - Revenue tracking with interactive visualizations
 - Advanced filtering and search capabilities
 - Comprehensive reporting and export functionality
 
-### 📅 **Advanced Scheduling System**
+### **Advanced Scheduling System**
 - Dynamic time slot management with conflict detection
 - **Lesson type management** - Choreography, Private, Group, and Competition Prep lessons
   - Calendar-integrated lesson type selection and editing
@@ -40,7 +40,7 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 - Google Calendar integration with automatic event sync
 - Timezone-aware scheduling for multiple rinks
 
-### 👥 **Student Management**
+### **Student Management**
 - Student approval workflow with role-based access
 - Progress tracking and skill assessments
 - **Custom pricing per student** with lesson type-specific rates
@@ -49,20 +49,20 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 - Lesson notes and attendance tracking
 - Parent/guardian communication tools
 
-### 💳 **Payment Processing**
+### **Payment Processing**
 - Payment status tracking and verification with proper student name display
 - Multiple payment method support (Venmo, Zelle)
 - Automated payment reminders with professional email templates
 - Financial reporting and analytics
 
-### 🔔 **Notifications & Communication**
+### **Notifications & Communication**
 - Real-time notification system with bell icon and badge counters
 - Auto-notifications for lesson bookings and important updates
 - Mark as read/unread functionality with persistent state
 - Email confirmations with proper timezone formatting
 - Password recovery system with secure token-based reset flow
 
-### 🔐 **Security & Performance**
+### **Security & Performance**
 - Enterprise-grade security with automated vulnerability scanning
 - Past time slot booking prevention with dual-layer validation
 - Advanced error boundaries with automatic recovery
@@ -70,7 +70,7 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 - Role-based access control (Admin/Student) with approval workflow
 - Comprehensive audit logging
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### **Frontend**
 - **Next.js 15.2.1** - App Router with React 19
@@ -96,7 +96,7 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 - **GitHub Actions** - CI/CD and security scanning
 - **Bundle Analyzer** - Performance monitoring
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ym-movement/
@@ -131,21 +131,18 @@ ym-movement/
 │   └── helpers/                # Test utilities and helpers
 ├── __tests__/                  # Unit test files
 ├── playwright.config.ts        # Playwright configuration
-└── docs/                       # Documentation
-    ├── PHASE2_OPTIMIZATIONS.md
-    └── SECURITY_FIXES_SUMMARY.md
 ├── TESTING.md                  # Comprehensive testing guide
 ├── CONTRIBUTING.md             # Contributing guidelines
 └── API.md                      # API documentation
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-- **Node.js** ≥ 20.15.0 (LTS recommended)
-- **pnpm** ≥ 9.0.0 (preferred) or npm ≥ 10.9.2
-- **PostgreSQL** ≥ 14.0
+- **Node.js** >= 20.15.0 (LTS recommended)
+- **pnpm** >= 9.0.0 (preferred) or npm >= 10.9.2
+- **PostgreSQL** >= 14.0
 - **Git** for version control
 
 ### Installation
@@ -166,8 +163,7 @@ cp .env.docker .env
 pnpm docker:dev
 
 # Access services:
-# App: http://localhost:3000
-# Docs: http://localhost:3001
+# App: http://localhost:3000  (Docker exposes on port 3000)
 # Database UI: http://localhost:5555 (Prisma Studio)
 ```
 
@@ -186,7 +182,7 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
-#### Option 2: WSL/Linux Development Setup
+#### Option 3: WSL/Linux Development Setup
 
 ```bash
 # Install Node.js 20+ (if not already installed)
@@ -208,9 +204,9 @@ pnpm install
 
 # For WSL: Setup PostgreSQL with Docker
 # Ensure Docker Desktop is running on Windows
-docker run --name postgres-yura \
+docker run --name postgres-ym \
   -e POSTGRES_PASSWORD=yourpassword \
-  -e POSTGRES_DB=yura_scheduler \
+  -e POSTGRES_DB=ym_movement \
   -d -p 5432:5432 postgres:14
 
 # Alternative: Install PostgreSQL directly in WSL
@@ -224,7 +220,7 @@ cd ~
 git clone https://github.com/your-username/ym-movement.git
 
 # Use WSL-native file paths in DATABASE_URL
-DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/yura_scheduler"
+DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/ym_movement"
 
 # Enable file watching (if needed)
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
@@ -237,11 +233,11 @@ Create a `.env` file with the following variables:
 
 ```env
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/yura_scheduler"
+DATABASE_URL="postgresql://username:password@localhost:5432/ym_movement"
 
 # Authentication
 NEXTAUTH_SECRET="your-secret-key-here"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3100"
 
 # Google Calendar Integration
 GOOGLE_CLIENT_EMAIL="your-service-account@project.iam.gserviceaccount.com"
@@ -273,10 +269,10 @@ pnpm prisma db seed
 # Start development server
 pnpm dev
 
-# Open http://localhost:3000
+# Open http://localhost:3100
 ```
 
-## 📜 Available Scripts
+## Available Scripts
 
 | Command | Description |
 |---------|-------------|
@@ -301,7 +297,7 @@ pnpm dev
 | `pnpm docker:down` | Stop Docker containers |
 | `pnpm docs:dev` | Start documentation server |
 
-## 🔧 Development
+## Development
 
 ### Code Quality
 
@@ -369,31 +365,31 @@ pnpm test:all
 ```
 
 #### Test Coverage
-- ✅ **Student signup and registration flow**
-- ✅ **Authentication and authorization**
-- ✅ **Admin dashboard functionality**
-- ✅ **Lesson scheduling and booking**
-- ✅ **Payment processing workflows**
-- ✅ **Email notification systems**
-- ✅ **Responsive design testing**
-- ✅ **Complete end-to-end user journeys**
+- **Student signup and registration flow**
+- **Authentication and authorization**
+- **Admin dashboard functionality**
+- **Lesson scheduling and booking**
+- **Payment processing workflows**
+- **Email notification systems**
+- **Responsive design testing**
+- **Complete end-to-end user journeys**
 
 #### Browser Support
 E2E tests run on multiple browsers:
-- 🌐 **Chromium** (Desktop & Mobile)
-- 🦊 **Firefox** (Desktop)
-- 🍎 **Safari/WebKit** (Desktop & Mobile)
+- **Chromium** (Desktop & Mobile)
+- **Firefox** (Desktop)
+- **Safari/WebKit** (Desktop & Mobile)
 
-## 🔒 Security
+## Security
 
 Security is a top priority:
 
-- ✅ **Zero known vulnerabilities** (regularly scanned)
-- ✅ **Role-based access control** with middleware protection
-- ✅ **SQL injection prevention** with Prisma ORM
-- ✅ **XSS protection** with Content Security Policy
-- ✅ **CSRF protection** built into Next.js
-- ✅ **Automated security monitoring** with daily scans
+- **Zero known vulnerabilities** (regularly scanned)
+- **Role-based access control** with middleware protection
+- **SQL injection prevention** with Prisma ORM
+- **XSS protection** with Content Security Policy
+- **CSRF protection** built into Next.js
+- **Automated security monitoring** with daily scans
 
 ### Security Features
 
@@ -403,7 +399,7 @@ Security is a top priority:
 - Authentication rate limiting
 - Audit logging for sensitive operations
 
-## 📈 Performance Metrics
+## Performance Metrics
 
 ### Before vs After Optimizations
 
@@ -422,7 +418,7 @@ Security is a top priority:
 - **FID (First Input Delay)**: < 100ms
 - **CLS (Cumulative Layout Shift)**: < 0.1
 
-## 🔄 Deployment
+## Deployment
 
 ### Production Deployment
 
@@ -455,7 +451,7 @@ The application includes health check endpoints:
 - `/api/health/database` - Database connectivity
 - `/api/health/detailed` - Comprehensive system status
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
@@ -475,17 +471,21 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - Use conventional commit messages
 - Update documentation for changes
 
-## 📝 Documentation
+## Documentation
 
 - [**CHANGELOG.md**](CHANGELOG.md) - Version history and changes
 - [**CLAUDE.md**](CLAUDE.md) - Development guide and recent updates
-- [**API Documentation**](API.md) - Complete TRPC API reference with new features
-- [**Reports & Payments Guide**](docs/reports-and-payments-guide.md) - Export and email features
-- [**OPTIMIZATION.md**](OPTIMIZATION.md) - Performance optimization details
+- [**API.md**](docs/API.md) - Complete TRPC API reference with new features
+- [**OPTIMIZATION.md**](docs/OPTIMIZATION.md) - Performance optimization details
 - [**SECURITY.md**](SECURITY.md) - Security policies and practices
-- [**Deployment Guide**](docs/deployment.md) - Production deployment
+- [**DEPLOYMENT.md**](docs/DEPLOYMENT.md) - Production deployment guide
+- [**DOCKER-DEPLOYMENT.md**](docs/DOCKER-DEPLOYMENT.md) - Docker deployment guide
+- [**TESTING.md**](docs/TESTING.md) - Comprehensive testing guide
+- [**CONTRIBUTING.md**](CONTRIBUTING.md) - Contributing guidelines
+- [**LESSON-TYPE-FEATURE.md**](docs/LESSON-TYPE-FEATURE.md) - Lesson type feature documentation
+- [**SWAGGER-API-DOCS.md**](docs/SWAGGER-API-DOCS.md) - Swagger API documentation guide
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -523,13 +523,13 @@ sudo sysctl -p
 
 # PostgreSQL connection issues in WSL
 # Check if PostgreSQL is running
-docker ps | grep postgres-yura
+docker ps | grep postgres-ym
 
 # Restart PostgreSQL container
-docker restart postgres-yura
+docker restart postgres-ym
 
 # Access PostgreSQL directly
-docker exec -it postgres-yura psql -U postgres -d yura_scheduler
+docker exec -it postgres-ym psql -U postgres -d ym_movement
 
 # WSL performance optimization
 # Ensure project is in WSL filesystem, not Windows mount
@@ -554,16 +554,14 @@ pnpm list react react-dom
 
 ### Getting Help
 
-- 📖 Check our [Documentation](docs/)
-- 🐛 [Report Issues](https://github.com/your-username/ym-movement/issues)
-- 💬 [Discussions](https://github.com/your-username/ym-movement/discussions)
-- 📧 Email: support@your-domain.com
+- [Report Issues](https://github.com/your-username/ym-movement/issues)
+- [Discussions](https://github.com/your-username/ym-movement/discussions)
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Next.js Team** - For the amazing React framework
 - **Prisma Team** - For the excellent ORM and database toolkit
@@ -573,6 +571,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for the figure skating community**
+**Built with care for the figure skating community**
 
-*Yura Scheduler v3 - Empowering skating instructors with enterprise-grade tools*
+*YM Movement - Empowering skating instructors with enterprise-grade tools*

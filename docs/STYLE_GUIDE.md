@@ -1,4 +1,4 @@
-# 💕 YM Scheduler Style Guide & Component Library
+# 💕 YM Movement Style Guide & Component Library
 
 *A love letter disguised as software - built with care, warmth, and admiration.*
 

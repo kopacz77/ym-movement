@@ -129,7 +129,6 @@ When you add new TRPC procedures, update the OpenAPI spec in `src/lib/openapi.ts
 
 ### Dependencies
 - **`swagger-ui-react`** - Swagger UI components
-- **`trpc-openapi`** - TRPC to OpenAPI utilities (optional, not actively used)
 - **`zod-to-json-schema`** - Convert Zod schemas to JSON Schema (future use)
 
 ## Authentication
@@ -143,7 +142,7 @@ The API uses **NextAuth session cookies** for authentication:
 
 Common enum types documented:
 
-- **LessonType**: `PRIVATE`, `SEMI_PRIVATE`, `GROUP`
+- **LessonType**: `PRIVATE`, `GROUP`, `CHOREOGRAPHY`, `COMPETITION_PREP`
 - **LessonStatus**: `SCHEDULED`, `COMPLETED`, `CANCELLED`
 - **PaymentStatus**: `PENDING`, `COMPLETED`, `FAILED`
 - **RinkArea**: `FULL_RINK`, `HALF_RINK`, `QUARTER_RINK`
@@ -172,7 +171,7 @@ Potential improvements to consider:
 
 ### Swagger UI not loading
 - Check that dev server is running: `pnpm dev`
-- Verify `/api/openapi` endpoint returns JSON: `curl http://localhost:3000/api/openapi`
+- Verify `/api/openapi` endpoint returns JSON: `curl http://localhost:3100/api/openapi`
 - Clear browser cache and hard reload
 
 ### Missing endpoints

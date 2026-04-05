@@ -1,8 +1,8 @@
-# Deployment Guide - Yura Scheduler v3
+# Deployment Guide - YM Movement
 
 ## Overview
 
-This guide covers deployment options for Yura Scheduler v3, from development to production environments. The application supports multiple deployment strategies including Netlify, Vercel, Docker, and traditional VPS hosting.
+This guide covers deployment options for YM Movement, from development to production environments. The application supports multiple deployment strategies including Netlify, Vercel, Docker, and traditional VPS hosting.
 
 ## 🚀 Netlify Deployment (Current Production)
 
@@ -140,123 +140,9 @@ Create `vercel.json` in project root:
 }
 ```
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
-### Development Environment
-
-```bash
-# Quick start with Docker Compose
-git clone <repository>
-cd ym-movement
-cp .env.docker .env
-pnpm docker:dev
-
-# Services will be available at:
-# App: http://localhost:3000
-# Database: localhost:5432
-# Docs: http://localhost:3001
-```
-
-### Production Docker
-
-1. **Build Production Image**
-   ```dockerfile
-   # Dockerfile
-   FROM node:20-alpine AS base
-   
-   # Install dependencies only when needed
-   FROM base AS deps
-   RUN apk add --no-cache libc6-compat
-   WORKDIR /app
-   
-   COPY package.json pnpm-lock.yaml* ./
-   RUN corepack enable pnpm && pnpm i --frozen-lockfile
-   
-   # Rebuild the source code only when needed
-   FROM base AS builder
-   WORKDIR /app
-   COPY --from=deps /app/node_modules ./node_modules
-   COPY . .
-   
-   ENV NEXT_TELEMETRY_DISABLED 1
-   RUN corepack enable pnpm && pnpm build
-   
-   # Production image, copy all the files and run next
-   FROM base AS runner
-   WORKDIR /app
-   
-   ENV NODE_ENV production
-   ENV NEXT_TELEMETRY_DISABLED 1
-   
-   RUN addgroup --system --gid 1001 nodejs
-   RUN adduser --system --uid 1001 nextjs
-   
-   COPY --from=builder /app/public ./public
-   COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-   COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-   
-   USER nextjs
-   
-   EXPOSE 3000
-   ENV PORT 3000
-   
-   CMD ["node", "server.js"]
-   ```
-
-2. **Docker Compose for Production**
-   ```yaml
-   # docker-compose.prod.yml
-   version: '3.8'
-   services:
-     app:
-       build: .
-       ports:
-         - "3000:3000"
-       environment:
-         - DATABASE_URL=${DATABASE_URL}
-         - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-         - NEXTAUTH_URL=${NEXTAUTH_URL}
-       depends_on:
-         - postgres
-   
-     postgres:
-       image: postgres:14-alpine
-       environment:
-         POSTGRES_DB: yura_scheduler
-         POSTGRES_USER: ${DB_USER}
-         POSTGRES_PASSWORD: ${DB_PASSWORD}
-       volumes:
-         - postgres_data:/var/lib/postgresql/data
-         - ./backups:/backups
-       ports:
-         - "5432:5432"
-   
-     nginx:
-       image: nginx:alpine
-       ports:
-         - "80:80"
-         - "443:443"
-       volumes:
-         - ./nginx.conf:/etc/nginx/nginx.conf
-         - ./ssl:/etc/ssl
-       depends_on:
-         - app
-   
-   volumes:
-     postgres_data:
-   ```
-
-3. **Deploy with Docker Compose**
-   ```bash
-   # Build and start
-   docker-compose -f docker-compose.prod.yml up -d --build
-   
-   # Run migrations
-   docker-compose exec app pnpm prisma migrate deploy
-   
-   # View logs
-   docker-compose logs -f app
-   ```
+For Docker-based development setup, see [DOCKER-DEPLOYMENT.md](DOCKER-DEPLOYMENT.md).
 
 ## 🖥️ VPS Deployment (Ubuntu/CentOS)
 
@@ -300,9 +186,9 @@ npm install -g pm2
 sudo -u postgres psql
 
 # In PostgreSQL prompt:
-CREATE DATABASE yura_scheduler;
+CREATE DATABASE ym_movement;
 CREATE USER your_user WITH PASSWORD 'your_password';
-GRANT ALL PRIVILEGES ON DATABASE yura_scheduler TO your_user;
+GRANT ALL PRIVILEGES ON DATABASE ym_movement TO your_user;
 \q
 
 # Configure PostgreSQL for remote connections (if needed)
@@ -319,18 +205,18 @@ sudo systemctl restart postgresql
 
 ```bash
 # Create application directory
-sudo mkdir -p /var/www/yura-scheduler
-sudo chown $USER:$USER /var/www/yura-scheduler
+sudo mkdir -p /var/www/ym-movement
+sudo chown $USER:$USER /var/www/ym-movement
 
 # Clone and setup application
-cd /var/www/yura-scheduler
+cd /var/www/ym-movement
 git clone <repository> .
 pnpm install
 
 # Create production environment file
 cat > .env.production << EOF
 NODE_ENV=production
-DATABASE_URL="postgresql://your_user:your_password@localhost:5432/yura_scheduler"
+DATABASE_URL="postgresql://your_user:your_password@localhost:5432/ym_movement"
 NEXTAUTH_SECRET="$(openssl rand -base64 32)"
 NEXTAUTH_URL="https://yourdomain.com"
 # Add other environment variables...
@@ -353,15 +239,15 @@ pnpm prisma db seed
 cat > ecosystem.config.js << EOF
 module.exports = {
   apps: [{
-    name: 'yura-scheduler',
+    name: 'ym-movement',
     script: 'pnpm',
     args: 'start',
-    cwd: '/var/www/yura-scheduler',
+    cwd: '/var/www/ym-movement',
     instances: 'max',
     exec_mode: 'cluster',
     env: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3100
     },
     env_file: '.env.production',
     max_memory_restart: '1G',
@@ -386,7 +272,7 @@ pm2 startup
 
 ```bash
 # Create Nginx configuration
-sudo nano /etc/nginx/sites-available/yura-scheduler
+sudo nano /etc/nginx/sites-available/ym-movement
 
 # Add configuration:
 server {
@@ -404,7 +290,7 @@ server {
     limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
     
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3100;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -417,19 +303,19 @@ server {
     
     location /api/ {
         limit_req zone=api burst=20 nodelay;
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3100;
         # Same proxy settings as above...
     }
     
     location /api/auth/ {
         limit_req zone=login burst=5 nodelay;
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3100;
         # Same proxy settings as above...
     }
 }
 
 # Enable site
-sudo ln -s /etc/nginx/sites-available/yura-scheduler /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/ym-movement /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -498,7 +384,7 @@ curl https://yourdomain.com/api/health/detailed
 ### Log Monitoring
 ```bash
 # PM2 logs
-pm2 logs yura-scheduler
+pm2 logs ym-movement
 
 # Nginx logs
 sudo tail -f /var/log/nginx/access.log
@@ -514,8 +400,8 @@ sudo journalctl -f -u nginx
 cat > /home/ubuntu/backup-db.sh << EOF
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M%S)
-pg_dump -h localhost -U your_user yura_scheduler > /backups/yura_scheduler_$DATE.sql
-find /backups -name "yura_scheduler_*.sql" -mtime +7 -delete
+pg_dump -h localhost -U your_user ym_movement > /backups/ym_movement_$DATE.sql
+find /backups -name "ym_movement_*.sql" -mtime +7 -delete
 EOF
 
 chmod +x /home/ubuntu/backup-db.sh
@@ -528,12 +414,12 @@ crontab -e
 ### Updates and Maintenance
 ```bash
 # Update application
-cd /var/www/yura-scheduler
+cd /var/www/ym-movement
 git pull origin main
 pnpm install
 pnpm build
 pnpm prisma migrate deploy
-pm2 restart yura-scheduler
+pm2 restart ym-movement
 
 # Update system
 sudo apt update && sudo apt upgrade -y
@@ -550,7 +436,7 @@ sudo systemctl restart nginx
 pm2 status
 
 # Check logs
-pm2 logs yura-scheduler
+pm2 logs ym-movement
 
 # Check environment variables
 pm2 env 0
@@ -559,7 +445,7 @@ pm2 env 0
 **Database connection issues**
 ```bash
 # Test database connection
-psql -h localhost -U your_user -d yura_scheduler
+psql -h localhost -U your_user -d ym_movement
 
 # Check PostgreSQL status
 sudo systemctl status postgresql
@@ -586,7 +472,7 @@ sudo tail -f /var/log/nginx/error.log
 ```nginx
 # Add to server block
 location /_next/static/ {
-    alias /var/www/yura-scheduler/.next/static/;
+    alias /var/www/ym-movement/.next/static/;
     expires 1y;
     add_header Cache-Control "public, immutable";
 }

@@ -1,17 +1,19 @@
-# Security Policy - Yura Scheduler v3
+# Security Policy - YM Movement
 
-## 🔒 Security Overview
+## Security Overview
 
-Yura Scheduler v3 is built with security as a top priority. This document outlines our security practices, policies, and procedures for maintaining a secure application.
+YM Movement is built with security as a top priority. This document outlines our security practices, policies, and procedures for maintaining a secure application.
 
-## 🛡️ Security Features
+## Security Features
 
 ### Authentication & Authorization
 - **Multi-factor Authentication**: NextAuth.js with secure session management
 - **Role-based Access Control**: ADMIN and STUDENT roles with granular permissions
+- **HTTP-Level Route Protection**: Next.js middleware enforcing role-based access via JWT token inspection
 - **Secure Session Management**: JWT tokens with httpOnly cookies
 - **Password Security**: bcrypt hashing with salt rounds
 - **Rate Limiting**: Protection against brute force attacks
+- **Account Lockout**: Fail-closed lockout on repeated failed attempts
 
 ### Input Validation & Sanitization
 - **Client-side Sanitization**: Custom hook for XSS prevention
@@ -30,8 +32,9 @@ Yura Scheduler v3 is built with security as a top priority. This document outlin
 - **Encryption in Transit**: TLS 1.3 for all connections
 - **Secure Token Generation**: Cryptographically secure random tokens
 - **PII Protection**: Minimal data collection and secure storage
+- **Password Hash Isolation**: Explicit field selection in Prisma queries prevents password hashes from reaching API responses
 
-## 🚨 Reporting Security Vulnerabilities
+## Reporting Security Vulnerabilities
 
 ### Responsible Disclosure Policy
 
@@ -44,7 +47,7 @@ We take security seriously and appreciate the security community's efforts to re
 - Disrupt service for other users
 
 **Please DO:**
-- Email security vulnerabilities to: **security@your-domain.com**
+- Email security vulnerabilities to: **security@ym-movement.com**
 - Provide detailed information about the vulnerability
 - Allow reasonable time for assessment and fixing
 - Follow responsible disclosure practices
@@ -74,7 +77,7 @@ We take security seriously and appreciate the security community's efforts to re
 | **Medium** | 1-2 weeks | Information disclosure, CSRF |
 | **Low** | 2-4 weeks | Minor information leaks |
 
-## 🔐 Security Implementation
+## Security Implementation
 
 ### Authentication Implementation
 
@@ -114,7 +117,7 @@ export const authOptions: NextAuthOptions = {
 export function useSanitizedInput() {
   const sanitizeInput = useCallback((input: string): string => {
     if (!input) return "";
-    
+
     return input
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
@@ -126,7 +129,7 @@ export function useSanitizedInput() {
       .replace(/on\w+=/gi, "")
       .substring(0, 10000);
   }, []);
-  
+
   return { sanitizeInput };
 }
 
@@ -144,12 +147,12 @@ const createStudentSchema = z.object({
 // Rate limiting implementation
 class RateLimiter {
   private requests: Map<string, { count: number; resetTime: number }>;
-  
+
   constructor(
     private maxRequests = 5,
     private windowMs = 15 * 60 * 1000 // 15 minutes
   ) {}
-  
+
   isAllowed(identifier: string): boolean {
     // Rate limiting logic
   }
@@ -175,7 +178,7 @@ export function logSecurityEvent(
     userId,
     environment: process.env.NODE_ENV,
   };
-  
+
   // Send to security monitoring service
   console.log('SECURITY_EVENT:', JSON.stringify(logEntry));
 }
@@ -186,7 +189,7 @@ logSecurityEvent('PASSWORD_CHANGED', { userId });
 logSecurityEvent('ADMIN_ACTION', { action: 'STUDENT_DELETED', targetId });
 ```
 
-## 🛠️ Security Configuration
+## Security Configuration
 
 ### Environment Variables
 
@@ -276,7 +279,7 @@ CREATE POLICY user_policy ON "User"
   USING (id = current_user_id());
 ```
 
-## 🔍 Security Monitoring
+## Security Monitoring
 
 ### Automated Security Checks
 
@@ -312,7 +315,7 @@ We monitor the following security metrics:
 5. **Recovery**: Restore normal operations
 6. **Lessons Learned**: Update security measures
 
-## 📋 Security Checklist
+## Security Checklist
 
 ### Development Security
 - [x] Input validation on all forms
@@ -323,22 +326,26 @@ We monitor the following security metrics:
 - [x] Secure error handling (no sensitive info in errors)
 - [x] Security headers configured
 - [x] Environment variables secured
+- [x] HTTP-level route protection via middleware
+- [x] Password hash exposure prevention in API responses
 
 ### Authentication Security
 - [x] Strong password requirements
 - [x] Secure session management
 - [x] JWT token security
 - [x] Role-based access control
-- [x] Account lockout protection
-- [x] Secure password reset flow
+- [x] Account lockout protection (fail-closed)
+- [x] Secure password reset flow with complexity validation
+- [x] HMAC-based timing-safe token comparison
 
 ### Infrastructure Security
 - [x] HTTPS enforced (HSTS headers)
 - [x] Database SSL connections
-- [ ] Secure backup procedures
+- [x] Secure backup procedures (Neon scheduled snapshots + pre-migration checks)
 - [ ] Network security (firewalls)
 - [ ] Server hardening
 - [x] Regular security updates
+- [x] Production CORS configuration
 
 ### Code Security
 - [x] Security code review process
@@ -346,9 +353,10 @@ We monitor the following security metrics:
 - [x] Dependency vulnerability scanning
 - [x] Static analysis tools
 - [x] Security-focused unit tests
+- [x] Logging hygiene (no PII, no stack traces in responses)
 - [ ] Regular penetration testing
 
-## 🚀 Production Security
+## Production Security
 
 ### Deployment Security
 - Use environment variables for secrets
@@ -369,12 +377,96 @@ pm2 set pm2-logrotate:retain 30
 tail -f logs/security.log | grep -E "(FAILED_LOGIN|RATE_LIMIT|XSS_ATTEMPT)"
 ```
 
-## 📚 Security Resources
+## Recent Security Updates
+
+### April 2026 Security Audit & Hardening
+
+A comprehensive security audit was conducted covering dependencies, API routes, middleware, data exposure, and logging hygiene. The following changes were implemented:
+
+**HTTP-Level Route Protection**
+- New `src/middleware.ts`: Next.js middleware enforcing role-based access on `/admin/*`, `/student/*`, `/coach/*` routes using JWT token inspection via `getToken` from `next-auth/jwt`
+- Gracefully handles stale sessions (missing `role` in token) by deferring to TRPC-layer auth
+- Redirects unauthenticated users to `/auth/login` with `callbackUrl` preserved
+
+**Dependency Security**
+- Removed `trpc-openapi` (unused, brought 4 transitive vulnerabilities via h3)
+- Removed `node-mock-http` (potential typosquat risk)
+- Updated `next` to latest security patches (CSRF bypass + HTTP smuggling fixes)
+- Added pnpm overrides for 8 transitive dependency vulnerabilities: `dompurify`, `h3`, `effect`, `defu`, `immutable`, `picomatch`, `yaml`, `brace-expansion`
+
+**Password Hash Exposure Prevention**
+- Replaced `include: { User: true }` with explicit `User: { select: { id, name, email, role } }` across 14+ Prisma queries to prevent password hashes from reaching API responses
+- Files affected: `approvalQueries.ts`, `lessonQueries.ts`, `bookingQueries.ts`, `auth-tokens.ts`
+
+**API Response Hardening**
+- Removed raw error details from 500 responses in signup, coach-signup, health check, and cron endpoints (prevents stack trace / internal info leakage)
+- Updated CORS config in `next.config.js` with proper production domain (`ym-movement.com`)
+
+**Authentication & Authorization Fixes**
+- `src/lib/security.ts`: Replaced length-leaking `safeCompare` with HMAC-based timing-safe comparison
+- `src/server/api/routers/passwordReset.ts`: Added password complexity validation (`validatePasswordStrength`) before allowing password resets
+- `src/lib/trpc.ts`: Tightened `superAdminProcedure` to exclusively require `SUPER_ADMIN` role (was accepting `ADMIN`)
+- `src/lib/account-lockout.ts`: Changed to fail-closed on DB errors (locked out instead of allowing through)
+- `src/features/admin/api/queries/student/approvalQueries.ts`: Removed hardcoded `"admin001"` fallback IDs
+
+**Logging Cleanup** (~138 statements removed)
+- Removed API key prefix logging, PII exposure, email body dumps from server utilities
+- Removed all emoji-prefixed debug logs from admin components and hooks
+- Removed Turnstile widget debug logs from auth pages
+- Removed form data dumps, render count tracking, and mutation callback debug logs
+- Retained only `console.error` for actual failures and `logSecurityEvent` for security-relevant events
+
+**Student Schedule Visibility Fix**
+- Fixed bug where students couldn't see booked lessons because `getStudentLessons` filtered by `RinkTimeSlot.isActive`, hiding lessons on unpublished (draft) time slots
+- Removed `isActive` filter from student's own lesson queries; filter remains correctly applied in availability queries to prevent booking unpublished slots
+
+### January 2025 Security Implementation
+
+**IMPLEMENTED: Comprehensive Security Framework**
+- Added client-side input sanitization hook (`useSanitizedInput`)
+- Implemented server-side security library with rate limiting
+- Enhanced password strength validation
+- Added security event logging across all TRPC endpoints
+- Comprehensive security test suite with 9 passing tests
+
+**IMPLEMENTED: Enhanced Security Headers**
+- Content Security Policy with strict directives
+- X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
+- Strict-Transport-Security for HTTPS enforcement
+- Referrer-Policy for privacy protection
+
+**IMPLEMENTED: Input Sanitization & Validation**
+- XSS prevention through HTML entity encoding
+- JavaScript/VBScript protocol removal
+- Event handler attribute filtering
+- Input length limits (10,000 characters max)
+- Comprehensive test coverage for malicious inputs
+
+**IMPLEMENTED: Authentication Security**
+- bcrypt password hashing with configurable salt rounds
+- Rate limiting: 5 auth attempts per 15 minutes
+- Secure session management with NextAuth.js
+- Role-based access control (ADMIN/STUDENT)
+
+### Security Audit Results: PASSED (April 2026)
+- 0 Known vulnerabilities in dependencies (with pnpm overrides applied)
+- Security headers properly configured
+- Input sanitization implemented and tested
+- All security files present and updated
+- Comprehensive test coverage for security features
+- HTTP-level route protection active
+- Password hashes isolated from API responses
+- Logging hygiene enforced (no PII leakage)
+
+**Last Updated**: April 5, 2026
+**Next Review**: October 5, 2026
+
+## Security Resources
 
 ### Internal Documentation
-- [API Security Documentation](API.md#security-features)
+- [API Security Documentation](docs/API.md#security-features)
 - [Development Security Guide](CONTRIBUTING.md#security-guidelines)
-- [Deployment Security](DEPLOYMENT.md#production-security-checklist)
+- [Deployment Security](docs/DEPLOYMENT.md#production-security-checklist)
 
 ### External Resources
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
@@ -383,56 +475,16 @@ tail -f logs/security.log | grep -E "(FAILED_LOGIN|RATE_LIMIT|XSS_ATTEMPT)"
 - [Prisma Security Guide](https://www.prisma.io/docs/guides/performance-and-optimization/query-optimization-performance#security-considerations)
 
 ### Security Tools
-- **Static Analysis**: ESLint security plugins
-- **Dependency Scanning**: npm audit, Snyk
-- **Runtime Protection**: Helmet.js for headers
-- **Monitoring**: PM2, custom logging solutions
+- **Static Analysis**: Biome linter with security rules
+- **Dependency Scanning**: pnpm audit, pnpm overrides for transitive vulnerabilities
+- **Runtime Protection**: Next.js security headers, middleware route protection
+- **Monitoring**: Custom `logSecurityEvent` logging, PM2
 
-## 🚨 Recent Security Updates
+## Contact Information
 
-### January 2025 Security Implementation
-
-✅ **IMPLEMENTED: Comprehensive Security Framework**
-- Added client-side input sanitization hook (`useSanitizedInput`)
-- Implemented server-side security library with rate limiting
-- Enhanced password strength validation
-- Added security event logging across all TRPC endpoints
-- Comprehensive security test suite with 9 passing tests
-
-✅ **IMPLEMENTED: Enhanced Security Headers**
-- Content Security Policy with strict directives
-- X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
-- Strict-Transport-Security for HTTPS enforcement
-- Referrer-Policy for privacy protection
-
-✅ **IMPLEMENTED: Input Sanitization & Validation**
-- XSS prevention through HTML entity encoding
-- JavaScript/VBScript protocol removal
-- Event handler attribute filtering
-- Input length limits (10,000 characters max)
-- Comprehensive test coverage for malicious inputs
-
-✅ **IMPLEMENTED: Authentication Security**
-- bcrypt password hashing with configurable salt rounds
-- Rate limiting: 5 auth attempts per 15 minutes
-- Secure session management with NextAuth.js
-- Role-based access control (ADMIN/STUDENT)
-
-### Security Audit Results: ✅ PASSED
-- ✅ 0 Known vulnerabilities in dependencies
-- ✅ Security headers properly configured  
-- ✅ Input sanitization implemented and tested
-- ✅ All security files present and updated
-- ✅ Comprehensive test coverage for security features
-
-**Last Updated**: January 29, 2025
-**Next Review**: February 29, 2025
-
-## 📞 Contact Information
-
-- **Security Team**: security@your-domain.com
-- **General Issues**: issues@your-domain.com
-- **Emergency Contact**: +1-XXX-XXX-XXXX
+- **Security Team**: security@ym-movement.com
+- **General Issues**: Use GitHub Issues for non-security matters
+- **Emergency Contact**: Contact the project maintainer directly
 
 ---
 

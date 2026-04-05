@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import BundleAnalyzer from "@next/bundle-analyzer";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Optional bundle analyzer setup
 const withBundleAnalyzer = BundleAnalyzer({
@@ -24,6 +20,7 @@ const nextConfig = {
     // Type-check locally with `pnpm type-check`. Netlify's 2GB heap can't handle tsc on this codebase.
     ignoreBuildErrors: process.env.NETLIFY === "true",
   },
+  turbopack: {},
   experimental: {
     optimizePackageImports: [
       "@radix-ui/react-dialog",
@@ -51,55 +48,6 @@ const nextConfig = {
         destination: "/offline.html",
       },
     ];
-  },
-  webpack: (config, { isServer, dev }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@": path.join(__dirname, "src"),
-    };
-
-    // Production optimizations
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: "all",
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk for large libraries
-          vendor: {
-            name: "vendor",
-            chunks: "all",
-            test: /[\\/]node_modules[\\/]/,
-            priority: 20,
-          },
-          // Common chunk for shared components
-          common: {
-            name: "common",
-            minChunks: 2,
-            chunks: "all",
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-          // UI components chunk
-          ui: {
-            name: "ui",
-            test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
-            chunks: "all",
-            priority: 30,
-          },
-          // Features chunk
-          features: {
-            name: "features",
-            test: /[\\/]src[\\/]features[\\/]/,
-            chunks: "all",
-            priority: 25,
-          },
-        },
-      };
-    }
-
-    return config;
   },
   async headers() {
     return [
@@ -157,32 +105,6 @@ const nextConfig = {
           {
             key: "Access-Control-Allow-Headers",
             value: "Content-Type, Authorization",
-          },
-        ],
-      },
-      {
-        source: "/_next/static/css/(.*)",
-        headers: [
-          {
-            key: "Content-Type",
-            value: "text/css",
-          },
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/_next/static/js/(.*)",
-        headers: [
-          {
-            key: "Content-Type",
-            value: "application/javascript",
-          },
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
           },
         ],
       },

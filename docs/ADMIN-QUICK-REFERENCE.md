@@ -213,10 +213,7 @@ This will fix any problems automatically.
 
 ## 📞 Still Have Questions?
 
-Check the detailed documentation:
-- [PAYMENT-FLOW-VERIFICATION.md](PAYMENT-FLOW-VERIFICATION.md) - Complete technical details
-- [PRICING-AND-PAYMENT-FIXES.md](PRICING-AND-PAYMENT-FIXES.md) - What was fixed
-- [DATABASE-MIGRATION-SUMMARY.md](DATABASE-MIGRATION-SUMMARY.md) - Migration details
+For technical details, review the API documentation in [API.md](API.md) and the lesson type feature documentation in [LESSON-TYPE-FEATURE.md](LESSON-TYPE-FEATURE.md).
 
 ---
 

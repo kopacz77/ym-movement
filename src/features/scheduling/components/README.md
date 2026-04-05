@@ -1,6 +1,6 @@
 # Scheduling Components
 
-This directory contains all components related to scheduling functionality in the Yura Scheduler application. The components are organized into subdirectories based on their purpose and functionality.
+This directory contains all components related to scheduling functionality in the YM Movement application. The components are organized into subdirectories based on their purpose and functionality.
 
 ## Directory Structure
 

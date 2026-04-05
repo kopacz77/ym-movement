@@ -38,7 +38,7 @@ pnpm docker:build
 
 # 4. Start the development environment
 pnpm docker:dev
-# App will be available at http://localhost:3000
+# App will be available at http://localhost:3100
 ```
 
 ### Daily Development Workflow
@@ -47,7 +47,7 @@ pnpm docker:dev
 # Start Docker development
 pnpm docker:dev
 
-# Open http://localhost:3000 in your browser
+# Open http://localhost:3100 in your browser
 # Edit code in VS Code - changes auto-reload
 
 # When done:
@@ -91,7 +91,7 @@ Your Docker setup is configured to use your **Neon cloud database** from the `.e
 # .env file
 DATABASE_URL="postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
 NEXTAUTH_SECRET="your-secret-here"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3100"
 # ... other environment variables
 ```
 
@@ -102,7 +102,7 @@ NEXTAUTH_URL="http://localhost:3000"
 Test database connectivity:
 ```bash
 # With Docker running
-curl http://localhost:3000/api/health
+curl http://localhost:3100/api/health
 
 # Should return:
 # {"status":"healthy","database":"connected","timestamp":"..."}
@@ -184,7 +184,7 @@ pnpm docker:dev
 cat .env | grep DATABASE_URL
 
 # Test health check
-curl http://localhost:3000/api/health
+curl http://localhost:3100/api/health
 
 # Check Neon dashboard for database status
 ```
@@ -272,7 +272,7 @@ docker ps
 # STATUS shows "healthy" when database connected
 
 # Manual health check
-curl http://localhost:3000/api/health
+curl http://localhost:3100/api/health
 ```
 
 Health check runs every 30 seconds and verifies:
@@ -297,7 +297,7 @@ Your production workflow:
 pnpm docker:dev  # or pnpm dev
 
 # 2. Test locally
-# Visit http://localhost:3000
+# Visit http://localhost:3100
 
 # 3. Commit and push to GitHub
 git add .

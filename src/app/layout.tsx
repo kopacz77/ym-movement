@@ -9,7 +9,7 @@ import "@/styles/globals.css";
 validateEnvironment();
 
 export const metadata: Metadata = {
-  title: "Yura Scheduler",
+  title: "YM Movement",
   description: "Professional skating lesson scheduling platform",
   manifest: "/manifest.json",
   icons: {

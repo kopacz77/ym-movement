@@ -390,7 +390,7 @@ npx playwright test debug-student-error.spec.ts
 ### Prerequisites
 1. **System Dependencies**: `libnspr4`, `libnss3`, `libasound2t64` (installed via apt)
 2. **Playwright Browsers**: Installed via `npx playwright install`
-3. **Application Running**: Dev server at `localhost:3000`
+3. **Application Running**: Dev server at `localhost:3100`
 4. **Database**: Test data seeded for consistent testing
 
 ### Environment Variables
@@ -487,7 +487,7 @@ jobs:
 
 2. **Start Application**:
    ```bash
-   npm run dev  # Development server at localhost:3000
+   npm run dev  # Development server at localhost:3100
    ```
 
 3. **Run Tests**:

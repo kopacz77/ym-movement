@@ -1,8 +1,8 @@
-# API Documentation - Yura Scheduler v3
+# API Documentation - YM Movement
 
 ## Overview
 
-The Yura Scheduler v3 API is built with TRPC v11, providing end-to-end type safety and excellent developer experience. All endpoints are automatically validated and include comprehensive security measures.
+The YM Movement API is built with TRPC v11, providing end-to-end type safety and excellent developer experience. All endpoints are automatically validated and include comprehensive security measures.
 
 ## Authentication
 
@@ -19,7 +19,7 @@ Content-Type: application/json
 ```
 
 ## Base URL
-- **Development**: `http://localhost:3000/api/trpc`
+- **Development**: `http://localhost:3100/api/trpc`
 - **Production**: `https://your-domain.com/api/trpc`
 
 ## Admin Endpoints
@@ -400,7 +400,7 @@ it('should create student with sanitized input', async () => {
     name: '<script>alert("xss")</script>',
     email: 'test@example.com'
   };
-  
+
   const result = await trpc.admin.students.create.mutate(maliciousInput);
   expect(result.name).not.toContain('<script>');
 });
@@ -445,7 +445,7 @@ Array<{
 }>
 ```
 
-### Get Student Activity Report  
+### Get Student Activity Report
 ```typescript
 admin.analytics.getStudentActivity.useQuery({ period })
 ```
@@ -469,10 +469,10 @@ Array<{
 
 ### Get Individual Student Attendance
 ```typescript
-admin.analytics.getStudentAttendance.useQuery({ 
-  studentId, 
-  startDate?, 
-  endDate? 
+admin.analytics.getStudentAttendance.useQuery({
+  studentId,
+  startDate?,
+  endDate?
 })
 ```
 **Input:**
@@ -491,13 +491,13 @@ admin.analytics.getStudentAttendance.useQuery({
 
 ### Get Payments with Filtering
 ```typescript
-admin.payment.getPayments.useQuery({ 
-  search?, 
-  status?, 
-  startDate?, 
-  endDate?, 
-  page?, 
-  limit? 
+admin.payment.getPayments.useQuery({
+  search?,
+  status?,
+  startDate?,
+  endDate?,
+  page?,
+  limit?
 })
 ```
 **Input:**
@@ -628,14 +628,14 @@ Located in `src/lib/export-utils.ts`, these functions provide comprehensive repo
 // Export revenue data to CSV
 exportRevenueToCSV(data: RevenueDataItem[], options: ExportOptions)
 
-// Export attendance data to CSV  
+// Export attendance data to CSV
 exportAttendanceToCSV(data: AttendanceDataItem[], options: ExportOptions)
 
 // Export combined report with summary statistics
 exportCombinedReportToCSV(
-  revenueData: RevenueDataItem[], 
-  attendanceData: AttendanceDataItem[], 
-  overviewData: OverviewData, 
+  revenueData: RevenueDataItem[],
+  attendanceData: AttendanceDataItem[],
+  overviewData: OverviewData,
   options: ExportOptions
 )
 ```
@@ -644,9 +644,9 @@ exportCombinedReportToCSV(
 ```typescript
 // Export styled PDF report via browser print dialog
 exportToPDF(
-  revenueData: RevenueDataItem[], 
-  attendanceData: AttendanceDataItem[], 
-  overviewData: OverviewData, 
+  revenueData: RevenueDataItem[],
+  attendanceData: AttendanceDataItem[],
+  overviewData: OverviewData,
   options: ExportOptions
 ): Promise<void>
 ```

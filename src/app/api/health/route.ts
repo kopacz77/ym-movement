@@ -15,7 +15,7 @@ export async function GET() {
       {
         status: "healthy",
         timestamp: new Date().toISOString(),
-        service: "yura-scheduler",
+        service: "ym-movement",
         database: "connected",
       },
       { status: 200 },
@@ -27,7 +27,7 @@ export async function GET() {
       {
         status: "unhealthy",
         timestamp: new Date().toISOString(),
-        service: "yura-scheduler",
+        service: "ym-movement",
         database: "disconnected",
       },
       { status: 503 },

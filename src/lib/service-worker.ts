@@ -179,7 +179,7 @@ class ServiceWorkerManager {
    */
   private async storeOfflineAction(action: OfflineAction): Promise<void> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open("YuraSchedulerOffline", 1);
+      const request = indexedDB.open("YMMovementOffline", 1);
 
       request.onerror = () => reject(request.error);
 

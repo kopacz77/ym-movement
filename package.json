@@ -4,7 +4,7 @@
   "description": "Enterprise-grade figure skating lesson scheduling platform with advanced performance optimizations, real-time analytics, and comprehensive student management",
   "private": true,
   "author": {
-    "name": "Yura Scheduler Team",
+    "name": "YM Movement Team",
     "email": "contact@yurascheduler.com"
   },
   "keywords": [
@@ -52,6 +52,7 @@
     "test:all": "npm run test:run && npm run test:e2e",
     "security:audit": "node scripts/security-audit.js",
     "security:fix": "pnpm audit --fix",
+    "db:check": "tsx scripts/pre-migration-check.ts",
     "prisma:migrate": "prisma migrate deploy",
     "migrate:coach-data": "tsx scripts/migrate-coach-data.ts",
     "migrate:lesson-types": "tsx scripts/migrate-lesson-types.ts",

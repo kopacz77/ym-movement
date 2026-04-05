@@ -10,7 +10,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: builder
-    container_name: yura-scheduler-app
+    container_name: ym-movement-app
     ports:
       - "3000:3000"
     environment:
@@ -33,7 +33,7 @@ services:
       - /app/.next
     command: pnpm dev
     networks:
-      - yura-network
+      - ym-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
@@ -45,13 +45,13 @@ services:
   # Redis Cache (Optional - uncomment if needed)
   redis:
     image: redis:7-alpine
-    container_name: yura-scheduler-redis
+    container_name: ym-movement-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - yura-network
+      - ym-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -67,5 +67,5 @@ volumes:
     driver: local
 
 networks:
-  yura-network:
+  ym-network:
     driver: bridge

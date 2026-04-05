@@ -1,8 +1,8 @@
-# Contributing to Yura Scheduler v3
+# Contributing to YM Movement
 
-Thank you for your interest in contributing to the Yura Scheduler v3 project! This document provides guidelines for contributing to this figure skating lesson management platform.
+Thank you for your interest in contributing to the YM Movement project! This document provides guidelines for contributing to this figure skating lesson management platform.
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Fork the repository** and clone it locally
 2. **Install dependencies**: `pnpm install`
@@ -10,7 +10,7 @@ Thank you for your interest in contributing to the Yura Scheduler v3 project! Th
 4. **Run database migrations**: `pnpm prisma:migrate`
 5. **Start development server**: `pnpm dev`
 
-## 📋 Development Guidelines
+## Development Guidelines
 
 ### Code Standards
 
@@ -21,7 +21,7 @@ Thank you for your interest in contributing to the Yura Scheduler v3 project! Th
 
 ### Security Requirements
 
-⚠️ **Security is our top priority**. All contributions must:
+**Security is our top priority**. All contributions must:
 
 - Use input sanitization for all user inputs
 - Follow password security policies
@@ -46,21 +46,21 @@ Run tests with: `pnpm test`
 - **Relation names**: Use PascalCase (e.g., `User`, `Lesson`, `Student`)
 - **Test data**: Use the test data factories in `__tests__/helpers/`
 
-## 🔒 Security Guidelines
+## Security Guidelines
 
 ### Input Validation
 ```typescript
-// ✅ Good: Use sanitization hook
+// Good: Use sanitization hook
 const { sanitizeInput } = useSanitizedInput();
 const cleanInput = sanitizeInput(userInput);
 
-// ❌ Bad: Direct user input usage
+// Bad: Direct user input usage
 const result = await api.create({ data: userInput });
 ```
 
 ### API Security
 ```typescript
-// ✅ Good: Server-side sanitization + logging
+// Good: Server-side sanitization + logging
 .mutation(async ({ ctx, input }) => {
   const sanitized = sanitizeInput(input.content);
   logSecurityEvent('DATA_CREATED', { userId: ctx.session?.user?.id });
@@ -70,14 +70,14 @@ const result = await api.create({ data: userInput });
 
 ### Password Handling
 ```typescript
-// ✅ Good: Use validatePasswordStrength
+// Good: Use validatePasswordStrength
 const validation = validatePasswordStrength(password);
 if (!validation.isValid) {
   throw new Error(validation.errors.join(', '));
 }
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 ### Directory Structure
 ```
@@ -99,7 +99,7 @@ Each feature should contain:
 - `types/` - TypeScript types
 - `hooks/` - Feature-specific hooks
 
-## 📝 Commit Guidelines
+## Commit Guidelines
 
 We use conventional commits:
 
@@ -120,7 +120,7 @@ docs: update API documentation
 - `refactor`: Code refactoring
 - `perf`: Performance improvements
 
-## 🧪 Testing Guidelines
+## Testing Guidelines
 
 ### Security Testing
 Always include security tests:
@@ -151,7 +151,7 @@ it("should handle form submission securely", async () => {
 });
 ```
 
-## 🚀 Pull Request Process
+## Pull Request Process
 
 1. **Create a feature branch**: `git checkout -b feat/your-feature`
 2. **Write comprehensive tests** for your changes
@@ -166,7 +166,7 @@ it("should handle form submission securely", async () => {
 - [ ] No security vulnerabilities introduced
 - [ ] Code follows style guidelines
 
-## 🔍 Code Review Guidelines
+## Code Review Guidelines
 
 ### Security Review Checklist
 - [ ] Input sanitization implemented
@@ -182,10 +182,10 @@ it("should handle form submission securely", async () => {
 - [ ] Performance considerations
 - [ ] Accessibility standards met
 
-## 🛠️ Development Environment
+## Development Environment
 
 ### Required Tools
-- **Node.js**: v18+ (recommended: v20)
+- **Node.js**: >= 20.15.0
 - **pnpm**: Package manager
 - **PostgreSQL**: Database (Neon recommended)
 - **Git**: Version control
@@ -197,7 +197,7 @@ DATABASE_URL="postgresql://..."
 
 # Authentication
 NEXTAUTH_SECRET="your-secret"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3100"
 
 # Email (optional)
 RESEND_API_KEY="your-key"
@@ -207,23 +207,23 @@ GOOGLE_CLIENT_ID="your-id"
 GOOGLE_CLIENT_SECRET="your-secret"
 ```
 
-## 📚 Resources
+## Resources
 
 - **TRPC Documentation**: https://trpc.io/
 - **Next.js App Router**: https://nextjs.org/docs/app
 - **Prisma ORM**: https://www.prisma.io/docs
 - **Radix UI**: https://www.radix-ui.com/
 
-## 🤝 Community
+## Community
 
 - **Issues**: Report bugs and request features
 - **Discussions**: Ask questions and share ideas
 - **Security**: Report vulnerabilities privately
 
-## 📄 License
+## License
 
 By contributing, you agree that your contributions will be licensed under the same license as the project.
 
 ---
 
-Thank you for contributing to Yura Scheduler v3! Your help makes this project better for everyone. 🎉
+Thank you for contributing to YM Movement! Your help makes this project better for everyone.

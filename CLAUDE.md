@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Access**: Visit `http://localhost:3100/api-docs` when running `pnpm dev`
 - **Security**: Only available in development mode (returns 404 in production)
 - **Features**: Interactive API testing, request/response schemas, endpoint catalog
-- **Documentation**: See [SWAGGER-API-DOCS.md](SWAGGER-API-DOCS.md) for usage guide
+- **Documentation**: See [SWAGGER-API-DOCS.md](docs/SWAGGER-API-DOCS.md) for usage guide
 
 ## Testing Commands
 
@@ -237,6 +237,39 @@ This project includes specialized Claude Code subagents for focused development 
 - Feature-based organization, custom UI components follow Radix patterns
 - Date handling with date-fns library
 
+## Neon Database Backup & Recovery
+
+### Scheduled Snapshots (Dashboard Setup)
+Neon supports scheduled snapshots configured via the dashboard — no external tooling needed.
+
+**To enable** (one-time setup in Neon Console):
+1. Go to [Neon Console](https://console.neon.tech) → your project
+2. Navigate to **Branches** → select your production branch (usually `main`)
+3. Click **Backup schedule** (or find it under branch settings)
+4. Set schedule: **Daily**, retention: **30 days**
+5. Save
+
+This creates automatic daily snapshots you can restore from if data is ever lost.
+
+### Pre-Migration Safety Check
+Before running any migration, verify current data:
+```bash
+pnpm db:check
+```
+This prints row counts for all critical tables (User, Student, Rink, RinkTimeSlot, Lesson, Payment) and warns if any are empty.
+
+### Data Integrity Endpoint
+`GET /api/health/data` — returns row counts for critical tables. Use to quickly verify data integrity at any time.
+
+### Recovery Procedure
+If data is accidentally deleted:
+1. **Do NOT run any more migrations or commands** — stop immediately
+2. Go to Neon Console → your project → **Branches**
+3. Use **Point-in-Time Restore** to restore to a timestamp before the incident
+4. Verify data with `pnpm db:check`
+
+**Reference incident**: On 2026-04-05, `prisma migrate reset` wiped 1,025 time slots, 871 lessons, and 871 payments. Recovered via Neon PITR.
+
 ## Development Notes
 
 - No test framework configured
@@ -244,6 +277,34 @@ This project includes specialized Claude Code subagents for focused development 
 - Development auth bypass: `ENABLE_AUTH_BYPASS=true`
 - Environment variables required for Google Calendar, database, NextAuth
 - **IMPORTANT**: Prisma relation names use PascalCase (e.g., `User`, `Lesson`, `Student`, `Rink`) - always use these in includes and access patterns
+
+## 🚨 ABSOLUTE PROHIBITION: Database Destructive Operations
+
+**⚠️ PRODUCTION DATA MUST NEVER BE MASS-DELETED UNDER ANY CIRCUMSTANCES ⚠️**
+
+### FORBIDDEN Commands (NEVER RUN — NO EXCEPTIONS UNLESS USER EXPLICITLY ASKS)
+- ❌ `prisma migrate reset` — **DROPS ALL TABLES AND DATA. ABSOLUTELY FORBIDDEN.** Only the user can authorize this, and only with an explicit direct request. Do NOT run this during dependency updates, schema changes, or any automated workflow.
+- ❌ `prisma db push --force-reset` — **DESTROYS ALL DATA**
+- ❌ `prisma migrate dev` — Can reset the database if migrations diverge. Use `prisma migrate deploy` instead.
+- ❌ `DELETE FROM` without a specific `WHERE` clause
+- ❌ `TRUNCATE` on any table
+- ❌ `DROP TABLE` on any table
+- ❌ Any bulk delete operation that could affect more than a handful of rows
+
+### SAFE Prisma Commands
+- ✅ `prisma generate` — generates TypeScript client (no DB changes)
+- ✅ `prisma migrate deploy` — applies pending migrations only (no data loss)
+- ✅ `prisma db pull` — introspects schema (read-only)
+- ✅ `prisma studio` — GUI browser (read-only by default)
+
+### Why This Rule Exists
+On 2026-04-05, a `prisma migrate reset` (or equivalent) wiped all RinkTimeSlot (1,025 rows), Lesson (871 rows), and Payment (871 rows) data from production during a dependency update session. Data was recovered via Neon point-in-time restore.
+
+### Enforcement
+- **Before ANY database operation**: Verify the command is on the SAFE list above
+- **Before ANY `pnpm install` or dependency update**: Check that no postinstall script runs destructive Prisma commands
+- **If uncertain**: ASK THE USER before executing any database-touching command
+- **Never assume a Prisma command is safe** — verify it explicitly
 
 ## 🚨 CRITICAL: TimeSlotDialog Data Flow Architecture
 

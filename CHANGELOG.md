@@ -5,9 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-04-05
+
+### Changed
+- Renamed project from "Yura Scheduler v3" to "YM Movement" across all documentation and configuration
+- Comprehensive security audit and hardening (see SECURITY.md for details)
+- Updated Next.js to latest security patches
+- Removed unused dependencies (trpc-openapi, node-mock-http)
+- Added HTTP-level route protection via Next.js middleware
+- Fixed password hash exposure in 14+ Prisma queries
+- Tightened superAdminProcedure to require SUPER_ADMIN role exclusively
+- Removed ~138 debug logging statements
+- Fixed student schedule visibility for lessons on draft time slots
+
 ## [3.3.0] - 2025-10-14
 
-### 🎯 Major Feature: Comprehensive Lesson Type Management
+### Major Feature: Comprehensive Lesson Type Management
 
 #### Added
 - **Calendar-Integrated Lesson Type Management**: Complete lesson type workflow in admin calendar
@@ -90,22 +103,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Database schema details
   - Testing recommendations
 
-- **CALENDAR-INTEGRATION-GUIDE.md**: Calendar workflow guide
-  - User workflows for admins
-  - Visual design specifications
-  - Error handling procedures
-  - Troubleshooting guide
-
-- **MIGRATION-LESSON-TYPES.md**: Database migration guide
-  - Step-by-step migration instructions
-  - Backup and restore procedures
-  - Rollback plan
-  - Production deployment checklist
-  - FAQ and troubleshooting
-
 ## [3.2.0] - 2025-09-03
 
-### 🔧 Critical Bug Fixes & System Improvements
+### Critical Bug Fixes & System Improvements
 
 #### Fixed
 - **Student Names in Payments**: Fixed "unknown" display issue by correcting Prisma relation naming
@@ -143,7 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0] - 2025-08-05
 
-### 🎉 Major UX & Notification System Overhaul
+### Major UX & Notification System Overhaul
 
 #### Added
 - **Unified Toast Notification System**: Complete replacement of browser dialogs with beautiful Sonner toasts
@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.1] - 2025-01-22
 
-### 🎨 UX Improvements & Bug Fixes
+### UX Improvements & Bug Fixes
 
 #### Fixed
 - **Bulk Time Slot Creation UX**: Complete redesign of bulk create form with improved layout, real-time validation, and better user flow
@@ -200,15 +200,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - 2025-01-22
 
-### 🚀 Major Release - Performance Optimization
+### Major Release - Performance Optimization
 
-This major release transforms Yura Scheduler with significant performance improvements, security enhancements, and advanced React patterns.
+This major release transforms YM Movement with significant performance improvements, security enhancements, and advanced React patterns.
 
-## Phase 2 - Priority 2 Optimizations ✨
+## Phase 2 - Priority 2 Optimizations
 
 ### Added
 
-#### 🎯 Advanced React Performance Patterns
+#### Advanced React Performance Patterns
 - **Context Optimization & Splitting**
   - `src/lib/context-utils.tsx` - Context selector utilities for granular subscriptions
   - `src/contexts/OptimizedAuthContext.tsx` - Memoized auth provider with selectors
@@ -227,7 +227,7 @@ This major release transforms Yura Scheduler with significant performance improv
   - `useOptimizedFormSubmission()` hook for preventing double submissions
   - **90% reduction** in API calls for search inputs
 
-#### 🔧 Enhanced Error Boundaries & Monitoring
+#### Enhanced Error Boundaries & Monitoring
 - **Enhanced Error Boundaries**
   - `src/components/enhanced-error-boundary.tsx` - Advanced error handling with metrics
   - Performance data capture on component failures
@@ -244,7 +244,7 @@ This major release transforms Yura Scheduler with significant performance improv
 
 ### Changed
 
-#### ⚡ React Component Optimizations
+#### React Component Optimizations
 - **Calendar Components**
   - Added `React.memo` to `BookingCalendar` and `ScheduleManager`
   - Optimized event handlers with `useCallback`
@@ -257,19 +257,19 @@ This major release transforms Yura Scheduler with significant performance improv
   - Split large contexts into focused, granular providers
   - Optimized callback functions with `useCallback`
 
-#### 📊 Performance Metrics Achieved
-- **Bundle Size**: 60% reduction (450KB → 180KB initial bundle)
-- **Time to Interactive**: 66% faster (3.2s → 1.1s)
-- **Large List Rendering**: 95% DOM node reduction (1000+ → ~20 nodes)
-- **Context Re-renders**: 90% reduction (100+ → 5-10 per action)
+#### Performance Metrics Achieved
+- **Bundle Size**: 60% reduction (450KB -> 180KB initial bundle)
+- **Time to Interactive**: 66% faster (3.2s -> 1.1s)
+- **Large List Rendering**: 95% DOM node reduction (1000+ -> ~20 nodes)
+- **Context Re-renders**: 90% reduction (100+ -> 5-10 per action)
 - **Search API Calls**: 90% reduction with debouncing
-- **Memory Usage**: 60% reduction (45MB → 18MB average)
+- **Memory Usage**: 60% reduction (45MB -> 18MB average)
 
-## Phase 2 - Priority 1 Optimizations 🔥
+## Phase 2 - Priority 1 Optimizations
 
 ### Added
 
-#### 🔒 Security Infrastructure
+#### Security Infrastructure
 - **Automated Security Monitoring**
   - `scripts/security-audit.js` - Custom security audit script
   - `.github/workflows/security.yml` - Daily automated security scans
@@ -277,12 +277,11 @@ This major release transforms Yura Scheduler with significant performance improv
   - Real-time vulnerability monitoring and alerts
 
 - **Security Documentation**
-  - `SECURITY_FIXES_SUMMARY.md` - Comprehensive security audit results
   - Security utilities library (`src/lib/security.ts`)
   - Environment validation (`src/lib/env-validation.ts`)
   - OWASP Top 10 compliance documentation
 
-#### ⚡ Performance Infrastructure
+#### Performance Infrastructure
 - **Dynamic Code Splitting**
   - Implemented dynamic imports for all major feature components
   - Added proper loading skeletons for better UX
@@ -296,7 +295,7 @@ This major release transforms Yura Scheduler with significant performance improv
   - Fixed N+1 query patterns in payment and student endpoints
   - **70% improvement** in database query performance
 
-#### 🛠️ Next.js Optimizations
+#### Next.js Optimizations
 - **Enhanced webpack Configuration**
   - Intelligent code splitting with vendor, UI, features, and common chunks
   - Package import optimization for Radix UI and Lucide React
@@ -305,7 +304,7 @@ This major release transforms Yura Scheduler with significant performance improv
 
 ### Fixed
 
-#### 🐛 Critical Issues Resolved
+#### Critical Issues Resolved
 - **Security Vulnerabilities** (6 total fixed)
   - **Critical**: Next.js authorization bypass (CVE-2025-29927) - Updated to 15.3.4
   - **Critical**: Future compatibility security improvements
@@ -320,48 +319,48 @@ This major release transforms Yura Scheduler with significant performance improv
   - Fixed environment variable assignment in test files
   - Updated IntersectionObserver mock for proper typing
 
-#### 🔧 Build & Development
+#### Build & Development
 - **Enhanced Development Experience**
   - Fixed all TypeScript strict mode errors
   - Improved error boundary integration
   - Enhanced testing framework setup
   - Optimized development server performance
 
-## Phase 1 - Foundation & Security 🏗️
+## Phase 1 - Foundation & Security
 
 ### Added
 
-#### 🧪 Testing Framework
+#### Testing Framework
 - **Comprehensive Testing Setup**
   - Vitest configuration for modern testing
   - React Testing Library integration
   - Component testing examples and patterns
   - Mock configurations for external dependencies
 
-#### 🔐 Security Hardening
+#### Security Hardening
 - **Authentication & Authorization**
   - Enhanced middleware with proper error handling
   - Role-based access control improvements
   - Security headers configuration
   - Development auth bypass controls
 
-#### 📦 Dependency Updates
+#### Dependency Updates
 - **Major Version Updates**
-  - Next.js 15.2.1 → 15.3.4 (security fixes)
-  - React 18 → 19 (latest stable)
+  - Next.js 15.2.1 -> 15.3.4 (security fixes)
+  - React 18 -> 19 (latest stable)
   - TRPC v11 with improved type safety
   - Updated all major dependencies to secure versions
 
 ### Changed
 
-#### 🎨 UI/UX Improvements
+#### UI/UX Improvements
 - **Component Library**
   - Enhanced Radix UI component integration
   - Improved loading states and skeletons
   - Better error handling and user feedback
   - Responsive design improvements
 
-#### 🗄️ Database Schema
+#### Database Schema
 - **Optimized Schema Design**
   - Added performance indexes for frequent queries
   - Improved relationship mappings
@@ -407,39 +406,36 @@ This major release transforms Yura Scheduler with significant performance improv
 ## [1.0.0] - 2024-06-15
 
 ### Added
-- Initial release of Yura Scheduler
+- Initial release of YM Movement
 - Basic scheduling functionality
 - Student management system
 - Payment processing
 
 ---
 
-## 🔗 Links
+## Links
 
 - [Security Documentation](SECURITY.md)
 - [Performance Optimization Guide](OPTIMIZATION.md)
-- [Phase 2 Optimization Details](PHASE2_OPTIMIZATIONS.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 
-## 📊 Performance Summary
+## Performance Summary
 
 ### Current Performance Metrics (v3.0.0)
 - **Lighthouse Score**: 98/100
 - **Core Web Vitals**: All in "Good" range
 - **Bundle Size**: 180KB initial (down from 450KB)
 - **Time to Interactive**: 1.1s (down from 3.2s)
-- **Zero Known Vulnerabilities**: ✅
+- **Zero Known Vulnerabilities**
 - **Test Coverage**: 85%+
 
 ### Optimization Impact
-- **🚀 Performance**: 60-95% improvements across all metrics
-- **🔒 Security**: Zero vulnerabilities with proactive monitoring
-- **🧠 Developer Experience**: Enhanced with modern tooling
-- **📱 User Experience**: Smooth interactions and fast loading
-- **⚡ Scalability**: Handles 1000+ concurrent users efficiently
+- **Performance**: 60-95% improvements across all metrics
+- **Security**: Zero vulnerabilities with proactive monitoring
+- **Developer Experience**: Enhanced with modern tooling
+- **User Experience**: Smooth interactions and fast loading
+- **Scalability**: Handles 1000+ concurrent users efficiently
 
 ---
 
-**For detailed technical information about optimizations, see [OPTIMIZATION.md](OPTIMIZATION.md)**
-
-**For security details and vulnerability fixes, see [SECURITY_FIXES_SUMMARY.md](SECURITY_FIXES_SUMMARY.md)**
+**For detailed technical information about optimizations, see [OPTIMIZATION.md](docs/OPTIMIZATION.md)**

@@ -39,13 +39,13 @@ services:
 
     # Add extra hosts for local testing
     # extra_hosts:
-    #   - "local.yurascheduler.com:127.0.0.1"
+    #   - "local.ym-movement.com:127.0.0.1"
 
   db:
     # Override database configuration for local needs
     environment:
       # Custom database settings
-      - POSTGRES_DB=yura_scheduler_local
+      - POSTGRES_DB=ym_movement_local
       # - POSTGRES_USER=custom_user
       # - POSTGRES_PASSWORD=custom_password
 
@@ -68,7 +68,7 @@ services:
   # Add additional services for local development
   # mailhog:
   #   image: mailhog/mailhog:latest
-  #   container_name: yura-scheduler-mailhog
+  #   container_name: ym-movement-mailhog
   #   ports:
   #     - "1025:1025"  # SMTP port
   #     - "8025:8025"  # Web UI port
@@ -77,7 +77,7 @@ services:
 
   # pgadmin:
   #   image: dpage/pgadmin4:latest
-  #   container_name: yura-scheduler-pgadmin
+  #   container_name: ym-movement-pgadmin
   #   environment:
   #     PGADMIN_DEFAULT_EMAIL: admin@example.com
   #     PGADMIN_DEFAULT_PASSWORD: admin

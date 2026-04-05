@@ -1,5 +1,5 @@
 /**
- * Service Worker for Yura Scheduler v3
+ * Service Worker for YM Movement
  * 
  * Advanced caching strategies, offline functionality, and background sync
  * 
@@ -8,10 +8,10 @@
  */
 
 const CACHE_VERSION = 'v3.0.0';
-const STATIC_CACHE = `yura-scheduler-static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `yura-scheduler-dynamic-${CACHE_VERSION}`;
-const API_CACHE = `yura-scheduler-api-${CACHE_VERSION}`;
-const IMAGE_CACHE = `yura-scheduler-images-${CACHE_VERSION}`;
+const STATIC_CACHE = `ym-movement-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `ym-movement-dynamic-${CACHE_VERSION}`;
+const API_CACHE = `ym-movement-api-${CACHE_VERSION}`;
+const IMAGE_CACHE = `ym-movement-images-${CACHE_VERSION}`;
 
 // Cache configuration
 const CACHE_CONFIG = {
@@ -105,7 +105,7 @@ self.addEventListener('activate', (event) => {
       try {
         const cacheNames = await caches.keys();
         const oldCaches = cacheNames.filter(name => 
-          name.startsWith('yura-scheduler-') && !name.includes(CACHE_VERSION)
+          name.startsWith('ym-movement-') && !name.includes(CACHE_VERSION)
         );
         
         // Delete old caches
@@ -428,7 +428,7 @@ async function syncAnalyticsUpdates() {
 // IndexedDB helpers for offline storage
 async function getFromIndexedDB(storeName) {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('YuraSchedulerOffline', 1);
+    const request = indexedDB.open('YMMovementOffline', 1);
     
     request.onerror = () => reject(request.error);
     
@@ -453,7 +453,7 @@ async function getFromIndexedDB(storeName) {
 
 async function removeFromIndexedDB(storeName, id) {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('YuraSchedulerOffline', 1);
+    const request = indexedDB.open('YMMovementOffline', 1);
     
     request.onerror = () => reject(request.error);
     
