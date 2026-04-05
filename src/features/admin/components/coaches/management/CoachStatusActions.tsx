@@ -339,7 +339,7 @@ export function CoachActionsCell({
           {deletionImpact && (
             <div className="space-y-2 py-2">
               <p className="text-sm font-medium text-muted-foreground">Impact summary:</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {deletionImpact.lessonCount > 0 && (
                   <Badge variant="outline" className="justify-center py-1.5">
                     {deletionImpact.lessonCount} lesson{deletionImpact.lessonCount !== 1 ? "s" : ""}{" "}

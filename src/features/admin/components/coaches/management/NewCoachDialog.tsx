@@ -123,7 +123,7 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input id="name" placeholder="Coach name" {...form.register("name")} />
@@ -155,7 +155,7 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="skills">Skills</Label>
               <Input
@@ -188,7 +188,7 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
 
           <div className="border-t pt-4">
             <h4 className="text-sm font-medium mb-3">Pricing (optional)</h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <Label htmlFor="privateLessonPrice">Private Lesson ($)</Label>
                 <Input

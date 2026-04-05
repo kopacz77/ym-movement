@@ -2,7 +2,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +60,18 @@ export function EditCoachPricingDialog({
     currentPricing.revenueSplitPercent.toString(),
   );
 
+  // Sync state when dialog opens with potentially different coach data
+  useEffect(() => {
+    if (open) {
+      setPrivateLessonPrice(currentPricing.privateLessonPrice?.toString() ?? "");
+      setGroupLessonPrice(currentPricing.groupLessonPrice?.toString() ?? "");
+      setChoreographyPrice(currentPricing.choreographyPrice?.toString() ?? "");
+      setCompetitionPrepPrice(currentPricing.competitionPrepPrice?.toString() ?? "");
+      setOffIceDancePrice(currentPricing.offIceDancePrice?.toString() ?? "");
+      setRevenueSplitPercent(currentPricing.revenueSplitPercent.toString());
+    }
+  }, [open, currentPricing]);
+
   const updatePricing = api.admin.coach.management.updateCoachPricing.useMutation({
     onSuccess: () => {
       toast.success("Coach pricing updated");
@@ -91,7 +103,7 @@ export function EditCoachPricingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px]">
+      <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Pricing - {coachName}</DialogTitle>
           <DialogDescription>
@@ -100,7 +112,7 @@ export function EditCoachPricingDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-private">Private Lesson ($)</Label>
               <Input
