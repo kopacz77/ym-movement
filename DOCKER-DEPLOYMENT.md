@@ -26,7 +26,7 @@ The YM Movement Scheduler uses:
 ```bash
 # 1. Clone the repository (if not already done)
 git clone <repository-url>
-cd yura-scheduler-v3
+cd ym-movement
 
 # 2. Ensure your .env file exists with Neon database URL
 cat .env | grep DATABASE_URL
@@ -217,7 +217,7 @@ docker rmi <image-id>
 ```bash
 # Ensure you're editing files in the project directory
 pwd
-# Should show: /home/username/projects/yura-scheduler-v3
+# Should show: /home/username/projects/ym-movement
 
 # Restart with clean volumes
 pnpm docker:down

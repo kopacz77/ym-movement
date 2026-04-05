@@ -1,5 +1,5 @@
 {
-  "name": "yura-scheduler-v3",
+  "name": "ym-movement",
   "version": "3.0.0",
   "description": "Enterprise-grade figure skating lesson scheduling platform with advanced performance optimizations, real-time analytics, and comprehensive student management",
   "private": true,
@@ -24,11 +24,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/yura-scheduler-v3.git"
+    "url": "https://github.com/kopacz77/ym-movement.git"
   },
-  "homepage": "https://github.com/your-username/yura-scheduler-v3#readme",
+  "homepage": "https://github.com/kopacz77/ym-movement#readme",
   "bugs": {
-    "url": "https://github.com/your-username/yura-scheduler-v3/issues"
+    "url": "https://github.com/kopacz77/ym-movement/issues"
   },
   "scripts": {
     "dev": "next dev -p 3100 --webpack",

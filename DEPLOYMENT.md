@@ -147,7 +147,7 @@ Create `vercel.json` in project root:
 ```bash
 # Quick start with Docker Compose
 git clone <repository>
-cd yura-scheduler-v3
+cd ym-movement
 cp .env.docker .env
 pnpm docker:dev
 

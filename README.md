@@ -99,7 +99,7 @@ Yura Scheduler v3 is a high-performance, full-stack application designed for pro
 ## 📁 Project Structure
 
 ```
-yura-scheduler-v3/
+ym-movement/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── (protected)/        # Protected routes (admin/student)
@@ -156,8 +156,8 @@ yura-scheduler-v3/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/yura-scheduler-v3.git
-cd yura-scheduler-v3
+git clone https://github.com/your-username/ym-movement.git
+cd ym-movement
 
 # Copy Docker environment template
 cp .env.docker .env
@@ -175,8 +175,8 @@ pnpm docker:dev
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/yura-scheduler-v3.git
-cd yura-scheduler-v3
+git clone https://github.com/your-username/ym-movement.git
+cd ym-movement
 
 # Install dependencies (pnpm recommended for performance)
 pnpm install
@@ -202,8 +202,8 @@ node --version  # Should be >= 20.15.0
 pnpm --version  # Should be >= 9.0.0
 
 # Clone and setup
-git clone https://github.com/your-username/yura-scheduler-v3.git
-cd yura-scheduler-v3
+git clone https://github.com/your-username/ym-movement.git
+cd ym-movement
 pnpm install
 
 # For WSL: Setup PostgreSQL with Docker
@@ -221,7 +221,7 @@ docker run --name postgres-yura \
 ```bash
 # For better performance, work within WSL filesystem
 cd ~
-git clone https://github.com/your-username/yura-scheduler-v3.git
+git clone https://github.com/your-username/ym-movement.git
 
 # Use WSL-native file paths in DATABASE_URL
 DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/yura_scheduler"
@@ -555,8 +555,8 @@ pnpm list react react-dom
 ### Getting Help
 
 - 📖 Check our [Documentation](docs/)
-- 🐛 [Report Issues](https://github.com/your-username/yura-scheduler-v3/issues)
-- 💬 [Discussions](https://github.com/your-username/yura-scheduler-v3/discussions)
+- 🐛 [Report Issues](https://github.com/your-username/ym-movement/issues)
+- 💬 [Discussions](https://github.com/your-username/ym-movement/discussions)
 - 📧 Email: support@your-domain.com
 
 ## 📄 License
