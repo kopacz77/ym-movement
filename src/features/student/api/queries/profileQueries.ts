@@ -14,10 +14,6 @@ interface LessonQueryFilters {
     gte?: Date;
     lte?: Date;
   };
-  OR?: Array<{
-    timeSlotId?: null;
-    RinkTimeSlot?: { isActive: boolean };
-  }>;
 }
 
 export const profileRouter = createTRPCRouter({
@@ -175,12 +171,6 @@ export const profileRouter = createTRPCRouter({
 
         const where: LessonQueryFilters = {
           studentId: input.studentId,
-          // Only show lessons where the time slot is published (isActive=true)
-          // or where there is no time slot (legacy lessons)
-          OR: [
-            { timeSlotId: null },
-            { RinkTimeSlot: { isActive: true } },
-          ],
         };
 
         if (input.status && input.status !== "ALL") {
@@ -350,14 +340,10 @@ export const profileRouter = createTRPCRouter({
           });
         }
 
-        // Get all student lessons (only from published time slots)
+        // Get all student lessons
         const allLessons = await ctx.prisma.lesson.findMany({
           where: {
             studentId: input.studentId,
-            OR: [
-              { timeSlotId: null },
-              { RinkTimeSlot: { isActive: true } },
-            ],
           },
         });
 

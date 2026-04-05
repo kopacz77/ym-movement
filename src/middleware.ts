@@ -32,9 +32,12 @@ export async function middleware(request: NextRequest) {
   }
 
   const allowedRoles = PROTECTED_ROUTES[matchedPrefix];
-  const userRole = token.role as string;
+  const userRole = token.role as string | undefined;
 
-  if (!allowedRoles.includes(userRole)) {
+  // If role is missing from token (stale session), allow through and let
+  // the TRPC/API layer handle authorization. This prevents blocking users
+  // who have valid sessions from before the role field was added to JWT.
+  if (userRole && !allowedRoles.includes(userRole)) {
     const loginUrl = new URL(LOGIN_URL, request.url);
     loginUrl.searchParams.set("error", "AccessDenied");
     return NextResponse.redirect(loginUrl);
