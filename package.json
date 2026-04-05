@@ -112,7 +112,7 @@
     "ioredis": "^5.8.2",
     "lucide-react": "^0.522.0",
     "luxon": "^3.7.2",
-    "next": "16.1.6",
+    "next": "16.1.7",
     "next-auth": "^4.24.13",
     "next-themes": "^0.4.6",
     "react": "^19.2.3",
@@ -129,7 +129,6 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.4.18",
     "tailwindcss-animate": "^1.0.7",
-    "trpc-openapi": "^1.2.0",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.25.0"
   },
@@ -158,7 +157,6 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.12.4",
     "msw-trpc": "^2.0.1",
-    "node-mock-http": "^1.0.4",
     "postcss": "^8.5.6",
     "prisma": "^6.19.0",
     "typescript": "^5.9.3",
@@ -169,23 +167,29 @@
       "react": "^19.2.3",
       "react-dom": "^19.2.3"
     },
-    "dompurify": ">=3.2.4"
+    "dompurify": ">=3.3.2"
   },
   "pnpm": {
     "overrides": {
-      "dompurify": ">=3.2.4",
+      "dompurify": ">=3.3.2",
       "qs": ">=6.14.2",
       "body-parser": ">=1.20.3",
       "glob": ">=11.0.1",
       "preact": ">=10.28.2",
-      "h3": ">=1.15.5",
+      "h3": ">=1.15.9",
       "lodash": ">=4.17.23",
       "lodash-es": ">=4.17.23",
       "axios": ">=1.13.5",
       "@isaacs/brace-expansion": ">=5.0.1",
       "minimatch": ">=10.2.1",
       "ajv": ">=8.18.0",
-      "rollup": ">=4.59.0"
+      "rollup": ">=4.59.0",
+      "effect": ">=3.20.0",
+      "defu": ">=6.1.5",
+      "immutable": ">=3.8.3",
+      "picomatch": ">=4.0.4",
+      "yaml": ">=2.8.3",
+      "brace-expansion": ">=5.0.5"
     },
     "peerDependencyRules": {
       "allowedVersions": {

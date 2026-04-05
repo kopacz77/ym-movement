@@ -29,7 +29,6 @@ export async function GET() {
         timestamp: new Date().toISOString(),
         service: "yura-scheduler",
         database: "disconnected",
-        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 503 },
     );

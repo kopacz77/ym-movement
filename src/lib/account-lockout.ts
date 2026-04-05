@@ -54,9 +54,8 @@ export async function isAccountLockedOut(email: string): Promise<boolean> {
 
     return failedAttempts >= LOCKOUT_THRESHOLD;
   } catch (error) {
-    console.error("Error checking account lockout:", error);
-    // Fail open - allow login attempt if we can't check
-    return false;
+    console.error("Error checking account lockout, failing closed:", error);
+    return true; // Fail closed - deny login if we can't verify
   }
 }
 
@@ -149,7 +148,7 @@ export async function getRemainingAttempts(email: string): Promise<number> {
 
     return Math.max(0, LOCKOUT_THRESHOLD - failedAttempts);
   } catch (error) {
-    console.error("Error getting remaining attempts:", error);
-    return LOCKOUT_THRESHOLD; // Fail open
+    console.error("Error getting remaining attempts, failing closed:", error);
+    return 0; // Fail closed - report no remaining attempts on error
   }
 }

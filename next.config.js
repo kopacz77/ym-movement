@@ -148,7 +148,7 @@ const nextConfig = {
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value: process.env.NODE_ENV === "production" ? "https://yourdomain.com" : "*",
+            value: process.env.NODE_ENV === "production" ? (process.env.NEXTAUTH_URL || "https://ym-movement.com") : "http://localhost:3100",
           },
           {
             key: "Access-Control-Allow-Methods",

@@ -14,7 +14,7 @@ export const approvalQueries = createTRPCRouter({
       // For clarity, let's use Prisma's built-in querying instead of raw SQL
       const pendingStudents = await ctx.prisma.student.findMany({
         where: { isApproved: false },
-        include: { User: true },
+        include: { User: { select: { id: true, name: true, email: true, role: true } } },
         orderBy: { createdAt: "desc" },
         take: 5,
       });
@@ -52,7 +52,7 @@ export const approvalQueries = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            User: true,
+            User: { select: { id: true, name: true, email: true, role: true } },
           },
         });
 
@@ -70,7 +70,7 @@ export const approvalQueries = createTRPCRouter({
           data: {
             isApproved: true,
             approvedAt: new Date(),
-            approvedById: ctx.session?.user?.id || "admin001",
+            approvedById: ctx.session.user.id,
           },
         });
 
@@ -78,7 +78,7 @@ export const approvalQueries = createTRPCRouter({
         const updatedStudent = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            User: true,
+            User: { select: { id: true, name: true, email: true, role: true } },
           },
         });
 
@@ -140,7 +140,7 @@ export const approvalQueries = createTRPCRouter({
 
       const unapprovedStudents = await ctx.prisma.student.findMany({
         where: { isApproved: false },
-        include: { User: true },
+        include: { User: { select: { id: true, name: true, email: true, role: true } } },
       });
 
       if (unapprovedStudents.length === 0) {
@@ -152,7 +152,7 @@ export const approvalQueries = createTRPCRouter({
         data: {
           isApproved: true,
           approvedAt: new Date(),
-          approvedById: ctx.session?.user?.id || "admin001",
+          approvedById: ctx.session.user.id,
         },
       });
 
@@ -182,7 +182,7 @@ export const approvalQueries = createTRPCRouter({
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            User: true,
+            User: { select: { id: true, name: true, email: true, role: true } },
           },
         });
 

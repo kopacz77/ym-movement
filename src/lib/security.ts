@@ -1,5 +1,5 @@
 // src/lib/security.ts
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 /**
  * Security utility functions for the application
@@ -46,14 +46,10 @@ export function validateSecurityEnvironment(): void {
  * @returns True if strings are equal
  */
 export function safeCompare(a: string, b: string): boolean {
-  const bufferA = Buffer.from(a, "utf8");
-  const bufferB = Buffer.from(b, "utf8");
-
-  if (bufferA.length !== bufferB.length) {
-    return false;
-  }
-
-  return timingSafeEqual(bufferA, bufferB);
+  const key = randomBytes(32);
+  const hmacA = createHmac("sha256", key).update(a).digest();
+  const hmacB = createHmac("sha256", key).update(b).digest();
+  return timingSafeEqual(hmacA, hmacB);
 }
 
 /**

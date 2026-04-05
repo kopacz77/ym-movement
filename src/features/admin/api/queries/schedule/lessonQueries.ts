@@ -47,7 +47,7 @@ export const lessonRouter = createTRPCRouter({
           }),
           ctx.prisma.student.findUnique({
             where: { id: sanitizedInput.studentId },
-            include: { User: true },
+            include: { User: { select: { id: true, name: true, email: true } } },
           }),
         ]);
         if (!timeSlot || !student) {
@@ -150,7 +150,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             updatedAt: new Date(),
           },
           include: {
-            Student: { include: { User: true } },
+            Student: { include: { User: { select: { id: true, name: true, email: true } } } },
             Rink: true,
           },
         });
@@ -252,7 +252,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             ...(input.coachId && { coachId: input.coachId }),
           },
           include: {
-            Student: { include: { User: true } },
+            Student: { include: { User: { select: { id: true, name: true, email: true } } } },
             Rink: true,
             Payment: true,
             RinkTimeSlot: true, // Include time slot for more context
@@ -301,7 +301,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
             ...(input?.active !== undefined ? { isActive: input.active } : {}),
           },
           include: {
-            User: true,
+            User: { select: { id: true, name: true, email: true, role: true } },
             // Include recent lessons for context
             Lesson: {
               where: {
@@ -414,7 +414,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         // Get student information for calendar event
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
-          include: { User: true },
+          include: { User: { select: { id: true, name: true, email: true } } },
         });
 
         if (!student) {
@@ -522,7 +522,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
               ...(timeSlot.coachId && { coachId: timeSlot.coachId }),
               updatedAt: new Date(),
             },
-            include: { Student: { include: { User: true } } },
+            include: { Student: { include: { User: { select: { id: true, name: true, email: true } } } } },
           });
 
           // Create payment record
@@ -589,7 +589,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         const existingLesson = await ctx.prisma.lesson.findUnique({
           where: { id: input.lessonId },
           include: {
-            Student: { include: { User: true } },
+            Student: { include: { User: { select: { id: true, name: true, email: true } } } },
             Rink: true,
             Payment: true,
           },
@@ -685,7 +685,7 @@ ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
             updatedAt: new Date(),
           },
           include: {
-            Student: { include: { User: true } },
+            Student: { include: { User: { select: { id: true, name: true, email: true } } } },
             Rink: true,
             Payment: true,
           },

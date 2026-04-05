@@ -7,6 +7,7 @@ import {
   createPasswordResetToken,
   verifyPasswordResetToken,
 } from "@/lib/auth-tokens";
+import { validatePasswordStrength } from "@/lib/security";
 import { createTRPCRouter, rateLimitedPublicProcedure } from "@/lib/trpc";
 
 export const passwordResetRouter = createTRPCRouter({
@@ -47,6 +48,15 @@ export const passwordResetRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { token, password, name } = input;
+
+      // Validate password complexity beyond minimum length
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: passwordValidation.errors.join(", "),
+        });
+      }
 
       try {
         // Verify and consume the token

@@ -74,7 +74,7 @@ export async function createPasswordResetToken(
 export async function verifyPasswordResetToken(token: string) {
   const passwordResetToken = await prisma.passwordResetToken.findUnique({
     where: { token },
-    include: { User: true },
+    include: { User: { select: { id: true, name: true, email: true } } },
   });
 
   if (!passwordResetToken) {

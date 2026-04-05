@@ -132,7 +132,7 @@ export const bookingRouter = createTRPCRouter({
         const student = (await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
-            User: true,
+            User: { select: { id: true, name: true, email: true } },
           },
         })) as unknown as ExtendedStudent; // Cast to our extended type
 
@@ -364,7 +364,7 @@ export const bookingRouter = createTRPCRouter({
             include: {
               Student: {
                 include: {
-                  User: true,
+                  User: { select: { id: true, name: true, email: true } },
                 },
               },
               Rink: true,
@@ -568,7 +568,7 @@ export const bookingRouter = createTRPCRouter({
           where: { id: input.lessonId },
           include: {
             Student: {
-              include: { User: true },
+              include: { User: { select: { id: true, name: true, email: true } } },
             },
             Rink: true,
           },

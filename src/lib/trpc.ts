@@ -137,14 +137,13 @@ const isAdmin = t.middleware(({ ctx, next }) => {
   });
 });
 
-// Super admin middleware -- functionally identical to isAdmin during the transition period.
-// In the future this can be tightened to SUPER_ADMIN-only.
+// Super admin middleware -- strictly requires SUPER_ADMIN role.
 const isSuperAdmin = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
   }
 
-  if (!isAdminRole(ctx.session.user.role)) {
+  if (ctx.session.user.role !== "SUPER_ADMIN") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Super admin access required" });
   }
 

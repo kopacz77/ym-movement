@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body with size limit
     const body = await req.json();
-    console.log("Signup request received:", { ...body, password: "[REDACTED]" });
+    console.log("Signup request received for:", body.email);
     const result = signupSchema.safeParse(body);
 
     if (!result.success) {
@@ -283,9 +283,6 @@ export async function POST(req: NextRequest) {
     console.log("Transaction completed successfully");
 
     // Send welcome email after successful user creation (don't fail if email fails)
-    console.log("=== EMAIL SENDING ATTEMPT ===");
-    console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
-    console.log("RESEND_API_KEY length:", process.env.RESEND_API_KEY?.length || 0);
     console.log("Sending welcome email to:", user.email);
 
     try {
@@ -317,7 +314,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "Failed to create account",
-        error: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     );
