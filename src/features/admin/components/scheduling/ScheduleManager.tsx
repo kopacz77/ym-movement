@@ -189,25 +189,16 @@ const ScheduleManagerComponent = () => {
   // Filter time slots by timezone when viewing "All Rinks" with a timezone filter
   const filteredTimeSlots = useMemo(() => {
     if (!timeSlots) {
-      console.log("[ScheduleManager] No timeSlots data yet");
       return undefined;
     }
 
-    console.log(
-      `[ScheduleManager] Raw timeSlots count: ${timeSlots.length}, selectedRink: ${selectedRink}, timezoneFilter: ${timezoneFilter}`,
-    );
-
     // If a specific rink is selected, no additional filtering needed
     if (selectedRink) {
-      console.log(`[ScheduleManager] Rink selected, returning all ${timeSlots.length} slots`);
       return timeSlots;
     }
 
     // Filter slots to only show rinks matching the selected timezone
     const filtered = timeSlots.filter((slot) => slot.Rink?.timezone === timezoneFilter);
-    console.log(
-      `[ScheduleManager] Filtered by timezone ${timezoneFilter}: ${filtered.length} of ${timeSlots.length} slots`,
-    );
     return filtered;
   }, [timeSlots, selectedRink, timezoneFilter]);
 
@@ -292,7 +283,6 @@ const ScheduleManagerComponent = () => {
 
       // Prevent dragging blocked dates
       if (event.slot && "isBlocked" in event.slot && event.slot.isBlocked) {
-        console.log("Cannot drag blocked dates - they are static periods");
         return;
       }
 
@@ -417,12 +407,6 @@ const ScheduleManagerComponent = () => {
 
   // Prepare data for the edit dialog
   const handleEditSlot = useCallback(() => {
-    console.log(
-      "handleEditSlot called with selectedEvent:",
-      selectedEvent,
-      "selectedSlot:",
-      selectedSlot,
-    );
     const slotData = selectedEvent
       ? {
           startTime: selectedEvent.schedule.start || new Date(),
@@ -446,7 +430,6 @@ const ScheduleManagerComponent = () => {
             "",
         };
 
-    console.log("Generated slotData:", slotData);
     setTimeSlotFormData(slotData);
     setIsCreateDialogOpen(true);
     setIsManageDialogOpen(false);
@@ -455,17 +438,8 @@ const ScheduleManagerComponent = () => {
   // Handle deleting a time slot
   const handleDeleteSlot = useCallback(() => {
     const slotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
-    console.log(
-      "handleDeleteSlot called with selectedEvent:",
-      selectedEvent,
-      "selectedSlot:",
-      selectedSlot,
-      "slotId:",
-      slotId,
-    );
 
     if (slotId) {
-      console.log("Calling deleteTimeSlot.mutate with id:", slotId);
       deleteTimeSlot.mutate({ id: slotId });
     } else {
       console.error("No slotId found for deletion");
@@ -476,8 +450,6 @@ const ScheduleManagerComponent = () => {
   const handleAssignStudent = useCallback(
     (studentId: string) => {
       const timeSlotId = selectedEvent ? selectedEvent.schedule.id : selectedSlot?.id || "";
-
-      console.log("Frontend assignment:", { timeSlotId, studentId, selectedEvent, selectedSlot });
 
       if (!timeSlotId) {
         console.error("No timeSlotId available for assignment");
@@ -755,8 +727,6 @@ const ScheduleManagerComponent = () => {
         students={students || []}
         onAssignStudent={handleAssignStudent}
         onUnassignStudent={(lessonId: string) => {
-          console.log("🔵 ScheduleManager: Removing student - lessonId:", lessonId);
-
           if (lessonId) {
             // Immediately update the selected slot in the dialog
             if (selectedSlot) {
@@ -768,11 +738,8 @@ const ScheduleManagerComponent = () => {
                 Lesson: currentLessons.filter((lesson: any) => lesson.id !== lessonId),
               };
               setSelectedSlot(updatedSlot);
-              console.log("✅ UI updated optimistically - Lesson removed from slot");
             }
 
-            // The optimistic update will handle cache updates
-            console.log("🚀 Calling mutation to delete lesson from backend...");
             unassignStudent.mutate({ lessonId });
           }
         }}

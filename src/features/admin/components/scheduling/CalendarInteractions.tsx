@@ -48,9 +48,8 @@ export const CalendarInteractions = ({ selectedStudentId }: CalendarInteractions
     setShowBookingDialog(true);
   };
 
-  const handleEventClick = (event: CalendarEvent) => {
+  const handleEventClick = (_event: CalendarEvent) => {
     // Handle existing event click
-    console.log("Event clicked:", event);
   };
 
   const handleViewChange = (view: string) => {

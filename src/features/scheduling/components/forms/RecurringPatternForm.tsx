@@ -135,9 +135,6 @@ export const RecurringPatternForm: React.FC<RecurringPatternFormProps> = ({
   }, [startDate, form]);
 
   const onSubmit = (data: FormValues) => {
-    // Log form data for debugging
-    console.log("Recurring pattern form submitted:", data);
-
     // Parse dates properly
     const startDate = parse(data.startDate, "yyyy-MM-dd", new Date());
     const endDate = parse(data.endDate, "yyyy-MM-dd", new Date());

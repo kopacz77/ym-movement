@@ -79,14 +79,12 @@ export const ScheduleCalendarView = () => {
   };
 
   // Handle event selection
-  const handleSelectEvent = (event: CalendarEvent) => {
-    console.log("Selected event:", event);
+  const handleSelectEvent = (_event: CalendarEvent) => {
     // Implement your event selection logic here
   };
 
   // Handle slot selection
-  const handleSelectSlot = (slotInfo: SlotInfo) => {
-    console.log("Selected slot:", slotInfo);
+  const handleSelectSlot = (_slotInfo: SlotInfo) => {
     // Implement your slot selection logic here
   };
 

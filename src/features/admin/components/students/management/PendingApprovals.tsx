@@ -41,33 +41,14 @@ export const PendingApprovals: React.FC = () => {
   // Fetch pending approvals from API
   const { data: pendingStudents, isLoading } = api.admin.student.getPendingApprovals.useQuery();
 
-  // 💰 $1000 CHALLENGE - ULTIMATE BULLETPROOF APPROVE 💰
   const approveStudentMutation = api.admin.student.approveStudent.useMutation({
     onMutate: async ({ studentId }) => {
-      console.log("🚀💰 $1000 CHALLENGE: Ultimate approve fix starting for student:", studentId);
-
-      // STEP 1: Cancel ALL queries aggressively
       await queryClient.cancelQueries();
-      console.log("🔄 CANCELLED all queries");
 
-      // STEP 2: Get complete cache state for debugging
       const cache = queryClient.getQueryCache();
       const allQueries = cache.getAll();
 
-      console.log("🗂️ FULL CACHE STATE:");
-      allQueries.forEach((query, index) => {
-        const data = query.state.data as any;
-        console.log(`Cache [${index}]:`, {
-          key: query.queryKey,
-          hasStudents: data?.students ? data.students.length : "no students",
-          isEnabled: (query.options as any)?.enabled !== false,
-          state: query.state.status,
-        });
-      });
-
-      // STEP 3: Find the student we're approving
       let studentToApprove: any = null;
-      let foundInQuery = "";
 
       for (const query of allQueries) {
         const data = query.state.data as any;
@@ -75,15 +56,13 @@ export const PendingApprovals: React.FC = () => {
           const student = data.students.find((s: any) => s.id === studentId);
           if (student) {
             studentToApprove = student;
-            foundInQuery = query.queryKey.join(".");
-            console.log("🎯 FOUND STUDENT:", student.user?.name, "in query:", foundInQuery);
             break;
           }
         }
       }
 
       if (!studentToApprove) {
-        console.error("❌ CRITICAL: Cannot find student to approve in any cache!");
+        console.error("Cannot find student to approve in any cache");
         return { studentId };
       }
 
@@ -111,9 +90,6 @@ export const PendingApprovals: React.FC = () => {
         Lesson: [],
       };
 
-      console.log("🔄 TRANSFORMED STUDENT:", approvedStudent);
-
-      // STEP 5: Update ALL cache entries with surgical precision
       let pendingRemoved = false;
       let approvedAdded = false;
 
@@ -127,16 +103,14 @@ export const PendingApprovals: React.FC = () => {
 
         // REMOVE from pending lists
         if (queryKey.includes("getPendingApprovals")) {
-          const beforeCount = data.students.length;
           const filtered = data.students.filter((s: any) => s.id !== studentId);
 
-          if (beforeCount !== filtered.length) {
+          if (data.students.length !== filtered.length) {
             queryClient.setQueryData(query.queryKey, {
               ...data,
               students: filtered,
             });
             pendingRemoved = true;
-            console.log(`✂️ REMOVED from ${queryKey}: ${beforeCount} -> ${filtered.length}`);
           }
         }
 
@@ -144,7 +118,7 @@ export const PendingApprovals: React.FC = () => {
         else if (queryKey.includes("getStudents")) {
           const exists = data.students.some((s: any) => s.id === studentId);
           if (!exists) {
-            const updated = [approvedStudent, ...data.students]; // Add to front for visibility
+            const updated = [approvedStudent, ...data.students];
             queryClient.setQueryData(query.queryKey, {
               ...data,
               students: updated,
@@ -157,33 +131,17 @@ export const PendingApprovals: React.FC = () => {
                 : undefined,
             });
             approvedAdded = true;
-            console.log(`➕ ADDED to ${queryKey}: ${data.students.length} -> ${updated.length}`);
           }
         }
       });
 
-      console.log(
-        `🎯 CACHE UPDATE RESULTS: Pending removed: ${pendingRemoved}, Approved added: ${approvedAdded}`,
-      );
-
-      if (!pendingRemoved || !approvedAdded) {
-        console.error("❌ CRITICAL: Cache update incomplete!");
-      }
-
       return { studentId, approvedStudent, pendingRemoved, approvedAdded };
     },
 
-    onSuccess: (_data, _variables, context) => {
-      console.log("🎉💰 SUCCESS! Student approved - results:", {
-        pendingRemoved: context?.pendingRemoved,
-        approvedAdded: context?.approvedAdded,
-      });
+    onSuccess: (_data, _variables, _context) => {
+      toast.success("Student approved successfully!");
 
-      toast.success("Student approved successfully! 🎉");
-
-      // MINIMAL invalidation to sync with backend data
       setTimeout(() => {
-        console.log("🔄 Syncing with backend...");
         queryClient.invalidateQueries({
           queryKey: ["admin", "student"],
           refetchType: "none", // Don't refetch, just mark stale
@@ -192,7 +150,7 @@ export const PendingApprovals: React.FC = () => {
     },
 
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      console.error("💥💰 APPROVE FAILED:", error.message);
+      console.error("Failed to approve student:", error.message);
       toast.error("Failed to approve student", {
         description: error.message,
       });
@@ -202,42 +160,31 @@ export const PendingApprovals: React.FC = () => {
     },
   });
 
-  // BULLETPROOF reject mutation - forces immediate UI update
   const rejectStudentMutation = api.admin.student.rejectStudent.useMutation({
     onMutate: async ({ studentId }) => {
-      console.log("🔄 REJECTING STUDENT:", studentId);
-
-      // AGGRESSIVE: Cancel ALL queries
       await queryClient.cancelQueries();
 
-      // BRUTE FORCE: Update ALL queries that contain students data
       const cache = queryClient.getQueryCache();
       const allQueries = cache.getAll();
 
       allQueries.forEach((query) => {
         const data = query.state.data as any;
         if (data?.students && Array.isArray(data.students)) {
-          // Remove from ALL student lists (pending and main)
           const filtered = data.students.filter((student: any) => student.id !== studentId);
           queryClient.setQueryData(query.queryKey, {
             ...data,
             students: filtered,
           });
-          console.log(
-            `✂️ REJECT: Removed from ${query.queryKey.join(".")} - ${data.students.length} -> ${filtered.length}`,
-          );
         }
       });
 
       return { studentId };
     },
     onSuccess: () => {
-      console.log("✅ REJECT: Success, forcing cache refresh");
       toast.success("Application rejected");
       queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
     },
     onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      console.log("❌ REJECT: Failed, showing error");
       toast.error("Failed to reject application", {
         description: error.message,
       });

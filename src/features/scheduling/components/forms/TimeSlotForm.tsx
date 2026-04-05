@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DateTime } from "luxon";
 // src/features/scheduling/components/forms/TimeSlotForm.tsx
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -97,18 +96,6 @@ export const TimeSlotForm = ({
     },
   });
 
-  // Debug initial values
-  useEffect(() => {
-    console.log("TimeSlotForm initial values:", {
-      startTime: initialStartTime ? initialStartTime.toISOString() : null,
-      formattedStartTime: initialStartTime ? formatInitialStartTime(initialStartTime) : null,
-      endTime: initialEndTime ? initialEndTime.toISOString() : null,
-      duration: initialDuration,
-      rawHours: initialStartTime ? initialStartTime.getUTCHours() : null,
-      rawMinutes: initialStartTime ? initialStartTime.getUTCMinutes() : null,
-    });
-  }, [initialStartTime, initialEndTime, initialDuration]);
-
   const handleSubmit = (values: TimeSlotFormValues) => {
     // Find the selected rink to get its timezone
     const selectedRink = rinks.find((rink) => rink.id === values.rinkId);
@@ -134,17 +121,6 @@ export const TimeSlotForm = ({
     // Convert to UTC for storage
     const utcStartTime = localRinkTime.toUTC().toJSDate();
     const utcEndTime = localRinkTime.plus({ minutes: values.duration }).toUTC().toJSDate();
-
-    // Log the time values for debugging
-    console.log("Creating time slot with:", {
-      rinkId: values.rinkId,
-      rinkTimezone,
-      inputLocalTime: `${hours}:${minutes.toString().padStart(2, "0")}`,
-      localRinkTime: localRinkTime.toString(),
-      utcStartTime: utcStartTime.toISOString(),
-      utcEndTime: utcEndTime.toISOString(),
-      durationMinutes: values.duration,
-    });
 
     // Validate the time range
     const validationError = validateTimeRange({ startTime: utcStartTime, endTime: utcEndTime });

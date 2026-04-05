@@ -61,7 +61,7 @@ class PerformanceMonitor {
 
     // Log slow renders in development
     if (process.env.NODE_ENV === "development" && renderTime > 16) {
-      console.warn(`⚠️ Slow render detected in ${componentName}: ${renderTime.toFixed(2)}ms`);
+      console.warn(`Slow render detected in ${componentName}: ${renderTime.toFixed(2)}ms`);
     }
   }
 
@@ -140,10 +140,8 @@ export function usePerformanceMonitor(componentName: string) {
   });
 
   const logRender = useCallback(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log(`🔄 ${componentName} render #${renderCount.current}`);
-    }
-  }, [componentName]);
+    // Intentionally empty - render tracking available via PerformancePanel
+  }, []);
 
   return { logRender };
 }

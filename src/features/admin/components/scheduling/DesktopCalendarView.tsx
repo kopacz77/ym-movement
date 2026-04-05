@@ -422,8 +422,6 @@ export const DesktopCalendarView: FC<DesktopCalendarViewProps> = ({
 
       // Check if this is a blocked date event - handle specially
       if (typedEvent.slot && "isBlocked" in typedEvent.slot && typedEvent.slot.isBlocked) {
-        console.log("Blocked date clicked - opening blocked date management");
-        // Pass the blocked date event to the parent for special handling
         onSelectEvent(typedEvent);
         return;
       }

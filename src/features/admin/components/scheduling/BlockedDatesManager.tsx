@@ -136,14 +136,13 @@ export function BlockedDatesManager({ className }: BlockedDatesManagerProps) {
 
   const deleteMutation = api.admin.schedule.deleteBlockedDate.useMutation({
     onSuccess: (result) => {
-      console.log("Delete mutation success:", result);
       toast.success("Success", {
         description: result.message,
       });
       refetch();
     },
     onError: (error) => {
-      console.error("Delete mutation error:", error);
+      console.error("Delete blocked date error:", error);
       toast.error("Error", {
         description: error.message,
       });
@@ -187,15 +186,10 @@ export function BlockedDatesManager({ className }: BlockedDatesManagerProps) {
 
   // Handle delete
   const handleDelete = (id: string) => {
-    console.log("Delete button clicked for blocked date ID:", id);
     showDeleteConfirmation(
       "blocked period",
       () => {
-        console.log("Delete action clicked, calling mutation with ID:", id);
         deleteMutation.mutate({ id });
-      },
-      () => {
-        console.log("Delete cancelled");
       },
     );
   };

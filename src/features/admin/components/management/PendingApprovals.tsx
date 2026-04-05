@@ -30,10 +30,8 @@ export const PendingApprovals = () => {
   const { data, isLoading, error } = api.admin.student.getPendingApprovals.useQuery();
   const pendingStudents = data?.students || [];
 
-  // NUCLEAR APPROVE - FORCE RELOAD EVERYTHING!
   const approveStudent = api.admin.student.approveStudent.useMutation({
     onSuccess: () => {
-      console.log("🚨 NUCLEAR APPROVE: FORCING COMPLETE REFRESH!");
       toast.success("Student approved successfully");
 
       // NUCLEAR: Clear ALL cache and force refetch
@@ -51,42 +49,31 @@ export const PendingApprovals = () => {
     },
   });
 
-  // BULLETPROOF reject student mutation (for comparison)
   const rejectStudent = api.admin.student.rejectStudent.useMutation({
     onMutate: async ({ studentId }) => {
-      console.log("🔄 REJECTING STUDENT:", studentId);
-
-      // AGGRESSIVE: Cancel ALL queries
       await queryClient.cancelQueries();
 
-      // BRUTE FORCE: Update ALL queries that contain students data
       const cache = queryClient.getQueryCache();
       const allQueries = cache.getAll();
 
       allQueries.forEach((query) => {
         const data = query.state.data as any;
         if (data?.students && Array.isArray(data.students)) {
-          // Remove from ALL student lists (pending and main)
           const filtered = data.students.filter((student: any) => student.id !== studentId);
           queryClient.setQueryData(query.queryKey, {
             ...data,
             students: filtered,
           });
-          console.log(
-            `✂️ REJECT: Removed from ${query.queryKey.join(".")} - ${data.students.length} -> ${filtered.length}`,
-          );
         }
       });
 
       return { studentId };
     },
     onSuccess: () => {
-      console.log("✅ REJECT: Success, forcing cache refresh");
       toast.success("Application rejected");
       queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
     },
     onError: (err) => {
-      console.log("❌ REJECT: Failed, showing error");
       toast.error("Failed to reject application", {
         description: err.message,
       });

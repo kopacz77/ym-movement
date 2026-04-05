@@ -64,12 +64,9 @@ export default function CoachSignupPage() {
 
   // Wait for Turnstile script to load
   useEffect(() => {
-    console.log("Checking if Turnstile is loaded...");
-
     // Poll for Turnstile availability
     const checkTurnstile = setInterval(() => {
       if (typeof window !== "undefined" && window.turnstile) {
-        console.log("Turnstile script loaded successfully");
         setTurnstileReady(true);
         clearInterval(checkTurnstile);
       }
@@ -92,7 +89,6 @@ export default function CoachSignupPage() {
   // Initialize Turnstile widget once script is ready
   useEffect(() => {
     if (!turnstileReady || typeof window === "undefined" || !window.turnstile) {
-      console.log("Waiting for Turnstile to be ready...");
       return;
     }
 
@@ -102,15 +98,12 @@ export default function CoachSignupPage() {
       return;
     }
 
-    console.log("Rendering Turnstile widget...");
-
     // Render visible widget that user must click - ALWAYS requires fresh interaction
     turnstileWidgetId.current = window.turnstile.render(container, {
       sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA",
       // Force manual execution - widget won't auto-verify
       execution: "render",
       callback: (token: string) => {
-        console.log("Turnstile verification successful");
         setTurnstileToken(token);
       },
       "error-callback": () => {
@@ -121,7 +114,6 @@ export default function CoachSignupPage() {
         });
       },
       "expired-callback": () => {
-        console.warn("Turnstile token expired");
         setTurnstileToken(null);
         toast("Verification Expired", {
           description: "Please verify again before submitting.",
@@ -129,13 +121,10 @@ export default function CoachSignupPage() {
       },
     });
 
-    console.log("Turnstile widget ID:", turnstileWidgetId.current);
-
     // CRITICAL: Reset immediately after render to clear any cached state
     if (turnstileWidgetId.current) {
       setTimeout(() => {
         if (turnstileWidgetId.current && window.turnstile) {
-          console.log("Resetting Turnstile to clear cache...");
           window.turnstile.reset(turnstileWidgetId.current);
         }
       }, 100);
@@ -143,7 +132,6 @@ export default function CoachSignupPage() {
 
     return () => {
       if (turnstileWidgetId.current && window.turnstile) {
-        console.log("Cleaning up Turnstile widget");
         window.turnstile.remove(turnstileWidgetId.current);
         setTurnstileToken(null);
       }
@@ -155,7 +143,6 @@ export default function CoachSignupPage() {
 
     // Layer 1 Check: Honeypot validation (client-side first line of defense)
     if (honeypot) {
-      console.warn("Bot detected via honeypot field");
       toast.error("Error", {
         description: "Invalid form submission. Please try again.",
       });
@@ -167,7 +154,6 @@ export default function CoachSignupPage() {
     if (!turnstileToken) {
       // Execute the Turnstile widget to show the challenge
       if (turnstileWidgetId.current && window.turnstile) {
-        console.log("Triggering Turnstile challenge...");
         window.turnstile.execute(turnstileWidgetId.current);
       }
       toast.error("Verification Required", {

@@ -284,14 +284,11 @@ export const OptimizedTextarea = memo(
 /**
  * Form field performance tracker for development
  */
-export const useFormFieldRenderTracker = (fieldName: string) => {
+export const useFormFieldRenderTracker = (_fieldName: string) => {
   const renderCount = useRef(0);
 
   useEffect(() => {
     renderCount.current += 1;
-    if (process.env.NODE_ENV === "development") {
-      console.log(`Field "${fieldName}" rendered ${renderCount.current} times`);
-    }
   });
 };
 

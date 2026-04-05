@@ -423,7 +423,6 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log("Edit button clicked in TimeSlotDialog");
                   onEdit();
                 }}
               >

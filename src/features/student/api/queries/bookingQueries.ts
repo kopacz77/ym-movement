@@ -58,8 +58,6 @@ export const bookingRouter = createTRPCRouter({
           }
         }
 
-        console.log(`[BOOKING] Starting booking process for student ${input.studentId}`);
-
         // 1. Get the time slot to check availability
         const timeSlot = await ctx.prisma.rinkTimeSlot.findUnique({
           where: { id: input.timeSlotId },
@@ -74,23 +72,15 @@ export const bookingRouter = createTRPCRouter({
         });
 
         if (!timeSlot) {
-          console.log(`[BOOKING] Time slot ${input.timeSlotId} not found`);
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Time slot not found",
           });
         }
 
-        console.log(
-          `[BOOKING] Time slot has ${timeSlot.Lesson.length}/${timeSlot.maxStudents} lessons`,
-        );
-
         // 2. Check if time slot is in the past
         const now = new Date();
         if (timeSlot.startTime <= now) {
-          console.log(
-            `[BOOKING] Time slot ${input.timeSlotId} is in the past (${timeSlot.startTime.toISOString()} <= ${now.toISOString()})`,
-          );
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "Cannot book lessons for past time slots",
@@ -121,7 +111,6 @@ export const bookingRouter = createTRPCRouter({
 
         // 3. Check if slot is available
         if (timeSlot.Lesson.length >= timeSlot.maxStudents) {
-          console.log(`[BOOKING] Time slot ${input.timeSlotId} is fully booked`);
           throw new TRPCError({
             code: "CONFLICT",
             message: "Time slot is fully booked",
@@ -137,7 +126,6 @@ export const bookingRouter = createTRPCRouter({
         })) as unknown as ExtendedStudent; // Cast to our extended type
 
         if (!student) {
-          console.log(`[BOOKING] Student ${input.studentId} not found`);
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",
@@ -146,7 +134,6 @@ export const bookingRouter = createTRPCRouter({
 
         // CRITICAL: Check if student is approved before allowing booking
         if (!student.isApproved) {
-          console.log(`[BOOKING] Student ${input.studentId} is not approved`);
           throw new TRPCError({
             code: "FORBIDDEN",
             message:
@@ -162,10 +149,6 @@ export const bookingRouter = createTRPCRouter({
         startOfWeek.setHours(0, 0, 0, 0);
         endOfWeek.setHours(23, 59, 59, 999);
 
-        console.log(
-          `[BOOKING] Checking weekly lessons for week ${startOfWeek.toISOString()} to ${endOfWeek.toISOString()}`,
-        );
-
         // Count lessons in current week - only count SCHEDULED lessons
         const weeklyLessonsCount = await ctx.prisma.lesson.count({
           where: {
@@ -178,14 +161,7 @@ export const bookingRouter = createTRPCRouter({
           },
         });
 
-        console.log(
-          `[BOOKING] Student has ${weeklyLessonsCount}/${student.maxLessonsPerWeek} lessons this week`,
-        );
-
         if (weeklyLessonsCount >= student.maxLessonsPerWeek) {
-          console.log(
-            `[BOOKING] Student ${input.studentId} has reached weekly limit of ${student.maxLessonsPerWeek} lessons`,
-          );
           throw new TRPCError({
             code: "FORBIDDEN",
             message: `You have reached your weekly limit of ${student.maxLessonsPerWeek} lessons`,
@@ -205,9 +181,6 @@ export const bookingRouter = createTRPCRouter({
 
         if (overlappingLesson) {
           const overlapTime = format(overlappingLesson.startTime, "h:mm a");
-          console.log(
-            `[BOOKING] Student ${input.studentId} has overlapping lesson at ${overlapTime}`,
-          );
           throw new TRPCError({
             code: "CONFLICT",
             message: `You already have a lesson scheduled at ${overlapTime} that overlaps with this time slot`,
@@ -267,9 +240,6 @@ export const bookingRouter = createTRPCRouter({
         try {
           // Only attempt calendar integration if name and email are available
           if (student.User?.name && student.User?.email) {
-            console.log(`[BOOKING] Attempting to create calendar event for ${student.User.name}`);
-            console.log(`[BOOKING] Using timezone: ${timeSlot.Rink.timezone}`);
-
             // Make sure we have a valid timezone
             const timezone = timeSlot.Rink.timezone || "America/Los_Angeles"; // Fallback timezone
 
@@ -292,16 +262,6 @@ export const bookingRouter = createTRPCRouter({
                 timeZone: timezone,
               });
             }
-
-            if (googleEventId) {
-              console.log(`[BOOKING] Created Google Calendar event with ID: ${googleEventId}`);
-            } else {
-              console.log(
-                "[BOOKING] Failed to create Google Calendar event, continuing without calendar integration",
-              );
-            }
-          } else {
-            console.log("[BOOKING] Skipping calendar integration - missing student name or email");
           }
         } catch (error) {
           console.error("[BOOKING] Error creating Google Calendar event:", error);
@@ -325,21 +285,9 @@ export const bookingRouter = createTRPCRouter({
           coachPricing,
         );
 
-        console.log(
-          `[BOOKING] Calculated price: $${price} for ${durationMinutes}min ${input.type} lesson${
-            student.customPricingEnabled
-              ? " (custom pricing)"
-              : coachPricing
-                ? " (coach pricing)"
-                : " (default pricing)"
-          }`,
-        );
-
         // 7. Create the lesson and payment in a transaction
-        console.log("[BOOKING] Creating lesson and payment records");
         // Generate payment reference code
         const paymentRef = `PAY-${randomUUID().substring(0, 8)}`;
-        console.log(`[BOOKING] Generated payment reference: ${paymentRef}`);
 
         const result = await ctx.prisma.$transaction(async (prisma) => {
           // Create the lesson
@@ -387,10 +335,6 @@ export const bookingRouter = createTRPCRouter({
           return { lesson, payment };
         });
 
-        console.log(
-          `[BOOKING] Successfully created lesson (ID: ${result.lesson.id}) and payment (ID: ${result.payment.id})`,
-        );
-
         // 7b. Upsert CoachStudent junction record if the lesson has a coach
         if (timeSlot.coachId) {
           try {
@@ -407,9 +351,6 @@ export const bookingRouter = createTRPCRouter({
               },
               update: {},
             });
-            console.log(
-              `[BOOKING] Upserted CoachStudent record for coach ${timeSlot.coachId} and student ${input.studentId}`,
-            );
           } catch (coachStudentError) {
             console.error("[BOOKING] Error upserting CoachStudent record:", coachStudentError);
             // Non-blocking: the booking itself succeeded
@@ -428,9 +369,6 @@ export const bookingRouter = createTRPCRouter({
             type: "SUCCESS",
             link: `/student/schedule/${result.lesson.id}`,
           });
-          console.log(
-            `[BOOKING] Created notification for user ${(student as any).User?.id || (student as any).userId}`,
-          );
         } catch (notificationError) {
           console.error("[BOOKING] Error creating notification:", notificationError);
           // Continue even if notification fails - the booking itself was successful
@@ -467,17 +405,7 @@ export const bookingRouter = createTRPCRouter({
           );
 
           // Use Promise.allSettled for partial success tolerance
-          const results = await Promise.allSettled(notificationPromises);
-          const successCount = results.filter((r) => r.status === "fulfilled").length;
-          const failureCount = results.filter((r) => r.status === "rejected").length;
-
-          if (failureCount > 0) {
-            console.warn(`[BOOKING] ${successCount} notifications sent, ${failureCount} failed`);
-          } else {
-            console.log(
-              `[BOOKING] Created admin notifications for ${adminUsers.length} admin user(s)`,
-            );
-          }
+          await Promise.allSettled(notificationPromises);
         } catch (adminNotificationError) {
           console.error("[BOOKING] Error creating admin notifications:", adminNotificationError);
           // Continue even if admin notification fails - the booking itself was successful
@@ -512,8 +440,6 @@ export const bookingRouter = createTRPCRouter({
         // 10. Send confirmation email to the student with fixed timezone information
         if (student.User?.email && student.User?.name) {
           try {
-            console.log(`[BOOKING] Sending confirmation email to ${student.User.email}`);
-
             await sendLessonConfirmationEmail(
               student.User.email,
               student.User.name,
@@ -528,14 +454,10 @@ export const bookingRouter = createTRPCRouter({
               input.paymentMethod,
               paymentRef,
             );
-
-            console.log(`[BOOKING] Successfully sent confirmation email to ${student.User.email}`);
           } catch (emailError) {
             console.error("[BOOKING] Error sending confirmation email:", emailError);
             // Continue even if email fails - the booking itself was successful
           }
-        } else {
-          console.log("[BOOKING] Skipping confirmation email - missing student name or email");
         }
 
         return result;

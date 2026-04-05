@@ -37,7 +37,6 @@ export default function BlockedDateDialog({
 
   const deleteMutation = api.admin.schedule.deleteBlockedDate.useMutation({
     onSuccess: (result) => {
-      console.log("Delete blocked date success:", result);
       toast.success("Success", {
         description: result.message,
       });
@@ -57,15 +56,10 @@ export default function BlockedDateDialog({
       return;
     }
 
-    console.log("Delete blocked date clicked for ID:", blockedRange.id);
     showDeleteConfirmation(
       "blocked period",
       () => {
-        console.log("Delete action confirmed, calling mutation with ID:", blockedRange.id);
         deleteMutation.mutate({ id: blockedRange.id });
-      },
-      () => {
-        console.log("Delete cancelled");
       },
     );
   };

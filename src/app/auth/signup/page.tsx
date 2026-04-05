@@ -71,12 +71,9 @@ export default function SignupPage() {
 
   // Wait for Turnstile script to load
   useEffect(() => {
-    console.log("🔍 Checking if Turnstile is loaded...");
-
     // Poll for Turnstile availability
     const checkTurnstile = setInterval(() => {
       if (typeof window !== "undefined" && window.turnstile) {
-        console.log("✅ Turnstile script loaded successfully");
         setTurnstileReady(true);
         clearInterval(checkTurnstile);
       }
@@ -86,7 +83,7 @@ export default function SignupPage() {
     const timeout = setTimeout(() => {
       clearInterval(checkTurnstile);
       if (!window.turnstile) {
-        console.error("❌ Turnstile script failed to load after 10 seconds");
+        console.error("Turnstile script failed to load after 10 seconds");
       }
     }, 10000);
 
@@ -99,17 +96,14 @@ export default function SignupPage() {
   // Initialize Turnstile widget once script is ready
   useEffect(() => {
     if (!turnstileReady || typeof window === "undefined" || !window.turnstile) {
-      console.log("⏳ Waiting for Turnstile to be ready...");
       return;
     }
 
     const container = turnstileContainerRef.current;
     if (!container) {
-      console.error("❌ Turnstile container ref not found");
+      console.error("Turnstile container ref not found");
       return;
     }
-
-    console.log("🎨 Rendering Turnstile widget...");
 
     // Render visible widget that user must click - ALWAYS requires fresh interaction
     turnstileWidgetId.current = window.turnstile.render(container, {
@@ -117,18 +111,16 @@ export default function SignupPage() {
       // Force manual execution - widget won't auto-verify
       execution: "render",
       callback: (token: string) => {
-        console.log("✅ Turnstile verification successful");
         setTurnstileToken(token);
       },
       "error-callback": () => {
-        console.error("❌ Turnstile verification failed");
+        console.error("Turnstile verification failed");
         setTurnstileToken(null);
         toast.error("Verification Failed", {
           description: "Please try refreshing the page.",
         });
       },
       "expired-callback": () => {
-        console.warn("⚠️ Turnstile token expired");
         setTurnstileToken(null);
         toast("Verification Expired", {
           description: "Please verify again before submitting.",
@@ -136,13 +128,10 @@ export default function SignupPage() {
       },
     });
 
-    console.log("🎨 Turnstile widget ID:", turnstileWidgetId.current);
-
     // CRITICAL: Reset immediately after render to clear any cached state
     if (turnstileWidgetId.current) {
       setTimeout(() => {
         if (turnstileWidgetId.current && window.turnstile) {
-          console.log("🔄 Resetting Turnstile to clear cache...");
           window.turnstile.reset(turnstileWidgetId.current);
         }
       }, 100);
@@ -150,7 +139,6 @@ export default function SignupPage() {
 
     return () => {
       if (turnstileWidgetId.current && window.turnstile) {
-        console.log("🧹 Cleaning up Turnstile widget");
         window.turnstile.remove(turnstileWidgetId.current);
         setTurnstileToken(null);
       }
@@ -164,7 +152,6 @@ export default function SignupPage() {
 
     // Layer 1 Check: Honeypot validation (client-side first line of defense)
     if (honeypot) {
-      console.warn("Bot detected via honeypot field");
       toast.error("Error", {
         description: "Invalid form submission. Please try again.",
       });
@@ -176,7 +163,6 @@ export default function SignupPage() {
     if (!turnstileToken) {
       // Execute the Turnstile widget to show the challenge
       if (turnstileWidgetId.current && window.turnstile) {
-        console.log("🎯 Triggering Turnstile challenge...");
         window.turnstile.execute(turnstileWidgetId.current);
       }
       toast.error("Verification Required", {
