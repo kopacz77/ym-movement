@@ -133,7 +133,10 @@
       "Skill(gsd:resume-work)",
       "Bash(npx next:*)",
       "Bash(pnpm outdated:*)",
-      "Bash(do if:*)"
+      "Bash(do if:*)",
+      "Bash(pnpm test:run:*)",
+      "Bash(pnpm vitest:*)",
+      "Bash(npx vitest:*)"
     ],
     "deny": []
   }
