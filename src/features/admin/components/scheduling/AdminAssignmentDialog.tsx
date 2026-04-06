@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
-import { getLessonTypePrice } from "@/lib/pricing-utils";
 
 interface TimeSlot {
   id: string;
@@ -62,20 +61,17 @@ export function AdminAssignmentDialog({
   );
 
   // Get student pricing for selected student
+  // Server resolves the correct waterfall based on coach role:
+  // - Admin coaches (Yura): student custom pricing wins
+  // - Non-admin coaches (Renee): coach pricing wins
   const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
-    { studentId: selectedStudentId },
+    { studentId: selectedStudentId, coachId: timeSlot.coachId ?? undefined },
     { enabled: !!selectedStudentId },
-  );
-
-  // Get coach pricing for this time slot's coach
-  const { data: coachPricing } = api.admin.coach.management.getCoachPricing.useQuery(
-    { coachId: timeSlot.coachId! },
-    { enabled: !!timeSlot.coachId },
   );
 
   // Assign student mutation
   const assignStudent = api.admin.schedule.assignStudentToTimeSlot.useMutation({
-    onSuccess: (lesson) => {
+    onSuccess: () => {
       const student = studentsData?.students?.find((s) => s.id === selectedStudentId);
       toast.success("Student Assigned", {
         description: `${student?.User?.name || "Student"} assigned to ${lessonType} lesson`,
@@ -117,6 +113,35 @@ export function AdminAssignmentDialog({
     1,
     Math.round((timeSlot.endTime.getTime() - timeSlot.startTime.getTime()) / 60000),
   );
+
+  // Get pro-rated price from server-resolved hourly rate
+  // Server already applied the correct waterfall (coach vs student priority)
+  const getProratedPrice = (type: LessonType): number => {
+    if (!studentPricing) {
+      return 0;
+    }
+    let hourlyRate: number;
+    switch (type) {
+      case LessonType.PRIVATE:
+        hourlyRate = studentPricing.privateLessonPrice;
+        break;
+      case LessonType.CHOREOGRAPHY:
+        hourlyRate = studentPricing.choreographyPrice;
+        break;
+      case LessonType.GROUP:
+        hourlyRate = studentPricing.groupLessonPrice;
+        break;
+      case LessonType.COMPETITION_PREP:
+        hourlyRate = studentPricing.competitionPrepPrice;
+        break;
+      case LessonType.OFF_ICE_DANCE:
+        hourlyRate = studentPricing.offIceDancePrice;
+        break;
+      default:
+        hourlyRate = studentPricing.privateLessonPrice;
+    }
+    return Math.round(((hourlyRate / 60) * slotDurationMinutes) * 100) / 100;
+  };
 
   // Format price for display (remove .00 if whole number)
   const formatPrice = (price: number) => {
@@ -192,49 +217,19 @@ export function AdminAssignmentDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={LessonType.PRIVATE}>
-                  Private Lesson - $
-                  {formatPrice(
-                    getLessonTypePrice(LessonType.PRIVATE, studentPricing, slotDurationMinutes, coachPricing ?? undefined),
-                  )}
+                  Private Lesson - ${formatPrice(getProratedPrice(LessonType.PRIVATE))}
                 </SelectItem>
                 <SelectItem value={LessonType.CHOREOGRAPHY}>
-                  Choreography - $
-                  {formatPrice(
-                    getLessonTypePrice(
-                      LessonType.CHOREOGRAPHY,
-                      studentPricing,
-                      slotDurationMinutes,
-                      coachPricing ?? undefined,
-                    ),
-                  )}
+                  Choreography - ${formatPrice(getProratedPrice(LessonType.CHOREOGRAPHY))}
                 </SelectItem>
                 <SelectItem value={LessonType.GROUP}>
-                  Group Lesson - $
-                  {formatPrice(
-                    getLessonTypePrice(LessonType.GROUP, studentPricing, slotDurationMinutes, coachPricing ?? undefined),
-                  )}
+                  Group Lesson - ${formatPrice(getProratedPrice(LessonType.GROUP))}
                 </SelectItem>
                 <SelectItem value={LessonType.COMPETITION_PREP}>
-                  Competition Prep - $
-                  {formatPrice(
-                    getLessonTypePrice(
-                      LessonType.COMPETITION_PREP,
-                      studentPricing,
-                      slotDurationMinutes,
-                      coachPricing ?? undefined,
-                    ),
-                  )}
+                  Competition Prep - ${formatPrice(getProratedPrice(LessonType.COMPETITION_PREP))}
                 </SelectItem>
                 <SelectItem value={LessonType.OFF_ICE_DANCE}>
-                  Off-Ice Dance - $
-                  {formatPrice(
-                    getLessonTypePrice(
-                      LessonType.OFF_ICE_DANCE,
-                      studentPricing,
-                      slotDurationMinutes,
-                      coachPricing ?? undefined,
-                    ),
-                  )}
+                  Off-Ice Dance - ${formatPrice(getProratedPrice(LessonType.OFF_ICE_DANCE))}
                 </SelectItem>
               </SelectContent>
             </Select>

@@ -262,11 +262,23 @@ describe("getHourlyRateForLessonType", () => {
   // ── Waterfall priority ──
 
   describe("Waterfall priority", () => {
-    it("student price beats coach price", () => {
+    it("coach price beats student custom price", () => {
+      // Coach pricing is authoritative — each coach sets their own rates.
+      // Student custom pricing only applies when no coach pricing is provided
+      // (role-aware logic at the caller decides whether to pass coach pricing).
       const student = customStudent({ privateLessonPrice: 100 });
       const coach = coachWith({ privateLessonPrice: 110 });
       expect(
         getHourlyRateForLessonType(LessonType.PRIVATE, student, fullDefaultPricing, coach),
+      ).toBe(110);
+    });
+
+    it("student custom price used when no coach pricing provided", () => {
+      // When caller passes null for coach (e.g. admin-coach or no coach on slot),
+      // student custom pricing takes effect
+      const student = customStudent({ privateLessonPrice: 100 });
+      expect(
+        getHourlyRateForLessonType(LessonType.PRIVATE, student, fullDefaultPricing, null),
       ).toBe(100);
     });
 

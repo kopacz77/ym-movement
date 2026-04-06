@@ -251,10 +251,11 @@ export const profileRouter = createTRPCRouter({
         // Get default pricing for reference
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        // Fetch coach pricing if coachId is provided
+        // Fetch coach pricing and role if coachId is provided
         let coachPricing = null;
+        let coachIsAdmin = false;
         if (input.coachId) {
-          coachPricing = await ctx.prisma.coach.findUnique({
+          const coach = await ctx.prisma.coach.findUnique({
             where: { id: input.coachId },
             select: {
               privateLessonPrice: true,
@@ -262,43 +263,76 @@ export const profileRouter = createTRPCRouter({
               choreographyPrice: true,
               competitionPrepPrice: true,
               offIceDancePrice: true,
+              User: { select: { role: true } },
             },
           });
+          if (coach) {
+            coachPricing = coach;
+            coachIsAdmin = isAdminRole(coach.User.role);
+          }
         }
 
-        // Apply the full pricing waterfall for each lesson type
+        // Pricing waterfall depends on coach role:
+        // - Admin coaches (Yura): student custom pricing wins → coach pricing fallback
+        // - Non-admin coaches (Renee etc.): coach pricing wins → student custom fallback
+        // getHourlyRateForLessonType uses coach-first order, so for admin coaches
+        // we pass coach as null initially and use it only as a fallback
+        const resolvePrice = (lessonType: LessonType) => {
+          if (coachIsAdmin) {
+            // Admin coach: student custom pricing takes priority
+            // Try student custom first (pass no coach), fall back to coach pricing
+            if (student.customPricingEnabled) {
+              const studentRate = getHourlyRateForLessonType(
+                lessonType,
+                student,
+                defaultPricing,
+                null,
+              );
+              // If student had a custom rate, use it; otherwise try coach pricing
+              const hasCustomRate = (() => {
+                switch (lessonType) {
+                  case LessonType.PRIVATE:
+                    return student.privateLessonPrice != null;
+                  case LessonType.CHOREOGRAPHY:
+                    return student.choreographyPrice != null;
+                  case LessonType.GROUP:
+                    return student.groupLessonPrice != null;
+                  case LessonType.COMPETITION_PREP:
+                    return student.competitionPrepPrice != null;
+                  case LessonType.OFF_ICE_DANCE:
+                    return student.offIceDancePrice != null;
+                  default:
+                    return false;
+                }
+              })();
+              if (hasCustomRate) {
+                return studentRate;
+              }
+            }
+            // Student has no custom rate for this type → use coach pricing as fallback
+            return getHourlyRateForLessonType(
+              lessonType,
+              student,
+              defaultPricing,
+              coachPricing,
+            );
+          }
+          // Non-admin coach: coach pricing takes priority (standard waterfall)
+          return getHourlyRateForLessonType(
+            lessonType,
+            student,
+            defaultPricing,
+            coachPricing,
+          );
+        };
+
         return {
           customPricingEnabled: student.customPricingEnabled,
-          privateLessonPrice: getHourlyRateForLessonType(
-            LessonType.PRIVATE,
-            student,
-            defaultPricing,
-            coachPricing,
-          ),
-          choreographyPrice: getHourlyRateForLessonType(
-            LessonType.CHOREOGRAPHY,
-            student,
-            defaultPricing,
-            coachPricing,
-          ),
-          groupLessonPrice: getHourlyRateForLessonType(
-            LessonType.GROUP,
-            student,
-            defaultPricing,
-            coachPricing,
-          ),
-          competitionPrepPrice: getHourlyRateForLessonType(
-            LessonType.COMPETITION_PREP,
-            student,
-            defaultPricing,
-            coachPricing,
-          ),
-          offIceDancePrice: getHourlyRateForLessonType(
-            LessonType.OFF_ICE_DANCE,
-            student,
-            defaultPricing,
-            coachPricing,
-          ),
+          privateLessonPrice: resolvePrice(LessonType.PRIVATE),
+          choreographyPrice: resolvePrice(LessonType.CHOREOGRAPHY),
+          groupLessonPrice: resolvePrice(LessonType.GROUP),
+          competitionPrepPrice: resolvePrice(LessonType.COMPETITION_PREP),
+          offIceDancePrice: resolvePrice(LessonType.OFF_ICE_DANCE),
         };
       } catch (error) {
         if (error instanceof TRPCError) {

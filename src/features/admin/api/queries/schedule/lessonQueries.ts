@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createScheduleChangeNotification } from "@/features/notifications/utils/notificationHelpers";
 import { type CoachWithTokens, googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
+import { isAdminRole } from "@/lib/roles";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
@@ -337,8 +338,6 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("Assigning student to time slot:", input);
-
         // Validate input
         if (!input.timeSlotId || !input.studentId) {
           throw new TRPCError({
@@ -441,6 +440,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           choreographyPrice: number | null;
           competitionPrepPrice: number | null;
           offIceDancePrice: number | null;
+          User: { role: string };
         }) | null = timeSlot.coachId
           ? await ctx.prisma.coach.findUnique({
               where: { id: timeSlot.coachId },
@@ -455,22 +455,50 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
                 choreographyPrice: true,
                 competitionPrepPrice: true,
                 offIceDancePrice: true,
+                User: { select: { role: true } },
               },
             })
           : null;
 
         // Build coach pricing for the price calculator
-        const coachPricing = assignCoach
-          ? {
+        // For admin coaches (Yura): student custom pricing wins IF they have a rate for this
+        // specific lesson type; otherwise coach pricing provides the fallback
+        // For non-admin coaches (Renee): coach pricing always wins
+        const assignCoachIsAdmin = assignCoach ? isAdminRole(assignCoach.User.role) : false;
+        const assignLessonType = input.lessonType || LessonType.PRIVATE;
+        let coachPricing: {
+          privateLessonPrice: number | null;
+          groupLessonPrice: number | null;
+          choreographyPrice: number | null;
+          competitionPrepPrice: number | null;
+          offIceDancePrice: number | null;
+        } | undefined;
+        if (assignCoach) {
+          let skipCoachPricing = false;
+          if (assignCoachIsAdmin && student.customPricingEnabled) {
+            skipCoachPricing = (() => {
+              switch (assignLessonType) {
+                case LessonType.PRIVATE: return student.privateLessonPrice != null;
+                case LessonType.GROUP: return student.groupLessonPrice != null;
+                case LessonType.CHOREOGRAPHY: return student.choreographyPrice != null;
+                case LessonType.COMPETITION_PREP: return student.competitionPrepPrice != null;
+                case LessonType.OFF_ICE_DANCE: return student.offIceDancePrice != null;
+                default: return false;
+              }
+            })();
+          }
+          if (!skipCoachPricing) {
+            coachPricing = {
               privateLessonPrice: assignCoach.privateLessonPrice,
               groupLessonPrice: assignCoach.groupLessonPrice,
               choreographyPrice: assignCoach.choreographyPrice,
               competitionPrepPrice: assignCoach.competitionPrepPrice,
               offIceDancePrice: assignCoach.offIceDancePrice,
-            }
-          : undefined;
+            };
+          }
+        }
 
-        // Calculate price based on lesson type, duration, student custom pricing, and coach pricing
+        // Calculate price: coach-first waterfall (coach > student custom > defaults)
         const price = calculateLessonPrice(
           input.lessonType || LessonType.PRIVATE,
           durationMinutes,
@@ -609,7 +637,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // Get default pricing from database
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        // Fetch coach pricing and calendar tokens
+        // Fetch coach pricing, role, and calendar tokens
         const updateCoach = existingLesson.coachId
           ? await ctx.prisma.coach.findUnique({
               where: { id: existingLesson.coachId },
@@ -624,22 +652,50 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
                 choreographyPrice: true,
                 competitionPrepPrice: true,
                 offIceDancePrice: true,
+                User: { select: { role: true } },
               },
             })
           : null;
 
-        const updateCoachPricing = updateCoach
-          ? {
+        const student = existingLesson.Student;
+
+        // For admin coaches (Yura): student custom pricing wins IF they have a rate for this
+        // specific lesson type; otherwise coach pricing provides the fallback
+        // For non-admin coaches (Renee): coach pricing always wins
+        const updateCoachIsAdmin = updateCoach ? isAdminRole(updateCoach.User.role) : false;
+        let updateCoachPricing: {
+          privateLessonPrice: number | null;
+          groupLessonPrice: number | null;
+          choreographyPrice: number | null;
+          competitionPrepPrice: number | null;
+          offIceDancePrice: number | null;
+        } | undefined;
+        if (updateCoach) {
+          let skipCoachPricing = false;
+          if (updateCoachIsAdmin && student.customPricingEnabled) {
+            skipCoachPricing = (() => {
+              switch (input.lessonType) {
+                case LessonType.PRIVATE: return student.privateLessonPrice != null;
+                case LessonType.GROUP: return student.groupLessonPrice != null;
+                case LessonType.CHOREOGRAPHY: return student.choreographyPrice != null;
+                case LessonType.COMPETITION_PREP: return student.competitionPrepPrice != null;
+                case LessonType.OFF_ICE_DANCE: return student.offIceDancePrice != null;
+                default: return false;
+              }
+            })();
+          }
+          if (!skipCoachPricing) {
+            updateCoachPricing = {
               privateLessonPrice: updateCoach.privateLessonPrice,
               groupLessonPrice: updateCoach.groupLessonPrice,
               choreographyPrice: updateCoach.choreographyPrice,
               competitionPrepPrice: updateCoach.competitionPrepPrice,
               offIceDancePrice: updateCoach.offIceDancePrice,
-            }
-          : undefined;
+            };
+          }
+        }
 
-        // Calculate new price based on lesson type, duration, student custom pricing, and coach pricing
-        const student = existingLesson.Student;
+        // Calculate new price: coach-first waterfall (coach > student custom > defaults)
         const price = calculateLessonPrice(
           input.lessonType,
           durationMinutes,

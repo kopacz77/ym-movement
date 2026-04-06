@@ -197,6 +197,7 @@ export const bookingRouter = createTRPCRouter({
           offIceDancePrice: number | null;
         } | null = null;
         let coachWithTokens: CoachWithTokens | null = null;
+        let coachIsAdmin = false;
 
         if (timeSlot.coachId) {
           const coach = await ctx.prisma.coach.findUnique({
@@ -212,11 +213,12 @@ export const bookingRouter = createTRPCRouter({
               googleRefreshToken: true,
               googleTokenExpiresAt: true,
               googleCalendarId: true,
-              User: { select: { name: true } },
+              User: { select: { name: true, role: true } },
             },
           });
           if (coach) {
             coachName = coach.User?.name ?? null;
+            coachIsAdmin = isAdminRole(coach.User.role);
             coachPricing = {
               privateLessonPrice: coach.privateLessonPrice,
               groupLessonPrice: coach.groupLessonPrice,
@@ -276,13 +278,33 @@ export const bookingRouter = createTRPCRouter({
         // Get default pricing from database
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
-        // Calculate price using the pricing waterfall (student > coach > global > hardcoded)
+        // Determine effective coach pricing based on coach role:
+        // - Admin coaches (Yura): student custom pricing wins IF they have a rate for this
+        //   specific lesson type; otherwise coach pricing provides the fallback
+        // - Non-admin coaches (Renee): coach pricing always wins (standard waterfall)
+        let effectiveCoachPricing = coachPricing;
+        if (coachIsAdmin && student.customPricingEnabled) {
+          const studentHasCustomRate = (() => {
+            switch (input.type) {
+              case LessonType.PRIVATE: return student.privateLessonPrice != null;
+              case LessonType.GROUP: return student.groupLessonPrice != null;
+              case LessonType.CHOREOGRAPHY: return student.choreographyPrice != null;
+              case LessonType.COMPETITION_PREP: return student.competitionPrepPrice != null;
+              case LessonType.OFF_ICE_DANCE: return student.offIceDancePrice != null;
+              default: return false;
+            }
+          })();
+          if (studentHasCustomRate) {
+            effectiveCoachPricing = null;
+          }
+        }
+
         const price = calculateLessonPrice(
           input.type,
           durationMinutes,
           student,
           defaultPricing,
-          coachPricing,
+          effectiveCoachPricing,
         );
 
         // 7. Create the lesson and payment in a transaction

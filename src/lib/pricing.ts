@@ -44,11 +44,18 @@ export function calculateProratedPrice(hourlyRate: number, durationMinutes: numb
 }
 
 /**
- * Get the hourly rate for a lesson type, considering custom student pricing
+ * Get the hourly rate for a lesson type
+ *
+ * Pricing waterfall:
+ * 1. Coach pricing (highest priority - each coach sets their own rates)
+ * 2. Student custom pricing (variable rates set by admin, used when no coach pricing)
+ * 3. Default pricing from database
+ * 4. Hardcoded fallback defaults
  *
  * @param lessonType - The type of lesson
  * @param student - Student object with custom pricing information
  * @param defaultPricing - Default pricing from database settings
+ * @param coach - Coach-specific pricing
  * @returns The hourly rate for the lesson type
  */
 export function getHourlyRateForLessonType(
@@ -76,38 +83,7 @@ export function getHourlyRateForLessonType(
     offIceDancePrice?: number | null;
   } | null,
 ): number {
-  // 1. Student custom pricing (highest priority)
-  if (student.customPricingEnabled) {
-    switch (lessonType) {
-      case LessonType.PRIVATE:
-        if (student.privateLessonPrice !== null && student.privateLessonPrice !== undefined) {
-          return student.privateLessonPrice;
-        }
-        break;
-      case LessonType.CHOREOGRAPHY:
-        if (student.choreographyPrice !== null && student.choreographyPrice !== undefined) {
-          return student.choreographyPrice;
-        }
-        break;
-      case LessonType.GROUP:
-        if (student.groupLessonPrice !== null && student.groupLessonPrice !== undefined) {
-          return student.groupLessonPrice;
-        }
-        break;
-      case LessonType.COMPETITION_PREP:
-        if (student.competitionPrepPrice !== null && student.competitionPrepPrice !== undefined) {
-          return student.competitionPrepPrice;
-        }
-        break;
-      case LessonType.OFF_ICE_DANCE:
-        if (student.offIceDancePrice !== null && student.offIceDancePrice !== undefined) {
-          return student.offIceDancePrice;
-        }
-        break;
-    }
-  }
-
-  // 2. Coach-specific pricing
+  // 1. Coach pricing takes priority — each coach sets their own rates
   if (coach) {
     switch (lessonType) {
       case LessonType.PRIVATE:
@@ -133,6 +109,37 @@ export function getHourlyRateForLessonType(
       case LessonType.OFF_ICE_DANCE:
         if (coach.offIceDancePrice !== null && coach.offIceDancePrice !== undefined) {
           return coach.offIceDancePrice;
+        }
+        break;
+    }
+  }
+
+  // 2. Student custom pricing (variable rates set by admin, e.g. for Yura's students)
+  if (student.customPricingEnabled) {
+    switch (lessonType) {
+      case LessonType.PRIVATE:
+        if (student.privateLessonPrice !== null && student.privateLessonPrice !== undefined) {
+          return student.privateLessonPrice;
+        }
+        break;
+      case LessonType.CHOREOGRAPHY:
+        if (student.choreographyPrice !== null && student.choreographyPrice !== undefined) {
+          return student.choreographyPrice;
+        }
+        break;
+      case LessonType.GROUP:
+        if (student.groupLessonPrice !== null && student.groupLessonPrice !== undefined) {
+          return student.groupLessonPrice;
+        }
+        break;
+      case LessonType.COMPETITION_PREP:
+        if (student.competitionPrepPrice !== null && student.competitionPrepPrice !== undefined) {
+          return student.competitionPrepPrice;
+        }
+        break;
+      case LessonType.OFF_ICE_DANCE:
+        if (student.offIceDancePrice !== null && student.offIceDancePrice !== undefined) {
+          return student.offIceDancePrice;
         }
         break;
     }

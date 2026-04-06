@@ -142,7 +142,10 @@
       "Bash(pnpm run:*)",
       "Bash(pnpm db:check:*)",
       "WebFetch(domain:authjs.dev)",
-      "WebFetch(domain:next-auth.js.org)"
+      "WebFetch(domain:next-auth.js.org)",
+      "WebFetch(domain:supastarter.dev)",
+      "Bash(/tmp/check_components.sh:*)",
+      "Bash(/tmp/check_scripts.sh:*)"
     ],
     "deny": []
   }
