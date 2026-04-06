@@ -3,9 +3,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
 import { TimezoneAwareLessonTime } from "@/components/TimezoneAwareLessonTime";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatRinkTime } from "@/lib/timezone";
 import { LessonCancelAction } from "./client";
@@ -29,7 +28,7 @@ export default async function LessonDetailsPage({
   // Await the params - this is critical for Next.js 15.2
   const { lessonId } = await params;
 
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session?.user) {
     return notFound();

@@ -37,7 +37,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SessionProvider>
+    <SessionProvider basePath="/api/auth">
       <AuthProvider>
         <BulkOperationsProvider>
           <api.Provider client={trpcClient} queryClient={queryClient}>

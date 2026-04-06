@@ -132,6 +132,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
         id: selectedSlot.id,
         startTime: new Date(selectedSlot.startTime),
         endTime: new Date(selectedSlot.endTime),
+        coachId: selectedSlot.Coach?.id ?? null,
         rink: {
           id: selectedSlot.Rink.id,
           name: selectedSlot.Rink.name,
@@ -459,6 +460,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
           studentId={selectedLesson.Student.id}
           studentName={selectedLesson.Student?.User?.name || "Student"}
           durationMinutes={slotDurationMinutes}
+          coachId={selectedSlot?.Coach?.id ?? null}
           open={showEditLessonTypeDialog}
           onOpenChange={setShowEditLessonTypeDialog}
         />

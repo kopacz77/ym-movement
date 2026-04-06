@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
 import { sendApprovalEmail } from "@/lib/email";
-import { createTRPCRouter, superAdminProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter, superAdminProcedure } from "@/lib/trpc";
 import { formatEmail } from "@/lib/utils";
 
 export const coachManagementRouter = createTRPCRouter({
@@ -55,6 +55,23 @@ export const coachManagementRouter = createTRPCRouter({
       });
     }
   }),
+
+  // Query: Get coach pricing by coach ID (for admin UI price display)
+  getCoachPricing: adminProcedure
+    .input(z.object({ coachId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const coach = await ctx.prisma.coach.findUnique({
+        where: { id: input.coachId },
+        select: {
+          privateLessonPrice: true,
+          groupLessonPrice: true,
+          choreographyPrice: true,
+          competitionPrepPrice: true,
+          offIceDancePrice: true,
+        },
+      });
+      return coach;
+    }),
 
   // Query: Get single coach by ID with full details
   getCoachById: superAdminProcedure

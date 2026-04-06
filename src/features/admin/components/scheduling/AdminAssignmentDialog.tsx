@@ -29,6 +29,7 @@ interface TimeSlot {
   id: string;
   startTime: Date;
   endTime: Date;
+  coachId?: string | null;
   rink: {
     id: string;
     name: string;
@@ -64,6 +65,12 @@ export function AdminAssignmentDialog({
   const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
     { studentId: selectedStudentId },
     { enabled: !!selectedStudentId },
+  );
+
+  // Get coach pricing for this time slot's coach
+  const { data: coachPricing } = api.admin.coach.management.getCoachPricing.useQuery(
+    { coachId: timeSlot.coachId! },
+    { enabled: !!timeSlot.coachId },
   );
 
   // Assign student mutation
@@ -187,7 +194,7 @@ export function AdminAssignmentDialog({
                 <SelectItem value={LessonType.PRIVATE}>
                   Private Lesson - $
                   {formatPrice(
-                    getLessonTypePrice(LessonType.PRIVATE, studentPricing, slotDurationMinutes),
+                    getLessonTypePrice(LessonType.PRIVATE, studentPricing, slotDurationMinutes, coachPricing ?? undefined),
                   )}
                 </SelectItem>
                 <SelectItem value={LessonType.CHOREOGRAPHY}>
@@ -197,13 +204,14 @@ export function AdminAssignmentDialog({
                       LessonType.CHOREOGRAPHY,
                       studentPricing,
                       slotDurationMinutes,
+                      coachPricing ?? undefined,
                     ),
                   )}
                 </SelectItem>
                 <SelectItem value={LessonType.GROUP}>
                   Group Lesson - $
                   {formatPrice(
-                    getLessonTypePrice(LessonType.GROUP, studentPricing, slotDurationMinutes),
+                    getLessonTypePrice(LessonType.GROUP, studentPricing, slotDurationMinutes, coachPricing ?? undefined),
                   )}
                 </SelectItem>
                 <SelectItem value={LessonType.COMPETITION_PREP}>
@@ -213,6 +221,7 @@ export function AdminAssignmentDialog({
                       LessonType.COMPETITION_PREP,
                       studentPricing,
                       slotDurationMinutes,
+                      coachPricing ?? undefined,
                     ),
                   )}
                 </SelectItem>
@@ -223,6 +232,7 @@ export function AdminAssignmentDialog({
                       LessonType.OFF_ICE_DANCE,
                       studentPricing,
                       slotDurationMinutes,
+                      coachPricing ?? undefined,
                     ),
                   )}
                 </SelectItem>

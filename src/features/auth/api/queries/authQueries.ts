@@ -3,9 +3,23 @@ import { compare, hash } from "bcrypt";
 // src/features/auth/api/queries/authQueries.ts
 import { z } from "zod";
 import { logSecurityEvent, validatePasswordStrength } from "@/lib/security";
-import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
+import { adminProcedure, createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 export const authRouter = createTRPCRouter({
+  unlockAccount: adminProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      const { clearLoginAttempts } = await import("@/lib/account-lockout");
+      await clearLoginAttempts(input.email);
+
+      logSecurityEvent("ACCOUNT_UNLOCKED", {
+        targetEmail: input.email,
+        unlockedBy: ctx.session.user.id,
+      });
+
+      return { success: true };
+    }),
+
   changePassword: protectedProcedure
     .input(
       z.object({

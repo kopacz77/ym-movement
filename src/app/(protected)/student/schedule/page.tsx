@@ -2,8 +2,7 @@
 
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import StudentScheduleClient from "./client"; // We'll create this file next
 
@@ -19,7 +18,7 @@ export function generateStaticParams() {
 
 export default async function Page() {
   // Auth check
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session?.user) {
     redirect("/auth/login");

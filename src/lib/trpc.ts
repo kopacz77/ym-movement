@@ -1,10 +1,8 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import type { Session } from "next-auth";
-import { getServerSession } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAdminRole, isCoachRole } from "@/lib/roles";
 import { authRateLimiter, getClientIP, logSecurityEvent } from "@/lib/security";
@@ -16,24 +14,10 @@ export type TRPCContext = {
 };
 
 export const createTRPCContext = async (
-  opts: CreateNextContextOptions | { headers: Headers },
+  opts: { headers: Headers },
 ): Promise<TRPCContext> => {
-  let session = null;
-  let clientIP = "unknown";
-
-  // Handle both Next.js Pages Router and App Router
-  if ("req" in opts && "res" in opts) {
-    session = await getServerSession(opts.req, opts.res, authOptions);
-    clientIP =
-      (opts.req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
-      (opts.req.headers["x-real-ip"] as string) ||
-      "unknown";
-  } else {
-    session = await getServerSession(authOptions);
-    if ("headers" in opts && opts.headers instanceof Headers) {
-      clientIP = getClientIP(opts.headers);
-    }
-  }
+  const session = await auth();
+  const clientIP = getClientIP(opts.headers);
 
   return {
     prisma,

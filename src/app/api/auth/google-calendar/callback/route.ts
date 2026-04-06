@@ -1,7 +1,6 @@
 import { google } from "googleapis";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
 import { createOAuth2Client } from "@/lib/google/oauth";
 import { prisma } from "@/lib/prisma";
@@ -18,7 +17,7 @@ export async function GET(req: Request) {
   }
 
   // CSRF validation: verify logged-in user's Coach record id matches state
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.redirect(new URL("/coach/profile?calendar=error", req.url));
   }

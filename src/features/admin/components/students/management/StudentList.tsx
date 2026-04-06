@@ -2,7 +2,7 @@
 "use client";
 import type { Level } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal, Search, UserCheck, UserX } from "lucide-react";
+import { LockOpen, MoreHorizontal, Search, UserCheck, UserX } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +78,19 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
         description: error.message,
       });
       queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+    },
+  });
+
+  const unlockAccountMutation = api.admin.auth.unlockAccount.useMutation({
+    onSuccess: () => {
+      toast.success("Account unlocked", {
+        description: "The student can now log in again.",
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to unlock account", {
+        description: error.message,
+      });
     },
   });
 
@@ -231,6 +244,15 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                             className="w-full"
                           >
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              unlockAccountMutation.mutate({ email: student.User.email })
+                            }
+                            disabled={unlockAccountMutation.isPending}
+                          >
+                            <LockOpen className="h-4 w-4 mr-2" />
+                            Unlock Account
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

@@ -1,34 +1,16 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcrypt";
-// Updated auth.ts
-import type { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma) as any,
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days (reduced from 30 for better security)
     updateAge: 24 * 60 * 60, // Update session every 24 hours
-  },
-  jwt: {
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-  },
-  cookies: {
-    sessionToken: {
-      name:
-        process.env.NODE_ENV === "production"
-          ? "__Secure-next-auth.session-token"
-          : "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
   },
   pages: {
     signIn: "/auth/login",
@@ -41,25 +23,27 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    CredentialsProvider({
-      name: "Credentials",
+    Credentials({
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
+
+        const email = credentials.email as string;
+        const password = credentials.password as string;
 
         // Dynamic import to avoid circular dependency
         const { isAccountLockedOut, recordLoginAttempt, clearLoginAttempts, getLockoutExpiry } =
           await import("@/lib/account-lockout");
 
         // Check if account is locked out
-        const isLocked = await isAccountLockedOut(credentials.email);
+        const isLocked = await isAccountLockedOut(email);
         if (isLocked) {
-          const lockExpiry = await getLockoutExpiry(credentials.email);
+          const lockExpiry = await getLockoutExpiry(email);
           if (lockExpiry) {
             const minutesRemaining = Math.ceil((lockExpiry.getTime() - Date.now()) / (1000 * 60));
             throw new Error(
@@ -69,45 +53,36 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         });
 
         if (!user || !user.password) {
-          // Record failed attempt
+          // Record failed attempt (no req available in v5 authorize)
           await recordLoginAttempt({
-            email: credentials.email,
+            email,
             success: false,
-            ipAddress:
-              (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
-            userAgent: (req as any)?.headers?.["user-agent"],
           });
           return null;
         }
 
-        const isPasswordValid = await compare(credentials.password, user.password);
+        const isPasswordValid = await compare(password, user.password);
 
         if (!isPasswordValid) {
           // Record failed attempt
           await recordLoginAttempt({
-            email: credentials.email,
+            email,
             success: false,
-            ipAddress:
-              (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
-            userAgent: (req as any)?.headers?.["user-agent"],
           });
           return null;
         }
 
         // Successful login - clear failed attempts
-        await clearLoginAttempts(credentials.email);
+        await clearLoginAttempts(email);
 
         // Record successful attempt
         await recordLoginAttempt({
-          email: credentials.email,
+          email,
           success: true,
-          ipAddress:
-            (req as any)?.headers?.["x-forwarded-for"] || (req as any)?.headers?.["x-real-ip"],
-          userAgent: (req as any)?.headers?.["user-agent"],
         });
 
         return {
@@ -123,7 +98,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = (user as any).role;
       }
       // On session update trigger, refresh role from database
       // This allows role changes (e.g., ADMIN -> SUPER_ADMIN) to propagate without re-login
@@ -147,21 +122,14 @@ export const authOptions: NextAuthOptions = {
     },
   },
   debug: process.env.NODE_ENV === "development",
-};
+});
 
 /**
  * Generates a cryptographically secure token for password reset
  * @returns A random string token
  */
 export function generateResetToken(): string {
-  // Use crypto.randomBytes for cryptographically secure random generation
-  if (typeof window !== "undefined") {
-    // Browser environment
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
-  }
-  // Node.js environment
-  const nodeCrypto = require("node:crypto");
-  return nodeCrypto.randomBytes(32).toString("hex");
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }

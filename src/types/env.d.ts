@@ -1,8 +1,8 @@
 declare namespace NodeJS {
   interface ProcessEnv {
-    NODE_ENV: "development" | "production" | "test";
+    readonly NODE_ENV: "development" | "production" | "test";
     DATABASE_URL: string;
-    NEXTAUTH_SECRET: string;
+    NEXTAUTH_SECRET?: string;
     NEXTAUTH_URL?: string;
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
@@ -10,7 +10,6 @@ declare namespace NodeJS {
     TOKEN_ENCRYPTION_KEY?: string;
     RESEND_API_KEY?: string;
     NEXT_PUBLIC_BASE_URL?: string;
-
     ANALYZE?: string;
   }
 }

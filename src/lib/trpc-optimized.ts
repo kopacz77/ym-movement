@@ -8,12 +8,10 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import type { Session } from "next-auth";
-import { getServerSession } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { cacheWrapper } from "@/lib/cache-wrapper";
 import { prisma } from "@/lib/prisma";
 import { CACHE_CONFIG, redis } from "@/lib/redis";
@@ -138,24 +136,11 @@ function getClientIp(req: any): string {
  * Create optimized TRPC context
  */
 export const createOptimizedTRPCContext = async (
-  opts: CreateNextContextOptions | { headers: Headers },
+  opts: { headers: Headers },
 ): Promise<OptimizedTRPCContext> => {
-  let session = null;
-  let userAgent: string | undefined;
-  let ip: string | undefined;
-
-  // Handle both Next.js Pages Router and App Router
-  if ("req" in opts && "res" in opts) {
-    session = await getServerSession(opts.req, opts.res, authOptions);
-    userAgent = opts.req.headers["user-agent"];
-    ip = getClientIp(opts.req);
-  } else {
-    session = await getServerSession(authOptions);
-    if ("headers" in opts) {
-      userAgent = opts.headers.get("user-agent") || undefined;
-      ip = opts.headers.get("x-forwarded-for") || opts.headers.get("x-real-ip") || undefined;
-    }
-  }
+  const session = await auth();
+  const userAgent = opts.headers.get("user-agent") || undefined;
+  const ip = opts.headers.get("x-forwarded-for") || opts.headers.get("x-real-ip") || undefined;
 
   return {
     prisma,

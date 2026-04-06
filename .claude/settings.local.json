@@ -140,7 +140,9 @@
       "Bash(source .env:*)",
       "WebFetch(domain:neon.com)",
       "Bash(pnpm run:*)",
-      "Bash(pnpm db:check:*)"
+      "Bash(pnpm db:check:*)",
+      "WebFetch(domain:authjs.dev)",
+      "WebFetch(domain:next-auth.js.org)"
     ],
     "deny": []
   }
