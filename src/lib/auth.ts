@@ -123,13 +123,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   debug: process.env.NODE_ENV === "development",
 });
-
-/**
- * Generates a cryptographically secure token for password reset
- * @returns A random string token
- */
-export function generateResetToken(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
