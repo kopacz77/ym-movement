@@ -4,7 +4,7 @@ import type { LessonType, PaymentMethod, PaymentStatus } from "@prisma/client";
 import { Check, FileText, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate, formatDateTime } from "@/lib/date";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/utils";
 
 // Updated type definition to handle null values from database

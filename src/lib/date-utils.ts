@@ -75,6 +75,22 @@ export function formatDate(dateStr: string | Date): string {
 }
 
 /**
+ * Format a date and time in a standardized format
+ * Example: "March 16, 2025 2:30 PM"
+ */
+export function formatDateTime(dateStr: string | Date): string {
+  const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+}
+
+/**
  * Format a duration in minutes to a human readable format
  * Example: "1 hour 30 minutes"
  */
