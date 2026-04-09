@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { compare, hash } from "bcrypt";
+import { compare, hash } from "bcryptjs";
 // src/features/auth/api/queries/authQueries.ts
 import { z } from "zod";
 import { logSecurityEvent, validatePasswordStrength } from "@/lib/security";

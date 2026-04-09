@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { hash } from "bcrypt";
+import { hash } from "bcryptjs";
 // src/server/api/routers/passwordReset.ts
 import { z } from "zod";
 import {
