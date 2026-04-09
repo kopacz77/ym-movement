@@ -18,15 +18,15 @@ export async function GET() {
     await prisma.$queryRaw`SELECT 1`;
     diagnostics.database = "connected";
   } catch (e) {
-    diagnostics.database = "FAILED: " + (e instanceof Error ? e.message : String(e));
+    diagnostics.database = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
   }
 
   // Test auth import
   try {
-    const { auth } = await import("@/lib/auth");
+    await import("@/lib/auth");
     diagnostics.authImport = "OK";
   } catch (e) {
-    diagnostics.authImport = "FAILED: " + (e instanceof Error ? e.message : String(e));
+    diagnostics.authImport = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
   }
 
   return NextResponse.json(diagnostics);
