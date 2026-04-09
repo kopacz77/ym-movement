@@ -145,7 +145,8 @@
       "WebFetch(domain:next-auth.js.org)",
       "WebFetch(domain:supastarter.dev)",
       "Bash(/tmp/check_components.sh:*)",
-      "Bash(/tmp/check_scripts.sh:*)"
+      "Bash(/tmp/check_scripts.sh:*)",
+      "Bash(netlify:*)"
     ],
     "deny": []
   }

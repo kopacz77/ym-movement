@@ -68,7 +68,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
     <>
       {/* Header */}
       <div className="h-24 px-6 border-b flex items-center bg-white">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center gap-1 w-full">
           <Image
             src="/ym-logo-symbol.svg"
             alt="YM Movement"
@@ -76,16 +76,13 @@ export function AppSidebar({ role }: AppSidebarProps) {
             height={40}
             className="h-10 w-auto"
           />
-          <div className="flex flex-col">
-            <span className="font-bold text-xl text-foreground">YM Movement</span>
-            <span className="text-xs text-muted-foreground">
-              {role === "admin"
-                ? "Admin Dashboard"
-                : role === "coach"
-                  ? "Coach Portal"
-                  : "Student Portal"}
-            </span>
-          </div>
+          <span className="text-xs text-muted-foreground">
+            {role === "admin"
+              ? "Admin Dashboard"
+              : role === "coach"
+                ? "Coach Portal"
+                : "Student Portal"}
+          </span>
         </div>
       </div>
 

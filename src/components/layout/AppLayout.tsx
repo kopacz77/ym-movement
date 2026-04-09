@@ -119,7 +119,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
           {/* Mobile Sidebar - Overlay only */}
           <Sidebar collapsible="offcanvas" className="border-r bg-white">
             <SidebarHeader className="h-16 px-4 border-b flex items-center bg-white">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center gap-1 w-full">
                 <Image
                   src="/ym-logo-symbol.svg"
                   alt="YM Movement"
@@ -127,16 +127,13 @@ export function AppLayout({ role, children }: AppLayoutProps) {
                   height={40}
                   className="h-8 w-auto"
                 />
-                <div className="flex flex-col">
-                  <span className="font-bold text-lg text-foreground">YM Movement</span>
-                  <span className="text-xs text-muted-foreground">
-                    {role === "admin"
-                      ? "Admin Dashboard"
-                      : role === "coach"
-                        ? "Coach Portal"
-                        : "Student Portal"}
-                  </span>
-                </div>
+                <span className="text-xs text-muted-foreground">
+                  {role === "admin"
+                    ? "Admin Dashboard"
+                    : role === "coach"
+                      ? "Coach Portal"
+                      : "Student Portal"}
+                </span>
               </div>
             </SidebarHeader>
 
