@@ -15,6 +15,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -68,22 +69,13 @@ export function AppSidebar({ role }: AppSidebarProps) {
       {/* Header */}
       <div className="h-24 px-6 border-b flex items-center bg-white">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-3 shadow-lg">
-            <svg
-              className="h-6 w-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
+          <Image
+            src="/ym-logo-symbol.svg"
+            alt="YM Movement"
+            width={73}
+            height={40}
+            className="h-10 w-auto"
+          />
           <div className="flex flex-col">
             <span className="font-bold text-xl text-foreground">YM Movement</span>
             <span className="text-xs text-muted-foreground">

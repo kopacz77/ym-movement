@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -29,9 +30,15 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Left: Logo */}
           <div>
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-primary">YM</span>
-              <span className="text-lg font-semibold">Movement</span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/ym-logo-symbol.svg"
+                alt="YM Movement"
+                width={73}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
             </Link>
           </div>
 
@@ -124,7 +131,13 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-4">
             <div>
-              <h3 className="mb-4 text-lg font-semibold">YM Movement</h3>
+              <Image
+                src="/ym-logo-symbol.svg"
+                alt="YM Movement"
+                width={73}
+                height={40}
+                className="mb-4 h-8 w-auto"
+              />
               <p className="text-sm text-muted-foreground">
                 Professional ice dance coaching and development programs.
               </p>

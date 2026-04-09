@@ -1,5 +1,6 @@
 // src/app/auth/login/page.tsx
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -77,6 +78,15 @@ export default function LoginPage() {
     <div className="flex justify-center items-center min-h-screen bg-zinc-50">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/ym-logo-symbol.svg"
+              alt="YM Movement"
+              width={117}
+              height={64}
+              className="h-12 w-auto"
+            />
+          </div>
           <CardTitle className="text-2xl">Welcome to YM Movement</CardTitle>
           <CardDescription>Login to your account</CardDescription>
         </CardHeader>

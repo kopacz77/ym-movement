@@ -1,4 +1,5 @@
 import { Calendar, ChevronRight, Medal, TrendingUp } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -10,9 +11,15 @@ export default function LandingPage() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Left: Logo */}
           <div>
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-primary">YM</span>
-              <span className="text-lg font-semibold">Movement</span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/ym-logo-symbol.svg"
+                alt="YM Movement"
+                width={73}
+                height={40}
+                className="h-8 w-auto"
+                priority
+              />
             </Link>
           </div>
 
@@ -57,6 +64,18 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="flex flex-col items-center justify-center pt-32 pb-12">
           <div className="container px-4 text-center">
+            {/* Prominent Logo */}
+            <div className="mb-8">
+              <Image
+                src="/ym-logo-full.svg"
+                alt="YM Movement"
+                width={6053}
+                height={3654}
+                className="mx-auto h-auto w-[280px] sm:w-[360px] md:w-[440px]"
+                priority
+              />
+            </div>
+
             <div className="mb-6 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
               <span>Olympic-level Ice Dance Coaching</span>
             </div>
@@ -161,7 +180,13 @@ export default function LandingPage() {
         <div className="container px-4">
           <div className="grid gap-8 md:grid-cols-4">
             <div>
-              <h3 className="mb-4 text-lg font-semibold">YM Movement</h3>
+              <Image
+                src="/ym-logo-symbol.svg"
+                alt="YM Movement"
+                width={73}
+                height={40}
+                className="mb-4 h-8 w-auto"
+              />
               <p className="text-sm text-muted-foreground">
                 Professional ice dance coaching and development programs.
               </p>

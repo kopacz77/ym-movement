@@ -23,6 +23,7 @@ declare global {
   }
 }
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -239,6 +240,15 @@ export default function CoachSignupPage() {
       <div className="flex justify-center items-center min-h-screen bg-gray-50 py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/ym-logo-symbol.svg"
+                alt="YM Movement"
+                width={117}
+                height={64}
+                className="h-12 w-auto"
+              />
+            </div>
             <CardTitle className="text-2xl">Apply to Coach at YM Movement</CardTitle>
             <CardDescription>Submit your application for admin review</CardDescription>
           </CardHeader>

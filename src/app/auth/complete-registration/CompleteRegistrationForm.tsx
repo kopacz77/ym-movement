@@ -4,6 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Level } from "@prisma/client";
 import { Check, Loader2, X } from "lucide-react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -337,22 +338,13 @@ export function CompleteRegistrationForm() {
       <CardHeader className="text-center">
         {/* YM Movement Logo */}
         <div className="flex justify-center mb-4">
-          <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 shadow-lg">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
+          <Image
+            src="/ym-logo-symbol.svg"
+            alt="YM Movement"
+            width={117}
+            height={64}
+            className="h-16 w-auto"
+          />
         </div>
         <CardTitle className="text-2xl mb-2">Welcome to YM Movement!</CardTitle>
         <CardDescription>
