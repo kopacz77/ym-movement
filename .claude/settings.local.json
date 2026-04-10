@@ -149,7 +149,13 @@
       "Bash(netlify:*)",
       "Bash(npx playwright:*)",
       "Bash(ss:*)",
-      "WebFetch(domain:answers.netlify.com)"
+      "WebFetch(domain:answers.netlify.com)",
+      "WebFetch(domain:oslo.js.org)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:guptadeepak.com)",
+      "WebFetch(domain:cybersierra.co)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:medium.com)"
     ],
     "deny": []
   }

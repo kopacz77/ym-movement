@@ -315,6 +315,7 @@ export default function CoachGuidePage() {
                 'Go to "Earnings" from the sidebar',
                 "Overview cards show: Total Earnings, This Month, Pending Payments, and Revenue Split",
                 "All earnings are calculated after your revenue split percentage is applied",
+                "Lesson types include Private, Choreography, Group, Competition Prep, and Off-Ice Dance",
                 "For example: if your split is 70% and a lesson costs $100, you earn $70",
                 "Pending payments show money that students haven't yet paid",
               ]}
@@ -420,7 +421,7 @@ export default function CoachGuidePage() {
             />
             <FAQCard
               question="What's my revenue split?"
-              answer="Your revenue split is set by the admin (default is 70%). This means you earn 70% of each lesson payment. Check your Earnings page to see your current rate."
+              answer="Your revenue split is set by the admin (default is 70%). This means you earn 70% of each lesson payment. The admin may also set coach-specific lesson rates for you. Check your Earnings page to see your current rate."
             />
             <FAQCard
               question="Can students book my slots directly?"
@@ -433,6 +434,14 @@ export default function CoachGuidePage() {
             <FAQCard
               question="What are Video Lessons?"
               answer="Video Lessons are remote sessions using the virtual 'Video Lesson' rink. The admin can create these slots even on your blocked travel dates and assign students to them. Students see a camera icon on their schedule for video lessons."
+            />
+            <FAQCard
+              question="What are Off-Ice Dance lessons?"
+              answer="Off-Ice Dance is a lesson type for off-ice dance training. The admin assigns this type when scheduling your lessons. Pricing for Off-Ice Dance follows the same structure as other lesson types."
+            />
+            <FAQCard
+              question="Will new features be added to the Coach Portal?"
+              answer="Yes! The Coach Portal is actively growing. New features and capabilities will be added over time to give you more tools for managing your coaching."
             />
             <FAQCard
               question="Do I get notifications?"

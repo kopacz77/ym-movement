@@ -167,6 +167,7 @@ export default function AdminGuidePage() {
                 "  • Choreography",
                 "  • Group Lessons",
                 "  • Competition Prep",
+                "  • Off-Ice Dance",
                 'Click "Save" - prices update automatically for future bookings',
               ]}
             />
@@ -225,7 +226,7 @@ export default function AdminGuidePage() {
                 "Click on any time slot in the calendar",
                 'Click "Assign Student with Lesson Type" button',
                 "Select the student from dropdown",
-                "Choose lesson type (Private, Choreography, Group, Competition Prep)",
+                "Choose lesson type (Private, Choreography, Group, Competition Prep, Off-Ice Dance)",
                 "Add any notes (optional)",
                 'Click "Assign" - creates lesson and updates Google Calendar',
               ]}
@@ -286,25 +287,26 @@ export default function AdminGuidePage() {
                 title="Private Lessons"
                 color="bg-blue-100 text-blue-700 border-blue-300"
                 description="One-on-one instruction focused on individual technique and skills"
-                defaultPrice="$120"
               />
               <LessonTypeCard
                 title="Choreography"
                 color="bg-purple-100 text-purple-700 border-purple-300"
                 description="Program development and routine choreography sessions"
-                defaultPrice="$150"
               />
               <LessonTypeCard
                 title="Group Lessons"
                 color="bg-green-100 text-green-700 border-green-300"
                 description="Small group instruction (2-4 students)"
-                defaultPrice="$80"
               />
               <LessonTypeCard
                 title="Competition Prep"
                 color="bg-orange-100 text-orange-700 border-orange-300"
                 description="Intensive preparation for upcoming competitions"
-                defaultPrice="$180"
+              />
+              <LessonTypeCard
+                title="Off-Ice Dance"
+                color="bg-rose-100 text-rose-700 border-rose-300"
+                description="Off-ice dance training for posture, expression, and movement quality"
               />
             </div>
 
@@ -312,7 +314,8 @@ export default function AdminGuidePage() {
               <p className="text-sm font-medium text-purple-900">💰 How Pricing Works</p>
               <ul className="text-sm text-purple-800 mt-2 space-y-1 list-disc list-inside">
                 <li>Each lesson type has a default price (set in Settings)</li>
-                <li>Students with custom pricing override defaults</li>
+                <li>Coaches can have their own per-type rates that override defaults</li>
+                <li>Students with custom pricing override both defaults and coach rates</li>
                 <li>Prices are automatically calculated when assigning lessons</li>
                 <li>Changing lesson type updates payment amount automatically</li>
               </ul>
@@ -401,16 +404,32 @@ export default function AdminGuidePage() {
         >
           <div className="space-y-6">
             <SubSection
+              icon={<Settings className="h-4 w-4" />}
+              title="Operational Hours"
+              steps={[
+                'Go to Settings → "Operational Hours" tab',
+                "Toggle active days (Mon-Sun)",
+                "Set start and end times per day",
+                "Configure default lesson duration",
+                "Set minimum booking notice (hours)",
+                "Set cancellation deadline (hours)",
+                "Toggle allow overlapping lessons",
+                "Toggle auto-approve bookings",
+              ]}
+            />
+
+            <SubSection
               icon={<CreditCard className="h-4 w-4" />}
               title="Setting Default Prices"
               steps={[
                 "Go to Settings page",
                 'Find "Default Pricing" section',
                 "Set prices for each lesson type:",
-                "  • Private Lessons (default: $120)",
-                "  • Choreography (default: $150)",
-                "  • Group Lessons (default: $80)",
-                "  • Competition Prep (default: $180)",
+                "  • Private Lessons",
+                "  • Choreography",
+                "  • Group Lessons",
+                "  • Competition Prep",
+                "  • Off-Ice Dance",
                 'Click "Save Changes"',
                 "New prices apply to future lesson assignments",
               ]}
@@ -425,6 +444,17 @@ export default function AdminGuidePage() {
                 "Enter rink name, address, and timezone",
                 "Rinks appear in time slot creation dropdown",
                 "Each rink can have different timezones for accurate scheduling",
+              ]}
+            />
+
+            <SubSection
+              icon={<Settings className="h-4 w-4" />}
+              title="Account Security"
+              steps={[
+                'Go to Settings → "Account Security" tab',
+                "Change your admin password",
+                "Enter current password, then new password twice",
+                'Click "Change Password"',
               ]}
             />
 
@@ -457,7 +487,7 @@ export default function AdminGuidePage() {
                 "Go to Coaches page from the sidebar",
                 'Click "Add Coach" to create a new coach account',
                 "Enter coach details: name, email, bio, skills, certifications",
-                "Set lesson pricing for each type (Private, Choreography, Group, Competition Prep)",
+                "Set lesson pricing for each type (Private, Choreography, Group, Competition Prep, Off-Ice Dance)",
                 "Set revenue split percentage (default: 70%)",
                 "New coaches appear in Pending tab until approved",
                 "Approved coaches receive email and can access their Coach Portal",
@@ -476,6 +506,26 @@ export default function AdminGuidePage() {
                 "Adjust lesson pricing or revenue split anytime",
               ]}
             />
+
+            <SubSection
+              icon={<CreditCard className="h-4 w-4" />}
+              title="Coach Pricing"
+              steps={[
+                "Click three-dot menu on an approved coach",
+                'Select "Edit Pricing"',
+                "Set per-lesson-type rates (leave blank to use defaults)",
+                "Adjust revenue split percentage",
+                "Save — coach rates override default prices for their lessons",
+              ]}
+            />
+
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+              <p className="text-sm font-medium text-purple-900">💰 Pricing Waterfall</p>
+              <p className="text-sm text-purple-800 mt-1">
+                Pricing priority: Coach rates → Student custom rates → Default prices.
+                The most specific rate always wins.
+              </p>
+            </div>
 
             <SubSection
               icon={<Calendar className="h-4 w-4" />}
@@ -703,13 +753,13 @@ function LessonTypeCard({
   title: string;
   color: string;
   description: string;
-  defaultPrice: string;
+  defaultPrice?: string;
 }) {
   return (
     <div className={`border rounded-lg p-4 ${color}`}>
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-semibold">{title}</h4>
-        <span className="text-sm font-bold">{defaultPrice}</span>
+        {defaultPrice && <span className="text-sm font-bold">{defaultPrice}</span>}
       </div>
       <p className="text-sm opacity-90">{description}</p>
     </div>

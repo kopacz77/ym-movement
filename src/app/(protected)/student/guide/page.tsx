@@ -299,6 +299,11 @@ export default function StudentGuidePage() {
                 description="Intensive preparation for upcoming competitions"
               />
               <LessonTypeCard
+                title="Off-Ice Dance"
+                color="bg-rose-100 text-rose-700 border-rose-300"
+                description="Off-ice dance training for posture, expression, and movement"
+              />
+              <LessonTypeCard
                 title="Video Lessons"
                 color="bg-teal-100 text-teal-700 border-teal-300"
                 description="Remote instruction via video call — look for the camera icon"
@@ -487,6 +492,10 @@ export default function StudentGuidePage() {
             <FAQCard
               question="Can I choose which coach I want?"
               answer="Yes! When booking lessons, you can filter available time slots by coach. Each coach has their own schedule and availability, so browse to find the best fit for you."
+            />
+            <FAQCard
+              question="What are Off-Ice Dance lessons?"
+              answer="Off-Ice Dance lessons focus on dance training off the ice to improve posture, expression, and movement quality. They appear on your schedule like other lesson types."
             />
             <FAQCard
               question="What are Video Lessons?"
