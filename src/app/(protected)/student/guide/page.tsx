@@ -198,6 +198,15 @@ export default function StudentGuidePage() {
               ]}
             />
 
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-red-900">⚠️ Cancellation Policy</p>
+              <div className="text-sm text-red-800 mt-2 space-y-1">
+                <p>Cancellations made <strong>more than 24 hours</strong> before the lesson are free of charge.</p>
+                <p>Cancellations made <strong>within 24 hours</strong> are considered late — you will be responsible for the full lesson fee.</p>
+                <p className="mt-2 text-xs">View full policies on the Policies page in the sidebar.</p>
+              </div>
+            </div>
+
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-sm font-medium text-green-900">📱 Mobile Tip</p>
               <p className="text-sm text-green-800 mt-1">
@@ -429,10 +438,12 @@ export default function StudentGuidePage() {
               title="Account Settings"
               steps={[
                 'Go to "Settings" from the sidebar',
-                "Change your password if needed",
-                "Update notification preferences",
-                "Review your account status",
-                "Contact instructor if you need help",
+                'Notifications tab: Toggle email notifications on/off',
+                "  • Enable lesson reminders (24 hours before your lesson)",
+                'Appearance tab: Enable dark mode for a darker color theme',
+                'Password tab: Change your password',
+                "  • Enter current password, then new password twice",
+                '  • Click "Update Password" to save',
               ]}
             />
 
