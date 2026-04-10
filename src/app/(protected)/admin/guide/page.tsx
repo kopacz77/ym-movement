@@ -522,7 +522,7 @@ export default function AdminGuidePage() {
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
               <p className="text-sm font-medium text-purple-900">💰 Pricing Waterfall</p>
               <p className="text-sm text-purple-800 mt-1">
-                Pricing priority: Coach rates → Student custom rates → Default prices.
+                Pricing priority: Student custom rates → Coach rates → Default prices.
                 The most specific rate always wins.
               </p>
             </div>
