@@ -163,7 +163,7 @@ export function CoachActionsCell({
                       e.preventDefault();
                       openDialog(setShowDeactivateDialog);
                     }}
-                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                    className="text-orange-600 focus:text-orange-700 focus:bg-orange-50"
                     disabled={toggleStatusMutation.isPending}
                   >
                     <PowerOff className="h-4 w-4 mr-2" />
@@ -174,7 +174,7 @@ export function CoachActionsCell({
                       e.preventDefault();
                       openDialog(setShowSuspendDialog);
                     }}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 focus:text-red-700 focus:bg-red-50"
                     disabled={toggleStatusMutation.isPending}
                   >
                     <Ban className="h-4 w-4 mr-2" />
@@ -189,7 +189,7 @@ export function CoachActionsCell({
                     e.preventDefault();
                     openDialog(setShowActivateDialog);
                   }}
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  className="text-green-600 focus:text-green-700 focus:bg-green-50"
                   disabled={toggleStatusMutation.isPending}
                 >
                   <Power className="h-4 w-4 mr-2" />
@@ -203,7 +203,7 @@ export function CoachActionsCell({
                     e.preventDefault();
                     openDialog(setShowActivateDialog);
                   }}
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  className="text-green-600 focus:text-green-700 focus:bg-green-50"
                   disabled={toggleStatusMutation.isPending}
                 >
                   <ShieldAlert className="h-4 w-4 mr-2" />
@@ -216,7 +216,7 @@ export function CoachActionsCell({
                   e.preventDefault();
                   openDialog(setShowDeleteDialog);
                 }}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="text-red-600 focus:text-red-700 focus:bg-red-50"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Coach

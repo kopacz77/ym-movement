@@ -121,11 +121,11 @@ export function AppLayout({ role, children }: AppLayoutProps) {
             <SidebarHeader className="h-16 px-4 border-b flex items-center bg-white">
               <div className="flex flex-col items-center gap-1 w-full">
                 <Image
-                  src="/ym-logo-symbol.svg"
+                  src="/ym-logo-full.svg"
                   alt="YM Movement"
-                  width={73}
-                  height={40}
-                  className="h-8 w-auto"
+                  width={140}
+                  height={84}
+                  className="h-10 w-auto"
                 />
                 <span className="text-xs text-muted-foreground">
                   {role === "admin"

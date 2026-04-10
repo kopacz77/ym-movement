@@ -26,6 +26,13 @@ interface Payment {
       name?: string | null;
     };
   };
+  Lesson?: {
+    Coach?: {
+      User?: {
+        name?: string | null;
+      };
+    } | null;
+  } | null;
 }
 
 interface PaymentTableProps {
@@ -97,6 +104,7 @@ export const PaymentTable = ({
         <TableHeader>
           <TableRow>
             <TableHead className="min-w-[150px]">Student</TableHead>
+            <TableHead className="min-w-[120px]">Coach</TableHead>
             <TableHead className="min-w-[100px]">Date</TableHead>
             <TableHead className="min-w-[100px]">Amount</TableHead>
             <TableHead className="min-w-[100px]">Method</TableHead>
@@ -110,6 +118,9 @@ export const PaymentTable = ({
             <TableRow key={payment.id}>
               <TableCell className="font-medium">
                 {payment.Student?.User?.name || "Unknown"}
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {payment.Lesson?.Coach?.User?.name || "—"}
               </TableCell>
               <TableCell>{format(new Date(payment.lesson_date), "PP")}</TableCell>
               <TableCell className="font-medium">{formatCurrency(payment.amount)}</TableCell>

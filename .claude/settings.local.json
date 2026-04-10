@@ -146,7 +146,9 @@
       "WebFetch(domain:supastarter.dev)",
       "Bash(/tmp/check_components.sh:*)",
       "Bash(/tmp/check_scripts.sh:*)",
-      "Bash(netlify:*)"
+      "Bash(netlify:*)",
+      "Bash(npx playwright:*)",
+      "Bash(ss:*)"
     ],
     "deny": []
   }

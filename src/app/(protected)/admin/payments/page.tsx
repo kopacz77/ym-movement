@@ -79,7 +79,13 @@ export default function PaymentsPage() {
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
+  const [coachFilter, setCoachFilter] = useState<string | undefined>(undefined);
   const utils = api.useUtils();
+
+  // Fetch coaches for filter dropdown
+  const { data: coaches } = api.admin.payment.getCoachesForFilter.useQuery(undefined, {
+    enabled: sessionStatus === "authenticated",
+  });
 
   // Fetch payments with filters - only when authenticated to prevent 401 race condition
   const { data: payments, isLoading } = api.admin.payment.getPayments.useQuery(
@@ -87,6 +93,7 @@ export default function PaymentsPage() {
       search: searchQuery || undefined,
       status: statusFilter !== "ALL" ? statusFilter : undefined,
       sortBy,
+      coachId: coachFilter,
     },
     {
       enabled: sessionStatus === "authenticated",
@@ -277,7 +284,13 @@ export default function PaymentsPage() {
           </DropdownMenu>
         </div>
         <div className="self-start">
-          <PaymentFilter currentFilter={statusFilter} onFilterChange={setStatusFilter} />
+          <PaymentFilter
+            currentFilter={statusFilter}
+            onFilterChange={setStatusFilter}
+            coachFilter={coachFilter}
+            onCoachFilterChange={setCoachFilter}
+            coaches={coaches ?? []}
+          />
         </div>
       </div>
 

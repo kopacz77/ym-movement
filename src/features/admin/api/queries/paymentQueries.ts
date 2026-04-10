@@ -119,6 +119,12 @@ export const paymentRouter = createTRPCRouter({
                       name: true,
                     },
                   },
+                  Coach: {
+                    select: {
+                      id: true,
+                      User: { select: { name: true } },
+                    },
+                  },
                 },
               },
             },
@@ -368,6 +374,18 @@ export const paymentRouter = createTRPCRouter({
         });
       }
     }),
+
+  getCoachesForFilter: adminProcedure.query(async ({ ctx }) => {
+    const coaches = await ctx.prisma.coach.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        User: { select: { name: true } },
+      },
+      orderBy: { User: { name: "asc" } },
+    });
+    return coaches.map((c) => ({ id: c.id, name: c.User.name }));
+  }),
 
   getPaymentStats: adminProcedure
     .input(z.object({ coachId: z.string().optional() }).optional())

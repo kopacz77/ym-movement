@@ -267,12 +267,22 @@
   }
 }
 
-/* Minimal React Big Calendar styling - let it work as designed */
+/* React Big Calendar: Fix header/grid column misalignment
+   Root cause: .rbc-time-content has overflow-y:auto which adds a scrollbar,
+   but .rbc-time-header has no scrollbar, so columns differ by scrollbar width.
+   RBC's built-in fix (1px border-right) is inadequate for a ~17px scrollbar.
 
-/* Fix: Scrollbar-induced column misalignment between header and time grid
-   The header row and time slot grid use separate flex containers. When the
-   time grid scrolls vertically, the scrollbar steals width causing columns
-   to misalign. scrollbar-gutter reserves space for the scrollbar consistently. */
+   Fix: Apply scrollbar-gutter:stable to BOTH header and content so both reserve
+   the same space for the scrollbar, keeping columns perfectly aligned. */
+.rbc-time-header {
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
+.rbc-time-header.rbc-overflowing {
+  border-right: none;
+}
+
 .rbc-time-content {
   scrollbar-gutter: stable;
 }

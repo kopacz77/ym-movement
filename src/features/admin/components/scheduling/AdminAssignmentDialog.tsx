@@ -2,9 +2,10 @@
 
 import { LessonType } from "@prisma/client";
 import { format } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { AlertCircle, Calendar, Clock, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,6 +50,7 @@ export function AdminAssignmentDialog({
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [lessonType, setLessonType] = useState<LessonType>(LessonType.PRIVATE);
   const [notes, setNotes] = useState("");
+  const [assignError, setAssignError] = useState<string | null>(null);
 
   const utils = api.useUtils();
 
@@ -76,6 +78,7 @@ export function AdminAssignmentDialog({
       toast.success("Student Assigned", {
         description: `${student?.User?.name || "Student"} assigned to ${lessonType} lesson`,
       });
+      setAssignError(null);
       // Invalidate relevant queries
       utils.admin.schedule.getTimeSlots.invalidate();
       utils.admin.schedule.getLessonsByDate.invalidate();
@@ -86,11 +89,14 @@ export function AdminAssignmentDialog({
       setNotes("");
     },
     onError: (error) => {
-      toast.error("Error Assigning Student", {
-        description: error.message,
-      });
+      setAssignError(error.message);
     },
   });
+
+  const handleStudentChange = (studentId: string) => {
+    setSelectedStudentId(studentId);
+    setAssignError(null);
+  };
 
   const handleAssign = () => {
     if (!selectedStudentId) {
@@ -98,6 +104,7 @@ export function AdminAssignmentDialog({
       return;
     }
 
+    setAssignError(null);
     assignStudent.mutate({
       timeSlotId: timeSlot.id,
       studentId: selectedStudentId,
@@ -181,7 +188,7 @@ export function AdminAssignmentDialog({
             <Label htmlFor="student-select">Student</Label>
             <Select
               value={selectedStudentId}
-              onValueChange={setSelectedStudentId}
+              onValueChange={handleStudentChange}
               disabled={studentsLoading}
             >
               <SelectTrigger id="student-select">
@@ -252,6 +259,14 @@ export function AdminAssignmentDialog({
             />
           </div>
         </div>
+
+        {assignError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Assignment Failed</AlertTitle>
+            <AlertDescription>{assignError}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex justify-end gap-2 pt-4">
           <Button
