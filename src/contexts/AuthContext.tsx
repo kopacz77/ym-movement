@@ -34,50 +34,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Create an abort controller for cleanup
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
-    const fetchUser = async () => {
-      if (session?.user) {
-        try {
-          const response = await fetch("/api/auth/me", { signal });
-
-          if (!response.ok) {
-            // Handle failed fetch
-            await signOut({ redirect: false });
-            router.push("/auth/login");
-            return;
-          }
-
-          const userData = await response.json();
-
-          // Only update state if component is still mounted
-          if (!signal.aborted) {
-            setUser(userData);
-          }
-        } catch (error) {
-          // Only process error if not caused by abort
-          if (!signal.aborted) {
-            console.error("Error fetching user data:", error);
-            await signOut({ redirect: false });
-            router.push("/auth/login");
-          }
-        }
-      }
-    };
-
-    if (status === "authenticated") {
-      fetchUser();
+    if (status === "authenticated" && session?.user) {
+      // Use session data directly — role is already in the JWT token
+      setUser({
+        id: session.user.id as string,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role as User["role"],
+      });
     } else if (status === "unauthenticated") {
       setUser(null);
     }
-
-    // Cleanup function
-    return () => {
-      abortController.abort();
-    };
-  }, [session, status, router]);
+  }, [session, status]);
 
   const logout = useCallback(async () => {
     try {

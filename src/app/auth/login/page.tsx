@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -44,22 +44,17 @@ export default function LoginPage() {
         return;
       }
 
-      // Fetch the user role to redirect appropriately
-      const response = await fetch("/api/auth/me");
-      if (!response.ok) {
-        throw new Error("Failed to fetch user information");
-      }
+      // Get the role from the session (already in the JWT, no extra network call needed)
+      const session = await getSession();
+      const role = session?.user?.role;
 
-      const userData = await response.json();
-
-      if (userData.role === "ADMIN" || userData.role === "SUPER_ADMIN") {
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
         router.push("/admin/dashboard");
-      } else if (userData.role === "COACH") {
+      } else if (role === "COACH") {
         router.push("/coach/dashboard");
-      } else if (userData.role === "STUDENT") {
+      } else if (role === "STUDENT") {
         router.push("/student/dashboard");
       } else {
-        console.error("Unexpected user role:", userData.role);
         toast.error("Login Error", {
           description: "User role not recognized",
         });

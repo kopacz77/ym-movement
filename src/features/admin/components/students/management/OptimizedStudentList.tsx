@@ -80,7 +80,7 @@ const StudentActions = memo(
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onDelete(studentId, studentName)}
-          className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="w-full text-red-600 focus:text-red-700 focus:bg-red-50"
         >
           Delete
         </DropdownMenuItem>

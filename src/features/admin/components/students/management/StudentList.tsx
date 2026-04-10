@@ -263,7 +263,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                                 isActive,
                               )
                             }
-                            className={`w-full ${isActive ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}`}
+                            className={`w-full ${isActive ? "text-orange-600 focus:text-orange-700 focus:bg-orange-50" : "text-green-600 focus:text-green-700 focus:bg-green-50"}`}
                             disabled={toggleStatusMutation.isPending}
                           >
                             {isActive ? (
@@ -282,7 +282,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                             onClick={() =>
                               handleDeleteStudent(student.id, student.User.name || "Student")
                             }
-                            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="w-full text-red-600 focus:text-red-700 focus:bg-red-50"
                           >
                             Delete
                           </DropdownMenuItem>

@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { clearLoginAttempts, getLockoutExpiry, isAccountLockedOut, recordLoginAttempt } from "@/lib/account-lockout";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -35,10 +36,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const email = credentials.email as string;
         const password = credentials.password as string;
-
-        // Dynamic import to avoid circular dependency
-        const { isAccountLockedOut, recordLoginAttempt, clearLoginAttempts, getLockoutExpiry } =
-          await import("@/lib/account-lockout");
 
         // Check if account is locked out
         const isLocked = await isAccountLockedOut(email);
@@ -76,14 +73,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // Successful login - clear failed attempts
-        await clearLoginAttempts(email);
-
-        // Record successful attempt
-        await recordLoginAttempt({
-          email,
-          success: true,
-        });
+        // Successful login - clear failed attempts (fire-and-forget, not needed for response)
+        clearLoginAttempts(email).catch(() => {});
+        recordLoginAttempt({ email, success: true }).catch(() => {});
 
         return {
           id: user.id,
