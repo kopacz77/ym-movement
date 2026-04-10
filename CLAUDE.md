@@ -236,6 +236,7 @@ This project includes specialized Claude Code subagents for focused development 
 - TypeScript strict mode, React Hook Form + Zod validation
 - Feature-based organization, custom UI components follow Radix patterns
 - Date handling with date-fns library
+- **Radix DropdownMenuItem hover styling**: Always use `focus:` (not `hover:`) for highlight overrides on `DropdownMenuItem`. Radix manages highlight state via focus, not CSS hover. Use `hover:` only on regular `Button` components. Example: `className="text-red-600 focus:text-red-700 focus:bg-red-50"` (not `hover:`)
 
 ## Neon Database Backup & Recovery
 

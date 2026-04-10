@@ -148,7 +148,8 @@
       "Bash(/tmp/check_scripts.sh:*)",
       "Bash(netlify:*)",
       "Bash(npx playwright:*)",
-      "Bash(ss:*)"
+      "Bash(ss:*)",
+      "WebFetch(domain:answers.netlify.com)"
     ],
     "deny": []
   }

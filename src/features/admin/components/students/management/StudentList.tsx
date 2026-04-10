@@ -2,7 +2,7 @@
 "use client";
 import type { Level } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { LockOpen, MoreHorizontal, Search, UserCheck, UserX } from "lucide-react";
+import { Eye, LockOpen, MoreHorizontal, Pencil, Search, Trash2, UserCheck, UserX } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -237,12 +237,14 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                             onClick={() => onViewProfileAction(student.id)}
                             className="w-full"
                           >
+                            <Eye className="h-4 w-4 mr-2" />
                             View Profile
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => onEditAction(student.id)}
                             className="w-full"
                           >
+                            <Pencil className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -284,6 +286,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                             }
                             className="w-full text-red-600 focus:text-red-700 focus:bg-red-50"
                           >
+                            <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>

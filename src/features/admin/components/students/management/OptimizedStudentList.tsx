@@ -3,7 +3,7 @@
 
 import type { Level } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal, Search } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Search, Trash2 } from "lucide-react";
 import type React from "react";
 import { memo, useEffect, useMemo } from "react";
 import { toast } from "sonner";
@@ -73,15 +73,18 @@ const StudentActions = memo(
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => onViewProfile(studentId)} className="w-full">
+          <Eye className="h-4 w-4 mr-2" />
           View Profile
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onEdit(studentId)} className="w-full">
+          <Pencil className="h-4 w-4 mr-2" />
           Edit
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onDelete(studentId, studentName)}
           className="w-full text-red-600 focus:text-red-700 focus:bg-red-50"
         >
+          <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
