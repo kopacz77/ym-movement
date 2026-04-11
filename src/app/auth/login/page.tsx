@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -44,22 +44,9 @@ export default function LoginPage() {
         return;
       }
 
-      // Get the role from the session (already in the JWT, no extra network call needed)
-      const session = await getSession();
-      const role = session?.user?.role;
-
-      if (role === "ADMIN" || role === "SUPER_ADMIN") {
-        router.push("/admin/dashboard");
-      } else if (role === "COACH") {
-        router.push("/coach/dashboard");
-      } else if (role === "STUDENT") {
-        router.push("/student/dashboard");
-      } else {
-        toast.error("Login Error", {
-          description: "User role not recognized",
-        });
-        setIsLoading(false);
-      }
+      // Redirect to server-side route that reads role from JWT and redirects
+      // This avoids an extra client-side network call to get the session
+      router.push("/dashboard");
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
       toast.error("Login Error", {

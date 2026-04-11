@@ -18,7 +18,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { signOut } from "next-auth/react";
 
 // Navigation configurations for each role
@@ -56,13 +55,14 @@ const coachNavigation = [
 
 interface AppSidebarProps {
   role: "admin" | "student" | "coach";
+  coachId?: string;
+  isAdmin?: boolean;
 }
 
-export function AppSidebar({ role }: AppSidebarProps) {
+export function AppSidebar({ role, coachId, isAdmin }: AppSidebarProps) {
   const pathname = usePathname() ?? "";
   const navigation =
     role === "admin" ? adminNavigation : role === "coach" ? coachNavigation : studentNavigation;
-  const currentUser = useCurrentUser();
 
   const SidebarContent = (
     <>
@@ -111,7 +111,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
         </nav>
 
         {/* Role Switch Link */}
-        {role === "admin" && currentUser.coachId && (
+        {role === "admin" && coachId && (
           <div className="mt-auto pt-4 border-t border-gray-200">
             <Link
               href="/coach/dashboard"
@@ -122,7 +122,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
             </Link>
           </div>
         )}
-        {role === "coach" && currentUser.isAdmin && (
+        {role === "coach" && isAdmin && (
           <div className="mt-auto pt-4 border-t border-gray-200">
             <Link
               href="/admin/dashboard"
@@ -135,7 +135,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
         )}
         {/* Sign Out */}
         <div
-          className={`${!(role === "admin" && currentUser.coachId) && !(role === "coach" && currentUser.isAdmin) ? "mt-auto" : ""} pt-4 border-t border-gray-200`}
+          className={`${!(role === "admin" && coachId) && !(role === "coach" && isAdmin) ? "mt-auto" : ""} pt-4 border-t border-gray-200`}
         >
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}

@@ -97,7 +97,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
       <div className="hidden min-[1300px]:flex min-h-screen bg-background">
         {/* Sidebar - Fixed width, always visible on desktop */}
         <div className="w-64 flex-col fixed inset-y-0">
-          <AppSidebar role={role} />
+          <AppSidebar role={role} coachId={currentUser.coachId} isAdmin={currentUser.isAdmin} />
         </div>
 
         {/* Main content area - offset by sidebar width on desktop */}

@@ -37,8 +37,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        // Check if account is locked out
-        const isLocked = await isAccountLockedOut(email);
+        // Run lockout check and user lookup in parallel to save a DB round trip
+        const [isLocked, user] = await Promise.all([
+          isAccountLockedOut(email),
+          prisma.user.findUnique({ where: { email } }),
+        ]);
+
         if (isLocked) {
           const lockExpiry = await getLockoutExpiry(email);
           if (lockExpiry) {
@@ -48,10 +52,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             );
           }
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
 
         if (!user || !user.password) {
           // Record failed attempt (no req available in v5 authorize)
