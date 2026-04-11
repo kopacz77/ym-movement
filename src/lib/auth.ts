@@ -1,4 +1,3 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -6,7 +5,6 @@ import { clearLoginAttempts, getLockoutExpiry, isAccountLockedOut, recordLoginAt
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma) as any,
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
@@ -40,7 +38,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Run lockout check and user lookup in parallel to save a DB round trip
         const [isLocked, user] = await Promise.all([
           isAccountLockedOut(email),
-          prisma.user.findUnique({ where: { email } }),
+          prisma.user.findUnique({
+            where: { email },
+            include: {
+              Student: { select: { id: true, isApproved: true, isActive: true } },
+              Coach: { select: { id: true, isApproved: true, isActive: true } },
+            },
+          }),
         ]);
 
         if (isLocked) {
@@ -77,11 +81,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         clearLoginAttempts(email).catch(() => {});
         recordLoginAttempt({ email, success: true }).catch(() => {});
 
+        // Determine profile IDs and approval status
+        const studentId = user.Student?.id ?? null;
+        const coachId = user.Coach?.id ?? null;
+        const isApproved = user.role === "ADMIN" || user.role === "SUPER_ADMIN"
+          ? true
+          : (user.Student?.isApproved ?? user.Coach?.isApproved ?? null);
+        const isActive = user.role === "ADMIN" || user.role === "SUPER_ADMIN"
+          ? true
+          : (user.Student?.isActive ?? user.Coach?.isActive ?? null);
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          studentId,
+          coachId,
+          isApproved,
+          isActive,
         };
       },
     }),
@@ -90,17 +108,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
+        token.role = user.role;
+        token.studentId = user.studentId;
+        token.coachId = user.coachId;
+        token.isApproved = user.isApproved;
+        token.isActive = user.isActive;
       }
-      // On session update trigger, refresh role from database
-      // This allows role changes (e.g., ADMIN -> SUPER_ADMIN) to propagate without re-login
+      // On session update trigger, refresh profile data from database
       if (trigger === "update") {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true },
+          select: {
+            role: true,
+            Student: { select: { id: true, isApproved: true, isActive: true } },
+            Coach: { select: { id: true, isApproved: true, isActive: true } },
+          },
         });
         if (dbUser) {
           token.role = dbUser.role;
+          token.studentId = dbUser.Student?.id ?? null;
+          token.coachId = dbUser.Coach?.id ?? null;
+          token.isApproved = dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN"
+            ? true
+            : (dbUser.Student?.isApproved ?? dbUser.Coach?.isApproved ?? null);
+          token.isActive = dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN"
+            ? true
+            : (dbUser.Student?.isActive ?? dbUser.Coach?.isActive ?? null);
         }
       }
       return token;
@@ -109,6 +142,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.studentId = token.studentId as string | null;
+        session.user.coachId = token.coachId as string | null;
+        session.user.isApproved = token.isApproved as boolean | null;
+        session.user.isActive = token.isActive as boolean | null;
       }
       return session;
     },
