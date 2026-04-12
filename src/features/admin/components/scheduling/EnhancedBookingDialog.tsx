@@ -125,7 +125,7 @@ export function EnhancedBookingDialog({
                 modifiersClassNames={{
                   booked: "[&>button]:line-through opacity-100",
                 }}
-                className="bg-transparent p-0 [--cell-size:--spacing(10)] lg:[--cell-size:--spacing(12)]"
+                className="bg-transparent p-0 [--cell-size:2.5rem] lg:[--cell-size:3rem]"
                 formatters={{
                   formatWeekdayName: (date) => {
                     return date.toLocaleString("en-US", { weekday: "short" });
