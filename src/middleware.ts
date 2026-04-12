@@ -1,37 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
-const PROTECTED_ROUTES: Record<string, string[]> = {
-  "/admin": ["ADMIN", "SUPER_ADMIN"],
-  "/student": ["STUDENT"],
-  "/coach": ["COACH", "ADMIN", "SUPER_ADMIN"],
-};
+// Cookie name used by next-auth v5 over HTTPS
+const SESSION_COOKIE = "__Secure-authjs.session-token";
+const SESSION_COOKIE_HTTP = "authjs.session-token";
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const matchedPrefix = Object.keys(PROTECTED_ROUTES).find(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  const isProtected =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/student") ||
+    pathname.startsWith("/coach");
 
-  if (!matchedPrefix) return NextResponse.next();
+  if (!isProtected) return NextResponse.next();
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  // Check for session cookie existence only. Role-based access control
+  // is enforced by server components (auth()) and the TRPC layer.
+  // We avoid getToken() here because JWE decryption is incompatible
+  // with Edge Runtime in next-auth v5 beta.
+  const hasSession =
+    req.cookies.has(SESSION_COOKIE) || req.cookies.has(SESSION_COOKIE_HTTP);
 
-  if (!token) {
+  if (!hasSession) {
     const loginUrl = new URL("/auth/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  const allowedRoles = PROTECTED_ROUTES[matchedPrefix];
-  const userRole = token.role as string | undefined;
-
-  // If role is missing from token (stale session), allow through and let
-  // the TRPC/API layer handle authorization.
-  if (userRole && !allowedRoles.includes(userRole)) {
-    const loginUrl = new URL("/auth/login", req.url);
-    loginUrl.searchParams.set("error", "AccessDenied");
     return NextResponse.redirect(loginUrl);
   }
 
