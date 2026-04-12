@@ -158,7 +158,8 @@
       "WebFetch(domain:medium.com)",
       "Bash(npx vercel:*)",
       "Bash(pnpm vercel:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(source:*)"
     ],
     "deny": []
   }
