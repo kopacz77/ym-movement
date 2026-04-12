@@ -113,7 +113,7 @@
     "ioredis": "^5.8.2",
     "lucide-react": "^0.522.0",
     "luxon": "^3.7.2",
-    "next": "15.5.15",
+    "next": "16.2.3",
     "next-auth": "5.0.0-beta.30",
     "next-themes": "^0.4.6",
     "react": "^19.2.3",
@@ -137,7 +137,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@faker-js/faker": "^9.9.0",
-    "@next/bundle-analyzer": "^15.5.7",
+    "@next/bundle-analyzer": "^16.2.3",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -208,7 +208,7 @@
     ]
   },
   "engines": {
-    "node": "20.x",
+    "node": ">=20.x",
     "pnpm": ">=9.0.0"
   },
   "type": "module",
