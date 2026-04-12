@@ -13,15 +13,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Database migrations**: `pnpm prisma:migrate` or `npm run prisma:migrate`
 - **Lesson type migration**: `pnpm migrate:lesson-types` (migrate existing lessons to use lesson types)
 
+## Production Deployment (Vercel)
+
+**Hosting**: Vercel (manual CLI deploys, no GitHub auto-deploy)
+**Project**: `ym-movement-v2` on Vercel
+**Domain**: `ym-movement.com`
+**Runtime**: Node.js 24.x, Next.js 16.x with Turbopack
+
+### Deploy Commands
+- **Deploy to production**: `npx vercel --prod --yes`
+- **Deploy preview**: `npx vercel`
+- **Check deployment**: `npx vercel inspect <url>`
+
+### Important Notes
+- Deploys push local files directly via Vercel CLI (not connected to GitHub)
+- Always `pnpm build` locally first to verify the build succeeds before deploying
+- Environment variables are configured in Vercel project settings (not from `.env`)
+- The `.env` file is for local development only
+- Auth token stored at `~/.local/share/com.vercel.cli/auth.json`
+
+### Middleware Constraint
+The middleware (`src/middleware.ts`) checks for session cookie existence only — it does **not** decrypt the JWT. This is intentional because `getToken()` from `next-auth/jwt` is incompatible with Edge Runtime in next-auth v5 beta (JWE decryption fails). Role-based access control is enforced by server components (`auth()`) and the TRPC layer.
+
+### Diagnostic Endpoints (remove when stable)
+- `GET /api/ping` — Node version, env var presence, NEXTAUTH_URL
+- `GET /api/debug` — DB connectivity, auth config status
+- `GET /api/test` — Minimal route handler health check
+
 ## Developer Tools
 
-### API Documentation (Swagger)
-**Development-only tool** for viewing complete API structure and testing endpoints.
-
-- **Access**: Visit `http://localhost:3100/api-docs` when running `pnpm dev`
-- **Security**: Only available in development mode (returns 404 in production)
-- **Features**: Interactive API testing, request/response schemas, endpoint catalog
-- **Documentation**: See [SWAGGER-API-DOCS.md](docs/SWAGGER-API-DOCS.md) for usage guide
+### API Documentation
+- The Swagger UI (`swagger-ui-react`) has been removed from the project
+- `/api-docs` returns a static 404 page
+- API structure is documented via TRPC router definitions in `src/server/api/routers/`
 
 ## Testing Commands
 
@@ -185,9 +209,10 @@ pipx inject mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin
 
 ## Tech Stack & Architecture
 
-**Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS, Radix UI
-**Backend**: TRPC v11, Prisma ORM, PostgreSQL
-**Auth**: NextAuth.js with ADMIN/STUDENT roles
+**Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS, Radix UI
+**Backend**: TRPC v11, Prisma ORM, PostgreSQL (Neon)
+**Auth**: NextAuth.js v5 (beta.30) with ADMIN/STUDENT/COACH roles
+**Hosting**: Vercel (CLI deploys, Node.js 24.x)
 **External**: Google Calendar API integration
 
 **Core Database Entities**: User, Student, Lesson, Payment, Rink, RinkTimeSlot, RecurringPattern
