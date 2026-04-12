@@ -155,7 +155,10 @@
       "WebFetch(domain:guptadeepak.com)",
       "WebFetch(domain:cybersierra.co)",
       "WebFetch(domain:dev.to)",
-      "WebFetch(domain:medium.com)"
+      "WebFetch(domain:medium.com)",
+      "Bash(npx vercel:*)",
+      "Bash(pnpm vercel:*)",
+      "Bash(vercel:*)"
     ],
     "deny": []
   }

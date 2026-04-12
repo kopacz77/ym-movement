@@ -1,4 +1,5 @@
-import { auth } from "@/lib/auth";
+import { type NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 const PROTECTED_ROUTES: Record<string, string[]> = {
   "/admin": ["ADMIN", "SUPER_ADMIN"],
@@ -6,35 +7,36 @@ const PROTECTED_ROUTES: Record<string, string[]> = {
   "/coach": ["COACH", "ADMIN", "SUPER_ADMIN"],
 };
 
-export default auth((req) => {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const matchedPrefix = Object.keys(PROTECTED_ROUTES).find(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
-  if (!matchedPrefix) return;
+  if (!matchedPrefix) return NextResponse.next();
 
-  const session = req.auth;
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
-  if (!session?.user) {
+  if (!token) {
     const loginUrl = new URL("/auth/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return Response.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl);
   }
 
   const allowedRoles = PROTECTED_ROUTES[matchedPrefix];
-  const userRole = (session.user as any).role as string | undefined;
+  const userRole = token.role as string | undefined;
 
   // If role is missing from token (stale session), allow through and let
-  // the TRPC/API layer handle authorization. This prevents blocking users
-  // who have valid sessions from before the role field was added to JWT.
+  // the TRPC/API layer handle authorization.
   if (userRole && !allowedRoles.includes(userRole)) {
     const loginUrl = new URL("/auth/login", req.url);
     loginUrl.searchParams.set("error", "AccessDenied");
-    return Response.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl);
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: ["/admin/:path*", "/student/:path*", "/coach/:path*"],

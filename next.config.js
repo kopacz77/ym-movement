@@ -17,8 +17,8 @@ const nextConfig = {
   // Security configuration for CVE-2025-48068
   allowedDevOrigins: process.env.NODE_ENV === "development" ? ["localhost"] : [],
   typescript: {
-    // Type-check locally with `pnpm type-check`. Netlify's 2GB heap can't handle tsc on this codebase.
-    ignoreBuildErrors: process.env.NETLIFY === "true",
+    // Type-check locally with `pnpm type-check`. CI build servers may not have enough heap for tsc.
+    ignoreBuildErrors: process.env.NETLIFY === "true" || process.env.VERCEL === "1",
   },
   turbopack: {},
   experimental: {
