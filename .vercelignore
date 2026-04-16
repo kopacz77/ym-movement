@@ -1,0 +1,39 @@
+# Dependencies (Vercel installs its own)
+node_modules
+
+# Git
+.git
+
+# Docker (not used on Vercel)
+docker
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+
+# Tests
+__tests__
+tests
+playwright
+playwright.config.ts
+vitest.config.ts
+
+# Documentation
+docs
+mkdocs.yml
+CHANGELOG.md
+CONTRIBUTING.md
+SECURITY.md
+README.md
+
+# Development config
+.claude
+.env
+.env.local
+biome.json
+commitlint.config.js
+
+# Scripts (dev/migration utilities)
+scripts
+
+# Build artifacts
+tsconfig.tsbuildinfo
