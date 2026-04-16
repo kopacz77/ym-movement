@@ -100,7 +100,7 @@ export function useCalendarEvents(
       let backgroundColor = "#22c55e"; // green-500 (default/available)
 
       if (!slot.isActive) {
-        backgroundColor = "#94a3b8"; // slate-400 (inactive)
+        backgroundColor = associatedLessons.length > 0 ? "#64748b" : "#94a3b8"; // slate-500 (booked draft) / slate-400 (empty draft)
       } else if (associatedLessons.length >= slot.maxStudents) {
         backgroundColor = "#3b82f6"; // blue-500 (full)
       } else if (associatedLessons.length > 0) {

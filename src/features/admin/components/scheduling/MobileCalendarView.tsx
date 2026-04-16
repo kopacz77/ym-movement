@@ -76,7 +76,7 @@ export function MobileCalendarView({
     const LessonCount = slot.Lesson?.length || 0;
 
     if (!slot.isActive) {
-      return "bg-slate-400";
+      return LessonCount > 0 ? "bg-slate-500" : "bg-slate-400";
     }
 
     if (LessonCount >= slot.maxStudents) {

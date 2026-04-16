@@ -165,7 +165,8 @@
       "Bash(npm view:*)",
       "Bash(find ~:*)",
       "Bash(echo No debug endpoint:*)",
-      "Bash(echo === Login page with callbackUrl ===:*)"
+      "Bash(echo === Login page with callbackUrl ===:*)",
+      "Bash(gh repo:*)"
     ],
     "deny": []
   }
