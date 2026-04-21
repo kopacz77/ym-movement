@@ -86,3 +86,4 @@ debug.log
 
 # Turborepo
 .turbo
+.env*.local
