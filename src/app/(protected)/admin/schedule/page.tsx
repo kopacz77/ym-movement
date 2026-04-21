@@ -11,6 +11,7 @@ const ScheduleManager = dynamic(
       default: mod.ScheduleManager,
     })),
   {
+    ssr: false,
     loading: () => <CalendarSkeleton />,
   },
 );
