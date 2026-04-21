@@ -159,7 +159,6 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
       }
-
     } else if (process.env.NODE_ENV === "production") {
       // In production, require Turnstile token
       logSecurityEvent("MISSING_TURNSTILE_TOKEN", {

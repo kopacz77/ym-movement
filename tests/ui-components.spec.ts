@@ -24,9 +24,9 @@ test.describe("UI Components - Navigation", () => {
     await page.goto("/admin/dashboard");
     await expect(page.locator('h1:has-text("Dashboard")').first()).toBeVisible({ timeout: 15000 });
 
-    // Dashboard link should have active styling (blue background)
-    const dashboardLink = page.locator('a:has-text("Dashboard")').first();
-    await expect(dashboardLink).toHaveClass(/blue/);
+    // Dashboard link should have active styling (blue background or right border)
+    const dashboardLink = page.locator('a[href="/admin/dashboard"]').first();
+    await expect(dashboardLink).toHaveClass(/blue|active/);
   });
 });
 

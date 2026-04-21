@@ -60,7 +60,10 @@ function getCoachCalendarApi(coach: CoachWithTokens) {
           data: updateData,
         })
         .catch((err) => {
-          console.error(`[CALENDAR] Failed to persist refreshed tokens for coach ${coach.id}:`, err);
+          console.error(
+            `[CALENDAR] Failed to persist refreshed tokens for coach ${coach.id}:`,
+            err,
+          );
         });
     }
   });

@@ -1,9 +1,9 @@
 import { LessonType } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_HOURLY_PRICES,
   calculateLessonPrice,
   calculateProratedPrice,
+  DEFAULT_HOURLY_PRICES,
   getHourlyRateForLessonType,
 } from "../pricing";
 
@@ -205,9 +205,9 @@ describe("getHourlyRateForLessonType", () => {
 
   describe("Tier 3: Default pricing from database", () => {
     it("uses default PRIVATE price", () => {
-      expect(
-        getHourlyRateForLessonType(LessonType.PRIVATE, baseStudent, fullDefaultPricing),
-      ).toBe(75);
+      expect(getHourlyRateForLessonType(LessonType.PRIVATE, baseStudent, fullDefaultPricing)).toBe(
+        75,
+      );
     });
 
     it("uses default GROUP price", () => {
@@ -290,9 +290,9 @@ describe("getHourlyRateForLessonType", () => {
     });
 
     it("default pricing beats hardcoded fallback", () => {
-      expect(
-        getHourlyRateForLessonType(LessonType.PRIVATE, baseStudent, fullDefaultPricing),
-      ).toBe(75);
+      expect(getHourlyRateForLessonType(LessonType.PRIVATE, baseStudent, fullDefaultPricing)).toBe(
+        75,
+      );
     });
 
     it("student null falls to coach, not default", () => {
@@ -336,9 +336,7 @@ describe("calculateLessonPrice", () => {
 
   it("prorates coach pricing for non-60-minute lesson", () => {
     const coach = coachWith({ choreographyPrice: 150 });
-    expect(calculateLessonPrice(LessonType.CHOREOGRAPHY, 45, baseStudent, null, coach)).toBe(
-      112.5,
-    );
+    expect(calculateLessonPrice(LessonType.CHOREOGRAPHY, 45, baseStudent, null, coach)).toBe(112.5);
   });
 
   it("handles all 5 lesson types with coach pricing", () => {
@@ -386,15 +384,20 @@ describe("calculateLessonPrice", () => {
     });
 
     // All should use coach rate, not fall through to defaults
-    expect(calculateLessonPrice(LessonType.PRIVATE, 45, baseStudent, fullDefaultPricing, coach))
-      .toBe(90); // 120 * 45/60
-    expect(calculateLessonPrice(LessonType.GROUP, 45, baseStudent, fullDefaultPricing, coach))
-      .toBe(60); // 80 * 45/60
-    expect(calculateLessonPrice(LessonType.CHOREOGRAPHY, 45, baseStudent, fullDefaultPricing, coach))
-      .toBe(120); // 160 * 45/60
-    expect(calculateLessonPrice(LessonType.COMPETITION_PREP, 45, baseStudent, fullDefaultPricing, coach))
-      .toBe(150); // 200 * 45/60
-    expect(calculateLessonPrice(LessonType.OFF_ICE_DANCE, 45, baseStudent, fullDefaultPricing, coach))
-      .toBe(82.5); // 110 * 45/60
+    expect(
+      calculateLessonPrice(LessonType.PRIVATE, 45, baseStudent, fullDefaultPricing, coach),
+    ).toBe(90); // 120 * 45/60
+    expect(calculateLessonPrice(LessonType.GROUP, 45, baseStudent, fullDefaultPricing, coach)).toBe(
+      60,
+    ); // 80 * 45/60
+    expect(
+      calculateLessonPrice(LessonType.CHOREOGRAPHY, 45, baseStudent, fullDefaultPricing, coach),
+    ).toBe(120); // 160 * 45/60
+    expect(
+      calculateLessonPrice(LessonType.COMPETITION_PREP, 45, baseStudent, fullDefaultPricing, coach),
+    ).toBe(150); // 200 * 45/60
+    expect(
+      calculateLessonPrice(LessonType.OFF_ICE_DANCE, 45, baseStudent, fullDefaultPricing, coach),
+    ).toBe(82.5); // 110 * 45/60
   });
 });

@@ -9,12 +9,10 @@ export const pricingQueries = createTRPCRouter({
   // Query: Get default pricing
   getDefaultPricing: adminProcedure.query(async ({ ctx }) => {
     try {
-      console.log("Fetching default pricing");
       // Get the first DefaultPricing record
       const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
       if (!defaultPricing) {
-        console.log("Default pricing not found, creating...");
         // Create default pricing if none exists
         return await ctx.prisma.defaultPricing.create({
           data: {
@@ -42,7 +40,6 @@ export const pricingQueries = createTRPCRouter({
     .input(defaultPricingSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("Updating default pricing");
         // Get the first DefaultPricing record
         const existingPricing = await ctx.prisma.defaultPricing.findFirst();
 
@@ -73,8 +70,6 @@ export const pricingQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        console.log(`Fetching pricing for student ID: ${input.studentId}`);
-
         // Get the student with pricing fields
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
@@ -126,8 +121,6 @@ export const pricingQueries = createTRPCRouter({
     .input(studentPricingSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`Updating pricing for student ID: ${input.studentId}`);
-
         // Check if student exists
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },

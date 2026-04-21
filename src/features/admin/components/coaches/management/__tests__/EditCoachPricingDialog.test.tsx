@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { renderWithProviders, mockAdminSession } from "@/test/utils";
+import { mockAdminSession, renderWithProviders } from "@/test/utils";
 import { EditCoachPricingDialog } from "../EditCoachPricingDialog";
 
 // Mock the api module
@@ -138,10 +138,9 @@ describe("EditCoachPricingDialog", () => {
   });
 
   it("syncs inputs when reopened with different coach data", async () => {
-    const { rerender } = renderWithProviders(
-      <EditCoachPricingDialog {...defaultProps} />,
-      { session: mockAdminSession },
-    );
+    const { rerender } = renderWithProviders(<EditCoachPricingDialog {...defaultProps} />, {
+      session: mockAdminSession,
+    });
 
     // Verify initial values
     expect(screen.getByLabelText("Private Lesson ($)")).toHaveValue(120);
@@ -160,9 +159,7 @@ describe("EditCoachPricingDialog", () => {
       },
     };
 
-    rerender(
-      <EditCoachPricingDialog {...newProps} />,
-    );
+    rerender(<EditCoachPricingDialog {...newProps} />);
 
     await waitFor(() => {
       expect(screen.getByLabelText("Private Lesson ($)")).toHaveValue(200);
@@ -172,10 +169,9 @@ describe("EditCoachPricingDialog", () => {
   });
 
   it("does not render when closed", () => {
-    renderWithProviders(
-      <EditCoachPricingDialog {...defaultProps} open={false} />,
-      { session: mockAdminSession },
-    );
+    renderWithProviders(<EditCoachPricingDialog {...defaultProps} open={false} />, {
+      session: mockAdminSession,
+    });
 
     expect(screen.queryByText("Edit Pricing - Jane Smith")).not.toBeInTheDocument();
   });

@@ -39,7 +39,8 @@ interface ApiRink {
   timezone?: string;
 }
 
-interface TimeSlot {
+// Local type for student booking calendar (uses lowercase rink and extra UI fields)
+interface BookingTimeSlot {
   id: string;
   startTime: string;
   endTime: string;
@@ -98,7 +99,7 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
   // State initialization
   const [date, setDate] = useState(initialDate);
   const [selectedRink, setSelectedRink] = useState<string>("");
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<BookingTimeSlot | null>(null);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [calendarView, setCalendarView] = useState<View>(Views.WEEK);
@@ -349,7 +350,7 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
       }
 
       // Convert event to TimeSlot format
-      const slot: TimeSlot = {
+      const slot: BookingTimeSlot = {
         id: event.id,
         startTime: event.start.toISOString(),
         endTime: event.end.toISOString(),
@@ -379,7 +380,7 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
       const stringifiedEndTime = rawSlot.endTime.toString();
 
       // Create a properly typed TimeSlot
-      const processedSlot: TimeSlot = {
+      const processedSlot: BookingTimeSlot = {
         id: rawSlot.id,
         startTime: stringifiedStartTime,
         endTime: stringifiedEndTime,

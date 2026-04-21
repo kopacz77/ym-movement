@@ -120,7 +120,7 @@ export function EditLessonTypeDialog({
       default:
         hourlyRate = studentPricing.privateLessonPrice;
     }
-    return Math.round(((hourlyRate / 60) * durationMinutes) * 100) / 100;
+    return Math.round((hourlyRate / 60) * durationMinutes * 100) / 100;
   };
 
   const priceWillChange = lessonType !== currentType;

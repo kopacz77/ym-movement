@@ -122,9 +122,7 @@ export const RevenueBreakdownChart = () => {
         {isAllZero ? (
           <div className="flex flex-col items-center justify-center py-8">
             <DollarSign className="h-10 w-10 text-gray-300 mb-3" />
-            <p className="text-sm text-muted-foreground">
-              No revenue data for the current period.
-            </p>
+            <p className="text-sm text-muted-foreground">No revenue data for the current period.</p>
           </div>
         ) : (
           <div className="rounded-lg border overflow-hidden">
@@ -145,9 +143,7 @@ export const RevenueBreakdownChart = () => {
                     key={coach.coachId}
                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
                   >
-                    <TableCell className="text-sm font-medium">
-                      {coach.name ?? "Unknown"}
-                    </TableCell>
+                    <TableCell className="text-sm font-medium">{coach.name ?? "Unknown"}</TableCell>
                     <TableCell className="text-sm text-right text-muted-foreground">
                       {coach.revenueSplitPercent}%
                     </TableCell>

@@ -84,9 +84,7 @@ export function GoogleCalendarConnect() {
         {status?.isConnected ? (
           <div className="space-y-3">
             {status.calendarId && (
-              <p className="text-sm text-muted-foreground">
-                Calendar: {status.calendarId}
-              </p>
+              <p className="text-sm text-muted-foreground">Calendar: {status.calendarId}</p>
             )}
             <Button
               variant="outline"

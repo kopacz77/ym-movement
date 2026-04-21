@@ -25,7 +25,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 
-interface TimeSlot {
+// Local narrow type for assignment dialog (uses lowercase rink, differs from canonical TimeSlot)
+interface AssignmentSlot {
   id: string;
   startTime: Date;
   endTime: Date;
@@ -37,7 +38,7 @@ interface TimeSlot {
 }
 
 interface AdminAssignmentDialogProps {
-  timeSlot: TimeSlot;
+  timeSlot: AssignmentSlot;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -147,7 +148,7 @@ export function AdminAssignmentDialog({
       default:
         hourlyRate = studentPricing.privateLessonPrice;
     }
-    return Math.round(((hourlyRate / 60) * slotDurationMinutes) * 100) / 100;
+    return Math.round((hourlyRate / 60) * slotDurationMinutes * 100) / 100;
   };
 
   // Format price for display (remove .00 if whole number)

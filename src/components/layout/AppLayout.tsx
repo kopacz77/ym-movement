@@ -1,25 +1,8 @@
 "use client";
 
-// Navigation configurations for mobile sidebar
-import {
-  ArrowLeftRight,
-  BarChart2,
-  BookOpen,
-  Calendar,
-  Clock,
-  CreditCard,
-  FileText,
-  GraduationCap,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  User,
-  Users,
-} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { signOut } from "next-auth/react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import {
@@ -41,37 +24,8 @@ import { CoachCommandPalette } from "@/features/coach/components/layout/CoachCom
 import { CoachHeader } from "@/features/coach/components/layout/CoachHeader";
 import { StudentCommandPalette } from "@/features/student/components/layout/StudentCommandPalette";
 import { StudentHeader } from "@/features/student/components/layout/StudentHeader";
-
-const adminNavigation = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Schedule", href: "/admin/schedule", icon: Calendar },
-  { name: "Students", href: "/admin/students", icon: Users },
-  { name: "Coaches", href: "/admin/coaches", icon: GraduationCap },
-  { name: "Payments", href: "/admin/payments", icon: CreditCard },
-  { name: "Reports", href: "/admin/reports", icon: BarChart2 },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
-  { name: "Guide", href: "/admin/guide", icon: BookOpen },
-];
-
-const studentNavigation = [
-  { name: "Dashboard", href: "/student/dashboard", icon: Clock },
-  { name: "Book Lessons", href: "/student/book", icon: Calendar },
-  { name: "My Schedule", href: "/student/schedule", icon: Calendar },
-  { name: "Payments", href: "/student/payments", icon: CreditCard },
-  { name: "Policies", href: "/student/policies", icon: FileText },
-  { name: "Profile", href: "/student/profile", icon: User },
-  { name: "Settings", href: "/student/settings", icon: Settings },
-  { name: "Guide", href: "/student/guide", icon: BookOpen },
-];
-
-const coachNavigation = [
-  { name: "Dashboard", href: "/coach/dashboard", icon: LayoutDashboard },
-  { name: "Schedule", href: "/coach/schedule", icon: Calendar },
-  { name: "Students", href: "/coach/students", icon: Users },
-  { name: "Earnings", href: "/coach/earnings", icon: CreditCard },
-  { name: "Proposals", href: "/coach/proposals", icon: Clock },
-  { name: "Profile", href: "/coach/profile", icon: User },
-];
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { ArrowLeftRight, getNavigationForRole, LogOut } from "@/lib/navigation-config";
 
 interface AppLayoutProps {
   role: "admin" | "student" | "coach";
@@ -92,6 +46,14 @@ export function AppLayout({ role, children }: AppLayoutProps) {
 
   return (
     <>
+      {/* Skip to content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+      >
+        Skip to main content
+      </a>
+
       {/* Desktop Layout - Beautiful fixed sidebar (NEVER CHANGE) */}
       {/* Breakpoint at 1300px: above half-screen on 2560px displays (1280px) */}
       <div className="hidden min-[1300px]:flex min-h-screen bg-background">
@@ -107,7 +69,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
             <HeaderComponent />
           </header>
 
-          <main className="flex-1 p-6">
+          <main id="main-content" className="flex-1 p-6">
             <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>
         </div>
@@ -141,12 +103,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu className="space-y-1">
-                    {(role === "admin"
-                      ? adminNavigation
-                      : role === "coach"
-                        ? coachNavigation
-                        : studentNavigation
-                    ).map((item) => {
+                    {getNavigationForRole(role).map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.href;
 
@@ -248,7 +205,7 @@ export function AppLayout({ role, children }: AppLayoutProps) {
               </div>
             </header>
 
-            <main className="flex-1 p-4">
+            <main id="main-content" className="flex-1 p-4">
               <div className="mx-auto w-full">{children}</div>
             </main>
           </SidebarInset>

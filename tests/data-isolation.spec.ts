@@ -36,9 +36,8 @@ test.describe("Coach 1 data visibility", () => {
     const emptyMessage = page.locator("text=No students have booked lessons with you yet").first();
     await expect(table.or(emptyMessage)).toBeVisible({ timeout: 10000 });
 
-    // Look for "Test Student" in the content
-    const pageContent = await page.textContent("body");
-    expect(pageContent).toContain("Test Student");
+    // Look for "Test Student" in the page content
+    await expect(page.locator("text=Test Student").first()).toBeVisible({ timeout: 10000 });
   });
 
   test("coach 1 earnings show only their payments", async ({ page }) => {
@@ -51,10 +50,9 @@ test.describe("Coach 1 data visibility", () => {
     await expect(page.locator("text=Total Earnings").first()).toBeVisible({ timeout: 10000 });
 
     // Coach1 has VENMO payment at $120 -- verify ZELLE (coach2's method) does not appear
-    const bodyText = await page.textContent("body");
-    if (bodyText && bodyText.includes("VENMO")) {
-      expect(bodyText).not.toContain("ZELLE");
-    }
+    // Wait for data to load before checking absence
+    await page.waitForTimeout(2000);
+    await expect(page.locator("text=ZELLE")).not.toBeVisible();
   });
 });
 
@@ -73,8 +71,7 @@ test.describe("Coach 2 data visibility", () => {
     await expect(page.locator("text=Monthly Earnings").first()).toBeVisible();
 
     // Dashboard should load without error and show data scoped to coach2
-    const pageContent = await page.textContent("body");
-    expect(pageContent).toBeTruthy();
+    await expect(page.locator("text=Total Students").first()).toBeVisible({ timeout: 10000 });
   });
 
   test("coach 2 students page shows only their students", async ({ page }) => {
@@ -98,10 +95,8 @@ test.describe("Coach 2 data visibility", () => {
     // Verify Total Earnings card is visible
     await expect(page.locator("text=Total Earnings").first()).toBeVisible({ timeout: 10000 });
 
-    // Coach2 has ZELLE payment at $90 -- verify VENMO (coach1's method) does not appear
-    const bodyText = await page.textContent("body");
-    if (bodyText && bodyText.includes("ZELLE")) {
-      expect(bodyText).not.toContain("TEST-PAYOUT-001");
-    }
+    // Coach2 has ZELLE payment at $90 -- verify coach1's reference code does not appear
+    await page.waitForTimeout(2000);
+    await expect(page.locator("text=TEST-PAYOUT-001")).not.toBeVisible();
   });
 });

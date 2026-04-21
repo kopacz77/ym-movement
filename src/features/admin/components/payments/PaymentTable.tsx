@@ -154,6 +154,7 @@ export const PaymentTable = ({
                       >
                         <Check className="h-3 w-3 mr-1" />
                         <span className="hidden sm:inline">Verify</span>
+                        <span className="sr-only sm:hidden">Verify</span>
                       </Button>
                       <Button
                         variant="outline"
@@ -164,6 +165,7 @@ export const PaymentTable = ({
                       >
                         <Send className="h-3 w-3 mr-1" />
                         <span className="hidden sm:inline">Remind</span>
+                        <span className="sr-only sm:hidden">Remind</span>
                       </Button>
                     </>
                   )}

@@ -1,7 +1,16 @@
 // src/app/(protected)/admin/reports/page.tsx
 "use client";
 
-import { addMonths, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays, subMonths } from "date-fns";
+import {
+  addMonths,
+  endOfDay,
+  endOfMonth,
+  format,
+  startOfDay,
+  startOfMonth,
+  subDays,
+  subMonths,
+} from "date-fns";
 import { ChevronLeft, ChevronRight, Download, FileText } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
@@ -44,7 +53,7 @@ export default function ReportsPage() {
 
   // Stable "today" reference that only changes when the period or selectedMonth changes
   // (prevents new Date() from creating unstable query keys on every render)
-  const today = useMemo(() => new Date(), [period]);
+  const today = useMemo(() => new Date(), []);
 
   // Calculate the actual date range based on period and selected month
   const dateRange = useMemo(() => {
@@ -318,11 +327,7 @@ export default function ReportsPage() {
               <CardTitle>Payout Report</CardTitle>
             </CardHeader>
             <CardContent>
-              <PayoutReport
-                period={period}
-                startDate={dateRange.start}
-                endDate={dateRange.end}
-              />
+              <PayoutReport period={period} startDate={dateRange.start} endDate={dateRange.end} />
             </CardContent>
           </Card>
         </TabsContent>

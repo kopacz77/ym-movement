@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  Calendar,
-  Clock,
-  DollarSign,
-  GraduationCap,
-  Users,
-  X,
-} from "lucide-react";
-import { useState, useEffect } from "react";
+import { Calendar, Clock, DollarSign, GraduationCap, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,10 +12,11 @@ import { CoachDetailView } from "./CoachDetailView";
 export const CoachOverviewCards = () => {
   const [selectedCoachId, setSelectedCoachId] = useState<string | null>(null);
 
-  const { data: coaches, error, isLoading } = api.admin.superAdmin.getCoachesOverview.useQuery(
-    undefined,
-    { retry: 3 },
-  );
+  const {
+    data: coaches,
+    error,
+    isLoading,
+  } = api.admin.superAdmin.getCoachesOverview.useQuery(undefined, { retry: 3 });
 
   useEffect(() => {
     if (error) {
@@ -94,9 +88,7 @@ export const CoachOverviewCards = () => {
     }
     if (coach.isActive) {
       return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
-          Active
-        </Badge>
+        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">Active</Badge>
       );
     }
     return (
@@ -115,9 +107,7 @@ export const CoachOverviewCards = () => {
             className={`relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group ${
               selectedCoachId === coach.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
             }`}
-            onClick={() => setSelectedCoachId(
-              selectedCoachId === coach.id ? null : coach.id,
-            )}
+            onClick={() => setSelectedCoachId(selectedCoachId === coach.id ? null : coach.id)}
           >
             {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-blue-50 opacity-50" />
@@ -133,9 +123,7 @@ export const CoachOverviewCards = () => {
                     <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                       {coach.name ?? "Unknown"}
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {coach.email}
-                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{coach.email}</p>
                   </div>
                 </div>
                 {getStatusBadge(coach)}
@@ -188,10 +176,7 @@ export const CoachOverviewCards = () => {
 
       {/* Coach detail view */}
       {selectedCoachId && (
-        <CoachDetailView
-          coachId={selectedCoachId}
-          onClose={() => setSelectedCoachId(null)}
-        />
+        <CoachDetailView coachId={selectedCoachId} onClose={() => setSelectedCoachId(null)} />
       )}
     </div>
   );

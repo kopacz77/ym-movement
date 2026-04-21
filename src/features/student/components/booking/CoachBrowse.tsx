@@ -2,8 +2,8 @@
 "use client";
 
 import { api } from "@/lib/api";
-import { CoachProfileCard } from "./CoachProfileCard";
 import type { CoachProfile } from "./CoachProfileCard";
+import { CoachProfileCard } from "./CoachProfileCard";
 
 interface CoachBrowseProps {
   onSelectCoach: (coach: CoachProfile) => void;

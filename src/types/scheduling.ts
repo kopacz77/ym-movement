@@ -43,6 +43,8 @@ export interface TimeSlot {
   startTime: string | Date;
   endTime: string | Date;
   maxStudents: number;
+  currentStudents?: number;
+  duration?: number;
   rinkId: string;
   Rink: {
     id: string;
@@ -51,7 +53,16 @@ export interface TimeSlot {
     address?: string;
   };
   Lesson?: Lesson[];
+  Coach?: {
+    id: string;
+    User: {
+      name: string | null;
+    };
+  } | null;
   isActive: boolean;
+  coachId?: string | null;
+  recurringId?: string;
+  title?: string | null;
 }
 
 /**

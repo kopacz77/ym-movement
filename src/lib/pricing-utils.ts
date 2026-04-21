@@ -59,19 +59,29 @@ export function getHourlyRate(
   if (coachPricing) {
     switch (type) {
       case "PRIVATE":
-        if (coachPricing.privateLessonPrice != null) return coachPricing.privateLessonPrice;
+        if (coachPricing.privateLessonPrice != null) {
+          return coachPricing.privateLessonPrice;
+        }
         break;
       case "CHOREOGRAPHY":
-        if (coachPricing.choreographyPrice != null) return coachPricing.choreographyPrice;
+        if (coachPricing.choreographyPrice != null) {
+          return coachPricing.choreographyPrice;
+        }
         break;
       case "GROUP":
-        if (coachPricing.groupLessonPrice != null) return coachPricing.groupLessonPrice;
+        if (coachPricing.groupLessonPrice != null) {
+          return coachPricing.groupLessonPrice;
+        }
         break;
       case "COMPETITION_PREP":
-        if (coachPricing.competitionPrepPrice != null) return coachPricing.competitionPrepPrice;
+        if (coachPricing.competitionPrepPrice != null) {
+          return coachPricing.competitionPrepPrice;
+        }
         break;
       case "OFF_ICE_DANCE":
-        if (coachPricing.offIceDancePrice != null) return coachPricing.offIceDancePrice;
+        if (coachPricing.offIceDancePrice != null) {
+          return coachPricing.offIceDancePrice;
+        }
         break;
     }
   }
@@ -80,19 +90,29 @@ export function getHourlyRate(
   if (studentPricing?.customPricingEnabled) {
     switch (type) {
       case "PRIVATE":
-        if (studentPricing.privateLessonPrice != null) return studentPricing.privateLessonPrice;
+        if (studentPricing.privateLessonPrice != null) {
+          return studentPricing.privateLessonPrice;
+        }
         break;
       case "CHOREOGRAPHY":
-        if (studentPricing.choreographyPrice != null) return studentPricing.choreographyPrice;
+        if (studentPricing.choreographyPrice != null) {
+          return studentPricing.choreographyPrice;
+        }
         break;
       case "GROUP":
-        if (studentPricing.groupLessonPrice != null) return studentPricing.groupLessonPrice;
+        if (studentPricing.groupLessonPrice != null) {
+          return studentPricing.groupLessonPrice;
+        }
         break;
       case "COMPETITION_PREP":
-        if (studentPricing.competitionPrepPrice != null) return studentPricing.competitionPrepPrice;
+        if (studentPricing.competitionPrepPrice != null) {
+          return studentPricing.competitionPrepPrice;
+        }
         break;
       case "OFF_ICE_DANCE":
-        if (studentPricing.offIceDancePrice != null) return studentPricing.offIceDancePrice;
+        if (studentPricing.offIceDancePrice != null) {
+          return studentPricing.offIceDancePrice;
+        }
         break;
     }
   }

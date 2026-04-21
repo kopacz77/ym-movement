@@ -71,12 +71,12 @@ const studentFormSchema = z.object({
 type StudentFormValues = z.infer<typeof studentFormSchema>;
 
 // Empty event handlers for StudentList props
-const handleEditClick = (id: string) => {
-  console.log(`Edit student with ID: ${id}`);
+const handleEditClick = (_id: string) => {
+  // TODO: implement edit student navigation
 };
 
-const handleViewProfileClick = (id: string) => {
-  console.log(`View profile for student with ID: ${id}`);
+const handleViewProfileClick = (_id: string) => {
+  // TODO: implement view profile navigation
 };
 
 export function StudentManager() {

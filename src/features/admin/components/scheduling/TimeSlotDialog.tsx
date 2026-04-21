@@ -27,8 +27,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
 import { showRemoveConfirmation } from "@/lib/toast-confirmations";
+import type { Lesson, TimeSlot } from "@/types/scheduling";
 import { AdminAssignmentDialog } from "./AdminAssignmentDialog";
-import type { Lesson, TimeSlot } from "./calendarUtils";
 import { EditLessonTypeDialog } from "./EditLessonTypeDialog";
 
 // Define interfaces for the data structures

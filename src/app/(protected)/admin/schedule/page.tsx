@@ -1,4 +1,5 @@
 // src/app/(protected)/admin/schedule/page.tsx
+"use client";
 
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -11,6 +12,7 @@ const ScheduleManager = dynamic(
       default: mod.ScheduleManager,
     })),
   {
+    ssr: false,
     loading: () => <CalendarSkeleton />,
   },
 );

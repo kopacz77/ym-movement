@@ -40,8 +40,8 @@ interface CalendarEvent {
   extendedProps?: Record<string, unknown>;
 }
 
-// Define TimeSlot interface based on your schema
-interface TimeSlot {
+// Local type for API response mapping (uses lowercase relations and index signature)
+interface CalendarTimeSlot {
   id: string;
   rinkId: string;
   startTime: Date;
@@ -113,7 +113,7 @@ export const CalendarEventsSystem = () => {
   useEffect(() => {
     if (data) {
       // Convert time slots to calendar events format
-      const calendarEvents = data.map((slot: TimeSlot) => {
+      const calendarEvents = data.map((slot: CalendarTimeSlot) => {
         const bookedStudents = slot.lessons?.length || 0;
         const isBooked = bookedStudents > 0;
 

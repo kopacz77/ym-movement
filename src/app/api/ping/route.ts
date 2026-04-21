@@ -17,9 +17,9 @@ export async function GET() {
       { headers: { "content-type": "application/json" } },
     );
   } catch (e: unknown) {
-    return new Response(
-      JSON.stringify({ error: String(e), stack: (e as Error)?.stack }),
-      { status: 500, headers: { "content-type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: String(e), stack: (e as Error)?.stack }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
   }
 }

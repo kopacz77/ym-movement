@@ -1,60 +1,9 @@
 // src/features/admin/components/scheduling/calendarUtils.ts
-import type { LessonStatus, LessonType } from "@prisma/client";
 import { parseISO } from "date-fns";
 import { DateTime } from "luxon";
+import type { TimeSlot } from "@/types/scheduling";
 
-// Define StudentNote interface
-export interface StudentNote {
-  id: string;
-  content: string;
-  createdAt: Date;
-  type: string;
-  User: {
-    name: string | null;
-  };
-}
-
-// Define Lesson interface for TimeSlot
-export interface Lesson {
-  id: string;
-  type: LessonType;
-  price: number;
-  status: LessonStatus;
-  notes: string | null;
-  Student: {
-    id: string;
-    notes: string | null;
-    StudentNote?: StudentNote[];
-    User: {
-      id: string;
-      name: string | null;
-      email: string;
-    };
-  };
-}
-
-// Define the TimeSlot interface
-export interface TimeSlot {
-  id: string;
-  startTime: string | Date;
-  endTime: string | Date;
-  maxStudents: number;
-  currentStudents?: number;
-  Lesson?: Lesson[];
-  isActive: boolean;
-  Rink: {
-    id: string;
-    name: string;
-    address?: string;
-    timezone: string;
-  };
-  Coach?: {
-    id: string;
-    User: {
-      name: string | null;
-    };
-  };
-}
+export type { Lesson, TimeSlot } from "@/types/scheduling";
 
 // Define the GroupedTimeSlot interface
 export interface GroupedTimeSlot {

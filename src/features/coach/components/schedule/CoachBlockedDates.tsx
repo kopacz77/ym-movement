@@ -50,11 +50,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
   // Create mutation
   const createMutation = api.coach.schedule.createBlockedDate.useMutation({
     onSuccess: (result) => {
-      delightfulToast.success(
-        `Blocked date created!`,
-        result.message,
-        "admin",
-      );
+      delightfulToast.success("Blocked date created!", result.message, "admin");
       resetForm();
       utils.coach.schedule.getMyBlockedDates.invalidate();
       utils.coach.schedule.getMyTimeSlots.invalidate();
@@ -69,11 +65,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
   // Update mutation
   const updateMutation = api.coach.schedule.updateBlockedDate.useMutation({
     onSuccess: (result) => {
-      delightfulToast.success(
-        `Blocked date updated!`,
-        result.message,
-        "admin",
-      );
+      delightfulToast.success("Blocked date updated!", result.message, "admin");
       resetForm();
       utils.coach.schedule.getMyBlockedDates.invalidate();
       utils.coach.schedule.getMyTimeSlots.invalidate();
@@ -88,11 +80,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
   // Delete mutation
   const deleteMutation = api.coach.schedule.deleteBlockedDate.useMutation({
     onSuccess: (result) => {
-      delightfulToast.success(
-        `Blocked date removed!`,
-        result.message,
-        "admin",
-      );
+      delightfulToast.success("Blocked date removed!", result.message, "admin");
       utils.coach.schedule.getMyBlockedDates.invalidate();
       utils.coach.schedule.getMyTimeSlots.invalidate();
     },
@@ -207,10 +195,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
 
       {/* Create/Edit form */}
       {isCreateFormOpen && (
-        <form
-          onSubmit={handleSubmit}
-          className="mb-4 p-3 border rounded-lg bg-gray-50 space-y-3"
-        >
+        <form onSubmit={handleSubmit} className="mb-4 p-3 border rounded-lg bg-gray-50 space-y-3">
           <h4 className="font-medium text-sm">
             {editingBlockedDate ? "Edit Blocked Date" : "Create Blocked Period"}
           </h4>
@@ -262,9 +247,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
                 id="bd-start"
                 type="date"
                 value={formData.startDate}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, startDate: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))}
                 className="h-8 text-sm"
                 required
               />
@@ -277,9 +260,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
                 id="bd-end"
                 type="date"
                 value={formData.endDate}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, endDate: e.target.value }))}
                 className="h-8 text-sm"
                 required
               />
@@ -293,9 +274,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
             <Input
               id="bd-desc"
               value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, description: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Additional details"
               className="h-8 text-sm"
             />
@@ -321,9 +300,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
       {/* Existing blocked dates list */}
       <div className="space-y-2">
         {!blockedDates || blockedDates.length === 0 ? (
-          <p className="text-muted-foreground text-xs italic">
-            No blocked date ranges configured
-          </p>
+          <p className="text-muted-foreground text-xs italic">No blocked date ranges configured</p>
         ) : (
           blockedDates.map((bd: any) => (
             <div

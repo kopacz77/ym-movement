@@ -19,7 +19,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 
-interface TimeSlot {
+// Local narrow type for booking display (uses lowercase rink, differs from canonical TimeSlot)
+interface BookingSlot {
   id: string;
   startTime: string | Date;
   endTime: string | Date;
@@ -30,7 +31,7 @@ interface TimeSlot {
 }
 
 interface BookingDialogProps {
-  slot: TimeSlot;
+  slot: BookingSlot;
   studentId: string;
   rinkTimezone: string; // ADDED: Timezone for proper time formatting
   coachName?: string;

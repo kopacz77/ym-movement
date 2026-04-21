@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 // src/hooks/useCalendarEvents.ts
 import { useMemo } from "react";
-import type { TimeSlot } from "@/features/admin/components/scheduling/calendarUtils";
+import type { TimeSlot } from "@/types/scheduling";
 
 // Extended calendar event type for our specific needs
 export interface ExtendedCalendarEvent {
@@ -156,13 +156,9 @@ export function useCalendarEvents(
       const groupSlots = groupedMap.get(dateKey);
       if (groupSlots) {
         groupSlots.push({
-          id: slot.id,
+          ...slot,
           startTime: startTimeStr,
           endTime: endTimeStr,
-          maxStudents: slot.maxStudents,
-          isActive: slot.isActive,
-          Lesson: slot.Lesson,
-          Rink: slot.Rink,
         });
       }
     }

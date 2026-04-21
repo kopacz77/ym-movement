@@ -168,7 +168,9 @@ export const superAdminDashboardRouter = createTRPCRouter({
           },
         };
       } catch (error) {
-        if (error instanceof TRPCError) throw error;
+        if (error instanceof TRPCError) {
+          throw error;
+        }
         console.error("Error in getCoachDetail:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

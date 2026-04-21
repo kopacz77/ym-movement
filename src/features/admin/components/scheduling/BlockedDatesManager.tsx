@@ -186,12 +186,9 @@ export function BlockedDatesManager({ className }: BlockedDatesManagerProps) {
 
   // Handle delete
   const handleDelete = (id: string) => {
-    showDeleteConfirmation(
-      "blocked period",
-      () => {
-        deleteMutation.mutate({ id });
-      },
-    );
+    showDeleteConfirmation("blocked period", () => {
+      deleteMutation.mutate({ id });
+    });
   };
 
   // Reset form when dialog closes

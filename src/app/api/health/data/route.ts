@@ -27,9 +27,15 @@ export async function GET() {
     };
 
     const warnings: string[] = [];
-    if (timeSlots === 0) warnings.push("RinkTimeSlot table is empty");
-    if (lessons === 0) warnings.push("Lesson table is empty");
-    if (payments === 0) warnings.push("Payment table is empty");
+    if (timeSlots === 0) {
+      warnings.push("RinkTimeSlot table is empty");
+    }
+    if (lessons === 0) {
+      warnings.push("Lesson table is empty");
+    }
+    if (payments === 0) {
+      warnings.push("Payment table is empty");
+    }
 
     return NextResponse.json(
       {

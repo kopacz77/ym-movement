@@ -28,12 +28,6 @@ export const recurringPatternRouter = createTRPCRouter({
         const slots = [];
         const currentDate = new Date(input.startDate);
 
-        console.log(
-          `Creating recurring pattern from ${currentDate.toISOString()} to ${input.endDate.toISOString()} on days: ${input.daysOfWeek.join(
-            ", ",
-          )}`,
-        );
-
         while (currentDate <= input.endDate) {
           if (input.daysOfWeek.includes(currentDate.getDay())) {
             const [hours, minutes] = input.startTime.split(":").map(Number);
@@ -54,8 +48,6 @@ export const recurringPatternRouter = createTRPCRouter({
           // Add exactly one day to ensure we don't have timezone issues
           currentDate.setDate(currentDate.getDate() + 1);
         }
-
-        console.log(`Generated ${slots.length} slots for recurring pattern`);
 
         if (slots.length > 0) {
           await ctx.prisma.rinkTimeSlot.createMany({

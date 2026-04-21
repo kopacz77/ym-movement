@@ -27,7 +27,8 @@ function formatTimeDisplay(dateStr: string) {
   )}`;
 }
 
-interface TimeSlot {
+// Local narrow type for booking slot display (differs from canonical TimeSlot)
+interface BookingSlot {
   id: string;
   startTime: string;
   endTime: string;
@@ -37,7 +38,7 @@ interface TimeSlot {
 }
 
 interface BookingDialogProps {
-  slot: TimeSlot;
+  slot: BookingSlot;
   studentId: string;
   onCloseAction: () => void;
 }

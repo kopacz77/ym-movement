@@ -7,16 +7,7 @@ export interface User {
   emailVerified?: Date;
 }
 
-export interface TimeSlot {
-  id: string;
-  rinkId: string;
-  startTime: Date;
-  endTime: Date;
-  maxStudents: number;
-  currentStudents: number;
-  isActive: boolean;
-  recurringId?: string;
-}
+export type { TimeSlot } from "./scheduling";
 
 export interface Lesson {
   id: string;

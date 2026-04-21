@@ -95,9 +95,7 @@ export function EditCoachPricingDialog({
         ? Number.parseFloat(competitionPrepPrice)
         : undefined,
       offIceDancePrice: offIceDancePrice ? Number.parseFloat(offIceDancePrice) : undefined,
-      revenueSplitPercent: revenueSplitPercent
-        ? Number.parseFloat(revenueSplitPercent)
-        : undefined,
+      revenueSplitPercent: revenueSplitPercent ? Number.parseFloat(revenueSplitPercent) : undefined,
     });
   };
 

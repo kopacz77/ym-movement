@@ -1,21 +1,7 @@
 // src/features/student/types/index.ts
 import type { LessonStatus, LessonType, Level, PaymentStatus } from "@prisma/client";
 
-export interface TimeSlot {
-  id: string;
-  startTime: Date;
-  endTime: Date;
-  duration: number;
-  maxStudents: number;
-  currentStudents: number;
-  isActive: boolean;
-  rinkId: string;
-  Rink: {
-    name: string;
-    address: string;
-    timezone: string;
-  };
-}
+export type { TimeSlot } from "@/types/scheduling";
 
 export interface LessonWithDetails {
   id: string;

@@ -1,9 +1,15 @@
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { Playfair_Display } from "next/font/google";
 import { validateEnvironment } from "@/lib/env-check";
 import { Providers } from "@/providers";
 
 import "@/styles/globals.css";
+
+const displayFont = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
 
 // Validate environment on app startup
 validateEnvironment();
@@ -36,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${displayFont.variable}`}>
       <body>
         <Providers>
           {children}

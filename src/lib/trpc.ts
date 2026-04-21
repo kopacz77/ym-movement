@@ -13,9 +13,7 @@ export type TRPCContext = {
   clientIP: string;
 };
 
-export const createTRPCContext = async (
-  opts: { headers: Headers },
-): Promise<TRPCContext> => {
+export const createTRPCContext = async (opts: { headers: Headers }): Promise<TRPCContext> => {
   const session = await auth();
   const clientIP = getClientIP(opts.headers);
 

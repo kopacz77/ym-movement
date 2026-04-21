@@ -57,76 +57,99 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-zinc-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Image
-              src="/ym-logo-symbol.svg"
-              alt="YM Movement"
-              width={117}
-              height={64}
-              className="h-12 w-auto"
-            />
-          </div>
-          <CardTitle className="text-2xl">Welcome to YM Movement</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-              <div className="text-right">
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-              onClick={(e) => {
-                if (isLoading) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              {isLoading ? "Loading..." : "Login"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-2">
-          <p className="text-sm text-center text-gray-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-blue-600 hover:underline">
-              Sign up
-            </Link>
+    <div className="flex min-h-screen">
+      {/* Left: Branded visual panel (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-[hsl(220,70%,20%)] via-[hsl(220,60%,30%)] to-[hsl(195,85%,35%)] items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[hsl(195,85%,45%)] blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[hsl(220,70%,50%)] blur-3xl" />
+        </div>
+        <div className="relative text-center px-12">
+          <Image
+            src="/ym-logo-full.svg"
+            alt="YM Movement"
+            width={6053}
+            height={3654}
+            className="mx-auto h-auto w-[280px] brightness-0 invert opacity-90"
+          />
+          <p className="mt-6 text-lg text-white/80 max-w-sm mx-auto">
+            Olympic-level ice dance coaching. Elevate your artistry on ice.
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
+
+      {/* Right: Login form */}
+      <div className="flex-1 flex justify-center items-center p-6 bg-background">
+        <Card className="w-full max-w-md border-0 shadow-none lg:shadow-sm lg:border">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4 lg:hidden">
+              <Image
+                src="/ym-logo-symbol.svg"
+                alt="YM Movement"
+                width={117}
+                height={64}
+                className="h-12 w-auto"
+              />
+            </div>
+            <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
+            <CardDescription>Login to your account</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+                <div className="text-right">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+                onClick={(e) => {
+                  if (isLoading) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                {isLoading ? "Loading..." : "Login"}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2">
+            <p className="text-sm text-center text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link href="/auth/signup" className="text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }

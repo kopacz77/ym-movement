@@ -190,7 +190,9 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
               >
                 <Send className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">
-                  {isPublishing ? "Publishing..." : `Publish ${draftCount} Draft${draftCount !== 1 ? "s" : ""}`}
+                  {isPublishing
+                    ? "Publishing..."
+                    : `Publish ${draftCount} Draft${draftCount !== 1 ? "s" : ""}`}
                 </span>
                 <span className="sm:hidden">
                   {isPublishing ? "..." : `Publish (${draftCount})`}

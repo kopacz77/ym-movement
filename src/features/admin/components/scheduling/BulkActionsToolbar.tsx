@@ -63,7 +63,13 @@ export function BulkActionsToolbar({
   return (
     <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 dark:bg-blue-950 dark:border-blue-800">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onToggleSelectionMode} className="h-8 w-8 p-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleSelectionMode}
+          className="h-8 w-8 p-0"
+          aria-label="Exit selection mode"
+        >
           <X className="h-4 w-4" />
         </Button>
         <Badge variant="secondary" className="flex items-center gap-1">

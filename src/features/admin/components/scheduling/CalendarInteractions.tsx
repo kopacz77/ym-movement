@@ -14,7 +14,8 @@ interface CalendarEvent {
   studentId?: string;
 }
 
-interface TimeSlot {
+// Local narrow type for demo slot construction (differs from canonical TimeSlot)
+interface BookingSlot {
   id: string;
   startTime: string;
   endTime: string;
@@ -28,14 +29,14 @@ interface CalendarInteractionsProps {
 }
 
 export const CalendarInteractions = ({ selectedStudentId }: CalendarInteractionsProps) => {
-  const [selectedSlot, setSelectedSlot] = React.useState<TimeSlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = React.useState<BookingSlot | null>(null);
   const [showBookingDialog, setShowBookingDialog] = React.useState(false);
   const [calendarView, setCalendarView] = React.useState<View>(Views.WEEK);
   const [events] = React.useState<CalendarEvent[]>([]);
 
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     // Convert SlotInfo to TimeSlot format
-    const timeSlot: TimeSlot = {
+    const timeSlot: BookingSlot = {
       id: `new-slot-${Date.now()}`, // Generate a temporary ID
       startTime: slotInfo.start.toISOString(),
       endTime: slotInfo.end.toISOString(),

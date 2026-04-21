@@ -1,7 +1,7 @@
 "use client";
 
 import { endOfDay, startOfDay } from "date-fns";
-import { Calendar, Globe, Plane } from "lucide-react";
+import { Globe, Plane } from "lucide-react";
 import { DateTime } from "luxon";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  formatDateRange,
+  type TimeSlot,
+} from "@/features/admin/components/scheduling/calendarUtils";
 import { DesktopCalendarView } from "@/features/admin/components/scheduling/DesktopCalendarView";
 import { MobileCalendarView } from "@/features/admin/components/scheduling/MobileCalendarView";
 import { TimeSlotDialogAdapter } from "@/features/admin/components/scheduling/TimeSlotDialogAdapter";
-import { formatDateRange, type TimeSlot } from "@/features/admin/components/scheduling/calendarUtils";
 import { useCoachTimeSlots } from "@/features/coach/hooks/useCoachTimeSlots";
 import { type ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -90,8 +93,12 @@ const CoachScheduleManagerComponent = () => {
 
   // Filter time slots by timezone when viewing "All Rinks"
   const filteredTimeSlots = useMemo(() => {
-    if (!timeSlots) return undefined;
-    if (selectedRink) return timeSlots;
+    if (!timeSlots) {
+      return undefined;
+    }
+    if (selectedRink) {
+      return timeSlots;
+    }
     return timeSlots.filter((slot: any) => slot.Rink?.timezone === timezoneFilter);
   }, [timeSlots, selectedRink, timezoneFilter]);
 

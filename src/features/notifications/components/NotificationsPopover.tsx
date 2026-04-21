@@ -114,12 +114,20 @@ export const NotificationsPopover = () => {
     if (event.key === "Enter" || event.key === " ") {
       handleMarkAsRead(id);
     }
+    if (event.key === "Escape") {
+      setOpen(false);
+    }
   };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-10 md:w-10 relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 md:h-10 md:w-10 relative"
+          aria-label="Notifications"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
@@ -162,6 +170,7 @@ export const NotificationsPopover = () => {
                   onKeyDown={(e) => handleNotificationKeyDown(e, notification.id)}
                   tabIndex={0}
                   role="button"
+                  aria-label={`Mark notification as read: ${notification.title}`}
                   aria-pressed={notification.isRead}
                 >
                   <div className="flex justify-between items-start">

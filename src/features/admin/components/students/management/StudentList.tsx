@@ -2,7 +2,16 @@
 "use client";
 import type { Level } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye, LockOpen, MoreHorizontal, Pencil, Search, Trash2, UserCheck, UserX } from "lucide-react";
+import {
+  Eye,
+  LockOpen,
+  MoreHorizontal,
+  Pencil,
+  Search,
+  Trash2,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";

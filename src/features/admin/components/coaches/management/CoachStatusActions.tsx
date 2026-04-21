@@ -2,7 +2,16 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Ban, DollarSign, MoreHorizontal, Power, PowerOff, ShieldAlert, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Ban,
+  DollarSign,
+  MoreHorizontal,
+  Power,
+  PowerOff,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -267,7 +276,9 @@ export function CoachActionsCell({
       <Dialog open={showActivateDialog} onOpenChange={setShowActivateDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{isSuspended ? "Reactivate" : "Activate"} {coachName}?</DialogTitle>
+            <DialogTitle>
+              {isSuspended ? "Reactivate" : "Activate"} {coachName}?
+            </DialogTitle>
             <DialogDescription>
               This will restore their access to the coach portal.
               {isSuspended && " The suspension record will be cleared."}

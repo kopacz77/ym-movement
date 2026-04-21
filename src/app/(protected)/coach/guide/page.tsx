@@ -8,7 +8,6 @@ import {
   CreditCard,
   HelpCircle,
   LayoutDashboard,
-  Settings,
   User,
   Users,
   Video,

@@ -522,8 +522,8 @@ export default function AdminGuidePage() {
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
               <p className="text-sm font-medium text-purple-900">💰 Pricing Waterfall</p>
               <p className="text-sm text-purple-800 mt-1">
-                Pricing priority: Student custom rates → Coach rates → Default prices.
-                The most specific rate always wins.
+                Pricing priority: Student custom rates → Coach rates → Default prices. The most
+                specific rate always wins.
               </p>
             </div>
 
@@ -542,9 +542,9 @@ export default function AdminGuidePage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm font-medium text-blue-900">💡 Multi-Coach Scheduling</p>
               <p className="text-sm text-blue-800 mt-1">
-                Each coach manages their own schedule independently. Time slots are scoped per-coach,
-                so multiple coaches can have overlapping slots at the same rink. Use the coach filter
-                on the Schedule page to view individual coach calendars.
+                Each coach manages their own schedule independently. Time slots are scoped
+                per-coach, so multiple coaches can have overlapping slots at the same rink. Use the
+                coach filter on the Schedule page to view individual coach calendars.
               </p>
             </div>
           </div>
@@ -591,8 +591,8 @@ export default function AdminGuidePage() {
               <p className="text-sm font-medium text-green-900">✅ Travel Teaching</p>
               <p className="text-sm text-green-800 mt-1">
                 Block your travel dates, then create Video Lesson slots on those dates for students
-                who need to continue training. Assign them manually - they'll see the lesson on their
-                schedule and get notified.
+                who need to continue training. Assign them manually - they'll see the lesson on
+                their schedule and get notified.
               </p>
             </div>
           </div>

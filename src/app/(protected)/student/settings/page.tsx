@@ -16,7 +16,6 @@ import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 export default function StudentSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [reminderNotifications, setReminderNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveSettings = () => {
@@ -111,14 +110,12 @@ export default function StudentSettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="dark-mode" className="font-medium">
+                  <Label htmlFor="dark-mode" className="font-medium text-muted-foreground">
                     Dark Mode
                   </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Use dark color theme for the application.
-                  </p>
+                  <p className="text-sm text-muted-foreground">Coming soon</p>
                 </div>
-                <Switch id="dark-mode" checked={darkMode} onCheckedChange={setDarkMode} />
+                <Switch id="dark-mode" checked={false} disabled />
               </div>
             </CardContent>
           </Card>

@@ -2,7 +2,7 @@
 
 import type { LessonStatus, LessonType } from "@prisma/client";
 import type { FC } from "react";
-import type { TimeSlot as CalendarUtilsTimeSlot } from "./calendarUtils";
+import type { TimeSlot as CalendarUtilsTimeSlot } from "@/types/scheduling";
 import { TimeSlotDialog } from "./TimeSlotDialog";
 
 // Define the StudentNote interface matching Prisma schema

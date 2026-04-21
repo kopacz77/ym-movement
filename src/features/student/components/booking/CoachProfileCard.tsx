@@ -27,10 +27,16 @@ interface CoachProfileCardProps {
 }
 
 function getInitials(name: string | null): string | null {
-  if (!name) return null;
+  if (!name) {
+    return null;
+  }
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 0) return null;
-  if (parts.length === 1) return parts[0][0]?.toUpperCase() || null;
+  if (parts.length === 0) {
+    return null;
+  }
+  if (parts.length === 1) {
+    return parts[0][0]?.toUpperCase() || null;
+  }
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
@@ -42,7 +48,9 @@ function getLowestPrice(coach: CoachProfile): number | null {
     coach.competitionPrepPrice,
   ].filter((p): p is number => p != null);
 
-  if (prices.length === 0) return null;
+  if (prices.length === 0) {
+    return null;
+  }
   return Math.min(...prices);
 }
 

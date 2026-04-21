@@ -1,57 +1,10 @@
 "use client";
 
-import {
-  ArrowLeftRight,
-  BarChart2,
-  BookOpen,
-  Calendar,
-  Clock,
-  CreditCard,
-  FileText,
-  GraduationCap,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  User,
-  Users,
-} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-
-// Navigation configurations for each role
-const adminNavigation = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Schedule", href: "/admin/schedule", icon: Calendar },
-  { name: "Students", href: "/admin/students", icon: Users },
-  { name: "Coaches", href: "/admin/coaches", icon: GraduationCap },
-  { name: "Payments", href: "/admin/payments", icon: CreditCard },
-  { name: "Reports", href: "/admin/reports", icon: BarChart2 },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
-  { name: "Guide", href: "/admin/guide", icon: BookOpen },
-];
-
-const studentNavigation = [
-  { name: "Dashboard", href: "/student/dashboard", icon: Clock },
-  { name: "Book Lessons", href: "/student/book", icon: Calendar },
-  { name: "My Schedule", href: "/student/schedule", icon: Calendar },
-  { name: "Payments", href: "/student/payments", icon: CreditCard },
-  { name: "Policies", href: "/student/policies", icon: FileText },
-  { name: "Profile", href: "/student/profile", icon: User },
-  { name: "Settings", href: "/student/settings", icon: Settings },
-  { name: "Guide", href: "/student/guide", icon: BookOpen },
-];
-
-const coachNavigation = [
-  { name: "Dashboard", href: "/coach/dashboard", icon: LayoutDashboard },
-  { name: "Schedule", href: "/coach/schedule", icon: Calendar },
-  { name: "Students", href: "/coach/students", icon: Users },
-  { name: "Earnings", href: "/coach/earnings", icon: CreditCard },
-  { name: "Proposals", href: "/coach/proposals", icon: Clock },
-  { name: "Profile", href: "/coach/profile", icon: User },
-  { name: "Guide", href: "/coach/guide", icon: BookOpen },
-];
+import { ArrowLeftRight, getNavigationForRole, LogOut } from "@/lib/navigation-config";
 
 interface AppSidebarProps {
   role: "admin" | "student" | "coach";
@@ -61,8 +14,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ role, coachId, isAdmin }: AppSidebarProps) {
   const pathname = usePathname() ?? "";
-  const navigation =
-    role === "admin" ? adminNavigation : role === "coach" ? coachNavigation : studentNavigation;
+  const navigation = getNavigationForRole(role);
 
   const SidebarContent = (
     <>

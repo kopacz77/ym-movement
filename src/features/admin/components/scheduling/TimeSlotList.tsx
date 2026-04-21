@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface TimeSlot {
+// Local display type for the slot list (uses different fields from canonical TimeSlot)
+interface TimeSlotListEntry {
   id: string;
   startTime: Date;
   endTime: Date;
@@ -13,12 +14,12 @@ interface TimeSlot {
 }
 
 interface TimeSlotListProps {
-  timeSlots?: TimeSlot[];
+  timeSlots?: TimeSlotListEntry[];
 }
 
 export const TimeSlotList: React.FC<TimeSlotListProps> = ({ timeSlots = [] }) => {
   // Sample time slot for demonstration
-  const sampleTimeSlots: TimeSlot[] =
+  const sampleTimeSlots: TimeSlotListEntry[] =
     timeSlots.length > 0
       ? timeSlots
       : [

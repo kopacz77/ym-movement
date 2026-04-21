@@ -4,9 +4,9 @@
 import { endOfDay, startOfDay } from "date-fns";
 import { DateTime } from "luxon";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import type { SlotInfo } from "react-big-calendar";
 import type { EventInteractionArgs } from "react-big-calendar/lib/addons/dragAndDrop";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBulkOperations } from "@/contexts/BulkOperationsContext";
 import { type ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
@@ -16,10 +16,11 @@ import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
 import { api } from "@/lib/api";
 import { localizer } from "@/lib/calendar/calendarLocalizer";
+import type { TimeSlot } from "@/types/scheduling";
 import BlockedDateDialog from "./BlockedDateDialog";
 import { BulkActionsToolbar } from "./BulkActionsToolbar";
 import { CompactTimeSlotDialog } from "./CompactTimeSlotDialog";
-import { formatDateRange, type TimeSlot } from "./calendarUtils";
+import { formatDateRange } from "./calendarUtils";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { DesktopCalendarView } from "./DesktopCalendarView";
 import { BulkCreateSlotsDialog } from "./DialogComponents";
@@ -100,16 +101,13 @@ const ScheduleManagerComponent = () => {
     if (currentUserCoachId && !selectedCoach) {
       setSelectedCoach(currentUserCoachId);
     }
-  }, [currentUserCoachId]); // intentionally exclude selectedCoach to only run on initial load
+  }, [currentUserCoachId, selectedCoach]); // intentionally exclude selectedCoach to only run on initial load
 
   // NOTE: getAllCoaches uses superAdminProcedure which is currently identical to adminProcedure
   // (both check isAdminRole). Safe for all admins during ADMIN/SUPER_ADMIN transition period.
   const { data: coachesData } = api.admin.coach.management.getAllCoaches.useQuery();
   const activeCoaches = useMemo(
-    () =>
-      coachesData?.coaches?.filter(
-        (c: any) => c.isApproved && c.isActive,
-      ),
+    () => coachesData?.coaches?.filter((c: any) => c.isApproved && c.isActive),
     [coachesData],
   );
 
@@ -204,7 +202,9 @@ const ScheduleManagerComponent = () => {
 
   // Count draft (unpublished) slots in current view
   const draftCount = useMemo(() => {
-    if (!filteredTimeSlots) return 0;
+    if (!filteredTimeSlots) {
+      return 0;
+    }
     return filteredTimeSlots.filter((slot) => !slot.isActive).length;
   }, [filteredTimeSlots]);
 
@@ -550,7 +550,9 @@ const ScheduleManagerComponent = () => {
   // Handle publishing all draft slots in current view
   const publishMutation = api.admin.schedule.publishTimeSlots.useMutation({
     onSuccess: (data) => {
-      toast.success(`Published ${data.publishedCount} time slot${data.publishedCount !== 1 ? "s" : ""}`);
+      toast.success(
+        `Published ${data.publishedCount} time slot${data.publishedCount !== 1 ? "s" : ""}`,
+      );
     },
     onError: (error) => {
       toast.error("Failed to publish time slots", {

@@ -178,15 +178,24 @@ export const PendingApprovals = () => {
                   {(student.user?.name || "U").charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-gray-900 truncate">{student.user?.name || "Unnamed"}</p>
-                  <p className="text-sm text-gray-600 truncate">{student.user?.email || "No email"}</p>
+                  <p className="font-semibold text-gray-900 truncate">
+                    {student.user?.name || "Unnamed"}
+                  </p>
+                  <p className="text-sm text-gray-600 truncate">
+                    {student.user?.email || "No email"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-2 ml-12">
-                <Badge variant="secondary" className="text-xs bg-orange-200 text-orange-800 shrink-0">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-orange-200 text-orange-800 shrink-0"
+                >
                   New Registration
                 </Badge>
-                <p className="text-xs text-gray-500 truncate">{formatDate(new Date(student.createdAt))}</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {formatDate(new Date(student.createdAt))}
+                </p>
               </div>
               <div className="flex gap-2 mt-3">
                 <Button

@@ -21,10 +21,10 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 2,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? [["list"], ["html"]] : "html",
-  /* Default test timeout - 60s to handle dev server cold compilation */
-  timeout: 60000,
-  /* Expect timeout - 15s for elements to appear (dev server can be slow) */
-  expect: { timeout: 15000 },
+  /* Default test timeout - 30s (first load may be slower due to cold compilation) */
+  timeout: 30000,
+  /* Expect timeout - 10s for elements to appear */
+  expect: { timeout: 10000 },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -106,7 +106,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run dev",
+    command: "pnpm dev",
     url: "http://localhost:3100",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000, // 2 minutes timeout for dev server
