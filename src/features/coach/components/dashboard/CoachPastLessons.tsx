@@ -33,10 +33,12 @@ export function CoachPastLessons() {
   const { data: lessons, isLoading } = api.coach.dashboard.getPastLessons.useQuery({ limit: 5 });
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-gray-50 to-transparent">
         <CardTitle className="text-lg flex items-center gap-2">
-          <History className="h-5 w-5 text-gray-500" />
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500 shadow-sm">
+            <History className="h-4 w-4 text-white" />
+          </div>
           Past Lessons
         </CardTitle>
       </CardHeader>

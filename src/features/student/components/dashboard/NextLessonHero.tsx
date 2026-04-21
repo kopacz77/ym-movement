@@ -63,11 +63,18 @@ export function NextLessonHero() {
   const lessonType = nextLesson.type || "PRIVATE";
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-medium text-primary">Next Lesson</p>
-          <Badge variant="outline">{timeUntil}</Badge>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10">
+              <Calendar className="h-4 w-4 text-primary" />
+            </div>
+            <p className="text-sm font-semibold text-primary">Next Lesson</p>
+          </div>
+          <Badge variant="outline" className="bg-white/80">
+            {timeUntil}
+          </Badge>
         </div>
 
         <div className="space-y-2">
@@ -90,8 +97,10 @@ export function NextLessonHero() {
         </div>
 
         <div className="flex items-center justify-between mt-4">
-          <Badge>{lessonType.replace("_", " ")}</Badge>
-          <Button size="sm" variant="outline" asChild>
+          <Badge className="bg-primary/10 text-primary border-primary/20">
+            {lessonType.replace("_", " ")}
+          </Badge>
+          <Button size="sm" variant="outline" className="bg-white/80" asChild>
             <Link href="/student/book">Book Another</Link>
           </Button>
         </div>

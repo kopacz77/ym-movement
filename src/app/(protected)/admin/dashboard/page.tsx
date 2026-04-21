@@ -52,7 +52,7 @@ const RevenueBreakdownChart = dynamic(
 
 export default function AdminDashboardPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Header */}
       <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
 
@@ -70,25 +70,43 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ErrorBoundary>
-          <RevenueChart />
-        </ErrorBoundary>
-        <ErrorBoundary>
-          <StudentActivityChart />
-        </ErrorBoundary>
+      {/* Analytics Section */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent" />
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Analytics
+          </h2>
+          <div className="h-px flex-1 bg-gradient-to-l from-primary/20 via-accent/10 to-transparent" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ErrorBoundary>
+            <RevenueChart />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <StudentActivityChart />
+          </ErrorBoundary>
+        </div>
       </div>
 
       {/* Coaches + Revenue Breakdown */}
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSkeleton />}>
-          <CoachOverviewCards />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <RevenueBreakdownChart />
-      </ErrorBoundary>
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent" />
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Coaches & Revenue
+          </h2>
+          <div className="h-px flex-1 bg-gradient-to-l from-primary/20 via-accent/10 to-transparent" />
+        </div>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSkeleton />}>
+            <CoachOverviewCards />
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <RevenueBreakdownChart />
+        </ErrorBoundary>
+      </div>
     </div>
   );
 }

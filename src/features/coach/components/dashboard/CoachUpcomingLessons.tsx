@@ -35,10 +35,12 @@ export function CoachUpcomingLessons() {
   });
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-green-50 to-transparent">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-green-500" />
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm">
+            <Calendar className="h-4 w-4 text-white" />
+          </div>
           Upcoming Lessons
         </CardTitle>
       </CardHeader>

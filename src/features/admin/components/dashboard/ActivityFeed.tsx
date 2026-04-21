@@ -28,11 +28,13 @@ export function ActivityFeed() {
         ) : recentItems.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4">No recent activity.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="relative space-y-3">
+            {/* Connecting line */}
+            <div className="absolute left-[5px] top-2 bottom-2 w-px bg-gradient-to-b from-primary/20 via-accent/15 to-transparent" />
             {recentItems.map((item: any) => (
-              <div key={item.id} className="flex items-start gap-3">
+              <div key={item.id} className="flex items-start gap-3 relative">
                 <div
-                  className={`w-2 h-2 rounded-full mt-1.5 ${item.isRead ? "bg-muted" : "bg-blue-500"}`}
+                  className={`w-2.5 h-2.5 rounded-full mt-1.5 ring-2 ring-background z-10 ${item.isRead ? "bg-muted-foreground/30" : "bg-primary shadow-sm shadow-primary/30"}`}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{item.title}</p>

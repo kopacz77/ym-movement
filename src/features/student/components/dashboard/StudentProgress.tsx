@@ -38,22 +38,22 @@ export function StudentProgress() {
   const weeklyMax = stats.maxAllowed || 0;
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent">
         <CardTitle className="text-lg">My Progress</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-4">
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div>
+          <div className="p-2 rounded-lg bg-primary/5">
             <p className="text-2xl font-bold text-primary">{completed}</p>
             <p className="text-[10px] text-muted-foreground">Completed</p>
           </div>
-          <div>
+          <div className="p-2 rounded-lg bg-emerald-50">
             <p className="text-2xl font-bold text-emerald-600">{upcoming}</p>
             <p className="text-[10px] text-muted-foreground">Upcoming</p>
           </div>
-          <div>
+          <div className="p-2 rounded-lg bg-amber-50">
             <p className="text-2xl font-bold text-amber-600">{cancelled}</p>
             <p className="text-[10px] text-muted-foreground">Cancelled</p>
           </div>
@@ -68,9 +68,9 @@ export function StudentProgress() {
                 {weeklyUsed}/{weeklyMax} lessons
               </span>
             </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary rounded-full transition-all"
+                className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all"
                 style={{ width: `${Math.min(100, (weeklyUsed / weeklyMax) * 100)}%` }}
               />
             </div>

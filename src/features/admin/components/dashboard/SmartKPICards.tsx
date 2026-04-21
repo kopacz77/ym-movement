@@ -31,9 +31,9 @@ export function SmartKPICards() {
       value: `${overview.activeLessons || 0} lessons`,
       subtitle: "scheduled today",
       icon: Calendar,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      shadowColor: "shadow-blue-200/50",
+      borderColor: "border-blue-500",
+      gradientFrom: "from-blue-500",
+      gradientTo: "to-blue-600",
       href: "/admin/schedule",
     },
     {
@@ -41,9 +41,9 @@ export function SmartKPICards() {
       value: `$${(overview.monthlyRevenue || 0).toLocaleString()}`,
       subtitle: "this month",
       icon: CreditCard,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      shadowColor: "shadow-emerald-200/50",
+      borderColor: "border-emerald-500",
+      gradientFrom: "from-emerald-500",
+      gradientTo: "to-emerald-600",
       href: "/admin/payments",
     },
     {
@@ -51,9 +51,9 @@ export function SmartKPICards() {
       value: `${overview.totalStudents || 0}`,
       subtitle: "enrolled students",
       icon: Users,
-      color: "text-violet-600",
-      bgColor: "bg-violet-50",
-      shadowColor: "shadow-violet-200/50",
+      borderColor: "border-violet-500",
+      gradientFrom: "from-violet-500",
+      gradientTo: "to-violet-600",
       href: "/admin/students",
     },
     {
@@ -61,9 +61,9 @@ export function SmartKPICards() {
       value: `${overview.pendingPayments || 0}`,
       subtitle: "need attention",
       icon: AlertCircle,
-      color: "text-amber-600",
-      bgColor: "bg-amber-50",
-      shadowColor: "shadow-amber-200/50",
+      borderColor: "border-amber-500",
+      gradientFrom: "from-amber-500",
+      gradientTo: "to-amber-600",
       href: "/admin/students",
     },
   ];
@@ -72,7 +72,9 @@ export function SmartKPICards() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card) => (
         <Link key={card.title} href={card.href}>
-          <Card className={`hover:shadow-lg transition-shadow cursor-pointer ${card.shadowColor}`}>
+          <Card
+            className={`hover:shadow-lg transition-all cursor-pointer border-l-4 ${card.borderColor} hover:-translate-y-0.5`}
+          >
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>
@@ -80,8 +82,10 @@ export function SmartKPICards() {
                   <p className="text-2xl font-bold mt-1">{card.value}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{card.subtitle}</p>
                 </div>
-                <div className={`p-2 rounded-lg ${card.bgColor}`}>
-                  <card.icon className={`h-5 w-5 ${card.color}`} />
+                <div
+                  className={`p-2.5 rounded-xl bg-gradient-to-br ${card.gradientFrom} ${card.gradientTo} shadow-sm`}
+                >
+                  <card.icon className="h-5 w-5 text-white" />
                 </div>
               </div>
             </CardContent>

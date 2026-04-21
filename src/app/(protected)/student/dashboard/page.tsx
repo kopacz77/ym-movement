@@ -57,11 +57,11 @@ export default function StudentDashboardPage() {
           </ErrorBoundary>
 
           {/* Payment info */}
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-3 bg-gradient-to-r from-emerald-50 to-transparent">
               <CardTitle className="text-lg">Payment Info</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-2 text-sm pt-4">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Venmo</span>
                 <span className="font-medium">@yura-min</span>

@@ -8,10 +8,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function QuickActions() {
   const actions = [
-    { label: "Create Time Slot", icon: Calendar, href: "/admin/schedule" },
-    { label: "View Payments", icon: CreditCard, href: "/admin/payments" },
-    { label: "Manage Students", icon: UserPlus, href: "/admin/students" },
-    { label: "View Reports", icon: BarChart2, href: "/admin/reports" },
+    {
+      label: "Create Time Slot",
+      icon: Calendar,
+      href: "/admin/schedule",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+    },
+    {
+      label: "View Payments",
+      icon: CreditCard,
+      href: "/admin/payments",
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+    },
+    {
+      label: "Manage Students",
+      icon: UserPlus,
+      href: "/admin/students",
+      iconBg: "bg-violet-100",
+      iconColor: "text-violet-600",
+    },
+    {
+      label: "View Reports",
+      icon: BarChart2,
+      href: "/admin/reports",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+    },
   ];
 
   return (
@@ -24,11 +48,13 @@ export function QuickActions() {
           <Button
             key={action.label}
             variant="outline"
-            className="h-auto py-3 flex-col gap-1"
+            className="h-auto py-3 flex-col gap-2 hover:bg-muted/50"
             asChild
           >
             <Link href={action.href}>
-              <action.icon className="h-5 w-5" />
+              <div className={`p-1.5 rounded-lg ${action.iconBg}`}>
+                <action.icon className={`h-4 w-4 ${action.iconColor}`} />
+              </div>
               <span className="text-xs">{action.label}</span>
             </Link>
           </Button>

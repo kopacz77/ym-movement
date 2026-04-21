@@ -66,8 +66,8 @@ export function TodayTimeline() {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-2 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent">
         <CardTitle className="text-lg">
           Today&apos;s Schedule — {format(today, "EEEE, MMM d")}
         </CardTitle>
