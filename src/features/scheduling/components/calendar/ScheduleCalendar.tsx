@@ -8,6 +8,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
+import { Globe } from "lucide-react";
 import { DateTime } from "luxon";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useScheduleContext } from "@/features/scheduling/context/ScheduleContext";
@@ -195,6 +196,16 @@ export function ScheduleCalendar() {
 
   // --- Render ---
 
+  // Timezone banner - show when a specific rink is selected
+  const timezoneBanner = state.selectedRinkId ? (
+    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-center text-amber-800 text-sm">
+      <Globe className="h-4 w-4 mr-2 shrink-0" />
+      <span suppressHydrationWarning>
+        All times shown in {calendarTimezone.split("/").pop()?.replace("_", " ")} local time
+      </span>
+    </div>
+  ) : null;
+
   if (isMobile) {
     return (
       <div className="flex flex-col gap-4">
@@ -203,6 +214,7 @@ export function ScheduleCalendar() {
           coaches={activeCoaches}
           filteredTimeSlots={filteredTimeSlots}
         />
+        {timezoneBanner}
         <MobileScheduleList
           timeSlots={filteredTimeSlots}
           timezone={calendarTimezone}
@@ -219,6 +231,7 @@ export function ScheduleCalendar() {
         coaches={activeCoaches}
         filteredTimeSlots={filteredTimeSlots}
       />
+      {timezoneBanner}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <FullCalendar
           ref={calendarRef}
