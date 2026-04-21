@@ -167,7 +167,10 @@
       "Bash(echo No debug endpoint:*)",
       "Bash(echo === Login page with callbackUrl ===:*)",
       "Bash(gh repo:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "WebFetch(domain:schedule-x.dev)",
+      "Bash(pnpm ls:*)"
     ],
     "deny": []
   }

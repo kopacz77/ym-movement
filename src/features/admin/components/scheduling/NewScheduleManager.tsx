@@ -86,11 +86,18 @@ function ScheduleDialogs() {
       maxStudents: number;
       coachId?: string;
     }) => {
+      // Build full Date objects from date + time strings (e.g. "09:00")
+      const [startH, startM] = bookingData.startTime.split(":").map(Number);
+      const [endH, endM] = bookingData.endTime.split(":").map(Number);
+      const startDate = new Date(bookingData.date);
+      startDate.setHours(startH, startM, 0, 0);
+      const endDate = new Date(bookingData.date);
+      endDate.setHours(endH, endM, 0, 0);
+
       createTimeSlot.mutate({
-        date: bookingData.date,
-        startTime: bookingData.startTime,
-        endTime: bookingData.endTime,
         rinkId: bookingData.rinkId,
+        startTime: startDate,
+        endTime: endDate,
         maxStudents: bookingData.maxStudents,
         coachId: bookingData.coachId,
       });
