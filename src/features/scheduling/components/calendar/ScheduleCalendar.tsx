@@ -7,7 +7,6 @@ import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { endOfDay, startOfDay } from "date-fns";
 import { Globe } from "lucide-react";
 import { DateTime } from "luxon";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -40,29 +39,28 @@ export function ScheduleCalendar() {
     }
   }, [currentUserCoachId, state.selectedCoachId, dispatch]);
 
-  // Calculate date range for data fetching
+  // Calculate date range for data fetching — timezone-aware
   const dateRange = useMemo(() => {
-    const d = state.currentDate;
+    const dt = DateTime.fromJSDate(state.currentDate, { zone: state.timezoneFilter });
     if (state.view === "timeGridWeek") {
-      const dt = DateTime.fromJSDate(d);
-      const weekday = dt.weekday;
-      const startOfWeek = dt.minus({ days: weekday === 1 ? 0 : weekday - 1 });
+      const startOfWeek = dt.startOf("week"); // Monday in Luxon (ISO)
       return {
-        start: startOfDay(startOfWeek.toJSDate()),
-        end: endOfDay(startOfWeek.plus({ days: 6 }).toJSDate()),
+        start: startOfWeek.startOf("day").toJSDate(),
+        end: startOfWeek.plus({ days: 6 }).endOf("day").toJSDate(),
       };
     }
     if (state.view === "timeGridDay") {
-      return { start: startOfDay(d), end: endOfDay(d) };
+      return {
+        start: dt.startOf("day").toJSDate(),
+        end: dt.endOf("day").toJSDate(),
+      };
     }
     // Month view
-    const year = d.getFullYear();
-    const month = d.getMonth();
     return {
-      start: startOfDay(new Date(year, month, 1)),
-      end: endOfDay(new Date(year, month + 1, 0)),
+      start: dt.startOf("month").startOf("day").toJSDate(),
+      end: dt.endOf("month").endOf("day").toJSDate(),
     };
-  }, [state.currentDate, state.view]);
+  }, [state.currentDate, state.view, state.timezoneFilter]);
 
   // Fetch data
   const { rinks, timeSlots } = useTimeSlots(dateRange, state.selectedRinkId, state.selectedCoachId);
@@ -186,13 +184,54 @@ export function ScheduleCalendar() {
     [updateTimeSlot],
   );
 
-  // Sync FullCalendar navigation with our state
-  const handleDatesSet = useCallback(
-    (dateInfo: { start: Date; view: { type: string } }) => {
-      dispatch({ type: "SET_DATE", date: dateInfo.start });
-    },
-    [dispatch],
-  );
+  // Sync FullCalendar when our toolbar state changes
+  // (our custom toolbar is the sole source of truth since headerToolbar={false})
+  useEffect(() => {
+    const api = calendarRef.current?.getApi();
+    if (!api) {
+      return;
+    }
+    if (api.view.type !== state.view) {
+      api.changeView(state.view, state.currentDate);
+    } else {
+      api.gotoDate(state.currentDate);
+    }
+  }, [state.currentDate, state.view]);
+
+  // Dynamic time range — fit to actual event data instead of hardcoded 6am-10pm
+  const timeRange = useMemo(() => {
+    if (state.view === "dayGridMonth" || !filteredTimeSlots?.length) {
+      return { min: "06:00:00", max: "22:00:00" };
+    }
+    let minHour = 23;
+    let maxHour = 0;
+    for (const slot of filteredTimeSlots) {
+      const startStr =
+        typeof slot.startTime === "string" ? slot.startTime : slot.startTime.toISOString();
+      const endStr = typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString();
+      const startDt = DateTime.fromISO(startStr, { zone: calendarTimezone });
+      const endDt = DateTime.fromISO(endStr, { zone: calendarTimezone });
+      if (startDt.hour < minHour) {
+        minHour = startDt.hour;
+      }
+      const eh = endDt.minute > 0 ? endDt.hour + 1 : endDt.hour;
+      if (eh > maxHour) {
+        maxHour = eh;
+      }
+    }
+    // Pad 1 hour on each side, min 4-hour window
+    minHour = Math.max(0, minHour - 1);
+    maxHour = Math.min(24, maxHour + 1);
+    if (maxHour - minHour < 4) {
+      const mid = Math.floor((minHour + maxHour) / 2);
+      minHour = Math.max(0, mid - 2);
+      maxHour = Math.min(24, mid + 2);
+    }
+    return {
+      min: `${String(minHour).padStart(2, "0")}:00:00`,
+      max: `${String(maxHour).padStart(2, "0")}:00:00`,
+    };
+  }, [filteredTimeSlots, calendarTimezone, state.view]);
 
   // --- Render ---
 
@@ -240,12 +279,13 @@ export function ScheduleCalendar() {
           initialDate={state.currentDate}
           timeZone={calendarTimezone}
           headerToolbar={false}
+          firstDay={1}
           selectable={!state.isSelectionMode}
           editable={!state.isSelectionMode}
           eventResizableFromStart={false}
           slotDuration="00:15:00"
-          slotMinTime="06:00:00"
-          slotMaxTime="22:00:00"
+          slotMinTime={timeRange.min}
+          slotMaxTime={timeRange.max}
           allDaySlot={false}
           nowIndicator={true}
           events={calendarEvents}
@@ -254,7 +294,6 @@ export function ScheduleCalendar() {
           eventClick={handleEventClick}
           eventDrop={handleEventDrop}
           eventResize={handleEventResize}
-          datesSet={handleDatesSet}
           height="auto"
           expandRows={true}
           stickyHeaderDates={true}
