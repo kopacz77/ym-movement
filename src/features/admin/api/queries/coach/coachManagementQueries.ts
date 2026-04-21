@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
-import { sendApprovalEmail } from "@/lib/email";
+import { sendCoachInvitationEmail } from "@/lib/email";
 import { adminProcedure, createTRPCRouter, superAdminProcedure } from "@/lib/trpc";
 import { formatEmail } from "@/lib/utils";
 
@@ -189,7 +189,7 @@ export const coachManagementRouter = createTRPCRouter({
           return { user, coach };
         });
 
-        // Send registration completion email
+        // Send invitation email with registration-completion link
         try {
           const passwordResetToken = await createPasswordResetToken(
             result.user.id,
@@ -199,13 +199,13 @@ export const coachManagementRouter = createTRPCRouter({
             false,
           );
 
-          await sendApprovalEmail(
+          await sendCoachInvitationEmail(
             result.user.email,
             result.user.name || "Coach",
             passwordResetToken.token,
           );
         } catch (emailError) {
-          console.error("Failed to send coach registration email:", emailError);
+          console.error("Failed to send coach invitation email:", emailError);
         }
 
         return result.coach;
@@ -220,6 +220,44 @@ export const coachManagementRouter = createTRPCRouter({
           cause: error,
         });
       }
+    }),
+
+  // Mutation: Resend invitation email to a coach (for when the original email didn't arrive)
+  resendInvitation: superAdminProcedure
+    .input(z.object({ coachId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const coach = await ctx.prisma.coach.findUnique({
+        where: { id: input.coachId },
+        include: { User: { select: { id: true, name: true, email: true } } },
+      });
+
+      if (!coach) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Coach not found" });
+      }
+
+      try {
+        const passwordResetToken = await createPasswordResetToken(
+          coach.User.id,
+          coach.User.email,
+          coach.User.name,
+          false,
+          false,
+        );
+
+        await sendCoachInvitationEmail(
+          coach.User.email,
+          coach.User.name || "Coach",
+          passwordResetToken.token,
+        );
+      } catch (emailError) {
+        console.error("Failed to resend coach invitation:", emailError);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send invitation email",
+        });
+      }
+
+      return { success: true, email: coach.User.email };
     }),
 
   // Mutation: Update coach pricing

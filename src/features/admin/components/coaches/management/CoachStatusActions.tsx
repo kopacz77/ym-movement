@@ -2,7 +2,17 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Ban, DollarSign, MoreHorizontal, Power, PowerOff, ShieldAlert, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Ban,
+  DollarSign,
+  Mail,
+  MoreHorizontal,
+  Power,
+  PowerOff,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +95,19 @@ export function CoachActionsCell({
     },
   });
 
+  const resendInvitationMutation = api.admin.coach.management.resendInvitation.useMutation({
+    onSuccess: (data) => {
+      toast.success("Invitation resent", {
+        description: `A new setup email was sent to ${data.email}.`,
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to resend invitation", {
+        description: error.message,
+      });
+    },
+  });
+
   const deleteCoachMutation = api.admin.coach.management.deleteCoach.useMutation({
     onSuccess: (data) => {
       toast.success("Coach deleted", {
@@ -155,6 +178,17 @@ export function CoachActionsCell({
               >
                 <DollarSign className="h-4 w-4 mr-2" />
                 Edit Pricing
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setDropdownOpen(false);
+                  resendInvitationMutation.mutate({ coachId });
+                }}
+                disabled={resendInvitationMutation.isPending}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Resend Invitation
               </DropdownMenuItem>
               {isActive && !isSuspended && (
                 <>
@@ -267,7 +301,9 @@ export function CoachActionsCell({
       <Dialog open={showActivateDialog} onOpenChange={setShowActivateDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{isSuspended ? "Reactivate" : "Activate"} {coachName}?</DialogTitle>
+            <DialogTitle>
+              {isSuspended ? "Reactivate" : "Activate"} {coachName}?
+            </DialogTitle>
             <DialogDescription>
               This will restore their access to the coach portal.
               {isSuspended && " The suspension record will be cleared."}

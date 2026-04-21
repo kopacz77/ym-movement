@@ -2,7 +2,17 @@
 "use client";
 import type { Level } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Eye, LockOpen, MoreHorizontal, Pencil, Search, Trash2, UserCheck, UserX } from "lucide-react";
+import {
+  Eye,
+  LockOpen,
+  Mail,
+  MoreHorizontal,
+  Pencil,
+  Search,
+  Trash2,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,13 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -36,32 +39,24 @@ import { showDeleteConfirmation, showStatusToggleConfirmation } from "@/lib/toas
 interface StudentListProps {
   onEditAction: (studentId: string) => void;
   onViewProfileAction: (studentId: string) => void;
+  showInactive?: boolean;
 }
 
-export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewProfileAction }) => {
+export const StudentList: React.FC<StudentListProps> = ({
+  onEditAction,
+  onViewProfileAction,
+  showInactive = false,
+}) => {
   const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const queryClient = useQueryClient();
 
-  // Determine the active filter value based on statusFilter
-  const getActiveFilter = () => {
-    if (statusFilter === "active") {
-      return true;
-    }
-    if (statusFilter === "inactive") {
-      return false;
-    }
-    return undefined; // "all" - don't filter by active status
-  };
-
-  // Add proper input object to fix the null/undefined issue
   const {
     data: studentsData,
     isLoading,
     error,
   } = api.admin.student.getStudents.useQuery({
     search: search || undefined,
-    active: getActiveFilter(),
+    active: !showInactive,
   });
 
   const deleteStudentMutation = api.admin.student.deleteStudent.useMutation({
@@ -78,6 +73,19 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
         description: error.message,
       });
       queryClient.invalidateQueries({ queryKey: ["admin", "student"] });
+    },
+  });
+
+  const resendInvitationMutation = api.admin.student.resendInvitation.useMutation({
+    onSuccess: (data) => {
+      toast.success("Invitation resent", {
+        description: `A new setup email was sent to ${data.email}.`,
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to resend invitation", {
+        description: error.message,
+      });
     },
   });
 
@@ -161,16 +169,6 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Students</SelectItem>
-            <SelectItem value="active">Active Only</SelectItem>
-            <SelectItem value="inactive">Inactive Only</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="rounded-md border overflow-x-auto">
@@ -246,6 +244,15 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
                           >
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              resendInvitationMutation.mutate({ studentId: student.id })
+                            }
+                            disabled={resendInvitationMutation.isPending}
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            Resend Invitation
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>

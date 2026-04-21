@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 // src/app/api/auth/coach-signup/route.ts
 import { z } from "zod";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendCoachWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import {
   authRateLimiter,
@@ -144,7 +144,6 @@ export async function POST(req: NextRequest) {
           { status: 400 },
         );
       }
-
     } else if (process.env.NODE_ENV === "production") {
       // In production, require Turnstile token
       logSecurityEvent("MISSING_TURNSTILE_TOKEN", {
@@ -210,9 +209,9 @@ export async function POST(req: NextRequest) {
 
     // Send welcome email after successful creation (don't fail if email fails)
     try {
-      await sendWelcomeEmail(user.email, user.name || "");
+      await sendCoachWelcomeEmail(user.email, user.name || "");
     } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
+      console.error("Failed to send coach welcome email:", emailError);
       // Don't fail the whole signup if email fails
     }
 

@@ -59,6 +59,7 @@ export function AdminAssignmentDialog({
     {
       limit: 100,
       approved: true,
+      active: true,
     },
   );
 
@@ -147,7 +148,7 @@ export function AdminAssignmentDialog({
       default:
         hourlyRate = studentPricing.privateLessonPrice;
     }
-    return Math.round(((hourlyRate / 60) * slotDurationMinutes) * 100) / 100;
+    return Math.round((hourlyRate / 60) * slotDurationMinutes * 100) / 100;
   };
 
   // Format price for display (remove .00 if whole number)

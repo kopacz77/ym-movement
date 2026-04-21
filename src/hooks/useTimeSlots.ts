@@ -35,7 +35,11 @@ interface UseTimeSlotsResult {
   processedEventsList: ProcessedEventsList[];
 }
 
-export function useTimeSlots(dateRange: DateRange, selectedRink?: string, selectedCoachId?: string): UseTimeSlotsResult {
+export function useTimeSlots(
+  dateRange: DateRange,
+  selectedRink?: string,
+  selectedCoachId?: string,
+): UseTimeSlotsResult {
   const { status: sessionStatus } = useSession();
   const isAuthenticated = sessionStatus === "authenticated";
 
@@ -51,6 +55,7 @@ export function useTimeSlots(dateRange: DateRange, selectedRink?: string, select
     {
       limit: 100, // Get up to 100 students
       approved: true, // Only approved students can be assigned
+      active: true, // Exclude deactivated students from assignment dropdowns
     },
     {
       retry: 2,

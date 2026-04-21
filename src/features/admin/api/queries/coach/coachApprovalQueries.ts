@@ -2,7 +2,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
-import { sendApprovalEmail } from "@/lib/email";
+import { sendCoachApprovalEmail } from "@/lib/email";
 import { createTRPCRouter, superAdminProcedure } from "@/lib/trpc";
 
 export const coachApprovalRouter = createTRPCRouter({
@@ -79,7 +79,7 @@ export const coachApprovalRouter = createTRPCRouter({
               false, // Don't send default email -- we send our custom approval email
             );
 
-            await sendApprovalEmail(
+            await sendCoachApprovalEmail(
               updatedCoach.User.email,
               updatedCoach.User.name || "Coach",
               passwordResetToken.token,

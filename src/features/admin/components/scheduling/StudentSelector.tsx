@@ -23,7 +23,7 @@ interface Student {
 
 export const StudentSelector: React.FC = () => {
   // Fix: Change getStudents to student.getStudents to use the namespaced procedure
-  const { data: students, isLoading } = api.admin.student.getStudents.useQuery({});
+  const { data: students, isLoading } = api.admin.student.getStudents.useQuery({ active: true });
 
   // Local state for the selected student id.
   const [selectedStudent, setSelectedStudent] = useState<string>("");

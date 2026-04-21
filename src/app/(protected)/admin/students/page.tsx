@@ -87,11 +87,11 @@ export default function AdminStudentsPage() {
     }, 300);
   };
 
-  // Handle tab changes - clear selected student when returning to list
+  // Handle tab changes - clear selected student when leaving the profile tab
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
-    if (newTab === "list") {
-      setSelectedStudentId(null); // Clear selection when returning to All Students
+    if (newTab !== "profile") {
+      setSelectedStudentId(null);
     }
   };
 
@@ -107,9 +107,12 @@ export default function AdminStudentsPage() {
       <PendingApprovals />
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-fit lg:grid-cols-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:w-fit lg:grid-cols-auto">
           <TabsTrigger value="list" className="text-sm">
-            All Students
+            Active Students
+          </TabsTrigger>
+          <TabsTrigger value="inactive" className="text-sm">
+            Inactive Students
           </TabsTrigger>
           {selectedStudentId && (
             <TabsTrigger value="profile" className="text-sm">
@@ -120,6 +123,14 @@ export default function AdminStudentsPage() {
 
         <TabsContent value="list">
           <StudentList onEditAction={handleEdit} onViewProfileAction={handleViewProfile} />
+        </TabsContent>
+
+        <TabsContent value="inactive">
+          <StudentList
+            onEditAction={handleEdit}
+            onViewProfileAction={handleViewProfile}
+            showInactive
+          />
         </TabsContent>
 
         <TabsContent value="profile">

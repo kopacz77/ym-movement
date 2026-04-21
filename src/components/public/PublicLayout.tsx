@@ -185,7 +185,9 @@ export function PublicLayout({ children }: PublicLayoutProps) {
             </div>
           </div>
           <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} YM Movement. All rights reserved.</p>
+            <p suppressHydrationWarning>
+              © {new Date().getFullYear()} YM Movement. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

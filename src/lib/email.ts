@@ -487,3 +487,111 @@ export async function sendScheduleChangesEmail(
 
   return sendEmail(studentEmail, "Schedule Update - Please Check YM Movement App", emailContent);
 }
+
+/**
+ * Sends a welcome receipt email to a coach who self-applied via /auth/coach-signup.
+ * Confirms we received their application while they wait for admin review.
+ */
+export async function sendCoachWelcomeEmail(email: string, name: string) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">Thanks for applying to coach with YM Movement</h1>
+      <p>Hello ${name || "there"},</p>
+      <p>We've received your coaching application and appreciate your interest in joining the YM Movement team.</p>
+      <p><strong>What happens next:</strong></p>
+      <ul style="margin-left: 20px;">
+        <li>Our team will review your background, skills, and certifications</li>
+        <li>Once approved, you'll receive an email with a link to finish setting up your coach account</li>
+        <li>After completing setup, you'll be able to manage your schedule, students, and lessons</li>
+      </ul>
+      <p>If you have any questions while your application is being reviewed, feel free to reach out at info@ym-movement.com.</p>
+      <div style="margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 5px;">
+        <p style="margin: 0; font-weight: bold;">Your application details:</p>
+        <p style="margin: 5px 0;">Name: ${name}</p>
+        <p style="margin: 5px 0;">Email: ${email}</p>
+      </div>
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+    </div>
+  `;
+
+  return sendEmail(email, "Coaching Application Received - YM Movement", emailContent);
+}
+
+/**
+ * Sends an invitation email to a coach created directly by an admin via "Add New Coach".
+ * Contains the registration-completion link so the coach can set their password.
+ */
+export async function sendCoachInvitationEmail(email: string, name: string, token: string) {
+  const registrationUrl = `${BASE_URL}/auth/complete-registration?token=${token}`;
+
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">Welcome to YM Movement</h1>
+      <p>Hello ${name || "there"},</p>
+      <p>A coach account has been created for you on the YM Movement platform. We're excited to have you on the team.</p>
+      <p><strong>Next step:</strong> Set your password and complete your account setup.</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${registrationUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Set Up Your Coach Account</a>
+      </div>
+
+      <p style="margin-top: 20px;">Once your account is active, you'll be able to:</p>
+      <ul style="margin-left: 20px; color: #374151;">
+        <li>Manage your teaching schedule and available time slots</li>
+        <li>View and manage your assigned students</li>
+        <li>Track lessons, payments, and earnings</li>
+        <li>Update your bio, skills, and certifications</li>
+      </ul>
+
+      <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Heads up:</strong> This setup link expires in 1 hour. If it expires before you use it, contact us at info@ym-movement.com and we'll send a new one.</p>
+      </div>
+
+      <p style="margin-top: 20px;">If you weren't expecting this invitation, you can safely ignore it.</p>
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+    </div>
+  `;
+
+  return sendEmail(email, "Welcome to YM Movement - Set Up Your Coach Account", emailContent);
+}
+
+/**
+ * Sends an approval email to a self-applied coach once an admin approves their application.
+ * Contains the registration-completion link so the coach can set their password.
+ */
+export async function sendCoachApprovalEmail(email: string, name: string, token: string) {
+  const registrationUrl = `${BASE_URL}/auth/complete-registration?token=${token}`;
+
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">Your coach application has been approved</h1>
+      <p>Hello ${name || "there"},</p>
+      <p>Great news — your coaching application has been approved by the YM Movement team.</p>
+      <p><strong>Next step:</strong> Set your password and finish setting up your coach account.</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${registrationUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Complete Account Setup</a>
+      </div>
+
+      <p style="margin-top: 20px;">Once your account is active, you'll be able to:</p>
+      <ul style="margin-left: 20px; color: #374151;">
+        <li>Manage your teaching schedule and available time slots</li>
+        <li>View and manage your assigned students</li>
+        <li>Track lessons, payments, and earnings</li>
+        <li>Update your bio, skills, and certifications</li>
+      </ul>
+
+      <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Heads up:</strong> This setup link expires in 1 hour. If it expires, reach out at info@ym-movement.com and we'll send a new one.</p>
+      </div>
+
+      <p style="margin-top: 20px;">Welcome to the team.</p>
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+    </div>
+  `;
+
+  return sendEmail(email, "Your YM Movement Coach Application is Approved", emailContent);
+}

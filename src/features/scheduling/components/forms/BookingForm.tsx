@@ -64,9 +64,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({ slot, open, onCloseAct
   const { sanitizeInput } = useSanitizedInput();
 
   // Fetch students using the correct API namespace with enabled option only
-  const { data: studentsData, isLoading } = api.admin.student.getStudents.useQuery(undefined, {
-    enabled: open,
-  });
+  const { data: studentsData, isLoading } = api.admin.student.getStudents.useQuery(
+    { active: true },
+    { enabled: open },
+  );
 
   // Create lesson mutation using the proper namespace and callbacks
   const createLesson = api.admin.schedule.createLesson.useMutation({
