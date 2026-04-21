@@ -3,7 +3,6 @@
 
 import { BarChart2, Calendar, CreditCard, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function QuickActions() {
@@ -14,6 +13,7 @@ export function QuickActions() {
       href: "/admin/schedule",
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
+      hoverBg: "hover:bg-blue-50",
     },
     {
       label: "View Payments",
@@ -21,6 +21,7 @@ export function QuickActions() {
       href: "/admin/payments",
       iconBg: "bg-emerald-100",
       iconColor: "text-emerald-600",
+      hoverBg: "hover:bg-emerald-50",
     },
     {
       label: "Manage Students",
@@ -28,6 +29,7 @@ export function QuickActions() {
       href: "/admin/students",
       iconBg: "bg-violet-100",
       iconColor: "text-violet-600",
+      hoverBg: "hover:bg-violet-50",
     },
     {
       label: "View Reports",
@@ -35,29 +37,29 @@ export function QuickActions() {
       href: "/admin/reports",
       iconBg: "bg-amber-100",
       iconColor: "text-amber-600",
+      hoverBg: "hover:bg-amber-50",
     },
   ];
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Quick Actions</CardTitle>
+        <CardTitle className="text-lg font-bold">Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-2">
+      <CardContent className="grid grid-cols-2 gap-4">
         {actions.map((action) => (
-          <Button
+          <Link
             key={action.label}
-            variant="outline"
-            className="h-auto py-3 flex-col gap-2 hover:bg-muted/50"
-            asChild
+            href={action.href}
+            className={`flex flex-col items-center justify-center p-4 bg-muted/30 ${action.hoverBg} border border-border/50 rounded-lg transition-colors group`}
           >
-            <Link href={action.href}>
-              <div className={`p-1.5 rounded-lg ${action.iconBg}`}>
-                <action.icon className={`h-4 w-4 ${action.iconColor}`} />
-              </div>
-              <span className="text-xs">{action.label}</span>
-            </Link>
-          </Button>
+            <div
+              className={`w-10 h-10 rounded-full ${action.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}
+            >
+              <action.icon className={`h-5 w-5 ${action.iconColor}`} />
+            </div>
+            <span className="text-xs font-medium text-center">{action.label}</span>
+          </Link>
         ))}
       </CardContent>
     </Card>

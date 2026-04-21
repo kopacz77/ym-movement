@@ -81,10 +81,14 @@ export default function AdminDashboardPage() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ErrorBoundary>
-            <RevenueChart />
+            <div className="rounded-lg border border-t-4 border-t-cyan-500 overflow-hidden">
+              <RevenueChart />
+            </div>
           </ErrorBoundary>
           <ErrorBoundary>
-            <StudentActivityChart />
+            <div className="rounded-lg border border-t-4 border-t-violet-500 overflow-hidden">
+              <StudentActivityChart />
+            </div>
           </ErrorBoundary>
         </div>
       </div>

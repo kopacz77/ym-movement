@@ -44,13 +44,34 @@ export function TodayTimeline() {
   const nowMinutes = (now.getHours() - timelineBounds.startHour) * 60 + now.getMinutes();
   const nowPercent = Math.max(0, Math.min(100, (nowMinutes / totalMinutes) * 100));
 
-  // Lesson type colors
-  const typeColors: Record<string, string> = {
-    PRIVATE: "bg-blue-500",
-    CHOREOGRAPHY: "bg-purple-500",
-    GROUP: "bg-green-500",
-    COMPETITION_PREP: "bg-orange-500",
+  // Lesson type colors — pastel backgrounds with colored text/borders
+  const typeStyles: Record<string, { bg: string; border: string; text: string; ring: string }> = {
+    PRIVATE: {
+      bg: "bg-blue-100",
+      border: "border-blue-200",
+      text: "text-blue-800",
+      ring: "hover:ring-blue-400",
+    },
+    CHOREOGRAPHY: {
+      bg: "bg-purple-100",
+      border: "border-purple-200",
+      text: "text-purple-800",
+      ring: "hover:ring-purple-400",
+    },
+    GROUP: {
+      bg: "bg-emerald-100",
+      border: "border-emerald-200",
+      text: "text-emerald-800",
+      ring: "hover:ring-emerald-400",
+    },
+    COMPETITION_PREP: {
+      bg: "bg-orange-100",
+      border: "border-orange-200",
+      text: "text-orange-800",
+      ring: "hover:ring-orange-400",
+    },
   };
+  const defaultStyle = typeStyles.PRIVATE;
 
   if (isLoading) {
     return (
@@ -94,9 +115,11 @@ export function TodayTimeline() {
               {/* Current time indicator */}
               {nowPercent > 0 && nowPercent < 100 && (
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
+                  className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 flex flex-col items-center"
                   style={{ left: `${nowPercent}%` }}
-                />
+                >
+                  <div className="w-2 h-2 rounded-full bg-red-500 -mt-1" />
+                </div>
               )}
 
               {/* Lesson blocks */}
@@ -112,15 +135,16 @@ export function TodayTimeline() {
                 const widthPercent = ((endMin - startMin) / totalMinutes) * 100;
                 const lessonType = lessons[0]?.type || "PRIVATE";
                 const studentName = lessons[0]?.Student?.User?.name || "Unknown";
+                const style = typeStyles[lessonType] || defaultStyle;
 
                 return (
                   <div
                     key={slot.id}
-                    className={`absolute top-1 bottom-1 rounded ${typeColors[lessonType] || "bg-blue-500"} text-white px-1.5 flex items-center overflow-hidden`}
+                    className={`absolute top-1 bottom-1 rounded border ${style.bg} ${style.border} ${style.text} ${style.ring} px-1.5 flex items-center overflow-hidden cursor-pointer hover:ring-2 transition-all`}
                     style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
                     title={`${studentName} - ${format(new Date(slot.startTime), "h:mm a")} to ${format(new Date(slot.endTime), "h:mm a")}`}
                   >
-                    <span className="text-[10px] font-medium truncate">{studentName}</span>
+                    <span className="text-[10px] font-bold truncate">{studentName}</span>
                   </div>
                 );
               })}
