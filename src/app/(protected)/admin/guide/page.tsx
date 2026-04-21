@@ -6,6 +6,7 @@ import {
   Calendar,
   CreditCard,
   FileText,
+  Mail,
   Plus,
   Settings,
   UserCheck,
@@ -152,6 +153,20 @@ export default function AdminGuidePage() {
                 'Click "Approve" to grant booking access',
                 "Student receives email confirmation",
                 "They can now see and book available time slots",
+              ]}
+            />
+
+            <SubSection
+              icon={<Mail className="h-4 w-4" />}
+              title="Resending a Student Invitation"
+              steps={[
+                "If a student says they never received their setup email, you can resend it",
+                'Go to Students → "Active Students" tab',
+                "Click the three-dot menu on the student's row",
+                'Select "Resend Invitation"',
+                "A fresh setup link is generated (1-hour expiry) and emailed",
+                "The previous link becomes invalid as soon as the new one is sent",
+                "Remind the student to check their spam folder if it doesn't arrive",
               ]}
             />
 
@@ -482,17 +497,52 @@ export default function AdminGuidePage() {
           <div className="space-y-6">
             <SubSection
               icon={<UserPlus className="h-4 w-4" />}
-              title="Adding & Approving Coaches"
+              title="Adding a Coach (Admin-Created)"
               steps={[
                 "Go to Coaches page from the sidebar",
-                'Click "Add Coach" to create a new coach account',
+                'Click "Add New Coach" to create a coach account',
                 "Enter coach details: name, email, bio, skills, certifications",
                 "Set lesson pricing for each type (Private, Choreography, Group, Competition Prep, Off-Ice Dance)",
                 "Set revenue split percentage (default: 70%)",
-                "New coaches appear in Pending tab until approved",
-                "Approved coaches receive email and can access their Coach Portal",
+                'Click "Create Coach" — the coach is auto-approved and immediately active',
+                'They\'ll receive a "Welcome to YM Movement" email with a setup link',
+                "The coach clicks the link to set their password, then can log in to the Coach Portal",
               ]}
             />
+
+            <SubSection
+              icon={<UserCheck className="h-4 w-4" />}
+              title="Approving Self-Applied Coaches"
+              steps={[
+                "Coaches can apply themselves via the public coach signup page",
+                "Pending applications appear at the top of the Coaches page",
+                "Review their bio, skills, certifications, and years of experience",
+                'Click "Approve" — the coach receives an approval email with a setup link',
+                'Click "Deny" to reject the application (the account is removed)',
+              ]}
+            />
+
+            <SubSection
+              icon={<Mail className="h-4 w-4" />}
+              title="Resending an Invitation"
+              steps={[
+                "If a coach says they never received their setup email, you can resend it",
+                "Go to Coaches page",
+                "Click the three-dot menu on the coach's row",
+                'Select "Resend Invitation"',
+                "A fresh setup link is generated (1-hour expiry) and emailed",
+                "The previous link becomes invalid as soon as the new one is sent",
+              ]}
+            />
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-amber-900">📧 If the email doesn't arrive</p>
+              <p className="text-sm text-amber-800 mt-1">
+                Ask the coach to check their spam/junk folder first — invitation emails from
+                info@ym-movement.com can occasionally be filtered. If it's still missing, use
+                "Resend Invitation" to send a fresh setup link.
+              </p>
+            </div>
 
             <SubSection
               icon={<Settings className="h-4 w-4" />}
@@ -522,8 +572,8 @@ export default function AdminGuidePage() {
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
               <p className="text-sm font-medium text-purple-900">💰 Pricing Waterfall</p>
               <p className="text-sm text-purple-800 mt-1">
-                Pricing priority: Student custom rates → Coach rates → Default prices.
-                The most specific rate always wins.
+                Pricing priority: Student custom rates → Coach rates → Default prices. The most
+                specific rate always wins.
               </p>
             </div>
 
@@ -542,9 +592,9 @@ export default function AdminGuidePage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm font-medium text-blue-900">💡 Multi-Coach Scheduling</p>
               <p className="text-sm text-blue-800 mt-1">
-                Each coach manages their own schedule independently. Time slots are scoped per-coach,
-                so multiple coaches can have overlapping slots at the same rink. Use the coach filter
-                on the Schedule page to view individual coach calendars.
+                Each coach manages their own schedule independently. Time slots are scoped
+                per-coach, so multiple coaches can have overlapping slots at the same rink. Use the
+                coach filter on the Schedule page to view individual coach calendars.
               </p>
             </div>
           </div>
@@ -591,8 +641,8 @@ export default function AdminGuidePage() {
               <p className="text-sm font-medium text-green-900">✅ Travel Teaching</p>
               <p className="text-sm text-green-800 mt-1">
                 Block your travel dates, then create Video Lesson slots on those dates for students
-                who need to continue training. Assign them manually - they'll see the lesson on their
-                schedule and get notified.
+                who need to continue training. Assign them manually - they'll see the lesson on
+                their schedule and get notified.
               </p>
             </div>
           </div>
