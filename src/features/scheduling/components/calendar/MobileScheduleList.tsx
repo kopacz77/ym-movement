@@ -22,7 +22,9 @@ export function MobileScheduleList({ timeSlots, timezone, onSlotClick }: MobileS
         { zone: "utc" },
       ).setZone(timezone);
       const key = dt.toFormat("yyyy-MM-dd");
-      if (!map.has(key)) map.set(key, []);
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
       map.get(key)!.push(slot);
     }
     // Sort by date

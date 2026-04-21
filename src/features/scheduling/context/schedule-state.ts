@@ -66,17 +66,25 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
 
     case "NAVIGATE_PREV": {
       const d = new Date(state.currentDate);
-      if (state.view === "dayGridMonth") d.setMonth(d.getMonth() - 1);
-      else if (state.view === "timeGridWeek") d.setDate(d.getDate() - 7);
-      else d.setDate(d.getDate() - 1);
+      if (state.view === "dayGridMonth") {
+        d.setMonth(d.getMonth() - 1);
+      } else if (state.view === "timeGridWeek") {
+        d.setDate(d.getDate() - 7);
+      } else {
+        d.setDate(d.getDate() - 1);
+      }
       return { ...state, currentDate: d };
     }
 
     case "NAVIGATE_NEXT": {
       const d = new Date(state.currentDate);
-      if (state.view === "dayGridMonth") d.setMonth(d.getMonth() + 1);
-      else if (state.view === "timeGridWeek") d.setDate(d.getDate() + 7);
-      else d.setDate(d.getDate() + 1);
+      if (state.view === "dayGridMonth") {
+        d.setMonth(d.getMonth() + 1);
+      } else if (state.view === "timeGridWeek") {
+        d.setDate(d.getDate() + 7);
+      } else {
+        d.setDate(d.getDate() + 1);
+      }
       return { ...state, currentDate: d };
     }
 
@@ -101,8 +109,11 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
 
     case "TOGGLE_SLOT_SELECTION": {
       const next = new Set(state.selectedSlotIds);
-      if (next.has(action.slotId)) next.delete(action.slotId);
-      else next.add(action.slotId);
+      if (next.has(action.slotId)) {
+        next.delete(action.slotId);
+      } else {
+        next.add(action.slotId);
+      }
       return { ...state, selectedSlotIds: next };
     }
 

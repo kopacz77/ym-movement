@@ -1,8 +1,8 @@
 // src/features/scheduling/components/calendar/CalendarToolbar.tsx
 "use client";
 
-import { ChevronLeft, ChevronRight, CheckSquare, Plus, X } from "lucide-react";
 import { format } from "date-fns";
+import { CheckSquare, ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,9 +79,7 @@ export function CalendarToolbar({ rinks, coaches, filteredTimeSlots }: CalendarT
                 key={opt.value}
                 onClick={() => dispatch({ type: "SET_VIEW", view: opt.value })}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  state.view === opt.value
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
+                  state.view === opt.value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                 }`}
               >
                 {opt.label}

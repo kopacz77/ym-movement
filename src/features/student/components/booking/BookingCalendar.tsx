@@ -1,14 +1,15 @@
 // src/features/student/components/booking/BookingCalendar.tsx
 "use client";
+import type { EventClickArg, EventContentArg, EventInput } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DateTime } from "luxon";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import type { EventClickArg, EventContentArg, EventInput } from "@fullcalendar/core";
-import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
+import { toast } from "sonner";
+import { TimezoneNotice } from "@/components/TimezoneNotice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,7 +23,6 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { api } from "@/lib/api";
 import { displayInRinkLocalTime } from "@/lib/timezone";
-import { toast } from "sonner";
 import { BookingDialog } from "./BookingDialog";
 
 interface Rink {
@@ -141,7 +141,9 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
 
   // Convert to FullCalendar events
   const calendarEvents: EventInput[] = useMemo(() => {
-    if (!availableSlots || !selectedRink) return [];
+    if (!availableSlots || !selectedRink) {
+      return [];
+    }
 
     return availableSlots.map((slot) => {
       const isAvailable = slot.isAvailable === true;
@@ -173,21 +175,18 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
   }, [availableSlots, selectedRink, rinkTimezone]);
 
   // Custom event content for booking calendar
-  const renderEventContent = useCallback(
-    ({ event, timeText }: EventContentArg) => {
-      const props = event.extendedProps;
-      const isAvailable = props.status === "available";
+  const renderEventContent = useCallback(({ event, timeText }: EventContentArg) => {
+    const props = event.extendedProps;
+    const _isAvailable = props.status === "available";
 
-      return (
-        <div className="px-1 py-0.5 h-full overflow-hidden text-white">
-          <div className="text-[10px] font-medium leading-tight">{timeText}</div>
-          <div className="text-xs font-semibold leading-tight truncate">{event.title}</div>
-          <div className="text-[10px] leading-tight opacity-90">{props.rinkName}</div>
-        </div>
-      );
-    },
-    [],
-  );
+    return (
+      <div className="px-1 py-0.5 h-full overflow-hidden text-white">
+        <div className="text-[10px] font-medium leading-tight">{timeText}</div>
+        <div className="text-xs font-semibold leading-tight truncate">{event.title}</div>
+        <div className="text-[10px] leading-tight opacity-90">{props.rinkName}</div>
+      </div>
+    );
+  }, []);
 
   // Handle FullCalendar event click
   const handleFCEventClick = useCallback(
@@ -238,7 +237,9 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
 
   // Mobile list processing
   const processEventsForCustomList = useCallback(() => {
-    if (!availableSlots || !selectedRink) return [];
+    if (!availableSlots || !selectedRink) {
+      return [];
+    }
 
     const groupedEvents = availableSlots.reduce(
       (groups, slot) => {
@@ -265,7 +266,9 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
         typeof timeStr === "string"
           ? DateTime.fromISO(timeStr, { zone: "utc" }).setZone(rinkTimezone)
           : DateTime.fromJSDate(timeStr, { zone: "utc" }).setZone(rinkTimezone);
-      if (!dateTime.isValid) return "Invalid time";
+      if (!dateTime.isValid) {
+        return "Invalid time";
+      }
       return dateTime.toFormat("h:mm a");
     },
     [rinkTimezone],
@@ -416,8 +419,7 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
                   <div className="border border-border rounded-b-md">
                     {day.slots
                       .sort(
-                        (a, b) =>
-                          new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+                        (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
                       )
                       .map((slot) => {
                         const currentStudents = slot.currentStudents || 0;

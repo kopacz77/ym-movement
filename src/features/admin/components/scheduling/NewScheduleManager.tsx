@@ -1,21 +1,24 @@
 // src/features/admin/components/scheduling/NewScheduleManager.tsx
 "use client";
 
+import { endOfDay, startOfDay } from "date-fns";
+import { DateTime } from "luxon";
 import { useCallback, useMemo, useState } from "react";
-import { ScheduleProvider, useScheduleContext } from "@/features/scheduling/context/ScheduleContext";
 import { ScheduleCalendar } from "@/features/scheduling/components/calendar/ScheduleCalendar";
-import { CompactTimeSlotDialog } from "./CompactTimeSlotDialog";
-import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
-import BlockedDateDialog from "./BlockedDateDialog";
-import { BulkCreateSlotsDialog } from "./DialogComponents";
-import { BulkActionsToolbar } from "./BulkActionsToolbar";
+import {
+  ScheduleProvider,
+  useScheduleContext,
+} from "@/features/scheduling/context/ScheduleContext";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
 import type { TimeSlot } from "@/types/scheduling";
-import { startOfDay, endOfDay } from "date-fns";
-import { DateTime } from "luxon";
+import BlockedDateDialog from "./BlockedDateDialog";
+import { BulkActionsToolbar } from "./BulkActionsToolbar";
+import { CompactTimeSlotDialog } from "./CompactTimeSlotDialog";
+import { BulkCreateSlotsDialog } from "./DialogComponents";
+import { TimeSlotDialogAdapter } from "./TimeSlotDialogAdapter";
 
 function ScheduleDialogs() {
   const { state, dispatch } = useScheduleContext();
@@ -108,7 +111,9 @@ function ScheduleDialogs() {
 
   // Handler for editing a slot (opens create dialog with slot data)
   const handleEditSlot = useCallback(() => {
-    if (!currentSlot) return;
+    if (!currentSlot) {
+      return;
+    }
     const startTime =
       typeof currentSlot.startTime === "string"
         ? new Date(currentSlot.startTime)
@@ -123,7 +128,9 @@ function ScheduleDialogs() {
 
   // Handler for deleting a slot
   const handleDeleteSlot = useCallback(() => {
-    if (!currentSlot) return;
+    if (!currentSlot) {
+      return;
+    }
     deleteTimeSlot.mutate({ id: currentSlot.id });
     closeDialog();
   }, [currentSlot, deleteTimeSlot, closeDialog]);
@@ -131,7 +138,9 @@ function ScheduleDialogs() {
   // Handler for assigning a student
   const handleAssignStudent = useCallback(
     (studentId: string) => {
-      if (!currentSlot) return;
+      if (!currentSlot) {
+        return;
+      }
       assignStudent.mutate({ timeSlotId: currentSlot.id, studentId });
     },
     [currentSlot, assignStudent],
@@ -140,7 +149,9 @@ function ScheduleDialogs() {
   // Handler for unassigning a student
   const handleUnassignStudent = useCallback(
     (lessonId: string) => {
-      if (!lessonId || !currentSlot) return;
+      if (!lessonId || !currentSlot) {
+        return;
+      }
       // Optimistically update the managed slot
       const currentLessons = Array.isArray(currentSlot.Lesson) ? currentSlot.Lesson : [];
       setManagedSlot({
@@ -159,7 +170,9 @@ function ScheduleDialogs() {
         <CompactTimeSlotDialog
           open={true}
           onOpenChange={(open) => {
-            if (!open) closeDialog();
+            if (!open) {
+              closeDialog();
+            }
           }}
           selectedDate={state.activeDialog.date || undefined}
           selectedStartTime={state.activeDialog.time || undefined}
@@ -196,7 +209,9 @@ function ScheduleDialogs() {
         <BulkCreateSlotsDialog
           isOpen={true}
           onOpenChange={(open) => {
-            if (!open) closeDialog();
+            if (!open) {
+              closeDialog();
+            }
           }}
           rinks={rinks || []}
           onSubmitAction={closeDialog}

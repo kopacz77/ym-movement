@@ -1,11 +1,11 @@
 // src/features/scheduling/context/ScheduleContext.tsx
 "use client";
 
-import { createContext, useContext, useReducer, type Dispatch, type ReactNode } from "react";
+import { createContext, type Dispatch, type ReactNode, useContext, useReducer } from "react";
 import {
+  initialScheduleState,
   type ScheduleAction,
   type ScheduleState,
-  initialScheduleState,
   scheduleReducer,
 } from "./schedule-state";
 

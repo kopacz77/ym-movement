@@ -36,7 +36,9 @@ function buildEventTitle(slot: TimeSlot): string {
       .map((l) => l.Student?.User?.name || "Unknown")
       .filter((n) => n !== "Unknown")
       .join(", ");
-    if (names) title += ` - ${names}`;
+    if (names) {
+      title += ` - ${names}`;
+    }
   }
 
   title += ` (${lessons.length}/${slot.maxStudents})`;

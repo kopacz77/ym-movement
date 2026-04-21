@@ -1,13 +1,13 @@
 "use client";
 
+import type { EventClickArg } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
 import { Globe, Plane } from "lucide-react";
 import { DateTime } from "luxon";
 import { memo, useCallback, useMemo, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import type { EventClickArg } from "@fullcalendar/core";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,13 +20,13 @@ import {
 } from "@/components/ui/select";
 import { TimeSlotDialogAdapter } from "@/features/admin/components/scheduling/TimeSlotDialogAdapter";
 import { useCoachTimeSlots } from "@/features/coach/hooks/useCoachTimeSlots";
-import { useIsMobile } from "@/hooks/useMediaQuery";
-import {
-  timeSlotsToEvents,
-  blockedDatesToBackgroundEvents,
-} from "@/features/scheduling/utils/fullcalendar-transforms";
 import { FCEventContent } from "@/features/scheduling/components/calendar/FCEventContent";
 import { MobileScheduleList } from "@/features/scheduling/components/calendar/MobileScheduleList";
+import {
+  blockedDatesToBackgroundEvents,
+  timeSlotsToEvents,
+} from "@/features/scheduling/utils/fullcalendar-transforms";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import type { TimeSlot } from "@/types/scheduling";
 import { CoachBlockedDates } from "./CoachBlockedDates";
 
@@ -47,7 +47,9 @@ const TIMEZONE_FILTERS = [
 const CoachScheduleManagerComponent = () => {
   const initialDate = useMemo(() => new Date(), []);
   const [date, setDate] = useState(initialDate);
-  const [calendarView, setCalendarView] = useState<"timeGridWeek" | "timeGridDay" | "dayGridMonth">("timeGridWeek");
+  const [calendarView, _setCalendarView] = useState<
+    "timeGridWeek" | "timeGridDay" | "dayGridMonth"
+  >("timeGridWeek");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
   const [timezoneFilter, setTimezoneFilter] = useState("America/Los_Angeles");
 
@@ -84,8 +86,12 @@ const CoachScheduleManagerComponent = () => {
 
   // Filter time slots by timezone when viewing "All Rinks"
   const filteredTimeSlots = useMemo(() => {
-    if (!timeSlots) return [];
-    if (selectedRink) return timeSlots as TimeSlot[];
+    if (!timeSlots) {
+      return [];
+    }
+    if (selectedRink) {
+      return timeSlots as TimeSlot[];
+    }
     return (timeSlots as TimeSlot[]).filter((slot) => slot.Rink?.timezone === timezoneFilter);
   }, [timeSlots, selectedRink, timezoneFilter]);
 
@@ -116,7 +122,9 @@ const CoachScheduleManagerComponent = () => {
   // Event click - view-only dialog
   const handleEventClick = useCallback((clickInfo: EventClickArg) => {
     const props = clickInfo.event.extendedProps;
-    if (props.isBlocked) return;
+    if (props.isBlocked) {
+      return;
+    }
     if (props.slot) {
       setSelectedSlot(props.slot as TimeSlot);
       setIsManageDialogOpen(true);

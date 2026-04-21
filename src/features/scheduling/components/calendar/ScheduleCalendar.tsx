@@ -1,29 +1,29 @@
 // src/features/scheduling/components/calendar/ScheduleCalendar.tsx
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
 import type { EventResizeDoneArg } from "@fullcalendar/interaction";
-import { useScheduleContext } from "@/features/scheduling/context/ScheduleContext";
-import { useScheduleActions } from "@/hooks/useScheduleActions";
-import { useTimeSlots } from "@/hooks/useTimeSlots";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useIsMobile } from "@/hooks/useMediaQuery";
-import { api } from "@/lib/api";
-import type { TimeSlot } from "@/types/scheduling";
-import {
-  timeSlotsToEvents,
-  blockedDatesToBackgroundEvents,
-} from "@/features/scheduling/utils/fullcalendar-transforms";
-import { FCEventContent } from "./FCEventContent";
-import { CalendarToolbar } from "./CalendarToolbar";
-import { MobileScheduleList } from "./MobileScheduleList";
+import interactionPlugin from "@fullcalendar/interaction";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
 import { DateTime } from "luxon";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useScheduleContext } from "@/features/scheduling/context/ScheduleContext";
+import {
+  blockedDatesToBackgroundEvents,
+  timeSlotsToEvents,
+} from "@/features/scheduling/utils/fullcalendar-transforms";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { useScheduleActions } from "@/hooks/useScheduleActions";
+import { useTimeSlots } from "@/hooks/useTimeSlots";
+import { api } from "@/lib/api";
+import type { TimeSlot } from "@/types/scheduling";
+import { CalendarToolbar } from "./CalendarToolbar";
+import { FCEventContent } from "./FCEventContent";
+import { MobileScheduleList } from "./MobileScheduleList";
 
 export function ScheduleCalendar() {
   const calendarRef = useRef<FullCalendar>(null);
@@ -78,15 +78,21 @@ export function ScheduleCalendar() {
 
   // Filter time slots by timezone when viewing all rinks
   const filteredTimeSlots = useMemo(() => {
-    if (!timeSlots) return [];
-    if (state.selectedRinkId) return timeSlots;
+    if (!timeSlots) {
+      return [];
+    }
+    if (state.selectedRinkId) {
+      return timeSlots;
+    }
     return timeSlots.filter((slot) => slot.Rink?.timezone === state.timezoneFilter);
   }, [timeSlots, state.selectedRinkId, state.timezoneFilter]);
 
   // Determine rink timezone for FullCalendar
   const calendarTimezone = useMemo(() => {
     if (state.selectedRinkId && rinks) {
-      const rink = rinks.find((r: { id: string; timezone: string }) => r.id === state.selectedRinkId);
+      const rink = rinks.find(
+        (r: { id: string; timezone: string }) => r.id === state.selectedRinkId,
+      );
       return rink?.timezone || state.timezoneFilter;
     }
     return state.timezoneFilter;
