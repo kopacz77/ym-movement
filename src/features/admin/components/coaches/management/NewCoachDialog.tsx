@@ -65,8 +65,18 @@ export const NewCoachDialog: React.FC<NewCoachDialogProps> = ({ open, onOpenChan
   });
 
   const createCoachMutation = api.admin.coach.management.createCoach.useMutation({
-    onSuccess: () => {
-      toast.success("Coach created. Registration email sent.");
+    onSuccess: (data) => {
+      if (data.emailSent) {
+        toast.success("Coach created", {
+          description: "Registration email sent.",
+        });
+      } else {
+        toast.error("Coach created, but email failed to send", {
+          description:
+            data.emailError || "Use 'Resend Invitation' from the coach's row menu to try again.",
+          duration: 10000,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: [["admin", "coach"]] });
       form.reset();
       onOpenChange(false);

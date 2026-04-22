@@ -167,7 +167,10 @@
       "Bash(echo No debug endpoint:*)",
       "Bash(echo === Login page with callbackUrl ===:*)",
       "Bash(gh repo:*)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(timeout 30 npx vercel logs https://ym-movement.com)",
+      "Bash(echo \"Exit: $?\")",
+      "Read(//tmp/**)"
     ],
     "deny": []
   }

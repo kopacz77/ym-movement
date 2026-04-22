@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 // src/features/admin/api/queries/student/studentQueries.ts
 import { z } from "zod";
 import { createPasswordResetToken } from "@/lib/auth-tokens";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendInvitationEmail, sendWelcomeEmail } from "@/lib/email";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 import { formatEmail, formatPhoneNumber, toProperCase } from "@/lib/utils";
@@ -516,13 +516,30 @@ export const studentQueries = createTRPCRouter({
           });
         }
 
-        // Create a new password reset token and send invitation
-        await createPasswordResetToken(
+        // Create token WITHOUT letting the helper send the email — we send it here so
+        // email failures surface as real errors instead of being swallowed internally.
+        const token = await createPasswordResetToken(
           student.User.id,
           student.User.email,
           student.User.name,
           true, // Mark as invitation
+          false, // Don't send email — we'll send and surface errors ourselves
         );
+
+        try {
+          await sendInvitationEmail(
+            student.User.email,
+            student.User.name || "Student",
+            token.token,
+          );
+        } catch (emailError) {
+          console.error("Failed to resend student invitation email:", emailError);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              emailError instanceof Error ? emailError.message : "Failed to send invitation email",
+          });
+        }
 
         return {
           success: true,

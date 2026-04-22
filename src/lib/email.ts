@@ -22,37 +22,34 @@ const EMAIL_CONFIG = {
 };
 
 /**
- * Helper function to send an email with error handling and fallback
+ * Send an email via Resend. Throws on any failure so callers can detect and surface it.
+ *
+ * In non-production environments, a missing RESEND_API_KEY is treated as a dev-convenience
+ * no-op (returns a mock id, logs a warning). In production, a missing key throws — silent
+ * misconfiguration was the root cause of a 15-day email outage on 2026-04-21.
  */
 async function sendEmail(to: string, subject: string, html: string) {
-  try {
-    if (!resendApiKey || !resend) {
-      console.warn("RESEND_API_KEY not found, using fallback email method");
-      return { id: "mock-email-id" };
+  if (!resendApiKey || !resend) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`[DEV] RESEND_API_KEY not set — would have sent "${subject}" to ${to}`);
+      return { id: "mock-email-id-dev" };
     }
-
-    const { data, error } = await resend.emails.send({
-      ...EMAIL_CONFIG,
-      to,
-      subject,
-      html,
-    });
-
-    if (error) {
-      console.error(`Error sending email (${subject}):`, error);
-      // In development, don't throw - just log and return mock response
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[DEV MODE] Email sending failed, continuing without error");
-        return { id: "mock-email-id-dev-fallback" };
-      }
-      throw new Error(`Failed to send email: ${error.message}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error(`Exception sending email (${subject}):`, error);
-    return { id: "error-fallback", error };
+    throw new Error("RESEND_API_KEY is not configured");
   }
+
+  const { data, error } = await resend.emails.send({
+    ...EMAIL_CONFIG,
+    to,
+    subject,
+    html,
+  });
+
+  if (error) {
+    console.error(`Resend error sending "${subject}" to ${to}:`, error);
+    throw new Error(`Resend: ${error.message}`);
+  }
+
+  return data;
 }
 
 /**

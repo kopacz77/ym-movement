@@ -189,7 +189,10 @@ export const coachManagementRouter = createTRPCRouter({
           return { user, coach };
         });
 
-        // Send invitation email with registration-completion link
+        // Send invitation email with registration-completion link.
+        // Coach creation is NOT rolled back on email failure — admin can Resend Invitation later.
+        let emailSent = true;
+        let emailError: string | null = null;
         try {
           const passwordResetToken = await createPasswordResetToken(
             result.user.id,
@@ -204,11 +207,13 @@ export const coachManagementRouter = createTRPCRouter({
             result.user.name || "Coach",
             passwordResetToken.token,
           );
-        } catch (emailError) {
-          console.error("Failed to send coach invitation email:", emailError);
+        } catch (err) {
+          emailSent = false;
+          emailError = err instanceof Error ? err.message : "Unknown email error";
+          console.error("Failed to send coach invitation email:", err);
         }
 
-        return result.coach;
+        return { ...result.coach, emailSent, emailError };
       } catch (error) {
         if (error instanceof TRPCError) {
           throw error;
