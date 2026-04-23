@@ -25,13 +25,9 @@ export default function CoachDashboardPage() {
 
       {/* Lessons Section */}
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent" />
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Lessons
-          </h2>
-          <div className="h-px flex-1 bg-gradient-to-l from-primary/20 via-accent/10 to-transparent" />
-        </div>
+        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Lessons
+        </h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ErrorBoundary>
             <CoachUpcomingLessons />
