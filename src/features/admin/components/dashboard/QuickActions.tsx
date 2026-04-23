@@ -51,14 +51,14 @@ export function QuickActions() {
           <Link
             key={action.label}
             href={action.href}
-            className={`flex flex-col items-center justify-center p-4 bg-muted/30 ${action.hoverBg} border border-border/50 rounded-lg transition-colors group`}
+            className={`flex flex-col items-center justify-center p-5 rounded-xl border border-border/40 ${action.hoverBg} transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md`}
           >
             <div
-              className={`w-10 h-10 rounded-full ${action.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}
+              className={`w-10 h-10 rounded-xl ${action.iconBg} flex items-center justify-center mb-2`}
             >
               <action.icon className={`h-5 w-5 ${action.iconColor}`} />
             </div>
-            <span className="text-xs font-medium text-center">{action.label}</span>
+            <span className="text-sm font-medium text-center">{action.label}</span>
           </Link>
         ))}
       </CardContent>
