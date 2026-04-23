@@ -58,7 +58,7 @@ export default function StudentDashboardPage() {
 
           {/* Payment info */}
           <Card className="overflow-hidden">
-            <CardHeader className="pb-3 bg-gradient-to-r from-emerald-50 to-transparent">
+            <CardHeader className="pb-3">
               <CardTitle className="text-lg">Payment Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm pt-4">

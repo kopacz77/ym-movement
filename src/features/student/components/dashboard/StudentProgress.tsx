@@ -39,7 +39,7 @@ export function StudentProgress() {
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 via-accent/5 to-transparent">
+      <CardHeader className="pb-3">
         <CardTitle className="text-lg">My Progress</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
