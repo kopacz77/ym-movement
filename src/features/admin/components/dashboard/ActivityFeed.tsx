@@ -30,12 +30,12 @@ export function ActivityFeed() {
         ) : (
           <div className="relative pl-4">
             {/* Vertical gradient line */}
-            <div className="absolute left-[7px] top-2 bottom-4 w-px bg-gradient-to-b from-primary via-accent/50 to-muted" />
-            <div className="space-y-5">
+            <div className="absolute left-[7px] top-2 bottom-4 w-px bg-border" />
+            <div className="space-y-6">
               {recentItems.map((item: any) => (
                 <div key={item.id} className="relative pl-6">
                   <div
-                    className={`absolute left-[-5px] top-1.5 w-3 h-3 rounded-full border-2 border-background z-10 ${item.isRead ? "bg-muted-foreground/30" : "bg-primary ring-2 ring-primary/20"}`}
+                    className={`absolute left-[-4px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-background z-10 ${item.isRead ? "bg-muted-foreground/20" : "bg-primary ring-2 ring-primary/15"}`}
                   />
                   <div className="flex justify-between items-start">
                     <p className="text-sm font-medium truncate">{item.title}</p>
