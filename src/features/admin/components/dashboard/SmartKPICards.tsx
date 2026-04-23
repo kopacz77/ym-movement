@@ -1,4 +1,3 @@
-// src/features/admin/components/dashboard/SmartKPICards.tsx
 "use client";
 
 import { AlertCircle, Calendar, CreditCard, Users } from "lucide-react";
@@ -13,10 +12,10 @@ export function SmartKPICards() {
 
   if (isLoading || !overview) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
-            <CardContent className="p-4">
+            <CardContent className="p-6">
               <div className="h-20 animate-pulse bg-muted rounded" />
             </CardContent>
           </Card>
@@ -31,8 +30,7 @@ export function SmartKPICards() {
       value: `${overview.activeLessons || 0}`,
       unit: "lessons",
       icon: Calendar,
-      borderColor: "border-cyan-500",
-      iconBg: "from-cyan-50 to-blue-100",
+      iconBg: "bg-cyan-50",
       iconColor: "text-cyan-600",
       href: "/admin/schedule",
     },
@@ -41,8 +39,7 @@ export function SmartKPICards() {
       value: `$${(overview.monthlyRevenue || 0).toLocaleString()}`,
       unit: "",
       icon: CreditCard,
-      borderColor: "border-emerald-500",
-      iconBg: "from-emerald-50 to-green-100",
+      iconBg: "bg-emerald-50",
       iconColor: "text-emerald-600",
       href: "/admin/payments",
     },
@@ -51,8 +48,7 @@ export function SmartKPICards() {
       value: `${overview.totalStudents || 0}`,
       unit: "",
       icon: Users,
-      borderColor: "border-violet-500",
-      iconBg: "from-violet-50 to-purple-100",
+      iconBg: "bg-violet-50",
       iconColor: "text-violet-600",
       href: "/admin/students",
     },
@@ -61,8 +57,7 @@ export function SmartKPICards() {
       value: `${overview.pendingPayments || 0}`,
       unit: "need attention",
       icon: AlertCircle,
-      borderColor: "border-amber-500",
-      iconBg: "from-amber-50 to-orange-100",
+      iconBg: "bg-amber-50",
       iconColor: "text-amber-600",
       href: "/admin/students",
     },
@@ -72,24 +67,22 @@ export function SmartKPICards() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {cards.map((card) => (
         <Link key={card.title} href={card.href}>
-          <Card
-            className={`hover:shadow-md transition-all cursor-pointer border-l-4 ${card.borderColor} hover:-translate-y-0.5`}
-          >
-            <CardContent className="p-5">
+          <Card className="hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_36px_rgba(0,0,0,0.1)] transition-all duration-200 cursor-pointer">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">{card.title}</p>
-                  <h3 className="text-2xl font-bold">
+                  <h3 className="text-3xl font-bold tracking-tight">
                     {card.value}
                     {card.unit && (
-                      <span className="text-base font-normal text-muted-foreground ml-1">
+                      <span className="text-sm font-normal text-muted-foreground ml-1.5">
                         {card.unit}
                       </span>
                     )}
                   </h3>
                 </div>
                 <div
-                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${card.iconBg} flex items-center justify-center`}
+                  className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center`}
                 >
                   <card.icon className={`h-5 w-5 ${card.iconColor}`} />
                 </div>
