@@ -1,0 +1,98 @@
+name: E2E tests
+
+on:
+  schedule:
+    # Nightly at 08:00 UTC (04:00 ET) — catches drift without blocking PRs.
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    # Manual "run now" button for when someone wants to sanity-check before merge.
+  pull_request:
+    branches: [main]
+    paths:
+      # Only run on PRs that touch code likely to affect E2E flows. Keeps the slow
+      # suite out of the path for docs/config-only changes.
+      - 'src/**'
+      - 'prisma/**'
+      - 'tests/**'
+      - 'playwright.config.ts'
+      - '.github/workflows/e2e.yml'
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ym_movement_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ym_movement_test
+      NEXTAUTH_URL: http://localhost:3100
+      NEXTAUTH_SECRET: ci-placeholder-secret-do-not-use-in-production
+      NEXT_PUBLIC_BASE_URL: http://localhost:3100
+      # Let the signup route's TURNSTILE check fall into its dev-bypass branch.
+      # No real Cloudflare verification happens in CI.
+      NODE_ENV: development
+      CI: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Apply migrations
+        # `migrate deploy` is the safe production-style migration command. It
+        # never resets the database — explicitly not `migrate dev` or `db push`.
+        run: pnpm prisma migrate deploy
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7

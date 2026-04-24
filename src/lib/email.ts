@@ -2,18 +2,46 @@
 
 import { DateTime } from "luxon";
 import { Resend } from "resend";
+import { REGISTRATION_TOKEN_EXPIRY_HOURS } from "@/lib/auth-tokens";
 
 // Initialize Resend with API key
 const resendApiKey = process.env.RESEND_API_KEY || "";
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-// Get the base URL with fallbacks for different hosting environments
-const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  process.env.VERCEL_URL ||
-  process.env.NETLIFY_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  "https://ym-movement.com";
+const DEFAULT_BASE_URL = "https://ym-movement.com";
+
+/**
+ * Resolve the public base URL used to build links in outgoing emails.
+ *
+ * Priority: NEXT_PUBLIC_BASE_URL → NEXTAUTH_URL → hardcoded production URL.
+ *
+ * VERCEL_URL / NETLIFY_URL are deliberately NOT consulted — they are scheme-less
+ * hostnames pointing at preview deployments that sit behind platform auth walls,
+ * which silently broke student-approval links on 2026-04-23 until this was fixed.
+ *
+ * The returned URL is always scheme-prefixed and has no trailing slash, so callers
+ * can safely do `${resolveBaseUrl()}/path`.
+ */
+export function resolveBaseUrl(
+  env: Partial<NodeJS.ProcessEnv> = process.env,
+): string {
+  const candidate = firstNonEmpty(env.NEXT_PUBLIC_BASE_URL, env.NEXTAUTH_URL) ?? DEFAULT_BASE_URL;
+  const withScheme = /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
+  return withScheme.replace(/\/+$/, "");
+}
+
+function firstNonEmpty(...values: Array<string | undefined>): string | undefined {
+  for (const v of values) {
+    if (typeof v === "string" && v.trim() !== "") {
+      return v.trim();
+    }
+  }
+  return undefined;
+}
+
+// Legacy module-level reference, resolved at module load. Prefer calling resolveBaseUrl()
+// directly inside email builders so runtime env changes (and tests) take effect.
+const BASE_URL = resolveBaseUrl();
 
 // Email configuration constants
 const EMAIL_CONFIG = {
@@ -141,6 +169,58 @@ export async function sendWelcomeEmail(email: string, name: string) {
 }
 
 /**
+ * Notifies the admin that a new student has signed up and is waiting for approval.
+ *
+ * Returns `{ sent: false }` (instead of throwing) when no admin address is configured,
+ * so sign-up never fails just because a dev env is missing the env var. In production,
+ * missing `ADMIN_NOTIFICATION_EMAIL` / `INSTRUCTOR_EMAIL` is logged as an error — the
+ * student still gets their welcome email and the record is still created.
+ */
+export async function sendAdminSignupNotification(student: {
+  name: string;
+  email: string;
+  level: string;
+  phone?: string | null;
+}): Promise<{ sent: boolean; skippedReason?: string }> {
+  const adminEmail =
+    process.env.ADMIN_NOTIFICATION_EMAIL ||
+    process.env.INSTRUCTOR_EMAIL ||
+    "";
+
+  if (!adminEmail) {
+    const reason = "ADMIN_NOTIFICATION_EMAIL / INSTRUCTOR_EMAIL not configured";
+    if (process.env.NODE_ENV === "production") {
+      console.error(`Admin signup notification skipped: ${reason}`);
+    }
+    return { sent: false, skippedReason: reason };
+  }
+
+  const approvalsUrl = `${resolveBaseUrl()}/admin/pending-approvals`;
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #3b82f6;">New student signup awaiting approval</h1>
+      <p>A new student has submitted a registration on YM Movement and is waiting for your review.</p>
+
+      <div style="margin: 20px 0; padding: 15px; background-color: #f3f4f6; border-radius: 5px;">
+        <p style="margin: 5px 0;"><strong>Name:</strong> ${student.name}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> ${student.email}</p>
+        <p style="margin: 5px 0;"><strong>Skating level:</strong> ${student.level.replace(/_/g, " ")}</p>
+        ${student.phone ? `<p style="margin: 5px 0;"><strong>Phone:</strong> ${student.phone}</p>` : ""}
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${approvalsUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Review in admin dashboard</a>
+      </div>
+
+      <p style="color: #6b7280; font-size: 13px;">This is an automated notification — reply to this message to reach the student directly.</p>
+    </div>
+  `;
+
+  await sendEmail(adminEmail, `New signup: ${student.name} (${student.level.replace(/_/g, " ")})`, emailContent);
+  return { sent: true };
+}
+
+/**
  * Sends an approval notification email to a student with registration completion link
  */
 export async function sendApprovalEmail(email: string, name: string, token: string) {
@@ -173,7 +253,7 @@ export async function sendApprovalEmail(email: string, name: string, token: stri
       </ul>
       
       <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
-        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>⏰ Important:</strong> This setup link expires in 24 hours. Please complete your registration soon!</p>
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>⏰ Important:</strong> This setup link expires in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours. Please complete your registration soon!</p>
       </div>
       
       <div style="margin-top: 25px; padding: 15px; background-color: #ecfdf5; border-left: 4px solid #10b981; border-radius: 4px;">
@@ -311,7 +391,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
       <p>We received a request to reset your password for your YM Movement account.</p>
       <p>Please click the button below to set a new password:</p>
       <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Reset Password</a>
-      <p style="margin-top: 20px; color: #666;">This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+      <p style="margin-top: 20px; color: #666;">This link will expire in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours. If you didn't request a password reset, you can safely ignore this email.</p>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
     </div>
@@ -333,7 +413,7 @@ export async function sendInvitationEmail(email: string, name: string, token: st
       <p>An account has been created for you on the YM Movement platform.</p>
       <p>Please click the button below to set your password and complete your registration:</p>
       <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Complete Registration</a>
-      <p style="margin-top: 20px; color: #666;">This link will expire in 1 hour.</p>
+      <p style="margin-top: 20px; color: #666;">This link will expire in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours.</p>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
     </div>
@@ -542,7 +622,7 @@ export async function sendCoachInvitationEmail(email: string, name: string, toke
       </ul>
 
       <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
-        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Heads up:</strong> This setup link expires in 1 hour. If it expires before you use it, contact us at info@ym-movement.com and we'll send a new one.</p>
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Heads up:</strong> This setup link expires in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours. If it expires before you use it, contact us at info@ym-movement.com and we'll send a new one.</p>
       </div>
 
       <p style="margin-top: 20px;">If you weren't expecting this invitation, you can safely ignore it.</p>
@@ -581,7 +661,7 @@ export async function sendCoachApprovalEmail(email: string, name: string, token:
       </ul>
 
       <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
-        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Heads up:</strong> This setup link expires in 1 hour. If it expires, reach out at info@ym-movement.com and we'll send a new one.</p>
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Heads up:</strong> This setup link expires in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours. If it expires, reach out at info@ym-movement.com and we'll send a new one.</p>
       </div>
 
       <p style="margin-top: 20px;">Welcome to the team.</p>

@@ -220,10 +220,22 @@ export default function SignupPage() {
         throw new Error(data.message || "Something went wrong");
       }
 
-      toast("Registration submitted", {
-        description:
-          "Your registration has been submitted for admin approval. You'll receive an email to complete setup once approved.",
-      });
+      if (data.welcomeEmailSent === false) {
+        // Registration went through but our confirmation email never landed —
+        // tell the user so they don't assume radio silence means failure, and
+        // give them a direct contact path. Admin has separately been notified
+        // (see welcomeEmailSent vs adminNotified in /api/auth/signup).
+        toast("Registration submitted — confirmation email delayed", {
+          description:
+            "Your registration was received, but our confirmation email couldn't be delivered right now. An admin has been alerted and will review your account. If you don't hear back within 48 hours, reach out to info@ym-movement.com.",
+          duration: 15000,
+        });
+      } else {
+        toast("Registration submitted", {
+          description:
+            "Your registration has been submitted for admin approval. You'll receive an email to complete setup once approved.",
+        });
+      }
 
       // Redirect to login page after successful signup
       router.push("/auth/login");

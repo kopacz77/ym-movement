@@ -5,6 +5,15 @@ import { sendInvitationEmail, sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
 /**
+ * How long a registration/invitation/reset token stays valid.
+ *
+ * Must stay in sync with the "expires in X hours" copy in the email templates
+ * (see src/lib/email.ts). The email-template test in __tests__/lib/email-base-url.test.ts
+ * asserts the templates reference this value so they can't drift.
+ */
+export const REGISTRATION_TOKEN_EXPIRY_HOURS = 24;
+
+/**
  * Generates a secure random token for password reset
  */
 export function generateToken(): string {
@@ -33,9 +42,8 @@ export async function createPasswordResetToken(
     where: { userId },
   });
 
-  // Generate a new token and expiry (1 hour from now)
   const token = generateToken();
-  const expires = addHours(new Date(), 1);
+  const expires = addHours(new Date(), REGISTRATION_TOKEN_EXPIRY_HOURS);
 
   // Create the token record
   const passwordResetToken = await prisma.passwordResetToken.create({

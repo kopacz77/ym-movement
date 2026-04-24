@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 // src/app/api/auth/signup/route.ts
 import { z } from "zod";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendAdminSignupNotification, sendWelcomeEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import {
   authRateLimiter,
@@ -203,7 +203,14 @@ export async function POST(req: NextRequest) {
         ip: clientIP,
         email,
       });
-      return NextResponse.json({ message: "Email already in use" }, { status: 400 });
+      return NextResponse.json(
+        {
+          message:
+            "This email is already registered. If you've already signed up, please wait for admin approval or check your inbox (including spam) for an approval email. Contact info@ym-movement.com if you need help.",
+          code: "DUPLICATE_EMAIL",
+        },
+        { status: 400 },
+      );
     }
 
     // REMOVED: Password hashing - password will be set during registration completion
@@ -246,20 +253,47 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // Send welcome email after successful user creation (don't fail if email fails)
-    try {
-      await sendWelcomeEmail(user.email, user.name || "");
-    } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
-      // Don't fail the whole signup if email fails
+    // Fire welcome + admin notification in parallel. Both are best-effort — neither
+    // rolls back the created records — but each failure is reported back to the UI
+    // and logged so admin can follow up manually instead of the student falling
+    // into a silent hole (the pre-fix behavior that hid Reina Lee's signup).
+    const [welcomeResult, adminResult] = await Promise.allSettled([
+      sendWelcomeEmail(user.email, user.name || ""),
+      sendAdminSignupNotification({
+        name: user.name || "",
+        email: user.email,
+        level,
+        phone: phone ?? undefined,
+      }),
+    ]);
+
+    const welcomeEmailSent = welcomeResult.status === "fulfilled";
+    const welcomeEmailError =
+      welcomeResult.status === "rejected"
+        ? welcomeResult.reason instanceof Error
+          ? welcomeResult.reason.message
+          : "Unknown email error"
+        : null;
+    if (!welcomeEmailSent) {
+      console.error("Failed to send welcome email to new signup:", welcomeResult.reason);
     }
 
-    // Return success with user data (excluding password)
+    const adminNotified =
+      adminResult.status === "fulfilled" && adminResult.value.sent === true;
+    if (adminResult.status === "rejected") {
+      console.error("Failed to send admin signup notification:", adminResult.reason);
+    }
+
+    // Return success with user data (excluding password) plus email-delivery status
+    // so the client can warn the user if their welcome email didn't actually send.
     const { password: _, ...userData } = user;
     return NextResponse.json(
       {
         message: "Account created successfully",
         user: userData,
+        welcomeEmailSent,
+        welcomeEmailError,
+        adminNotified,
       },
       { status: 201 },
     );
