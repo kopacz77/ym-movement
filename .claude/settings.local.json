@@ -170,7 +170,16 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:blog.logrocket.com)",
       "WebFetch(domain:schedule-x.dev)",
-      "Bash(pnpm ls:*)"
+      "Bash(pnpm ls:*)",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__create_project",
+      "mcp__stitch__create_design_system",
+      "mcp__stitch__update_design_system",
+      "mcp__stitch__generate_screen_from_text",
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "mcp__stitch__get_screen",
+      "mcp__stitch__list_screens",
+      "WebFetch(domain:lh3.googleusercontent.com)"
     ],
     "deny": []
   }
