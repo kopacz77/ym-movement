@@ -170,21 +170,7 @@
       "Bash(wait)",
       "Bash(timeout 30 npx vercel logs https://ym-movement.com)",
       "Bash(echo \"Exit: $?\")",
-      "Read(//tmp/**)",
-      "Bash(pnpm tsx *)",
-      "Bash(ps aux *)",
-      "Bash(ps *)",
-      "Bash(kill 93171 93205 93260 9211 9263 116220 113859)",
-      "Bash(kill -9 9211 9263 113859)",
-      "Bash(dmesg)",
-      "Bash(neon --version)",
-      "Bash(neonctl --version)",
-      "Read(//home/kopacz/.config/**)",
-      "Read(//home/kopacz/**)",
-      "Bash(command -v psql)",
-      "Bash(sync)",
-      "Bash(pnpm lint-staged *)",
-      "Bash(echo \"exit=$?\")"
+      "Read(//tmp/**)"
     ],
     "deny": []
   }
