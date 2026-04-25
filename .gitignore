@@ -86,3 +86,6 @@ debug.log
 
 # Turborepo
 .turbo
+
+# Storybook
+storybook-static/
