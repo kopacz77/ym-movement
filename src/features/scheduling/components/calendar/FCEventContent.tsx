@@ -14,26 +14,27 @@ export function FCEventContent({ event, timeText }: EventContentArg) {
   const isDraft = props.isDraft;
   const lessonCount = props.lessonCount ?? 0;
   const maxStudents = props.maxStudents ?? 1;
+  const textClass = (props.textClass as string) || "text-slate-800";
 
   return (
-    <div className={cn("px-1 py-0.5 h-full overflow-hidden text-white", isDraft && "opacity-75")}>
+    <div className={cn("px-1.5 py-0.5 h-full overflow-hidden", textClass)}>
       {/* Time display */}
-      <div className="text-[10px] font-medium leading-tight">{timeText}</div>
+      <div className="text-[10px] font-medium leading-tight opacity-70">{timeText}</div>
 
       {/* Rink name */}
       <div className="text-xs font-semibold leading-tight truncate">
-        {isDraft && <span className="text-[9px] uppercase mr-1">Draft</span>}
+        {isDraft && <span className="text-[9px] uppercase mr-1 font-bold opacity-60">Draft</span>}
         {props.rinkName || "Unknown"}
       </div>
 
       {/* Capacity indicator */}
-      <div className="text-[10px] leading-tight opacity-90">
+      <div className="text-[10px] leading-tight opacity-70">
         {lessonCount}/{maxStudents} students
       </div>
 
       {/* Coach name (when multi-coach view) */}
       {props.coachName && (
-        <div className="text-[10px] leading-tight opacity-80 truncate">{props.coachName}</div>
+        <div className="text-[10px] leading-tight opacity-60 truncate">{props.coachName}</div>
       )}
     </div>
   );

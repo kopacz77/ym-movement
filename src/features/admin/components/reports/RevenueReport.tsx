@@ -82,9 +82,11 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate,
     <div className="w-full h-[400px]">
       <ResponsiveContainer width="100%" height="80%">
         <BarChart data={safeData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} />
           <XAxis
             dataKey="date"
+            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            stroke="#94a3b8"
             tickFormatter={(date: string) => {
               // Monthly aggregation keys are YYYY-MM (length 7)
               if (date.length === 7) {
@@ -100,7 +102,7 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate,
               });
             }}
           />
-          <YAxis tickFormatter={(value) => `$${value}`} />
+          <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} stroke="#94a3b8" tickFormatter={(value) => `$${value}`} />
           <Tooltip
             formatter={(value, name) => [
               `$${Number(value).toFixed(2)}`,
@@ -122,7 +124,7 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate,
             }}
           />
           <Legend />
-          <Bar dataKey="totalRevenue" name="Revenue" fill="#8884d8" />
+          <Bar dataKey="totalRevenue" name="Revenue" fill="#0891b2" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
 

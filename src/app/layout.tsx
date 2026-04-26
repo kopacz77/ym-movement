@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Public_Sans } from "next/font/google";
 
 import { validateEnvironment } from "@/lib/env-check";
 import { Providers } from "@/providers";
 
 import "@/styles/globals.css";
 
-const bodyFont = Plus_Jakarta_Sans({
+const headlineFont = Public_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-sans",
 });
 
-const displayFont = Playfair_Display({
+const bodyFont = Inter({
   subsets: ["latin"],
-  variable: "--font-display",
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
 });
 
 // Validate environment on app startup
@@ -47,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bodyFont.variable} ${displayFont.variable}`}>
+    <html lang="en" className={`${headlineFont.variable} ${bodyFont.variable}`}>
       <body>
         <Providers>
           {children}

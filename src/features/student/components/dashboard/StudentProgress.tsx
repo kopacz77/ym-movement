@@ -24,7 +24,7 @@ export function StudentProgress() {
   if (!isReady || isLoading || !stats) {
     return (
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-6">
           <div className="h-32 animate-pulse bg-muted rounded" />
         </CardContent>
       </Card>
@@ -40,20 +40,22 @@ export function StudentProgress() {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">My Progress</CardTitle>
+        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          My Progress
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 pt-4">
+      <CardContent className="space-y-4 p-6 pt-4">
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-2 rounded-lg bg-primary/5">
-            <p className="text-2xl font-bold text-primary">{completed}</p>
+          <div className="p-2 rounded-lg bg-cyan-50 border border-border/30">
+            <p className="text-2xl font-bold text-cyan-600">{completed}</p>
             <p className="text-[10px] text-muted-foreground">Completed</p>
           </div>
-          <div className="p-2 rounded-lg bg-emerald-50">
+          <div className="p-2 rounded-lg bg-emerald-50 border border-border/30">
             <p className="text-2xl font-bold text-emerald-600">{upcoming}</p>
             <p className="text-[10px] text-muted-foreground">Upcoming</p>
           </div>
-          <div className="p-2 rounded-lg bg-amber-50">
+          <div className="p-2 rounded-lg bg-amber-50 border border-border/30">
             <p className="text-2xl font-bold text-amber-600">{cancelled}</p>
             <p className="text-[10px] text-muted-foreground">Cancelled</p>
           </div>

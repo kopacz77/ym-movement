@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YM Movement Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {},
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-body antialiased min-h-screen pl-64 pt-16">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md docked full-width top-0 z-40 border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center w-full px-8 h-16 fixed left-0 right-0">
+<div class="flex items-center space-x-6">
+<span class="text-xl font-black text-[#1a3a5c] dark:text-white font-['Inter'] font-bold tracking-tight">YM Movement</span>
+<div class="hidden md:flex space-x-1 border-l pl-6 border-slate-200 h-8 items-center">
+<!-- Search bar would go here based on search_bar: on_left -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="pl-9 pr-4 py-1.5 bg-slate-100 border-none rounded-md text-sm focus:ring-2 focus:ring-[#0891b2] outline-none" placeholder="Search..." type="text"/>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<button class="text-slate-500 hover:text-[#0891b2] transition-colors p-2 rounded-full hover:bg-slate-100 active:scale-95 duration-200 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#0891b2] rounded-full"></span>
+</button>
+<button class="text-slate-500 hover:text-[#0891b2] transition-colors p-2 rounded-full hover:bg-slate-100 active:scale-95 duration-200">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="text-slate-500 hover:text-[#0891b2] transition-colors p-2 rounded-full hover:bg-slate-100 active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Coach Admin Avatar" class="w-8 h-8 rounded-full border border-slate-200 cursor-pointer object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKR4k5SwL54b-xvm4iGBjopi9Ii68MH7Kj_t8xPnedjHTpJRecDzQd-3G7qcVk-YwG0Toc2CPLa07GD-ZZ4NAIkLxTAH0NMpz4XKqs6FfN-562jWp3wqPZZ_ZVhxAWH4Bd6ko8pEJ70b1-bJJTbxdNASVDmd3UZ9TqEHd1p8bp-ZSoamh3fm7YJz9MSRn7JPWSmAXF4bXOZSavor9HPS11g5UzVHMYjPFv2u8NuivLTDRSXWSAaEkErL-3XqvyizZrHdqTgtjaoNX0"/>
+</div>
+</nav>
+<!-- SideNavBar (Shared Component) -->
+<aside class="bg-[#1a3a5c] dark:bg-slate-950 h-screen w-64 fixed left-0 top-0 border-r border-white/10 shadow-xl flex flex-col h-full py-6 z-50">
+<div class="px-6 mb-8 flex flex-col">
+<div class="flex items-center space-x-3 mb-2">
+<div class="w-8 h-8 bg-white/10 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-lg" data-icon="skating">ice_skating</span>
+</div>
+<h1 class="text-white font-bold tracking-tighter text-lg leading-tight">YM Movement</h1>
+</div>
+<span class="text-white/60 text-xs font-medium tracking-wide">Admin Portal</span>
+</div>
+<nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+<a class="bg-gradient-to-r from-[#0891b2] to-[#7c3aed] text-white rounded-lg mx-2 flex items-center px-4 py-3 font-['Inter'] font-medium tracking-widest text-xs uppercase mb-1 focus:ring-2 focus:ring-cyan-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg" data-weight="fill">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-slate-300 hover:bg-white/5 mx-2 rounded-lg flex items-center px-4 py-3 font-['Inter'] font-medium tracking-widest text-xs uppercase mb-1 hover:text-white transition-all duration-300 focus:ring-2 focus:ring-cyan-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">calendar_today</span>
+                Schedule
+            </a>
+<a class="text-slate-300 hover:bg-white/5 mx-2 rounded-lg flex items-center px-4 py-3 font-['Inter'] font-medium tracking-widest text-xs uppercase mb-1 hover:text-white transition-all duration-300 focus:ring-2 focus:ring-cyan-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">group</span>
+                Students
+            </a>
+<a class="text-slate-300 hover:bg-white/5 mx-2 rounded-lg flex items-center px-4 py-3 font-['Inter'] font-medium tracking-widest text-xs uppercase mb-1 hover:text-white transition-all duration-300 focus:ring-2 focus:ring-cyan-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">insights</span>
+                Analytics
+            </a>
+<a class="text-slate-300 hover:bg-white/5 mx-2 rounded-lg flex items-center px-4 py-3 font-['Inter'] font-medium tracking-widest text-xs uppercase mb-1 hover:text-white transition-all duration-300 focus:ring-2 focus:ring-cyan-500 active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-lg">payments</span>
+                Finances
+            </a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<a class="text-slate-300 hover:bg-white/5 mx-2 rounded-lg flex items-center px-4 py-2 font-['Inter'] font-medium tracking-widest text-[10px] uppercase hover:text-white transition-all duration-300 focus:ring-2 focus:ring-cyan-500" href="#">
+<span class="material-symbols-outlined mr-3 text-base">contact_support</span>
+                Support
+            </a>
+<a class="text-slate-300 hover:bg-white/5 mx-2 rounded-lg flex items-center px-4 py-2 font-['Inter'] font-medium tracking-widest text-[10px] uppercase hover:text-white transition-all duration-300 focus:ring-2 focus:ring-cyan-500" href="#">
+<span class="material-symbols-outlined mr-3 text-base">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="p-8 max-w-7xl mx-auto space-y-8">
+<!-- Header -->
+<header class="flex justify-between items-end">
+<div>
+<h1 class="font-headline text-3xl font-bold text-[#1a3a5c] tracking-tight">Dashboard</h1>
+<p class="text-slate-500 mt-1">Thursday, October 24, 2024</p>
+</div>
+<button class="bg-gradient-to-r from-[#1a3a5c] to-[#0891b2] text-white px-5 py-2.5 rounded-lg font-medium shadow-md shadow-[#0891b2]/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center">
+<span class="material-symbols-outlined mr-2 text-sm">add</span>
+                New Lesson
+            </button>
+</header>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+<!-- Today's Schedule -->
+<div class="bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-[#0891b2] p-5 flex items-center justify-between">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">Today's Schedule</p>
+<h3 class="text-2xl font-bold text-slate-800">8 <span class="text-base font-normal text-slate-500">lessons</span></h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-50 to-blue-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#0891b2]">calendar_today</span>
+</div>
+</div>
+<!-- Revenue This Month -->
+<div class="bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-emerald-500 p-5 flex items-center justify-between">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">Revenue This Month</p>
+<h3 class="text-2xl font-bold text-slate-800">$4,250</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-50 to-green-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-600">credit_card</span>
+</div>
+</div>
+<!-- Active Students -->
+<div class="bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-[#7c3aed] p-5 flex items-center justify-between">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">Active Students</p>
+<h3 class="text-2xl font-bold text-slate-800">24</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-[#7c3aed]">group</span>
+</div>
+</div>
+<!-- Pending Actions -->
+<div class="bg-white rounded-lg border border-slate-100 shadow-sm hover:shadow-md transition-shadow border-l-4 border-l-amber-500 p-5 flex items-center justify-between">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">Pending Actions</p>
+<h3 class="text-2xl font-bold text-slate-800">3</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-amber-600">warning</span>
+</div>
+</div>
+</div>
+<!-- Today's Timeline -->
+<section class="bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden relative">
+<div class="bg-gradient-to-r from-[#1a3a5c]/5 to-[#0891b2]/5 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+<h2 class="font-bold text-[#1a3a5c]">Today's Timeline</h2>
+<div class="flex space-x-4 text-xs font-medium">
+<span class="flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>Private</span>
+<span class="flex items-center"><span class="w-2 h-2 rounded-full bg-purple-500 mr-1.5"></span>Choreography</span>
+<span class="flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>Group</span>
+<span class="flex items-center"><span class="w-2 h-2 rounded-full bg-orange-500 mr-1.5"></span>Comp Prep</span>
+</div>
+</div>
+<div class="p-6 overflow-x-auto relative min-h-[160px]">
+<!-- Time Markers -->
+<div class="flex text-xs text-slate-400 font-medium mb-4 min-w-[800px] border-b border-slate-100 pb-2">
+<div class="flex-1">8am</div>
+<div class="flex-1">9am</div>
+<div class="flex-1">10am</div>
+<div class="flex-1">11am</div>
+<div class="flex-1 text-center">12pm</div>
+<div class="flex-1 text-right">1pm</div>
+<div class="flex-1 text-right">2pm</div>
+<div class="flex-1 text-right">3pm</div>
+<div class="flex-1 text-right">4pm</div>
+<div class="text-right">5pm</div>
+</div>
+<!-- Gantt Bars Container -->
+<div class="relative min-w-[800px] h-16 bg-slate-50 rounded-md p-2">
+<!-- Current Time Line (Simulated around 10:30am) -->
+<div class="absolute top-0 bottom-0 left-[28%] w-0.5 bg-red-500 z-10 flex flex-col items-center">
+<div class="w-2 h-2 rounded-full bg-red-500 -mt-1"></div>
+<span class="text-[10px] text-red-500 font-bold bg-white px-1 mt-1 rounded shadow-sm border border-red-100">Now</span>
+</div>
+<!-- Lesson Blocks -->
+<!-- 8:00 - 9:00 Private -->
+<div class="absolute top-3 bottom-3 left-0 w-[11%] bg-blue-100 border border-blue-200 rounded text-xs p-1 flex flex-col justify-center overflow-hidden hover:ring-2 hover:ring-blue-400 cursor-pointer transition-all">
+<span class="font-bold text-blue-800 truncate">Emma S.</span>
+</div>
+<!-- 9:30 - 10:30 Choreography -->
+<div class="absolute top-3 bottom-3 left-[16.5%] w-[11%] bg-purple-100 border border-purple-200 rounded text-xs p-1 flex flex-col justify-center overflow-hidden hover:ring-2 hover:ring-purple-400 cursor-pointer transition-all">
+<span class="font-bold text-purple-800 truncate">Liam T.</span>
+</div>
+<!-- 11:00 - 12:30 Group -->
+<div class="absolute top-3 bottom-3 left-[33%] w-[16%] bg-emerald-100 border border-emerald-200 rounded text-xs p-1 flex flex-col justify-center overflow-hidden hover:ring-2 hover:ring-emerald-400 cursor-pointer transition-all">
+<span class="font-bold text-emerald-800 truncate">Beg. Edges</span>
+</div>
+<!-- 2:00 - 3:30 Comp Prep -->
+<div class="absolute top-3 bottom-3 left-[66%] w-[16%] bg-orange-100 border border-orange-200 rounded text-xs p-1 flex flex-col justify-center overflow-hidden hover:ring-2 hover:ring-orange-400 cursor-pointer transition-all">
+<span class="font-bold text-orange-800 truncate">Mia &amp; Noah</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Two Column Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Quick Actions -->
+<div class="bg-white rounded-lg shadow-sm border border-slate-100 p-6 flex flex-col">
+<h2 class="font-bold text-[#1a3a5c] mb-5">Quick Actions</h2>
+<div class="grid grid-cols-2 gap-4 flex-1">
+<button class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-blue-50 border border-slate-100 rounded-lg transition-colors group">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-blue-600">event_available</span>
+</div>
+<span class="text-xs font-medium text-slate-700 text-center">Create Time Slot</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-emerald-50 border border-slate-100 rounded-lg transition-colors group">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-emerald-600">receipt_long</span>
+</div>
+<span class="text-xs font-medium text-slate-700 text-center">View Payments</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-violet-50 border border-slate-100 rounded-lg transition-colors group">
+<div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-violet-600">manage_accounts</span>
+</div>
+<span class="text-xs font-medium text-slate-700 text-center">Manage Students</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-amber-50 border border-slate-100 rounded-lg transition-colors group">
+<div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-amber-600">bar_chart</span>
+</div>
+<span class="text-xs font-medium text-slate-700 text-center">View Reports</span>
+</button>
+</div>
+</div>
+<!-- Recent Activity -->
+<div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-slate-100 p-6 flex flex-col">
+<div class="flex justify-between items-center mb-5">
+<h2 class="font-bold text-[#1a3a5c]">Recent Activity</h2>
+<button class="text-xs text-[#0891b2] font-medium hover:underline">View All</button>
+</div>
+<div class="relative flex-1 pl-4">
+<!-- Vertical Line -->
+<div class="absolute left-[11px] top-2 bottom-4 w-px bg-gradient-to-b from-[#1a3a5c] via-[#0891b2] to-slate-200"></div>
+<div class="space-y-6">
+<!-- Item 1 (Unread) -->
+<div class="relative pl-6">
+<div class="absolute left-[-5px] top-1.5 w-3 h-3 rounded-full bg-[#1a3a5c] border-2 border-white ring-2 ring-[#1a3a5c]/20"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-slate-800">Payment Received</p>
+<p class="text-xs text-slate-500 mt-0.5">Emma S. paid $120 for upcoming 4 private lessons.</p>
+</div>
+<span class="text-xs text-slate-400 whitespace-nowrap ml-4">10m ago</span>
+</div>
+</div>
+<!-- Item 2 (Read) -->
+<div class="relative pl-6">
+<div class="absolute left-[-5px] top-1.5 w-3 h-3 rounded-full bg-slate-300 border-2 border-white"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-slate-700">Cancellation Notice</p>
+<p class="text-xs text-slate-500 mt-0.5">Liam T. cancelled choreography session for tomorrow.</p>
+</div>
+<span class="text-xs text-slate-400 whitespace-nowrap ml-4">1h ago</span>
+</div>
+</div>
+<!-- Item 3 (Read) -->
+<div class="relative pl-6">
+<div class="absolute left-[-5px] top-1.5 w-3 h-3 rounded-full bg-slate-300 border-2 border-white"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-slate-700">New Student Registration</p>
+<p class="text-xs text-slate-500 mt-0.5">Sarah J. enrolled in Beginner Edges Group Class.</p>
+</div>
+<span class="text-xs text-slate-400 whitespace-nowrap ml-4">Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section Divider -->
+<div class="flex items-center justify-center py-4">
+<div class="h-px bg-gradient-to-r from-transparent via-[#1a3a5c]/30 to-[#0891b2]/30 w-1/3"></div>
+<span class="px-4 font-label font-medium text-xs tracking-[0.2em] text-slate-400 uppercase">Analytics</span>
+<div class="h-px bg-gradient-to-l from-transparent via-[#1a3a5c]/30 to-[#0891b2]/30 w-1/3"></div>
+</div>
+<!-- Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
+<!-- Revenue Chart Placeholder -->
+<div class="bg-white rounded-lg shadow-sm border border-slate-100 border-t-4 border-t-[#0891b2] p-6 h-72 flex flex-col">
+<h3 class="text-sm font-bold text-slate-700 mb-4">Revenue Trend</h3>
+<div class="flex-1 bg-slate-50 rounded border border-slate-100 flex items-center justify-center relative overflow-hidden">
+<!-- Decorative Chart Lines -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0,80 L20,60 L40,70 L60,30 L80,40 L100,10" fill="none" stroke="#0891b2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M0,80 L20,60 L40,70 L60,30 L80,40 L100,10 L100,100 L0,100 Z" fill="url(#grad)" opacity="0.1"></path>
+<defs>
+<lineargradient id="grad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0891b2"></stop>
+<stop offset="100%" stop-color="white"></stop>
+</lineargradient>
+</defs>
+</svg>
+<span class="text-slate-400 text-sm z-10 bg-white/80 px-2 py-1 rounded backdrop-blur">Interactive Line Chart</span>
+</div>
+</div>
+<!-- Student Activity Chart Placeholder -->
+<div class="bg-white rounded-lg shadow-sm border border-slate-100 border-t-4 border-t-[#7c3aed] p-6 h-72 flex flex-col">
+<h3 class="text-sm font-bold text-slate-700 mb-4">Student Activity</h3>
+<div class="flex-1 flex items-end justify-between px-4 pb-2 pt-8 border-b border-l border-slate-200">
+<!-- Faux Bar Chart -->
+<div class="w-8 bg-violet-200 hover:bg-violet-400 transition-colors h-[40%] rounded-t"></div>
+<div class="w-8 bg-violet-300 hover:bg-violet-400 transition-colors h-[60%] rounded-t"></div>
+<div class="w-8 bg-violet-400 hover:bg-violet-500 transition-colors h-[30%] rounded-t"></div>
+<div class="w-8 bg-[#7c3aed] hover:bg-violet-600 transition-colors h-[80%] rounded-t relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-violet-700 bg-violet-50 px-1 rounded shadow-sm border border-violet-100">Peak</div>
+</div>
+<div class="w-8 bg-violet-300 hover:bg-violet-400 transition-colors h-[50%] rounded-t"></div>
+<div class="w-8 bg-violet-200 hover:bg-violet-400 transition-colors h-[70%] rounded-t"></div>
+</div>
+<div class="flex justify-between px-4 mt-2 text-[10px] text-slate-400">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

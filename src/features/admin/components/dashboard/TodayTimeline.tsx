@@ -44,40 +44,22 @@ export function TodayTimeline() {
   const nowMinutes = (now.getHours() - timelineBounds.startHour) * 60 + now.getMinutes();
   const nowPercent = Math.max(0, Math.min(100, (nowMinutes / totalMinutes) * 100));
 
-  // Lesson type colors — pastel backgrounds with colored text/borders
-  const typeStyles: Record<string, { bg: string; border: string; text: string; ring: string }> = {
-    PRIVATE: {
-      bg: "bg-blue-100",
-      border: "border-blue-200",
-      text: "text-blue-800",
-      ring: "hover:ring-blue-400",
-    },
-    CHOREOGRAPHY: {
-      bg: "bg-purple-100",
-      border: "border-purple-200",
-      text: "text-purple-800",
-      ring: "hover:ring-purple-400",
-    },
-    GROUP: {
-      bg: "bg-emerald-100",
-      border: "border-emerald-200",
-      text: "text-emerald-800",
-      ring: "hover:ring-emerald-400",
-    },
-    COMPETITION_PREP: {
-      bg: "bg-orange-100",
-      border: "border-orange-200",
-      text: "text-orange-800",
-      ring: "hover:ring-orange-400",
-    },
+  // Lesson type colors — transparent tinted blocks with borders matching calendar events
+  const typeStyles: Record<string, { bg: string; border: string; text: string }> = {
+    PRIVATE: { bg: "bg-blue-100", border: "border border-blue-300", text: "text-blue-900" },
+    CHOREOGRAPHY: { bg: "bg-purple-100", border: "border border-purple-300", text: "text-purple-900" },
+    GROUP: { bg: "bg-emerald-100", border: "border border-emerald-300", text: "text-emerald-900" },
+    COMPETITION_PREP: { bg: "bg-orange-100", border: "border border-orange-300", text: "text-orange-900" },
   };
-  const defaultStyle = typeStyles.PRIVATE;
+  const defaultStyle = typeStyles.PRIVATE as { bg: string; border: string; text: string };
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Today&apos;s Schedule</CardTitle>
+          <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            Today&apos;s Schedule
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-16 animate-pulse bg-muted rounded" />
@@ -89,36 +71,24 @@ export function TodayTimeline() {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">
-          Today&apos;s Schedule — {format(today, "EEEE, MMM d")}
-        </CardTitle>
+        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          Today&apos;s Timeline
+        </p>
       </CardHeader>
       <CardContent>
         {todayLessons.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4">No lessons scheduled today.</p>
         ) : (
           <div className="relative">
-            {/* Hour markers */}
-            <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-              {Array.from(
-                { length: timelineBounds.endHour - timelineBounds.startHour + 1 },
-                (_, i) => (
-                  <span key={i}>
-                    {format(new Date(2000, 0, 1, timelineBounds.startHour + i), "ha")}
-                  </span>
-                ),
-              )}
-            </div>
-
             {/* Timeline bar */}
-            <div className="relative h-12 bg-muted/50 rounded-lg overflow-hidden">
-              {/* Current time indicator */}
+            <div className="relative h-16 bg-muted/30 rounded-lg overflow-hidden">
+              {/* Current time indicator — cyan glow */}
               {nowPercent > 0 && nowPercent < 100 && (
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 flex flex-col items-center"
+                  className="absolute top-0 bottom-0 w-0.5 bg-cyan-400 z-10 flex flex-col items-center shadow-[0_0_8px_rgba(34,211,238,0.8)]"
                   style={{ left: `${nowPercent}%` }}
                 >
-                  <div className="w-2 h-2 rounded-full bg-red-500 -mt-1" />
+                  <div className="w-2 h-2 rounded-full bg-cyan-400 -mt-1 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                 </div>
               )}
 
@@ -140,7 +110,7 @@ export function TodayTimeline() {
                 return (
                   <div
                     key={slot.id}
-                    className={`absolute top-1 bottom-1 rounded border ${style.bg} ${style.border} ${style.text} ${style.ring} px-1.5 flex items-center overflow-hidden cursor-pointer hover:ring-2 transition-all`}
+                    className={`absolute top-2 bottom-2 rounded-md ${style.bg} ${style.border} ${style.text} hover:-translate-y-1 px-2 flex items-center overflow-hidden cursor-pointer transition-all duration-200`}
                     style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
                     title={`${studentName} - ${format(new Date(slot.startTime), "h:mm a")} to ${format(new Date(slot.endTime), "h:mm a")}`}
                   >
@@ -150,24 +120,21 @@ export function TodayTimeline() {
               })}
             </div>
 
-            {/* Legend */}
-            <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                Private
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-purple-500" />
-                Choreo
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
-                Group
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-orange-500" />
-                Comp
-              </span>
+            {/* Hour markers — every 2 hours for clean spacing */}
+            <div className="flex justify-between mt-3 text-xs text-muted-foreground">
+              {Array.from(
+                { length: timelineBounds.endHour - timelineBounds.startHour + 1 },
+                (_, i) => {
+                  const hour = timelineBounds.startHour + i;
+                  // Show every 2 hours for cleaner look
+                  if (hour % 2 !== 0) return null;
+                  return (
+                    <span key={i}>
+                      {format(new Date(2000, 0, 1, hour), "h a")}
+                    </span>
+                  );
+                },
+              ).filter(Boolean)}
             </div>
           </div>
         )}

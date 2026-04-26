@@ -5,40 +5,40 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 25% 10%;
+    --background: 210 20% 98%;
+    --foreground: 210 15% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 210 15% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
-    --primary: 220 70% 25%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 30% 95%;
-    --secondary-foreground: 220 25% 15%;
-    --muted: 210 30% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 195 85% 45%;
+    --popover-foreground: 210 15% 10%;
+    --primary: 207 100% 13%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 193 100% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 5% 29%;
+    --accent: 193 100% 25%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 220 70% 25%;
+    --border: 220 10% 81%;
+    --input: 220 10% 81%;
+    --ring: 193 100% 25%;
     --radius: 0.5rem;
-    --chart-1: 220 70% 50%;
-    --chart-2: 195 85% 45%;
+    --chart-1: 207 100% 30%;
+    --chart-2: 193 100% 35%;
     --chart-3: 160 60% 40%;
     --chart-4: 43 74% 66%;
-    --chart-5: 280 60% 55%;
+    --chart-5: 270 60% 45%;
     /* Sidebar variables */
-    --sidebar: 210 40% 98%;
-    --sidebar-foreground: 220 25% 10%;
-    --sidebar-primary: 220 70% 25%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 30% 95%;
-    --sidebar-accent-foreground: 220 25% 15%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 220 70% 25%;
+    --sidebar: 215 28% 10%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 187 100% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 100% / 0.1;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 100% / 0.1;
+    --sidebar-ring: 187 100% 42%;
   }
 
   .dark {
@@ -83,8 +83,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
+}
+
+/* Luxury Athletic shadow system */
+.shadow-multi {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 /* Mobile Optimizations */
@@ -336,8 +341,7 @@
 .fc {
   --fc-border-color: hsl(var(--border));
   --fc-today-bg-color: hsl(var(--accent) / 0.05);
-  --fc-now-indicator-color: hsl(var(--primary));
-  --fc-event-border-color: transparent;
+  --fc-now-indicator-color: #22d3ee;
   font-family: inherit;
 }
 
@@ -346,6 +350,7 @@
   font-weight: 600;
   font-size: 0.75rem;
   text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: hsl(var(--muted-foreground));
 }
 
@@ -353,14 +358,29 @@
   height: 2.5rem;
 }
 
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #22d3ee;
+  border-width: 2px;
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: #22d3ee;
+}
+
 .fc .fc-event {
-  border-radius: 4px;
-  border: none;
+  border-radius: 8px;
+  border-width: 1px;
+  border-style: solid;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .fc .fc-event:hover {
-  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  filter: none;
 }
 
 .fc .fc-daygrid-day-number {

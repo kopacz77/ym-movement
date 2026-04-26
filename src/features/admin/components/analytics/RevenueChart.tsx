@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState } from "react";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -106,7 +106,7 @@ export const RevenueChart = () => {
 
   if (isLoading) {
     return (
-      <Card className="w-full h-[400px] bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
+      <Card className="w-full h-[400px]">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Revenue Overview</CardTitle>
@@ -134,8 +134,8 @@ export const RevenueChart = () => {
   }
 
   return (
-    <Card className="w-full h-[400px] bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+    <Card className="w-full h-[400px]">
+      <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Revenue Overview</CardTitle>
           <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
@@ -156,11 +156,18 @@ export const RevenueChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+          <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <defs>
+              <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#0891b2" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#0891b2" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              stroke="#94a3b8"
               tickFormatter={(date) =>
                 new Date(date).toLocaleDateString("en-US", {
                   month: "short",
@@ -168,7 +175,11 @@ export const RevenueChart = () => {
                 })
               }
             />
-            <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
+            <YAxis
+              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              stroke="#94a3b8"
+              tickFormatter={(value) => `$${value}`}
+            />
             <Tooltip
               formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
               labelFormatter={(label) =>
@@ -180,15 +191,17 @@ export const RevenueChart = () => {
                 })
               }
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#8884d8"
+              stroke="#0891b2"
               strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
+              fill="url(#revenueGradient)"
+              fillOpacity={1}
+              dot={{ r: 3, fill: "#0891b2" }}
+              activeDot={{ r: 5, fill: "#0891b2", stroke: "#fff", strokeWidth: 2 }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

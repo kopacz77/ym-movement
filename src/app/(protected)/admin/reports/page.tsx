@@ -205,7 +205,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reports</h1>
         <DropdownMenu>
@@ -349,8 +349,8 @@ export default function ReportsPage() {
 
               {isLoadingOverview ? (
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-200 rounded" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-4 bg-muted rounded" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
                 </div>
               ) : (
                 <>
@@ -384,9 +384,9 @@ export default function ReportsPage() {
               Use the period selector to change the date range of the report. You can export this
               report by clicking the Export button.
             </p>
-            <div className="mt-4 p-3 border rounded bg-amber-50 text-amber-800">
-              <p className="text-sm font-medium">Pro Tip</p>
-              <p className="text-xs mt-1">
+            <div className="mt-4 p-3 border border-border/30 rounded-lg bg-amber-50/60 text-amber-800">
+              <p className="text-sm font-semibold">Pro Tip</p>
+              <p className="text-xs mt-1 text-amber-700">
                 For more detailed insights, try changing the report period to see trends over
                 different timeframes. Weekly reports are great for immediate insights, while monthly
                 and yearly reports help identify long-term patterns.

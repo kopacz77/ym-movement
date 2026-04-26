@@ -107,8 +107,8 @@ export const PendingApprovals = () => {
   // Loading state
   if (isLoading || isRefreshing) {
     return (
-      <Card className="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-        <CardHeader className="bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+      <Card>
+        <CardHeader>
           <CardTitle>Pending Approvals</CardTitle>
         </CardHeader>
         <CardContent>
@@ -121,8 +121,8 @@ export const PendingApprovals = () => {
   // Empty state
   if (!pendingStudents || pendingStudents.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-        <CardHeader className="pb-4 bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+      <Card>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2">
             <div className="p-2 bg-green-100 rounded-lg">
               <Badge className="bg-green-500 text-white">✓</Badge>
@@ -157,8 +157,8 @@ export const PendingApprovals = () => {
 
   // Normal state with data
   return (
-    <Card className="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-      <CardHeader className="pb-4 bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+    <Card>
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center space-x-2">
           <div className="p-2 bg-orange-100 rounded-lg">
             <Badge className="bg-orange-500 text-white">{pendingStudents.length}</Badge>

@@ -67,22 +67,24 @@ export function SmartKPICards() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {cards.map((card) => (
         <Link key={card.title} href={card.href}>
-          <Card className="hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_36px_rgba(0,0,0,0.1)] transition-all duration-200 cursor-pointer">
+          <Card className="group hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_36px_rgba(0,0,0,0.1)] transition-all duration-200 cursor-pointer">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">{card.title}</p>
-                  <h3 className="text-3xl font-bold tracking-tight">
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-2">
+                    {card.title}
+                  </p>
+                  <p className="text-3xl font-bold tracking-tight text-primary">
                     {card.value}
                     {card.unit && (
-                      <span className="text-sm font-normal text-muted-foreground ml-1.5">
+                      <span className="text-base font-normal text-muted-foreground ml-1.5">
                         {card.unit}
                       </span>
                     )}
-                  </h3>
+                  </p>
                 </div>
                 <div
-                  className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center`}
+                  className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}
                 >
                   <card.icon className={`h-5 w-5 ${card.iconColor}`} />
                 </div>

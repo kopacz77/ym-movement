@@ -3,24 +3,93 @@ import type { EventInput } from "@fullcalendar/core";
 import type { TimeSlot } from "@/types/scheduling";
 
 /**
- * Determines event background color based on slot state.
- * - Draft (unpublished): slate shades
- * - Full (booked to capacity): blue
- * - Partial (some students booked): amber
- * - Available (no students, published): green
+ * Determines event colors based on lesson type (Stitch-style transparent tinted blocks).
+ * Returns bg (rgba background), border (rgba border), and textClass (Tailwind text color).
+ *
+ * Color mapping by lesson type:
+ * - Private: blue tint
+ * - Choreography: purple tint
+ * - Group: green tint
+ * - Competition Prep: orange tint
+ * - Available (no lessons): subtle green
+ * - Draft: reduced opacity or slate
  */
-function getSlotColor(slot: TimeSlot): string {
+function getSlotColors(slot: TimeSlot): { bg: string; border: string; textClass: string } {
   const lessons = slot.Lesson || [];
+  const primaryType = lessons[0]?.type as string | undefined;
+
+  // Lesson-type color map
+  const typeColors: Record<string, { bg: string; border: string; textClass: string }> = {
+    PRIVATE: {
+      bg: "rgba(59, 130, 246, 0.30)",
+      border: "rgba(59, 130, 246, 0.6)",
+      textClass: "text-blue-900",
+    },
+    CHOREOGRAPHY: {
+      bg: "rgba(168, 85, 247, 0.30)",
+      border: "rgba(168, 85, 247, 0.6)",
+      textClass: "text-purple-900",
+    },
+    GROUP: {
+      bg: "rgba(34, 197, 94, 0.30)",
+      border: "rgba(34, 197, 94, 0.6)",
+      textClass: "text-green-900",
+    },
+    COMPETITION_PREP: {
+      bg: "rgba(249, 115, 22, 0.30)",
+      border: "rgba(249, 115, 22, 0.6)",
+      textClass: "text-orange-900",
+    },
+  };
+
+  // Draft with lessons: same lesson-type color but more subtle
+  const draftTypeColors: Record<string, { bg: string; border: string; textClass: string }> = {
+    PRIVATE: {
+      bg: "rgba(59, 130, 246, 0.15)",
+      border: "rgba(59, 130, 246, 0.4)",
+      textClass: "text-blue-800",
+    },
+    CHOREOGRAPHY: {
+      bg: "rgba(168, 85, 247, 0.15)",
+      border: "rgba(168, 85, 247, 0.4)",
+      textClass: "text-purple-800",
+    },
+    GROUP: {
+      bg: "rgba(34, 197, 94, 0.15)",
+      border: "rgba(34, 197, 94, 0.4)",
+      textClass: "text-green-800",
+    },
+    COMPETITION_PREP: {
+      bg: "rgba(249, 115, 22, 0.15)",
+      border: "rgba(249, 115, 22, 0.4)",
+      textClass: "text-orange-800",
+    },
+  };
+
   if (!slot.isActive) {
-    return lessons.length > 0 ? "#64748b" : "#94a3b8"; // slate-500 / slate-400
+    // Draft slot
+    if (lessons.length > 0 && primaryType && draftTypeColors[primaryType]) {
+      return draftTypeColors[primaryType];
+    }
+    // Draft without lessons
+    return {
+      bg: "rgba(148, 163, 184, 0.20)",
+      border: "rgba(148, 163, 184, 0.45)",
+      textClass: "text-slate-600",
+    };
   }
-  if (lessons.length >= slot.maxStudents) {
-    return "#3b82f6"; // blue-500 (full)
+
+  // Active slot with lessons
+  if (lessons.length > 0 && primaryType && typeColors[primaryType]) {
+    return typeColors[primaryType];
   }
-  if (lessons.length > 0) {
-    return "#fbbf24"; // amber-400 (partial)
-  }
-  return "#22c55e"; // green-500 (available)
+
+  // Available slot (no lessons, published)
+  return {
+    bg: "rgba(34, 197, 94, 0.25)",
+    border: "rgba(34, 197, 94, 0.55)",
+    textClass: "text-green-800",
+  };
 }
 
 /**
@@ -60,25 +129,32 @@ function buildEventTitle(slot: TimeSlot): string {
  * when you pass ISO 8601 strings and set the calendar's timeZone prop.
  */
 export function timeSlotsToEvents(timeSlots: TimeSlot[]): EventInput[] {
-  return timeSlots.map((slot) => ({
-    id: slot.id,
-    title: buildEventTitle(slot),
-    start: typeof slot.startTime === "string" ? slot.startTime : slot.startTime.toISOString(),
-    end: typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString(),
-    backgroundColor: getSlotColor(slot),
-    borderColor: getSlotColor(slot),
-    extendedProps: {
-      slot, // full slot data for dialog access
-      rinkId: slot.rinkId,
-      rinkName: slot.Rink?.name,
-      rinkTimezone: slot.Rink?.timezone,
-      lessonCount: (slot.Lesson || []).length,
-      maxStudents: slot.maxStudents,
-      isActive: slot.isActive,
-      coachName: slot.Coach?.User?.name,
-      isDraft: !slot.isActive,
-    },
-  }));
+  return timeSlots.map((slot) => {
+    const colors = getSlotColors(slot);
+    const lessons = slot.Lesson || [];
+
+    return {
+      id: slot.id,
+      title: buildEventTitle(slot),
+      start: typeof slot.startTime === "string" ? slot.startTime : slot.startTime.toISOString(),
+      end: typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString(),
+      backgroundColor: colors.bg,
+      borderColor: colors.border,
+      extendedProps: {
+        slot, // full slot data for dialog access
+        rinkId: slot.rinkId,
+        rinkName: slot.Rink?.name,
+        rinkTimezone: slot.Rink?.timezone,
+        lessonCount: lessons.length,
+        maxStudents: slot.maxStudents,
+        isActive: slot.isActive,
+        coachName: slot.Coach?.User?.name,
+        isDraft: !slot.isActive,
+        textClass: colors.textClass,
+        lessonType: lessons[0]?.type || null,
+      },
+    };
+  });
 }
 
 /**

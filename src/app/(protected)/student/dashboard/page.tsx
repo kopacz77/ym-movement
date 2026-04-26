@@ -4,11 +4,9 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { WarmGreeting } from "@/components/ui/warm-greeting";
 import { NextLessonHero } from "@/features/student/components/dashboard/NextLessonHero";
 import { StudentProgress } from "@/features/student/components/dashboard/StudentProgress";
 import { UpcomingLessons } from "@/features/student/components/dashboard/UpcomingLessons";
@@ -16,15 +14,11 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function StudentDashboardPage() {
   const user = useCurrentUser();
-  const { data: session } = useSession();
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header with greeting */}
-      <div className="flex justify-between items-center">
-        <div>
-          <WarmGreeting name={session?.user?.name || "Student"} role="student" />
-        </div>
+      {/* Book a Lesson action */}
+      <div className="flex justify-end">
         {user.isApproved ? (
           <Button asChild>
             <Link href="/student/book">Book a Lesson</Link>
@@ -59,9 +53,11 @@ export default function StudentDashboardPage() {
           {/* Payment info */}
           <Card className="overflow-hidden">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Payment Info</CardTitle>
+              <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                Payment Info
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm pt-4">
+            <CardContent className="space-y-2 text-sm p-6 pt-4">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Venmo</span>
                 <span className="font-medium">@yura-min</span>

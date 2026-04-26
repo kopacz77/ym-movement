@@ -324,7 +324,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
         <Button

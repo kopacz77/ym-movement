@@ -103,9 +103,11 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({
     <div className="w-full h-[400px]">
       <ResponsiveContainer width="100%" height="80%">
         <LineChart data={safeData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} />
           <XAxis
             dataKey="date"
+            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            stroke="#94a3b8"
             tickFormatter={(date: string) => {
               // Monthly aggregation keys are YYYY-MM (length 7)
               if (date.length === 7) {
@@ -121,7 +123,7 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({
               });
             }}
           />
-          <YAxis tickFormatter={(value) => `${value}%`} />
+          <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} stroke="#94a3b8" tickFormatter={(value) => `${value}%`} />
           <Tooltip
             formatter={(value, name) => [
               `${Number(value).toFixed(1)}%`,
@@ -153,16 +155,19 @@ export const AttendanceReport: React.FC<AttendanceReportProps> = ({
             type="monotone"
             dataKey="attendanceRate"
             name="Attendance Rate"
-            stroke="#8884d8"
+            stroke="#0891b2"
             strokeWidth={2}
-            activeDot={{ r: 8 }}
+            dot={{ r: 3, fill: "#0891b2" }}
+            activeDot={{ r: 5, fill: "#0891b2", stroke: "#fff", strokeWidth: 2 }}
           />
           <Line
             type="monotone"
             dataKey="cancelledLessons"
             name="Cancellations"
-            stroke="#ff8042"
+            stroke="#f97316"
             strokeWidth={2}
+            dot={{ r: 3, fill: "#f97316" }}
+            activeDot={{ r: 5, fill: "#f97316", stroke: "#fff", strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

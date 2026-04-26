@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-// Story IDs to screenshot — add more as you create stories
+// Story IDs to screenshot — covers all story files for visual regression
 const stories = [
+  // UI Primitives
   "ui-button--all-variants",
   "ui-button--all-sizes",
   "ui-card--default",
@@ -9,9 +10,24 @@ const stories = [
   "ui-badge--all-variants",
   "ui-badge--lesson-types",
   "ui-skeleton--card-skeleton",
+  // Admin Dashboard
   "admin-dashboard-smartkpicards--default",
   "admin-dashboard-todaytimeline--with-lessons",
+  "admin-dashboard-quickactions--default",
+  "admin-dashboard-activityfeed--default",
+  // Admin Analytics
   "admin-analytics-revenuechart--default",
+  "admin-analytics-studentactivitychart--default",
+  "admin-analytics-revenuebreakdownchart--default",
+  // Coach Dashboard
+  "coach-dashboard-coachoverviewcards--default",
+  "coach-dashboard-coachupcominglessons--default",
+  "coach-dashboard-coachpastlessons--default",
+  // Student Dashboard
+  "student-dashboard-upcominglessons--default",
+  "student-dashboard-studentprogress--default",
+  // Calendar Events
+  "scheduling-fceventcontent--private-lesson",
 ];
 
 for (const storyId of stories) {

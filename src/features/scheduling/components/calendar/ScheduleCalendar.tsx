@@ -198,10 +198,10 @@ export function ScheduleCalendar() {
     }
   }, [state.currentDate, state.view]);
 
-  // Dynamic time range — fit to actual event data instead of hardcoded 6am-10pm
+  // Dynamic time range — fit to actual event data; default to typical coaching hours
   const timeRange = useMemo(() => {
     if (state.view === "dayGridMonth" || !filteredTimeSlots?.length) {
-      return { min: "06:00:00", max: "22:00:00" };
+      return { min: "10:00:00", max: "22:00:00" };
     }
     let minHour = 23;
     let maxHour = 0;
