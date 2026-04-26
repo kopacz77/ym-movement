@@ -1,116 +1,129 @@
 import { Calendar, Medal, TrendingUp } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { Button } from "@/components/ui/button";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
       {/* Navigation Header */}
-      <header className="fixed top-0 z-50 w-full border-b bg-background">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          {/* Left: Logo */}
-          <div>
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/ym-logo-symbol.svg"
-                alt="YM Movement"
-                width={73}
-                height={40}
-                className="h-8 w-auto"
-                priority
-              />
+      <nav className="fixed top-0 z-50 flex w-full items-center justify-between px-6 md:px-8 h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        {/* Left: Wordmark */}
+        <Link
+          href="/"
+          className="text-xl font-black text-[#1a3a5c] tracking-tight"
+        >
+          YM Movement
+        </Link>
+
+        {/* Center: Navigation Links */}
+        <ul className="hidden md:flex gap-8 items-center">
+          <li>
+            <Link
+              href="/about"
+              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+            >
+              About
             </Link>
-          </div>
+          </li>
+          <li>
+            <Link
+              href="/programs"
+              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+            >
+              Programs
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/testimonials"
+              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+            >
+              Testimonials
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="#contact"
+              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+            >
+              Contact
+            </Link>
+          </li>
+        </ul>
 
-          {/* Center: Navigation Links */}
-          <div className="hidden md:block">
-            <div className="flex space-x-8">
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
-                About
-              </Link>
-              <Link
-                href="/programs"
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                Programs
-              </Link>
-              <Link
-                href="/testimonials"
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                Testimonials
-              </Link>
-              <Link href="#contact" className="text-sm text-muted-foreground hover:text-foreground">
-                Contact
-              </Link>
-            </div>
-          </div>
-
-          {/* Right: Sign In */}
-          <div>
-            <Button variant="outline" className="mr-2" asChild>
-              <Link href="/auth/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/auth/signup">Sign Up</Link>
-            </Button>
-          </div>
+        {/* Right: Auth buttons */}
+        <div className="flex gap-3">
+          <Link
+            href="/auth/login"
+            className="hidden md:block text-[#1a3a5c] font-bold px-4 py-2 rounded-lg hover:text-[#0891b2] transition-colors active:scale-95 duration-200"
+          >
+            Login
+          </Link>
+          <Link
+            href="/auth/signup"
+            className="bg-[#1a3a5c] text-white font-bold px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors active:scale-95 duration-200"
+          >
+            Get Started
+          </Link>
         </div>
-      </header>
+      </nav>
 
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
         <HeroSection />
 
-        {/* Feature Cards */}
-        <section className="py-12" id="about">
-          <div className="container px-4">
-            <h2 className="mb-10 text-center font-display text-3xl font-bold text-foreground">
-              Why Train With Us
-            </h2>
-            <div className="mx-auto grid gap-8 md:grid-cols-3">
-              {/* Professional Coaching */}
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Medal className="h-6 w-6 text-primary" />
+        {/* Why Train With Us */}
+        <section className="py-24 bg-[#0f172a] relative">
+          <div className="max-w-7xl mx-auto px-6 md:px-8">
+            <div className="text-center mb-16">
+              <p className="text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400 mb-2">
+                The Advantage
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                Why Train With Us
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Olympic Experience */}
+              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-8 hover:-translate-y-2 transition-transform duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-6">
+                  <Medal className="h-6 w-6 text-cyan-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-card-foreground">
+                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">
                   Olympic Experience
                 </h3>
-                <p className="text-muted-foreground">
-                  Learn from an Olympic athlete with years of international competitive experience
-                  and technical expertise.
+                <p className="text-slate-400 leading-relaxed">
+                  Direct mentorship from an Olympic athlete, bringing world-stage insights and
+                  rigorous training methodologies to your practice.
                 </p>
               </div>
 
               {/* Flexible Scheduling */}
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Calendar className="h-6 w-6 text-primary" />
+              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-8 hover:-translate-y-2 transition-transform duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6">
+                  <Calendar className="h-6 w-6 text-purple-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-card-foreground">
+                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">
                   Flexible Scheduling
                 </h3>
-                <p className="text-muted-foreground">
-                  Book lessons that fit your schedule with our easy-to-use platform. Manage your
-                  training calendar effortlessly.
+                <p className="text-slate-400 leading-relaxed">
+                  Adaptive lesson planning that works around your competitive season and personal
+                  commitments without compromising intensity.
                 </p>
               </div>
 
               {/* Progress Tracking */}
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50/30 border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-8 hover:-translate-y-2 transition-transform duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-6">
+                  <TrendingUp className="h-6 w-6 text-emerald-400" />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-card-foreground">
+                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">
                   Progress Tracking
                 </h3>
-                <p className="text-muted-foreground">
-                  Monitor your development with detailed progress tracking, personalized feedback,
-                  and structured improvement plans.
+                <p className="text-slate-400 leading-relaxed">
+                  Data-driven performance analysis focusing on technical precision, edge quality, and
+                  artistic development over time.
                 </p>
               </div>
             </div>
@@ -118,83 +131,103 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-primary/5 py-16">
-          <div className="container px-4 text-center">
-            <h2 className="mb-4 font-display text-3xl font-bold text-foreground">
+        <section className="py-20 bg-[#0f172a] relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent" />
+          <div className="relative max-w-3xl mx-auto px-6 md:px-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
               Ready to Elevate Your Ice Dancing?
             </h2>
-            <p className="mx-auto mb-8 max-w-[600px] text-muted-foreground">
+            <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto">
               Join our community of dedicated skaters and start your journey toward excellence
               today.
             </p>
-            <Button size="lg" asChild>
-              <Link href="/auth/signup">Sign Up Now</Link>
-            </Button>
+            <Link
+              href="/auth/signup"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-cyan-500 to-[#0891b2] text-white font-bold px-8 py-4 rounded-lg hover:scale-105 transition-all duration-200 shadow-[0_0_20px_rgba(8,145,178,0.4)]"
+            >
+              Sign Up Now
+            </Link>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-background py-12" id="contact">
-        <div className="container px-4">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <Image
-                src="/ym-logo-symbol.svg"
-                alt="YM Movement"
-                width={73}
-                height={40}
-                className="mb-4 h-8 w-auto"
-              />
-              <p className="text-sm text-muted-foreground">
-                Professional ice dance coaching and development programs.
-              </p>
+      <footer className="w-full py-16 px-6 md:px-8 border-t border-white/10 bg-[#1a3a5c]" id="contact">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-7xl mx-auto text-sm">
+          <div className="col-span-2 md:col-span-1">
+            <div className="text-2xl font-black tracking-tighter text-white mb-4">
+              YM Movement
             </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/about" className="hover:text-foreground">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/programs" className="hover:text-foreground">
-                    Programs
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/testimonials" className="hover:text-foreground">
-                    Testimonials
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/privacy" className="hover:text-foreground">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="hover:text-foreground">
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Contact</h4>
-              <address className="not-italic text-sm text-muted-foreground">
-                <p>Email: info@ym-movement.com</p>
-              </address>
-            </div>
+            <p className="text-slate-300 mt-4 leading-relaxed">
+              Elite figure skating coaching platform founded by Olympic athlete Yura Min. Precision
+              in Motion.
+            </p>
           </div>
-          <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} YM Movement. All rights reserved.</p>
+          <div>
+            <h4 className="text-white font-semibold mb-4 tracking-wider uppercase text-xs">
+              Quick Links
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-slate-300 hover:text-cyan-400 transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/programs"
+                  className="text-slate-300 hover:text-cyan-400 transition-colors"
+                >
+                  Programs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/testimonials"
+                  className="text-slate-300 hover:text-cyan-400 transition-colors"
+                >
+                  Testimonials
+                </Link>
+              </li>
+            </ul>
           </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4 tracking-wider uppercase text-xs">
+              Legal
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-slate-300 hover:text-cyan-400 transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-slate-300 hover:text-cyan-400 transition-colors"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white font-semibold mb-4 tracking-wider uppercase text-xs">
+              Contact
+            </h4>
+            <address className="not-italic text-slate-300">
+              <p>Email: info@ym-movement.com</p>
+            </address>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/10 text-slate-400 text-xs text-center">
+          © {new Date().getFullYear()} YM Movement. Precision in Motion.
         </div>
       </footer>
     </div>
