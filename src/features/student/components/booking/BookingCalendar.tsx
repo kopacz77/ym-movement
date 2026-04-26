@@ -2,6 +2,7 @@
 "use client";
 import type { EventClickArg, EventContentArg, EventInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import luxon3Plugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
@@ -461,7 +462,8 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
           </div>
         ) : (
           <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin]}
+            key={rinkTimezone}
+            plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin]}
             initialView="timeGridWeek"
             initialDate={date}
             timeZone={rinkTimezone}

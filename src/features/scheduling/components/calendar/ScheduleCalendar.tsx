@@ -5,6 +5,7 @@ import type { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/c
 import dayGridPlugin from "@fullcalendar/daygrid";
 import type { EventResizeDoneArg } from "@fullcalendar/interaction";
 import interactionPlugin from "@fullcalendar/interaction";
+import luxon3Plugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { Globe } from "lucide-react";
@@ -17,6 +18,7 @@ import {
 } from "@/features/scheduling/utils/fullcalendar-transforms";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { useOperationalSettings } from "@/hooks/useOperationalSettings";
 import { useScheduleActions } from "@/hooks/useScheduleActions";
 import { useTimeSlots } from "@/hooks/useTimeSlots";
 import { api } from "@/lib/api";
@@ -31,6 +33,7 @@ export function ScheduleCalendar() {
   const { updateTimeSlot } = useScheduleActions();
   const { coachId: currentUserCoachId } = useCurrentUser();
   const isMobile = useIsMobile();
+  const { businessHours } = useOperationalSettings();
 
   // Auto-select coach on mount
   useEffect(() => {
@@ -198,40 +201,55 @@ export function ScheduleCalendar() {
     }
   }, [state.currentDate, state.view]);
 
-  // Dynamic time range — fit to actual event data; default to typical coaching hours
+  // Dynamic time range — start with working hours from settings, expand if events fall outside
   const timeRange = useMemo(() => {
-    if (state.view === "dayGridMonth" || !filteredTimeSlots?.length) {
-      return { min: "10:00:00", max: "22:00:00" };
+    // Month view is date-only; no time axis needed
+    if (state.view === "dayGridMonth") {
+      return { min: "00:00:00", max: "24:00:00" };
     }
-    let minHour = 23;
-    let maxHour = 0;
-    for (const slot of filteredTimeSlots) {
-      const startStr =
-        typeof slot.startTime === "string" ? slot.startTime : slot.startTime.toISOString();
-      const endStr = typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString();
-      const startDt = DateTime.fromISO(startStr, { zone: calendarTimezone });
-      const endDt = DateTime.fromISO(endStr, { zone: calendarTimezone });
-      if (startDt.hour < minHour) {
-        minHour = startDt.hour;
-      }
-      const eh = endDt.minute > 0 ? endDt.hour + 1 : endDt.hour;
-      if (eh > maxHour) {
-        maxHour = eh;
+
+    // Base range from operational settings (e.g. 06:00-18:00)
+    let minHour = businessHours.startHour;
+    let maxHour = businessHours.endHour;
+    // If endMinutes > 0, round the end hour up so the full working period is visible
+    if (businessHours.endMinutes > 0) {
+      maxHour = Math.min(24, maxHour + 1);
+    }
+
+    // Scan events — expand window if any events fall outside working hours
+    if (filteredTimeSlots?.length) {
+      for (const slot of filteredTimeSlots) {
+        const startStr =
+          typeof slot.startTime === "string" ? slot.startTime : slot.startTime.toISOString();
+        const endStr =
+          typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString();
+        const startDt = DateTime.fromISO(startStr, { zone: calendarTimezone });
+        const endDt = DateTime.fromISO(endStr, { zone: calendarTimezone });
+
+        // Event starts before working hours — expand with 1-hour padding
+        if (startDt.hour < minHour) {
+          minHour = Math.max(0, startDt.hour - 1);
+        }
+        // Event ends after working hours — expand with 1-hour padding
+        const eventEndHour = endDt.minute > 0 ? endDt.hour + 1 : endDt.hour;
+        if (eventEndHour > maxHour) {
+          maxHour = Math.min(24, eventEndHour + 1);
+        }
       }
     }
-    // Pad 1 hour on each side, min 4-hour window
-    minHour = Math.max(0, minHour - 1);
-    maxHour = Math.min(24, maxHour + 1);
+
+    // Enforce minimum 4-hour window for readability
     if (maxHour - minHour < 4) {
       const mid = Math.floor((minHour + maxHour) / 2);
       minHour = Math.max(0, mid - 2);
       maxHour = Math.min(24, mid + 2);
     }
+
     return {
       min: `${String(minHour).padStart(2, "0")}:00:00`,
       max: `${String(maxHour).padStart(2, "0")}:00:00`,
     };
-  }, [filteredTimeSlots, calendarTimezone, state.view]);
+  }, [filteredTimeSlots, calendarTimezone, state.view, businessHours]);
 
   // --- Render ---
 
@@ -273,8 +291,9 @@ export function ScheduleCalendar() {
       {timezoneBanner}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <FullCalendar
+          key={calendarTimezone}
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, luxon3Plugin]}
           initialView={state.view}
           initialDate={state.currentDate}
           timeZone={calendarTimezone}

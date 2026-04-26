@@ -2,6 +2,7 @@
 
 import type { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import luxon3Plugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
@@ -247,7 +248,8 @@ const CoachScheduleManagerComponent = () => {
           ) : (
             <div className="p-4">
               <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin]}
+                key={rinkTimezone}
+                plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin]}
                 initialView={calendarView}
                 initialDate={date}
                 timeZone={rinkTimezone}
