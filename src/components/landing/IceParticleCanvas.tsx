@@ -56,6 +56,7 @@ export default function IceParticleCanvas() {
             luminanceThreshold={0.05}
             luminanceSmoothing={0.9}
             mipmapBlur
+            radius={0.8}
           />
         </EffectComposer>
       </Canvas>

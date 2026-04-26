@@ -20,16 +20,16 @@ const fadeUp = {
 export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-[#0f172a] overflow-hidden pt-20">
-      {/* Layer 1: Photo backdrop — very subtle human presence */}
+      {/* Layer 1: Photo backdrop — subtle human presence, positioned to show face */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/images/yura-min1.jpeg"
           alt=""
           fill
-          className="object-cover opacity-[0.08]"
+          className="object-cover object-top opacity-[0.10]"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/70 to-[#0f172a]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/60 to-[#0f172a]/80" />
       </div>
 
       {/* Layer 2: Three.js ice crystal particles with bloom */}
@@ -47,14 +47,18 @@ export function HeroSection() {
         animate="visible"
         transition={{ staggerChildren: 0.15, delayChildren: 0.3 }}
       >
-        {/* YM Movement Logo */}
-        <motion.div className="mb-10" variants={fadeUp} transition={{ duration: 0.6 }}>
+        {/* YM Movement Logo with backlight glow */}
+        <motion.div className="mb-10 relative" variants={fadeUp} transition={{ duration: 0.6 }}>
+          {/* Backlight glow behind logo */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-[300px] sm:w-[400px] md:w-[500px] h-[180px] sm:h-[240px] md:h-[300px] rounded-full bg-white/[0.08] blur-[60px]" />
+          </div>
           <Image
             src="/ym-logo-full.svg"
             alt="YM Movement"
             width={6053}
             height={3654}
-            className="mx-auto h-auto w-[260px] sm:w-[340px] md:w-[420px] drop-shadow-[0_0_30px_rgba(34,211,238,0.15)]"
+            className="relative mx-auto h-auto w-[260px] sm:w-[340px] md:w-[420px] brightness-0 invert drop-shadow-[0_0_40px_rgba(255,255,255,0.2)]"
             priority
           />
         </motion.div>

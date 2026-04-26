@@ -288,17 +288,17 @@ function AthleteCard({ athlete, onClick }: { athlete: Athlete; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="group relative w-full text-left rounded-xl overflow-hidden bg-white border border-gray-200/60 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group relative w-full text-left rounded-xl overflow-hidden bg-white/5 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-2"
     >
       {/* Thumbnail */}
-      <div className="relative aspect-[3/4] w-full bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
+      <div className="relative aspect-[3/4] w-full bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
         {imageError ? (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="w-10 h-10 text-primary/40" />
+              <div className="w-20 h-20 mx-auto mb-2 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                <Users className="w-10 h-10 text-cyan-400/40" />
               </div>
-              <p className="text-xs text-muted-foreground px-4">Athlete Photo</p>
+              <p className="text-xs text-slate-500 px-4">Athlete Photo</p>
             </div>
           </div>
         ) : (
@@ -320,8 +320,8 @@ function AthleteCard({ athlete, onClick }: { athlete: Athlete; onClick: () => vo
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-300">
           <div className="text-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-            <div className="w-14 h-14 mx-auto rounded-full bg-white/90 flex items-center justify-center shadow-lg mb-2">
-              <Video className="w-7 h-7 text-primary" />
+            <div className="w-14 h-14 mx-auto rounded-full bg-cyan-500/90 flex items-center justify-center shadow-lg mb-2">
+              <Video className="w-7 h-7 text-white" />
             </div>
             <span className="text-white text-sm font-medium">
               View {videoCount} Video{videoCount !== 1 ? "s" : ""}
@@ -338,10 +338,10 @@ function AthleteCard({ athlete, onClick }: { athlete: Athlete; onClick: () => vo
 
       {/* Info */}
       <div className="p-4">
-        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-white group-hover:text-cyan-400 transition-colors">
           {athlete.name}
         </h3>
-        <p className="text-sm text-muted-foreground mt-1">{athlete.discipline}</p>
+        <p className="text-sm text-slate-400 mt-1">{athlete.discipline}</p>
       </div>
     </button>
   );
@@ -474,16 +474,16 @@ export default function ProgramsPage() {
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
-        <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-6">
+      <section className="py-24 bg-[#0f172a]">
+        <div className="max-w-7xl mx-auto px-6 md:px-8 text-center">
+          <div className="inline-flex items-center rounded-full bg-cyan-500/10 px-4 py-1.5 text-sm font-medium text-cyan-400 mb-6">
             <Play className="w-4 h-4 mr-2" />
             Choreography Showcase
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-6">
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-6">
             Programs by Yura Min
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             Explore the competitive routines and exhibition programs choreographed by Yura Min.
             Click on any athlete to view their complete video library.
           </p>
@@ -491,8 +491,8 @@ export default function ProgramsPage() {
       </section>
 
       {/* Athlete Grid */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
+      <section className="py-24 bg-[#0f172a]">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {visibleAthletes.map((athlete) => (
               <AthleteCard
@@ -506,18 +506,19 @@ export default function ProgramsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary/5">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
+      <section className="py-20 bg-[#0f172a] relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent" />
+        <div className="relative max-w-3xl mx-auto px-6 md:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
             Want Yura to Choreograph Your Program?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+          <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto">
             Join YM Movement and work with Yura to create a custom program that showcases your
             unique style and abilities.
           </p>
           <a
             href="/auth/signup"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center bg-gradient-to-r from-cyan-500 to-[#0891b2] text-white font-bold px-8 py-4 rounded-lg hover:scale-105 transition-all duration-200 shadow-[0_0_20px_rgba(8,145,178,0.4)]"
           >
             Sign Up Today
           </a>

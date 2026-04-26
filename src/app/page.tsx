@@ -1,4 +1,5 @@
 import { Calendar, Medal, TrendingUp } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { HeroSection } from "@/components/landing/HeroSection";
 
@@ -6,67 +7,75 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Navigation Header */}
-      <nav className="fixed top-0 z-50 flex w-full items-center justify-between px-6 md:px-8 h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        {/* Left: Wordmark */}
-        <Link
-          href="/"
-          className="text-xl font-black text-[#1a3a5c] tracking-tight"
-        >
-          YM Movement
-        </Link>
-
-        {/* Center: Navigation Links */}
-        <ul className="hidden md:flex gap-8 items-center">
-          <li>
-            <Link
-              href="/about"
-              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
-            >
-              About
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/programs"
-              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
-            >
-              Programs
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/testimonials"
-              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
-            >
-              Testimonials
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#contact"
-              className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
-            >
-              Contact
-            </Link>
-          </li>
-        </ul>
-
-        {/* Right: Auth buttons */}
-        <div className="flex gap-3">
-          <Link
-            href="/auth/login"
-            className="hidden md:block text-[#1a3a5c] font-bold px-4 py-2 rounded-lg hover:text-[#0891b2] transition-colors active:scale-95 duration-200"
-          >
-            Login
+      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-white/80 backdrop-blur-md shadow-sm">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-8">
+          {/* Left: Logo */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/ym-logo-symbol.svg"
+              alt="YM Movement"
+              width={73}
+              height={40}
+              className="h-9 w-auto"
+              priority
+            />
           </Link>
-          <Link
-            href="/auth/signup"
-            className="bg-[#1a3a5c] text-white font-bold px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors active:scale-95 duration-200"
-          >
-            Get Started
-          </Link>
+
+          {/* Center: Navigation Links */}
+          <nav className="hidden md:block">
+            <ul className="flex gap-8 items-center">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/programs"
+                  className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+                >
+                  Programs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/testimonials"
+                  className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+                >
+                  Testimonials
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/#contact"
+                  className="text-slate-500 font-medium hover:text-[#0891b2] transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Right: Auth buttons */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/auth/login"
+              className="hidden md:block text-[#1a3a5c] font-bold px-4 py-2 rounded-lg hover:text-[#0891b2] transition-colors active:scale-95 duration-200"
+            >
+              Login
+            </Link>
+            <Link
+              href="/auth/signup"
+              className="hidden sm:block bg-[#1a3a5c] text-white font-bold px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors active:scale-95 duration-200"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
-      </nav>
+      </header>
 
       {/* Main Content */}
       <main className="flex-1">
@@ -155,9 +164,15 @@ export default function LandingPage() {
       <footer className="w-full py-16 px-6 md:px-8 border-t border-white/10 bg-[#1a3a5c]" id="contact">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-7xl mx-auto text-sm">
           <div className="col-span-2 md:col-span-1">
-            <div className="text-2xl font-black tracking-tighter text-white mb-4">
-              YM Movement
-            </div>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/ym-logo-full.svg"
+                alt="YM Movement"
+                width={6053}
+                height={3654}
+                className="h-10 w-auto brightness-0 invert"
+              />
+            </Link>
             <p className="text-slate-300 mt-4 leading-relaxed">
               Elite figure skating coaching platform founded by Olympic athlete Yura Min. Precision
               in Motion.

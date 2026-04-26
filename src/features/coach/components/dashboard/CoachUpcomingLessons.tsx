@@ -29,7 +29,10 @@ export function CoachUpcomingLessons() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h4 className="font-semibold text-slate-900 text-lg">Upcoming Lessons</h4>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">Upcoming</p>
+        <h4 className="text-lg font-semibold text-foreground">Lessons</h4>
+      </div>
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (

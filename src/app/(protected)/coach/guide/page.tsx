@@ -53,7 +53,7 @@ export default function CoachGuidePage() {
               onClick={() => scrollToSection("dashboard")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
-              <LayoutDashboard className="h-4 w-4 text-blue-600" />
+              <LayoutDashboard className="h-4 w-4 text-[#0891b2]" />
               <span className="font-medium">Dashboard</span>
             </button>
             <button

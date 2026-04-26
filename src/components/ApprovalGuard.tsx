@@ -24,7 +24,7 @@ export function ApprovalGuard({
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="text-center">
-          <Clock className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-500" />
+          <Clock className="h-8 w-8 animate-spin mx-auto mb-4 text-[#0891b2]" />
           <p className="text-muted-foreground">Checking account status...</p>
         </div>
       </div>
@@ -62,7 +62,7 @@ export function ApprovalGuard({
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="font-semibold text-blue-800 mb-2">Need to reactivate?</h4>
-              <p className="text-sm text-blue-700">
+              <p className="text-sm text-foreground">
                 Contact us at{" "}
                 <a href="mailto:info@ym-movement.com" className="underline hover:no-underline">
                   info@ym-movement.com
@@ -103,7 +103,7 @@ export function ApprovalGuard({
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-semibold text-blue-800 mb-2">Need help?</h4>
-            <p className="text-sm text-blue-700">
+            <p className="text-sm text-foreground">
               Contact us at{" "}
               <a href="mailto:info@ym-movement.com" className="underline hover:no-underline">
                 info@ym-movement.com

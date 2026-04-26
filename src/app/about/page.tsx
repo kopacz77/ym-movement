@@ -1,5 +1,6 @@
 import { Award, Heart, Medal, Star, Target, Users } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { PublicLayout } from "@/components/public/PublicLayout";
 
 export const metadata = {
@@ -12,12 +13,13 @@ export default function AboutPage() {
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-primary/5 to-background">
-        <div className="container mx-auto px-4">
+      <section className="relative py-24 bg-[#0f172a]">
+        <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent" />
+        <div className="relative max-w-7xl mx-auto px-6 md:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             {/* Photo */}
             <div className="relative order-2 lg:order-1">
-              <div className="relative aspect-[2/3] w-full max-w-md mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-2xl">
+              <div className="relative aspect-[2/3] w-full max-w-md mx-auto overflow-hidden rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                 <Image
                   src="/images/yura-min1.jpeg"
                   alt="Yura Min - Olympic Ice Dancer"
@@ -26,35 +28,34 @@ export default function AboutPage() {
                   priority
                 />
               </div>
-              {/* Decorative elements */}
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
-              <div className="absolute -top-4 -left-4 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -left-4 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl" />
             </div>
 
             {/* Bio intro */}
             <div className="order-1 lg:order-2">
-              <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-6">
+              <div className="inline-flex items-center rounded-full bg-cyan-500/10 px-4 py-1.5 text-sm font-medium text-cyan-400 mb-6">
                 <Medal className="w-4 h-4 mr-2" />
                 Olympic Ice Dancer
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl mb-6">
+              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl mb-6">
                 Yura Min
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed mb-8">
+              <p className="text-xl text-slate-300 leading-relaxed mb-8">
                 A world-renowned ice dancer who represented South Korea at the Winter Olympics, Yura
                 brings her passion for skating excellence to every student she coaches.
               </p>
               <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Star className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <Star className="w-4 h-4 text-cyan-400" />
                   <span>Olympic Athlete</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Award className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <Award className="w-4 h-4 text-cyan-400" />
                   <span>World Competitor</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Heart className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <Heart className="w-4 h-4 text-cyan-400" />
                   <span>Dedicated Coach</span>
                 </div>
               </div>
@@ -64,12 +65,18 @@ export default function AboutPage() {
       </section>
 
       {/* Story Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">The Journey</h2>
+      <section className="py-24 bg-[#0f172a]">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400 mb-2">
+              The Story
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              The Journey
+            </h2>
+          </div>
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center max-w-6xl mx-auto">
-            {/* Text content - Left side */}
-            <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
+            <div className="space-y-6 text-slate-300 text-lg leading-relaxed">
               <p>
                 Yura Min&apos;s skating journey began at a young age, driven by an unwavering
                 passion for the artistry and athleticism of ice dance. Her dedication and talent
@@ -90,9 +97,8 @@ export default function AboutPage() {
               </p>
             </div>
 
-            {/* Photo - Right side */}
             <div className="relative">
-              <div className="relative aspect-[4/5] w-full max-w-md mx-auto overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-2xl">
+              <div className="relative aspect-[4/5] w-full max-w-md mx-auto overflow-hidden rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                 <Image
                   src="/images/yura-min2.jpeg"
                   alt="Yura Min performing on ice"
@@ -100,101 +106,129 @@ export default function AboutPage() {
                   className="object-cover"
                 />
               </div>
-              {/* Decorative elements */}
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
-              <div className="absolute -top-4 -right-4 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -right-4 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Achievements Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-primary/5">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
-            Achievements & Credentials
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+      <section className="py-24 bg-[#0f172a]">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
+          <div className="text-center mb-16">
+            <p className="text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400 mb-2">
+              Credentials
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              Achievements
+            </h2>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
             {[
               {
                 icon: Medal,
                 title: "Olympic Competitor",
                 description: "Represented South Korea at the Winter Olympics in ice dance",
+                color: "cyan",
               },
               {
                 icon: Award,
                 title: "World Championships",
                 description: "Multiple appearances at ISU World Figure Skating Championships",
+                color: "purple",
               },
               {
                 icon: Star,
                 title: "Four Continents",
                 description: "Competed at Four Continents Figure Skating Championships",
+                color: "emerald",
               },
               {
                 icon: Target,
                 title: "Grand Prix Circuit",
                 description: "Competed on the ISU Grand Prix of Figure Skating circuit",
+                color: "cyan",
               },
               {
                 icon: Users,
                 title: "Certified Coach",
                 description: "Professional coaching certification with years of experience",
+                color: "purple",
               },
               {
                 icon: Heart,
                 title: "Choreographer",
                 description: "Creates award-winning programs for competitive skaters",
+                color: "emerald",
               },
-            ].map((achievement, index) => (
-              <div
-                key={index}
-                className="rounded-xl bg-white border border-gray-200/60 p-6 shadow-md hover:shadow-lg transition-shadow"
-              >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <achievement.icon className="h-6 w-6 text-primary" />
+            ].map((achievement, index) => {
+              const colorMap = {
+                cyan: { bg: "bg-cyan-500/20", text: "text-cyan-400" },
+                purple: { bg: "bg-purple-500/20", text: "text-purple-400" },
+                emerald: { bg: "bg-emerald-500/20", text: "text-emerald-400" },
+              };
+              const c = colorMap[achievement.color as keyof typeof colorMap];
+              return (
+                <div
+                  key={index}
+                  className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-8 hover:-translate-y-2 transition-transform duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
+                >
+                  <div
+                    className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center mb-6`}
+                  >
+                    <achievement.icon className={`h-6 w-6 ${c.text}`} />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+                    {achievement.title}
+                  </h3>
+                  <p className="text-slate-400 leading-relaxed">{achievement.description}</p>
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-foreground">{achievement.title}</h3>
-                <p className="text-sm text-muted-foreground">{achievement.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Philosophy Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-foreground mb-8">Coaching Philosophy</h2>
-            <blockquote className="text-2xl font-medium text-foreground italic mb-8">
-              &ldquo;Every skater has a unique voice waiting to be heard on the ice. My job is to
-              help them find it and express it beautifully.&rdquo;
-            </blockquote>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Yura&apos;s coaching approach combines rigorous technical training with artistic
-              development. She believes in building strong fundamentals while nurturing each
-              skater&apos;s individual style and expression. Her programs are designed to challenge,
-              inspire, and bring out the best in every student.
-            </p>
-          </div>
+      <section className="py-24 bg-[#0f172a] relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent" />
+        <div className="relative max-w-3xl mx-auto px-6 md:px-8 text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.15em] text-cyan-400 mb-2">
+            Approach
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 tracking-tight">
+            Coaching Philosophy
+          </h2>
+          <blockquote className="text-2xl font-medium text-white italic mb-10 leading-relaxed">
+            &ldquo;Every skater has a unique voice waiting to be heard on the ice. My job is to
+            help them find it and express it beautifully.&rdquo;
+          </blockquote>
+          <p className="text-lg text-slate-300 leading-relaxed">
+            Yura&apos;s coaching approach combines rigorous technical training with artistic
+            development. She believes in building strong fundamentals while nurturing each
+            skater&apos;s individual style and expression. Her programs are designed to challenge,
+            inspire, and bring out the best in every student.
+          </p>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary/5">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Train with Yura?</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+      <section className="py-20 bg-[#0f172a]">
+        <div className="max-w-3xl mx-auto px-6 md:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+            Ready to Train with Yura?
+          </h2>
+          <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto">
             Take the first step in your skating journey. Sign up to book lessons and start training
             with an Olympic athlete.
           </p>
-          <a
+          <Link
             href="/auth/signup"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center bg-gradient-to-r from-cyan-500 to-[#0891b2] text-white font-bold px-8 py-4 rounded-lg hover:scale-105 transition-all duration-200 shadow-[0_0_20px_rgba(8,145,178,0.4)]"
           >
             Get Started Today
-          </a>
+          </Link>
         </div>
       </section>
     </PublicLayout>

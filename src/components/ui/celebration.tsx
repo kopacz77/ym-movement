@@ -122,7 +122,7 @@ export function Celebration({
         admin: "from-blue-50 via-indigo-50 to-blue-50",
         student: "from-blue-50 to-indigo-50",
       },
-      iconColor: "text-blue-600",
+      iconColor: "text-[#0891b2]",
       decorativeElements: ["🚀", "⚡", "🌟"],
     },
   };

@@ -34,8 +34,8 @@ export function CoachOverviewCards() {
       title: "Upcoming Lessons",
       value: stats?.upcomingLessons ?? 0,
       icon: Calendar,
-      iconBg: "bg-blue-50",
-      iconColor: "text-blue-600",
+      iconBg: "bg-cyan-50/70",
+      iconColor: "text-cyan-600",
     },
     {
       title: "Completed This Month",

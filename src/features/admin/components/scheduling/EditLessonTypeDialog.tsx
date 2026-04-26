@@ -177,7 +177,7 @@ export function EditLessonTypeDialog({
               </p>
             )}
             {studentPricing?.customPricingEnabled && (
-              <p className="text-xs text-blue-600 font-medium">
+              <p className="text-xs text-[#0891b2] font-medium">
                 This student has custom pricing enabled
               </p>
             )}

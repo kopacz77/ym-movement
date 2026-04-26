@@ -195,7 +195,7 @@ export function CoachBlockedDates({ className }: CoachBlockedDatesProps) {
 
       {/* Create/Edit form */}
       {isCreateFormOpen && (
-        <form onSubmit={handleSubmit} className="mb-4 p-3 border rounded-lg bg-gray-50 space-y-3">
+        <form onSubmit={handleSubmit} className="mb-4 p-3 border rounded-lg bg-muted space-y-3">
           <h4 className="font-medium text-sm">
             {editingBlockedDate ? "Edit Blocked Date" : "Create Blocked Period"}
           </h4>

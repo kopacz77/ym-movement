@@ -304,7 +304,7 @@ function TemplateCard({ template, onSelect }: TemplateCardProps) {
         </div>
 
         {template.dateRange && (
-          <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+          <div className="text-xs text-[#0891b2] bg-secondary/10 p-2 rounded">
             Auto-sets {template.dateRange.duration} days starting{" "}
             {template.dateRange.startOffset === 0
               ? "today"

@@ -67,7 +67,7 @@ export function CoachProfileCard({ coach, onSelect }: CoachProfileCardProps) {
         <div className="flex items-start gap-3 mb-3">
           <Avatar className="h-12 w-12">
             {coach.photoUrl && <AvatarImage src={coach.photoUrl} alt={coach.name || "Coach"} />}
-            <AvatarFallback className="bg-blue-100 text-blue-700 text-sm font-medium">
+            <AvatarFallback className="bg-cyan-50 text-cyan-700 text-sm font-medium">
               {initials || <User className="h-5 w-5" />}
             </AvatarFallback>
           </Avatar>

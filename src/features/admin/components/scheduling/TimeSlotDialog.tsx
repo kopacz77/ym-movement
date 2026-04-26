@@ -311,10 +311,10 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-5 w-5 p-0 hover:bg-blue-100"
+                                      className="h-5 w-5 p-0 hover:bg-cyan-50"
                                       title="View student notes"
                                     >
-                                      <Info className="h-4 w-4 text-blue-600" />
+                                      <Info className="h-4 w-4 text-[#0891b2]" />
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-96" align="start">
@@ -323,7 +323,7 @@ export const TimeSlotDialog: FC<TimeSlotDialogProps> = ({
                                         <h4 className="font-semibold text-sm">Recent Notes</h4>
                                         <Link
                                           href={`/admin/students/${lesson.Student.id}`}
-                                          className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                                          className="text-xs text-[#0891b2] hover:text-[#006780] flex items-center gap-1"
                                         >
                                           View all
                                           <ExternalLink className="h-3 w-3" />

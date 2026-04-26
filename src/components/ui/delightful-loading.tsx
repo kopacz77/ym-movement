@@ -18,7 +18,7 @@ function DelightfulLoading({
           <div className="absolute top-0 left-0 h-12 w-12 rounded-full border-2 border-transparent border-t-blue-500 animate-spin" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Heart className="h-4 w-4 text-blue-500 animate-pulse" />
+          <Heart className="h-4 w-4 text-[#0891b2] animate-pulse" />
         </div>
       </div>
       <div className="flex items-center space-x-2 text-sm text-muted-foreground">

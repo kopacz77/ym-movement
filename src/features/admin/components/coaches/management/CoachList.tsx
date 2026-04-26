@@ -49,7 +49,7 @@ function getStatusBadge(coach: {
   }
 
   if (coach.isActive) {
-    return <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
+    return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>;
   }
 
   return <Badge variant="secondary">Inactive</Badge>;

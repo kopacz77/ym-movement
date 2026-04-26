@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-zinc-50">
+    <div className="flex justify-center items-center min-h-screen bg-muted">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Forgot Password</CardTitle>
@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
                 If an account exists with email <span className="font-medium">{email}</span>,
                 we&apos;ve sent a password reset link.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Please check your email and follow the instructions to reset your password.
               </p>
             </div>
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
           )}
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Link href="/auth/login" className="text-sm text-blue-600 hover:underline">
+          <Link href="/auth/login" className="text-sm text-[#0891b2] hover:underline">
             Back to Login
           </Link>
         </CardFooter>

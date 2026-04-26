@@ -112,7 +112,7 @@ export const BookingDialog = ({ slot, studentId, onCloseAction }: BookingDialogP
         </DialogHeader>
         <div className="flex flex-col gap-6">
           {/* Time slot details */}
-          <div className="bg-gray-50 p-4 rounded-lg flex flex-col gap-3">
+          <div className="bg-muted p-4 rounded-lg flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{dayStr}</span>

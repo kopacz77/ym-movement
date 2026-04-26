@@ -81,7 +81,7 @@ export default async function LessonDetailsPage({
     return (
       <div className="container py-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Link href="/student/schedule" className="text-sm text-blue-600 hover:underline">
+          <Link href="/student/schedule" className="text-sm text-[#0891b2] hover:underline">
             &larr; Back to Schedule
           </Link>
         </div>

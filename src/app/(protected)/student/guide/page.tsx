@@ -56,7 +56,7 @@ export default function StudentGuidePage() {
               onClick={() => scrollToSection("getting-started")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
-              <User className="h-4 w-4 text-blue-600" />
+              <User className="h-4 w-4 text-[#0891b2]" />
               <span className="font-medium">Getting Started</span>
             </button>
             <button
@@ -317,7 +317,7 @@ export default function StudentGuidePage() {
               />
               <LessonTypeCard
                 title="Group Lessons"
-                color="bg-green-100 text-green-700 border-green-300"
+                color="bg-emerald-50 text-emerald-700 border-emerald-300"
                 description="Small group instruction with other students"
               />
               <LessonTypeCard

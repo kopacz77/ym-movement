@@ -134,7 +134,7 @@ export const CoachOverviewCards = () => {
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div className="flex flex-col items-center p-2 rounded-lg bg-muted/40">
-                  <Calendar className="h-3.5 w-3.5 text-blue-500 mb-1" />
+                  <Calendar className="h-3.5 w-3.5 text-[#0891b2] mb-1" />
                   <span className="text-sm font-bold text-foreground">{coach.lessonCount}</span>
                   <span className="text-[10px] text-muted-foreground">Lessons</span>
                 </div>
@@ -160,7 +160,7 @@ export const CoachOverviewCards = () => {
                   <span className="text-[10px] text-muted-foreground">/mo</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-blue-600" />
+                  <Clock className="h-3.5 w-3.5 text-[#0891b2]" />
                   <span className="text-xs text-muted-foreground">
                     {coach.totalHoursBooked.toFixed(1)}h booked
                   </span>

@@ -59,11 +59,11 @@ export const PaymentTable = ({
   const getStatusBadge = (status: PaymentStatus) => {
     switch (status) {
       case "COMPLETED":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+        return <Badge className="bg-emerald-50 text-emerald-700">Completed</Badge>;
       case "PENDING":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return <Badge className="bg-amber-50 text-amber-700">Pending</Badge>;
       case "FAILED":
-        return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
+        return <Badge className="bg-rose-50 text-rose-700">Failed</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }

@@ -153,7 +153,7 @@ export function EncouragingEmptyState({
         )}
       >
         <Icon
-          className={cn("h-12 w-12", isAdmin ? "text-pink-600" : "text-blue-600", "animate-pulse")}
+          className={cn("h-12 w-12", isAdmin ? "text-pink-600" : "text-[#0891b2]", "animate-pulse")}
         />
       </div>
 

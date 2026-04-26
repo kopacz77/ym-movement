@@ -160,8 +160,8 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
 
               {/* Monthly stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col items-center p-3 rounded-lg bg-blue-50/80 border border-blue-100">
-                  <Calendar className="h-4 w-4 text-blue-500 mb-1" />
+                <div className="flex flex-col items-center p-3 rounded-lg bg-cyan-50/80 border border-cyan-100">
+                  <Calendar className="h-4 w-4 text-[#0891b2] mb-1" />
                   <span className="text-lg font-bold text-gray-900">{stats.monthLessonCount}</span>
                   <span className="text-[10px] text-muted-foreground">Lessons/Mo</span>
                 </div>
@@ -180,7 +180,7 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
               {/* Upcoming lessons section */}
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-500" />
+                  <Clock className="h-4 w-4 text-[#0891b2]" />
                   Upcoming Lessons ({upcomingLessons.length})
                 </h4>
                 {upcomingLessons.length === 0 ? (

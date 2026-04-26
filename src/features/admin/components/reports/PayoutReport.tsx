@@ -77,7 +77,7 @@ export function PayoutReport({ period, startDate, endDate }: PayoutReportProps) 
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 border rounded-lg">
-          <Users className="h-8 w-8 text-blue-600" />
+          <Users className="h-8 w-8 text-[#0891b2]" />
           <div>
             <p className="text-sm text-muted-foreground">Coach Payouts</p>
             <p className="text-xl font-bold">{formatCurrency(data.totals.totalCoachPayouts)}</p>

@@ -83,11 +83,11 @@ export default function StudentPaymentsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "COMPLETED":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+        return <Badge className="bg-emerald-50 text-emerald-700">Completed</Badge>;
       case "PENDING":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return <Badge className="bg-amber-50 text-amber-700">Pending</Badge>;
       case "FAILED":
-        return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
+        return <Badge className="bg-rose-50 text-rose-700">Failed</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -194,9 +194,9 @@ export default function StudentPaymentsPage() {
                 <p className="text-sm mt-1">Bring exact amount to lesson</p>
               </div>
             </div>
-            <div className="bg-blue-50 border border-blue-100 rounded-md p-4">
-              <h3 className="font-medium text-blue-800">Important</h3>
-              <p className="text-sm text-blue-700 mt-1">
+            <div className="bg-secondary/10 border border-secondary/20 rounded-md p-4">
+              <h3 className="font-medium text-foreground">Important</h3>
+              <p className="text-sm text-foreground mt-1">
                 Always include your payment reference code in the payment notes to ensure your
                 payment is properly tracked.
               </p>

@@ -124,8 +124,8 @@ export const PendingApprovals = () => {
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Badge className="bg-green-500 text-white">✓</Badge>
+            <div className="p-2 bg-emerald-50 rounded-lg">
+              <Badge className="bg-emerald-500 text-white">✓</Badge>
             </div>
             <span>Pending Approvals</span>
           </CardTitle>
@@ -161,7 +161,7 @@ export const PendingApprovals = () => {
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center space-x-2">
           <div className="p-2 bg-orange-100 rounded-lg">
-            <Badge className="bg-orange-500 text-white">{pendingStudents.length}</Badge>
+            <Badge className="bg-amber-500 text-white">{pendingStudents.length}</Badge>
           </div>
           <span>Pending Approvals</span>
         </CardTitle>
