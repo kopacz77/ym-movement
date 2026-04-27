@@ -222,7 +222,9 @@
       "Bash(git rebase:*)",
       "Bash(GIT_EDITOR=true git rebase:*)",
       "Bash(git push:*)",
-      "Bash(printf:*)"
+      "Bash(printf:*)",
+      "Bash(pnpm exec:*)",
+      "Bash(/tmp/screenshot-schedule.mjs:*)"
     ],
     "deny": [
       "Bash(npx prisma migrate reset:*)",

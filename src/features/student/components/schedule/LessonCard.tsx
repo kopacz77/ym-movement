@@ -6,12 +6,38 @@ import Link from "next/link";
 import { useState } from "react";
 import { AdaptiveTimeRange } from "@/components/AdaptiveTime";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LessonStatusBadge, LessonStatusIndicator } from "@/components/ui/lesson-status";
+import { Card, CardContent } from "@/components/ui/card";
+import { LessonStatusBadge } from "@/components/ui/lesson-status";
 import type { LessonWithDetails } from "@/features/student/types";
 import { formatUtcDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { CancellationDialog } from "./CancellationDialog";
+
+const typeConfig: Record<
+  string,
+  { label: string; badgeClass: string }
+> = {
+  PRIVATE: {
+    label: "Private",
+    badgeClass: "bg-blue-100 text-blue-700 border border-blue-200",
+  },
+  CHOREOGRAPHY: {
+    label: "Choreography",
+    badgeClass: "bg-violet-100 text-violet-700 border border-violet-200",
+  },
+  GROUP: {
+    label: "Group",
+    badgeClass: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  },
+  COMPETITION_PREP: {
+    label: "Comp Prep",
+    badgeClass: "bg-orange-100 text-orange-700 border border-orange-200",
+  },
+  OFF_ICE_DANCE: {
+    label: "Off-Ice Dance",
+    badgeClass: "bg-pink-100 text-pink-700 border border-pink-200",
+  },
+};
 
 interface LessonCardProps {
   lesson: LessonWithDetails;
@@ -26,6 +52,9 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
   const hoursUntilLesson = (lesson.startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
   const isLateCancellation = hoursUntilLesson < 24;
 
+  const type = (lesson.type as string) ?? "PRIVATE";
+  const config = typeConfig[type] ?? typeConfig.PRIVATE;
+
   return (
     <Card
       className={cn(
@@ -33,16 +62,16 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
         lesson.status === LessonStatus.CANCELLED && "opacity-60",
       )}
     >
-      <LessonStatusIndicator status={lesson.status as any} />
-
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">{lesson.type.replace("_", " ")} Lesson</CardTitle>
-        <CardAction>
+      <CardContent className="p-5">
+        {/* Header: lesson type badge + status badge */}
+        <div className="flex items-center justify-between mb-4">
+          <span className={cn("px-3 py-1 rounded-full text-xs font-medium", config.badgeClass)}>
+            {config.label}
+          </span>
           <LessonStatusBadge status={lesson.status as any} />
-        </CardAction>
-      </CardHeader>
+        </div>
 
-      <CardContent>
+        {/* Details */}
         <div className="space-y-2.5">
           <div className="flex items-center gap-2.5 text-sm">
             <Calendar className="h-4 w-4 text-slate-400" />
