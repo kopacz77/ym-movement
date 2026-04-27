@@ -71,12 +71,12 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-transform duration-300">
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-transform duration-300 isolate">
                 <Image
                   src="/images/yura-min1.jpeg"
                   alt="Portrait of Yura Min"
                   fill
-                  className="object-cover object-top"
+                  className="object-cover object-top rounded-2xl"
                 />
               </div>
               <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl" />
