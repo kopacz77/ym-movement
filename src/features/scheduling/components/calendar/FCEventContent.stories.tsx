@@ -61,7 +61,10 @@ export const PrivateLesson: Story = {
   }),
   decorators: [
     (Story) => (
-      <div className="w-48 rounded-md border border-blue-300 bg-blue-100 p-0.5" style={{ minHeight: 60 }}>
+      <div
+        className="w-48 rounded-md border border-blue-300 bg-blue-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
         <Story />
       </div>
     ),
@@ -77,7 +80,10 @@ export const ChoreographyLesson: Story = {
   }),
   decorators: [
     (Story) => (
-      <div className="w-48 rounded-md border border-purple-300 bg-purple-100 p-0.5" style={{ minHeight: 60 }}>
+      <div
+        className="w-48 rounded-md border border-purple-300 bg-purple-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
         <Story />
       </div>
     ),
@@ -93,7 +99,10 @@ export const GroupLesson: Story = {
   }),
   decorators: [
     (Story) => (
-      <div className="w-48 rounded-md border border-emerald-300 bg-emerald-100 p-0.5" style={{ minHeight: 60 }}>
+      <div
+        className="w-48 rounded-md border border-emerald-300 bg-emerald-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
         <Story />
       </div>
     ),
@@ -109,7 +118,10 @@ export const CompetitionPrep: Story = {
   }),
   decorators: [
     (Story) => (
-      <div className="w-48 rounded-md border border-orange-300 bg-orange-100 p-0.5" style={{ minHeight: 60 }}>
+      <div
+        className="w-48 rounded-md border border-orange-300 bg-orange-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
         <Story />
       </div>
     ),
@@ -126,7 +138,10 @@ export const DraftSlot: Story = {
   }),
   decorators: [
     (Story) => (
-      <div className="w-48 rounded-md border border-slate-300 bg-slate-100 p-0.5 opacity-70" style={{ minHeight: 60 }}>
+      <div
+        className="w-48 rounded-md border border-slate-300 bg-slate-100 p-0.5 opacity-70"
+        style={{ minHeight: 60 }}
+      >
         <Story />
       </div>
     ),
@@ -143,7 +158,10 @@ export const WithCoachName: Story = {
   }),
   decorators: [
     (Story) => (
-      <div className="w-48 rounded-md border border-blue-300 bg-blue-100 p-0.5" style={{ minHeight: 60 }}>
+      <div
+        className="w-48 rounded-md border border-blue-300 bg-blue-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
         <Story />
       </div>
     ),
@@ -153,20 +171,55 @@ export const WithCoachName: Story = {
 export const AllTypes: Story = {
   render: () => (
     <div className="flex gap-3">
-      <div className="w-40 rounded-md border border-blue-300 bg-blue-100 p-0.5" style={{ minHeight: 60 }}>
-        <FCEventContent {...mockEventArg({ rinkName: "Arena", textClass: "text-blue-900", lessonCount: 1 })} />
+      <div
+        className="w-40 rounded-md border border-blue-300 bg-blue-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
+        <FCEventContent
+          {...mockEventArg({ rinkName: "Arena", textClass: "text-blue-900", lessonCount: 1 })}
+        />
       </div>
-      <div className="w-40 rounded-md border border-purple-300 bg-purple-100 p-0.5" style={{ minHeight: 60 }}>
-        <FCEventContent {...mockEventArg({ rinkName: "Center", textClass: "text-purple-900", lessonCount: 1 })} />
+      <div
+        className="w-40 rounded-md border border-purple-300 bg-purple-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
+        <FCEventContent
+          {...mockEventArg({ rinkName: "Center", textClass: "text-purple-900", lessonCount: 1 })}
+        />
       </div>
-      <div className="w-40 rounded-md border border-emerald-300 bg-emerald-100 p-0.5" style={{ minHeight: 60 }}>
-        <FCEventContent {...mockEventArg({ rinkName: "Rink", textClass: "text-emerald-900", lessonCount: 3, maxStudents: 5 })} />
+      <div
+        className="w-40 rounded-md border border-emerald-300 bg-emerald-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
+        <FCEventContent
+          {...mockEventArg({
+            rinkName: "Rink",
+            textClass: "text-emerald-900",
+            lessonCount: 3,
+            maxStudents: 5,
+          })}
+        />
       </div>
-      <div className="w-40 rounded-md border border-orange-300 bg-orange-100 p-0.5" style={{ minHeight: 60 }}>
-        <FCEventContent {...mockEventArg({ rinkName: "Training", textClass: "text-orange-900", lessonCount: 1 })} />
+      <div
+        className="w-40 rounded-md border border-orange-300 bg-orange-100 p-0.5"
+        style={{ minHeight: 60 }}
+      >
+        <FCEventContent
+          {...mockEventArg({ rinkName: "Training", textClass: "text-orange-900", lessonCount: 1 })}
+        />
       </div>
-      <div className="w-40 rounded-md border border-slate-300 bg-slate-100 p-0.5 opacity-70" style={{ minHeight: 60 }}>
-        <FCEventContent {...mockEventArg({ rinkName: "Draft", isDraft: true, textClass: "text-slate-600", lessonCount: 0 })} />
+      <div
+        className="w-40 rounded-md border border-slate-300 bg-slate-100 p-0.5 opacity-70"
+        style={{ minHeight: 60 }}
+      >
+        <FCEventContent
+          {...mockEventArg({
+            rinkName: "Draft",
+            isDraft: true,
+            textClass: "text-slate-600",
+            lessonCount: 0,
+          })}
+        />
       </div>
     </div>
   ),

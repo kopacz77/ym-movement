@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { CoachUpcomingLessons } from "./CoachUpcomingLessons";
 
 const tomorrow = new Date();

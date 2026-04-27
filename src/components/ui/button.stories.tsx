@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Mail, Plus, Loader2 } from "lucide-react";
+import { Loader2, Mail, Plus } from "lucide-react";
 import { Button } from "./button";
 
 const meta = {
@@ -56,7 +56,13 @@ export const Large: Story = {
 };
 
 export const WithIcon: Story = {
-  args: { children: <><Mail /> Send Email</> },
+  args: {
+    children: (
+      <>
+        <Mail /> Send Email
+      </>
+    ),
+  },
 };
 
 export const IconOnly: Story = {
@@ -65,7 +71,11 @@ export const IconOnly: Story = {
 
 export const Loading: Story = {
   args: {
-    children: <><Loader2 className="animate-spin" /> Please wait</>,
+    children: (
+      <>
+        <Loader2 className="animate-spin" /> Please wait
+      </>
+    ),
     disabled: true,
   },
 };
@@ -93,7 +103,9 @@ export const AllSizes: Story = {
       <Button size="sm">Small</Button>
       <Button size="default">Default</Button>
       <Button size="lg">Large</Button>
-      <Button size="icon"><Plus /></Button>
+      <Button size="icon">
+        <Plus />
+      </Button>
     </div>
   ),
 };

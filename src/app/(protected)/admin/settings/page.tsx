@@ -324,9 +324,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-[#1a3a5c]">Settings</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Configure operational hours, pricing, rinks, and account security.
+          </p>
+        </div>
         <Button
           onClick={handleSave}
           disabled={isSaving || !operationalSettings}
@@ -337,8 +343,8 @@ export default function SettingsPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="operational">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-b mb-4 pb-0">
+      <Tabs defaultValue="operational" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:w-fit">
           <TabsTrigger value="operational" className="flex items-center text-xs sm:text-sm">
             <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Operational Hours</span>
@@ -363,9 +369,11 @@ export default function SettingsPage() {
 
         {/* Operational Hours Settings */}
         <TabsContent value="operational">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
             <CardHeader>
-              <CardTitle>Operational Hours</CardTitle>
+              <CardTitle className="text-lg font-semibold text-[#1a3a5c]">
+                Operational Hours
+              </CardTitle>
               <CardDescription>
                 Configure the default business hours and scheduling settings
               </CardDescription>
@@ -374,7 +382,9 @@ export default function SettingsPage() {
               {operationalSettings ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Business Hours</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                      Business Hours
+                    </h3>
                     {Object.entries(operationalSettings.days).map(([day, settings]) => (
                       <div
                         key={day}
@@ -415,7 +425,9 @@ export default function SettingsPage() {
                     ))}
                   </div>
                   <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Scheduling Settings</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                      Scheduling Settings
+                    </h3>
                     <div className="space-y-2">
                       <Label htmlFor="default-lesson-duration" className="w-full">
                         Default Lesson Duration (minutes)
@@ -519,9 +531,11 @@ export default function SettingsPage() {
             {/* New Global Default Pricing Component */}
             <DefaultPricingSettings />
 
-            <Card>
+            <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
               <CardHeader>
-                <CardTitle>Payment Methods</CardTitle>
+                <CardTitle className="text-lg font-semibold text-[#1a3a5c]">
+                  Payment Methods
+                </CardTitle>
                 <CardDescription>Configure available payment methods for students</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -582,9 +596,11 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
               <CardHeader>
-                <CardTitle>Level-Based Pricing</CardTitle>
+                <CardTitle className="text-lg font-semibold text-[#1a3a5c]">
+                  Level-Based Pricing
+                </CardTitle>
                 <CardDescription>Configure price adjustments based on skater level</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -608,10 +624,16 @@ export default function SettingsPage() {
                 </div>
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Skill Level</TableHead>
-                      <TableHead>Price Adjustment</TableHead>
-                      <TableHead>Type</TableHead>
+                    <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Skill Level
+                      </TableHead>
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Price Adjustment
+                      </TableHead>
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Type
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -657,16 +679,20 @@ export default function SettingsPage() {
 
         {/* Rink Management Settings */}
         <TabsContent value="locations">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
             <CardHeader>
-              <CardTitle>Rink Management</CardTitle>
+              <CardTitle className="text-lg font-semibold text-[#1a3a5c]">
+                Rink Management
+              </CardTitle>
               <CardDescription>
                 Manage all the rink locations where lessons are held
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Rink Locations</h3>
+                <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                  Rink Locations
+                </h3>
                 <Button variant="outline" size="sm" onClick={handleAddRink}>
                   Add New Rink
                 </Button>
@@ -678,22 +704,40 @@ export default function SettingsPage() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Address</TableHead>
-                      <TableHead>Timezone</TableHead>
-                      <TableHead>Capacity</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Name
+                      </TableHead>
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Address
+                      </TableHead>
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Timezone
+                      </TableHead>
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4">
+                        Capacity
+                      </TableHead>
+                      <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-3 px-4 text-right">
+                        Actions
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {rinks?.map((rink: Rink) => (
-                      <TableRow key={rink.id}>
-                        <TableCell className="font-medium">{rink.name}</TableCell>
-                        <TableCell>{rink.address}</TableCell>
-                        <TableCell>{rink.timezone}</TableCell>
-                        <TableCell>{rink.maxCapacity}</TableCell>
-                        <TableCell className="text-right">
+                      <TableRow key={rink.id} className="hover:bg-slate-50/50">
+                        <TableCell className="font-medium text-[#1a3a5c] py-3 px-4">
+                          {rink.name}
+                        </TableCell>
+                        <TableCell className="text-sm text-slate-600 py-3 px-4">
+                          {rink.address}
+                        </TableCell>
+                        <TableCell className="text-sm text-slate-600 py-3 px-4">
+                          {rink.timezone}
+                        </TableCell>
+                        <TableCell className="text-sm text-slate-600 py-3 px-4">
+                          {rink.maxCapacity}
+                        </TableCell>
+                        <TableCell className="text-right py-3 px-4">
                           <div className="flex items-center justify-end gap-2">
                             <Button variant="ghost" size="sm" onClick={() => handleEditRink(rink)}>
                               <Edit className="h-4 w-4 mr-1" />
@@ -703,7 +747,7 @@ export default function SettingsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteRink(rink)}
-                              className="text-red-600 hover:text-red-700"
+                              className="text-red-600 focus:text-red-700 focus:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4 mr-1" />
                               Delete
@@ -716,7 +760,9 @@ export default function SettingsPage() {
                 </Table>
               )}
               <Separator />
-              <h3 className="text-lg font-medium">Rink Areas</h3>
+              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                Rink Areas
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {rinkAreas.map((area, index) => (
                   <Card key={area.name}>
@@ -754,9 +800,11 @@ export default function SettingsPage() {
 
         {/* Account Security Settings */}
         <TabsContent value="account">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
             <CardHeader>
-              <CardTitle>Account Security</CardTitle>
+              <CardTitle className="text-lg font-semibold text-[#1a3a5c]">
+                Account Security
+              </CardTitle>
               <CardDescription>Manage your account security settings</CardDescription>
             </CardHeader>
             <CardContent>

@@ -1,10 +1,10 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Plus } from "lucide-react";
 import { ArrowLeftRight, getNavigationForRole, LogOut } from "@/lib/navigation-config";
 
 interface AppSidebarProps {
@@ -100,9 +100,7 @@ export function AppSidebar({ role, coachId, isAdmin }: AppSidebarProps) {
           </div>
         )}
         {/* Sign Out */}
-        <div
-          className={`${role === "student" ? "mt-auto" : ""} pt-4 border-t border-white/10`}
-        >
+        <div className={`${role === "student" ? "mt-auto" : ""} pt-4 border-t border-white/10`}>
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
             className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-white/60 hover:bg-white/10 hover:text-red-400 transition-all duration-200 w-full"

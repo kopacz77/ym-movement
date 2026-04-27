@@ -201,8 +201,8 @@ export default function AboutPage() {
             Coaching Philosophy
           </h2>
           <blockquote className="text-2xl font-medium text-white italic mb-10 leading-relaxed">
-            &ldquo;Every skater has a unique voice waiting to be heard on the ice. My job is to
-            help them find it and express it beautifully.&rdquo;
+            &ldquo;Every skater has a unique voice waiting to be heard on the ice. My job is to help
+            them find it and express it beautifully.&rdquo;
           </blockquote>
           <p className="text-lg text-slate-300 leading-relaxed">
             Yura&apos;s coaching approach combines rigorous technical training with artistic

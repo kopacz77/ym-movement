@@ -18,15 +18,17 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-xl font-semibold text-white mb-3">1. Introduction</h2>
               <p>
-                YM Movement (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to
-                protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and
-                safeguard your information when you use our website and services.
+                YM Movement (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed
+                to protecting your privacy. This Privacy Policy explains how we collect, use,
+                disclose, and safeguard your information when you use our website and services.
               </p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold text-white mb-3">2. Information We Collect</h2>
-              <p className="mb-3">We collect information that you provide directly to us, including:</p>
+              <p className="mb-3">
+                We collect information that you provide directly to us, including:
+              </p>
               <ul className="list-disc pl-6 space-y-1 text-slate-400">
                 <li>Personal identification information (name, email address, phone number)</li>
                 <li>For minor students, parent/guardian contact information</li>
@@ -40,7 +42,9 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold text-white mb-3">3. How We Use Your Information</h2>
+              <h2 className="text-xl font-semibold text-white mb-3">
+                3. How We Use Your Information
+              </h2>
               <p className="mb-3">We use the information we collect to:</p>
               <ul className="list-disc pl-6 space-y-1 text-slate-400">
                 <li>Provide, maintain, and improve our services</li>
@@ -56,8 +60,8 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-xl font-semibold text-white mb-3">4. Sharing of Information</h2>
               <p className="mb-3">
-                We do not sell or rent personal information to third parties. We may share information
-                with:
+                We do not sell or rent personal information to third parties. We may share
+                information with:
               </p>
               <ul className="list-disc pl-6 space-y-1 text-slate-400">
                 <li>Coaches and staff who need access to provide services</li>
@@ -73,9 +77,10 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-xl font-semibold text-white mb-3">5. Data Security</h2>
               <p>
-                We implement appropriate security measures to protect personal information, including that
-                of children. However, no internet transmission is completely secure, and we cannot
-                guarantee the security of information transmitted through our platform.
+                We implement appropriate security measures to protect personal information,
+                including that of children. However, no internet transmission is completely secure,
+                and we cannot guarantee the security of information transmitted through our
+                platform.
               </p>
             </div>
 
@@ -100,23 +105,25 @@ export default function PrivacyPolicyPage() {
               </p>
               <ul className="list-disc pl-6 space-y-1 text-slate-400">
                 <li>
-                  Accounts for children under 13 must be created and managed by parents or legal guardians
+                  Accounts for children under 13 must be created and managed by parents or legal
+                  guardians
                 </li>
                 <li>We collect only the information necessary to provide coaching services</li>
                 <li>
                   Parents/guardians have the right to review information collected about their child
                 </li>
                 <li>
-                  Parents/guardians may request deletion of their child&apos;s information (where not
-                  required for legitimate business purposes)
+                  Parents/guardians may request deletion of their child&apos;s information (where
+                  not required for legitimate business purposes)
                 </li>
                 <li>
-                  We do not allow children under 13 to independently create accounts or provide personal
-                  information
+                  We do not allow children under 13 to independently create accounts or provide
+                  personal information
                 </li>
                 <li>We do not knowingly collect more information than necessary from children</li>
                 <li>
-                  All communications regarding children under 13 are directed to their parents/guardians
+                  All communications regarding children under 13 are directed to their
+                  parents/guardians
                 </li>
               </ul>
             </div>
@@ -138,17 +145,17 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-xl font-semibold text-white mb-3">9. Changes to This Policy</h2>
               <p>
-                We may update this Privacy Policy periodically. We will notify parents/guardians of any
-                material changes by posting the new policy on this page and updating the &ldquo;Last
-                Updated&rdquo; date.
+                We may update this Privacy Policy periodically. We will notify parents/guardians of
+                any material changes by posting the new policy on this page and updating the
+                &ldquo;Last Updated&rdquo; date.
               </p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold text-white mb-3">10. Contact Us</h2>
               <p>
-                If you have questions about this Privacy Policy or your child&apos;s information, please
-                contact us at:
+                If you have questions about this Privacy Policy or your child&apos;s information,
+                please contact us at:
                 <br />
                 Email: info@ym-movement.com
               </p>

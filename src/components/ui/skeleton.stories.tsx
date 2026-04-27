@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Skeleton } from "./skeleton";
 import { Card, CardContent, CardHeader } from "./card";
+import { Skeleton } from "./skeleton";
 
 const meta = {
   title: "UI/Skeleton",

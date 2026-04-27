@@ -20,15 +20,18 @@ export function FCEventContent({ event, timeText }: EventContentArg) {
   const textClass = (props.textClass as string) || "text-slate-800";
 
   return (
-    <div className={cn("fc-event-scaled px-2 py-1 h-full overflow-hidden flex flex-col gap-0.5", textClass)}>
+    <div
+      className={cn(
+        "fc-event-scaled px-2 py-1 h-full overflow-hidden flex flex-col gap-0.5",
+        textClass,
+      )}
+    >
       {/* Time display */}
       <div className="fc-ev-time font-medium leading-tight opacity-70">{timeText}</div>
 
       {/* Rink name + draft badge */}
       <div className="fc-ev-primary font-semibold leading-tight truncate">
-        {isDraft && (
-          <span className="fc-ev-badge uppercase mr-1 font-bold opacity-60">Draft</span>
-        )}
+        {isDraft && <span className="fc-ev-badge uppercase mr-1 font-bold opacity-60">Draft</span>}
         {props.rinkName || "Blocked"}
       </div>
 
@@ -39,9 +42,7 @@ export function FCEventContent({ event, timeText }: EventContentArg) {
 
       {/* Coach name (when multi-coach view) */}
       {props.coachName && (
-        <div className="fc-ev-secondary leading-tight opacity-60 truncate">
-          {props.coachName}
-        </div>
+        <div className="fc-ev-secondary leading-tight opacity-60 truncate">{props.coachName}</div>
       )}
     </div>
   );

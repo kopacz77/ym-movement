@@ -111,6 +111,7 @@ export const paymentRouter = createTRPCRouter({
                   id: true,
                   startTime: true,
                   endTime: true,
+                  duration: true,
                   type: true,
                   area: true,
                   Rink: {

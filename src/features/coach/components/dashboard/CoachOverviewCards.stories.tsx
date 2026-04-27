@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { CoachOverviewCards } from "./CoachOverviewCards";
 
 const meta = {
@@ -18,16 +18,18 @@ export const Default: Story = {
     msw: {
       handlers: [
         http.get("*/api/trpc/coach.dashboard.getDashboardStats*", () => {
-          return HttpResponse.json([{
-            result: {
-              data: {
-                totalStudents: 8,
-                upcomingLessons: 5,
-                completedThisMonth: 18,
-                earningsThisMonth: 2640,
+          return HttpResponse.json([
+            {
+              result: {
+                data: {
+                  totalStudents: 8,
+                  upcomingLessons: 5,
+                  completedThisMonth: 18,
+                  earningsThisMonth: 2640,
+                },
               },
             },
-          }]);
+          ]);
         }),
       ],
     },
@@ -40,16 +42,18 @@ export const Empty: Story = {
     msw: {
       handlers: [
         http.get("*/api/trpc/coach.dashboard.getDashboardStats*", () => {
-          return HttpResponse.json([{
-            result: {
-              data: {
-                totalStudents: 0,
-                upcomingLessons: 0,
-                completedThisMonth: 0,
-                earningsThisMonth: 0,
+          return HttpResponse.json([
+            {
+              result: {
+                data: {
+                  totalStudents: 0,
+                  upcomingLessons: 0,
+                  completedThisMonth: 0,
+                  earningsThisMonth: 0,
+                },
               },
             },
-          }]);
+          ]);
         }),
       ],
     },

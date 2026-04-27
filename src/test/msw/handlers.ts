@@ -1,10 +1,9 @@
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import {
   adminOverview,
-  revenueReportData,
   revenueBreakdown,
+  revenueReportData,
   studentActivity,
-  activityFeedItems,
 } from "./fixtures/admin";
 import { todayTimeSlots } from "./fixtures/scheduling";
 

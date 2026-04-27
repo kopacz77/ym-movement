@@ -2,10 +2,18 @@
 "use client";
 
 import type { PaymentStatus } from "@prisma/client";
-import { ArrowDownAZ, ArrowUpAZ, Search } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowDownAZ,
+  ArrowUpAZ,
+  Calendar,
+  DollarSign,
+  Search,
+  TrendingUp,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,24 +28,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { showPaymentConfirmation } from "@/lib/toast-confirmations";
+import { formatCurrency } from "@/lib/utils";
 
 const PaymentDetail = dynamic(
   () =>
     import("@/features/admin/components/payments/PaymentDetail").then((mod) => ({
       default: mod.PaymentDetail,
-    })),
-  {
-    loading: () => <LoadingSkeleton />,
-  },
-);
-
-const PaymentFilter = dynamic(
-  () =>
-    import("@/features/admin/components/payments/PaymentFilter").then((mod) => ({
-      default: mod.PaymentFilter,
     })),
   {
     loading: () => <LoadingSkeleton />,
@@ -72,6 +77,8 @@ type SortOption =
   | "amount-desc"
   | "amount-asc";
 
+type DateRange = "30days" | "this-month" | "3months" | "this-year" | "all";
+
 export default function PaymentsPage() {
   const { status: sessionStatus } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,6 +87,7 @@ export default function PaymentsPage() {
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("date-desc");
   const [coachFilter, setCoachFilter] = useState<string | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange>("all");
   const utils = api.useUtils();
 
   // Fetch coaches for filter dropdown
@@ -105,6 +113,67 @@ export default function PaymentsPage() {
     { paymentId: selectedPaymentId || "" },
     { enabled: !!selectedPaymentId },
   );
+
+  // Compute KPI data from payments
+  const kpiData = useMemo(() => {
+    if (!payments?.payments) {
+      return { totalRevenue: 0, outstanding: 0, thisMonth: 0, pendingCount: 0 };
+    }
+
+    const allPayments = payments.payments;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const totalRevenue = allPayments
+      .filter((p) => p.status === "COMPLETED")
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const pendingPayments = allPayments.filter((p) => p.status === "PENDING");
+    const outstanding = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
+
+    const thisMonth = allPayments
+      .filter((p) => p.status === "COMPLETED" && new Date(p.lesson_date) >= startOfMonth)
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    return {
+      totalRevenue,
+      outstanding,
+      thisMonth,
+      pendingCount: pendingPayments.length,
+    };
+  }, [payments]);
+
+  // Filter payments by date range client-side
+  const filteredByDatePayments = useMemo(() => {
+    if (!payments?.payments) {
+      return [];
+    }
+    if (dateRange === "all") {
+      return payments.payments;
+    }
+
+    const now = new Date();
+    let startDate: Date;
+
+    switch (dateRange) {
+      case "30days":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "this-month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case "3months":
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case "this-year":
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        return payments.payments;
+    }
+
+    return payments.payments.filter((p) => new Date(p.lesson_date) >= startDate);
+  }, [payments, dateRange]);
 
   // Verify payment mutation
   const verifyPayment = api.admin.payment.verifyPayment.useMutation({
@@ -158,7 +227,6 @@ export default function PaymentsPage() {
   });
 
   const handleVerifyPayment = (paymentId: string) => {
-    // Find the payment to get details for confirmation
     const payment = payments?.payments.find((p) => p.id === paymentId);
     if (!payment) {
       toast.error("Payment not found", {
@@ -171,20 +239,17 @@ export default function PaymentsPage() {
     const paymentMethod = payment.method;
     const amount = payment.amount;
 
-    // Show confirmation before verifying
     showPaymentConfirmation(
       amount,
       studentName,
       paymentMethod,
       () => {
-        // User confirmed - proceed with verification
         verifyPayment.mutate({
           paymentId,
-          verifiedBy: "admin", // In a real app, use the current user's ID
+          verifiedBy: "admin",
         });
       },
       () => {
-        // User cancelled - show cancellation message
         toast.info("Payment verification cancelled", {
           description: "The payment was not marked as paid.",
         });
@@ -204,159 +269,226 @@ export default function PaymentsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Payments</h1>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-[#1a3a5c]">Payments</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Track revenue, manage outstanding payments, and send reminders.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by student name or reference code..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Total Revenue */}
+        <div className="group relative bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/40 to-transparent pointer-events-none" />
+          <div className="relative flex items-start justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                Total Revenue
+              </p>
+              <p className="text-3xl font-bold text-[#1a3a5c] tracking-tight">
+                {formatCurrency(kpiData.totalRevenue)}
+              </p>
+              <p className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                <TrendingUp className="h-3 w-3" />
+                All-time completed
+              </p>
+            </div>
+            <div className="w-14 h-14 rounded-xl bg-emerald-100 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <DollarSign className="h-7 w-7 text-emerald-600" />
+            </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-auto">
-                {sortBy === "date-desc" && (
-                  <>
-                    <ArrowDownAZ className="mr-2 h-4 w-4" />
-                    Newest First
-                  </>
-                )}
-                {sortBy === "date-asc" && (
-                  <>
-                    <ArrowUpAZ className="mr-2 h-4 w-4" />
-                    Oldest First
-                  </>
-                )}
-                {sortBy === "name-asc" && (
-                  <>
-                    <ArrowUpAZ className="mr-2 h-4 w-4" />
-                    Name A-Z
-                  </>
-                )}
-                {sortBy === "name-desc" && (
-                  <>
-                    <ArrowDownAZ className="mr-2 h-4 w-4" />
-                    Name Z-A
-                  </>
-                )}
-                {sortBy === "amount-desc" && (
-                  <>
-                    <ArrowDownAZ className="mr-2 h-4 w-4" />
-                    Amount High-Low
-                  </>
-                )}
-                {sortBy === "amount-asc" && (
-                  <>
-                    <ArrowUpAZ className="mr-2 h-4 w-4" />
-                    Amount Low-High
-                  </>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSortBy("date-desc")}>
-                Newest First
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("date-asc")}>
-                Oldest First
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSortBy("name-asc")}>Name A-Z</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("name-desc")}>Name Z-A</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSortBy("amount-desc")}>
-                Amount High-Low
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("amount-asc")}>
-                Amount Low-High
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
-        <div className="self-start">
-          <PaymentFilter
-            currentFilter={statusFilter}
-            onFilterChange={setStatusFilter}
-            coachFilter={coachFilter}
-            onCoachFilterChange={setCoachFilter}
-            coaches={coaches ?? []}
-          />
+
+        {/* Outstanding */}
+        <div className="group relative bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-rose-50/40 to-transparent pointer-events-none" />
+          <div className="relative flex items-start justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                Outstanding
+              </p>
+              <p className="text-3xl font-bold text-[#1a3a5c] tracking-tight">
+                {formatCurrency(kpiData.outstanding)}
+              </p>
+              <p className="flex items-center gap-1 text-xs font-medium text-rose-600">
+                <AlertTriangle className="h-3 w-3" />
+                {kpiData.pendingCount} payment{kpiData.pendingCount !== 1 ? "s" : ""} pending
+              </p>
+            </div>
+            <div className="w-14 h-14 rounded-xl bg-rose-100 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <AlertTriangle className="h-7 w-7 text-rose-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* This Month */}
+        <div className="group relative bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-50/40 to-transparent pointer-events-none" />
+          <div className="relative flex items-start justify-between">
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                This Month
+              </p>
+              <p className="text-3xl font-bold text-[#1a3a5c] tracking-tight">
+                {formatCurrency(kpiData.thisMonth)}
+              </p>
+              <p className="flex items-center gap-1 text-xs font-medium text-[#0891b2]">
+                <Calendar className="h-3 w-3" />
+                Current billing period
+              </p>
+            </div>
+            <div className="w-14 h-14 rounded-xl bg-cyan-100 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <Calendar className="h-7 w-7 text-[#0891b2]" />
+            </div>
+          </div>
         </div>
       </div>
 
-      <Tabs defaultValue="all">
-        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 lg:w-fit lg:grid-cols-auto">
-          <TabsTrigger value="all" className="text-sm">
-            All Payments
-          </TabsTrigger>
-          <TabsTrigger value="pending" className="text-sm">
-            Pending
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="text-sm">
-            Completed
-          </TabsTrigger>
-        </TabsList>
+      {/* Transactions Card */}
+      <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
+        <CardContent className="p-0">
+          {/* Card Header with Filters */}
+          <div className="px-6 pt-6 pb-4 space-y-4">
+            {/* Title Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold text-[#1a3a5c]">Recent Transactions</h2>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                  {filteredByDatePayments.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search..."
+                    className="pl-8 w-[180px] h-9 text-sm border-slate-200 focus:border-[#0891b2] focus:ring-[#0891b2]/20"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                {/* Sort */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 border-slate-200">
+                      {sortBy.startsWith("date") &&
+                        (sortBy === "date-desc" ? (
+                          <ArrowDownAZ className="h-4 w-4" />
+                        ) : (
+                          <ArrowUpAZ className="h-4 w-4" />
+                        ))}
+                      {sortBy.startsWith("name") &&
+                        (sortBy === "name-desc" ? (
+                          <ArrowDownAZ className="h-4 w-4" />
+                        ) : (
+                          <ArrowUpAZ className="h-4 w-4" />
+                        ))}
+                      {sortBy.startsWith("amount") &&
+                        (sortBy === "amount-desc" ? (
+                          <ArrowDownAZ className="h-4 w-4" />
+                        ) : (
+                          <ArrowUpAZ className="h-4 w-4" />
+                        ))}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[200px]">
+                    <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setSortBy("date-desc")}>
+                      Newest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("date-asc")}>
+                      Oldest First
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setSortBy("name-asc")}>
+                      Name A-Z
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("name-desc")}>
+                      Name Z-A
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setSortBy("amount-desc")}>
+                      Amount High-Low
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("amount-asc")}>
+                      Amount Low-High
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
 
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardContent className="p-0">
-              <PaymentTable
-                payments={payments?.payments || []}
-                isLoading={isLoading}
-                onViewPayment={setSelectedPaymentId}
-                onVerifyPayment={handleVerifyPayment}
-                onSendReminder={handleSendReminder}
-                isVerifying={verifyPayment.isPending}
-                isSendingReminder={sendReminder.isPending}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
+            {/* Filter Row */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Status Filter */}
+              <Select
+                value={statusFilter}
+                onValueChange={(value: PaymentStatus | "ALL") => setStatusFilter(value)}
+              >
+                <SelectTrigger className="w-[150px] h-9 text-sm border-slate-200">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Statuses</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                  <SelectItem value="FAILED">Failed</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <TabsContent value="pending">
-          <Card>
-            <CardContent className="p-0">
-              <PaymentTable
-                payments={payments?.payments || []}
-                isLoading={isLoading}
-                onViewPayment={setSelectedPaymentId}
-                onVerifyPayment={handleVerifyPayment}
-                onSendReminder={handleSendReminder}
-                isVerifying={verifyPayment.isPending}
-                isSendingReminder={sendReminder.isPending}
-                filterStatus="PENDING"
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
+              {/* Date Range Filter */}
+              <Select value={dateRange} onValueChange={(value: DateRange) => setDateRange(value)}>
+                <SelectTrigger className="w-[160px] h-9 text-sm border-slate-200">
+                  <SelectValue placeholder="All Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="this-month">This Month</SelectItem>
+                  <SelectItem value="3months">Last 3 Months</SelectItem>
+                  <SelectItem value="this-year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <TabsContent value="completed">
-          <Card>
-            <CardContent className="p-0">
-              <PaymentTable
-                payments={payments?.payments || []}
-                isLoading={isLoading}
-                onViewPayment={setSelectedPaymentId}
-                onVerifyPayment={handleVerifyPayment}
-                onSendReminder={handleSendReminder}
-                isVerifying={verifyPayment.isPending}
-                isSendingReminder={sendReminder.isPending}
-                filterStatus="COMPLETED"
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              {/* Coach Filter */}
+              {coaches && coaches.length > 0 && (
+                <Select
+                  value={coachFilter ?? "ALL"}
+                  onValueChange={(value) => setCoachFilter(value === "ALL" ? undefined : value)}
+                >
+                  <SelectTrigger className="w-[150px] h-9 text-sm border-slate-200">
+                    <SelectValue placeholder="All Coaches" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All Coaches</SelectItem>
+                    {coaches.map((coach) => (
+                      <SelectItem key={coach.id} value={coach.id}>
+                        {coach.name || "Unnamed Coach"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          </div>
+
+          {/* Table */}
+          <PaymentTable
+            payments={filteredByDatePayments}
+            isLoading={isLoading}
+            onViewPayment={setSelectedPaymentId}
+            onVerifyPayment={handleVerifyPayment}
+            onSendReminder={handleSendReminder}
+            isVerifying={verifyPayment.isPending}
+            isSendingReminder={sendReminder.isPending}
+          />
+        </CardContent>
+      </Card>
 
       {/* Payment Detail Dialog */}
       {selectedPaymentId && (

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { TodayTimeline } from "./TodayTimeline";
 
 const today = new Date();
@@ -13,7 +13,16 @@ const todayTimeSlots = [
     maxStudents: 1,
     isActive: true,
     rinkId: "rink-1",
-    Lesson: [{ id: "l1", type: "PRIVATE", price: 120, status: "CONFIRMED", notes: null, Student: { id: "s1", User: { name: "Sarah Chen" } } }],
+    Lesson: [
+      {
+        id: "l1",
+        type: "PRIVATE",
+        price: 120,
+        status: "CONFIRMED",
+        notes: null,
+        Student: { id: "s1", User: { name: "Sarah Chen" } },
+      },
+    ],
   },
   {
     id: "slot-2",
@@ -22,7 +31,16 @@ const todayTimeSlots = [
     maxStudents: 1,
     isActive: true,
     rinkId: "rink-1",
-    Lesson: [{ id: "l2", type: "CHOREOGRAPHY", price: 150, status: "CONFIRMED", notes: "Free skate program", Student: { id: "s2", User: { name: "Alex Kim" } } }],
+    Lesson: [
+      {
+        id: "l2",
+        type: "CHOREOGRAPHY",
+        price: 150,
+        status: "CONFIRMED",
+        notes: "Free skate program",
+        Student: { id: "s2", User: { name: "Alex Kim" } },
+      },
+    ],
   },
   {
     id: "slot-3",
@@ -31,7 +49,16 @@ const todayTimeSlots = [
     maxStudents: 3,
     isActive: true,
     rinkId: "rink-1",
-    Lesson: [{ id: "l3", type: "GROUP", price: 60, status: "CONFIRMED", notes: null, Student: { id: "s3", User: { name: "Maria Lopez" } } }],
+    Lesson: [
+      {
+        id: "l3",
+        type: "GROUP",
+        price: 60,
+        status: "CONFIRMED",
+        notes: null,
+        Student: { id: "s3", User: { name: "Maria Lopez" } },
+      },
+    ],
   },
   {
     id: "slot-4",
@@ -40,7 +67,16 @@ const todayTimeSlots = [
     maxStudents: 1,
     isActive: true,
     rinkId: "rink-1",
-    Lesson: [{ id: "l4", type: "COMPETITION_PREP", price: 180, status: "CONFIRMED", notes: "Regional comp", Student: { id: "s4", User: { name: "Jake Wilson" } } }],
+    Lesson: [
+      {
+        id: "l4",
+        type: "COMPETITION_PREP",
+        price: 180,
+        status: "CONFIRMED",
+        notes: "Regional comp",
+        Student: { id: "s4", User: { name: "Jake Wilson" } },
+      },
+    ],
   },
 ];
 

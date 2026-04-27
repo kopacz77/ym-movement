@@ -43,7 +43,9 @@ export const WithAction: Story = {
         <CardTitle>Revenue</CardTitle>
         <CardDescription>Monthly overview</CardDescription>
         <CardAction>
-          <Button variant="outline" size="sm">View All</Button>
+          <Button variant="outline" size="sm">
+            View All
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent>

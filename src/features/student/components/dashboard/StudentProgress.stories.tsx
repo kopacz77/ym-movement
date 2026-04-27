@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { SessionProvider } from "next-auth/react";
 import { StudentProgress } from "./StudentProgress";
 
@@ -47,17 +47,19 @@ export const Default: Story = {
     msw: {
       handlers: [
         http.get("*/api/trpc/student.profile.getStudentLessonStats*", () => {
-          return HttpResponse.json([{
-            result: {
-              data: {
-                completed: 24,
-                upcoming: 3,
-                cancelled: 2,
-                thisWeekCount: 2,
-                maxAllowed: 4,
+          return HttpResponse.json([
+            {
+              result: {
+                data: {
+                  completed: 24,
+                  upcoming: 3,
+                  cancelled: 2,
+                  thisWeekCount: 2,
+                  maxAllowed: 4,
+                },
               },
             },
-          }]);
+          ]);
         }),
       ],
     },
@@ -70,17 +72,19 @@ export const NewStudent: Story = {
     msw: {
       handlers: [
         http.get("*/api/trpc/student.profile.getStudentLessonStats*", () => {
-          return HttpResponse.json([{
-            result: {
-              data: {
-                completed: 0,
-                upcoming: 1,
-                cancelled: 0,
-                thisWeekCount: 0,
-                maxAllowed: 4,
+          return HttpResponse.json([
+            {
+              result: {
+                data: {
+                  completed: 0,
+                  upcoming: 1,
+                  cancelled: 0,
+                  thisWeekCount: 0,
+                  maxAllowed: 4,
+                },
               },
             },
-          }]);
+          ]);
         }),
       ],
     },

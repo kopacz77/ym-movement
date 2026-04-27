@@ -35,8 +35,15 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useTouchTarget } from "@/hooks/useTouchTarget";
 
 function getInitials(name: string | null | undefined): string {
-  if (!name) return "?";
-  return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  if (!name) {
+    return "?";
+  }
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function AdminHeader() {

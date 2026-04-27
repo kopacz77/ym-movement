@@ -33,7 +33,13 @@ export const WithError: Story = {
   render: () => (
     <div className="grid w-full max-w-sm items-center gap-1.5">
       <Label htmlFor="email-err">Email</Label>
-      <Input type="email" id="email-err" placeholder="Email" aria-invalid="true" className="border-destructive" />
+      <Input
+        type="email"
+        id="email-err"
+        placeholder="Email"
+        aria-invalid="true"
+        className="border-destructive"
+      />
       <p className="text-sm text-destructive">Please enter a valid email address</p>
     </div>
   ),

@@ -131,8 +131,8 @@ export default function LandingPage() {
                   Progress Tracking
                 </h3>
                 <p className="text-slate-400 leading-relaxed">
-                  Data-driven performance analysis focusing on technical precision, edge quality, and
-                  artistic development over time.
+                  Data-driven performance analysis focusing on technical precision, edge quality,
+                  and artistic development over time.
                 </p>
               </div>
             </div>
@@ -161,7 +161,10 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-16 px-6 md:px-8 border-t border-white/10 bg-[#1a3a5c]" id="contact">
+      <footer
+        className="w-full py-16 px-6 md:px-8 border-t border-white/10 bg-[#1a3a5c]"
+        id="contact"
+      >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-7xl mx-auto text-sm">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-block mb-4">

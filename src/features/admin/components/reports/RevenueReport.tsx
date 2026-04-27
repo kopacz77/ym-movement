@@ -102,7 +102,11 @@ export const RevenueReport: React.FC<RevenueReportProps> = ({ period, startDate,
               });
             }}
           />
-          <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} stroke="#94a3b8" tickFormatter={(value) => `$${value}`} />
+          <YAxis
+            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            stroke="#94a3b8"
+            tickFormatter={(value) => `$${value}`}
+          />
           <Tooltip
             formatter={(value, name) => [
               `$${Number(value).toFixed(2)}`,

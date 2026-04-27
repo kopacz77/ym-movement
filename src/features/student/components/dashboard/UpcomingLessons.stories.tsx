@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { SessionProvider } from "next-auth/react";
 import { UpcomingLessons } from "./UpcomingLessons";
 
@@ -11,8 +11,20 @@ const lessonData = [
     id: "l1",
     type: "PRIVATE",
     status: "SCHEDULED",
-    startTime: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 10, 0).toISOString(),
-    endTime: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 11, 0).toISOString(),
+    startTime: new Date(
+      tomorrow.getFullYear(),
+      tomorrow.getMonth(),
+      tomorrow.getDate(),
+      10,
+      0,
+    ).toISOString(),
+    endTime: new Date(
+      tomorrow.getFullYear(),
+      tomorrow.getMonth(),
+      tomorrow.getDate(),
+      11,
+      0,
+    ).toISOString(),
     Rink: { name: "Arctic Ice Arena", timezone: "America/Los_Angeles" },
     Coach: { User: { name: "Yura Min" } },
   },
@@ -20,8 +32,20 @@ const lessonData = [
     id: "l2",
     type: "CHOREOGRAPHY",
     status: "SCHEDULED",
-    startTime: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate() + 2, 14, 0).toISOString(),
-    endTime: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate() + 2, 15, 0).toISOString(),
+    startTime: new Date(
+      tomorrow.getFullYear(),
+      tomorrow.getMonth(),
+      tomorrow.getDate() + 2,
+      14,
+      0,
+    ).toISOString(),
+    endTime: new Date(
+      tomorrow.getFullYear(),
+      tomorrow.getMonth(),
+      tomorrow.getDate() + 2,
+      15,
+      0,
+    ).toISOString(),
     Rink: { name: "Glacier Skating Center", timezone: "America/Los_Angeles" },
     Coach: { User: { name: "Yura Min" } },
   },

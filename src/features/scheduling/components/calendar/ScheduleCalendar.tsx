@@ -85,7 +85,11 @@ export function ScheduleCalendar() {
   }, [state.currentDate, state.view, calendarTimezone]);
 
   // Fetch time slots and other data
-  const { rinks: _rinksDuplicate, timeSlots } = useTimeSlots(dateRange, state.selectedRinkId, state.selectedCoachId);
+  const { rinks: _rinksDuplicate, timeSlots } = useTimeSlots(
+    dateRange,
+    state.selectedRinkId,
+    state.selectedCoachId,
+  );
   const { data: blockedDateRanges = [] } = api.admin.schedule.getBlockedDates.useQuery({
     startDate: dateRange.start,
     endDate: dateRange.end,
@@ -230,8 +234,7 @@ export function ScheduleCalendar() {
       for (const slot of filteredTimeSlots) {
         const startStr =
           typeof slot.startTime === "string" ? slot.startTime : slot.startTime.toISOString();
-        const endStr =
-          typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString();
+        const endStr = typeof slot.endTime === "string" ? slot.endTime : slot.endTime.toISOString();
         const startDt = DateTime.fromISO(startStr, { zone: calendarTimezone });
         const endDt = DateTime.fromISO(endStr, { zone: calendarTimezone });
 

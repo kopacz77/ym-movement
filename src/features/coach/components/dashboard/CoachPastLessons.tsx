@@ -7,10 +7,22 @@ import { api } from "@/lib/api";
 
 const typeConfig: Record<string, { label: string; badgeClass: string }> = {
   PRIVATE: { label: "Private", badgeClass: "bg-slate-100 text-slate-700 border border-slate-200" },
-  CHOREOGRAPHY: { label: "Choreography", badgeClass: "bg-violet-100 text-violet-700 border border-violet-200" },
-  GROUP: { label: "Group", badgeClass: "bg-emerald-100 text-emerald-700 border border-emerald-200" },
-  COMPETITION_PREP: { label: "Comp Prep", badgeClass: "bg-orange-100 text-orange-700 border border-orange-200" },
-  OFF_ICE_DANCE: { label: "Off-Ice Dance", badgeClass: "bg-pink-100 text-pink-700 border border-pink-200" },
+  CHOREOGRAPHY: {
+    label: "Choreography",
+    badgeClass: "bg-violet-100 text-violet-700 border border-violet-200",
+  },
+  GROUP: {
+    label: "Group",
+    badgeClass: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  },
+  COMPETITION_PREP: {
+    label: "Comp Prep",
+    badgeClass: "bg-orange-100 text-orange-700 border border-orange-200",
+  },
+  OFF_ICE_DANCE: {
+    label: "Off-Ice Dance",
+    badgeClass: "bg-pink-100 text-pink-700 border border-pink-200",
+  },
 };
 
 function getInitials(name: string): string {
@@ -31,7 +43,10 @@ export function CoachPastLessons() {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 p-5 bg-white rounded-lg border border-slate-200/50">
+            <div
+              key={i}
+              className="flex items-center gap-4 p-5 bg-white rounded-lg border border-slate-200/50"
+            >
               <Skeleton className="w-10 h-10 rounded-full" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-32" />

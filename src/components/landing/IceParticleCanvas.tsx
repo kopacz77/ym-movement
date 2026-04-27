@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useCallback, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { IceParticles, IceFlares } from "./IceParticles";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IceFlares, IceParticles } from "./IceParticles";
 
 export default function IceParticleCanvas() {
   const mouse = useRef({ x: 0, y: 0 });
@@ -23,13 +23,12 @@ export default function IceParticleCanvas() {
     mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
   }, []);
 
-  if (reducedMotion) return null;
+  if (reducedMotion) {
+    return null;
+  }
 
   return (
-    <div
-      className="absolute inset-0 z-0"
-      onMouseMove={handleMouseMove}
-    >
+    <div className="absolute inset-0 z-0" onMouseMove={handleMouseMove}>
       <Canvas
         camera={{ position: [0, 0, 6], fov: 60 }}
         dpr={[1, 2]}

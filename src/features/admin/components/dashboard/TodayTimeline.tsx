@@ -47,9 +47,17 @@ export function TodayTimeline() {
   // Lesson type colors — transparent tinted blocks with borders matching calendar events
   const typeStyles: Record<string, { bg: string; border: string; text: string }> = {
     PRIVATE: { bg: "bg-blue-100", border: "border border-blue-300", text: "text-blue-900" },
-    CHOREOGRAPHY: { bg: "bg-purple-100", border: "border border-purple-300", text: "text-purple-900" },
+    CHOREOGRAPHY: {
+      bg: "bg-purple-100",
+      border: "border border-purple-300",
+      text: "text-purple-900",
+    },
     GROUP: { bg: "bg-emerald-100", border: "border border-emerald-300", text: "text-emerald-900" },
-    COMPETITION_PREP: { bg: "bg-orange-100", border: "border border-orange-300", text: "text-orange-900" },
+    COMPETITION_PREP: {
+      bg: "bg-orange-100",
+      border: "border border-orange-300",
+      text: "text-orange-900",
+    },
   };
   const defaultStyle = typeStyles.PRIVATE as { bg: string; border: string; text: string };
 
@@ -127,12 +135,10 @@ export function TodayTimeline() {
                 (_, i) => {
                   const hour = timelineBounds.startHour + i;
                   // Show every 2 hours for cleaner look
-                  if (hour % 2 !== 0) return null;
-                  return (
-                    <span key={i}>
-                      {format(new Date(2000, 0, 1, hour), "h a")}
-                    </span>
-                  );
+                  if (hour % 2 !== 0) {
+                    return null;
+                  }
+                  return <span key={i}>{format(new Date(2000, 0, 1, hour), "h a")}</span>;
                 },
               ).filter(Boolean)}
             </div>

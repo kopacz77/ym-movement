@@ -16,6 +16,7 @@ import React, { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,23 @@ import { showDeleteConfirmation, showStatusToggleConfirmation } from "@/lib/toas
 interface StudentListProps {
   onEditAction: (studentId: string) => void;
   onViewProfileAction: (studentId: string) => void;
+}
+
+const INITIALS_COLORS = ["bg-[#1a3a5c]", "bg-violet-600", "bg-slate-400", "bg-[#0891b2]"];
+
+function getInitials(name: string | null): string {
+  if (!name) {
+    return "??";
+  }
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function getInitialsColor(index: number): string {
+  return INITIALS_COLORS[index % INITIALS_COLORS.length];
 }
 
 export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewProfileAction }) => {
@@ -159,161 +177,229 @@ export const StudentList: React.FC<StudentListProps> = ({ onEditAction, onViewPr
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search students..."
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+    <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.08)] border-0">
+      <CardContent className="p-0">
+        {/* Card Header with Search & Filter */}
+        <div className="px-6 pt-6 pb-4 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-[#1a3a5c]">All Students</h2>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                {studentsData?.pagination?.total ?? students.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search students..."
+                  className="pl-8 w-[200px] h-9 text-sm border-slate-200 focus:border-[#0891b2] focus:ring-[#0891b2]/20"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              {/* Status Filter */}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px] h-9 text-sm border-slate-200">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Students</SelectItem>
+                  <SelectItem value="active">Active Only</SelectItem>
+                  <SelectItem value="inactive">Inactive Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Students</SelectItem>
-            <SelectItem value="active">Active Only</SelectItem>
-            <SelectItem value="inactive">Inactive Only</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      <div className="rounded-md border overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="min-w-[150px] sticky left-0 bg-background">Name</TableHead>
-              <TableHead className="min-w-[200px] hidden sm:table-cell">Email</TableHead>
-              <TableHead className="min-w-[120px]">Level</TableHead>
-              <TableHead className="min-w-[100px] hidden md:table-cell">Status</TableHead>
-              <TableHead className="min-w-[100px] hidden lg:table-cell">Lessons</TableHead>
-              <TableHead className="w-[80px] sticky right-0 bg-background">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  Loading...
-                </TableCell>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-4 px-6">
+                  Student
+                </TableHead>
+                <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-4 px-6 hidden sm:table-cell">
+                  Level
+                </TableHead>
+                <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-4 px-6 hidden md:table-cell">
+                  Status
+                </TableHead>
+                <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-4 px-6 hidden lg:table-cell">
+                  Lessons
+                </TableHead>
+                <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-4 px-6 hidden lg:table-cell">
+                  Rate
+                </TableHead>
+                <TableHead className="uppercase tracking-[0.15em] text-xs text-slate-500 font-medium py-4 px-6 w-[60px]">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
               </TableRow>
-            ) : students?.length ? (
-              students.map((student) => {
-                const isActive = student.isActive ?? true;
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-slate-400">
+                    Loading students...
+                  </TableCell>
+                </TableRow>
+              ) : students?.length ? (
+                students.map((student, index) => {
+                  const isActive = student.isActive ?? true;
 
-                return (
-                  <TableRow key={student.id} className={isActive ? "" : "opacity-60"}>
-                    <TableCell className="font-medium sticky left-0 bg-background">
-                      <div className="min-w-0">
-                        <button
-                          onClick={() => onViewProfileAction(student.id)}
-                          className="font-medium truncate text-left hover:text-[#0891b2] hover:underline cursor-pointer transition-colors"
-                        >
-                          {student.User.name}
-                        </button>
-                        <div className="text-sm text-muted-foreground sm:hidden truncate">
-                          {student.User.email}
+                  return (
+                    <TableRow
+                      key={student.id}
+                      className={`hover:bg-slate-50/50 transition-colors duration-150 ${isActive ? "" : "opacity-60"}`}
+                    >
+                      {/* Student Name + Initials */}
+                      <TableCell className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-full ${getInitialsColor(index)} text-white flex items-center justify-center text-xs font-bold shrink-0`}
+                          >
+                            {getInitials(student.User.name)}
+                          </div>
+                          <div className="min-w-0">
+                            <button
+                              onClick={() => onViewProfileAction(student.id)}
+                              className="font-medium text-[#1a3a5c] hover:text-[#0891b2] transition-colors text-left truncate block"
+                            >
+                              {student.User.name}
+                            </button>
+                            <p className="text-xs text-slate-400 truncate max-w-[180px]">
+                              {student.User.email}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">{student.User.email}</TableCell>
-                    <TableCell>
-                      <Badge className={getLevelColor(student.level)}>
-                        {student.level.replace("_", " ")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Badge variant={isActive ? "default" : "secondary"}>
-                        {isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {student._count?.Lesson || 0} Lesson
-                    </TableCell>
-                    <TableCell className="sticky right-0 bg-background">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => onViewProfileAction(student.id)}
-                            className="w-full"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Profile
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onEditAction(student.id)}
-                            className="w-full"
-                          >
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              unlockAccountMutation.mutate({ email: student.User.email })
-                            }
-                            disabled={unlockAccountMutation.isPending}
-                          >
-                            <LockOpen className="h-4 w-4 mr-2" />
-                            Unlock Account
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleToggleStatus(
-                                student.id,
-                                student.User.name || "Student",
-                                isActive,
-                              )
-                            }
-                            className={`w-full ${isActive ? "text-orange-600 focus:text-orange-700 focus:bg-orange-50" : "text-green-600 focus:text-green-700 focus:bg-green-50"}`}
-                            disabled={toggleStatusMutation.isPending}
-                          >
-                            {isActive ? (
-                              <>
-                                <UserX className="h-4 w-4 mr-2" />
-                                Deactivate
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="h-4 w-4 mr-2" />
-                                Reactivate
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleDeleteStudent(student.id, student.User.name || "Student")
-                            }
-                            className="w-full text-red-600 focus:text-red-700 focus:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  No students found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+                      </TableCell>
+
+                      {/* Level */}
+                      <TableCell className="px-6 py-4 hidden sm:table-cell">
+                        <Badge className={getLevelColor(student.level)}>
+                          {student.level.replace("_", " ")}
+                        </Badge>
+                      </TableCell>
+
+                      {/* Status */}
+                      <TableCell className="px-6 py-4 hidden md:table-cell">
+                        {isActive ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                            Inactive
+                          </span>
+                        )}
+                      </TableCell>
+
+                      {/* Lessons */}
+                      <TableCell className="px-6 py-4 hidden lg:table-cell">
+                        <span className="text-sm font-medium text-[#1a3a5c]">
+                          {student._count?.Lesson || 0}
+                        </span>
+                        <span className="text-sm text-slate-400 ml-1">lessons</span>
+                      </TableCell>
+
+                      {/* Rate */}
+                      <TableCell className="px-6 py-4 hidden lg:table-cell">
+                        {student.customPricingEnabled && student.privateLessonPrice ? (
+                          <span className="text-sm font-medium text-[#1a3a5c]">
+                            ${Number(student.privateLessonPrice).toFixed(0)}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-slate-400">Standard</span>
+                        )}
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className="px-6 py-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => onViewProfileAction(student.id)}
+                              className="w-full"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onEditAction(student.id)}
+                              className="w-full"
+                            >
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                unlockAccountMutation.mutate({ email: student.User.email })
+                              }
+                              disabled={unlockAccountMutation.isPending}
+                            >
+                              <LockOpen className="h-4 w-4 mr-2" />
+                              Unlock Account
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleToggleStatus(
+                                  student.id,
+                                  student.User.name || "Student",
+                                  isActive,
+                                )
+                              }
+                              className={`w-full ${isActive ? "text-orange-600 focus:text-orange-700 focus:bg-orange-50" : "text-green-600 focus:text-green-700 focus:bg-green-50"}`}
+                              disabled={toggleStatusMutation.isPending}
+                            >
+                              {isActive ? (
+                                <>
+                                  <UserX className="h-4 w-4 mr-2" />
+                                  Deactivate
+                                </>
+                              ) : (
+                                <>
+                                  <UserCheck className="h-4 w-4 mr-2" />
+                                  Reactivate
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleDeleteStudent(student.id, student.User.name || "Student")
+                              }
+                              className="w-full text-red-600 focus:text-red-700 focus:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-slate-400">
+                    No students found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

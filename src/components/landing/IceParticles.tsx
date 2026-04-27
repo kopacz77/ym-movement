@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { PointMaterial, Points } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Points, PointMaterial } from "@react-three/drei";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 interface IceParticlesProps {
@@ -39,7 +39,9 @@ export function IceParticles({ count = 800, mouse }: IceParticlesProps) {
   }, [particleCount]);
 
   useFrame((state) => {
-    if (!pointsRef.current) return;
+    if (!pointsRef.current) {
+      return;
+    }
     const time = state.clock.elapsedTime;
 
     // Gentle camera parallax following mouse
@@ -50,8 +52,7 @@ export function IceParticles({ count = 800, mouse }: IceParticlesProps) {
     state.camera.lookAt(0, 0, 0);
 
     // Animate particle positions
-    const posArray = pointsRef.current.geometry.attributes.position
-      .array as Float32Array;
+    const posArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
@@ -68,8 +69,12 @@ export function IceParticles({ count = 800, mouse }: IceParticlesProps) {
       posArray[i3] += Math.cos(time * speed * 0.5 + phase) * 0.001;
 
       // Wrap particles that drift too far
-      if (posArray[i3 + 1] > 7) posArray[i3 + 1] = -7;
-      if (posArray[i3 + 1] < -7) posArray[i3 + 1] = 7;
+      if (posArray[i3 + 1] > 7) {
+        posArray[i3 + 1] = -7;
+      }
+      if (posArray[i3 + 1] < -7) {
+        posArray[i3 + 1] = 7;
+      }
     }
 
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
@@ -108,7 +113,9 @@ export function IceFlares({ mouse }: { mouse: React.MutableRefObject<{ x: number
   }, []);
 
   useFrame((state) => {
-    if (!pointsRef.current) return;
+    if (!pointsRef.current) {
+      return;
+    }
     const time = state.clock.elapsedTime;
     pointsRef.current.rotation.y = -time * 0.008;
     pointsRef.current.rotation.x = Math.sin(time * 0.05) * 0.02;

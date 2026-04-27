@@ -1,11 +1,11 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { Plus } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
