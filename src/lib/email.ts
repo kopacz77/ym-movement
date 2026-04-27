@@ -5,7 +5,7 @@ import { Resend } from "resend";
 import { REGISTRATION_TOKEN_EXPIRY_HOURS } from "@/lib/auth-tokens";
 
 // Initialize Resend with API key
-const resendApiKey = process.env.RESEND_API_KEY || "";
+const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const DEFAULT_BASE_URL = "https://ym-movement.com";
@@ -22,9 +22,7 @@ const DEFAULT_BASE_URL = "https://ym-movement.com";
  * The returned URL is always scheme-prefixed and has no trailing slash, so callers
  * can safely do `${resolveBaseUrl()}/path`.
  */
-export function resolveBaseUrl(
-  env: Partial<NodeJS.ProcessEnv> = process.env,
-): string {
+export function resolveBaseUrl(env: Partial<NodeJS.ProcessEnv> = process.env): string {
   const candidate = firstNonEmpty(env.NEXT_PUBLIC_BASE_URL, env.NEXTAUTH_URL) ?? DEFAULT_BASE_URL;
   const withScheme = /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
   return withScheme.replace(/\/+$/, "");
@@ -39,9 +37,8 @@ function firstNonEmpty(...values: Array<string | undefined>): string | undefined
   return undefined;
 }
 
-// Legacy module-level reference, resolved at module load. Prefer calling resolveBaseUrl()
-// directly inside email builders so runtime env changes (and tests) take effect.
-const BASE_URL = resolveBaseUrl();
+// Inline resolveBaseUrl() in each email function for correct runtime resolution on Vercel.
+// Module-level caching caused stale URLs on serverless cold starts (2026-04-27 incident).
 
 // Email configuration constants
 const EMAIL_CONFIG = {
@@ -182,10 +179,7 @@ export async function sendAdminSignupNotification(student: {
   level: string;
   phone?: string | null;
 }): Promise<{ sent: boolean; skippedReason?: string }> {
-  const adminEmail =
-    process.env.ADMIN_NOTIFICATION_EMAIL ||
-    process.env.INSTRUCTOR_EMAIL ||
-    "";
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.INSTRUCTOR_EMAIL || "";
 
   if (!adminEmail) {
     const reason = "ADMIN_NOTIFICATION_EMAIL / INSTRUCTOR_EMAIL not configured";
@@ -216,7 +210,11 @@ export async function sendAdminSignupNotification(student: {
     </div>
   `;
 
-  await sendEmail(adminEmail, `New signup: ${student.name} (${student.level.replace(/_/g, " ")})`, emailContent);
+  await sendEmail(
+    adminEmail,
+    `New signup: ${student.name} (${student.level.replace(/_/g, " ")})`,
+    emailContent,
+  );
   return { sent: true };
 }
 
@@ -224,7 +222,7 @@ export async function sendAdminSignupNotification(student: {
  * Sends an approval notification email to a student with registration completion link
  */
 export async function sendApprovalEmail(email: string, name: string, token: string) {
-  const registrationUrl = `${BASE_URL}/auth/complete-registration?token=${token}`;
+  const registrationUrl = `${resolveBaseUrl()}/auth/complete-registration?token=${token}`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -363,7 +361,7 @@ export async function sendLessonConfirmationEmail(
       </div>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${BASE_URL}/student/schedule" 
+        <a href="${resolveBaseUrl()}/student/schedule" 
            style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             View Your Schedule
         </a>
@@ -382,7 +380,7 @@ export async function sendLessonConfirmationEmail(
  * Sends a password reset email to a user
  */
 export async function sendPasswordResetEmail(email: string, name: string, token: string) {
-  const resetUrl = `${BASE_URL}/auth/reset-password?token=${token}`;
+  const resetUrl = `${resolveBaseUrl()}/auth/reset-password?token=${token}`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -404,7 +402,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
  * Sends an invitation email to a new user created by an admin
  */
 export async function sendInvitationEmail(email: string, name: string, token: string) {
-  const resetUrl = `${BASE_URL}/auth/reset-password?token=${token}&invite=true`;
+  const resetUrl = `${resolveBaseUrl()}/auth/reset-password?token=${token}&invite=true`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -491,7 +489,7 @@ export async function sendPaymentReminderEmail(
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${BASE_URL}/student/payments" 
+        <a href="${resolveBaseUrl()}/student/payments" 
            style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             View Payment Details
         </a>
@@ -537,7 +535,7 @@ export async function sendScheduleChangesEmail(
       </div>
 
       <div style="text-align: center; margin: 40px 0;">
-        <a href="${BASE_URL}/student/schedule"
+        <a href="${resolveBaseUrl()}/student/schedule"
            style="display: inline-block; background-color: #0891b2; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 18px;">
             Check Your Schedule
         </a>
@@ -600,7 +598,7 @@ export async function sendCoachWelcomeEmail(email: string, name: string) {
  * Contains the registration-completion link so the coach can set their password.
  */
 export async function sendCoachInvitationEmail(email: string, name: string, token: string) {
-  const registrationUrl = `${BASE_URL}/auth/complete-registration?token=${token}`;
+  const registrationUrl = `${resolveBaseUrl()}/auth/complete-registration?token=${token}`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -639,7 +637,7 @@ export async function sendCoachInvitationEmail(email: string, name: string, toke
  * Contains the registration-completion link so the coach can set their password.
  */
 export async function sendCoachApprovalEmail(email: string, name: string, token: string) {
-  const registrationUrl = `${BASE_URL}/auth/complete-registration?token=${token}`;
+  const registrationUrl = `${resolveBaseUrl()}/auth/complete-registration?token=${token}`;
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

@@ -130,9 +130,7 @@ export default function AboutPage() {
               <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-6">
                 <Target className="h-6 w-6 text-emerald-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
-                Four Continents
-              </h3>
+              <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Four Continents</h3>
               <p className="text-slate-400 leading-relaxed">
                 Multiple appearances and distinguished rankings at the prestigious Four Continents
                 Figure Skating Championships.

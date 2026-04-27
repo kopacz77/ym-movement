@@ -34,7 +34,7 @@ const coachSignupSchema = z.object({
  */
 async function verifyTurnstileToken(token: string, clientIP: string): Promise<boolean> {
   try {
-    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+    const secretKey = process.env.TURNSTILE_SECRET_KEY?.trim();
 
     // In development, allow bypass if no secret key is configured
     if (!secretKey && process.env.NODE_ENV === "development") {

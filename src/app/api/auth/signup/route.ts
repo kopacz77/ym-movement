@@ -50,7 +50,7 @@ const signupSchema = z.object({
  */
 async function verifyTurnstileToken(token: string, clientIP: string): Promise<boolean> {
   try {
-    const secretKey = process.env.TURNSTILE_SECRET_KEY;
+    const secretKey = process.env.TURNSTILE_SECRET_KEY?.trim();
 
     // In development, allow bypass if no secret key is configured
     if (!secretKey && process.env.NODE_ENV === "development") {
@@ -277,8 +277,7 @@ export async function POST(req: NextRequest) {
       console.error("Failed to send welcome email to new signup:", welcomeResult.reason);
     }
 
-    const adminNotified =
-      adminResult.status === "fulfilled" && adminResult.value.sent === true;
+    const adminNotified = adminResult.status === "fulfilled" && adminResult.value.sent === true;
     if (adminResult.status === "rejected") {
       console.error("Failed to send admin signup notification:", adminResult.reason);
     }

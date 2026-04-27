@@ -10,7 +10,7 @@ import {
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET?.trim(),
   session: {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days (reduced from 30 for better security)

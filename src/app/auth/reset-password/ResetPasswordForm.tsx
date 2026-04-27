@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -63,6 +63,7 @@ export default function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [isValidToken, setIsValidToken] = useState(false);
   const [email, setEmail] = useState("");
+  const hasVerifiedToken = useRef(false);
 
   // Verify token mutation
   const verifyTokenMutation = api.passwordReset.verifyToken.useMutation({
@@ -102,11 +103,13 @@ export default function ResetPasswordForm() {
     },
   });
 
-  // Verify token on page load
+  // Verify token on page load - only run once per token
   useEffect(() => {
-    if (token) {
+    if (token && !hasVerifiedToken.current) {
+      hasVerifiedToken.current = true;
       verifyTokenMutation.mutate({ token });
-    } else {
+    } else if (!token && !hasVerifiedToken.current) {
+      hasVerifiedToken.current = true;
       setIsValidToken(false);
       setIsLoading(false);
       toast.error("Missing reset token", {

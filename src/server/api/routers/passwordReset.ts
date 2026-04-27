@@ -29,10 +29,15 @@ export const passwordResetRouter = createTRPCRouter({
           name: user.name,
         };
       } catch (error) {
-        console.error("Error verifying reset token:", error);
+        console.error(
+          "Error verifying reset token:",
+          error instanceof Error ? error.message : error,
+          "| token prefix:",
+          input.token.substring(0, 8),
+        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to verify reset token",
+          message: "Failed to verify reset token. Please try requesting a new link.",
         });
       }
     }),
