@@ -195,7 +195,8 @@
       "Bash(pnpm test:vrt:*)",
       "WebFetch(domain:stitch.withgoogle.com)",
       "WebFetch(domain:the-decoder.com)",
-      "Bash(npx:*)"
+      "Bash(npx:*)",
+      "Bash(identify:*)"
     ],
     "deny": [
       "Bash(npx prisma migrate reset:*)",
