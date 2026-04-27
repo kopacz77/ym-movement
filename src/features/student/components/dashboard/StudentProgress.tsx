@@ -44,35 +44,35 @@ export function StudentProgress() {
           My Progress
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 p-6 pt-4">
+      <CardContent className="space-y-5 p-6 pt-4">
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-2 rounded-lg bg-cyan-50 border border-border/30">
-            <p className="text-2xl font-bold text-cyan-600">{completed}</p>
-            <p className="text-[10px] text-muted-foreground">Completed</p>
+          <div className="p-3 rounded-xl bg-cyan-50/80 border border-cyan-100 hover:-translate-y-0.5 transition-all duration-200">
+            <p className="text-2xl font-bold text-cyan-700">{completed}</p>
+            <p className="text-[10px] font-medium text-cyan-600/70 uppercase tracking-wide">Completed</p>
           </div>
-          <div className="p-2 rounded-lg bg-emerald-50 border border-border/30">
-            <p className="text-2xl font-bold text-emerald-600">{upcoming}</p>
-            <p className="text-[10px] text-muted-foreground">Upcoming</p>
+          <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-100 hover:-translate-y-0.5 transition-all duration-200">
+            <p className="text-2xl font-bold text-emerald-700">{upcoming}</p>
+            <p className="text-[10px] font-medium text-emerald-600/70 uppercase tracking-wide">Upcoming</p>
           </div>
-          <div className="p-2 rounded-lg bg-amber-50 border border-border/30">
-            <p className="text-2xl font-bold text-amber-600">{cancelled}</p>
-            <p className="text-[10px] text-muted-foreground">Cancelled</p>
+          <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-100 hover:-translate-y-0.5 transition-all duration-200">
+            <p className="text-2xl font-bold text-amber-700">{cancelled}</p>
+            <p className="text-[10px] font-medium text-amber-600/70 uppercase tracking-wide">Cancelled</p>
           </div>
         </div>
 
         {/* Weekly progress bar */}
         {weeklyMax > 0 && (
           <div>
-            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>This week</span>
-              <span>
+            <div className="flex justify-between text-xs text-muted-foreground mb-2">
+              <span className="font-medium">This week</span>
+              <span className="font-semibold text-slate-700">
                 {weeklyUsed}/{weeklyMax} lessons
               </span>
             </div>
-            <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+            <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all"
+                className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, (weeklyUsed / weeklyMax) * 100)}%` }}
               />
             </div>

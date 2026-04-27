@@ -120,14 +120,16 @@ export function ProfileForm() {
   }
 
   return (
-    <Card>
+    <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
       <CardHeader>
-        <CardTitle>Your Profile</CardTitle>
+        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          Your Profile
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div>
-            <h3 className="text-lg font-medium mb-4">Account Information</h3>
+            <h3 className="text-sm font-semibold text-slate-800 mb-4">Account Information</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -184,7 +186,7 @@ export function ProfileForm() {
           </div>
 
           <div>
-            <h3 className="text-lg font-medium mb-4">Emergency Contact</h3>
+            <h3 className="text-sm font-semibold text-slate-800 mb-4">Emergency Contact</h3>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="emergency-name">Contact Name</Label>

@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NextLessonHero } from "@/features/student/components/dashboard/NextLessonHero";
+import { OutstandingPayments } from "@/features/student/components/dashboard/OutstandingPayments";
 import { StudentProgress } from "@/features/student/components/dashboard/StudentProgress";
 import { UpcomingLessons } from "@/features/student/components/dashboard/UpcomingLessons";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -16,9 +17,10 @@ export default function StudentDashboardPage() {
   const user = useCurrentUser();
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Book a Lesson action */}
-      <div className="flex justify-end">
+    <div className="flex flex-col gap-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
         {user.isApproved ? (
           <Button asChild>
             <Link href="/student/book">Book a Lesson</Link>
@@ -30,13 +32,18 @@ export default function StudentDashboardPage() {
         )}
       </div>
 
+      {/* Outstanding Payments Alert */}
+      <ErrorBoundary>
+        <OutstandingPayments />
+      </ErrorBoundary>
+
       {/* Next Lesson Hero */}
       <ErrorBoundary>
         <NextLessonHero />
       </ErrorBoundary>
 
       {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Upcoming lessons (2/3 width) */}
         <div className="lg:col-span-2">
           <ErrorBoundary>
@@ -57,16 +64,16 @@ export default function StudentDashboardPage() {
                 Payment Info
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm p-6 pt-4">
-              <div className="flex justify-between">
+            <CardContent className="space-y-3 text-sm p-6 pt-4">
+              <div className="flex justify-between items-center p-2.5 rounded-lg bg-cyan-50/50">
                 <span className="text-muted-foreground">Venmo</span>
-                <span className="font-medium">@yura-min</span>
+                <span className="font-semibold text-cyan-700">@yura-min</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center p-2.5 rounded-lg bg-emerald-50/50">
                 <span className="text-muted-foreground">Zelle</span>
-                <span className="font-medium">(714) 743-7071</span>
+                <span className="font-semibold text-emerald-700">(714) 743-7071</span>
               </div>
-              <Button variant="outline" size="sm" className="w-full mt-3" asChild>
+              <Button variant="outline" size="sm" className="w-full mt-2" asChild>
                 <Link href="/student/payments">View Payment History</Link>
               </Button>
             </CardContent>

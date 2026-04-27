@@ -81,9 +81,9 @@ export function UpcomingLessons() {
         ) : upcomingLessons?.length ? (
           <div className="space-y-4">
             {upcomingLessons.map((lesson) => (
-              <Card key={lesson.id} className="border border-border/30 rounded-lg">
+              <Card key={lesson.id} className="border border-border/30 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_36px_rgba(0,0,0,0.1)] transition-all duration-200">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">
+                  <CardTitle className="text-base font-semibold">
                     {lesson.type ? lesson.type.replace("_", " ") : "Private"} Lesson
                   </CardTitle>
                   <CardAction>
@@ -92,28 +92,28 @@ export function UpcomingLessons() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-2 mb-4">
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium text-slate-700">
                       {format(new Date(lesson.startTime), "EEE, MMM d")}
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-2.5 text-sm text-slate-600">
+                      <Clock className="h-4 w-4 text-slate-400" />
                       <AdaptiveTimeRange
                         startTime={lesson.startTime}
                         endTime={lesson.endTime}
                         rinkTimezone={lesson.Rink.timezone}
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div className="flex items-center gap-2.5 text-sm text-slate-600">
+                      <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
                       <span className="break-words">{lesson.Rink.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center gap-2.5 text-sm text-slate-600">
+                      <User className="h-4 w-4 text-slate-400" />
                       <span>{(lesson as any).Coach?.User?.name || "Instructor"}</span>
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" className="hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-200" asChild>
                       <Link href={`/student/schedule/${lesson.id}`}>View Details</Link>
                     </Button>
                   </div>

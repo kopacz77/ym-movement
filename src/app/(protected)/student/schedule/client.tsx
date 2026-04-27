@@ -142,7 +142,7 @@ export default function StudentScheduleClient() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">My Schedule</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Schedule</h1>
       </div>
       <Tabs
         value={activeTab}
@@ -158,11 +158,11 @@ export default function StudentScheduleClient() {
         <TabsContent value="upcoming" className="pt-4">
           {showLoading ? (
             <div className="flex justify-center items-center h-32">
-              <p>Loading lessons...</p>
+              <p className="text-muted-foreground">Loading lessons...</p>
             </div>
           ) : upcomingLessons.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center">
+            <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
+              <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">You don&apos;t have any upcoming lessons.</p>
               </CardContent>
             </Card>
@@ -177,11 +177,11 @@ export default function StudentScheduleClient() {
         <TabsContent value="past" className="pt-4">
           {showLoading ? (
             <div className="flex justify-center items-center h-32">
-              <p>Loading lessons...</p>
+              <p className="text-muted-foreground">Loading lessons...</p>
             </div>
           ) : pastLessons.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center">
+            <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
+              <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">You don&apos;t have any past lessons.</p>
               </CardContent>
             </Card>
@@ -194,37 +194,37 @@ export default function StudentScheduleClient() {
           )}
         </TabsContent>
         <TabsContent value="policies" className="pt-4">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
             <CardContent className="py-6 space-y-6">
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-[#0891b2]" />
-                <h2 className="text-lg font-semibold">Lesson Policies</h2>
+                <FileText className="h-5 w-5 text-cyan-600" />
+                <h2 className="text-base font-semibold text-slate-800">Lesson Policies</h2>
               </div>
 
               <div className="space-y-4">
-                <div className="rounded-lg border p-4 space-y-2">
-                  <h3 className="font-semibold text-base">Cancellation Policy</h3>
-                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1.5">
+                <div className="rounded-xl border border-slate-200/60 p-5 space-y-3 bg-slate-50/50">
+                  <h3 className="font-semibold text-sm text-slate-800">Cancellation Policy</h3>
+                  <ul className="list-disc list-inside text-sm text-slate-600 space-y-2 leading-relaxed">
                     <li>Lessons may be cancelled at any time before the scheduled start.</li>
                     <li>
-                      Cancellations made <span className="font-medium">more than 24 hours</span>{" "}
+                      Cancellations made <span className="font-medium text-slate-800">more than 24 hours</span>{" "}
                       before the lesson are free of charge.
                     </li>
                     <li>
-                      Cancellations made <span className="font-medium">within 24 hours</span> of the
+                      Cancellations made <span className="font-medium text-slate-800">within 24 hours</span> of the
                       lesson are considered late cancellations. You will be{" "}
-                      <span className="font-medium">responsible for the full lesson fee</span>.
+                      <span className="font-medium text-slate-800">responsible for the full lesson fee</span>.
                     </li>
                     <li>
-                      To cancel a lesson, use the <span className="font-medium">Cancel</span> button
+                      To cancel a lesson, use the <span className="font-medium text-slate-800">Cancel</span> button
                       on your lesson card or lesson details page.
                     </li>
                   </ul>
                 </div>
 
-                <div className="rounded-lg border p-4 space-y-2">
-                  <h3 className="font-semibold text-base">Payment Policy</h3>
-                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1.5">
+                <div className="rounded-xl border border-slate-200/60 p-5 space-y-3 bg-slate-50/50">
+                  <h3 className="font-semibold text-sm text-slate-800">Payment Policy</h3>
+                  <ul className="list-disc list-inside text-sm text-slate-600 space-y-2 leading-relaxed">
                     <li>Payment is expected for each scheduled lesson.</li>
                     <li>Accepted payment methods: Venmo, Zelle, and Cash.</li>
                     <li>
@@ -234,9 +234,9 @@ export default function StudentScheduleClient() {
                   </ul>
                 </div>
 
-                <div className="rounded-lg border p-4 space-y-2">
-                  <h3 className="font-semibold text-base">Booking Policy</h3>
-                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1.5">
+                <div className="rounded-xl border border-slate-200/60 p-5 space-y-3 bg-slate-50/50">
+                  <h3 className="font-semibold text-sm text-slate-800">Booking Policy</h3>
+                  <ul className="list-disc list-inside text-sm text-slate-600 space-y-2 leading-relaxed">
                     <li>Lessons are booked on a first-come, first-served basis.</li>
                     <li>You may only book available time slots shown on the booking page.</li>
                     <li>

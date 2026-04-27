@@ -27,6 +27,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { PasswordStrength } from "@/components/ui/password-strength";
 import { api } from "@/lib/api";
 import type { AppRouter } from "@/lib/root";
 
@@ -98,7 +99,9 @@ export default function ResetPasswordForm() {
     },
     onError: (err: TRPCClientErrorLike<AppRouter>) => {
       toast.error("Failed to reset password", {
-        description: err.message || "Please try again",
+        description: err.message?.includes("Password must")
+          ? "Password needs: 8+ chars, uppercase, lowercase, number, and special character (@$!%*?&)"
+          : err.message || "Please try again",
       });
     },
   });
@@ -192,6 +195,9 @@ export default function ResetPasswordForm() {
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
                     <FormMessage />
+                    {field.value && (
+                      <PasswordStrength password={field.value} showErrors={true} />
+                    )}
                   </FormItem>
                 )}
               />

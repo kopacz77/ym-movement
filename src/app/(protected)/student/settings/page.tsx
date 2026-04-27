@@ -57,20 +57,20 @@ export default function StudentSettingsPage() {
         </TabsList>
 
         <TabsContent value="notifications">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
+              <CardTitle className="text-base font-semibold">Notification Preferences</CardTitle>
               <CardDescription>
                 Manage how you receive notifications from YM Movement
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
+            <CardContent className="space-y-5">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50/80 border border-slate-100">
                 <div>
-                  <Label htmlFor="email-notifications" className="font-medium">
+                  <Label htmlFor="email-notifications" className="font-semibold text-slate-800">
                     Email Notifications
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-500 mt-0.5">
                     Receive email notifications about lesson bookings, cancellations, and updates.
                   </p>
                 </div>
@@ -81,12 +81,12 @@ export default function StudentSettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50/80 border border-slate-100">
                 <div>
-                  <Label htmlFor="reminder-notifications" className="font-medium">
+                  <Label htmlFor="reminder-notifications" className="font-semibold text-slate-800">
                     Lesson Reminders
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-500 mt-0.5">
                     Receive email reminders 24 hours before your scheduled lessons.
                   </p>
                 </div>
@@ -102,18 +102,18 @@ export default function StudentSettingsPage() {
         </TabsContent>
 
         <TabsContent value="appearance">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
             <CardHeader>
-              <CardTitle>Appearance</CardTitle>
+              <CardTitle className="text-base font-semibold">Appearance</CardTitle>
               <CardDescription>Customize the visual appearance of the application</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50/80 border border-slate-100">
                 <div>
-                  <Label htmlFor="dark-mode" className="font-medium text-muted-foreground">
+                  <Label htmlFor="dark-mode" className="font-semibold text-slate-400">
                     Dark Mode
                   </Label>
-                  <p className="text-sm text-muted-foreground">Coming soon</p>
+                  <p className="text-sm text-slate-400">Coming soon</p>
                 </div>
                 <Switch id="dark-mode" checked={false} disabled />
               </div>
@@ -122,9 +122,9 @@ export default function StudentSettingsPage() {
         </TabsContent>
 
         <TabsContent value="password">
-          <Card>
+          <Card className="shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]">
             <CardHeader>
-              <CardTitle>Password Security</CardTitle>
+              <CardTitle className="text-base font-semibold">Password Security</CardTitle>
               <CardDescription>Change your password to keep your account secure</CardDescription>
             </CardHeader>
             <CardContent>

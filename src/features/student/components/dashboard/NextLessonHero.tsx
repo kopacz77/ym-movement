@@ -63,44 +63,44 @@ export function NextLessonHero() {
   const lessonType = nextLesson.type || "PRIVATE";
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent overflow-hidden">
+    <Card className="border-cyan-200/60 bg-gradient-to-br from-cyan-50/80 via-white to-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 transition-all duration-200">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <Calendar className="h-4 w-4 text-primary" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-cyan-100">
+              <Calendar className="h-4 w-4 text-cyan-700" />
             </div>
-            <p className="text-sm font-semibold text-primary">Next Lesson</p>
+            <p className="text-sm font-bold uppercase tracking-wide text-cyan-700">Next Lesson</p>
           </div>
-          <Badge variant="outline" className="bg-white/80">
+          <Badge variant="outline" className="bg-white border-cyan-200 text-cyan-700 font-medium">
             {timeUntil}
           </Badge>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold">{format(lessonDate, "EEEE, MMMM d")}</span>
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2.5">
+            <Calendar className="h-4 w-4 text-slate-400" />
+            <span className="font-semibold text-slate-800">{format(lessonDate, "EEEE, MMMM d")}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>
+          <div className="flex items-center gap-2.5">
+            <Clock className="h-4 w-4 text-slate-400" />
+            <span className="text-slate-600">
               {format(lessonDate, "h:mm a")} - {format(endDate, "h:mm a")}
             </span>
           </div>
           {nextLesson.RinkTimeSlot?.Rink?.name && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{nextLesson.RinkTimeSlot.Rink.name}</span>
+            <div className="flex items-center gap-2.5">
+              <MapPin className="h-4 w-4 text-slate-400" />
+              <span className="text-sm text-slate-600">{nextLesson.RinkTimeSlot.Rink.name}</span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between mt-4">
-          <Badge className="bg-primary/10 text-primary border-primary/20">
+        <div className="flex items-center justify-between mt-5 pt-4 border-t border-cyan-100/60">
+          <Badge className="bg-cyan-50 text-cyan-700 border-cyan-200/60">
             {lessonType.replace("_", " ")}
           </Badge>
-          <Button size="sm" variant="outline" className="bg-white/80" asChild>
+          <Button size="sm" variant="outline" className="bg-white hover:bg-cyan-50 border-cyan-200/60 text-cyan-700" asChild>
             <Link href="/student/book">Book Another</Link>
           </Button>
         </div>
