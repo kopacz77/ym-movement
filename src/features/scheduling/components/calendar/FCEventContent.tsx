@@ -29,7 +29,7 @@ export function FCEventContent({ event, timeText }: EventContentArg) {
         {isDraft && (
           <span className="fc-ev-badge uppercase mr-1 font-bold opacity-60">Draft</span>
         )}
-        {props.rinkName || "Unknown"}
+        {props.rinkName || "Blocked"}
       </div>
 
       {/* Capacity indicator */}

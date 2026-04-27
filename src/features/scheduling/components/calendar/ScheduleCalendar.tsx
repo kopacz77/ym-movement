@@ -192,18 +192,22 @@ export function ScheduleCalendar() {
     [updateTimeSlot],
   );
 
-  // Sync FullCalendar when our toolbar state changes
-  // (our custom toolbar is the sole source of truth since headerToolbar={false})
+  // Sync FullCalendar when our toolbar state changes.
+  // Deferred via setTimeout because FullCalendar's API calls use flushSync,
+  // which cannot run inside a React useEffect (commit phase).
   useEffect(() => {
-    const api = calendarRef.current?.getApi();
-    if (!api) {
-      return;
-    }
-    if (api.view.type !== state.view) {
-      api.changeView(state.view, state.currentDate);
-    } else {
-      api.gotoDate(state.currentDate);
-    }
+    const handle = setTimeout(() => {
+      const calApi = calendarRef.current?.getApi();
+      if (!calApi) {
+        return;
+      }
+      if (calApi.view.type !== state.view) {
+        calApi.changeView(state.view, state.currentDate);
+      } else {
+        calApi.gotoDate(state.currentDate);
+      }
+    }, 0);
+    return () => clearTimeout(handle);
   }, [state.currentDate, state.view]);
 
   // Dynamic time range — start with working hours from settings, expand if events fall outside

@@ -98,7 +98,7 @@ function getSlotColors(slot: TimeSlot): { bg: string; border: string; textClass:
  */
 function buildEventTitle(slot: TimeSlot): string {
   const lessons = slot.Lesson || [];
-  let title = slot.Rink?.name || "Unknown Rink";
+  let title = slot.Rink?.name || "Blocked";
 
   if (lessons.length > 0) {
     const names = lessons
