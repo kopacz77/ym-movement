@@ -197,7 +197,7 @@ export function CoachActionsCell({
                       e.preventDefault();
                       openDialog(setShowDeactivateDialog);
                     }}
-                    className="text-orange-600 focus:text-orange-700 focus:bg-orange-50"
+                    className="text-amber-600 focus:text-amber-700 focus:bg-amber-50"
                     disabled={toggleStatusMutation.isPending}
                   >
                     <PowerOff className="h-4 w-4 mr-2" />
@@ -223,7 +223,7 @@ export function CoachActionsCell({
                     e.preventDefault();
                     openDialog(setShowActivateDialog);
                   }}
-                  className="text-green-600 focus:text-green-700 focus:bg-green-50"
+                  className="text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50"
                   disabled={toggleStatusMutation.isPending}
                 >
                   <Power className="h-4 w-4 mr-2" />
@@ -237,7 +237,7 @@ export function CoachActionsCell({
                     e.preventDefault();
                     openDialog(setShowActivateDialog);
                   }}
-                  className="text-green-600 focus:text-green-700 focus:bg-green-50"
+                  className="text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50"
                   disabled={toggleStatusMutation.isPending}
                 >
                   <ShieldAlert className="h-4 w-4 mr-2" />
@@ -287,7 +287,7 @@ export function CoachActionsCell({
             </Button>
             <Button
               variant="default"
-              className="bg-orange-600 hover:bg-orange-700 text-white"
+              className="bg-amber-600 hover:bg-amber-700 text-white"
               onClick={handleDeactivateConfirm}
               disabled={toggleStatusMutation.isPending}
             >
@@ -315,7 +315,7 @@ export function CoachActionsCell({
             </Button>
             <Button
               variant="default"
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={handleActivateConfirm}
               disabled={toggleStatusMutation.isPending}
             >

@@ -57,17 +57,6 @@ export const availabilityRouter = createTRPCRouter({
         const now = new Date();
         const effectiveStartDate = startDate > now ? startDate : now;
 
-        console.log(
-          `[DEBUG] Fetching time slots from ${effectiveStartDate.toISOString()} to ${endDate.toISOString()}`,
-        );
-
-        // Log the input parameters
-        console.log(
-          `[DEBUG] Query params - rinkId: ${input.rinkId || "all"}, _cache: ${
-            input._cache || "none"
-          }`,
-        );
-
         // Create where clause with all matching slots in the date range (excluding past slots)
         // Only show active slots to students
         const whereClause: WhereClause = {
@@ -87,8 +76,6 @@ export const availabilityRouter = createTRPCRouter({
         if (input.coachId) {
           whereClause.OR = [{ coachId: input.coachId }, { coachId: null }];
         }
-
-        console.log("[DEBUG] Where clause:", JSON.stringify(whereClause));
 
         // Run the query with the modified where clause
         const timeSlots = await ctx.prisma.rinkTimeSlot.findMany({
@@ -116,8 +103,6 @@ export const availabilityRouter = createTRPCRouter({
           },
         });
 
-        console.log(`[DEBUG] Found ${timeSlots.length} time slots for the queried date range`);
-
         // Filter out virtual rink slots on blocked dates (students cannot self-book these)
         const hasVirtualSlots = timeSlots.some((slot) => slot.Rink.isVirtual);
         let filteredTimeSlots = timeSlots;
@@ -135,7 +120,9 @@ export const availabilityRouter = createTRPCRouter({
           if (blockedRanges.length > 0) {
             filteredTimeSlots = timeSlots.filter((slot) => {
               // Non-virtual rinks are never filtered
-              if (!slot.Rink.isVirtual) return true;
+              if (!slot.Rink.isVirtual) {
+                return true;
+              }
               // Check if this slot's date falls within any blocked range
               const slotDate = new Date(slot.startTime);
               slotDate.setHours(0, 0, 0, 0);
@@ -148,27 +135,6 @@ export const availabilityRouter = createTRPCRouter({
               });
               return !isBlocked;
             });
-            console.log(
-              `[DEBUG] Filtered ${timeSlots.length - filteredTimeSlots.length} virtual slots on blocked dates`,
-            );
-          }
-        }
-
-        if (filteredTimeSlots.length === 0) {
-          // Enhanced debugging for no results case
-          const allSlots = await ctx.prisma.rinkTimeSlot.findMany({
-            take: 5,
-            orderBy: { startTime: "asc" },
-            select: { id: true, startTime: true, isActive: true },
-          });
-
-          console.log("[DEBUG] Sample of available slots in database:");
-          for (const slot of allSlots) {
-            console.log(
-              `[DEBUG] Sample slot: ID=${
-                slot.id
-              }, startTime=${slot.startTime.toISOString()}, isActive=${slot.isActive}`,
-            );
           }
         }
 
@@ -180,11 +146,6 @@ export const availabilityRouter = createTRPCRouter({
           const studentCount = activeLesson.length;
           // A slot is available if it's active and not fully booked
           const isAvailable = studentCount < slot.maxStudents && slot.isActive === true;
-
-          console.log(
-            `[DEBUG] Slot ${slot.id} at ${slot.startTime.toISOString()}: ` +
-              `${studentCount}/${slot.maxStudents} students, available: ${isAvailable}, isActive: ${slot.isActive}`,
-          );
 
           return {
             ...slot,

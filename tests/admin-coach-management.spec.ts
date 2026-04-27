@@ -68,8 +68,8 @@ test.describe("Revenue Split Editor (ATST-02)", () => {
     // by matching the row with email "coach@test.com" (unique to Test Coach)
     const coachRow = page.locator("tr").filter({ hasText: "coach@test.com" }).first();
 
-    // Click the pencil edit button
-    const editButton = coachRow.locator("button").filter({ has: page.locator("svg") }).first();
+    // Click the pencil edit button (first icon button in the row)
+    const editButton = coachRow.locator('button:has(svg.lucide-pencil), button:has(svg.lucide-edit)').first();
     await editButton.click();
 
     // Input should now be visible in the coach row
@@ -95,7 +95,7 @@ test.describe("Revenue Split Editor (ATST-02)", () => {
     // CLEANUP: Reset back to 70%
     await page.waitForTimeout(500);
 
-    const editButton2 = coachRow.locator("button").filter({ has: page.locator("svg") }).first();
+    const editButton2 = coachRow.locator('button:has(svg.lucide-pencil), button:has(svg.lucide-edit)').first();
     await editButton2.click();
 
     const splitInput2 = coachRow.locator('input[type="number"]');

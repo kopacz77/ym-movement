@@ -1,9 +1,22 @@
-import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { Inter, Public_Sans } from "next/font/google";
+
 import { validateEnvironment } from "@/lib/env-check";
 import { Providers } from "@/providers";
 
 import "@/styles/globals.css";
+
+const headlineFont = Public_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-sans",
+});
+
+const bodyFont = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+});
 
 // Validate environment on app startup
 validateEnvironment();
@@ -36,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${headlineFont.variable} ${bodyFont.variable}`}>
       <body>
         <Providers>
           {children}

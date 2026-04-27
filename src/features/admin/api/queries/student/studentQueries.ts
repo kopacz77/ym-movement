@@ -142,7 +142,6 @@ export const studentQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        console.log("Fetching student with ID:", input.studentId);
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
           include: {
@@ -315,8 +314,6 @@ export const studentQueries = createTRPCRouter({
 
             // Set the flag in our response object
             result.inviteSent = true;
-
-            console.log(`Invitation with password reset link sent to ${userData.email}`);
           } catch (inviteError) {
             console.error("Failed to send invitation email:", inviteError);
           }
@@ -324,7 +321,6 @@ export const studentQueries = createTRPCRouter({
           // Only send welcome email if NOT sending invitation
           try {
             await sendWelcomeEmail(userData.email, userData.name || "Student");
-            console.log(`Welcome email sent to ${userData.email}`);
           } catch (emailError) {
             console.error("Failed to send welcome email:", emailError);
             // We don't throw here - we just log the error
@@ -386,7 +382,6 @@ export const studentQueries = createTRPCRouter({
       });
 
       try {
-        console.log(`Updating student with ID: ${id}`);
         // Find the student to update by ID
         const student = await ctx.prisma.student.findUnique({
           where: { id },
@@ -402,8 +397,6 @@ export const studentQueries = createTRPCRouter({
             message: "Student not found",
           });
         }
-
-        console.log(`Found student: ${student.id}, userId: ${student.userId}`);
 
         // Update user and student in a transaction
         const [user, updatedStudent] = await ctx.prisma.$transaction([
@@ -444,8 +437,6 @@ export const studentQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string(), active: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`Toggling student ${input.studentId} active status to: ${input.active}`);
-
         // Find the student first
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
@@ -478,10 +469,6 @@ export const studentQueries = createTRPCRouter({
           studentName: student.User.name,
         });
 
-        console.log(
-          `Student ${student.User.name} (${student.User.email}) has been ${input.active ? "reactivated" : "deactivated"}`,
-        );
-
         return updatedStudent;
       } catch (error) {
         console.error("Error toggling student status:", error);
@@ -501,8 +488,6 @@ export const studentQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`Resending invitation for student ID: ${input.studentId}`);
-
         // Find the student with user details
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
@@ -563,8 +548,6 @@ export const studentQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`Deleting student with ID: ${input.studentId}`);
-
         // Find the student first to get user details and check for related data
         const [student, counts] = await Promise.all([
           ctx.prisma.student.findUnique({
@@ -599,10 +582,6 @@ export const studentQueries = createTRPCRouter({
           });
         }
 
-        console.log(
-          `Found student with ${counts.lessons} lessons, ${counts.payments} payments, ${counts.notes} notes`,
-        );
-
         // Log security event
         logSecurityEvent("STUDENT_DELETED", {
           userId: ctx.session?.user?.id,
@@ -613,11 +592,8 @@ export const studentQueries = createTRPCRouter({
 
         // Use transaction to properly handle cascade deletions
         await ctx.prisma.$transaction(async (tx) => {
-          console.log("Starting transaction to delete student and related records...");
-
           // 1. Delete student notes first
           if (counts.notes > 0) {
-            console.log(`Deleting ${counts.notes} student notes...`);
             await tx.studentNote.deleteMany({
               where: { studentId: input.studentId },
             });
@@ -625,7 +601,6 @@ export const studentQueries = createTRPCRouter({
 
           // 2. Delete payments (these reference lessons, so delete before lessons)
           if (counts.payments > 0) {
-            console.log(`Deleting ${counts.payments} payments...`);
             await tx.payment.deleteMany({
               where: { studentId: input.studentId },
             });
@@ -633,40 +608,32 @@ export const studentQueries = createTRPCRouter({
 
           // 3. Delete lessons
           if (counts.lessons > 0) {
-            console.log(`Deleting ${counts.lessons} lessons...`);
             await tx.lesson.deleteMany({
               where: { studentId: input.studentId },
             });
           }
 
           // 4. Delete any notifications for this user
-          console.log("Deleting user notifications...");
           await tx.notification.deleteMany({
             where: { userId: student.userId },
           });
 
           // 5. Delete any password reset tokens
-          console.log("Deleting password reset tokens...");
           await tx.passwordResetToken.deleteMany({
             where: { userId: student.userId },
           });
 
           // 6. Finally delete the student record
-          console.log("Deleting student record...");
           await tx.student.delete({
             where: { id: input.studentId },
           });
 
           // 7. Delete the user record last
-          console.log("Deleting user record...");
           await tx.user.delete({
             where: { id: student.userId },
           });
-
-          console.log("Transaction completed successfully");
         });
 
-        console.log(`Successfully deleted student: ${student.User.name} (${student.User.email})`);
         return {
           success: true,
           message: "Student deleted successfully",

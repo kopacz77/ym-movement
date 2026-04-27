@@ -103,7 +103,13 @@ export const lessonRouter = createTRPCRouter({
         const coachForCalendar: CoachWithTokens | null = timeSlot.coachId
           ? await ctx.prisma.coach.findUnique({
               where: { id: timeSlot.coachId },
-              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+              select: {
+                id: true,
+                googleAccessToken: true,
+                googleRefreshToken: true,
+                googleTokenExpiresAt: true,
+                googleCalendarId: true,
+              },
             })
           : null;
 
@@ -118,9 +124,7 @@ Area: ${sanitizedInput.area}
 ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
-              attendees: [
-                { email: student.User.email, name: student.User.name || undefined },
-              ],
+              attendees: [{ email: student.User.email, name: student.User.name || undefined }],
               location: timeSlot.Rink.address || "",
               timeZone: timezone,
             });
@@ -197,7 +201,13 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           try {
             const coach = await ctx.prisma.coach.findUnique({
               where: { id: lesson.coachId },
-              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+              select: {
+                id: true,
+                googleAccessToken: true,
+                googleRefreshToken: true,
+                googleTokenExpiresAt: true,
+                googleCalendarId: true,
+              },
             });
             if (coach) {
               await googleCalendar.deleteEvent(coach, lesson.googleCalendarEventId);
@@ -434,14 +444,16 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         const defaultPricing = await ctx.prisma.defaultPricing.findFirst();
 
         // Fetch coach with both pricing fields and calendar tokens
-        const assignCoach: (CoachWithTokens & {
-          privateLessonPrice: number | null;
-          groupLessonPrice: number | null;
-          choreographyPrice: number | null;
-          competitionPrepPrice: number | null;
-          offIceDancePrice: number | null;
-          User: { role: string };
-        }) | null = timeSlot.coachId
+        const assignCoach:
+          | (CoachWithTokens & {
+              privateLessonPrice: number | null;
+              groupLessonPrice: number | null;
+              choreographyPrice: number | null;
+              competitionPrepPrice: number | null;
+              offIceDancePrice: number | null;
+              User: { role: string };
+            })
+          | null = timeSlot.coachId
           ? await ctx.prisma.coach.findUnique({
               where: { id: timeSlot.coachId },
               select: {
@@ -466,24 +478,32 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
         // For non-admin coaches (Renee): coach pricing always wins
         const assignCoachIsAdmin = assignCoach ? isAdminRole(assignCoach.User.role) : false;
         const assignLessonType = input.lessonType || LessonType.PRIVATE;
-        let coachPricing: {
-          privateLessonPrice: number | null;
-          groupLessonPrice: number | null;
-          choreographyPrice: number | null;
-          competitionPrepPrice: number | null;
-          offIceDancePrice: number | null;
-        } | undefined;
+        let coachPricing:
+          | {
+              privateLessonPrice: number | null;
+              groupLessonPrice: number | null;
+              choreographyPrice: number | null;
+              competitionPrepPrice: number | null;
+              offIceDancePrice: number | null;
+            }
+          | undefined;
         if (assignCoach) {
           let skipCoachPricing = false;
           if (assignCoachIsAdmin && student.customPricingEnabled) {
             skipCoachPricing = (() => {
               switch (assignLessonType) {
-                case LessonType.PRIVATE: return student.privateLessonPrice != null;
-                case LessonType.GROUP: return student.groupLessonPrice != null;
-                case LessonType.CHOREOGRAPHY: return student.choreographyPrice != null;
-                case LessonType.COMPETITION_PREP: return student.competitionPrepPrice != null;
-                case LessonType.OFF_ICE_DANCE: return student.offIceDancePrice != null;
-                default: return false;
+                case LessonType.PRIVATE:
+                  return student.privateLessonPrice != null;
+                case LessonType.GROUP:
+                  return student.groupLessonPrice != null;
+                case LessonType.CHOREOGRAPHY:
+                  return student.choreographyPrice != null;
+                case LessonType.COMPETITION_PREP:
+                  return student.competitionPrepPrice != null;
+                case LessonType.OFF_ICE_DANCE:
+                  return student.offIceDancePrice != null;
+                default:
+                  return false;
               }
             })();
           }
@@ -517,9 +537,7 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
 ${input.notes ? `Notes: ${input.notes}` : ""}`,
               startTime: timeSlot.startTime,
               endTime: timeSlot.endTime,
-              attendees: [
-                { email: student.User.email, name: student.User.name || undefined },
-              ],
+              attendees: [{ email: student.User.email, name: student.User.name || undefined }],
               location: timeSlot.Rink.address || "",
               timeZone: timezone,
             });
@@ -550,7 +568,9 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
               ...(timeSlot.coachId && { coachId: timeSlot.coachId }),
               updatedAt: new Date(),
             },
-            include: { Student: { include: { User: { select: { id: true, name: true, email: true } } } } },
+            include: {
+              Student: { include: { User: { select: { id: true, name: true, email: true } } } },
+            },
           });
 
           // Create payment record
@@ -663,24 +683,32 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
         // specific lesson type; otherwise coach pricing provides the fallback
         // For non-admin coaches (Renee): coach pricing always wins
         const updateCoachIsAdmin = updateCoach ? isAdminRole(updateCoach.User.role) : false;
-        let updateCoachPricing: {
-          privateLessonPrice: number | null;
-          groupLessonPrice: number | null;
-          choreographyPrice: number | null;
-          competitionPrepPrice: number | null;
-          offIceDancePrice: number | null;
-        } | undefined;
+        let updateCoachPricing:
+          | {
+              privateLessonPrice: number | null;
+              groupLessonPrice: number | null;
+              choreographyPrice: number | null;
+              competitionPrepPrice: number | null;
+              offIceDancePrice: number | null;
+            }
+          | undefined;
         if (updateCoach) {
           let skipCoachPricing = false;
           if (updateCoachIsAdmin && student.customPricingEnabled) {
             skipCoachPricing = (() => {
               switch (input.lessonType) {
-                case LessonType.PRIVATE: return student.privateLessonPrice != null;
-                case LessonType.GROUP: return student.groupLessonPrice != null;
-                case LessonType.CHOREOGRAPHY: return student.choreographyPrice != null;
-                case LessonType.COMPETITION_PREP: return student.competitionPrepPrice != null;
-                case LessonType.OFF_ICE_DANCE: return student.offIceDancePrice != null;
-                default: return false;
+                case LessonType.PRIVATE:
+                  return student.privateLessonPrice != null;
+                case LessonType.GROUP:
+                  return student.groupLessonPrice != null;
+                case LessonType.CHOREOGRAPHY:
+                  return student.choreographyPrice != null;
+                case LessonType.COMPETITION_PREP:
+                  return student.competitionPrepPrice != null;
+                case LessonType.OFF_ICE_DANCE:
+                  return student.offIceDancePrice != null;
+                default:
+                  return false;
               }
             })();
           }
@@ -714,9 +742,7 @@ ${input.notes ? `Notes: ${input.notes}` : ""}`,
 ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
               startTime: existingLesson.startTime,
               endTime: existingLesson.endTime,
-              attendees: [
-                { email: student.User.email, name: student.User.name || undefined },
-              ],
+              attendees: [{ email: student.User.email, name: student.User.name || undefined }],
               location: existingLesson.Rink.address || "",
               timeZone: existingLesson.Rink.timezone || "America/Toronto",
             });
@@ -837,7 +863,13 @@ ${input.notes ? `Notes: ${input.notes}` : existingLesson.notes || ""}`,
           try {
             const unassignCoach = await ctx.prisma.coach.findUnique({
               where: { id: lesson.coachId },
-              select: { id: true, googleAccessToken: true, googleRefreshToken: true, googleTokenExpiresAt: true, googleCalendarId: true },
+              select: {
+                id: true,
+                googleAccessToken: true,
+                googleRefreshToken: true,
+                googleTokenExpiresAt: true,
+                googleCalendarId: true,
+              },
             });
             if (unassignCoach) {
               await googleCalendar.deleteEvent(unassignCoach, lesson.googleCalendarEventId);

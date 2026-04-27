@@ -135,24 +135,24 @@ function PasswordRequirements({ password }: { password: string }) {
 
   return (
     <div className="space-y-2 mt-2">
-      <div className="text-xs font-medium text-gray-700 mb-3">Password Requirements:</div>
+      <div className="text-xs font-medium text-foreground mb-3">Password Requirements:</div>
       <div className="grid grid-cols-1 gap-1.5">
         {requirements.map((req, index) => (
           <div
             key={index}
-            className={`flex items-center gap-2 text-xs transition-colors duration-200 ${req.met ? "text-green-600" : "text-gray-500"}`}
+            className={`flex items-center gap-2 text-xs transition-colors duration-200 ${req.met ? "text-emerald-600" : "text-muted-foreground"}`}
           >
             {req.met ? (
-              <Check className="h-3 w-3 text-green-500" />
+              <Check className="h-3 w-3 text-emerald-500" />
             ) : (
-              <X className="h-3 w-3 text-gray-400" />
+              <X className="h-3 w-3 text-muted-foreground/70" />
             )}
             <span className={req.met ? "font-medium" : ""}>{req.text}</span>
           </div>
         ))}
       </div>
       {validation.isValid && (
-        <div className="flex items-center gap-2 text-xs text-green-600 font-medium mt-3 pt-2 border-t border-green-100">
+        <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium mt-3 pt-2 border-t border-emerald-200">
           <Check className="h-3 w-3" />
           <span>Password meets all requirements!</span>
         </div>
@@ -357,7 +357,7 @@ export function CompleteRegistrationForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
             {/* Account Info */}
             <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-gray-800">Account Information</h3>
+              <h3 className="text-lg font-medium text-foreground">Account Information</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -374,8 +374,8 @@ export function CompleteRegistrationForm() {
                   )}
                 />
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-900">Email</label>
-                  <Input value={email} disabled className="bg-zinc-50" />
+                  <label className="text-sm font-medium text-foreground">Email</label>
+                  <Input value={email} disabled className="bg-muted" />
                 </div>
               </div>
 
@@ -411,7 +411,7 @@ export function CompleteRegistrationForm() {
                 </div>
 
                 {/* Password Requirements - Full Width Below */}
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="bg-muted rounded-lg p-4 border border-border">
                   <PasswordStrength password={form.watch("password")} showErrors={false} />
                   <PasswordRequirements password={form.watch("password")} />
                 </div>
@@ -420,7 +420,7 @@ export function CompleteRegistrationForm() {
 
             {/* Profile Info */}
             <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-gray-800">Profile Information</h3>
+              <h3 className="text-lg font-medium text-foreground">Profile Information</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
@@ -456,7 +456,7 @@ export function CompleteRegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Phone Number <span className="text-gray-400">(Optional)</span>
+                        Phone Number <span className="text-muted-foreground">(Optional)</span>
                       </FormLabel>
                       <FormControl>
                         <Input placeholder="(555) 123-4567" {...field} />
@@ -474,7 +474,7 @@ export function CompleteRegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Date of Birth <span className="text-gray-400">(Optional)</span>
+                        Date of Birth <span className="text-muted-foreground">(Optional)</span>
                       </FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
@@ -484,8 +484,8 @@ export function CompleteRegistrationForm() {
                   )}
                 />
                 <div className="flex items-end">
-                  <div className="text-sm text-gray-500 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <p className="font-medium text-blue-800 mb-1">💡 Why we need this info:</p>
+                  <div className="text-sm text-muted-foreground p-3 bg-secondary/10 rounded-lg border border-secondary/20">
+                    <p className="font-medium text-secondary mb-1">💡 Why we need this info:</p>
                     <p>
                       Helps us tailor your coaching experience and ensure proper emergency
                       protocols.
@@ -498,8 +498,8 @@ export function CompleteRegistrationForm() {
             {/* Emergency Contact */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-medium text-gray-800">Emergency Contact</h3>
-                <span className="text-sm text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                <h3 className="text-lg font-medium text-foreground">Emergency Contact</h3>
+                <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
                   Optional
                 </span>
               </div>
@@ -555,7 +555,7 @@ export function CompleteRegistrationForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Additional Notes <span className="text-gray-400">(Optional)</span>
+                    Additional Notes <span className="text-muted-foreground">(Optional)</span>
                   </FormLabel>
                   <FormControl>
                     <Textarea
@@ -570,7 +570,7 @@ export function CompleteRegistrationForm() {
             />
 
             {/* Submit Section */}
-            <div className="pt-4 border-t border-gray-100">
+            <div className="pt-4 border-t border-border">
               {!isPasswordValid && watchedPassword && (
                 <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                   <div className="flex items-center gap-2 text-amber-800">
@@ -585,7 +585,7 @@ export function CompleteRegistrationForm() {
 
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-medium bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
+                className="w-full h-12 text-base font-medium bg-gradient-to-r from-[#0891b2] to-[#006780] hover:from-[#0891b2]/90 hover:to-[#006780]/90 transition-all duration-200"
                 disabled={completeRegistrationMutation.isPending || !isPasswordValid}
               >
                 {completeRegistrationMutation.isPending ? (
@@ -602,7 +602,7 @@ export function CompleteRegistrationForm() {
               </Button>
 
               {isPasswordValid && (
-                <p className="text-xs text-center text-green-600 mt-2 flex items-center justify-center gap-1">
+                <p className="text-xs text-center text-emerald-600 mt-2 flex items-center justify-center gap-1">
                   <Check className="h-3 w-3" />
                   Ready to complete registration!
                 </p>
@@ -614,14 +614,14 @@ export function CompleteRegistrationForm() {
 
       {/* Footer with branding */}
       <div className="px-6 pb-6">
-        <div className="text-center text-sm text-gray-500 border-t pt-4">
+        <div className="text-center text-sm text-muted-foreground border-t pt-4">
           <p className="mb-2">
-            Welcome to <span className="font-semibold text-blue-600">YM Movement</span> -
+            Welcome to <span className="font-semibold text-[#0891b2]">YM Movement</span> -
             Professional Ice Dance Coaching
           </p>
           <p>
             Need help? Contact us at{" "}
-            <a href="mailto:info@ym-movement.com" className="text-blue-600 hover:underline">
+            <a href="mailto:info@ym-movement.com" className="text-[#0891b2] hover:underline">
               info@ym-movement.com
             </a>
           </p>

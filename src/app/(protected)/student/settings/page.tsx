@@ -16,7 +16,6 @@ import ChangePasswordForm from "@/features/auth/components/ChangePasswordForm";
 export default function StudentSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [reminderNotifications, setReminderNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaveSettings = () => {
@@ -32,9 +31,9 @@ export default function StudentSettingsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
         <Button onClick={handleSaveSettings} disabled={isSaving}>
           <Save className="h-4 w-4 mr-2" />
           {isSaving ? "Saving..." : "Save Changes"}
@@ -111,14 +110,12 @@ export default function StudentSettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="dark-mode" className="font-medium">
+                  <Label htmlFor="dark-mode" className="font-medium text-muted-foreground">
                     Dark Mode
                   </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Use dark color theme for the application.
-                  </p>
+                  <p className="text-sm text-muted-foreground">Coming soon</p>
                 </div>
-                <Switch id="dark-mode" checked={darkMode} onCheckedChange={setDarkMode} />
+                <Switch id="dark-mode" checked={false} disabled />
               </div>
             </CardContent>
           </Card>

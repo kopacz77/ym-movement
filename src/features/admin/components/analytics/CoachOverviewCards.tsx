@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  Calendar,
-  Clock,
-  DollarSign,
-  GraduationCap,
-  Users,
-  X,
-} from "lucide-react";
-import { useState, useEffect } from "react";
+import { Calendar, Clock, DollarSign, GraduationCap, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,10 +12,11 @@ import { CoachDetailView } from "./CoachDetailView";
 export const CoachOverviewCards = () => {
   const [selectedCoachId, setSelectedCoachId] = useState<string | null>(null);
 
-  const { data: coaches, error, isLoading } = api.admin.superAdmin.getCoachesOverview.useQuery(
-    undefined,
-    { retry: 3 },
-  );
+  const {
+    data: coaches,
+    error,
+    isLoading,
+  } = api.admin.superAdmin.getCoachesOverview.useQuery(undefined, { retry: 3 });
 
   useEffect(() => {
     if (error) {
@@ -37,20 +31,20 @@ export const CoachOverviewCards = () => {
       <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 animate-pulse" />
+            <div className="absolute inset-0 bg-muted animate-pulse" />
             <CardHeader className="relative p-4 sm:p-6">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-slate-200 rounded-lg animate-pulse shrink-0" />
+                <div className="h-10 w-10 bg-muted rounded-lg animate-pulse shrink-0" />
                 <div className="space-y-2 min-w-0 flex-1">
-                  <div className="h-4 bg-slate-200 rounded w-24 animate-pulse" />
-                  <div className="h-3 bg-slate-200 rounded w-32 animate-pulse" />
+                  <div className="h-4 bg-muted rounded w-24 animate-pulse" />
+                  <div className="h-3 bg-muted rounded w-32 animate-pulse" />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="relative p-4 sm:p-6 pt-0">
               <div className="grid grid-cols-3 gap-3">
                 {[...Array(3)].map((_, j) => (
-                  <div key={j} className="h-12 bg-slate-200 rounded animate-pulse" />
+                  <div key={j} className="h-12 bg-muted rounded animate-pulse" />
                 ))}
               </div>
             </CardContent>
@@ -75,9 +69,9 @@ export const CoachOverviewCards = () => {
 
   if (!coaches || coaches.length === 0) {
     return (
-      <Card className="border-dashed border-2 border-gray-200">
+      <Card className="border-dashed border-2 border-border">
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <GraduationCap className="h-12 w-12 text-gray-300 mb-4" />
+          <GraduationCap className="h-12 w-12 text-muted-foreground/30 mb-4" />
           <p className="text-sm text-muted-foreground">No coaches registered yet.</p>
         </CardContent>
       </Card>
@@ -94,9 +88,7 @@ export const CoachOverviewCards = () => {
     }
     if (coach.isActive) {
       return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
-          Active
-        </Badge>
+        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">Active</Badge>
       );
     }
     return (
@@ -112,30 +104,26 @@ export const CoachOverviewCards = () => {
         {coaches.map((coach) => (
           <Card
             key={coach.id}
-            className={`relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group ${
-              selectedCoachId === coach.id ? "ring-2 ring-blue-500 ring-offset-2" : ""
+            className={`relative overflow-hidden hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_36px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-1 cursor-pointer group ${
+              selectedCoachId === coach.id ? "ring-2 ring-cyan-500 ring-offset-2" : ""
             }`}
-            onClick={() => setSelectedCoachId(
-              selectedCoachId === coach.id ? null : coach.id,
-            )}
+            onClick={() => setSelectedCoachId(selectedCoachId === coach.id ? null : coach.id)}
           >
             {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-blue-50 opacity-50" />
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-50/30 to-blue-50/30" />
 
             {/* Content */}
             <CardHeader className="relative p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
-                  <div className="p-2 sm:p-3 rounded-xl bg-indigo-500 shadow-lg group-hover:scale-110 transition-transform duration-300 shrink-0">
-                    <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shrink-0">
+                    <GraduationCap className="h-5 w-5 text-cyan-600" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+                    <CardTitle className="text-sm sm:text-base font-semibold text-foreground truncate">
                       {coach.name ?? "Unknown"}
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {coach.email}
-                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{coach.email}</p>
                   </div>
                 </div>
                 {getStatusBadge(coach)}
@@ -145,19 +133,19 @@ export const CoachOverviewCards = () => {
             <CardContent className="relative pt-0 p-4 sm:p-6">
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="flex flex-col items-center p-2 rounded-lg bg-white/60">
-                  <Calendar className="h-3.5 w-3.5 text-blue-500 mb-1" />
-                  <span className="text-sm font-bold text-gray-900">{coach.lessonCount}</span>
+                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/40">
+                  <Calendar className="h-3.5 w-3.5 text-[#0891b2] mb-1" />
+                  <span className="text-sm font-bold text-foreground">{coach.lessonCount}</span>
                   <span className="text-[10px] text-muted-foreground">Lessons</span>
                 </div>
-                <div className="flex flex-col items-center p-2 rounded-lg bg-white/60">
+                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/40">
                   <Users className="h-3.5 w-3.5 text-emerald-500 mb-1" />
-                  <span className="text-sm font-bold text-gray-900">{coach.studentCount}</span>
+                  <span className="text-sm font-bold text-foreground">{coach.studentCount}</span>
                   <span className="text-[10px] text-muted-foreground">Students</span>
                 </div>
-                <div className="flex flex-col items-center p-2 rounded-lg bg-white/60">
+                <div className="flex flex-col items-center p-2 rounded-lg bg-muted/40">
                   <Clock className="h-3.5 w-3.5 text-amber-500 mb-1" />
-                  <span className="text-sm font-bold text-gray-900">{coach.activeSlots}</span>
+                  <span className="text-sm font-bold text-foreground">{coach.activeSlots}</span>
                   <span className="text-[10px] text-muted-foreground">Slots</span>
                 </div>
               </div>
@@ -166,13 +154,13 @@ export const CoachOverviewCards = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(coach.monthEarnings)}
                   </span>
                   <span className="text-[10px] text-muted-foreground">/mo</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-blue-600" />
+                  <Clock className="h-3.5 w-3.5 text-[#0891b2]" />
                   <span className="text-xs text-muted-foreground">
                     {coach.totalHoursBooked.toFixed(1)}h booked
                   </span>
@@ -181,17 +169,14 @@ export const CoachOverviewCards = () => {
             </CardContent>
 
             {/* Decorative accent */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-teal-500" />
           </Card>
         ))}
       </div>
 
       {/* Coach detail view */}
       {selectedCoachId && (
-        <CoachDetailView
-          coachId={selectedCoachId}
-          onClose={() => setSelectedCoachId(null)}
-        />
+        <CoachDetailView coachId={selectedCoachId} onClose={() => setSelectedCoachId(null)} />
       )}
     </div>
   );

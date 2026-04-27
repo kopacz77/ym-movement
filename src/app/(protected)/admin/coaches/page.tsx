@@ -43,14 +43,21 @@ export default function AdminCoachesPage() {
   const [showNewCoach, setShowNewCoach] = useState(false);
 
   return (
-    <div className="container mx-auto py-4 lg:py-6 space-y-4 lg:space-y-6">
+    <div className="space-y-8">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Coach Management</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-[#1a3a5c]">Coaches</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage coaching staff, set pricing, and track performance.
+          </p>
+        </div>
         <div className="self-start sm:self-auto">
           <Button onClick={() => setShowNewCoach(true)}>Add Coach</Button>
         </div>
       </div>
 
+      {/* Tabs */}
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3 lg:w-fit lg:grid-cols-none lg:flex">
           <TabsTrigger value="all" className="text-sm">

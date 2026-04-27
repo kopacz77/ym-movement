@@ -41,50 +41,50 @@ export const analyticsRouter = createTRPCRouter({
   getOverview: adminProcedure
     .input(z.object({ coachId: z.string().optional() }).optional())
     .query(async ({ ctx, input }) => {
-    try {
-      const [totalStudents, activeLessons, pendingPayments, monthlyRevenue] = await Promise.all([
-        // Students are shared resources -- do NOT scope by coachId
-        ctx.prisma.student.count(),
-        ctx.prisma.lesson.count({
-          where: {
-            status: LessonStatus.SCHEDULED,
-            startTime: { gte: new Date() },
-            ...(input?.coachId && { coachId: input.coachId }),
-          },
-        }),
-        ctx.prisma.payment.count({
-          where: {
-            status: PaymentStatus.PENDING,
-            ...(input?.coachId && { Lesson: { coachId: input.coachId } }),
-          },
-        }),
-        ctx.prisma.payment.aggregate({
-          where: {
-            status: PaymentStatus.COMPLETED,
-            lesson_date: {
-              gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+      try {
+        const [totalStudents, activeLessons, pendingPayments, monthlyRevenue] = await Promise.all([
+          // Students are shared resources -- do NOT scope by coachId
+          ctx.prisma.student.count(),
+          ctx.prisma.lesson.count({
+            where: {
+              status: LessonStatus.SCHEDULED,
+              startTime: { gte: new Date() },
+              ...(input?.coachId && { coachId: input.coachId }),
             },
-            ...(input?.coachId && { Lesson: { coachId: input.coachId } }),
-          },
-          _sum: { amount: true },
-        }),
-      ]);
+          }),
+          ctx.prisma.payment.count({
+            where: {
+              status: PaymentStatus.PENDING,
+              ...(input?.coachId && { Lesson: { coachId: input.coachId } }),
+            },
+          }),
+          ctx.prisma.payment.aggregate({
+            where: {
+              status: PaymentStatus.COMPLETED,
+              lesson_date: {
+                gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+              },
+              ...(input?.coachId && { Lesson: { coachId: input.coachId } }),
+            },
+            _sum: { amount: true },
+          }),
+        ]);
 
-      return {
-        totalStudents,
-        activeLessons,
-        pendingPayments,
-        monthlyRevenue: monthlyRevenue._sum.amount || 0,
-      };
-    } catch (error) {
-      console.error("Error in getOverview:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch overview data",
-        cause: error,
-      });
-    }
-  }),
+        return {
+          totalStudents,
+          activeLessons,
+          pendingPayments,
+          monthlyRevenue: monthlyRevenue._sum.amount || 0,
+        };
+      } catch (error) {
+        console.error("Error in getOverview:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch overview data",
+          cause: error,
+        });
+      }
+    }),
 
   getStudentActivity: adminProcedure
     .input(

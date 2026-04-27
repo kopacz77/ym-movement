@@ -71,6 +71,7 @@ export const OverviewCards = () => {
       gradient: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-50 to-blue-100",
       iconBg: "bg-blue-500",
+      shadowColor: "shadow-blue-200/50",
     },
     {
       title: "Active Lessons",
@@ -82,6 +83,7 @@ export const OverviewCards = () => {
       gradient: "from-emerald-500 to-emerald-600",
       bgGradient: "from-emerald-50 to-emerald-100",
       iconBg: "bg-emerald-500",
+      shadowColor: "shadow-emerald-200/50",
     },
     {
       title: "Pending Payments",
@@ -96,6 +98,7 @@ export const OverviewCards = () => {
       gradient: "from-amber-500 to-amber-600",
       bgGradient: "from-amber-50 to-amber-100",
       iconBg: "bg-amber-500",
+      shadowColor: "shadow-amber-200/50",
     },
   ];
 
@@ -104,7 +107,7 @@ export const OverviewCards = () => {
       {stats.map((stat) => (
         <Card
           key={stat.title}
-          className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+          className={`relative overflow-hidden border-0 shadow-lg ${stat.shadowColor} hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}
         >
           {/* Background gradient */}
           <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-50`} />

@@ -1,11 +1,16 @@
 // src/features/student/components/booking/BookingCalendar.tsx
 "use client";
+import type { EventClickArg, EventContentArg, EventInput } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import luxon3Plugin from "@fullcalendar/luxon3";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DateTime } from "luxon";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Calendar, Views } from "react-big-calendar";
-import { formatTimeWithTimezone, TimezoneNotice } from "@/components/TimezoneNotice";
+import { toast } from "sonner";
+import { TimezoneNotice } from "@/components/TimezoneNotice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,13 +23,9 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { api } from "@/lib/api";
-import { localizer } from "@/lib/calendar/calendarLocalizer";
 import { displayInRinkLocalTime } from "@/lib/timezone";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import { toast } from "sonner";
 import { BookingDialog } from "./BookingDialog";
 
-// Define types for the rinks and time slots
 interface Rink {
   id: string;
   name: string;
@@ -39,7 +40,7 @@ interface ApiRink {
   timezone?: string;
 }
 
-interface TimeSlot {
+interface BookingTimeSlot {
   id: string;
   startTime: string;
   endTime: string;
@@ -64,25 +65,6 @@ interface ApiTimeSlot {
   [key: string]: unknown;
 }
 
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  allDay?: boolean;
-  resource?: unknown;
-  interactive?: boolean;
-  rinkName?: string;
-  timezone?: string;
-  timeDisplay?: string;
-  status?: string;
-  maxStudents?: number;
-  currentStudents?: number;
-}
-
-// Define a type for view
-type View = typeof Views.WEEK | typeof Views.MONTH;
-
 interface BookingCalendarProps {
   coachId: string;
   coachName: string;
@@ -92,16 +74,12 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
   const { id: studentId } = useCurrentUser();
   const isMobile = useIsMobile();
 
-  // Create a stable initial date
   const initialDate = useMemo(() => new Date(), []);
-
-  // State initialization
   const [date, setDate] = useState(initialDate);
   const [selectedRink, setSelectedRink] = useState<string>("");
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<BookingTimeSlot | null>(null);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [calendarView, setCalendarView] = useState<View>(Views.WEEK);
 
   useEffect(() => {
     if (studentId) {
@@ -109,28 +87,17 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
     }
   }, [studentId]);
 
-  // Calculate date range based on month for efficient data loading
-  // Include 6-day buffer to handle week views that span across months
-  // (e.g., viewing Dec 30 shows Dec 30 - Jan 5, needing 6 days into January)
+  // Calculate date range (month + buffer for week views spanning months)
   const dateRange = useMemo(() => {
     const year = date.getFullYear();
     const month = date.getMonth();
-
-    // First day of month minus 6 days (for week views starting in prev month)
     const firstDay = new Date(year, month, 1);
     firstDay.setDate(firstDay.getDate() - 6);
-
-    // Last day of month plus 6 days (for week views ending in next month)
     const lastDay = new Date(year, month + 1, 0);
     lastDay.setDate(lastDay.getDate() + 6);
-
-    return {
-      start: startOfDay(firstDay),
-      end: endOfDay(lastDay),
-    };
+    return { start: startOfDay(firstDay), end: endOfDay(lastDay) };
   }, [date]);
 
-  // Generate a stable cache key
   const cacheKey = useMemo(() => {
     const hashStr = `${dateRange.start.getTime()}-${dateRange.end.getTime()}-${selectedRink}-${coachId}`;
     return hashStr.split("").reduce((acc, char) => {
@@ -138,32 +105,25 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
     }, 0);
   }, [dateRange.start, dateRange.end, selectedRink, coachId]);
 
-  // Fetch rinks
   const { data: rinks } = api.student.availability.getRinks.useQuery(undefined, {
     enabled: isReady,
   });
 
-  // Set the first rink as default if not already set
   useEffect(() => {
-    // Safely access the first rink ID within the effect body
     const firstRinkId = rinks?.[0]?.id;
-
     if (firstRinkId && !selectedRink) {
       setSelectedRink(firstRinkId);
     }
   }, [rinks, selectedRink]);
 
-  // Get current rink timezone
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
       const selectedRinkData = rinks.find((rink: Rink) => rink.id === selectedRink);
       return selectedRinkData?.timezone || "America/Los_Angeles";
     }
-    // Default timezone if no rink is selected
     return "America/Los_Angeles";
   }, [selectedRink, rinks]);
 
-  // Fetch time slots - only enable when a rink is selected
   const { data: availableSlots, isLoading } =
     api.student.availability.getAvailableTimeSlots.useQuery(
       {
@@ -180,189 +140,90 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
       },
     );
 
-  // Format the date range for display
-  const dateRangeText = useMemo(() => {
-    if (!selectedRink) {
-      return "";
-    }
-
-    try {
-      // Use Luxon for proper timezone handling
-      const startDate = DateTime.fromJSDate(date).setZone(rinkTimezone);
-
-      // Check if the DateTime is valid
-      if (!startDate.isValid) {
-        console.error(
-          "Invalid date for dateRangeText:",
-          date,
-          "timezone:",
-          rinkTimezone,
-          "error:",
-          startDate.invalidReason,
-        );
-        // Fallback to a simple date format
-        return date.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        });
-      }
-
-      if (calendarView === Views.WEEK) {
-        const endDate = startDate.plus({ days: 6 });
-
-        // Check if endDate is also valid
-        if (!endDate.isValid) {
-          console.error("Invalid endDate for dateRangeText:", endDate.invalidReason);
-          return startDate.toFormat("MMM d, yyyy");
-        }
-
-        if (startDate.month === endDate.month) {
-          return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("d")}, ${startDate.toFormat(
-            "yyyy",
-          )}`;
-        }
-        return `${startDate.toFormat("MMM d")} - ${endDate.toFormat("MMM d")}, ${startDate.toFormat(
-          "yyyy",
-        )}`;
-      }
-
-      return startDate.toFormat("MMMM yyyy");
-    } catch (error) {
-      console.error("Error formatting date range:", error);
-      // Fallback to basic date formatting
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    }
-  }, [date, calendarView, rinkTimezone, selectedRink]);
-
-  // Convert slots to calendar events
-  const events = useMemo(() => {
+  // Convert to FullCalendar events
+  const calendarEvents: EventInput[] = useMemo(() => {
     if (!availableSlots || !selectedRink) {
       return [];
     }
 
-    return availableSlots.map((slot): CalendarEvent => {
+    return availableSlots.map((slot) => {
       const isAvailable = slot.isAvailable === true;
-      const isYuraSlot = slot.isActive === true;
+      const isSlotActive = slot.isActive === true;
       const studentCount = slot.currentStudents || 0;
       const timezone = (slot as any).Rink.timezone || rinkTimezone;
 
-      // Format times in the rink's timezone
       const startTimeInfo = displayInRinkLocalTime(slot.startTime, timezone);
       const endTimeInfo = displayInRinkLocalTime(slot.endTime, timezone);
 
-      const timeDisplay = `${startTimeInfo.formattedTime} - ${endTimeInfo.formattedTime}`;
-
-      const title = `${studentCount}/${slot.maxStudents} students${
-        isAvailable ? " - Available" : " - Full"
-      }`;
-
       return {
         id: slot.id,
-        title,
-        start: startTimeInfo.dateTime.toJSDate(),
-        end: endTimeInfo.dateTime.toJSDate(),
-        interactive: isYuraSlot && isAvailable,
-        rinkName: (slot as any).Rink?.name || "",
-        timezone,
-        timeDisplay,
-        status: isAvailable && isYuraSlot ? "available" : "unavailable",
-        maxStudents: slot.maxStudents,
-        currentStudents: studentCount,
+        title: `${studentCount}/${slot.maxStudents}${isAvailable ? " - Available" : " - Full"}`,
+        start: startTimeInfo.dateTime.toJSDate().toISOString(),
+        end: endTimeInfo.dateTime.toJSDate().toISOString(),
+        backgroundColor: isAvailable && isSlotActive ? "#22c55e" : "#ef4444",
+        borderColor: isAvailable && isSlotActive ? "#16a34a" : "#dc2626",
+        extendedProps: {
+          interactive: isSlotActive && isAvailable,
+          rinkName: (slot as any).Rink?.name || "",
+          timezone,
+          maxStudents: slot.maxStudents,
+          currentStudents: studentCount,
+          status: isAvailable && isSlotActive ? "available" : "unavailable",
+          rawSlot: slot,
+        },
       };
     });
   }, [availableSlots, selectedRink, rinkTimezone]);
 
-  // Process events for list view
-  const processEventsForCustomList = useCallback(() => {
-    if (!availableSlots || !selectedRink) {
-      return [];
-    }
+  // Custom event content for booking calendar
+  const renderEventContent = useCallback(({ event, timeText }: EventContentArg) => {
+    const props = event.extendedProps;
+    const _isAvailable = props.status === "available";
 
-    // Group events by day in the rink's timezone
-    const groupedEvents = availableSlots.reduce(
-      (groups, slot) => {
-        // Get the date in the rink's timezone
-        const slotDateTime = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
-        const dateKey = slotDateTime.toFormat("yyyy-MM-dd");
-
-        if (!groups[dateKey]) {
-          groups[dateKey] = {
-            date: slotDateTime.toJSDate(),
-            slots: [],
-          };
-        }
-
-        groups[dateKey].slots.push(slot as any);
-        return groups;
-      },
-      {} as Record<string, { date: Date; slots: ApiTimeSlot[] }>,
+    return (
+      <div className="px-1 py-0.5 h-full overflow-hidden text-white">
+        <div className="text-[10px] font-medium leading-tight">{timeText}</div>
+        <div className="text-xs font-semibold leading-tight truncate">{event.title}</div>
+        <div className="text-[10px] leading-tight opacity-90">{props.rinkName}</div>
+      </div>
     );
+  }, []);
 
-    // Convert to array and sort by date
-    return Object.values(groupedEvents).sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [availableSlots, selectedRink, rinkTimezone]);
+  // Handle FullCalendar event click
+  const handleFCEventClick = useCallback(
+    (clickInfo: EventClickArg) => {
+      const props = clickInfo.event.extendedProps;
+      const rawSlot = props.rawSlot;
 
-  // Format time in the rink's timezone
-  const formatTimeInRinkTimezone = useCallback(
-    (timeStr: string | Date) => {
-      try {
-        const dateTime =
-          typeof timeStr === "string"
-            ? DateTime.fromISO(timeStr, { zone: "utc" }).setZone(rinkTimezone)
-            : DateTime.fromJSDate(timeStr, { zone: "utc" }).setZone(rinkTimezone);
-
-        if (!dateTime.isValid) {
-          console.error("Invalid date in formatTimeInRinkTimezone:", timeStr);
-          return "Invalid time";
-        }
-
-        return dateTime.toFormat("h:mm a");
-      } catch (error) {
-        console.error("Error formatting time in rink timezone:", error);
-        return "Invalid time";
-      }
-    },
-    [rinkTimezone],
-  );
-
-  // Handle events
-  const handleEventClick = useCallback(
-    (event: CalendarEvent) => {
-      if (!event.interactive) {
+      if (!props.interactive) {
         toast("Non-bookable time slot", {
           description: "This time slot is not available for booking.",
         });
         return;
       }
 
-      const currentStudents = event.currentStudents || 0;
-      if (currentStudents >= (event.maxStudents || 0)) {
+      const currentStudents = props.currentStudents || 0;
+      if (currentStudents >= (props.maxStudents || 0)) {
         toast.error("Time slot unavailable", {
           description: "This time slot is already fully booked.",
         });
         return;
       }
 
-      // Convert event to TimeSlot format
-      const slot: TimeSlot = {
-        id: event.id,
-        startTime: event.start.toISOString(),
-        endTime: event.end.toISOString(),
-        maxStudents: event.maxStudents || 0,
-        currentStudents: event.currentStudents,
+      const slot: BookingTimeSlot = {
+        id: clickInfo.event.id,
+        startTime: rawSlot.startTime.toString(),
+        endTime: rawSlot.endTime.toString(),
+        maxStudents: props.maxStudents || 0,
+        currentStudents: props.currentStudents,
         isActive: true,
         rink: {
           id: selectedRink,
-          name: event.rinkName || "",
+          name: props.rinkName || "",
           address: "",
-          timezone: event.timezone || rinkTimezone,
+          timezone: props.timezone || rinkTimezone,
         },
-        interactive: event.interactive,
+        interactive: props.interactive,
       };
 
       setSelectedSlot(slot);
@@ -371,18 +232,55 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
     [selectedRink, rinkTimezone],
   );
 
-  // Handle clicking a slot in the custom list view
+  const handleDatesSet = useCallback((dateInfo: { start: Date }) => {
+    setDate(dateInfo.start);
+  }, []);
+
+  // Mobile list processing
+  const processEventsForCustomList = useCallback(() => {
+    if (!availableSlots || !selectedRink) {
+      return [];
+    }
+
+    const groupedEvents = availableSlots.reduce(
+      (groups, slot) => {
+        const slotDateTime = DateTime.fromJSDate(
+          typeof slot.startTime === "string" ? new Date(slot.startTime) : slot.startTime,
+        ).setZone(rinkTimezone);
+        const dateKey = slotDateTime.toFormat("yyyy-MM-dd");
+
+        if (!groups[dateKey]) {
+          groups[dateKey] = { date: slotDateTime.toJSDate(), slots: [] };
+        }
+        groups[dateKey].slots.push(slot as any);
+        return groups;
+      },
+      {} as Record<string, { date: Date; slots: ApiTimeSlot[] }>,
+    );
+
+    return Object.values(groupedEvents).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [availableSlots, selectedRink, rinkTimezone]);
+
+  const formatTimeInRinkTimezone = useCallback(
+    (timeStr: string | Date) => {
+      const dateTime =
+        typeof timeStr === "string"
+          ? DateTime.fromISO(timeStr, { zone: "utc" }).setZone(rinkTimezone)
+          : DateTime.fromJSDate(timeStr, { zone: "utc" }).setZone(rinkTimezone);
+      if (!dateTime.isValid) {
+        return "Invalid time";
+      }
+      return dateTime.toFormat("h:mm a");
+    },
+    [rinkTimezone],
+  );
+
   const handleCustomSlotClick = useCallback(
     (rawSlot: ApiTimeSlot) => {
-      // Ensure startTime and endTime are strings
-      const stringifiedStartTime = rawSlot.startTime.toString();
-      const stringifiedEndTime = rawSlot.endTime.toString();
-
-      // Create a properly typed TimeSlot
-      const processedSlot: TimeSlot = {
+      const processedSlot: BookingTimeSlot = {
         id: rawSlot.id,
-        startTime: stringifiedStartTime,
-        endTime: stringifiedEndTime,
+        startTime: rawSlot.startTime.toString(),
+        endTime: rawSlot.endTime.toString(),
         maxStudents: rawSlot.maxStudents,
         currentStudents: rawSlot.currentStudents,
         lessons: rawSlot.lessons,
@@ -417,98 +315,24 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
     [rinkTimezone],
   );
 
-  // Navigation handlers
   const handleNavigate = useCallback(
-    (action: "PREV" | "NEXT" | "TODAY" | Date) => {
+    (action: "PREV" | "NEXT" | "TODAY") => {
       if (action === "PREV") {
         const newDate = new Date(date);
-        if (calendarView === Views.MONTH) {
-          newDate.setMonth(date.getMonth() - 1);
-        } else {
-          newDate.setDate(date.getDate() - 7);
-        }
+        newDate.setDate(date.getDate() - 7);
         setDate(newDate);
       } else if (action === "NEXT") {
         const newDate = new Date(date);
-        if (calendarView === Views.MONTH) {
-          newDate.setMonth(date.getMonth() + 1);
-        } else {
-          newDate.setDate(date.getDate() + 7);
-        }
+        newDate.setDate(date.getDate() + 7);
         setDate(newDate);
-      } else if (action === "TODAY") {
+      } else {
         setDate(new Date());
-      } else if (action instanceof Date) {
-        setDate(action);
       }
     },
-    [date, calendarView],
+    [date],
   );
 
-  // Event styling based on status
-  const eventPropGetter = useCallback((event: CalendarEvent) => {
-    const isAvailable = event.status === "available";
-    const backgroundColor = isAvailable ? "#22c55e" : "#ef4444";
-
-    return {
-      style: {
-        backgroundColor,
-        borderColor: isAvailable ? "#16a34a" : "#dc2626",
-        color: "#ffffff",
-      },
-    };
-  }, []);
-
-  // Custom slot styling
-  const slotPropGetter = useCallback(() => {
-    return {
-      className: "rbc-time-slot",
-    };
-  }, []);
-
-  // Custom event component
-  const EventComponent = useCallback(
-    ({ event }: { event: CalendarEvent }) => {
-      const timezone = event.timezone || rinkTimezone;
-
-      // Get both local and rink formatted times
-      const startTimeObj = formatTimeWithTimezone(event.start, timezone, "h:mm a");
-      const endTimeObj = formatTimeWithTimezone(event.end, timezone, "h:mm a");
-
-      // Format the times for display
-      const localTimeStr = `${startTimeObj.localTime} - ${endTimeObj.localTime}`;
-      const rinkTimeStr = `${startTimeObj.rinkTime} - ${endTimeObj.rinkTime}`;
-
-      const showBothTimes = timezone !== Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      // For month view, keep it simple but visible
-      if (calendarView === Views.MONTH) {
-        return (
-          <div className="p-1">
-            <div className="font-medium text-xs whitespace-normal">{event.title}</div>
-            <div className="text-xs whitespace-normal opacity-80">{startTimeObj.rinkTime}</div>
-          </div>
-        );
-      }
-
-      // Detailed display for week view
-      return (
-        <div className="p-1">
-          <div className="font-medium text-sm whitespace-normal">{event.title}</div>
-          <div className="text-xs whitespace-normal">{localTimeStr}</div>
-          {showBothTimes && (
-            <div className="text-xs whitespace-normal opacity-80">({rinkTimeStr} rink time)</div>
-          )}
-          <div className="text-xs whitespace-normal">
-            {event.rinkName} ({event.timezone?.split("/").pop()?.replace("_", " ")})
-          </div>
-        </div>
-      );
-    },
-    [rinkTimezone, calendarView],
-  );
-
-  // When no rink is selected yet
+  // No rink selected - prompt
   if (!selectedRink && rinks && rinks.length > 0) {
     return (
       <Card className="h-full">
@@ -557,7 +381,6 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
       </CardHeader>
 
       <CardContent>
-        {/* Timezone Notice Banner */}
         {selectedRink && (
           <TimezoneNotice
             rinkTimezone={rinkTimezone}
@@ -571,43 +394,29 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
             <p>Loading calendar...</p>
           </div>
         ) : isMobile ? (
-          // Custom mobile list view
           <div className="h-[600px] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <Button variant="outline" size="sm" onClick={() => handleNavigate("PREV")}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="text-center">
-                <span className="font-medium">{dateRangeText}</span>
-              </div>
+              <Button variant="outline" size="sm" onClick={() => handleNavigate("TODAY")}>
+                Today
+              </Button>
               <Button variant="outline" size="sm" onClick={() => handleNavigate("NEXT")}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full mb-4"
-              onClick={() => handleNavigate("TODAY")}
-            >
-              Today
-            </Button>
 
             {processEventsForCustomList().map((day) => {
-              // Format the date in the rink's timezone
               const dayDate = DateTime.fromJSDate(day.date).setZone(rinkTimezone);
-
               return (
                 <div key={dayDate.toFormat("yyyy-MM-dd")} className="mb-4">
-                  {/* Day header */}
                   <div className="py-2 px-3 bg-muted rounded-t-md">
                     <div className="flex justify-between items-center">
                       <span className="font-bold">{dayDate.toFormat("EEEE")}</span>
                       <span>{dayDate.toFormat("MMMM d, yyyy")}</span>
                     </div>
                   </div>
-
-                  {/* Time slots for the day */}
                   <div className="border border-border rounded-b-md">
                     {day.slots
                       .sort(
@@ -618,25 +427,8 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
                         const isAvailable = slot.isAvailable === true;
                         const isSlotActive = slot.isActive === true;
                         const isSlotBookable = isSlotActive && isAvailable;
-
-                        // Format time in rink's timezone
                         const startTime = formatTimeInRinkTimezone(slot.startTime);
                         const endTime = formatTimeInRinkTimezone(slot.endTime);
-
-                        // Add local time if timezone differs from user's timezone
-                        const timezone = (slot as any).Rink.timezone || rinkTimezone;
-                        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                        const showLocalTime = timezone !== userTimezone;
-
-                        let localStartTime = "";
-                        let localEndTime = "";
-
-                        if (showLocalTime) {
-                          const startTimeObj = formatTimeWithTimezone(slot.startTime, timezone);
-                          const endTimeObj = formatTimeWithTimezone(slot.endTime, timezone);
-                          localStartTime = startTimeObj.localTime;
-                          localEndTime = endTimeObj.localTime;
-                        }
 
                         return (
                           <button
@@ -656,11 +448,6 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
                                 {`${currentStudents}/${slot.maxStudents} students`}
                               </div>
                             </div>
-                            {showLocalTime && (
-                              <div className="text-xs text-muted-foreground">
-                                Your time: {localStartTime} - {localEndTime}
-                              </div>
-                            )}
                             <div className="text-sm text-muted-foreground">
                               {(slot as any).Rink.name}{" "}
                               {isSlotBookable ? "- Available" : "- Not Available"}
@@ -674,65 +461,32 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
             })}
           </div>
         ) : (
-          // Desktop calendar view with React Big Calendar
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => handleNavigate("PREV")}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleNavigate("TODAY")}>
-                  Today
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleNavigate("NEXT")}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="text-center">
-                <span className="font-medium">{dateRangeText}</span>
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant={calendarView === Views.WEEK ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCalendarView(Views.WEEK)}
-                >
-                  Week
-                </Button>
-                <Button
-                  variant={calendarView === Views.MONTH ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCalendarView(Views.MONTH)}
-                >
-                  Month
-                </Button>
-              </div>
-            </div>
-
-            <Calendar
-              localizer={localizer}
-              events={events}
-              step={15}
-              timeslots={4}
-              defaultView={Views.WEEK}
-              views={[Views.WEEK, Views.MONTH]}
-              view={calendarView}
-              onView={(view) => setCalendarView(view as View)}
-              date={date}
-              onNavigate={handleNavigate}
-              components={{
-                event: EventComponent,
-                toolbar: () => null, // Disable the default toolbar
-              }}
-              eventPropGetter={eventPropGetter}
-              slotPropGetter={slotPropGetter}
-              min={new Date(date.getFullYear(), date.getMonth(), date.getDate(), 5, 0)} // 5 AM
-              max={new Date(date.getFullYear(), date.getMonth(), date.getDate(), 22, 0)} // 10 PM
-              onSelectEvent={handleEventClick}
-              popup
-              style={{ height: 600 }}
-            />
-          </div>
+          <FullCalendar
+            key={rinkTimezone}
+            plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin]}
+            initialView="timeGridWeek"
+            initialDate={date}
+            timeZone={rinkTimezone}
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "timeGridWeek,dayGridMonth",
+            }}
+            selectable={false}
+            editable={false}
+            slotDuration="00:15:00"
+            slotMinTime="05:00:00"
+            slotMaxTime="22:00:00"
+            allDaySlot={false}
+            nowIndicator={true}
+            events={calendarEvents}
+            eventContent={renderEventContent}
+            eventClick={handleFCEventClick}
+            datesSet={handleDatesSet}
+            height={600}
+            expandRows={true}
+            dayMaxEvents={3}
+          />
         )}
 
         {isBookingDialogOpen && selectedSlot && studentId && (

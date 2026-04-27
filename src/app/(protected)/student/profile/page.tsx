@@ -44,24 +44,27 @@ export default function StudentProfilePage() {
 
   if (!isReady || isLoading) {
     return (
-      <div className="container mx-auto py-6 flex justify-center items-center h-96">
-        <p>Loading profile...</p>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="h-64 bg-muted rounded-lg animate-pulse" />
       </div>
     );
   }
 
   if (!student) {
     return (
-      <div className="container mx-auto py-6 flex justify-center items-center h-96">
+      <div className="flex justify-center items-center h-96">
         <p>Profile not found</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Your Profile</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Profile</h1>
       </div>
       <ProfileForm />
     </div>

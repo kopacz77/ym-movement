@@ -7,8 +7,7 @@ import type * as React from "react";
 import { useState } from "react";
 import superjson from "superjson";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext"; // Add this import
+import { BulkOperationsProvider } from "@/contexts/BulkOperationsContext";
 import { api } from "@/lib/api";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -38,16 +37,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider basePath="/api/auth">
-      <AuthProvider>
-        <BulkOperationsProvider>
-          <api.Provider client={trpcClient} queryClient={queryClient}>
-            <QueryClientProvider client={queryClient}>
-              {children}
-              <Toaster />
-            </QueryClientProvider>
-          </api.Provider>
-        </BulkOperationsProvider>
-      </AuthProvider>
+      <BulkOperationsProvider>
+        <api.Provider client={trpcClient} queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <Toaster />
+          </QueryClientProvider>
+        </api.Provider>
+      </BulkOperationsProvider>
     </SessionProvider>
   );
 }

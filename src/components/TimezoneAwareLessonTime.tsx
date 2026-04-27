@@ -88,12 +88,12 @@ export function TimezoneAwareLessonTime({
         <div className="space-y-2">
           {/* User's current timezone - PRIMARY */}
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-blue-600" />
+            <Clock className="h-4 w-4 text-[#0891b2]" />
             <div>
               <p className="text-gray-900 font-medium">
                 {formatUtcDate(startTime)}, {userTimeStart} - {userTimeEnd} ({duration} minutes)
               </p>
-              <p className="text-xs text-blue-600 font-medium">
+              <p className="text-xs text-[#0891b2] font-medium">
                 Your current time ({getUserTimezoneAbbr()})
               </p>
             </div>

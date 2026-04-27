@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
-import { api } from "@/lib/api";
 import type { DateRange } from "@/hooks/useTimeSlots";
+import { api } from "@/lib/api";
 
 export function useCoachTimeSlots(dateRange: DateRange, selectedRink?: string) {
   const { status } = useSession();

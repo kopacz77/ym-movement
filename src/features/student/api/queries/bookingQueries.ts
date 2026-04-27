@@ -286,12 +286,18 @@ export const bookingRouter = createTRPCRouter({
         if (coachIsAdmin && student.customPricingEnabled) {
           const studentHasCustomRate = (() => {
             switch (input.type) {
-              case LessonType.PRIVATE: return student.privateLessonPrice != null;
-              case LessonType.GROUP: return student.groupLessonPrice != null;
-              case LessonType.CHOREOGRAPHY: return student.choreographyPrice != null;
-              case LessonType.COMPETITION_PREP: return student.competitionPrepPrice != null;
-              case LessonType.OFF_ICE_DANCE: return student.offIceDancePrice != null;
-              default: return false;
+              case LessonType.PRIVATE:
+                return student.privateLessonPrice != null;
+              case LessonType.GROUP:
+                return student.groupLessonPrice != null;
+              case LessonType.CHOREOGRAPHY:
+                return student.choreographyPrice != null;
+              case LessonType.COMPETITION_PREP:
+                return student.competitionPrepPrice != null;
+              case LessonType.OFF_ICE_DANCE:
+                return student.offIceDancePrice != null;
+              default:
+                return false;
             }
           })();
           if (studentHasCustomRate) {

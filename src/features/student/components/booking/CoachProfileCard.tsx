@@ -27,10 +27,16 @@ interface CoachProfileCardProps {
 }
 
 function getInitials(name: string | null): string | null {
-  if (!name) return null;
+  if (!name) {
+    return null;
+  }
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 0) return null;
-  if (parts.length === 1) return parts[0][0]?.toUpperCase() || null;
+  if (parts.length === 0) {
+    return null;
+  }
+  if (parts.length === 1) {
+    return parts[0][0]?.toUpperCase() || null;
+  }
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
@@ -42,7 +48,9 @@ function getLowestPrice(coach: CoachProfile): number | null {
     coach.competitionPrepPrice,
   ].filter((p): p is number => p != null);
 
-  if (prices.length === 0) return null;
+  if (prices.length === 0) {
+    return null;
+  }
   return Math.min(...prices);
 }
 
@@ -59,7 +67,7 @@ export function CoachProfileCard({ coach, onSelect }: CoachProfileCardProps) {
         <div className="flex items-start gap-3 mb-3">
           <Avatar className="h-12 w-12">
             {coach.photoUrl && <AvatarImage src={coach.photoUrl} alt={coach.name || "Coach"} />}
-            <AvatarFallback className="bg-blue-100 text-blue-700 text-sm font-medium">
+            <AvatarFallback className="bg-cyan-50 text-cyan-700 text-sm font-medium">
               {initials || <User className="h-5 w-5" />}
             </AvatarFallback>
           </Avatar>

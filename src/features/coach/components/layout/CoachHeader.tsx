@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -32,6 +33,18 @@ import { NotificationsPopover } from "@/features/notifications/components/Notifi
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useTouchTarget } from "@/hooks/useTouchTarget";
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) {
+    return "?";
+  }
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
 
 export function CoachHeader() {
   const router = useRouter();
@@ -106,6 +119,15 @@ export function CoachHeader() {
         <div className={`flex items-center shrink-0 ${getTouchSpacing("gap-2")}`}>
           {/* Notifications Popover */}
           <NotificationsPopover />
+
+          {/* Profile Avatar */}
+          <Link href="/coach/profile">
+            <Avatar className="h-9 w-9 border border-slate-200 hover:ring-2 hover:ring-cyan-500 transition-all cursor-pointer">
+              <AvatarFallback className="bg-slate-100 text-slate-600 text-sm font-semibold">
+                {getInitials(session?.user?.name)}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
 
           <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
             <AlertDialogTrigger asChild>

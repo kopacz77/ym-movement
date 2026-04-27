@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, CheckCircle, DollarSign, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 
@@ -10,14 +10,11 @@ export function CoachOverviewCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-24" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
+            <CardContent className="p-6">
+              <Skeleton className="h-20 w-full" />
             </CardContent>
           </Card>
         ))}
@@ -30,46 +27,53 @@ export function CoachOverviewCards() {
       title: "Total Students",
       value: stats?.totalStudents ?? 0,
       icon: Users,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      iconBg: "bg-cyan-50",
+      iconColor: "text-cyan-600",
     },
     {
       title: "Upcoming Lessons",
       value: stats?.upcomingLessons ?? 0,
       icon: Calendar,
-      color: "text-green-600",
-      bg: "bg-green-50",
+      iconBg: "bg-cyan-50/70",
+      iconColor: "text-cyan-600",
     },
     {
       title: "Completed This Month",
       value: stats?.completedThisMonth ?? 0,
       icon: CheckCircle,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
     },
     {
       title: "Monthly Earnings",
       value: `$${(stats?.earningsThisMonth ?? 0).toFixed(2)}`,
       icon: DollarSign,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      iconBg: "bg-violet-50",
+      iconColor: "text-violet-600",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {cards.map((card) => (
-        <Card key={card.title}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <div className={`rounded-md p-1.5 ${card.bg}`}>
-                <card.icon className={`h-4 w-4 ${card.color}`} />
+        <Card
+          key={card.title}
+          className="group hover:-translate-y-1 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_36px_rgba(0,0,0,0.1)] transition-all duration-200"
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-1">
+                  {card.title}
+                </p>
+                <div className="text-3xl font-bold tracking-tight">{card.value}</div>
               </div>
-              {card.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{card.value}</div>
+              <div
+                className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}
+              >
+                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+              </div>
+            </div>
           </CardContent>
         </Card>
       ))}

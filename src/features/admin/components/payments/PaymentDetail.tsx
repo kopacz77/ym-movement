@@ -53,11 +53,26 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
   const getStatusBadge = (status: PaymentStatus) => {
     switch (status) {
       case "COMPLETED":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+        return (
+          <Badge className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Paid
+          </Badge>
+        );
       case "PENDING":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return (
+          <Badge className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 border-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Pending
+          </Badge>
+        );
       case "FAILED":
-        return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
+        return (
+          <Badge className="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 border-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            Failed
+          </Badge>
+        );
       default:
         return <Badge>{status}</Badge>;
     }

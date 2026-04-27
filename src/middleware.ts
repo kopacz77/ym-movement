@@ -12,14 +12,15 @@ export function middleware(req: NextRequest) {
     pathname.startsWith("/student") ||
     pathname.startsWith("/coach");
 
-  if (!isProtected) return NextResponse.next();
+  if (!isProtected) {
+    return NextResponse.next();
+  }
 
   // Check for session cookie existence only. Role-based access control
   // is enforced by server components (auth()) and the TRPC layer.
   // We avoid getToken() here because JWE decryption is incompatible
   // with Edge Runtime in next-auth v5 beta.
-  const hasSession =
-    req.cookies.has(SESSION_COOKIE) || req.cookies.has(SESSION_COOKIE_HTTP);
+  const hasSession = req.cookies.has(SESSION_COOKIE) || req.cookies.has(SESSION_COOKIE_HTTP);
 
   if (!hasSession) {
     const loginUrl = new URL("/auth/login", req.url);

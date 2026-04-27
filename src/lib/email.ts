@@ -144,7 +144,7 @@ function formatRawTimeForCalendar(date: Date, timezone: string): string {
 export async function sendWelcomeEmail(email: string, name: string) {
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">Registration Received!</h1>
+      <h1 style="color: #0891b2;">Registration Received!</h1>
       <p>Hello ${name},</p>
       <p>Thank you for your interest in YM Movement. We've received your registration and are excited about the possibility of having you join us!</p>
       <p><strong>What happens next:</strong></p>
@@ -228,13 +228,13 @@ export async function sendApprovalEmail(email: string, name: string, token: stri
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">🎉 Registration Approved!</h1>
+      <h1 style="color: #0891b2;">🎉 Registration Approved!</h1>
       <p>Hello ${name},</p>
       <p>Fantastic news! Your YM Movement registration has been approved by our administrators!</p>
       <p><strong>Next Step:</strong> Complete your account setup by creating your password and finalizing your profile.</p>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${registrationUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Complete Account Setup</a>
+        <a href="${registrationUrl}" style="display: inline-block; background-color: #0891b2; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Complete Account Setup</a>
       </div>
       
       <p style="margin-top: 20px;">During account setup, you'll:</p>
@@ -345,7 +345,7 @@ export async function sendLessonConfirmationEmail(
         
         <div style="background-color: #fff; padding: 15px; border-radius: 4px; margin-top: 10px;">
           <p style="margin: 0; font-size: 14px;">⚠️ <strong>Important:</strong> Please include this reference in your payment note:</p>
-          <p style="font-size: 18px; font-weight: bold; margin: 10px 0; color: #0066cc;">${referenceCode}</p>
+          <p style="font-size: 18px; font-weight: bold; margin: 10px 0; color: #0891b2;">${referenceCode}</p>
         </div>
       </div>
 
@@ -357,14 +357,14 @@ export async function sendLessonConfirmationEmail(
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${googleCalendarLink}" 
-           style="display: inline-block; background-color: #0066cc; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             Add to Google Calendar
         </a>
       </div>
       
       <div style="text-align: center; margin: 30px 0;">
         <a href="${BASE_URL}/student/schedule" 
-           style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             View Your Schedule
         </a>
       </div>
@@ -386,11 +386,11 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">Reset Your Password</h1>
+      <h1 style="color: #0891b2;">Reset Your Password</h1>
       <p>Hello ${name || "there"},</p>
       <p>We received a request to reset your password for your YM Movement account.</p>
       <p>Please click the button below to set a new password:</p>
-      <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Reset Password</a>
+      <a href="${resetUrl}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 15px; font-weight: bold;">Reset Password</a>
       <p style="margin-top: 20px; color: #666;">This link will expire in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours. If you didn't request a password reset, you can safely ignore this email.</p>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
@@ -408,11 +408,11 @@ export async function sendInvitationEmail(email: string, name: string, token: st
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">Welcome to YM Movement!</h1>
+      <h1 style="color: #0891b2;">Welcome to YM Movement!</h1>
       <p>Hello ${name || "there"},</p>
       <p>An account has been created for you on the YM Movement platform.</p>
       <p>Please click the button below to set your password and complete your registration:</p>
-      <a href="${resetUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Complete Registration</a>
+      <a href="${resetUrl}" style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 15px; font-weight: bold;">Complete Registration</a>
       <p style="margin-top: 20px; color: #666;">This link will expire in ${REGISTRATION_TOKEN_EXPIRY_HOURS} hours.</p>
       <p style="margin-top: 20px;">Best regards,</p>
       <p>The YM Movement Team</p>
@@ -458,12 +458,12 @@ export async function sendPaymentReminderEmail(
 
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #e11d48;">💳 Payment Reminder</h1>
+      <h1 style="color: #1a3a5c;">💳 Payment Reminder</h1>
       <p>Hello ${studentName},</p>
       <p>This is a friendly reminder that you have an outstanding payment for your recent lesson at YM Movement.</p>
       
-      <div style="background-color: #fee2e2; border-left: 4px solid #e11d48; padding: 20px; margin: 20px 0; border-radius: 4px;">
-        <h2 style="color: #991b1b; margin-top: 0;">Payment Details</h2>
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Payment Details</h2>
         <ul style="list-style: none; padding: 0;">
           <li style="margin-bottom: 8px;">💰 <strong>Amount Due:</strong> $${paymentDetails.amount.toFixed(2)}</li>
           ${paymentDetails.lessonDate ? `<li style="margin-bottom: 8px;">📅 <strong>Lesson Date:</strong> ${formatDate(paymentDetails.lessonDate, "America/Los_Angeles")}</li>` : ""}
@@ -479,7 +479,7 @@ export async function sendPaymentReminderEmail(
         
         <div style="background-color: #fff; padding: 15px; border-radius: 4px; margin-top: 15px;">
           <p style="margin: 0; font-size: 14px;">⚠️ <strong>Important:</strong> Please include this reference code in your payment note:</p>
-          <p style="font-size: 20px; font-weight: bold; margin: 10px 0; color: #0066cc; background-color: #f8f9fa; padding: 8px; border-radius: 4px; text-align: center;">${paymentDetails.referenceCode}</p>
+          <p style="font-size: 20px; font-weight: bold; margin: 10px 0; color: #0891b2; background-color: #f8f9fa; padding: 8px; border-radius: 4px; text-align: center;">${paymentDetails.referenceCode}</p>
         </div>
       </div>
 
@@ -492,7 +492,7 @@ export async function sendPaymentReminderEmail(
 
       <div style="text-align: center; margin: 30px 0;">
         <a href="${BASE_URL}/student/payments" 
-           style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             View Payment Details
         </a>
       </div>
@@ -526,7 +526,7 @@ export async function sendScheduleChangesEmail(
 ) {
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #3b82f6;">📅 Schedule Update</h1>
+      <h1 style="color: #0891b2;">📅 Schedule Update</h1>
       <p>Hello ${studentName},</p>
       <p>Changes have been made to your schedule. Please log in to the YM Movement platform to review your updated schedule.</p>
 
@@ -538,7 +538,7 @@ export async function sendScheduleChangesEmail(
 
       <div style="text-align: center; margin: 40px 0;">
         <a href="${BASE_URL}/student/schedule"
-           style="display: inline-block; background-color: #3b82f6; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 18px;">
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 18px;">
             Check Your Schedule
         </a>
       </div>

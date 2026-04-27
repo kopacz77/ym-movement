@@ -42,10 +42,7 @@ export default function BookLessonPage() {
         </div>
         <ErrorBoundary>
           {selectedCoach ? (
-            <BookingCalendar
-              coachId={selectedCoach.id}
-              coachName={selectedCoach.name || "Coach"}
-            />
+            <BookingCalendar coachId={selectedCoach.id} coachName={selectedCoach.name || "Coach"} />
           ) : (
             <CoachBrowse onSelectCoach={setSelectedCoach} />
           )}

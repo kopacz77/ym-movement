@@ -120,7 +120,7 @@ export function EditLessonTypeDialog({
       default:
         hourlyRate = studentPricing.privateLessonPrice;
     }
-    return Math.round(((hourlyRate / 60) * durationMinutes) * 100) / 100;
+    return Math.round((hourlyRate / 60) * durationMinutes * 100) / 100;
   };
 
   const priceWillChange = lessonType !== currentType;
@@ -177,7 +177,7 @@ export function EditLessonTypeDialog({
               </p>
             )}
             {studentPricing?.customPricingEnabled && (
-              <p className="text-xs text-blue-600 font-medium">
+              <p className="text-xs text-[#0891b2] font-medium">
                 This student has custom pricing enabled
               </p>
             )}

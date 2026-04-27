@@ -48,9 +48,13 @@ export function CoachStudentList() {
                   <TableCell>{student.totalLessons}</TableCell>
                   <TableCell>
                     {student.isActive ? (
-                      <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>
+                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                        Active
+                      </Badge>
                     ) : (
-                      <Badge className="bg-gray-100 text-gray-800 border-gray-200">Inactive</Badge>
+                      <Badge className="bg-muted text-muted-foreground border-border">
+                        Inactive
+                      </Badge>
                     )}
                   </TableCell>
                 </TableRow>

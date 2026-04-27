@@ -83,19 +83,19 @@ export const StudentActivityChart: React.FC = () => {
   const getBarColor = (metricType: ActivityMetric): string => {
     switch (metricType) {
       case "lessons":
-        return "#82ca9d";
+        return "#0891b2";
       case "attendance":
-        return "#8884d8";
+        return "#7c3aed";
       case "cancellations":
-        return "#ff8042";
+        return "#f97316";
       default:
-        return "#82ca9d";
+        return "#0891b2";
     }
   };
 
   if (isLoading) {
     return (
-      <Card className="w-full h-[400px] bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
+      <Card className="w-full h-[400px]">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Student Activity</CardTitle>
@@ -129,8 +129,8 @@ export const StudentActivityChart: React.FC = () => {
       : 0;
 
   return (
-    <Card className="w-full h-[400px] bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+    <Card className="w-full h-[400px]">
+      <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Student Activity</CardTitle>
           <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
@@ -164,10 +164,11 @@ export const StudentActivityChart: React.FC = () => {
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              stroke="#94a3b8"
               tickFormatter={(date) =>
                 new Date(date).toLocaleDateString("en-US", {
                   month: "short",
@@ -176,7 +177,8 @@ export const StudentActivityChart: React.FC = () => {
               }
             />
             <YAxis
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              stroke="#94a3b8"
               tickFormatter={(value) => `${value}${metric === "attendance" ? "%" : ""}`}
             />
             <Tooltip

@@ -72,7 +72,7 @@ export function GoogleCalendarConnect() {
             <CardDescription>Sync your lessons with Google Calendar</CardDescription>
           </div>
           {status?.isConnected ? (
-            <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+            <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700">
               Connected
             </Badge>
           ) : (
@@ -84,9 +84,7 @@ export function GoogleCalendarConnect() {
         {status?.isConnected ? (
           <div className="space-y-3">
             {status.calendarId && (
-              <p className="text-sm text-muted-foreground">
-                Calendar: {status.calendarId}
-              </p>
+              <p className="text-sm text-muted-foreground">Calendar: {status.calendarId}</p>
             )}
             <Button
               variant="outline"

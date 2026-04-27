@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - YM Movement</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed-variant": "#5a00c6",
+                    "on-error-container": "#93000a",
+                    "surface": "#f7f9fb",
+                    "on-surface-variant": "#43474e",
+                    "on-surface": "#191c1e",
+                    "primary-fixed": "#d2e4ff",
+                    "outline-variant": "#c3c6cf",
+                    "secondary": "#006780",
+                    "error": "#ba1a1a",
+                    "on-secondary-container": "#006077",
+                    "tertiary-container": "#4900a2",
+                    "surface-container": "#eceef0",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#2a486b",
+                    "surface-tint": "#436084",
+                    "primary": "#002444",
+                    "on-primary-fixed": "#001c37",
+                    "surface-container-high": "#e6e8ea",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "secondary-container": "#76dcff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#73777f",
+                    "on-secondary-fixed": "#001f28",
+                    "on-secondary-fixed-variant": "#004e61",
+                    "inverse-surface": "#2d3133",
+                    "secondary-fixed-dim": "#6cd3f7",
+                    "primary-fixed-dim": "#abc9f2",
+                    "surface-bright": "#f7f9fb",
+                    "on-tertiary-fixed": "#25005a",
+                    "on-primary-container": "#87a4cc",
+                    "tertiary": "#2e006d",
+                    "surface-container-low": "#f2f4f6",
+                    "primary-container": "#1a3a5c",
+                    "on-background": "#191c1e",
+                    "on-tertiary-container": "#b38eff",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#d8dadc",
+                    "secondary-fixed": "#b7eaff",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#abc9f2",
+                    "background": "#f7f9fb",
+                    "inverse-on-surface": "#eff1f3",
+                    "tertiary-fixed-dim": "#d2bbff",
+                    "tertiary-fixed": "#eaddff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Public Sans"
+                    ],
+                    "display": [
+                            "Public Sans"
+                    ],
+                    "body": [
+                            "Inter"
+                    ],
+                    "label": [
+                            "Public Sans"
+                    ]
+            },
+            "fontSize": {}
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Public Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface h-screen w-screen overflow-hidden font-body">
+<!-- Note: TopAppBar suppressed due to transactional "Login" intent -->
+<div class="flex h-full w-full">
+<!-- Left Panel: Branding (Navy) -->
+<div class="hidden lg:flex lg:w-1/2 bg-primary-container relative flex-col justify-center items-center overflow-hidden">
+<!-- Background Image overlay -->
+<div class="absolute inset-0 z-0 opacity-20 bg-cover bg-center mix-blend-overlay" data-alt="close up of figure skating blades carving into smooth ice with dramatic cool blue lighting and ice spray" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmbiFR__T52eamGBmuyXENJG4eGG7SWQFmQmPorjFR9KODWQgaVfz6NY5sEkfnYbp6rQ94Id8gTuKQ2b-BXkECJpj4JQijdQLBqIM0MjTNa5Wr4Zptin2cZz0HHvr4oHycYLt6E7Jhavc6wYkcgVCk0mmQ0iofCverNtAzN6hCeLaBKnoN6my3B6RG8iAH8irBoR8MRUQTNkUZfZxFJTmPtGYEQIDV49bpBQT0uuAE1XtlOpg-wMAiGdmXUYLNoEcv9ZAsqcoMJH3M');"></div>
+<div class="z-10 text-center px-12">
+<h1 class="text-on-primary text-5xl font-headline font-bold tracking-tight mb-4">YM Movement</h1>
+<p class="text-on-primary-container text-xl font-body font-light tracking-wide">Elite Ice Dance Coaching</p>
+</div>
+<div class="absolute bottom-12 left-12 z-10">
+<div class="flex items-center space-x-3 text-on-primary-container/60 text-sm">
+<span class="material-symbols-outlined text-lg">skateboarding</span>
+<span>Founded by Yura Min</span>
+</div>
+</div>
+</div>
+<!-- Right Panel: Login Form -->
+<div class="w-full lg:w-1/2 flex flex-col justify-center items-center bg-surface p-8 sm:p-12 lg:p-24 relative overflow-y-auto">
+<!-- Mobile Header (Visible only on small screens) -->
+<div class="lg:hidden w-full text-center mb-12">
+<h1 class="text-primary text-3xl font-headline font-bold tracking-tight">YM Movement</h1>
+</div>
+<!-- Form Container (Glass-like on white) -->
+<div class="w-full max-w-md bg-surface-container-lowest/80 backdrop-blur-xl p-8 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] border border-outline-variant/30 transition-transform duration-200">
+<h2 class="text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Welcome Back</h2>
+<p class="text-on-surface-variant font-body mb-8">Sign in to access your coaching schedule.</p>
+<form class="space-y-6">
+<div>
+<label class="block text-sm font-label font-medium text-on-surface-variant mb-2 uppercase tracking-[0.15em]" for="email">Email Address</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-xl">mail</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-outline-variant rounded-lg bg-surface text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200" id="email" name="email" placeholder="athlete@ymmovement.com" type="email"/>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="block text-sm font-label font-medium text-on-surface-variant uppercase tracking-[0.15em]" for="password">Password</label>
+<a class="text-sm font-body font-medium text-secondary hover:text-secondary-container transition-colors duration-200" href="#">Forgot Password?</a>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-xl">lock</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-outline-variant rounded-lg bg-surface text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-headline font-medium py-3 px-4 rounded-lg shadow-sm hover:bg-primary-container hover:shadow-md transition-all duration-200 active:scale-95 flex justify-center items-center space-x-2" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</form>
+<div class="mt-8 flex items-center justify-center space-x-4">
+<div class="h-px bg-outline-variant w-full"></div>
+<span class="text-outline text-sm font-body bg-surface-container-lowest px-2">OR</span>
+<div class="h-px bg-outline-variant w-full"></div>
+</div>
+<div class="mt-8 space-y-4">
+<a class="block w-full text-center py-3 px-4 border border-outline rounded-lg text-on-surface font-body font-medium hover:bg-surface-container-low transition-colors duration-200" href="#">
+                        New Student? Sign Up
+                    </a>
+<a class="block w-full text-center py-3 px-4 text-on-surface-variant font-body font-medium hover:text-primary transition-colors duration-200" href="#">
+                        Coach Registration
+                    </a>
+</div>
+</div>
+</div>
+</div>
+</body></html>

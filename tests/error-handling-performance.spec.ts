@@ -10,8 +10,11 @@ test.describe("Error Handling", () => {
   test("should handle 404 pages gracefully", async ({ page }) => {
     await page.goto("/admin/nonexistent-page");
 
-    // Page should not crash -- either show 404 or redirect
+    // Page should not crash -- show 404 content or redirect to a valid page
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    // Verify the page rendered meaningful content (not a blank crash)
+    const bodyText = await page.textContent("body");
+    expect(bodyText?.length).toBeGreaterThan(0);
   });
 
   test("should handle API errors without crashing", async ({ page }) => {
@@ -37,8 +40,8 @@ test.describe("Error Handling", () => {
     await page.context().clearCookies();
     await page.goto("/admin/dashboard");
 
-    // Should redirect to login or show unauthorized
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    // Should redirect to login
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 15000 });
   });
 });
 

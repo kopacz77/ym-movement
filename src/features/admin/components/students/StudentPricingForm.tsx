@@ -87,7 +87,13 @@ export function StudentPricingForm({
       }
 
       // Check for valid numbers
-      const prices = [privatePrice, groupPrice, choreographyPrice, competitionPrice, offIceDancePrice];
+      const prices = [
+        privatePrice,
+        groupPrice,
+        choreographyPrice,
+        competitionPrice,
+        offIceDancePrice,
+      ];
       for (const price of prices) {
         const parsed = Number.parseFloat(price);
         if (Number.isNaN(parsed) || parsed < 0) {
@@ -376,10 +382,8 @@ export function StudentPricingForm({
                           ? `$${Math.abs(
                               calculateDifference(offIceDancePrice, defaultPrices.offIceDancePrice),
                             ).toFixed(2)} discount`
-                          : calculateDifference(
-                                offIceDancePrice,
-                                defaultPrices.offIceDancePrice,
-                              ) > 0
+                          : calculateDifference(offIceDancePrice, defaultPrices.offIceDancePrice) >
+                              0
                             ? `$${calculateDifference(
                                 offIceDancePrice,
                                 defaultPrices.offIceDancePrice,

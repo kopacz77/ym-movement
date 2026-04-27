@@ -38,8 +38,8 @@ interface OptimizedStudentListProps {
 
 const getLevelColor = (level: Level): string => {
   const colors: Record<Level, string> = {
-    PRE_PRELIMINARY: "bg-blue-100 text-blue-800",
-    PRELIMINARY: "bg-green-100 text-green-800",
+    PRE_PRELIMINARY: "bg-cyan-50 text-cyan-700",
+    PRELIMINARY: "bg-emerald-50 text-emerald-700",
     PRE_JUVENILE: "bg-yellow-100 text-yellow-800",
     JUVENILE: "bg-orange-100 text-orange-800",
     INTERMEDIATE: "bg-purple-100 text-purple-800",

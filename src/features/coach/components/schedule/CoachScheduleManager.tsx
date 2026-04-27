@@ -1,7 +1,12 @@
 "use client";
 
+import type { EventClickArg } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import luxon3Plugin from "@fullcalendar/luxon3";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import { endOfDay, startOfDay } from "date-fns";
-import { Calendar, Globe, Plane } from "lucide-react";
+import { Globe, Plane } from "lucide-react";
 import { DateTime } from "luxon";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,17 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DesktopCalendarView } from "@/features/admin/components/scheduling/DesktopCalendarView";
-import { MobileCalendarView } from "@/features/admin/components/scheduling/MobileCalendarView";
 import { TimeSlotDialogAdapter } from "@/features/admin/components/scheduling/TimeSlotDialogAdapter";
-import { formatDateRange, type TimeSlot } from "@/features/admin/components/scheduling/calendarUtils";
 import { useCoachTimeSlots } from "@/features/coach/hooks/useCoachTimeSlots";
-import { type ExtendedCalendarEvent, useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { FCEventContent } from "@/features/scheduling/components/calendar/FCEventContent";
+import { MobileScheduleList } from "@/features/scheduling/components/calendar/MobileScheduleList";
+import {
+  blockedDatesToBackgroundEvents,
+  timeSlotsToEvents,
+} from "@/features/scheduling/utils/fullcalendar-transforms";
 import { useIsMobile } from "@/hooks/useMediaQuery";
-import { localizer } from "@/lib/calendar/calendarLocalizer";
+import type { TimeSlot } from "@/types/scheduling";
 import { CoachBlockedDates } from "./CoachBlockedDates";
 
-// Rink interface
 interface Rink {
   id: string;
   name: string;
@@ -32,7 +38,6 @@ interface Rink {
   address?: string;
 }
 
-// US timezones for filtering
 const TIMEZONE_FILTERS = [
   { value: "America/Los_Angeles", label: "Pacific Time" },
   { value: "America/Denver", label: "Mountain Time" },
@@ -41,10 +46,11 @@ const TIMEZONE_FILTERS = [
 ];
 
 const CoachScheduleManagerComponent = () => {
-  // Calendar state
   const initialDate = useMemo(() => new Date(), []);
   const [date, setDate] = useState(initialDate);
-  const [calendarView, setCalendarView] = useState("week");
+  const [calendarView, _setCalendarView] = useState<
+    "timeGridWeek" | "timeGridDay" | "dayGridMonth"
+  >("timeGridWeek");
   const [selectedRink, setSelectedRink] = useState<string | undefined>(undefined);
   const [timezoneFilter, setTimezoneFilter] = useState("America/Los_Angeles");
 
@@ -52,31 +58,22 @@ const CoachScheduleManagerComponent = () => {
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
 
-  // Media query
   const isMobile = useIsMobile();
 
   // Calculate date range for fetching data
   const dateRange = useMemo(() => {
-    if (calendarView === "week") {
-      const dateTime = DateTime.fromJSDate(date);
-      const currentWeekday = dateTime.weekday;
-      const daysToSubtract = currentWeekday === 1 ? 0 : currentWeekday - 1;
-      const startOfWeek = dateTime.minus({ days: daysToSubtract });
-      const endOfWeek = startOfWeek.plus({ days: 6 });
+    if (calendarView === "timeGridWeek") {
+      const dt = DateTime.fromJSDate(date);
+      const weekday = dt.weekday;
+      const startOfWeek = dt.minus({ days: weekday === 1 ? 0 : weekday - 1 });
       return {
         start: startOfDay(startOfWeek.toJSDate()),
-        end: endOfDay(endOfWeek.toJSDate()),
+        end: endOfDay(startOfWeek.plus({ days: 6 }).toJSDate()),
       };
     }
-
-    if (calendarView === "day") {
-      return {
-        start: startOfDay(date),
-        end: endOfDay(date),
-      };
+    if (calendarView === "timeGridDay") {
+      return { start: startOfDay(date), end: endOfDay(date) };
     }
-
-    // Month view
     const year = date.getFullYear();
     const month = date.getMonth();
     return {
@@ -90,12 +87,16 @@ const CoachScheduleManagerComponent = () => {
 
   // Filter time slots by timezone when viewing "All Rinks"
   const filteredTimeSlots = useMemo(() => {
-    if (!timeSlots) return undefined;
-    if (selectedRink) return timeSlots;
-    return timeSlots.filter((slot: any) => slot.Rink?.timezone === timezoneFilter);
+    if (!timeSlots) {
+      return [];
+    }
+    if (selectedRink) {
+      return timeSlots as TimeSlot[];
+    }
+    return (timeSlots as TimeSlot[]).filter((slot) => slot.Rink?.timezone === timezoneFilter);
   }, [timeSlots, selectedRink, timezoneFilter]);
 
-  // Get current rink timezone for display
+  // Get current rink timezone
   const rinkTimezone = useMemo(() => {
     if (selectedRink && rinks) {
       const rinkData = (rinks as Rink[]).find((r) => r.id === selectedRink);
@@ -104,110 +105,51 @@ const CoachScheduleManagerComponent = () => {
     return timezoneFilter;
   }, [selectedRink, rinks, timezoneFilter]);
 
-  // Convert time slots to calendar events
-  const displayTimezoneOverride = selectedRink ? undefined : timezoneFilter;
-  const { events, processedEvents } = useCalendarEvents(filteredTimeSlots, displayTimezoneOverride);
+  // Transform to FullCalendar events
+  const calendarEvents = useMemo(() => {
+    const slotEvents = timeSlotsToEvents(filteredTimeSlots);
+    const blockedEvents = blockedDatesToBackgroundEvents(
+      (blockedDates || []).map((bd: any) => ({
+        id: bd.id,
+        startDate: bd.startDate,
+        endDate: bd.endDate,
+        type: bd.type,
+        description: bd.description,
+      })),
+    );
+    return [...slotEvents, ...blockedEvents];
+  }, [filteredTimeSlots, blockedDates]);
 
-  // Convert blocked dates to BlockedDateRange shape for DesktopCalendarView
-  const calendarBlockedDates = useMemo(() => {
-    return (blockedDates || []).map((bd: any) => ({
-      id: bd.id,
-      title: bd.title,
-      description: bd.description || undefined,
-      startDate: bd.startDate,
-      endDate: bd.endDate,
-      type: bd.type as "TRAVEL" | "COMPETITION" | "OTHER",
-      createdById: bd.createdById,
-      createdAt: bd.createdAt,
-      updatedAt: bd.updatedAt,
-    }));
-  }, [blockedDates]);
-
-  // No-op handlers - coach view is read-only for time slots
-  const handleSelectSlot = useCallback(() => {
-    // Coaches cannot create time slots directly; they use the proposal workflow
-  }, []);
-
-  const handleEventDrop = useCallback(() => {
-    // Coaches cannot drag/drop time slots
-  }, []);
-
-  // Event selection handler (view-only)
-  const handleSelectEvent = useCallback((event: object) => {
-    const typedEvent = event as ExtendedCalendarEvent;
-    if (typedEvent.slot) {
-      // Skip blocked date events
-      if ("isBlocked" in typedEvent.slot && typedEvent.slot.isBlocked) {
-        return;
-      }
-      setSelectedSlot(typedEvent.slot);
+  // Event click - view-only dialog
+  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
+    const props = clickInfo.event.extendedProps;
+    if (props.isBlocked) {
+      return;
+    }
+    if (props.slot) {
+      setSelectedSlot(props.slot as TimeSlot);
       setIsManageDialogOpen(true);
     }
   }, []);
 
-  // Mobile slot click handler
+  // Mobile slot click
   const handleMobileSlotClick = useCallback((slot: TimeSlot) => {
     setSelectedSlot(slot);
     setIsManageDialogOpen(true);
   }, []);
 
-  // Navigation callbacks
-  const goToPrev = useCallback(() => {
-    setDate((prev) => {
-      const newDate = new Date(prev);
-      if (calendarView === "month") {
-        newDate.setMonth(newDate.getMonth() - 1);
-      } else if (calendarView === "week") {
-        newDate.setDate(newDate.getDate() - 7);
-      } else if (calendarView === "day") {
-        newDate.setDate(newDate.getDate() - 1);
-      }
-      return newDate;
-    });
-  }, [calendarView]);
-
-  const goToNext = useCallback(() => {
-    setDate((prev) => {
-      const newDate = new Date(prev);
-      if (calendarView === "month") {
-        newDate.setMonth(newDate.getMonth() + 1);
-      } else if (calendarView === "week") {
-        newDate.setDate(newDate.getDate() + 7);
-      } else if (calendarView === "day") {
-        newDate.setDate(newDate.getDate() + 1);
-      }
-      return newDate;
-    });
-  }, [calendarView]);
-
-  const goToToday = useCallback(() => {
-    setDate(new Date());
-    setCalendarView("day");
+  const handleDatesSet = useCallback((dateInfo: { start: Date }) => {
+    setDate(dateInfo.start);
   }, []);
-
-  const handleViewChange = useCallback((newView: string) => {
-    setCalendarView(newView);
-  }, []);
-
-  const handleDateChange = useCallback((newDate: Date) => {
-    setDate(newDate);
-  }, []);
-
-  // Format the date range text for display
-  const dateRangeText = useMemo(() => {
-    return formatDateRange(date, calendarView);
-  }, [date, calendarView]);
 
   const handleManageDialogClose = useCallback(() => {
     setSelectedSlot(null);
     setIsManageDialogOpen(false);
   }, []);
 
-  // Empty handlers for read-only dialog
-  const noopEdit = useCallback(() => {}, []);
-  const noopDelete = useCallback(() => {}, []);
-  const noopAssign = useCallback((_studentId: string) => {}, []);
-  const noopUnassign = useCallback((_lessonId: string) => {}, []);
+  // No-op handlers for read-only dialog
+  const noop = useCallback(() => {}, []);
+  const noopStr = useCallback((_: string) => {}, []);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -221,7 +163,6 @@ const CoachScheduleManagerComponent = () => {
 
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
-        {/* Rink selector */}
         <Select
           value={selectedRink || "all"}
           onValueChange={(value) => setSelectedRink(value === "all" ? undefined : value)}
@@ -239,7 +180,6 @@ const CoachScheduleManagerComponent = () => {
           </SelectContent>
         </Select>
 
-        {/* Timezone selector (when viewing all rinks) */}
         {!selectedRink && (
           <Select value={timezoneFilter} onValueChange={setTimezoneFilter}>
             <SelectTrigger className="w-[180px] h-9">
@@ -256,7 +196,6 @@ const CoachScheduleManagerComponent = () => {
           </Select>
         )}
 
-        {/* Blocked dates management popover */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-9">
@@ -270,12 +209,10 @@ const CoachScheduleManagerComponent = () => {
         </Popover>
       </div>
 
-      {/* Timezone Information Banner */}
+      {/* Timezone banner */}
       {selectedRink && (
         <div className="bg-amber-50 border border-amber-200 rounded p-3 flex items-center text-amber-800 text-sm">
-          <span className="mr-2">
-            <Globe className="h-4 w-4" />
-          </span>
+          <Globe className="h-4 w-4 mr-2" />
           <span className="truncate" suppressHydrationWarning>
             All times shown in {rinkTimezone.split("/").pop()?.replace("_", " ")} local time
           </span>
@@ -286,13 +223,13 @@ const CoachScheduleManagerComponent = () => {
       <TimeSlotDialogAdapter
         isOpen={isManageDialogOpen}
         onClose={handleManageDialogClose}
-        onEdit={noopEdit}
-        onDelete={noopDelete}
+        onEdit={noop}
+        onDelete={noop}
         selectedEvent={null}
         selectedSlot={selectedSlot}
         students={[]}
-        onAssignStudent={noopAssign}
-        onUnassignStudent={noopUnassign}
+        onAssignStudent={noopStr}
+        onUnassignStudent={noopStr}
         isAssigning={false}
         isUnassigning={false}
       />
@@ -301,51 +238,43 @@ const CoachScheduleManagerComponent = () => {
       <Card className="shadow-sm">
         <CardContent className="p-0">
           {isMobile ? (
-            <MobileCalendarView
-              dateRangeText={dateRangeText}
-              calendarView={calendarView}
-              onViewChangeAction={handleViewChange}
-              onPrevAction={goToPrev}
-              onNextAction={goToNext}
-              onTodayAction={goToToday}
-              groupedSlots={processedEvents}
-              onSlotClickAction={handleMobileSlotClick}
-              rinkTimezone={rinkTimezone}
-              rinkName={
-                selectedRink
-                  ? (rinks as Rink[] | undefined)?.find((r) => r.id === selectedRink)?.name
-                  : undefined
-              }
-              isSelectionMode={false}
-              selectedSlotIds={new Set()}
-            />
+            <div className="p-4">
+              <MobileScheduleList
+                timeSlots={filteredTimeSlots}
+                timezone={rinkTimezone}
+                onSlotClick={handleMobileSlotClick}
+              />
+            </div>
           ) : (
-            <DesktopCalendarView
-              localizer={localizer}
-              events={events}
-              date={date}
-              calendarView={calendarView}
-              onSelectSlot={handleSelectSlot}
-              onSelectEvent={handleSelectEvent}
-              onEventDrop={handleEventDrop}
-              dateRangeText={dateRangeText}
-              onViewChange={handleViewChange}
-              onPrev={goToPrev}
-              onNext={goToNext}
-              onToday={goToToday}
-              onDateChange={handleDateChange}
-              rinkTimezone={rinkTimezone}
-              rinkName={
-                selectedRink
-                  ? (rinks as Rink[] | undefined)?.find((r) => r.id === selectedRink)?.name
-                  : undefined
-              }
-              isSelectionMode={false}
-              selectedSlotIds={new Set()}
-              timeSlots={timeSlots as TimeSlot[] | undefined}
-              useEnhancedHeader={true}
-              blockedDateRanges={calendarBlockedDates}
-            />
+            <div className="p-4">
+              <FullCalendar
+                key={rinkTimezone}
+                plugins={[dayGridPlugin, timeGridPlugin, luxon3Plugin]}
+                initialView={calendarView}
+                initialDate={date}
+                timeZone={rinkTimezone}
+                headerToolbar={{
+                  left: "prev,next today",
+                  center: "title",
+                  right: "timeGridWeek,timeGridDay,dayGridMonth",
+                }}
+                selectable={false}
+                editable={false}
+                slotDuration="00:15:00"
+                slotMinTime="06:00:00"
+                slotMaxTime="22:00:00"
+                allDaySlot={false}
+                nowIndicator={true}
+                events={calendarEvents}
+                eventContent={FCEventContent}
+                eventClick={handleEventClick}
+                datesSet={handleDatesSet}
+                height="auto"
+                expandRows={true}
+                stickyHeaderDates={true}
+                dayMaxEvents={3}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

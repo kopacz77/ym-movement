@@ -90,9 +90,9 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
       {/* Actions Bar */}
       <div className="flex flex-col gap-4 p-3 sm:p-4 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl border">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg shrink-0">
+          <div className="p-2 bg-cyan-50 rounded-lg shrink-0">
             <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-[#0891b2]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -186,11 +186,13 @@ export const ScheduleHeader: FC<ScheduleHeaderProps> = ({
                 size="sm"
                 onClick={onPublishDrafts}
                 disabled={isPublishing}
-                className="flex items-center gap-2 text-xs sm:text-sm bg-green-600 hover:bg-green-700"
+                className="flex items-center gap-2 text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700"
               >
                 <Send className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">
-                  {isPublishing ? "Publishing..." : `Publish ${draftCount} Draft${draftCount !== 1 ? "s" : ""}`}
+                  {isPublishing
+                    ? "Publishing..."
+                    : `Publish ${draftCount} Draft${draftCount !== 1 ? "s" : ""}`}
                 </span>
                 <span className="sm:hidden">
                   {isPublishing ? "..." : `Publish (${draftCount})`}

@@ -1,7 +1,17 @@
 // src/app/(protected)/student/guide/page.tsx
 "use client";
 
-import { BookOpen, Calendar, CreditCard, HelpCircle, Plus, Settings, User, Video, X } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  CreditCard,
+  HelpCircle,
+  Plus,
+  Settings,
+  User,
+  Video,
+  X,
+} from "lucide-react";
 import { useId } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -46,7 +56,7 @@ export default function StudentGuidePage() {
               onClick={() => scrollToSection("getting-started")}
               className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer text-left"
             >
-              <User className="h-4 w-4 text-blue-600" />
+              <User className="h-4 w-4 text-[#0891b2]" />
               <span className="font-medium">Getting Started</span>
             </button>
             <button
@@ -201,9 +211,17 @@ export default function StudentGuidePage() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <p className="text-sm font-medium text-red-900">⚠️ Cancellation Policy</p>
               <div className="text-sm text-red-800 mt-2 space-y-1">
-                <p>Cancellations made <strong>more than 24 hours</strong> before the lesson are free of charge.</p>
-                <p>Cancellations made <strong>within 24 hours</strong> are considered late — you will be responsible for the full lesson fee.</p>
-                <p className="mt-2 text-xs">View full policies on the Policies page in the sidebar.</p>
+                <p>
+                  Cancellations made <strong>more than 24 hours</strong> before the lesson are free
+                  of charge.
+                </p>
+                <p>
+                  Cancellations made <strong>within 24 hours</strong> are considered late — you will
+                  be responsible for the full lesson fee.
+                </p>
+                <p className="mt-2 text-xs">
+                  View full policies on the Policies page in the sidebar.
+                </p>
               </div>
             </div>
 
@@ -299,7 +317,7 @@ export default function StudentGuidePage() {
               />
               <LessonTypeCard
                 title="Group Lessons"
-                color="bg-green-100 text-green-700 border-green-300"
+                color="bg-emerald-50 text-emerald-700 border-emerald-300"
                 description="Small group instruction with other students"
               />
               <LessonTypeCard
@@ -438,10 +456,10 @@ export default function StudentGuidePage() {
               title="Account Settings"
               steps={[
                 'Go to "Settings" from the sidebar',
-                'Notifications tab: Toggle email notifications on/off',
+                "Notifications tab: Toggle email notifications on/off",
                 "  • Enable lesson reminders (24 hours before your lesson)",
-                'Appearance tab: Enable dark mode for a darker color theme',
-                'Password tab: Change your password',
+                "Appearance tab: Enable dark mode for a darker color theme",
+                "Password tab: Change your password",
                 "  • Enter current password, then new password twice",
                 '  • Click "Update Password" to save',
               ]}

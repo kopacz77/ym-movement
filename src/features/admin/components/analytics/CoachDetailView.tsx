@@ -1,15 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import {
-  Calendar,
-  Clock,
-  DollarSign,
-  GraduationCap,
-  Mail,
-  Users,
-  X,
-} from "lucide-react";
+import { Calendar, Clock, DollarSign, GraduationCap, Mail, Users, X } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -87,9 +79,7 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
       return <Badge variant="destructive">Suspended</Badge>;
     }
     if (profile.isActive) {
-      return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Active</Badge>
-      );
+      return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Active</Badge>;
     }
     return <Badge variant="secondary">Inactive</Badge>;
   };
@@ -97,12 +87,24 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
   const getLessonTypeBadge = (type: string) => {
     const typeMap: Record<string, { label: string; className: string }> = {
       PRIVATE: { label: "Private", className: "bg-blue-100 text-blue-700 border-blue-200" },
-      CHOREOGRAPHY: { label: "Choreography", className: "bg-purple-100 text-purple-700 border-purple-200" },
+      CHOREOGRAPHY: {
+        label: "Choreography",
+        className: "bg-purple-100 text-purple-700 border-purple-200",
+      },
       GROUP: { label: "Group", className: "bg-green-100 text-green-700 border-green-200" },
-      COMPETITION_PREP: { label: "Competition", className: "bg-orange-100 text-orange-700 border-orange-200" },
-      OFF_ICE_DANCE: { label: "Off-Ice Dance", className: "bg-pink-100 text-pink-700 border-pink-200" },
+      COMPETITION_PREP: {
+        label: "Competition",
+        className: "bg-orange-100 text-orange-700 border-orange-200",
+      },
+      OFF_ICE_DANCE: {
+        label: "Off-Ice Dance",
+        className: "bg-pink-100 text-pink-700 border-pink-200",
+      },
     };
-    const config = typeMap[type] ?? { label: type ?? "Private", className: "bg-gray-100 text-gray-700 border-gray-200" };
+    const config = typeMap[type] ?? {
+      label: type ?? "Private",
+      className: "bg-gray-100 text-gray-700 border-gray-200",
+    };
     return <Badge className={`text-xs ${config.className}`}>{config.label}</Badge>;
   };
 
@@ -158,8 +160,8 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
 
               {/* Monthly stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col items-center p-3 rounded-lg bg-blue-50/80 border border-blue-100">
-                  <Calendar className="h-4 w-4 text-blue-500 mb-1" />
+                <div className="flex flex-col items-center p-3 rounded-lg bg-cyan-50/80 border border-cyan-100">
+                  <Calendar className="h-4 w-4 text-[#0891b2] mb-1" />
                   <span className="text-lg font-bold text-gray-900">{stats.monthLessonCount}</span>
                   <span className="text-[10px] text-muted-foreground">Lessons/Mo</span>
                 </div>
@@ -178,7 +180,7 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
               {/* Upcoming lessons section */}
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-500" />
+                  <Clock className="h-4 w-4 text-[#0891b2]" />
                   Upcoming Lessons ({upcomingLessons.length})
                 </h4>
                 {upcomingLessons.length === 0 ? (
@@ -209,12 +211,8 @@ export const CoachDetailView = ({ coachId, onClose }: CoachDetailViewProps) => {
                             <TableCell className="text-xs">
                               {lesson.Student?.User?.name ?? "Unknown"}
                             </TableCell>
-                            <TableCell className="text-xs">
-                              {lesson.Rink?.name ?? "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {getLessonTypeBadge(lesson.type)}
-                            </TableCell>
+                            <TableCell className="text-xs">{lesson.Rink?.name ?? "N/A"}</TableCell>
+                            <TableCell>{getLessonTypeBadge(lesson.type)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

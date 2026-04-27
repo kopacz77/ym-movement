@@ -107,8 +107,8 @@ export const PendingApprovals = () => {
   // Loading state
   if (isLoading || isRefreshing) {
     return (
-      <Card className="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-        <CardHeader className="bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+      <Card>
+        <CardHeader>
           <CardTitle>Pending Approvals</CardTitle>
         </CardHeader>
         <CardContent>
@@ -121,11 +121,11 @@ export const PendingApprovals = () => {
   // Empty state
   if (!pendingStudents || pendingStudents.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-        <CardHeader className="pb-4 bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+      <Card>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Badge className="bg-green-500 text-white">✓</Badge>
+            <div className="p-2 bg-emerald-50 rounded-lg">
+              <Badge className="bg-emerald-500 text-white">✓</Badge>
             </div>
             <span>Pending Approvals</span>
           </CardTitle>
@@ -157,11 +157,11 @@ export const PendingApprovals = () => {
 
   // Normal state with data
   return (
-    <Card className="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/80 border-2 border-slate-200 shadow-md">
-      <CardHeader className="pb-4 bg-gradient-to-r from-slate-100/50 to-blue-50/50 rounded-t-lg border-b border-slate-200/50">
+    <Card>
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center space-x-2">
           <div className="p-2 bg-orange-100 rounded-lg">
-            <Badge className="bg-orange-500 text-white">{pendingStudents.length}</Badge>
+            <Badge className="bg-amber-500 text-white">{pendingStudents.length}</Badge>
           </div>
           <span>Pending Approvals</span>
         </CardTitle>
@@ -178,15 +178,24 @@ export const PendingApprovals = () => {
                   {(student.user?.name || "U").charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-gray-900 truncate">{student.user?.name || "Unnamed"}</p>
-                  <p className="text-sm text-gray-600 truncate">{student.user?.email || "No email"}</p>
+                  <p className="font-semibold text-gray-900 truncate">
+                    {student.user?.name || "Unnamed"}
+                  </p>
+                  <p className="text-sm text-gray-600 truncate">
+                    {student.user?.email || "No email"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-2 ml-12">
-                <Badge variant="secondary" className="text-xs bg-orange-200 text-orange-800 shrink-0">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-orange-200 text-orange-800 shrink-0"
+                >
                   New Registration
                 </Badge>
-                <p className="text-xs text-gray-500 truncate">{formatDate(new Date(student.createdAt))}</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {formatDate(new Date(student.createdAt))}
+                </p>
               </div>
               <div className="flex gap-2 mt-3">
                 <Button

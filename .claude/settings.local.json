@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "$schema": "https://json-schema.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(claude mcp:*)",
@@ -46,8 +46,8 @@
       "Bash(git clone:*)",
       "Read(//tmp/subagents-repo/**)",
       "Bash(pnpm remove:*)",
-      "Bash(npx prisma migrate dev:*)",
-      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma migrate deploy:*)",
+      "Bash(npx prisma migrate status:*)",
       "Bash(tree:*)",
       "Bash(cat:*)",
       "Bash(awk:*)",
@@ -115,7 +115,9 @@
       "Bash(kill 1001921:*)",
       "Skill(gsd:new-milestone)",
       "Skill(gsd:define-requirements)",
-      "Bash(npx prisma:*)",
+      "Bash(npx prisma generate)",
+      "Bash(npx prisma db pull:*)",
+      "Bash(npx prisma studio:*)",
       "Skill(gsd:create-roadmap)",
       "Skill(gsd:plan-phase)",
       "Bash(npx tsx:*)",
@@ -187,8 +189,47 @@
       "Bash(echo \"exit=$?\")",
       "Bash(tee /tmp/ym-build.log)",
       "Bash(tee /tmp/ym-deploy.log)",
-      "Bash(tee /tmp/ym-deploy2.log)"
+      "Bash(tee /tmp/ym-deploy2.log)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "WebFetch(domain:schedule-x.dev)",
+      "Bash(pnpm ls:*)",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__create_project",
+      "mcp__stitch__create_design_system",
+      "mcp__stitch__update_design_system",
+      "mcp__stitch__generate_screen_from_text",
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "mcp__stitch__get_screen",
+      "mcp__stitch__list_screens",
+      "WebFetch(domain:lh3.googleusercontent.com)",
+      "mcp__stitch__list_design_systems",
+      "Bash(npx neonctl:*)",
+      "Bash(psql:*)",
+      "Bash(do:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(timeout 30 pnpm storybook:*)",
+      "Bash(pnpm dlx:*)",
+      "Bash(timeout 35 pnpm storybook:*)",
+      "Bash(pnpm storybook:build:*)",
+      "Bash(pnpm test:vrt:*)",
+      "WebFetch(domain:stitch.withgoogle.com)",
+      "WebFetch(domain:the-decoder.com)",
+      "Bash(npx:*)",
+      "Bash(identify:*)",
+      "Bash(git add:*)",
+      "Bash(git rebase:*)",
+      "Bash(GIT_EDITOR=true git rebase:*)"
     ],
-    "deny": []
+    "deny": [
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push --force-reset:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(pnpm prisma migrate reset:*)",
+      "Bash(pnpm prisma migrate dev:*)",
+      "Bash(pnpm prisma db push:*)"
+    ]
   }
 }

@@ -4,7 +4,7 @@ import { CompleteRegistrationForm } from "./CompleteRegistrationForm";
 
 export default function CompleteRegistrationPage() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-zinc-50 p-4">
+    <div className="flex justify-center items-center min-h-screen bg-muted p-4">
       <Suspense
         fallback={
           <div className="flex justify-center items-center">

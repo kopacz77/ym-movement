@@ -190,7 +190,7 @@ export const AchievementsManager: React.FC<AchievementsManagerProps> = ({ studen
             {progress.achievements.map((studentAchievement) => (
               <div key={studentAchievement.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 text-blue-800 p-2 rounded-full">
+                  <div className="bg-cyan-50 text-cyan-700 p-2 rounded-full">
                     <Medal className="h-4 w-4" />
                   </div>
                   <div>

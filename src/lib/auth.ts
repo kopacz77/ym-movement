@@ -1,7 +1,12 @@
 import { compare } from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { clearLoginAttempts, getLockoutExpiry, isAccountLockedOut, recordLoginAttempt } from "@/lib/account-lockout";
+import {
+  clearLoginAttempts,
+  getLockoutExpiry,
+  isAccountLockedOut,
+  recordLoginAttempt,
+} from "@/lib/account-lockout";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -84,12 +89,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Determine profile IDs and approval status
         const studentId = user.Student?.id ?? null;
         const coachId = user.Coach?.id ?? null;
-        const isApproved = user.role === "ADMIN" || user.role === "SUPER_ADMIN"
-          ? true
-          : (user.Student?.isApproved ?? user.Coach?.isApproved ?? null);
-        const isActive = user.role === "ADMIN" || user.role === "SUPER_ADMIN"
-          ? true
-          : (user.Student?.isActive ?? user.Coach?.isActive ?? null);
+        const isApproved =
+          user.role === "ADMIN" || user.role === "SUPER_ADMIN"
+            ? true
+            : (user.Student?.isApproved ?? user.Coach?.isApproved ?? null);
+        const isActive =
+          user.role === "ADMIN" || user.role === "SUPER_ADMIN"
+            ? true
+            : (user.Student?.isActive ?? user.Coach?.isActive ?? null);
 
         return {
           id: user.id,
@@ -128,12 +135,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = dbUser.role;
           token.studentId = dbUser.Student?.id ?? null;
           token.coachId = dbUser.Coach?.id ?? null;
-          token.isApproved = dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN"
-            ? true
-            : (dbUser.Student?.isApproved ?? dbUser.Coach?.isApproved ?? null);
-          token.isActive = dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN"
-            ? true
-            : (dbUser.Student?.isActive ?? dbUser.Coach?.isActive ?? null);
+          token.isApproved =
+            dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN"
+              ? true
+              : (dbUser.Student?.isApproved ?? dbUser.Coach?.isApproved ?? null);
+          token.isActive =
+            dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN"
+              ? true
+              : (dbUser.Student?.isActive ?? dbUser.Coach?.isActive ?? null);
         }
       }
       return token;

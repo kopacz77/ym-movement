@@ -6,8 +6,8 @@ import { z } from "zod";
 import { logSecurityEvent } from "@/lib/security";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
-// Define the TimeSlot interface to fix the implicit any[] errors
-interface TimeSlot {
+// Local create-data shape for bulk slot creation (differs from canonical TimeSlot)
+interface TimeSlotCreateData {
   rinkId: string;
   startTime: Date;
   endTime: Date;
@@ -175,15 +175,8 @@ export const timeSlotRouter = createTRPCRouter({
         const rinkTimezone = rink?.timezone || "America/Los_Angeles";
 
         // Convert the start and end times to rink timezone for checking overlap
-        const startTimeInRinkTz = DateTime.fromJSDate(input.startTime).setZone(rinkTimezone);
-        const endTimeInRinkTz = DateTime.fromJSDate(input.endTime).setZone(rinkTimezone);
-
-        console.log(`Creating time slot in ${rinkTimezone}:`, {
-          start: startTimeInRinkTz.toFormat("yyyy-MM-dd HH:mm"),
-          end: endTimeInRinkTz.toFormat("yyyy-MM-dd HH:mm"),
-          utcStart: input.startTime.toISOString(),
-          utcEnd: input.endTime.toISOString(),
-        });
+        const _startTimeInRinkTz = DateTime.fromJSDate(input.startTime).setZone(rinkTimezone);
+        const _endTimeInRinkTz = DateTime.fromJSDate(input.endTime).setZone(rinkTimezone);
 
         // Check for overlapping time slots (only check against active slots, scoped per-coach)
         const overlapping = await ctx.prisma.rinkTimeSlot.findFirst({
@@ -208,13 +201,6 @@ export const timeSlotRouter = createTRPCRouter({
           },
         });
         if (overlapping) {
-          console.log("Found overlapping slot:", {
-            existingSlotId: overlapping.id,
-            existingStart: overlapping.startTime.toISOString(),
-            existingEnd: overlapping.endTime.toISOString(),
-            attemptedStart: input.startTime.toISOString(),
-            attemptedEnd: input.endTime.toISOString(),
-          });
           throw new TRPCError({
             code: "CONFLICT",
             message: `Time slot overlaps with existing slot (ID: ${overlapping.id})`,
@@ -324,13 +310,8 @@ export const timeSlotRouter = createTRPCRouter({
         const rinkTimezone = rink?.timezone || "America/Los_Angeles";
 
         // Convert times to rink timezone for logging
-        const startTimeInRinkTz = DateTime.fromJSDate(input.startTime).setZone(rinkTimezone);
-        const endTimeInRinkTz = DateTime.fromJSDate(input.endTime).setZone(rinkTimezone);
-
-        console.log(`Updating time slot in ${rinkTimezone}:`, {
-          start: startTimeInRinkTz.toFormat("yyyy-MM-dd HH:mm"),
-          end: endTimeInRinkTz.toFormat("yyyy-MM-dd HH:mm"),
-        });
+        const _startTimeInRinkTz = DateTime.fromJSDate(input.startTime).setZone(rinkTimezone);
+        const _endTimeInRinkTz = DateTime.fromJSDate(input.endTime).setZone(rinkTimezone);
 
         // Check for overlapping time slots (scoped per-coach)
         const overlapping = await ctx.prisma.rinkTimeSlot.findFirst({
@@ -512,11 +493,9 @@ export const timeSlotRouter = createTRPCRouter({
         ),
     )
     .mutation(async ({ ctx, input }) => {
-      const slots: TimeSlot[] = [];
+      const slots: TimeSlotCreateData[] = [];
       const skippedSlots: SkippedSlot[] = []; // Track slots that were skipped due to conflicts
       const createdSlotIds: string[] = []; // Track IDs of created slots
-
-      console.log("Creating bulk time slots with input:", input);
 
       // Resolve coachId: use provided value, or fall back to calling user's coach profile
       let resolvedCoachId = input.coachId;
@@ -537,7 +516,6 @@ export const timeSlotRouter = createTRPCRouter({
       });
 
       const rinkTimezone = rink?.timezone || "America/Los_Angeles";
-      console.log(`Using rink timezone: ${rinkTimezone}`);
 
       // Parse dates in the rink's timezone
       const startDate = DateTime.fromFormat(input.startDate, "yyyy-MM-dd", {
@@ -571,8 +549,6 @@ export const timeSlotRouter = createTRPCRouter({
         // Increment by one day
         currentDate = currentDate.plus({ days: 1 });
       }
-
-      console.log(`Found ${dates.length} matching dates for days: ${input.daysOfWeek.join(", ")}`);
 
       // Parse time components
       const [dailyStartHour, dailyStartMinute] = input.dailyStartTime.split(":").map(Number);
@@ -678,25 +654,6 @@ export const timeSlotRouter = createTRPCRouter({
         }
       }
 
-      // Print first few slots for debugging
-      if (slots.length > 0) {
-        console.log("Sample of slots to be created:");
-        slots.slice(0, 3).forEach((slot, i) => {
-          // Convert back to rink timezone to verify correct times
-          const startInRinkTZ = DateTime.fromJSDate(slot.startTime).setZone(rinkTimezone);
-          const endInRinkTZ = DateTime.fromJSDate(slot.endTime).setZone(rinkTimezone);
-
-          console.log(
-            `Slot ${i + 1}: ${slot.startTime.toISOString()} to ${slot.endTime.toISOString()}`,
-          );
-          console.log(
-            `  Rink Time: ${startInRinkTZ.toFormat("HH:mm")} to ${endInRinkTZ.toFormat(
-              "HH:mm",
-            )} (${rinkTimezone})`,
-          );
-        });
-      }
-
       // Safety check with more reasonable limit
       if (slots.length > 2000) {
         // Increased from 1000 to 2000 for more flexibility
@@ -705,8 +662,6 @@ export const timeSlotRouter = createTRPCRouter({
           message: `Attempting to create too many slots (${slots.length}). Please check your settings.`,
         });
       }
-
-      console.log(`Creating ${slots.length} time slots`);
 
       if (slots.length > 0) {
         // Check for overlapping slots if requested

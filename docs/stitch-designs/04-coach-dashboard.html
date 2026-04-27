@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YM Movement - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@400;500;600;700;900&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#191c1e",
+                        "tertiary-fixed-dim": "#d2bbff",
+                        "primary": "#002444",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#25005a",
+                        "on-primary-fixed": "#001c37",
+                        "secondary": "#006780",
+                        "outline-variant": "#c3c6cf",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#abc9f2",
+                        "background": "#f7f9fb",
+                        "on-tertiary-container": "#b38eff",
+                        "error-container": "#ffdad6",
+                        "surface": "#f7f9fb",
+                        "surface-tint": "#436084",
+                        "tertiary-fixed": "#eaddff",
+                        "secondary-fixed": "#b7eaff",
+                        "tertiary": "#2e006d",
+                        "surface-container": "#eceef0",
+                        "error": "#ba1a1a",
+                        "outline": "#73777f",
+                        "on-secondary-fixed-variant": "#004e61",
+                        "inverse-surface": "#2d3133",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#6cd3f7",
+                        "on-secondary-container": "#006077",
+                        "primary-fixed-dim": "#abc9f2",
+                        "primary-fixed": "#d2e4ff",
+                        "on-primary-fixed-variant": "#2a486b",
+                        "tertiary-container": "#4900a2",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#76dcff",
+                        "on-primary-container": "#87a4cc",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#001f28",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-surface-variant": "#43474e",
+                        "on-tertiary-fixed-variant": "#5a00c6",
+                        "on-surface": "#191c1e",
+                        "surface-bright": "#f7f9fb",
+                        "primary-container": "#1a3a5c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Public Sans"],
+                        "display": ["Public Sans"],
+                        "body": ["Inter"],
+                        "label": ["Public Sans"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="text-on-background font-body antialiased flex">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-64 bg-slate-900 border-r border-slate-800 shadow-2xl flex flex-col h-full py-8 z-50 hidden md:flex">
+<div class="px-6 mb-12">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">ice_skating</span>
+</div>
+<div>
+<h1 class="text-white font-bold tracking-tight font-headline">YM Movement</h1>
+<p class="text-xs text-white/60 font-body uppercase tracking-wider">Elite Coaching</p>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-6 py-4 text-white bg-white/10 border-l-[3px] border-cyan-500 font-label uppercase text-xs tracking-[0.15em] font-medium active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-6 py-4 text-white/60 hover:text-white hover:bg-white/5 font-label uppercase text-xs tracking-[0.15em] font-medium hover:translate-x-1 transition-all duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                Schedule
+            </a>
+<a class="flex items-center gap-3 px-6 py-4 text-white/60 hover:text-white hover:bg-white/5 font-label uppercase text-xs tracking-[0.15em] font-medium hover:translate-x-1 transition-all duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+                Students
+            </a>
+<a class="flex items-center gap-3 px-6 py-4 text-white/60 hover:text-white hover:bg-white/5 font-label uppercase text-xs tracking-[0.15em] font-medium hover:translate-x-1 transition-all duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                Earnings
+            </a>
+<a class="flex items-center gap-3 px-6 py-4 text-white/60 hover:text-white hover:bg-white/5 font-label uppercase text-xs tracking-[0.15em] font-medium hover:translate-x-1 transition-all duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                Proposals
+            </a>
+<a class="flex items-center gap-3 px-6 py-4 text-white/60 hover:text-white hover:bg-white/5 font-label uppercase text-xs tracking-[0.15em] font-medium hover:translate-x-1 transition-all duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+                Profile
+            </a>
+</div>
+<div class="px-6 mt-auto">
+<button class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                New Session
+            </button>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-0 md:ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/30 shadow-sm flex justify-between items-center w-full px-6 py-4 sticky">
+<div class="flex items-center md:hidden gap-3">
+<div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1; font-size: 16px;">ice_skating</span>
+</div>
+<span class="font-headline font-bold text-slate-900 tracking-tighter">YM Movement</span>
+</div>
+<div class="hidden md:flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 rounded-lg bg-slate-100 border-none focus:ring-2 focus:ring-cyan-500 text-sm w-64" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-500 transition-colors duration-200 active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden border border-slate-300 cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all">
+<img alt="Coach Profile Avatar" class="w-full h-full object-cover" data-alt="Professional portrait of a female coach with warm smile, well-lit studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoXXyWVQ7-w9Neehd0KQpReSvVbXDY79dUKeZesb2YJChFTOWiEs4mCG1ILyDXrRKN0B9Y-XVQ-D59_Rups9ojhfpoSdwIMhlCBOI_KXDiaZozenVnYYYP04IROrgRfZgy3OK7sqCg-mU2yLdRecEcjPTJ9J3WU9-O-KXKqvWGj7jDJR84iWAHv5_FPWQDbbkbui5V7dLugwlNSihvhaksMrEFhZGuxkE5c4ObuV70ougULZasm3PFFQ86e5zFEY24kO6JZGI_t2cA"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+<!-- Greeting -->
+<div class="mb-10">
+<h2 class="text-4xl font-headline font-bold tracking-tight text-slate-900 mb-2">Welcome back, Coach Yura</h2>
+<p class="text-slate-500 font-body">Here's a look at your schedule and performance today.</p>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:shadow-[0_4px_6px_rgba(0,0,0,0.05),0_10px_40px_rgba(0,0,0,0.06)] transition-all duration-200 flex justify-between items-start">
+<div>
+<p class="font-label uppercase text-xs tracking-[0.15em] text-slate-500 font-medium mb-3">Total Students</p>
+<h3 class="text-3xl font-headline font-bold text-slate-900 tracking-tight">12</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:shadow-[0_4px_6px_rgba(0,0,0,0.05),0_10px_40px_rgba(0,0,0,0.06)] transition-all duration-200 flex justify-between items-start">
+<div>
+<p class="font-label uppercase text-xs tracking-[0.15em] text-slate-500 font-medium mb-3">Upcoming Lessons</p>
+<h3 class="text-3xl font-headline font-bold text-slate-900 tracking-tight">5</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:shadow-[0_4px_6px_rgba(0,0,0,0.05),0_10px_40px_rgba(0,0,0,0.06)] transition-all duration-200 flex justify-between items-start">
+<div>
+<p class="font-label uppercase text-xs tracking-[0.15em] text-slate-500 font-medium mb-3">Completed This Month</p>
+<h3 class="text-3xl font-headline font-bold text-slate-900 tracking-tight">18</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:shadow-[0_4px_6px_rgba(0,0,0,0.05),0_10px_40px_rgba(0,0,0,0.06)] transition-all duration-200 flex justify-between items-start">
+<div>
+<p class="font-label uppercase text-xs tracking-[0.15em] text-slate-500 font-medium mb-3">Monthly Earnings</p>
+<h3 class="text-3xl font-headline font-bold text-slate-900 tracking-tight">$3,450</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+</div>
+</div>
+<!-- Lessons Section -->
+<div class="mb-6">
+<h3 class="font-label uppercase text-xs tracking-[0.15em] font-bold text-slate-500 mb-6">LESSONS</h3>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Left Col: Upcoming Lessons -->
+<div class="flex flex-col gap-4">
+<h4 class="font-headline font-semibold text-slate-900 text-lg mb-2">Upcoming Lessons</h4>
+<!-- Lesson Card 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-5 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 transition-transform duration-200 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold font-headline">SJ</div>
+<div>
+<h5 class="font-headline font-bold text-slate-900">Sarah J.</h5>
+<div class="flex items-center gap-2 text-sm text-slate-500 font-body">
+<span class="material-symbols-outlined" style="font-size: 16px;">calendar_month</span> Oct 26
+                                        <span class="material-symbols-outlined ml-2" style="font-size: 16px;">schedule</span> 2:00 PM
+                                    </div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium font-body border border-blue-200">Ice Dance</span>
+</div>
+<!-- Lesson Card 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-5 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] hover:-translate-y-1 transition-transform duration-200 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold font-headline">EK</div>
+<div>
+<h5 class="font-headline font-bold text-slate-900">Emma K.</h5>
+<div class="flex items-center gap-2 text-sm text-slate-500 font-body">
+<span class="material-symbols-outlined" style="font-size: 16px;">calendar_month</span> Oct 26
+                                        <span class="material-symbols-outlined ml-2" style="font-size: 16px;">schedule</span> 3:30 PM
+                                    </div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-medium font-body border border-violet-200">Choreography</span>
+</div>
+</div>
+<!-- Right Col: Past Lessons -->
+<div class="flex flex-col gap-4">
+<h4 class="font-headline font-semibold text-slate-900 text-lg mb-2">Past Lessons</h4>
+<!-- Lesson Card 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-5 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] flex items-center justify-between opacity-80">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold font-headline">LT</div>
+<div>
+<h5 class="font-headline font-bold text-slate-900">Liam T.</h5>
+<div class="flex items-center gap-2 text-sm text-slate-500 font-body">
+<span class="material-symbols-outlined" style="font-size: 16px;">calendar_month</span> Oct 25
+                                        <span class="material-symbols-outlined ml-2" style="font-size: 16px;">schedule</span> 10:00 AM
+                                    </div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium font-body border border-slate-200">Private</span>
+</div>
+<!-- Lesson Card 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-5 border border-slate-200/50 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] flex items-center justify-between opacity-80">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold font-headline">MR</div>
+<div>
+<h5 class="font-headline font-bold text-slate-900">Mia R.</h5>
+<div class="flex items-center gap-2 text-sm text-slate-500 font-body">
+<span class="material-symbols-outlined" style="font-size: 16px;">calendar_month</span> Oct 25
+                                        <span class="material-symbols-outlined ml-2" style="font-size: 16px;">schedule</span> 1:00 PM
+                                    </div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-medium font-body border border-violet-200">Choreography</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

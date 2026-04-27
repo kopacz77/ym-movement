@@ -56,12 +56,9 @@ export default function BlockedDateDialog({
       return;
     }
 
-    showDeleteConfirmation(
-      "blocked period",
-      () => {
-        deleteMutation.mutate({ id: blockedRange.id });
-      },
-    );
+    showDeleteConfirmation("blocked period", () => {
+      deleteMutation.mutate({ id: blockedRange.id });
+    });
   };
 
   if (!isOpen) {

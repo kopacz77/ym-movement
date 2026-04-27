@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { Calendar, Clock, MapPin, User } from "lucide-react";
+import { Clock, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -64,25 +64,24 @@ export function UpcomingLessons() {
   const showLoading = !isReady || isLoading || !studentId;
 
   return (
-    <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30">
-      <CardHeader className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border-b border-blue-100/50">
-        <CardTitle className="text-xl flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-blue-500" />
-          Your Upcoming Adventures ✨
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          Upcoming Lessons
         </CardTitle>
         <CardAction>
-          <Button variant="ghost" size="sm" asChild className="hover:bg-blue-50">
+          <Button variant="ghost" size="sm" asChild className="hover:bg-muted/50">
             <Link href="/student/schedule">View All</Link>
           </Button>
         </CardAction>
       </CardHeader>
       <CardContent className="p-6">
         {showLoading ? (
-          <DelightfulLoading message="Loading your exciting lessons..." />
+          <DelightfulLoading message="Loading lessons..." />
         ) : upcomingLessons?.length ? (
           <div className="space-y-4">
             {upcomingLessons.map((lesson) => (
-              <Card key={lesson.id} className="border rounded-lg">
+              <Card key={lesson.id} className="border border-border/30 rounded-lg">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">
                     {lesson.type ? lesson.type.replace("_", " ") : "Private"} Lesson

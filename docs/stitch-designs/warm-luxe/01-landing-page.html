@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YM Movement | Elevate Your Ice Dance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "espresso": "#2a1810",
+                        "espresso-dark": "#1a0f0a",
+                        "espresso-deep": "#120a06",
+                        "gold": "#d4a853",
+                        "bronze": "#8b6914",
+                        "cream": "#f5f0e8",
+                        "text-light": "#faf7f2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Playfair Display", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #1a0f0a;
+            color: #faf7f2;
+            font-family: 'Manrope', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        .label-text {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .glow-gold {
+            box-shadow: 0 0 20px rgba(212, 168, 83, 0.2);
+        }
+        .glow-gold-strong {
+            box-shadow: 0 0 30px rgba(212, 168, 83, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopNavBar from JSON -->
+<nav class="bg-[#2a1810]/90 backdrop-blur-md dark:bg-[#2a1810]/95 full-width top-0 z-50 sticky border-b border-[#d4a853]/20 shadow-[0_4px_20px_rgba(212,168,83,0.1)]">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-serif tracking-widest text-[#d4a853] uppercase">
+                YM MOVEMENT
+            </div>
+<div class="hidden md:flex items-center space-x-8">
+<!-- No obvious active tab based on intent (Landing Page), so all inactive initially, but normally we'd highlight one if it was a specific page -->
+<a class="text-[#faf7f2]/80 font-medium hover:text-[#d4a853] hover:drop-shadow-[0_0_8px_rgba(212,168,83,0.4)] transition-all" href="#">Coaching</a>
+<a class="text-[#faf7f2]/80 font-medium hover:text-[#d4a853] hover:drop-shadow-[0_0_8px_rgba(212,168,83,0.4)] transition-all" href="#">Programs</a>
+<a class="text-[#faf7f2]/80 font-medium hover:text-[#d4a853] hover:drop-shadow-[0_0_8px_rgba(212,168,83,0.4)] transition-all" href="#">Results</a>
+<a class="text-[#faf7f2]/80 font-medium hover:text-[#d4a853] hover:drop-shadow-[0_0_8px_rgba(212,168,83,0.4)] transition-all" href="#">Philosophy</a>
+<a class="text-[#faf7f2]/80 font-medium hover:text-[#d4a853] hover:drop-shadow-[0_0_8px_rgba(212,168,83,0.4)] transition-all" href="#">Journal</a>
+</div>
+<button class="hidden md:flex items-center justify-center bg-[#d4a853] text-[#1a0f0a] px-6 py-2 rounded-full font-bold font-label hover:bg-opacity-90 transition-all glow-gold">
+                Book Session
+            </button>
+<button class="md:hidden text-[#d4a853]">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center justify-center overflow-hidden">
+<!-- Background Image -->
+<div class="absolute inset-0 w-full h-full">
+<div class="absolute inset-0 bg-gradient-to-r from-espresso-dark/95 via-espresso-dark/80 to-transparent z-10"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-espresso-dark via-transparent to-transparent z-10"></div>
+<img alt="Hero Background" class="w-full h-full object-cover object-center opacity-40" data-alt="Elegant ice dancer mid-spin on pristine ice surface, dramatic warm spotlighting, deep cinematic shadows, capturing elite movement and grace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6JxJQUdxUbIjMCES9gEpABaK9EJ5JXpq8WOIsDZKcdHjiC7tAYdwyfRBhL4nu3jV3BNSTEt7MCm1p8feKFNumK5yAektyJ6MSj6H_BiRkgmc46IAXBjTfU4MjzY6CYEdH2FGQ0iJtjGh1QSKyuwp38B_VkSn18TvXjPr2tPLQc4c0Z2cmaenMLPD5O8DBurAUIUy-OxuuYgSy-i9B0Ps4CZkg85Z4X9MPgk0fPSbFo5wFrXxSGaiYpOGml3FL3ZPiJ1reIvEwYrJd"/>
+</div>
+<div class="relative z-20 w-full max-w-7xl mx-auto px-8 flex flex-col md:flex-row items-center">
+<div class="w-full md:w-2/3 lg:w-1/2 space-y-8">
+<h1 class="text-5xl md:text-7xl font-headline text-cream leading-tight">
+                        Elevate Your <br/>
+<span class="text-gold italic font-light">Ice Dance</span>
+</h1>
+<p class="text-lg md:text-xl text-text-light/80 font-body max-w-lg leading-relaxed">
+                        Experience luxury elite coaching designed by Olympian Yura Min. Refining technique, artistry, and precision for the world stage.
+                    </p>
+<div class="pt-4 flex flex-col sm:flex-row gap-4">
+<button class="px-8 py-4 bg-gold text-espresso-deep font-label font-bold tracking-wide rounded-full hover:bg-white hover:text-espresso-deep transition-all duration-300 glow-gold-strong flex items-center justify-center gap-2">
+                            Explore Coaching
+                            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 600;">arrow_forward</span>
+</button>
+<button class="px-8 py-4 border border-gold text-gold font-label font-bold tracking-wide rounded-full hover:bg-gold/10 transition-all duration-300 flex items-center justify-center">
+                            Watch Philosophy
+                        </button>
+</div>
+</div>
+</div>
+<!-- Scroll Indicator -->
+<div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center animate-bounce opacity-70">
+<span class="text-gold font-label text-xs tracking-widest uppercase mb-2">Scroll</span>
+<span class="material-symbols-outlined text-gold">south</span>
+</div>
+</section>
+<!-- Feature Pillars (Bento-style layout) -->
+<section class="py-24 bg-espresso-dark relative">
+<div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+<div class="max-w-7xl mx-auto px-8">
+<div class="text-center mb-16 space-y-4">
+<h2 class="text-gold font-label tracking-widest text-sm uppercase">The YM Standard</h2>
+<h3 class="text-3xl md:text-5xl font-headline text-cream">Excellence in Motion</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Pillar 1 -->
+<div class="group relative bg-espresso border border-gold/10 rounded-2xl p-8 hover:border-gold/40 transition-all duration-500 hover:-translate-y-2 glow-gold">
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gold/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="w-14 h-14 rounded-full bg-espresso-deep border border-gold/30 flex items-center justify-center mb-6 text-gold group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<h4 class="text-2xl font-headline text-cream mb-4">Olympic-Level Coaching</h4>
+<p class="text-text-light/70 font-body leading-relaxed flex-grow">
+                                Direct guidance from 2x Olympian Yura Min, translating world-class experience into actionable technique refinement.
+                            </p>
+</div>
+</div>
+<!-- Pillar 2 -->
+<div class="group relative bg-espresso border border-gold/10 rounded-2xl p-8 hover:border-gold/40 transition-all duration-500 hover:-translate-y-2 glow-gold">
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gold/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="w-14 h-14 rounded-full bg-espresso-deep border border-gold/30 flex items-center justify-center mb-6 text-gold group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">model_training</span>
+</div>
+<h4 class="text-2xl font-headline text-cream mb-4">Personalized Programs</h4>
+<p class="text-text-light/70 font-body leading-relaxed flex-grow">
+                                Bespoke training regimens tailored to your specific biomechanics, competitive goals, and artistic expression.
+                            </p>
+</div>
+</div>
+<!-- Pillar 3 -->
+<div class="group relative bg-espresso border border-gold/10 rounded-2xl p-8 hover:border-gold/40 transition-all duration-500 hover:-translate-y-2 glow-gold">
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gold/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="w-14 h-14 rounded-full bg-espresso-deep border border-gold/30 flex items-center justify-center mb-6 text-gold group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+</div>
+<h4 class="text-2xl font-headline text-cream mb-4">World-Class Results</h4>
+<p class="text-text-light/70 font-body leading-relaxed flex-grow">
+                                Data-driven analytics paired with artistic intuition to consistently elevate scores and competitive placement.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Social Proof / Legacy Section -->
+<section class="py-24 bg-[#120a06] relative overflow-hidden">
+<div class="max-w-7xl mx-auto px-8 relative z-10">
+<div class="flex flex-col lg:flex-row items-center gap-16">
+<div class="w-full lg:w-1/2 relative">
+<div class="relative rounded-2xl overflow-hidden border border-gold/20 shadow-2xl shadow-gold/10 aspect-[4/5]">
+<img alt="Yura Min Legacy" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" data-alt="Close up of polished ice skates resting on pristine ice with dramatic warm sidelighting, deep espresso shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWMMHjkgiOHAsPXt_GdNxEbuUehRyneOeDj5FL-V_1Hke8LqMmkyMznquzgAc2P7nxILo4l8_lJT2Wo_32A_g_Srm2IuvsfFEzy6j1GS3pWpzhAQDT1kFBPdjf174SRADYUJxPIB8m8kA1fj8SGJlAsDt0JFZ70rvPTwIZbI_WaIkkqE_KfIva_2-5ky4NZ5jasd1mx5RG5dH2rgLQgMZrH_L_QIcWlLvX--w1_ZAXQmeM-cX-1G-_DafvhEe6xmtChU6pmu2-Uamh"/>
+<div class="absolute inset-0 bg-gradient-to-t from-espresso-deep via-transparent to-transparent"></div>
+<!-- KPI Badge -->
+<div class="absolute bottom-8 left-8 right-8 bg-espresso/90 backdrop-blur-md border border-gold/30 rounded-xl p-6 flex justify-around">
+<div class="text-center">
+<div class="text-3xl font-headline text-gold mb-1">2x</div>
+<div class="text-xs font-label text-cream uppercase tracking-wider">Olympian</div>
+</div>
+<div class="w-px bg-gold/20"></div>
+<div class="text-center">
+<div class="text-3xl font-headline text-gold mb-1">15+</div>
+<div class="text-xs font-label text-cream uppercase tracking-wider">Years Elite</div>
+</div>
+<div class="w-px bg-gold/20"></div>
+<div class="text-center">
+<div class="text-3xl font-headline text-gold mb-1">100%</div>
+<div class="text-xs font-label text-cream uppercase tracking-wider">Commitment</div>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full lg:w-1/2 space-y-8">
+<h2 class="text-gold font-label tracking-widest text-sm uppercase">The Legacy</h2>
+<h3 class="text-4xl md:text-5xl font-headline text-cream leading-tight">
+                            Forged on the World Stage. <br/>Refined for You.
+                        </h3>
+<p class="text-lg text-text-light/80 font-body leading-relaxed">
+                            True artistry in ice dance is born from relentless discipline and expert guidance. The YM Movement distills decades of international competition experience into a proprietary coaching methodology. We don't just teach steps; we sculpt champions.
+                        </p>
+<div class="space-y-6 pt-4 border-l border-gold/30 pl-6">
+<blockquote class="text-xl font-headline text-cream italic">
+                                "Yura's approach transformed my understanding of edge control and connection. It's truly a masterclass."
+                            </blockquote>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-gold/20 border border-gold/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-gold">person</span>
+</div>
+<div>
+<div class="font-label font-bold text-cream">A. Chen</div>
+<div class="text-sm text-text-light/50 font-body">International Competitor</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-32 relative bg-espresso-dark overflow-hidden flex items-center justify-center text-center">
+<!-- Subtle background texture/pattern -->
+<div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(#d4a853 1px, transparent 1px); background-size: 40px 40px;"></div>
+<div class="relative z-10 max-w-3xl mx-auto px-8 space-y-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-5xl text-gold mb-4" style="font-variation-settings: 'wght' 200;">diamond</span>
+<h2 class="text-5xl md:text-6xl font-headline text-cream leading-tight">Ready to Command <br/><span class="italic text-gold">the Ice?</span></h2>
+<p class="text-xl text-text-light/70 font-body max-w-xl">
+                    Spaces in the YM Movement elite program are strictly limited to ensure uncompromising quality of instruction.
+                </p>
+<button class="mt-8 px-10 py-5 bg-gold text-espresso-deep font-label font-bold text-lg tracking-wider rounded-full hover:bg-white transition-all duration-300 glow-gold-strong">
+                    Join the Movement
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer from JSON -->
+<footer class="bg-[#1a0f0a] dark:bg-[#120a06] w-full border-t border-[#d4a853]/10 flex flex-col items-center gap-6 py-12 px-8">
+<div class="text-lg font-serif text-[#d4a853] tracking-widest uppercase">
+            YM MOVEMENT
+        </div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="text-[#faf7f2]/40 font-label hover:text-[#d4a853] transition-colors focus:ring-1 focus:ring-[#d4a853] outline-none rounded px-2" href="#">Privacy Policy</a>
+<a class="text-[#faf7f2]/40 font-label hover:text-[#d4a853] transition-colors focus:ring-1 focus:ring-[#d4a853] outline-none rounded px-2" href="#">Terms of Service</a>
+<a class="text-[#faf7f2]/40 font-label hover:text-[#d4a853] transition-colors focus:ring-1 focus:ring-[#d4a853] outline-none rounded px-2" href="#">Contact</a>
+<a class="text-[#faf7f2]/40 font-label hover:text-[#d4a853] transition-colors focus:ring-1 focus:ring-[#d4a853] outline-none rounded px-2" href="#">Press Kit</a>
+</div>
+<div class="text-[#faf7f2]/40 font-body text-sm mt-4">
+            © 2024 YM MOVEMENT. EXCELLENCE IN MOTION.
+        </div>
+</footer>
+</body></html>

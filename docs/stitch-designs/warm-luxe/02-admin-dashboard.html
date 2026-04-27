@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YM Movement - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Playfair+Display:wght@400;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        espresso: "#2a1810",
+                        gold: "#d4a853",
+                        bronze: "#8b6914",
+                        cream: "#f5f0e8",
+                        textLight: "#faf7f2",
+                    },
+                    fontFamily: {
+                        headline: ["Playfair Display", "serif"],
+                        display: ["Playfair Display", "serif"],
+                        body: ["Manrope", "sans-serif"],
+                        label: ["Space Grotesk", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-[#2a1810] text-[#faf7f2] font-body antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="w-64 fixed left-0 top-0 h-screen border-r border-[#8b6914]/20 shadow-xl bg-[#2a1810] z-50 flex flex-col py-8 px-4 font-body font-medium">
+<div class="mb-10 px-4">
+<h1 class="font-headline text-2xl font-bold text-[#d4a853]">YM Movement</h1>
+<p class="text-sm text-[#faf7f2]/60 mt-1">Elite Ice Dance</p>
+</div>
+<div class="flex-1 space-y-2">
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#d4a853] font-bold border-l-4 border-[#d4a853] bg-stone-900/50 hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#faf7f2]/60 hover:text-[#faf7f2] hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span>Schedule</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#faf7f2]/60 hover:text-[#faf7f2] hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span>Students</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#faf7f2]/60 hover:text-[#faf7f2] hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Payments</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#faf7f2]/60 hover:text-[#faf7f2] hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Reports</span>
+</a>
+</div>
+<div class="mt-auto space-y-2 pt-8 border-t border-[#8b6914]/20">
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#faf7f2]/60 hover:text-[#faf7f2] hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-[#faf7f2]/60 hover:text-[#faf7f2] hover:bg-stone-900/30 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-[#2a1810]/95 backdrop-blur-md border-b border-stone-800/50 shadow-[0_4px_20px_rgba(42,24,16,0.5)] flex justify-between items-center h-16 px-8">
+<h2 class="font-headline text-xl font-bold text-[#d4a853]">Admin Dashboard</h2>
+<div class="flex items-center space-x-6 text-[#faf7f2]/70">
+<button class="hover:text-[#d4a853] transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-[#d4a853] transition-all">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-24 px-8 pb-12 max-w-7xl mx-auto">
+<!-- Greeting -->
+<div class="mb-10">
+<h1 class="font-headline text-4xl font-bold text-[#faf7f2]">Good morning, Yura</h1>
+<p class="text-[#faf7f2]/60 mt-2 font-label">Here is your daily overview.</p>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<div class="bg-[#f5f0e8] rounded-xl p-6 shadow-[0_8px_30px_rgba(212,168,83,0.15)] border border-[#d4a853]/20 flex flex-col">
+<span class="text-[#2a1810]/60 font-label text-sm uppercase tracking-wider mb-2">Total Students</span>
+<span class="text-[#d4a853] font-headline text-4xl font-bold">24</span>
+</div>
+<div class="bg-[#f5f0e8] rounded-xl p-6 shadow-[0_8px_30px_rgba(212,168,83,0.15)] border border-[#d4a853]/20 flex flex-col">
+<span class="text-[#2a1810]/60 font-label text-sm uppercase tracking-wider mb-2">Today's Lessons</span>
+<span class="text-[#d4a853] font-headline text-4xl font-bold">6</span>
+</div>
+<div class="bg-[#f5f0e8] rounded-xl p-6 shadow-[0_8px_30px_rgba(212,168,83,0.15)] border border-[#d4a853]/20 flex flex-col">
+<span class="text-[#2a1810]/60 font-label text-sm uppercase tracking-wider mb-2">Monthly Revenue</span>
+<span class="text-[#d4a853] font-headline text-4xl font-bold">$12,450</span>
+</div>
+<div class="bg-[#f5f0e8] rounded-xl p-6 shadow-[0_8px_30px_rgba(212,168,83,0.15)] border border-[#d4a853]/20 flex flex-col">
+<span class="text-[#2a1810]/60 font-label text-sm uppercase tracking-wider mb-2">Completion Rate</span>
+<span class="text-[#d4a853] font-headline text-4xl font-bold">94%</span>
+</div>
+</div>
+<!-- Dashboard Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Today's Timeline (Spans 2 columns) -->
+<div class="lg:col-span-2 bg-[#2a1810] border border-[#8b6914]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-2xl text-[#d4a853] font-bold">Today's Timeline</h3>
+<div class="flex space-x-3 text-xs font-label">
+<span class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500/20 border border-blue-500 mr-2"></span>Private</span>
+<span class="flex items-center"><span class="w-3 h-3 rounded-full bg-purple-500/20 border border-purple-500 mr-2"></span>Choreography</span>
+<span class="flex items-center"><span class="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500 mr-2"></span>Comp Prep</span>
+</div>
+</div>
+<div class="relative mt-8 font-label">
+<!-- Timeline Grid Lines -->
+<div class="space-y-16">
+<div class="flex items-start border-t border-[#8b6914]/10 pt-2"><span class="w-16 text-[#faf7f2]/40 text-sm">06:00</span><div class="flex-1 relative h-16"></div></div>
+<div class="flex items-start border-t border-[#8b6914]/10 pt-2"><span class="w-16 text-[#faf7f2]/40 text-sm">08:00</span>
+<div class="flex-1 relative h-16">
+<div class="absolute top-4 left-4 right-4 bg-blue-900/40 border border-blue-500/50 rounded-lg p-3 shadow-lg">
+<p class="font-bold text-blue-200">Elena V. &amp; Ivan K.</p>
+<p class="text-xs text-blue-300 mt-1">Private • East Rink</p>
+</div>
+</div>
+</div>
+<div class="flex items-start border-t border-[#8b6914]/10 pt-2"><span class="w-16 text-[#faf7f2]/40 text-sm">10:00</span><div class="flex-1 relative h-16"></div></div>
+<div class="flex items-start border-t border-[#8b6914]/10 pt-2"><span class="w-16 text-[#faf7f2]/40 text-sm">12:00</span>
+<div class="flex-1 relative h-16">
+<div class="absolute top-2 left-4 right-4 bg-purple-900/40 border border-purple-500/50 rounded-lg p-3 shadow-lg">
+<p class="font-bold text-purple-200">Sarah M.</p>
+<p class="text-xs text-purple-300 mt-1">Choreography • Main Rink</p>
+</div>
+</div>
+</div>
+<div class="flex items-start border-t border-[#8b6914]/10 pt-2"><span class="w-16 text-[#faf7f2]/40 text-sm">14:00</span><div class="flex-1 relative h-16"></div></div>
+<div class="flex items-start border-t border-[#8b6914]/10 pt-2"><span class="w-16 text-[#faf7f2]/40 text-sm">16:00</span>
+<div class="flex-1 relative h-16">
+<div class="absolute top-0 left-4 right-4 bg-orange-900/40 border border-orange-500/50 rounded-lg p-3 shadow-lg">
+<p class="font-bold text-orange-200">Team Alpha</p>
+<p class="text-xs text-orange-300 mt-1">Comp Prep • West Rink</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Feed -->
+<div class="bg-[#2a1810] border border-[#8b6914]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+<h3 class="font-headline text-xl text-[#d4a853] font-bold mb-6 border-b border-[#8b6914]/20 pb-4">Recent Bookings</h3>
+<div class="space-y-6">
+<div class="flex items-start space-x-4">
+<div class="w-10 h-10 rounded-full bg-stone-800 border border-[#8b6914]/30 flex items-center justify-center text-[#d4a853]">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<div>
+<p class="text-[#faf7f2] font-medium">Michael T. booked Private Lesson</p>
+<p class="text-sm text-[#faf7f2]/50 mt-1 font-label">Tomorrow, 09:00 AM</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="w-10 h-10 rounded-full bg-stone-800 border border-[#8b6914]/30 flex items-center justify-center text-[#d4a853]">
+<span class="material-symbols-outlined text-sm">group</span>
+</div>
+<div>
+<p class="text-[#faf7f2] font-medium">Chloe S. joined Comp Prep</p>
+<p class="text-sm text-[#faf7f2]/50 mt-1 font-label">Wed, 16:00 PM</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="w-10 h-10 rounded-full bg-stone-800 border border-[#8b6914]/30 flex items-center justify-center text-[#d4a853]">
+<span class="material-symbols-outlined text-sm">event</span>
+</div>
+<div>
+<p class="text-[#faf7f2] font-medium">David L. rescheduled Choreography</p>
+<p class="text-sm text-[#faf7f2]/50 mt-1 font-label">Fri, 11:00 AM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

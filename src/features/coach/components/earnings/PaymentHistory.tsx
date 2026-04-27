@@ -15,9 +15,9 @@ import {
 import { api } from "@/lib/api";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  COMPLETED: { label: "Completed", className: "bg-green-100 text-green-800 border-green-200" },
-  PENDING: { label: "Pending", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-  FAILED: { label: "Failed", className: "bg-red-100 text-red-800 border-red-200" },
+  COMPLETED: { label: "Completed", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  PENDING: { label: "Pending", className: "bg-amber-50 text-amber-700 border-amber-200" },
+  FAILED: { label: "Failed", className: "bg-rose-50 text-rose-700 border-rose-200" },
 };
 
 function formatLessonType(type: string | null | undefined): string {

@@ -383,7 +383,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                   <h3 className="text-lg font-medium mb-2">Recent Achievements</h3>
                   <div className="border rounded-lg divide-y">
                     <div className="p-3 flex items-center">
-                      <div className="bg-blue-100 text-blue-800 p-2 rounded-full mr-3">
+                      <div className="bg-cyan-50 text-cyan-700 p-2 rounded-full mr-3">
                         <Award className="h-4 w-4" />
                       </div>
                       <div>
@@ -392,7 +392,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onEdi
                       </div>
                     </div>
                     <div className="p-3 flex items-center">
-                      <div className="bg-green-100 text-green-800 p-2 rounded-full mr-3">
+                      <div className="bg-emerald-50 text-emerald-700 p-2 rounded-full mr-3">
                         <Award className="h-4 w-4" />
                       </div>
                       <div>

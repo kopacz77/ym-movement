@@ -9,8 +9,6 @@ export const approvalQueries = createTRPCRouter({
   // Query: Get pending approvals
   getPendingApprovals: adminProcedure.query(async ({ ctx }) => {
     try {
-      console.log("Fetching pending approvals");
-
       // For clarity, let's use Prisma's built-in querying instead of raw SQL
       const pendingStudents = await ctx.prisma.student.findMany({
         where: { isApproved: false },
@@ -30,7 +28,6 @@ export const approvalQueries = createTRPCRouter({
         createdAt: student.createdAt,
       }));
 
-      console.log(`Found ${formattedStudents.length} pending approvals`);
       return { students: formattedStudents };
     } catch (error) {
       console.error("Error fetching pending approvals:", error);
@@ -47,7 +44,6 @@ export const approvalQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`Approving student with ID: ${input.studentId}`);
         // Find the student first
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
@@ -57,7 +53,6 @@ export const approvalQueries = createTRPCRouter({
         });
 
         if (!student) {
-          console.log(`Student not found: ${input.studentId}`);
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",
@@ -107,10 +102,6 @@ export const approvalQueries = createTRPCRouter({
               updatedStudent.User.name || "Student",
               passwordResetToken.token,
             );
-
-            console.log(
-              `Approval email with registration completion link sent to ${updatedStudent.User.email}`,
-            );
           } else {
             console.error("Cannot send approval email: user or email is missing");
           }
@@ -136,8 +127,6 @@ export const approvalQueries = createTRPCRouter({
   // Mutation: Approve all students (development helper)
   approveAllStudents: adminProcedure.mutation(async ({ ctx }) => {
     try {
-      console.log("Approving all unapproved students");
-
       const unapprovedStudents = await ctx.prisma.student.findMany({
         where: { isApproved: false },
         include: { User: { select: { id: true, name: true, email: true, role: true } } },
@@ -156,7 +145,6 @@ export const approvalQueries = createTRPCRouter({
         },
       });
 
-      console.log(`Approved ${result.count} students`);
       return {
         message: `Successfully approved ${result.count} students`,
         approved: result.count,
@@ -177,7 +165,6 @@ export const approvalQueries = createTRPCRouter({
     .input(z.object({ studentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log(`Rejecting student with ID: ${input.studentId}`);
         // Find the student first
         const student = await ctx.prisma.student.findUnique({
           where: { id: input.studentId },
@@ -187,7 +174,6 @@ export const approvalQueries = createTRPCRouter({
         });
 
         if (!student) {
-          console.log(`Student not found: ${input.studentId}`);
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Student not found",

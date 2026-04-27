@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YM Movement - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700&amp;family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "on-background": "#191c1e",
+                        "outline-variant": "#c3c6cf",
+                        "surface-dim": "#d8dadc",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#abc9f2",
+                        "inverse-surface": "#2d3133",
+                        "primary-fixed-dim": "#abc9f2",
+                        "inverse-on-surface": "#eff1f3",
+                        "background": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-container": "#b38eff",
+                        "on-tertiary-fixed-variant": "#5a00c6",
+                        "secondary-fixed": "#b7eaff",
+                        "tertiary-fixed": "#eaddff",
+                        "on-primary-fixed": "#001c37",
+                        "surface-variant": "#e0e3e5",
+                        "outline": "#73777f",
+                        "on-tertiary-fixed": "#25005a",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#002444",
+                        "surface-container": "#eceef0",
+                        "secondary-container": "#76dcff",
+                        "surface-container-highest": "#e0e3e5",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#6cd3f7",
+                        "primary-container": "#1a3a5c",
+                        "surface-container-low": "#f2f4f6",
+                        "tertiary": "#2e006d",
+                        "on-surface-variant": "#43474e",
+                        "secondary": "#006780",
+                        "on-secondary-fixed-variant": "#004e61",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#d2e4ff",
+                        "tertiary-fixed-dim": "#d2bbff",
+                        "on-surface": "#191c1e",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#006077",
+                        "on-secondary-fixed": "#001f28",
+                        "on-primary-container": "#87a4cc",
+                        "surface-tint": "#436084",
+                        "on-primary-fixed-variant": "#2a486b",
+                        "tertiary-container": "#4900a2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Public Sans"],
+                        "display": ["Public Sans"],
+                        "body": ["Inter"],
+                        "label": ["Public Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .shadow-multi { box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.08); }
+        .font-dm-sans { font-family: 'DM Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased flex">
+<!-- SideNavBar -->
+<nav class="bg-slate-900 dark:bg-[#0f172a] text-cyan-500 dark:text-cyan-400 font-['Public_Sans'] font-bold tracking-tight fixed left-0 top-0 h-full w-64 border-r border-white/10 dark:border-slate-800 shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex flex-col h-screen py-8 z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<img alt="YM Movement Logo" class="w-10 h-10 rounded-lg object-cover" data-alt="close-up of a sleek abstract silver and deep navy geometric icon on a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuoO21WhUlCglRHkErmuiBnLXDMrC40y9Yrvpl1u99iN4mbIm-OV-teLFTLpq-hj9NKsOGEBTTik9U06EXSIf733BF8ZVjQG2p3_lR8bhfz3vDTWCfmJ2R77nJFpGavgNbQbdrUu6X-R8W7862qITwhOMgIgYP5bNSoVZCq1ms7i93c3V7YgkludSRTLzP3BjNLdQHpjrKFSBgnQJPFJfraT3hMfEjQj63C1vREEY4OpB2LlQi_Fl6vZZvgcH6qvl549aP7MNl0Ei0"/>
+<div>
+<h1 class="text-lg font-black text-white tracking-[-0.02em]">YM Movement</h1>
+<p class="text-xs text-white/60 font-medium">Elite Coaching Platform</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto space-y-1">
+<a class="border-l-[3px] border-cyan-500 bg-white/10 text-white flex items-center px-6 py-3 gap-3 active:scale-[0.98] transition-transform duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="calendar_today">calendar_today</span>
+                Schedule
+            </a>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="group">group</span>
+                Students
+            </a>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="payments">payments</span>
+                Payments
+            </a>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="assessment">assessment</span>
+                Reports
+            </a>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="sports">sports</span>
+                Coaches
+            </a>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+                Settings
+            </a>
+</div>
+<div class="px-6 mt-auto space-y-4">
+<button class="w-full py-3 bg-gradient-to-r from-cyan-600 to-teal-500 text-white rounded-lg font-medium hover:scale-[1.02] transition-transform duration-200 shadow-md">
+                Add New Session
+            </button>
+<a class="text-white/60 hover:text-white flex items-center px-6 py-3 gap-3 transition-all duration-200 hover:bg-white/5 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="logout">logout</span>
+                Log Out
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl text-[#1a3a5c] dark:text-cyan-400 font-['Public_Sans'] font-semibold sticky top-0 w-full z-40 border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center px-8 py-4">
+<div class="flex items-center gap-4 w-1/3">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-cyan-500/50 transition-all outline-none text-sm font-body" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all focus:ring-2 focus:ring-cyan-500/50">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all focus:ring-2 focus:ring-cyan-500/50">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-9 h-9 rounded-full overflow-hidden border border-outline-variant ml-2">
+<img alt="Admin User Profile" class="w-full h-full object-cover" data-alt="professional headshot of an athletic woman smiling softly against a light gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx_VAzTyCdKPOXd8FmLqRawWn2EQ8KOFDw78srz5mx_cDbTes56vjB6c8MD-FYd4EviS3HPv63jNsD7QKoMkX6uOkGBvbm-cfyEgp5yxGZVB8xWO2oLTh8hQjALPO9eVZWzThb9_rI_par97sTCp0mTHyGFDjOo90bXU7W_27LMYf6-KItqPh79ziDPnsiHStrFl-bNv4mvAdljhSlPuEs_0xpvd0FCEm9Jl9d9rOcwp53_2-oWCvWfxWR2pCkhAjrq_HVwdVB4bTm"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<main class="flex-1 p-8 space-y-8 overflow-y-auto">
+<h1 class="text-3xl font-dm-sans text-primary-container tracking-tight">Dashboard</h1>
+<!-- KPI Cards -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30 hover:-translate-y-1 transition-transform duration-200 flex justify-between items-center group">
+<div>
+<p class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-2">Today's Schedule</p>
+<p class="text-3xl font-headline font-bold tracking-tight text-primary-container">8 <span class="text-base font-body font-normal text-outline">lessons</span></p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="event">event</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30 hover:-translate-y-1 transition-transform duration-200 flex justify-between items-center group">
+<div>
+<p class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-2">Revenue</p>
+<p class="text-3xl font-headline font-bold tracking-tight text-primary-container">$4,250</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30 hover:-translate-y-1 transition-transform duration-200 flex justify-between items-center group">
+<div>
+<p class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-2">Active Students</p>
+<p class="text-3xl font-headline font-bold tracking-tight text-primary-container">24</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30 hover:-translate-y-1 transition-transform duration-200 flex justify-between items-center group">
+<div>
+<p class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-2">Pending Actions</p>
+<p class="text-3xl font-headline font-bold tracking-tight text-primary-container">3</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</div>
+</div>
+</section>
+<!-- Timeline Section -->
+<section class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30">
+<h2 class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-6">Today's Timeline</h2>
+<div class="relative w-full h-16 bg-surface-container-low rounded-lg overflow-hidden flex items-center px-4">
+<!-- Current time indicator -->
+<div class="absolute left-1/3 top-0 bottom-0 w-0.5 bg-cyan-500 shadow-[0_0_8px_rgba(8,145,178,0.8)] z-10"></div>
+<!-- Gantt Bars -->
+<div class="absolute top-1/2 -translate-y-1/2 left-[10%] w-[15%] h-8 bg-blue-500 rounded-md shadow-sm opacity-90 hover:opacity-100 hover:-translate-y-0.5 transition-all cursor-pointer"></div>
+<div class="absolute top-1/2 -translate-y-1/2 left-[30%] w-[20%] h-8 bg-purple-500 rounded-md shadow-sm opacity-90 hover:opacity-100 hover:-translate-y-0.5 transition-all cursor-pointer"></div>
+<div class="absolute top-1/2 -translate-y-1/2 left-[55%] w-[10%] h-8 bg-orange-500 rounded-md shadow-sm opacity-90 hover:opacity-100 hover:-translate-y-0.5 transition-all cursor-pointer"></div>
+<div class="absolute top-1/2 -translate-y-1/2 left-[70%] w-[25%] h-8 bg-green-500 rounded-md shadow-sm opacity-90 hover:opacity-100 hover:-translate-y-0.5 transition-all cursor-pointer"></div>
+</div>
+<div class="flex justify-between mt-3 text-xs text-outline font-body">
+<span>8 AM</span>
+<span>10 AM</span>
+<span>12 PM</span>
+<span>2 PM</span>
+<span>4 PM</span>
+<span>6 PM</span>
+</div>
+</section>
+<!-- Mid Section (2 columns) -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Quick Actions -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30">
+<h2 class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-6">Quick Actions</h2>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center p-6 bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/50 transition-all hover:scale-[1.02] shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</div>
+<span class="font-headline font-semibold text-sm text-primary-container">Add Lesson</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/50 transition-all hover:scale-[1.02] shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</div>
+<span class="font-headline font-semibold text-sm text-primary-container">View Payments</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/50 transition-all hover:scale-[1.02] shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+</div>
+<span class="font-headline font-semibold text-sm text-primary-container">New Student</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/50 transition-all hover:scale-[1.02] shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary flex items-center justify-center mb-3">
+<span class="material-symbols-outlined" data-icon="summarize">summarize</span>
+</div>
+<span class="font-headline font-semibold text-sm text-primary-container">Generate Report</span>
+</button>
+</div>
+</div>
+<!-- Recent Activity -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30">
+<h2 class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-6">Recent Activity</h2>
+<div class="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-surface-variant before:to-transparent">
+<!-- Item 1 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+<div class="flex items-center justify-center w-8 h-8 rounded-full border border-surface-variant bg-surface-container-lowest text-emerald-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2rem)] p-4 rounded-lg bg-surface border border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline font-semibold text-sm text-primary-container">Payment Received</h3>
+<time class="text-xs font-body text-outline">10 mins ago</time>
+</div>
+<div class="text-xs font-body text-on-surface-variant">$150 from Sarah J.</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+<div class="flex items-center justify-center w-8 h-8 rounded-full border border-surface-variant bg-surface-container-lowest text-blue-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+<span class="material-symbols-outlined text-[16px]" data-icon="event_available">event_available</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2rem)] p-4 rounded-lg bg-surface border border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline font-semibold text-sm text-primary-container">Lesson Booked</h3>
+<time class="text-xs font-body text-outline">1 hr ago</time>
+</div>
+<div class="text-xs font-body text-on-surface-variant">Private coaching with Mike T.</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+<div class="flex items-center justify-center w-8 h-8 rounded-full border border-surface-variant bg-surface-container-lowest text-purple-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+<span class="material-symbols-outlined text-[16px]" data-icon="person_add">person_add</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2rem)] p-4 rounded-lg bg-surface border border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-headline font-semibold text-sm text-primary-container">New Registration</h3>
+<time class="text-xs font-body text-outline">3 hrs ago</time>
+</div>
+<div class="text-xs font-body text-on-surface-variant">Emma W. joined platform.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Analytics Section -->
+<section>
+<h2 class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant mb-6 mt-4">ANALYTICS</h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Revenue Trend (Mock Line Chart) -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30 h-64 flex flex-col">
+<h3 class="font-headline font-semibold text-sm text-primary-container mb-4">Revenue Trend</h3>
+<div class="flex-1 w-full bg-surface-container-low rounded flex items-end p-4 relative overflow-hidden">
+<!-- SVG decorative path to simulate line chart -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0,100 L0,70 Q20,80 40,50 T80,30 L100,10 L100,100 Z" fill="rgba(8,145,178,0.1)"></path>
+<path d="M0,70 Q20,80 40,50 T80,30 L100,10" fill="none" stroke="#0891b2" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Student Activity (Mock Bar Chart) -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-multi border border-outline-variant/30 h-64 flex flex-col">
+<h3 class="font-headline font-semibold text-sm text-primary-container mb-4">Student Activity</h3>
+<div class="flex-1 flex items-end gap-2 justify-around pt-8">
+<div class="w-1/6 bg-secondary/80 rounded-t-md h-[40%] hover:bg-secondary transition-colors relative group"><div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">Mon</div></div>
+<div class="w-1/6 bg-secondary/80 rounded-t-md h-[60%] hover:bg-secondary transition-colors relative group"><div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">Tue</div></div>
+<div class="w-1/6 bg-secondary/80 rounded-t-md h-[30%] hover:bg-secondary transition-colors relative group"><div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">Wed</div></div>
+<div class="w-1/6 bg-secondary/80 rounded-t-md h-[80%] hover:bg-secondary transition-colors relative group"><div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">Thu</div></div>
+<div class="w-1/6 bg-cyan-500 rounded-t-md h-[90%] shadow-[0_0_8px_rgba(8,145,178,0.4)] relative group"><div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold">Fri</div></div>
+<div class="w-1/6 bg-secondary/80 rounded-t-md h-[50%] hover:bg-secondary transition-colors relative group"><div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">Sat</div></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

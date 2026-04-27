@@ -87,3 +87,6 @@ debug.log
 # Turborepo
 .turbo
 .env*.local
+
+# Storybook
+storybook-static/

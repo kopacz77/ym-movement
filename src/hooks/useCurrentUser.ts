@@ -15,9 +15,6 @@ export function useCurrentUser() {
     isActive: user?.isActive ?? null,
     isStudent: user?.role === "STUDENT",
     isAdmin: user?.role === "ADMIN" || user?.role === "SUPER_ADMIN",
-    isCoach:
-      user?.role === "COACH" ||
-      user?.role === "SUPER_ADMIN" ||
-      user?.role === "ADMIN",
+    isCoach: user?.role === "COACH" || user?.role === "SUPER_ADMIN" || user?.role === "ADMIN",
   };
 }

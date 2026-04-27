@@ -237,7 +237,7 @@ export default function CoachSignupPage() {
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
       />
-      <div className="flex justify-center items-center min-h-screen bg-gray-50 py-8">
+      <div className="flex justify-center items-center min-h-screen bg-muted py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -371,23 +371,23 @@ export default function CoachSignupPage() {
             </form>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
-            <p className="text-sm text-center text-gray-500">
+            <p className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/auth/login" className="text-blue-600 hover:underline">
+              <Link href="/auth/login" className="text-[#0891b2] hover:underline">
                 Login
               </Link>
             </p>
-            <p className="text-xs text-center text-gray-400 mt-2">
+            <p className="text-xs text-center text-muted-foreground mt-2">
               By applying, you agree to our{" "}
-              <Link href="/terms" className="text-blue-500 hover:underline">
+              <Link href="/terms" className="text-[#0891b2] hover:underline">
                 Terms of Service
               </Link>
               ,{" "}
-              <Link href="/privacy" className="text-blue-500 hover:underline">
+              <Link href="/privacy" className="text-[#0891b2] hover:underline">
                 Privacy Policy
               </Link>
               , and{" "}
-              <Link href="/policies" className="text-blue-500 hover:underline">
+              <Link href="/policies" className="text-[#0891b2] hover:underline">
                 Lesson Policies
               </Link>
             </p>

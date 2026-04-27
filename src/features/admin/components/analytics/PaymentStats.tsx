@@ -42,8 +42,8 @@ export const PaymentStats = () => {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center space-x-4">
-            <div className="p-2 bg-blue-100 rounded-full">
-              <CreditCard className="h-5 w-5 text-blue-600" />
+            <div className="p-2 bg-cyan-50 rounded-full">
+              <CreditCard className="h-5 w-5 text-[#0891b2]" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Payments</p>
@@ -62,7 +62,7 @@ export const PaymentStats = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="p-2 bg-green-100 rounded-full">
+            <div className="p-2 bg-emerald-50 rounded-full">
               <CheckCircle className="h-5 w-5 text-green-600" />
             </div>
             <div>

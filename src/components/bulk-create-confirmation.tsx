@@ -141,15 +141,15 @@ export function BulkCreateConfirmation({
               <div className="grid grid-cols-3 gap-4 p-3 bg-blue-50 rounded-lg text-sm">
                 <div className="text-center">
                   <div className="font-semibold text-blue-900">{data.estimatedSlots}</div>
-                  <div className="text-blue-700 text-xs">Total Slots</div>
+                  <div className="text-foreground text-xs">Total Slots</div>
                 </div>
                 <div className="text-center">
                   <div className="font-semibold text-blue-900">{data.slotDuration}min</div>
-                  <div className="text-blue-700 text-xs">Per Slot</div>
+                  <div className="text-foreground text-xs">Per Slot</div>
                 </div>
                 <div className="text-center">
                   <div className="font-semibold text-blue-900">{weeklyHours.toFixed(1)}h</div>
-                  <div className="text-blue-700 text-xs">Per Week</div>
+                  <div className="text-foreground text-xs">Per Week</div>
                 </div>
               </div>
             </CardContent>

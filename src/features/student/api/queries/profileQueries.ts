@@ -310,20 +310,10 @@ export const profileRouter = createTRPCRouter({
               }
             }
             // Student has no custom rate for this type → use coach pricing as fallback
-            return getHourlyRateForLessonType(
-              lessonType,
-              student,
-              defaultPricing,
-              coachPricing,
-            );
+            return getHourlyRateForLessonType(lessonType, student, defaultPricing, coachPricing);
           }
           // Non-admin coach: coach pricing takes priority (standard waterfall)
-          return getHourlyRateForLessonType(
-            lessonType,
-            student,
-            defaultPricing,
-            coachPricing,
-          );
+          return getHourlyRateForLessonType(lessonType, student, defaultPricing, coachPricing);
         };
 
         return {

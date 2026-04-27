@@ -102,13 +102,6 @@ export function CalendarPreview({
       const dayOfWeek = currentDate.getDay(); // JavaScript: 0=Sunday, 1=Monday, etc.
       const isSelected = selectedDays.includes(dayOfWeek);
 
-      // Debug: log the first few days
-      if (days.length < 3 && process.env.NODE_ENV === "development") {
-        console.log(
-          `Date: ${currentDate.toISOString().split("T")[0]}, getDay(): ${dayOfWeek}, isSelected: ${isSelected}, selectedDays: ${selectedDays}`,
-        );
-      }
-
       days.push({
         date: new Date(currentDate),
         isSelected,
