@@ -391,3 +391,43 @@
 .fc .fc-bg-event {
   opacity: 1;
 }
+
+/* ── Uniform event card text sizing ──
+   All event cards use the same font sizes that scale with the
+   calendar column width via clamp(). No per-event variation. */
+
+/* Enable container context on each day column so cqi units work */
+.fc .fc-timegrid-col {
+  container-type: inline-size;
+}
+
+/* Responsive base: scale with column width via clamp */
+.fc-event-scaled .fc-ev-time {
+  font-size: clamp(0.625rem, 5.5cqi, 0.8125rem);
+}
+
+.fc-event-scaled .fc-ev-primary {
+  font-size: clamp(0.6875rem, 6.5cqi, 0.9375rem);
+}
+
+.fc-event-scaled .fc-ev-secondary {
+  font-size: clamp(0.625rem, 5.5cqi, 0.8125rem);
+}
+
+.fc-event-scaled .fc-ev-badge {
+  font-size: clamp(0.5rem, 4cqi, 0.6875rem);
+}
+
+/* Day view — single column is very wide, cap font size so it stays proportional */
+.fc-timeGridDay-view .fc-event-scaled .fc-ev-time {
+  font-size: 0.8125rem;
+}
+.fc-timeGridDay-view .fc-event-scaled .fc-ev-primary {
+  font-size: 0.9375rem;
+}
+.fc-timeGridDay-view .fc-event-scaled .fc-ev-secondary {
+  font-size: 0.8125rem;
+}
+.fc-timeGridDay-view .fc-event-scaled .fc-ev-badge {
+  font-size: 0.6875rem;
+}

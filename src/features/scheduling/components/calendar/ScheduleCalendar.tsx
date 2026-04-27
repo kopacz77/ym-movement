@@ -42,9 +42,28 @@ export function ScheduleCalendar() {
     }
   }, [currentUserCoachId, state.selectedCoachId, dispatch]);
 
-  // Calculate date range for data fetching — timezone-aware
+  // Fetch rinks independently (no date range dependency) to determine timezone early
+  const { data: rinks } = api.admin.schedule.getRinks.useQuery(undefined, {
+    retry: 2,
+    retryDelay: 1000,
+  } as any);
+
+  // Determine rink timezone for FullCalendar — computed before dateRange so day
+  // boundaries align with the timezone FullCalendar will actually display
+  const calendarTimezone = useMemo(() => {
+    if (state.selectedRinkId && rinks) {
+      const rink = rinks.find(
+        (r: { id: string; timezone: string }) => r.id === state.selectedRinkId,
+      );
+      return rink?.timezone || state.timezoneFilter;
+    }
+    return state.timezoneFilter;
+  }, [state.selectedRinkId, rinks, state.timezoneFilter]);
+
+  // Calculate date range for data fetching — use calendarTimezone so day boundaries
+  // align with what FullCalendar actually displays (not the browser's local timezone)
   const dateRange = useMemo(() => {
-    const dt = DateTime.fromJSDate(state.currentDate, { zone: state.timezoneFilter });
+    const dt = DateTime.fromJSDate(state.currentDate, { zone: calendarTimezone });
     if (state.view === "timeGridWeek") {
       const startOfWeek = dt.startOf("week"); // Monday in Luxon (ISO)
       return {
@@ -58,15 +77,15 @@ export function ScheduleCalendar() {
         end: dt.endOf("day").toJSDate(),
       };
     }
-    // Month view
+    // Month view — pad ±7 days so events on partial weeks at edges are visible
     return {
-      start: dt.startOf("month").startOf("day").toJSDate(),
-      end: dt.endOf("month").endOf("day").toJSDate(),
+      start: dt.startOf("month").minus({ days: 7 }).startOf("day").toJSDate(),
+      end: dt.endOf("month").plus({ days: 7 }).endOf("day").toJSDate(),
     };
-  }, [state.currentDate, state.view, state.timezoneFilter]);
+  }, [state.currentDate, state.view, calendarTimezone]);
 
-  // Fetch data
-  const { rinks, timeSlots } = useTimeSlots(dateRange, state.selectedRinkId, state.selectedCoachId);
+  // Fetch time slots and other data
+  const { rinks: _rinksDuplicate, timeSlots } = useTimeSlots(dateRange, state.selectedRinkId, state.selectedCoachId);
   const { data: blockedDateRanges = [] } = api.admin.schedule.getBlockedDates.useQuery({
     startDate: dateRange.start,
     endDate: dateRange.end,
@@ -78,27 +97,13 @@ export function ScheduleCalendar() {
     [coachesData],
   );
 
-  // Filter time slots by timezone when viewing all rinks
+  // Filter time slots by selected rink (timezone dropdown only controls display, not filtering)
   const filteredTimeSlots = useMemo(() => {
     if (!timeSlots) {
       return [];
     }
-    if (state.selectedRinkId) {
-      return timeSlots;
-    }
-    return timeSlots.filter((slot) => slot.Rink?.timezone === state.timezoneFilter);
-  }, [timeSlots, state.selectedRinkId, state.timezoneFilter]);
-
-  // Determine rink timezone for FullCalendar
-  const calendarTimezone = useMemo(() => {
-    if (state.selectedRinkId && rinks) {
-      const rink = rinks.find(
-        (r: { id: string; timezone: string }) => r.id === state.selectedRinkId,
-      );
-      return rink?.timezone || state.timezoneFilter;
-    }
-    return state.timezoneFilter;
-  }, [state.selectedRinkId, rinks, state.timezoneFilter]);
+    return timeSlots;
+  }, [timeSlots]);
 
   // Transform to FullCalendar events
   const calendarEvents = useMemo(() => {
