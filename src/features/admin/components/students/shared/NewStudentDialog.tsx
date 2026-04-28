@@ -91,13 +91,13 @@ export const NewStudentDialog = () => {
   });
 
   const onSubmit = (data: NewStudentFormData) => {
-    // For student creation, send welcome email but NOT invitation
-    // Invitation should only be sent after approval
     createStudent.mutate({
       ...data,
-      sendInvite: false, // Important: Only send invitation after approval
+      sendInvite: data.sendEmail, // Send invitation with setup link when email is enabled
     });
   };
+
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -217,7 +217,7 @@ export const NewStudentDialog = () => {
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Send welcome email</FormLabel>
+                    <FormLabel>Send invitation email</FormLabel>
                   </div>
                 </FormItem>
               )}

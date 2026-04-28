@@ -224,7 +224,9 @@
       "Bash(git push:*)",
       "Bash(printf:*)",
       "Bash(pnpm exec:*)",
-      "Bash(/tmp/screenshot-schedule.mjs:*)"
+      "Bash(/tmp/screenshot-schedule.mjs:*)",
+      "Bash(dig:*)",
+      "Bash(host:*)"
     ],
     "deny": [
       "Bash(npx prisma migrate reset:*)",

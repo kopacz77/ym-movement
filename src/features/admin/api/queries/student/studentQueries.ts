@@ -245,12 +245,15 @@ export const studentQueries = createTRPCRouter({
             });
           }
 
-          // Create student for existing user
+          // Create student for existing user (admin-added = pre-approved)
           student = await ctx.prisma.student.create({
             data: {
               id: randomUUID(),
               ...sanitizedStudentData,
               userId: existingUser.id,
+              isApproved: true,
+              approvedAt: new Date(),
+              approvedById: ctx.session.user.id,
               updatedAt: new Date(),
             },
             include: {
@@ -269,12 +272,15 @@ export const studentQueries = createTRPCRouter({
             },
           });
 
-          // Create student with the new user's ID
+          // Create student with the new user's ID (admin-added = pre-approved)
           student = await ctx.prisma.student.create({
             data: {
               id: randomUUID(),
               ...sanitizedStudentData,
               userId: newUser.id,
+              isApproved: true,
+              approvedAt: new Date(),
+              approvedById: ctx.session.user.id,
               updatedAt: new Date(),
             },
             include: {
