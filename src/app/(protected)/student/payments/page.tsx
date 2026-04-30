@@ -219,7 +219,7 @@ export default function StudentPaymentsPage() {
                   </Badge>
                 </div>
                 <span className="text-sm font-medium text-slate-600">
-                  ${group.payments.reduce((sum, p) => sum + (p.payment?.amount || 0), 0).toFixed(2)}
+                  {group.payments.length} {group.payments.length === 1 ? "lesson" : "lessons"}
                 </span>
               </button>
 
