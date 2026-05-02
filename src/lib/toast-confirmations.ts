@@ -143,6 +143,43 @@ export function showStatusToggleConfirmation(
 }
 
 /**
+ * Undo payment verification — two-step confirmation with personality
+ */
+export function showUnverifyConfirmation(
+  amount: number,
+  studentName: string,
+  onConfirm: () => void,
+  onCancel?: () => void,
+) {
+  const formattedAmount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+
+  // Step 1
+  showConfirmationToast({
+    title: "Are you sure you don't want to double dip?",
+    description: `Undo verification of ${formattedAmount} from ${studentName}?`,
+    confirmLabel: "Yes, undo it",
+    cancelLabel: "Nevermind",
+    onConfirm: () => {
+      // Step 2
+      showConfirmationToast({
+        title: "But this could be clothes for our child, are you really really sure??",
+        description: `This will revert ${formattedAmount} back to pending.`,
+        confirmLabel: "I'm sure!",
+        cancelLabel: "You're right, keep it",
+        onConfirm,
+        onCancel,
+        duration: 15000,
+      });
+    },
+    onCancel,
+    duration: 15000,
+  });
+}
+
+/**
  * Payment verification confirmation toast
  * Prevents accidental marking of payments as paid
  */

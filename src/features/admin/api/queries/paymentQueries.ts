@@ -376,6 +376,37 @@ export const paymentRouter = createTRPCRouter({
       }
     }),
 
+  unverifyPayment: adminProcedure
+    .input(z.object({ paymentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const payment = await ctx.prisma.payment.findUnique({
+        where: { id: input.paymentId },
+      });
+
+      if (!payment) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Payment not found",
+        });
+      }
+
+      if (payment.status !== "COMPLETED") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only verified payments can be reverted",
+        });
+      }
+
+      return await ctx.prisma.payment.update({
+        where: { id: input.paymentId },
+        data: {
+          status: "PENDING",
+          verifiedBy: null,
+          verifiedAt: null,
+        },
+      });
+    }),
+
   getCoachesForFilter: adminProcedure.query(async ({ ctx }) => {
     const coaches = await ctx.prisma.coach.findMany({
       where: { isActive: true },

@@ -1,6 +1,6 @@
 import type { LessonType, PaymentStatus } from "@prisma/client";
 import { format, isPast } from "date-fns";
-import { Check, MoreVertical, Send } from "lucide-react";
+import { Check, MoreVertical, Send, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,8 +47,10 @@ interface PaymentTableProps {
   isLoading: boolean;
   onViewPayment: (paymentId: string) => void;
   onVerifyPayment: (paymentId: string) => void;
+  onUnverifyPayment?: (paymentId: string) => void;
   onSendReminder: (paymentId: string) => void;
   isVerifying: boolean;
+  isUnverifying?: boolean;
   isSendingReminder: boolean;
   filterStatus?: PaymentStatus;
 }
@@ -166,8 +168,10 @@ export const PaymentTable = ({
   isLoading,
   onViewPayment,
   onVerifyPayment,
+  onUnverifyPayment,
   onSendReminder,
   isVerifying,
+  isUnverifying,
   isSendingReminder,
   filterStatus,
 }: PaymentTableProps) => {
@@ -313,6 +317,18 @@ export const PaymentTable = ({
                           Remind
                         </Button>
                       </>
+                    )}
+                    {payment.status === "COMPLETED" && onUnverifyPayment && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUnverifyPayment(payment.id)}
+                        disabled={isUnverifying}
+                        className="h-8 text-xs font-medium border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                      >
+                        <Undo2 className="h-3 w-3 mr-1" />
+                        Undo
+                      </Button>
                     )}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

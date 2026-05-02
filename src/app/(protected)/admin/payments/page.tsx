@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { showPaymentConfirmation } from "@/lib/toast-confirmations";
+import { showPaymentConfirmation, showUnverifyConfirmation } from "@/lib/toast-confirmations";
 import { formatCurrency } from "@/lib/utils";
 
 const PaymentDetail = dynamic(
@@ -191,6 +191,22 @@ export default function PaymentsPage() {
     },
   });
 
+  // Unverify payment mutation
+  const unverifyPayment = api.admin.payment.unverifyPayment.useMutation({
+    onSuccess: () => {
+      toast("Payment reverted", {
+        description: "The payment has been set back to pending.",
+      });
+      utils.admin.payment.getPayments.invalidate();
+      setSelectedPaymentId(null);
+    },
+    onError: (error) => {
+      toast.error("Failed to undo verification", {
+        description: error.message,
+      });
+    },
+  });
+
   // Send reminder mutation
   const sendReminder = api.admin.payment.sendPaymentReminder.useMutation({
     onSuccess: () => {
@@ -252,6 +268,26 @@ export default function PaymentsPage() {
       () => {
         toast.info("Payment verification cancelled", {
           description: "The payment was not marked as paid.",
+        });
+      },
+    );
+  };
+
+  const handleUnverifyPayment = (paymentId: string) => {
+    const payment = payments?.payments.find((p) => p.id === paymentId);
+    if (!payment) return;
+
+    const studentName = payment.Student?.User?.name || "Unknown Student";
+
+    showUnverifyConfirmation(
+      payment.amount,
+      studentName,
+      () => {
+        unverifyPayment.mutate({ paymentId });
+      },
+      () => {
+        toast.info("Smart choice!", {
+          description: "The payment stays verified.",
         });
       },
     );
@@ -483,8 +519,10 @@ export default function PaymentsPage() {
             isLoading={isLoading}
             onViewPayment={setSelectedPaymentId}
             onVerifyPayment={handleVerifyPayment}
+            onUnverifyPayment={handleUnverifyPayment}
             onSendReminder={handleSendReminder}
             isVerifying={verifyPayment.isPending}
+            isUnverifying={unverifyPayment.isPending}
             isSendingReminder={sendReminder.isPending}
           />
         </CardContent>
@@ -504,9 +542,10 @@ export default function PaymentsPage() {
               <PaymentDetail
                 payment={selectedPayment}
                 onVerify={() => handleVerifyPayment(selectedPaymentId)}
+                onUnverify={() => handleUnverifyPayment(selectedPaymentId)}
                 onAddNote={() => setIsNoteDialogOpen(true)}
                 onSendReminder={() => handleSendReminder(selectedPaymentId)}
-                isProcessing={verifyPayment.isPending || sendReminder.isPending}
+                isProcessing={verifyPayment.isPending || sendReminder.isPending || unverifyPayment.isPending}
               />
             ) : (
               <div className="py-4">Loading payment details...</div>

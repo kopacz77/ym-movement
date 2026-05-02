@@ -1,7 +1,7 @@
 // src/features/admin/components/payments/PaymentDetail.tsx
 
 import type { LessonType, PaymentMethod, PaymentStatus } from "@prisma/client";
-import { Check, FileText, Send } from "lucide-react";
+import { Check, FileText, Send, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
@@ -38,6 +38,7 @@ interface Payment {
 interface PaymentDetailProps {
   payment: Payment;
   onVerify: () => void;
+  onUnverify?: () => void;
   onAddNote: () => void;
   onSendReminder: () => void;
   isProcessing: boolean;
@@ -46,6 +47,7 @@ interface PaymentDetailProps {
 export const PaymentDetail: React.FC<PaymentDetailProps> = ({
   payment,
   onVerify,
+  onUnverify,
   onAddNote,
   onSendReminder,
   isProcessing,
@@ -169,6 +171,12 @@ export const PaymentDetail: React.FC<PaymentDetailProps> = ({
               Verify Payment
             </Button>
           </>
+        )}
+        {payment.status === "COMPLETED" && onUnverify && (
+          <Button variant="outline" onClick={onUnverify} disabled={isProcessing}>
+            <Undo2 className="h-4 w-4 mr-2" />
+            Undo Verification
+          </Button>
         )}
       </div>
     </div>
