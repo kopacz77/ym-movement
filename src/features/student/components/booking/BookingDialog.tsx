@@ -2,7 +2,7 @@
 
 import { LessonType, PaymentMethod } from "@prisma/client";
 import { format } from "date-fns";
-import { Calendar, Clock, DollarSign, MapPin, User } from "lucide-react";
+import { Calendar, Clock, DollarSign, Loader2, MapPin, User } from "lucide-react";
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -53,11 +53,13 @@ export function BookingDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  // Fix Error 1: Use only the pricing endpoint and remove the unused studentProfile
-  const { data: studentPricing } = api.student.profile.getStudentPricing.useQuery(
-    { studentId, coachId },
-    { enabled: !!studentId },
-  );
+  const { data: studentPricing, isLoading: isPricingLoading } =
+    api.student.profile.getStudentPricing.useQuery(
+      { studentId, coachId },
+      { enabled: !!studentId },
+    );
+
+  const pricingReady = !!studentPricing && !isPricingLoading;
 
   const bookLesson = api.student.booking.bookLesson.useMutation();
 
@@ -102,24 +104,10 @@ export function BookingDialog({
 
   const slotDurationMinutes = getSlotDurationMinutes();
 
-  // Get hourly rate for the lesson type
-  // The API already handles fallback logic (custom price -> default pricing -> hardcoded)
-  const getHourlyRate = (type: LessonType) => {
-    // Fallback prices only used while API data is loading
-    const fallbackPrices = {
-      PRIVATE: 75,
-      GROUP: 45,
-      CHOREOGRAPHY: 90,
-      COMPETITION_PREP: 95,
-      OFF_ICE_DANCE: 75,
-    };
+  // Get hourly rate for the lesson type from API data only — never guess
+  const getHourlyRate = (type: LessonType): number | null => {
+    if (!studentPricing) return null;
 
-    // If pricing data hasn't loaded yet, use fallbacks
-    if (!studentPricing) {
-      return fallbackPrices[type];
-    }
-
-    // Use API-provided prices (already handles custom vs default logic)
     switch (type) {
       case LessonType.PRIVATE:
         return studentPricing.privateLessonPrice;
@@ -132,16 +120,15 @@ export function BookingDialog({
       case LessonType.OFF_ICE_DANCE:
         return studentPricing.offIceDancePrice;
       default:
-        return fallbackPrices[type];
+        return null;
     }
   };
 
   // Calculate pro-rated price based on slot duration
-  const getLessonTypePrice = (type: LessonType) => {
+  const getLessonTypePrice = (type: LessonType): number | null => {
     const hourlyRate = getHourlyRate(type);
-    // Pro-rate: (hourlyRate / 60) * durationMinutes
+    if (hourlyRate == null) return null;
     const proratedPrice = (hourlyRate / 60) * slotDurationMinutes;
-    // Round to 2 decimal places
     return Math.round(proratedPrice * 100) / 100;
   };
 
@@ -203,7 +190,14 @@ export function BookingDialog({
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                Price: ${formatPrice(getLessonTypePrice(lessonType))}
+                Price:{" "}
+                {pricingReady ? (
+                  `$${formatPrice(getLessonTypePrice(lessonType) ?? 0)}`
+                ) : (
+                  <span className="inline-flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Loading...
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -220,13 +214,22 @@ export function BookingDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={LessonType.PRIVATE}>
-                    Private Lesson - ${formatPrice(getLessonTypePrice(LessonType.PRIVATE))}
+                    Private Lesson
+                    {pricingReady
+                      ? ` - $${formatPrice(getLessonTypePrice(LessonType.PRIVATE) ?? 0)}`
+                      : ""}
                   </SelectItem>
                   <SelectItem value={LessonType.CHOREOGRAPHY}>
-                    Choreography - ${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY))}
+                    Choreography
+                    {pricingReady
+                      ? ` - $${formatPrice(getLessonTypePrice(LessonType.CHOREOGRAPHY) ?? 0)}`
+                      : ""}
                   </SelectItem>
                   <SelectItem value={LessonType.OFF_ICE_DANCE}>
-                    Off-Ice Dance - ${formatPrice(getLessonTypePrice(LessonType.OFF_ICE_DANCE))}
+                    Off-Ice Dance
+                    {pricingReady
+                      ? ` - $${formatPrice(getLessonTypePrice(LessonType.OFF_ICE_DANCE) ?? 0)}`
+                      : ""}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -268,8 +271,15 @@ export function BookingDialog({
             <Button variant="outline" onClick={onCloseAction} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button onClick={handleBooking} disabled={isSubmitting || bookLesson.isPending}>
-              {isSubmitting || bookLesson.isPending ? "Booking..." : "Book Lesson"}
+            <Button
+              onClick={handleBooking}
+              disabled={isSubmitting || bookLesson.isPending || !pricingReady}
+            >
+              {isSubmitting || bookLesson.isPending
+                ? "Booking..."
+                : !pricingReady
+                  ? "Loading prices..."
+                  : "Book Lesson"}
             </Button>
           </div>
         </div>
