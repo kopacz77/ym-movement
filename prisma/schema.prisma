@@ -234,11 +234,25 @@ model Student {
   choreographyPrice    Float?
   competitionPrepPrice Float?
   offIceDancePrice     Float?
+
+  // Body measurements (Phase 13 — wardrobe fit matching)
+  heightCm              Int?
+  chestCm               Int?
+  waistCm               Int?
+  hipsCm                Int?
+  torsoCm               Int?
+  inseamCm              Int?
+  sleeveLengthCm        Int?
+  preferredFitNotes     String?
+  measurementsUpdatedAt DateTime?
+
   Lesson               Lesson[]
   Payment              Payment[]
   User                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   StudentNote          StudentNote[]
   CoachStudent         CoachStudent[]
+  RentalRequest        RentalRequest[]
+  Rental               Rental[]
 
   @@index([createdAt])
   @@index([isApproved])
@@ -276,6 +290,7 @@ model User {
   Coach                    Coach?
   Student                  Student?
   StudentNote              StudentNote[]
+  OwnedDresses             Dress[]                    @relation("DressOwner")
 
   @@index([createdAt])
   @@index([emailVerified])
@@ -441,4 +456,173 @@ model ProposedTimeSlot {
   @@index([coachId])
   @@index([status])
   @@index([coachId, status])
+}
+
+// =============================================================================
+// Wardrobe (Phase 13)
+// =============================================================================
+
+enum DressCategory {
+  CLASSICAL
+  DRAMATIC
+  THEMED
+  ICE_DANCE_PARTNER
+  ICE_DANCE_SINGLE
+  COMPETITION
+  TEST
+}
+
+enum DressCondition {
+  NEW
+  LIKE_NEW
+  GENTLY_USED
+  USED
+}
+
+enum DressStatus {
+  PENDING_APPROVAL
+  AVAILABLE
+  PENDING
+  RENTED
+  MAINTENANCE
+  ARCHIVED
+  REJECTED
+}
+
+enum RentalType {
+  COMPETITION
+  SEASONAL
+  PURCHASE
+}
+
+enum RentalRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  CONVERTED
+  CANCELED
+}
+
+enum RentalPaymentStatus {
+  AWAITING_PAYMENT
+  PAID
+  RETURNED
+  DEPOSIT_RELEASED
+  LATE_FEE_OWED
+}
+
+model Dress {
+  id                       String          @id @default(cuid())
+  ownerId                  String
+  Owner                    User            @relation("DressOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  title                    String
+  description              String
+  category                 DressCategory
+  themeTags                String[]
+  color                    String
+  secondaryColors          String[]
+  condition                DressCondition
+  yearMade                 Int?
+
+  sizeLabel                String
+  chestMinCm               Int?
+  chestMaxCm               Int?
+  waistMinCm               Int?
+  waistMaxCm               Int?
+  hipsMinCm                Int?
+  hipsMaxCm                Int?
+  torsoMinCm               Int?
+  torsoMaxCm               Int?
+  lengthCm                 Int?
+  alterableSmaller         Boolean         @default(false)
+  alterableLarger          Boolean         @default(false)
+
+  competitionPrice         Int             @default(5000)
+  seasonalPrice            Int             @default(37500)
+  purchasePrice            Int?
+  securityDeposit          Int             @default(20000)
+  cleaningFee              Int             @default(3000)
+
+  consignmentCommissionPct Int             @default(0)
+  status                   DressStatus     @default(AVAILABLE)
+  internalNotes            String?
+  Images                   DressImage[]
+  Requests                 RentalRequest[]
+  Rentals                  Rental[]
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt
+  archivedAt               DateTime?
+
+  @@index([status])
+  @@index([category])
+  @@index([ownerId])
+}
+
+model DressImage {
+  id        String   @id @default(cuid())
+  dressId   String
+  Dress     Dress    @relation(fields: [dressId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([dressId])
+}
+
+model RentalRequest {
+  id              String              @id @default(cuid())
+  dressId         String
+  Dress           Dress               @relation(fields: [dressId], references: [id], onDelete: Restrict)
+  studentId       String
+  Student         Student             @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  rentalType      RentalType
+  startDate       DateTime
+  endDate         DateTime
+  competitionName String?
+  competitionDate DateTime?
+  message         String
+  status          RentalRequestStatus @default(PENDING)
+  ownerResponse   String?
+  createdAt       DateTime            @default(now())
+  respondedAt     DateTime?
+  expiresAt       DateTime?
+  Rental          Rental?
+
+  @@index([dressId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model Rental {
+  id                      String              @id @default(cuid())
+  dressId                 String
+  Dress                   Dress               @relation(fields: [dressId], references: [id], onDelete: Restrict)
+  studentId               String
+  Student                 Student             @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  requestId               String              @unique
+  Request                 RentalRequest       @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  rentalType              RentalType
+  startDate               DateTime
+  endDate                 DateTime
+  rentalFee               Int
+  cleaningFee             Int
+  securityDeposit         Int
+  totalCharged            Int
+  paymentMethod           PaymentMethod
+  paymentStatus           RentalPaymentStatus @default(AWAITING_PAYMENT)
+  depositCollectedAt      DateTime?
+  depositReleasedAt       DateTime?
+  returnedAt              DateTime?
+  conditionOnReturn       String?
+  consignmentPayoutAmount Int?
+  consignmentPaidOut      Boolean             @default(false)
+  consignmentPaidOutAt    DateTime?
+  notes                   String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+
+  @@index([dressId])
+  @@index([studentId])
+  @@index([paymentStatus])
 }
