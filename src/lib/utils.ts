@@ -15,6 +15,17 @@ export function formatCurrency(value: number): string {
 }
 
 /**
+ * Format an Int cents value as USD currency.
+ * Used throughout the wardrobe surface where all prices are stored as Int cents
+ * (per Dress schema: competitionPrice, seasonalPrice, securityDeposit, cleaningFee, purchasePrice).
+ *
+ * @example formatCurrencyFromCents(37500) // "$375.00"
+ */
+export function formatCurrencyFromCents(cents: number): string {
+  return formatCurrency(cents / 100);
+}
+
+/**
  * Formats a name to proper case (capitalizes first letter of each word)
  * Examples: "john doe" -> "John Doe", "MARY SMITH" -> "Mary Smith"
  * Handles special cases like "McDonald", "O'Brien", "van der Berg"
