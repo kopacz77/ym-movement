@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 14 of 22 (Admin Inventory CRUD) — In progress
-Plan: 1/7 complete
-Status: 14-01 shipped — admin.wardrobe.* CRUD spine live, smoke-tested, dressInputSchema exported for Wave 2 form reuse
-Last activity: 2026-05-29 — Completed 14-01-PLAN.md (3 tasks, ~3 min)
+Plan: 2/7 complete
+Status: 14-02 shipped — DressStatusBadge / CategoryBadge / StatusFilterChips presentational primitives live, Wave 2 form + inventory grid unblocked
+Last activity: 2026-05-29 — Completed 14-02-PLAN.md (3 tasks, 2m 28s)
 
-Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases shipped + 1/7 plans into Phase 14)
+Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases shipped + 2/7 plans into Phase 14)
 
 ## Performance Metrics
 
@@ -27,8 +27,8 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 4 (13-01, 13-02, 13-03, 14-01)
-- Phase 14 plans shipped: 1/7
+- Total plans completed: 5 (13-01, 13-02, 13-03, 14-01, 14-02)
+- Phase 14 plans shipped: 2/7
 
 ## Accumulated Context
 
@@ -69,6 +69,12 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 - **(14-01) `dressInputSchema` excludes system-managed fields (id, createdAt, updatedAt, archivedAt, ownerId, status)**: schema is the single contract the Wave 2 admin RHF form validates against. Zero schema duplication.
 - **(14-01) `formatCurrencyFromCents` helper composes on top of existing `formatCurrency(dollars)`**: kills inlined `cents/100` math. All wardrobe money fields are Int cents at DB and API; dollar formatting only at display.
 - **(14-01) Sub-router mounted at `admin.wardrobe`, adjacent to `admin.wardrobeSettings`**: semantic grouping (readability over alphabetization) — both wardrobe-namespace siblings live next to each other in the parent createTRPCRouter call.
+- **(14-02) Wardrobe status palette one-to-one to brand sweep**: AVAILABLE=emerald, PENDING_APPROVAL=amber+pulse, PENDING(rental)=cyan, RENTED=violet, MAINTENANCE/ARCHIVED=slate, REJECTED=rose. Matches CLAUDE.md 2026-04-26 sweep (green→emerald, orange→amber, red→rose) and reuses lesson-type violet for active "in use" state.
+- **(14-02) CategoryBadge stays neutral slate**: category is metadata not state. Coloring it would compete with the status badge inside grid cards. Status owns semantic color; category is descriptive.
+- **(14-02) StatusFilterChips imposes NO default selection**: parent (`DressInventoryGrid` in 14-05) owns the initial `["AVAILABLE"]` so the URL-sync layer is single-sourced. This component is a dumb controlled toggle array.
+- **(14-02) Exhaustive `Record<Enum, …>` for status + category mappings**: Prisma adding a new variant forces a compile error in DressStatusBadge / CategoryBadge / StatusFilterChips until the maps are extended. Schema is the contract.
+- **(14-02) Type-only Prisma imports in all three primitives**: `import type { DressStatus }` keeps zero Prisma client runtime in the component bundle and lets them render in Server OR Client Components without re-export friction.
+- **(14-02) Directory split: `wardrobe/components/` for cross-role primitives, `wardrobe/components/admin/` for admin-only chrome**: Phase 15 (student catalog) reuses DressStatusBadge + CategoryBadge from the root path without importing admin code.
 
 ### Pending Todos
 
@@ -90,6 +96,6 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-01-PLAN.md — admin.wardrobe.{list,byId,create,update,archive} TRPC procedures live, dressInputSchema exported, formatCurrencyFromCents helper added, smoke-tested against dev Neon with zero leftover rows. Type-check clean (no new errors).
+Stopped at: Completed 14-02-PLAN.md — DressStatusBadge + CategoryBadge + StatusFilterChips presentational primitives shipped in `src/features/wardrobe/components/`. Brand palette locked. Pure presentational (no TRPC, type-only Prisma imports). Biome + tsc clean on new files; 2 pre-existing repo TS errors (IceParticles `three` types, sidebar `@radix-ui/react-visually-hidden`) unchanged.
 Resume file: None
-Next step: Execute 14-02-PLAN.md — Wave 2 admin form + inventory grid UI (consumes admin.wardrobe.* + dressInputSchema from this plan). **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute 14-03-PLAN.md — Admin DressForm (RHF + zod dressInputSchema from 14-01). Will consume DressStatusBadge + CategoryBadge for the form preview. **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
