@@ -13,7 +13,7 @@
 // row. The onUploadCompleted callback below is intentionally a logging stub
 // because Vercel cannot reach back to localhost without a public tunnel.
 
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

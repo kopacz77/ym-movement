@@ -132,7 +132,9 @@ export const imageRouter = createTRPCRouter({
         where: { id: input.imageId },
         select: { id: true, dressId: true },
       });
-      if (!image) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!image) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
       await assertCanModifyDress(ctx, image.dressId);
 
       await ctx.prisma.$transaction([
