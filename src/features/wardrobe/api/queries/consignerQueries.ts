@@ -140,21 +140,19 @@ export const consignerRouter = createTRPCRouter({
    * securityDeposit + cleaningFee fall back to the schema @default values
    * (20000 + 3000 cents respectively).
    */
-  create: protectedProcedure
-    .input(consignerCreateInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const settings = await getWardrobeSettings(ctx.prisma);
-      return ctx.prisma.dress.create({
-        data: {
-          ...input,
-          ownerId: ctx.session.user.id,
-          status: "PENDING_APPROVAL",
-          consignmentCommissionPct: settings.defaultConsignmentCommissionPct,
-          // securityDeposit + cleaningFee fall back to schema @default(20000) / @default(3000)
-          // rejectionReason intentionally left as schema default (NULL)
-        },
-      });
-    }),
+  create: protectedProcedure.input(consignerCreateInputSchema).mutation(async ({ ctx, input }) => {
+    const settings = await getWardrobeSettings(ctx.prisma);
+    return ctx.prisma.dress.create({
+      data: {
+        ...input,
+        ownerId: ctx.session.user.id,
+        status: "PENDING_APPROVAL",
+        consignmentCommissionPct: settings.defaultConsignmentCommissionPct,
+        // securityDeposit + cleaningFee fall back to schema @default(20000) / @default(3000)
+        // rejectionReason intentionally left as schema default (NULL)
+      },
+    });
+  }),
 
   /**
    * CONSIGN-04 + PERM-01: Caller updates their own dress. Caller-owns guard
@@ -167,32 +165,29 @@ export const consignerRouter = createTRPCRouter({
    * REJECTED → PENDING_APPROVAL transition belongs to resubmit() exclusively;
    * the AVAILABLE flip belongs to admin.wardrobe.approveDress.
    */
-  update: protectedProcedure
-    .input(consignerUpdateInputSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { id, ...patch } = input;
-      const dress = await assertOwnsDress(ctx, id);
+  update: protectedProcedure.input(consignerUpdateInputSchema).mutation(async ({ ctx, input }) => {
+    const { id, ...patch } = input;
+    const dress = await assertOwnsDress(ctx, id);
 
-      // CONSIGN-04: pricing + size locked after first approval. Pre-approval states
-      // (PENDING_APPROVAL, REJECTED) allow ALL fields. Post-approval states
-      // (AVAILABLE, PENDING, RENTED, MAINTENANCE, ARCHIVED) reject the locked keys.
-      const isPreApproval =
-        dress.status === "PENDING_APPROVAL" || dress.status === "REJECTED";
-      if (!isPreApproval) {
-        for (const key of LOCKED_AFTER_APPROVAL_KEYS) {
-          if (patch[key] !== undefined) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: `Cannot edit ${key} after dress has been approved`,
-            });
-          }
+    // CONSIGN-04: pricing + size locked after first approval. Pre-approval states
+    // (PENDING_APPROVAL, REJECTED) allow ALL fields. Post-approval states
+    // (AVAILABLE, PENDING, RENTED, MAINTENANCE, ARCHIVED) reject the locked keys.
+    const isPreApproval = dress.status === "PENDING_APPROVAL" || dress.status === "REJECTED";
+    if (!isPreApproval) {
+      for (const key of LOCKED_AFTER_APPROVAL_KEYS) {
+        if (patch[key] !== undefined) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Cannot edit ${key} after dress has been approved`,
+          });
         }
       }
+    }
 
-      // NEVER auto-flip status or rejectionReason here. resubmit() owns the
-      // REJECTED → PENDING_APPROVAL transition explicitly.
-      return ctx.prisma.dress.update({ where: { id }, data: patch });
-    }),
+    // NEVER auto-flip status or rejectionReason here. resubmit() owns the
+    // REJECTED → PENDING_APPROVAL transition explicitly.
+    return ctx.prisma.dress.update({ where: { id }, data: patch });
+  }),
 
   /**
    * CONSIGN-05: Caller archives their own dress. Only AVAILABLE dresses can be
@@ -207,8 +202,7 @@ export const consignerRouter = createTRPCRouter({
       if (dress.status !== "AVAILABLE") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message:
-            "Only available dresses can be archived (cannot pull during pending rental)",
+          message: "Only available dresses can be archived (cannot pull during pending rental)",
         });
       }
       return ctx.prisma.dress.update({

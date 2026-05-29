@@ -3,6 +3,7 @@
 import { DressCategory, DressCondition, DressStatus, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { createNotification } from "@/features/notifications/utils/notificationHelpers";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 /**
@@ -240,5 +241,170 @@ export const wardrobeDressRouter = createTRPCRouter({
           cause: error,
         });
       }
+    }),
+
+  /**
+   * CONSIGN-06: List consigner-submitted dresses awaiting admin approval.
+   *
+   * Filters out image-less dresses (CONSIGN-03 enforcement at the queue layer)
+   * because a live catalog listing with zero images is broken UX. The consigner
+   * sees their image-less PENDING_APPROVAL dress on /wardrobe/consigned (Plan
+   * 18-05) with a "Add an image to submit for review" CTA.
+   *
+   * Sorted createdAt ASC so the oldest pending submission is reviewed first
+   * (fair queue).
+   */
+  listPendingApproval: adminProcedure
+    .input(
+      z.object({
+        page: z.number().int().positive().default(1),
+        limit: z.number().int().positive().max(100).default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const where: Prisma.DressWhereInput = {
+        status: "PENDING_APPROVAL",
+        Images: { some: {} },
+      };
+      const [dresses, total] = await Promise.all([
+        ctx.prisma.dress.findMany({
+          where,
+          include: {
+            Owner: { select: { id: true, name: true, email: true } },
+            Images: {
+              where: { isPrimary: true },
+              select: { url: true },
+              take: 1,
+            },
+            _count: { select: { Images: true } },
+          },
+          orderBy: { createdAt: "asc" },
+          skip: (input.page - 1) * input.limit,
+          take: input.limit,
+        }),
+        ctx.prisma.dress.count({ where }),
+      ]);
+      return { dresses, total, page: input.page, limit: input.limit };
+    }),
+
+  /**
+   * CONSIGN-07: Approve a consigner-submitted dress, with optional commission %
+   * override. Flips status PENDING_APPROVAL → AVAILABLE and clears any leftover
+   * rejectionReason from a previous reject cycle.
+   *
+   * Defense-in-depth: refuses to approve a dress with zero images (per
+   * CONSIGN-03). The queue listPendingApproval already filters these out, but
+   * the mutation is the authoritative gate.
+   *
+   * Fires a post-commit in-app notification to the consigner. Email is Phase 20.
+   */
+  approveDress: adminProcedure
+    .input(
+      z.object({
+        id: z.string().cuid(),
+        consignmentCommissionPctOverride: z.number().int().min(0).max(100).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const dress = await ctx.prisma.dress.findUnique({
+        where: { id: input.id },
+        select: {
+          id: true,
+          ownerId: true,
+          title: true,
+          status: true,
+          _count: { select: { Images: true } },
+        },
+      });
+      if (!dress) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Dress not found" });
+      }
+      if (dress.status !== "PENDING_APPROVAL") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only PENDING_APPROVAL dresses can be approved",
+        });
+      }
+      if (dress._count.Images === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot approve a dress with zero images",
+        });
+      }
+
+      const updated = await ctx.prisma.dress.update({
+        where: { id: dress.id },
+        data: {
+          status: "AVAILABLE",
+          rejectionReason: null, // clear any stale reason from a prior reject cycle
+          ...(input.consignmentCommissionPctOverride !== undefined
+            ? { consignmentCommissionPct: input.consignmentCommissionPctOverride }
+            : {}),
+        },
+      });
+
+      // Post-commit notification — non-blocking (Phase 20 wires the actual email)
+      try {
+        await createNotification({
+          userId: dress.ownerId,
+          title: "Your dress was approved",
+          message: `${dress.title} is now live on the YM Wardrobe catalog.`,
+          type: "SUCCESS",
+          link: `/wardrobe/consigned/${dress.id}/edit`,
+        });
+      } catch (err) {
+        console.error("[WARDROBE] Failed to notify consigner of approval:", err);
+      }
+
+      return updated;
+    }),
+
+  /**
+   * CONSIGN-08: Reject a consigner-submitted dress with a required reason.
+   * Flips status PENDING_APPROVAL → REJECTED and stores the reason on
+   * Dress.rejectionReason (column added by Plan 18-01). Consigner can edit +
+   * resubmit (CONSIGN-09 — wardrobe.consigner.resubmit clears rejectionReason
+   * and flips back to PENDING_APPROVAL).
+   */
+  rejectDress: adminProcedure
+    .input(
+      z.object({
+        id: z.string().cuid(),
+        reason: z.string().min(1, "Rejection reason is required").max(2000),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const dress = await ctx.prisma.dress.findUnique({
+        where: { id: input.id },
+        select: { id: true, ownerId: true, title: true, status: true },
+      });
+      if (!dress) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Dress not found" });
+      }
+      if (dress.status !== "PENDING_APPROVAL") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only PENDING_APPROVAL dresses can be rejected",
+        });
+      }
+
+      const updated = await ctx.prisma.dress.update({
+        where: { id: dress.id },
+        data: { status: "REJECTED", rejectionReason: input.reason },
+      });
+
+      try {
+        await createNotification({
+          userId: dress.ownerId,
+          title: "Your dress was not approved",
+          message: `${dress.title} was rejected. Reason: ${input.reason}. Edit and resubmit on the consigned page.`,
+          type: "WARNING",
+          link: `/wardrobe/consigned/${dress.id}/edit`,
+        });
+      } catch (err) {
+        console.error("[WARDROBE] Failed to notify consigner of rejection:", err);
+      }
+
+      return updated;
     }),
 });
