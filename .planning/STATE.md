@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 14 of 22 (Admin Inventory CRUD) — In progress
-Plan: 3/7 complete
-Status: 14-04 shipped — WardrobeSettingsForm client component live; three numeric inputs + sonner toasts + single-source Zod reuse from Phase 13; ready for Plan 14-06 page wrapper
-Last activity: 2026-05-29 — Completed 14-04-PLAN.md (1 task, 2m 15s)
+Plan: 4/7 complete
+Status: 14-03 shipped — DressForm (tabbed RHF, mode-aware, dollars↔cents at boundary) + DressImageGallery (full Phase 13 upload pipeline + 8-cap + reorder + primary + delete) live; Wave 2 admin form components ready for Plan 14-05 page wiring
+Last activity: 2026-05-29 — Completed 14-03-PLAN.md (2 tasks, ~6 min)
 
-Progress: █░░░░░░░░░ ~12% of v2.0 milestone (1 of 10 phases shipped + 3/7 plans into Phase 14)
+Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases shipped + 4/7 plans into Phase 14)
 
 ## Performance Metrics
 
@@ -27,8 +27,8 @@ Progress: █░░░░░░░░░ ~12% of v2.0 milestone (1 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 6 (13-01, 13-02, 13-03, 14-01, 14-02, 14-04)
-- Phase 14 plans shipped: 3/7
+- Total plans completed: 7 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04)
+- Phase 14 plans shipped: 4/7
 
 ## Accumulated Context
 
@@ -79,6 +79,15 @@ Progress: █░░░░░░░░░ ~12% of v2.0 milestone (1 of 10 phases 
 - **(14-04) `useForm<z.input<S>, unknown, z.output<S>>` generics when the Zod schema has `.default()` on every field**: RHF's TFieldValues needs the input shape (optionals) while the submit handler receives the output shape (required). Using `z.infer` (== `z.output`) for both causes TS2322 on the resolver and TS2345 on handleSubmit.
 - **(14-04) Mount form immediately with `wardrobeSettingsSchema.parse({})` defaults; rehydrate via `form.reset(data)` in useEffect**: avoids the "remount-on-data-arrival flicker / lose user keystrokes" anti-pattern. RHF refs and state machine initialize against the canonical defaults; fetched values patch in once useQuery resolves.
 - **(14-04) `valueAsNumber: true` on every numeric register()**: HTML number inputs report their `.value` as a string. Without this RHF passes `"15"` to zodResolver, which fails the `z.number()` check. With it, coercion happens before validation.
+- **(14-03) Two-tier Zod schema for DressForm — internal dollar-based `dressFormSchema` (UI) bridges to canonical cents-based `dressInputSchema` (wire) inside `handleSubmit`**: UI layer needs dollars (humans don't think in cents), empty-string preprocessing for optional numerics (HTMLInputElement returns `""` on clear), comma-separated raw tag strings. None belongs on the wire. `Math.round(dollars * 100)` is the single conversion site.
+- **(14-03) Mode prop `"create" | "edit"` (NOT boolean) on DressForm**: structural divergence (image gallery placement, status field visibility, submit copy). Literal-type prop self-documents at call sites.
+- **(14-03) DressImageGallery is a sibling of DressForm, never a child**: create mode has no dressId yet for the blob uploader's `clientPayload`; edit mode slots `<DressImageGallery />` above `<DressForm />`. Keeps the form pure.
+- **(14-03) Sequential await inside the upload `for…of` loop (NOT `Promise.all`)**: Phase 13's `attachImage` sets `isPrimary=true` on the first image based on the row count at insert time. Parallel attaches would race for the primary flag. Serial is the correctness/UX-tradeoff winner.
+- **(14-03) Single bulk `onMutated()` after the upload batch + per-mutation `onSuccess` on the three single-shot mutations (reorder/setPrimary/deleteImage)**: reduces N round-trips to one refetch for an N-file upload, keeps the three single-action mutations responsive.
+- **(14-03) Defense-in-depth 8-image cap at FOUR layers**: UI counter + UI button disabled + `attachImage` BAD_REQUEST (Phase 13 TRPC) + route-handler token mint refusal. Each layer fails independently; UI cap is the cheapest UX signal but never authoritative.
+- **(14-03) Up/down arrow reorder over drag-and-drop for v1**: Phase 13 TRPC contract is identical (full ordered id list). Arrows are accessible by default; DnD would need keyboard fallback engineering. Polish pass can land without backend changes.
+- **(14-03) Plan's `setPrimary({ dressId, imageId })` / `deleteImage({ dressId, imageId })` / `reorderImages({ orderedImageIds })` signatures were stale**: actual Phase 13 contracts are `setPrimary({ imageId })`, `deleteImage({ imageId })`, `reorderImages({ dressId, orderedIds })`. Used the actual signatures; server-side `assertCanModifyDress` still authorizes correctly via the row's `dressId` lookup.
+- **(14-03) Plain `<img>` with biome lint-ignore (NOT `next/image`) for blob URLs**: `blob.vercel-storage.com` would need to be added to `next.config.js images.remotePatterns`. Out of scope for a UI plan. Revisit when public browse / fit-match surfaces need image optimization.
 
 ### Pending Todos
 
@@ -100,6 +109,6 @@ Progress: █░░░░░░░░░ ~12% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-04-PLAN.md — `WardrobeSettingsForm` (`src/features/wardrobe/components/admin/WardrobeSettingsForm.tsx`) shipped: three numeric inputs, single-source `wardrobeSettingsSchema` reuse from Phase 13 queries, hydrate via `api.admin.wardrobeSettings.get.useQuery()` + `form.reset(data)` useEffect, submit via `api.admin.wardrobeSettings.update.useMutation()` with sonner toasts, brand cyan #0891b2 CTA. 1 atomic commit (34cd8ee). Biome + tsc clean on the new file; 2 pre-existing repo TS errors (IceParticles, sidebar) unchanged.
+Stopped at: Completed 14-03-PLAN.md — `DressForm` (`src/features/wardrobe/components/admin/DressForm.tsx`, 625 lines) and `DressImageGallery` (`src/features/wardrobe/components/admin/DressImageGallery.tsx`, 303 lines) shipped. DressForm: tabbed RHF (General/Measurements/Pricing/Status & Internal), two-tier Zod schema (dollar-based UI bridges to cents-based wire), mode-aware copy/fields, edit-mode rehydration via useEffect form.reset, `Save to add images` copy in create mode. DressImageGallery: composes all four Phase 13 `wardrobe.images.*` mutations, sequential awaited `compressForUpload → upload → attachImage` upload loop, 8-image UI cap with counter, up/down arrow reorder rebuilding full id list, make-primary action with badge, delete via `showDeleteConfirmation`. 2 atomic commits (be7aa92, 618096d). Biome + tsc clean on both files; only 2 pre-existing repo TS errors (IceParticles, sidebar) unchanged.
 Resume file: None
-Next step: Execute 14-03-PLAN.md (admin DressForm) and 14-05-PLAN.md (inventory grid) in parallel; 14-06 (settings page wrapper) consumes today's WardrobeSettingsForm. **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute 14-05-PLAN.md (admin new/edit dress pages that wire DressForm + DressImageGallery) and 14-06-PLAN.md (settings page wrapper that hosts WardrobeSettingsForm). **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
