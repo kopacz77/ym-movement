@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 14 of 22 (Admin Inventory CRUD) — In progress
-Plan: 4/7 complete
-Status: 14-03 shipped — DressForm (tabbed RHF, mode-aware, dollars↔cents at boundary) + DressImageGallery (full Phase 13 upload pipeline + 8-cap + reorder + primary + delete) live; Wave 2 admin form components ready for Plan 14-05 page wiring
-Last activity: 2026-05-29 — Completed 14-03-PLAN.md (2 tasks, ~6 min)
+Plan: 5/7 complete
+Status: 14-05 shipped — DressInventoryGrid (URL-stateful, all-status optimization, archive-via-toast) live; Wave 2 admin grid is the visible artifact. Only Plan 14-06 page wrappers + 14-07 sidebar nav remain before Phase 14 closes.
+Last activity: 2026-05-29 — Completed 14-05-PLAN.md (1 task, ~3 min)
 
-Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases shipped + 4/7 plans into Phase 14)
+Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases shipped + 5/7 plans into Phase 14)
 
 ## Performance Metrics
 
@@ -27,8 +27,8 @@ Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 7 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04)
-- Phase 14 plans shipped: 4/7
+- Total plans completed: 8 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05)
+- Phase 14 plans shipped: 5/7
 
 ## Accumulated Context
 
@@ -88,6 +88,13 @@ Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases 
 - **(14-03) Up/down arrow reorder over drag-and-drop for v1**: Phase 13 TRPC contract is identical (full ordered id list). Arrows are accessible by default; DnD would need keyboard fallback engineering. Polish pass can land without backend changes.
 - **(14-03) Plan's `setPrimary({ dressId, imageId })` / `deleteImage({ dressId, imageId })` / `reorderImages({ orderedImageIds })` signatures were stale**: actual Phase 13 contracts are `setPrimary({ imageId })`, `deleteImage({ imageId })`, `reorderImages({ dressId, orderedIds })`. Used the actual signatures; server-side `assertCanModifyDress` still authorizes correctly via the row's `dressId` lookup.
 - **(14-03) Plain `<img>` with biome lint-ignore (NOT `next/image`) for blob URLs**: `blob.vercel-storage.com` would need to be added to `next.config.js images.remotePatterns`. Out of scope for a UI plan. Revisit when public browse / fit-match surfaces need image optimization.
+- **(14-05) URL-state for statuses + search + page (NOT React state, NOT a Zustand store)**: refresh-survivability and shareable deep-links are first-class UX features for an inventory admins reach via bookmarks and Slack pastes. The URL IS the state; React state is derived (parsed on every searchParams change). Local search input is the only piece of UI state NOT immediately mirrored — flushed to URL on form submit to avoid history-entry churn.
+- **(14-05) Default-value elision policy**: when a filter equals its default (statuses=['AVAILABLE'], q='', page=1), delete the param from the URL instead of writing it explicitly. Canonical first-load URL stays clean (`/admin/wardrobe`); only deviating selections produce visible URL noise.
+- **(14-05) All-statuses-selected optimization**: when every DressStatus variant is checked, send `statuses: undefined` to the server, NOT the full 7-element array. listInputSchema already treats undefined as "no filter" which skips the WHERE IN clause. Matches semantic intent ("show everything") AND saves the index lookup.
+- **(14-05) Archive UX reuses `showDeleteConfirmation` (Delete button copy) but mutation calls `admin.wardrobe.archive` + toast says "Dress archived"**: MVP has no hard-delete (per 14-01 ADR). Reusing the established admin destructive-action pattern keeps muscle memory intact while being honest about the actual operation in the success toast.
+- **(14-05) `router.replace()` + `{ scroll: false }` on every URL update**: filter changes don't deserve their own back-button entry, and default Next.js scroll-to-top on URL change is catastrophic for filter UX (chip click → page jumps). Both suppressions are universal across every URL-state mutation in this component.
+- **(14-05) Page reset on every filter change centralized in `updateParams()` helper**: page=N is meaningless across different result sets, so any statuses/q delta deletes the page param. Centralized so it can't drift; the only call that DOESN'T delete page is Prev/Next itself.
+- **(14-05) Total-defensive `parseStatusesParam`**: always returns `DressStatus[]` with at least one element. Garbage input → AVAILABLE default. Unknown variants filtered. Consumer never sees null, empty array, or invalid enum values. Reusable pattern for any URL-state-driven enum filter.
 
 ### Pending Todos
 
@@ -109,6 +116,6 @@ Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-03-PLAN.md — `DressForm` (`src/features/wardrobe/components/admin/DressForm.tsx`, 625 lines) and `DressImageGallery` (`src/features/wardrobe/components/admin/DressImageGallery.tsx`, 303 lines) shipped. DressForm: tabbed RHF (General/Measurements/Pricing/Status & Internal), two-tier Zod schema (dollar-based UI bridges to cents-based wire), mode-aware copy/fields, edit-mode rehydration via useEffect form.reset, `Save to add images` copy in create mode. DressImageGallery: composes all four Phase 13 `wardrobe.images.*` mutations, sequential awaited `compressForUpload → upload → attachImage` upload loop, 8-image UI cap with counter, up/down arrow reorder rebuilding full id list, make-primary action with badge, delete via `showDeleteConfirmation`. 2 atomic commits (be7aa92, 618096d). Biome + tsc clean on both files; only 2 pre-existing repo TS errors (IceParticles, sidebar) unchanged.
+Stopped at: Completed 14-05-PLAN.md — `DressInventoryGrid` (`src/features/wardrobe/components/admin/DressInventoryGrid.tsx`, 327 lines) shipped. URL-stateful (`?statuses=`, `?q=`, `?page=`) with default-value elision (`/admin/wardrobe` is the canonical clean URL for the ["AVAILABLE"] default), all-statuses-selected → `statuses: undefined` optimization, debounced search (local input → flush on submit), responsive 1/2/3/4-column card grid with floating status badges + category badges + owner email + sizeLabel + competitionPrice + image/rental counts + updatedAt, paginated via Prev/Next with totalPages math, archive via `showDeleteConfirmation` toast pattern (NOT `window.confirm`), ARCHIVED rows at opacity-60 with archive button hidden, skeleton loading state, empty-state CTA to /admin/wardrobe/new. 1 atomic commit (2ea3cb8). Biome + tsc clean on the new file; only the 2 pre-existing repo TS errors (IceParticles, sidebar) unchanged.
 Resume file: None
-Next step: Execute 14-05-PLAN.md (admin new/edit dress pages that wire DressForm + DressImageGallery) and 14-06-PLAN.md (settings page wrapper that hosts WardrobeSettingsForm). **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute 14-06-PLAN.md (admin page wrappers: `/admin/wardrobe/page.tsx` renders DressInventoryGrid, `/admin/wardrobe/new/page.tsx` and `/admin/wardrobe/[id]/edit/page.tsx` wire DressForm + DressImageGallery, `/admin/wardrobe/settings/page.tsx` hosts WardrobeSettingsForm) and 14-07-PLAN.md (sidebar nav entry + smoke verification). **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
