@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 14 of 22 (Admin Inventory CRUD) — In progress
-Plan: 5/7 complete
-Status: 14-05 shipped — DressInventoryGrid (URL-stateful, all-status optimization, archive-via-toast) live; Wave 2 admin grid is the visible artifact. Only Plan 14-06 page wrappers + 14-07 sidebar nav remain before Phase 14 closes.
-Last activity: 2026-05-29 — Completed 14-05-PLAN.md (1 task, ~3 min)
+Plan: 6/7 complete (14-07 stub shipped; 14-06 page wrappers still pending)
+Status: 14-07 shipped — `/wardrobe` placeholder server-component live (editorial Coming Soon card with Shirt icon, navy + cyan brand). Plan 14-06 NAV-01's link target now resolves to a real page instead of 404'ing. Only Plan 14-06 page wrappers remain before Phase 14 closes.
+Last activity: 2026-05-29 — Completed 14-07-PLAN.md (1 task, 1 min)
 
-Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases shipped + 5/7 plans into Phase 14)
+Progress: ██░░░░░░░░ ~16% of v2.0 milestone (1 of 10 phases shipped + 6/7 plans into Phase 14)
 
 ## Performance Metrics
 
@@ -27,8 +27,8 @@ Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 8 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05)
-- Phase 14 plans shipped: 5/7
+- Total plans completed: 9 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-07)
+- Phase 14 plans shipped: 6/7
 
 ## Accumulated Context
 
@@ -95,6 +95,9 @@ Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases 
 - **(14-05) `router.replace()` + `{ scroll: false }` on every URL update**: filter changes don't deserve their own back-button entry, and default Next.js scroll-to-top on URL change is catastrophic for filter UX (chip click → page jumps). Both suppressions are universal across every URL-state mutation in this component.
 - **(14-05) Page reset on every filter change centralized in `updateParams()` helper**: page=N is meaningless across different result sets, so any statuses/q delta deletes the page param. Centralized so it can't drift; the only call that DOESN'T delete page is Prev/Next itself.
 - **(14-05) Total-defensive `parseStatusesParam`**: always returns `DressStatus[]` with at least one element. Garbage input → AVAILABLE default. Unknown variants filtered. Consumer never sees null, empty array, or invalid enum values. Reusable pattern for any URL-state-driven enum filter.
+- **(14-07) Server-component placeholder, no AppLayout wrap**: top-level `(protected)` route group has no `layout.tsx`, so the stub renders raw. Acceptable for a static page with zero sensitive data; Phase 15 decides whether student routes get a consistent `AppLayout role="student"` shell.
+- **(14-07) Brand fidelity on throwaway code**: navy `#1a3a5c` header + cyan `#0891b2` Shirt icon accent + standard luxury card shadow even though the entire file gets deleted in Phase 15. No half-styled stubs shipped to users.
+- **(14-07) Copy explicitly names "Phase 15"**: gives the next planner a literal grep target. Replacing `Coming soon` is a one-search-one-edit operation when the catalog ships.
 
 ### Pending Todos
 
@@ -116,6 +119,6 @@ Progress: ██░░░░░░░░ ~15% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-05-PLAN.md — `DressInventoryGrid` (`src/features/wardrobe/components/admin/DressInventoryGrid.tsx`, 327 lines) shipped. URL-stateful (`?statuses=`, `?q=`, `?page=`) with default-value elision (`/admin/wardrobe` is the canonical clean URL for the ["AVAILABLE"] default), all-statuses-selected → `statuses: undefined` optimization, debounced search (local input → flush on submit), responsive 1/2/3/4-column card grid with floating status badges + category badges + owner email + sizeLabel + competitionPrice + image/rental counts + updatedAt, paginated via Prev/Next with totalPages math, archive via `showDeleteConfirmation` toast pattern (NOT `window.confirm`), ARCHIVED rows at opacity-60 with archive button hidden, skeleton loading state, empty-state CTA to /admin/wardrobe/new. 1 atomic commit (2ea3cb8). Biome + tsc clean on the new file; only the 2 pre-existing repo TS errors (IceParticles, sidebar) unchanged.
+Stopped at: Completed 14-07-PLAN.md — `/wardrobe` placeholder page shipped (`src/app/(protected)/wardrobe/page.tsx`, 24 lines). Static server component, editorial navy `#1a3a5c` header + cyan `#0891b2`-tinted Shirt icon + standard luxury card shadow. Copy explicitly names "Phase 15" so the next planner can grep+replace cleanly. NAV-01's link target (added by Plan 14-06 to studentNavigation) now resolves to a real page instead of 404'ing. 1 atomic commit (7341d55). Biome + tsc clean; only the 2 pre-existing repo TS errors (IceParticles missing `three` types, sidebar missing `@radix-ui/react-visually-hidden`) unchanged. Working tree retains uncommitted edits to `src/lib/navigation-config.ts` from a prior parallel session — those belong to Plan 14-06 and were deliberately NOT committed under this plan.
 Resume file: None
-Next step: Execute 14-06-PLAN.md (admin page wrappers: `/admin/wardrobe/page.tsx` renders DressInventoryGrid, `/admin/wardrobe/new/page.tsx` and `/admin/wardrobe/[id]/edit/page.tsx` wire DressForm + DressImageGallery, `/admin/wardrobe/settings/page.tsx` hosts WardrobeSettingsForm) and 14-07-PLAN.md (sidebar nav entry + smoke verification). **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute 14-06-PLAN.md (admin page wrappers: `/admin/wardrobe/page.tsx` renders DressInventoryGrid, `/admin/wardrobe/new/page.tsx` and `/admin/wardrobe/[id]/edit/page.tsx` wire DressForm + DressImageGallery, `/admin/wardrobe/settings/page.tsx` hosts WardrobeSettingsForm, plus the navigation-config Wardrobe entries for admin + student). That closes Phase 14. **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
