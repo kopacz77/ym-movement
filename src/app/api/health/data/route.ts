@@ -8,14 +8,18 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    const [users, students, rinks, timeSlots, lessons, payments] = await Promise.all([
-      prisma.user.count(),
-      prisma.student.count(),
-      prisma.rink.count(),
-      prisma.rinkTimeSlot.count(),
-      prisma.lesson.count(),
-      prisma.payment.count(),
-    ]);
+    const [users, students, rinks, timeSlots, lessons, payments, dresses, rentalRequests, rentals] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.student.count(),
+        prisma.rink.count(),
+        prisma.rinkTimeSlot.count(),
+        prisma.lesson.count(),
+        prisma.payment.count(),
+        prisma.dress.count(),
+        prisma.rentalRequest.count(),
+        prisma.rental.count(),
+      ]);
 
     const counts = {
       users,
@@ -24,6 +28,9 @@ export async function GET() {
       timeSlots,
       lessons,
       payments,
+      dresses,
+      rentalRequests,
+      rentals,
     };
 
     const warnings: string[] = [];
