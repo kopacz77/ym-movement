@@ -5,20 +5,11 @@
 // Per-tab queries (PENDING + APPROVED) — separate React Query keys so each tab
 // caches independently. Per-row actions wire to a controlled dialog union:
 //   - PENDING rows: Approve / Decline → RequestResponseDialog
-//   - APPROVED rows: Mark Paid → PaymentPlaceholderDialog (stub, Plan 17-03 swap)
+//   - APPROVED rows: Mark Paid → RecordPaymentDialog (Plan 17-03)
 //
 // Mounted in Plan 17-04's /admin/wardrobe/requests/page.tsx. This file does NOT
 // own any routing, auth, or business logic — same thin-composition contract as
 // 16-07 MyRentalsView.
-//
-// DEVIATION NOTE: Plan body specified a direct
-// `import { RecordPaymentDialog } from "./RecordPaymentDialog"` (from Plan
-// 17-03). 17-03 has not shipped yet, so the direct import would break tsc
-// (which the plan's verify-step requires to pass). Plan's critical_notes
-// authorize an inline stub ("or stub a callback — page composition wires the
-// actual dialog"). Local PaymentPlaceholderDialog co-located below keeps the
-// kind:"payment" discriminator intact; 17-03 swaps the import + JSX in a
-// 2-line diff.
 
 "use client";
 
@@ -26,13 +17,6 @@ import { format } from "date-fns";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -46,6 +30,7 @@ import { RentalStatusBadge } from "@/features/wardrobe/components/request/Rental
 import { api } from "@/lib/api";
 import { formatCurrencyFromCents } from "@/lib/utils";
 
+import { RecordPaymentDialog } from "./RecordPaymentDialog";
 import { RequestResponseDialog } from "./RequestResponseDialog";
 
 // ---------------------------------------------------------------------------
@@ -205,13 +190,14 @@ export function RequestQueueTable() {
         />
       )}
       {dialog.kind === "payment" && (
-        <PaymentPlaceholderDialog
+        <RecordPaymentDialog
           open={true}
           onOpenChange={(o) => {
             if (!o) {
               closeDialog();
             }
           }}
+          requestId={dialog.requestId}
           dressTitle={dialog.dressTitle}
           studentName={dialog.studentName}
         />
@@ -435,43 +421,4 @@ function pickPrice(r: QueueRequestRow): number {
     case "PURCHASE":
       return r.Dress.purchasePrice ?? 0;
   }
-}
-
-// ---------------------------------------------------------------------------
-// PaymentPlaceholderDialog — stub until Plan 17-03 ships RecordPaymentDialog.
-// Same controlled open/onOpenChange contract so the swap is trivial.
-// ---------------------------------------------------------------------------
-
-function PaymentPlaceholderDialog({
-  open,
-  onOpenChange,
-  dressTitle,
-  studentName,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  dressTitle: string;
-  studentName: string;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-[#1a3a5c]">Record payment</DialogTitle>
-        </DialogHeader>
-        <p className="text-sm text-slate-600">
-          Record payment for {studentName}'s rental of {dressTitle}.
-        </p>
-        <p className="text-xs text-slate-500">
-          Recording the payment UI lands in Plan 17-03. For now this is a placeholder so the queue
-          can compose the full state machine.
-        </p>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
 }
