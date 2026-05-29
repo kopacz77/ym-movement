@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 14 of 22 (Admin Inventory CRUD) — In progress
-Plan: 2/7 complete
-Status: 14-02 shipped — DressStatusBadge / CategoryBadge / StatusFilterChips presentational primitives live, Wave 2 form + inventory grid unblocked
-Last activity: 2026-05-29 — Completed 14-02-PLAN.md (3 tasks, 2m 28s)
+Plan: 3/7 complete
+Status: 14-04 shipped — WardrobeSettingsForm client component live; three numeric inputs + sonner toasts + single-source Zod reuse from Phase 13; ready for Plan 14-06 page wrapper
+Last activity: 2026-05-29 — Completed 14-04-PLAN.md (1 task, 2m 15s)
 
-Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases shipped + 2/7 plans into Phase 14)
+Progress: █░░░░░░░░░ ~12% of v2.0 milestone (1 of 10 phases shipped + 3/7 plans into Phase 14)
 
 ## Performance Metrics
 
@@ -27,8 +27,8 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 5 (13-01, 13-02, 13-03, 14-01, 14-02)
-- Phase 14 plans shipped: 2/7
+- Total plans completed: 6 (13-01, 13-02, 13-03, 14-01, 14-02, 14-04)
+- Phase 14 plans shipped: 3/7
 
 ## Accumulated Context
 
@@ -75,6 +75,10 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 - **(14-02) Exhaustive `Record<Enum, …>` for status + category mappings**: Prisma adding a new variant forces a compile error in DressStatusBadge / CategoryBadge / StatusFilterChips until the maps are extended. Schema is the contract.
 - **(14-02) Type-only Prisma imports in all three primitives**: `import type { DressStatus }` keeps zero Prisma client runtime in the component bundle and lets them render in Server OR Client Components without re-export friction.
 - **(14-02) Directory split: `wardrobe/components/` for cross-role primitives, `wardrobe/components/admin/` for admin-only chrome**: Phase 15 (student catalog) reuses DressStatusBadge + CategoryBadge from the root path without importing admin code.
+- **(14-04) Single-source Zod reuse — import `wardrobeSettingsSchema` from Phase 13 queries file, never redeclare**: client form validates against the SAME schema the TRPC procedure parses with. Schema drift made structurally impossible.
+- **(14-04) `useForm<z.input<S>, unknown, z.output<S>>` generics when the Zod schema has `.default()` on every field**: RHF's TFieldValues needs the input shape (optionals) while the submit handler receives the output shape (required). Using `z.infer` (== `z.output`) for both causes TS2322 on the resolver and TS2345 on handleSubmit.
+- **(14-04) Mount form immediately with `wardrobeSettingsSchema.parse({})` defaults; rehydrate via `form.reset(data)` in useEffect**: avoids the "remount-on-data-arrival flicker / lose user keystrokes" anti-pattern. RHF refs and state machine initialize against the canonical defaults; fetched values patch in once useQuery resolves.
+- **(14-04) `valueAsNumber: true` on every numeric register()**: HTML number inputs report their `.value` as a string. Without this RHF passes `"15"` to zodResolver, which fails the `z.number()` check. With it, coercion happens before validation.
 
 ### Pending Todos
 
@@ -96,6 +100,6 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-02-PLAN.md — DressStatusBadge + CategoryBadge + StatusFilterChips presentational primitives shipped in `src/features/wardrobe/components/`. Brand palette locked. Pure presentational (no TRPC, type-only Prisma imports). Biome + tsc clean on new files; 2 pre-existing repo TS errors (IceParticles `three` types, sidebar `@radix-ui/react-visually-hidden`) unchanged.
+Stopped at: Completed 14-04-PLAN.md — `WardrobeSettingsForm` (`src/features/wardrobe/components/admin/WardrobeSettingsForm.tsx`) shipped: three numeric inputs, single-source `wardrobeSettingsSchema` reuse from Phase 13 queries, hydrate via `api.admin.wardrobeSettings.get.useQuery()` + `form.reset(data)` useEffect, submit via `api.admin.wardrobeSettings.update.useMutation()` with sonner toasts, brand cyan #0891b2 CTA. 1 atomic commit (34cd8ee). Biome + tsc clean on the new file; 2 pre-existing repo TS errors (IceParticles, sidebar) unchanged.
 Resume file: None
-Next step: Execute 14-03-PLAN.md — Admin DressForm (RHF + zod dressInputSchema from 14-01). Will consume DressStatusBadge + CategoryBadge for the form preview. **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute 14-03-PLAN.md (admin DressForm) and 14-05-PLAN.md (inventory grid) in parallel; 14-06 (settings page wrapper) consumes today's WardrobeSettingsForm. **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
