@@ -93,7 +93,14 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. Sticky filter bar supports category, color, size, theme, length, price, and availability dates with URL-encoded shareable state
   4. "Fits me" toggle filters by stored measurements with alterable-slack accounting; disabled with tooltip when no measurements set
   5. Sort by Newest/Price/Best Fit works; Best Fit score correctly applies alterable slack and penalizes null structured fields
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 15-01-PLAN.md — wardrobe.{list,byId,facets} + wardrobe.measurements.{get,update} TRPC procedures; PUBLIC_DRESS_SELECT enforces CAT-08 at SQL level; availability anti-join against Rental + RentalRequest
+- [ ] 15-02-PLAN.md — fitScore.ts pure module (scoreDress, passesFitsMeFilter, scoreToPercent) + wire into catalogQueries.list for sort=bestFit and fitsMe
+- [ ] 15-03-PLAN.md — Install @radix-ui/react-slider + src/components/ui/slider.tsx wrapper (cyan brand color)
+- [ ] 15-04-PLAN.md — MeasurementForm + /wardrobe/measurements page + /wardrobe layout.tsx (AppLayout role=student wrap)
+- [ ] 15-05-PLAN.md — DressCard catalog tile primitive + BestFitBadge (tiered emerald/cyan/amber)
+- [ ] 15-06-PLAN.md — WardrobeFilterBar sticky controlled component (9 filter controls + sort + clear-all; Fits Me tooltip-gating)
+- [ ] 15-07-PLAN.md — CatalogGrid URL-state owner + /wardrobe page replaces 14-07 Coming Soon stub
 
 #### Phase 16: Dress Detail & Rental Request
 **Goal**: Students can view a dress in detail with fit comparison and submit a rental request to the owner.
@@ -183,7 +190,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 8-12 | v1.1 | (see archive) | Complete | 2026-03-17 |
 | 13. Wardrobe schema foundation | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 14. Admin inventory CRUD | v2.0 | 7/7 | Complete | 2026-05-29 |
-| 15. Catalog browse measurements | v2.0 | 0/TBD | Not started | — |
+| 15. Catalog browse measurements | v2.0 | 0/7 | Planned | — |
 | 16. Dress detail rental request | v2.0 | 0/TBD | Not started | — |
 | 17. Admin rental lifecycle | v2.0 | 0/TBD | Not started | — |
 | 18. Self-serve consignment | v2.0 | 0/TBD | Not started | — |
