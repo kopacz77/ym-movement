@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 
 ## Current Position
 
-Phase: 14 of 22 (Admin Inventory CRUD) — ✓ COMPLETE & VERIFIED
-Plan: 7/7 complete
-Status: Phase 14 verifier returned passed on all 5 programmatic success criteria. Visual UX confirmation (sidebar visible, create-then-redirect round-trip, ARCHIVED opacity, non-admin 403) deferred to user wake-up. Ready to plan Phase 15.
-Last activity: 2026-05-29 — Phase 14 verified complete: 5 TRPC procedures, 7 new components, 4 admin pages, 1 student stub, sidebar wired via navigation-config.ts. Locked AppSidebar.tsx + AppLayout.tsx untouched.
+Phase: 15 of 22 (Catalog Browse & Measurements) — IN PROGRESS
+Plan: 1/? complete (15-01 shipped)
+Status: Phase 15 Wave 1 began. Plan 15-01 (catalog + measurement TRPC procedures) executed and committed; smoke tests pass against dev Neon; type-check clean. Next: continue with subsequent Phase 15 plans (Slider primitive + image domain, fit-score module, measurement form, filter bar, catalog grid).
+Last activity: 2026-05-29 — Plan 15-01 complete: wardrobe.list/byId/facets + wardrobe.measurements.get/update mounted on wardrobeRouter. PUBLIC_DRESS_SELECT enforces CAT-08 at the SQL level; availability anti-join enforces CAT-03; server BAD_REQUEST gates enforce CAT-05 for sort=bestFit and fitsMe=true.
 
-Progress: ██░░░░░░░░ ~20% of v2.0 milestone (2 of 10 phases shipped)
+Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shipped, Phase 15 Wave 1 underway)
 
 ## Performance Metrics
 
@@ -27,8 +27,9 @@ Progress: ██░░░░░░░░ ~20% of v2.0 milestone (2 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 10 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07)
+- Total plans completed: 11 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07, 15-01)
 - Phase 14 plans shipped: 7/7 — PHASE 14 COMPLETE
+- Phase 15 plans shipped: 1/? (15-01 — catalog + measurement TRPC procedures)
 
 ## Accumulated Context
 
@@ -105,6 +106,15 @@ Progress: ██░░░░░░░░ ~20% of v2.0 milestone (2 of 10 phases 
 - **(14-06) `useParams<{id: string}>()` on the edit page, not server-component `params: Promise<{id}>`**: the page is `"use client"` because both children (DressForm, DressImageGallery) consume TRPC hooks. A server-component shell would buy nothing. `useParams` is the canonical client-side dynamic-route accessor in Next.js 16 App Router.
 - **(14-06) Sidebar entries via navigation-config.ts ONLY, no AppSidebar/AppLayout edits**: AppSidebar consumes `getNavigationForRole(role)`; new entries flow through automatically. Both files are LOCKED per CLAUDE.md. The lucide `Shirt` icon was added to the existing import block (alphabetical, after Settings), and a single `{ name: "Wardrobe", href, icon: Shirt }` line inserted into BOTH adminNavigation (`/admin/wardrobe`) and studentNavigation (`/wardrobe`), positioned above the Settings entry. coachNavigation intentionally untouched.
 - **(14-06) TRPC procedures that include relations MUST type the local variable with the explicit findUnique generic**, NOT `Awaited<ReturnType<typeof ctx.prisma.dress.findUnique>>`. The latter collapses to the base model with no relations; the TRPC client then loses sight of Owner / Images on the return type. Caught in 14-06 Task 4 as a bug in 14-01's `byId`; fixed by replacing the annotation with `Awaited<ReturnType<typeof ctx.prisma.dress.findUnique<{ where: {...}; include: { Owner: ...; Images: ... } }>>>`.
+- **(15-01) `protectedProcedure` over a new `studentProcedure` middleware**: two procedures don't justify a new middleware; coaches/admins viewing `/wardrobe` see the same catalog by design (research Open Question 4). The two procedures that need "current student" derive it via inline `ctx.prisma.student.findUnique({ where: { userId: ctx.session.user.id } })` — same pattern as `bookingQueries.ts:49`.
+- **(15-01) PUBLIC_DRESS_SELECT typed via `satisfies Prisma.DressSelect` (not annotated)**: the `satisfies` operator anchors the type without widening, so adding a sensitive column to the Dress model wouldn't auto-leak. New safe columns must be added to PUBLIC_DRESS_SELECT explicitly. Single SQL-level enforcement point for CAT-08 (internalNotes + consignmentCommissionPct never returned).
+- **(15-01) `themeQuery` filter uses `hasSome` exact-tag match for MVP**: substring ILIKE via raw SQL (research Pattern 4 option c) is the documented fallback. The facets endpoint will eventually drive autocomplete, making exact-match the right UX too. Decision: ship simple, escalate to raw SQL only if user feedback warrants.
+- **(15-01) In-memory pagination via `.slice()` over Prisma skip/take**: result set is bounded by AVAILABLE+PENDING + filter WHERE clauses; Plan 15-02's bestFit sort requires the full set anyway. Mixing skip/take with in-memory sort for one branch would complicate the dispatch.
+- **(15-01) `list`/`byId`/`facets` mounted flat on `wardrobeRouter` root** (matches design-doc spec L298-299); only `images.*` and `measurements.*` are nested sub-routers. TRPC client paths read as `api.wardrobe.list.useQuery({})`, `api.wardrobe.measurements.get.useQuery()` — semantic over structural.
+- **(15-01) BAD_REQUEST gate for `sort=bestFit` AND `fitsMe=true` fires before any expensive query**: matches the disabled-toggle client UX guarantee. `callerHasMeasurements = (chest ?? waist ?? hips) != null` — any one suffices (research Open Question 5).
+- **(15-01) `measurementsUpdatedAt` stamped unconditionally on every successful `wardrobe.measurements.update` call**: timestamp tracks "last reviewed", not "last mutated" (MEASURE-03). Empowers the UI to show an honest recency indicator even when the user saved without changing anything.
+- **(15-01) `wardrobe.byId` returns NOT_FOUND for any status outside AVAILABLE/PENDING**: identical 404 response to a truly missing row — does not leak the existence of ARCHIVED/REJECTED/PENDING_APPROVAL dresses to public catalog callers.
+- **(15-01) Wave 1 stubs `sort=bestFit` and `fitsMe=true` as no-op pass-throughs with TODO(15-02) markers**: procedure is deployable before Plan 15-02 lands `fitScore.ts`. BAD_REQUEST gates remain authoritative regardless of whether 15-02 has shipped.
 
 ### Pending Todos
 
@@ -126,8 +136,6 @@ Progress: ██░░░░░░░░ ~20% of v2.0 milestone (2 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Phase 14 verified complete. 7/7 plans shipped, 6 REQ-IDs marked Complete in REQUIREMENTS.md (ADMIN-01/02/03/07, NAV-01, PERM-02). Programmatic verification all green; live UX confirmation deferred to user wake-up (see Pending Todos below).
+Stopped at: Completed Plan 15-01 (catalog + measurement TRPC procedures). 4 atomic task commits + 1 metadata commit. SUMMARY.md written. Phase 14 live-UX checklist still pending user wake-up confirmation.
 Resume file: None
-Next step: `/gsd:plan-phase 15` — Catalog Browse & Measurements (marketplace `/wardrobe` route, student measurements, "fits me" filter, best-fit sort). **Live UX checks for Phase 14** queued for user to verify after wake-up: (1) sidebar Wardrobe entry visible above Settings for both admin and student roles, (2) `/admin/wardrobe/new` create-then-redirect flow round-trips to /edit, (3) image upload works once `BLOB_READ_WRITE_TOKEN` is in local `.env`, (4) ARCHIVED rows visually de-emphasized in inventory grid, (5) non-admin user gets UNAUTHORIZED when hitting `admin.wardrobe.*` procedures.
-Resume file: None
-Next step: Execute Phase 15 (student wardrobe catalog). Replace the `/wardrobe` Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx` with the real catalog. Reuse `DressStatusBadge` + `CategoryBadge` from `@/features/wardrobe/components/` (cross-role primitives). The read-side of `admin.wardrobe.list` may inform a new public/student-scoped procedure that filters out PENDING_APPROVAL + ARCHIVED. **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Continue Phase 15. Subsequent plans (per the Phase 15 design): Slider primitive + Vercel Blob image domain config, fit-score module replacing the TODO(15-02) markers in `catalogQueries.list`, measurement form at `/wardrobe/measurements`, filter bar component, catalog grid replacing the Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx`. **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
