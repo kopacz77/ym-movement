@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 
 ## Current Position
 
-Phase: 13 of 22 (Wardrobe Schema Foundation) — ✓ COMPLETE & VERIFIED
-Plan: 3/3 complete
-Status: Phase 13 verifier returned passed (27/27 must-haves). Ready to plan Phase 14.
-Last activity: 2026-05-29 — Phase 13 verified complete: schema applied, settings live, Blob pipeline online, 0 regressions
+Phase: 14 of 22 (Admin Inventory CRUD) — In progress
+Plan: 1/7 complete
+Status: 14-01 shipped — admin.wardrobe.* CRUD spine live, smoke-tested, dressInputSchema exported for Wave 2 form reuse
+Last activity: 2026-05-29 — Completed 14-01-PLAN.md (3 tasks, ~3 min)
 
-Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases shipped)
+Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases shipped + 1/7 plans into Phase 14)
 
 ## Performance Metrics
 
@@ -25,6 +25,10 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 **v1.1 Test & Stabilize (completed):**
 - Total plans completed: 11
 - Average duration: 10.5min
+
+**v2.0 Wardrobe (in progress):**
+- Total plans completed: 4 (13-01, 13-02, 13-03, 14-01)
+- Phase 14 plans shipped: 1/7
 
 ## Accumulated Context
 
@@ -58,6 +62,13 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 - **(13-02) Fail-soft read on corrupt JSON**: `getWardrobeSettings` wraps `JSON.parse` + Zod parse in try/catch; falls back to defaults rather than throwing — bad data must not brick the wardrobe
 - **(13-02) Lazy upsert (no seed row)**: matches existing `operational`/`payment`/`rinkAreas` pattern; row appears only on first real `update`
 - **(13-02) Both procedures use `adminProcedure`; non-admin consumers call helpers directly from server code**: avoids exposing settings to public TRPC clients while keeping server-only pre-fill (e.g. consigner form commission %) ergonomic
+- **(14-01) `adminProcedure` (NOT `superAdminProcedure`) on every admin.wardrobe.* procedure**: PERM-02 reads admin-or-super-admin; `adminProcedure` already gates on `isAdminRole(role)` which accepts both. Matches Phase 13 wardrobeSettings sibling.
+- **(14-01) Server-side hardcoded `status: "AVAILABLE"` on create**: admins bypass the consigner PENDING_APPROVAL queue (ADMIN-02). Client-passed status is silently overridden. Consigners use a separate Phase 18 flow into the same Dress table.
+- **(14-01) Auto-inject `ownerId = ctx.session.user.id` on create**: admin doing the create owns the dress. Re-assignment is permitted via update (admins can flip ownerId there).
+- **(14-01) Soft-archive only — no hard-delete TRPC procedure exposed in MVP**: `archive` flips status=ARCHIVED + stamps archivedAt=now(). Rentals/requests/images preserved for audit.
+- **(14-01) `dressInputSchema` excludes system-managed fields (id, createdAt, updatedAt, archivedAt, ownerId, status)**: schema is the single contract the Wave 2 admin RHF form validates against. Zero schema duplication.
+- **(14-01) `formatCurrencyFromCents` helper composes on top of existing `formatCurrency(dollars)`**: kills inlined `cents/100` math. All wardrobe money fields are Int cents at DB and API; dollar formatting only at display.
+- **(14-01) Sub-router mounted at `admin.wardrobe`, adjacent to `admin.wardrobeSettings`**: semantic grouping (readability over alphabetization) — both wardrobe-namespace siblings live next to each other in the parent createTRPCRouter call.
 
 ### Pending Todos
 
@@ -79,6 +90,6 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Phase 13 verified complete (all 3 plans shipped, 12 REQ-IDs marked Complete in REQUIREMENTS.md, 0 type-check regressions). VERIFICATION.md committed.
+Stopped at: Completed 14-01-PLAN.md — admin.wardrobe.{list,byId,create,update,archive} TRPC procedures live, dressInputSchema exported, formatCurrencyFromCents helper added, smoke-tested against dev Neon with zero leftover rows. Type-check clean (no new errors).
 Resume file: None
-Next step: `/gsd:plan-phase 14` — Admin Inventory CRUD (admin create/edit/list dresses + global settings UI + sidebar entry + admin permission middleware). **User-setup blocker for Phase 14 end-to-end testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute 14-02-PLAN.md — Wave 2 admin form + inventory grid UI (consumes admin.wardrobe.* + dressInputSchema from this plan). **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
