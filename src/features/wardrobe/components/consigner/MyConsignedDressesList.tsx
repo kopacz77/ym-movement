@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DressStatusBadge } from "@/features/wardrobe/components/DressStatusBadge";
 import { api } from "@/lib/api";
 import { formatCurrencyFromCents } from "@/lib/utils";
+import { ConsignerEarningsTable } from "./ConsignerEarningsTable";
 
 // Local shape mirroring wardrobe.consigner.mine's per-item select shape (see
 // consignerQueries.ts mine procedure). We keep this declaration here so the
@@ -64,8 +65,8 @@ type ConsignedDress = {
   _count: { Images: number; Rentals: number };
 };
 
-type TabKey = "live" | "pending" | "attention" | "archived";
-const TAB_KEYS: TabKey[] = ["live", "pending", "attention", "archived"];
+type TabKey = "live" | "pending" | "attention" | "archived" | "earnings";
+const TAB_KEYS: TabKey[] = ["live", "pending", "attention", "archived", "earnings"];
 const DEFAULT_TAB: TabKey = "live";
 
 function parseTab(raw: string | null): TabKey {
@@ -175,6 +176,7 @@ export function MyConsignedDressesList() {
           <TabsTrigger value="pending">Pending Review ({buckets.pending.length})</TabsTrigger>
           <TabsTrigger value="attention">Needs Attention ({buckets.attention.length})</TabsTrigger>
           <TabsTrigger value="archived">Archived ({buckets.archived.length})</TabsTrigger>
+          <TabsTrigger value="earnings">Earnings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="live" className="mt-4">
@@ -188,6 +190,9 @@ export function MyConsignedDressesList() {
         </TabsContent>
         <TabsContent value="archived" className="mt-4">
           <DressRowGrid rows={buckets.archived} variant="archived" />
+        </TabsContent>
+        <TabsContent value="earnings" className="mt-4">
+          <ConsignerEarningsTable />
         </TabsContent>
       </Tabs>
     </div>
