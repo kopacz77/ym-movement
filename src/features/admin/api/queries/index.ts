@@ -9,6 +9,7 @@ import { scheduleRouter } from "./schedule"; // Updated import
 import { settingsRouter } from "./settingsQueries";
 import { studentRouter } from "./student"; // Updated import
 import { superAdminDashboardRouter } from "./superAdminQueries";
+import { wardrobeSettingsRouter } from "./wardrobeSettingsQueries";
 
 export const adminRouter = createTRPCRouter({
   analytics: analyticsRouter,
@@ -17,6 +18,7 @@ export const adminRouter = createTRPCRouter({
   //progress: progressRouter,
   schedule: scheduleRouter, // Using the refactored schedule router
   settings: settingsRouter,
+  wardrobeSettings: wardrobeSettingsRouter,
   student: studentRouter, // Using the refactored student router
   superAdmin: superAdminDashboardRouter,
   auth: authRouter,
