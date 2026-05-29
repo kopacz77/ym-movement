@@ -41,7 +41,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 - [x] **Phase 15: Catalog Browse & Measurements** — Marketplace `/wardrobe` with structured filters, student measurement profile, "fits me" toggle, best-fit sort ✓ 2026-05-29
 - [x] **Phase 16: Dress Detail & Rental Request** — Detail page with fit comparison, request modal, my-rentals history, conflict warnings ✓ 2026-05-29
 - [x] **Phase 17: Admin Rental Lifecycle** — Request queue, payment-received flow, returns, deposit release, consignment payout calculation ✓ 2026-05-29
-- [ ] **Phase 18: Self-Serve Consignment** — Consigner upload form, PENDING_APPROVAL queue, admin approve/reject with commission override
+- [x] **Phase 18: Self-Serve Consignment** — Consigner upload form, PENDING_APPROVAL queue, admin approve/reject with commission override ✓ 2026-05-29
 - [ ] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking
 - [ ] **Phase 20: Wardrobe Notifications** — 9 new email + in-app templates spanning rental and consignment lifecycle
 - [ ] **Phase 21: Testing, Seeding & Health Checks** — Playwright E2E specs, unit tests, seed script, health-check extension, new Storybook stories + VRT
@@ -212,7 +212,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 15. Catalog browse measurements | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 16. Dress detail rental request | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 17. Admin rental lifecycle | v2.0 | 5/5 | Complete | 2026-05-29 |
-| 18. Self-serve consignment | v2.0 | 0/7 | Planned | — |
+| 18. Self-serve consignment | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 19. Consignment payouts | v2.0 | 0/TBD | Not started | — |
 | 20. Wardrobe notifications | v2.0 | 0/TBD | Not started | — |
 | 21. Wardrobe testing seed health | v2.0 | 0/TBD | Not started | — |
