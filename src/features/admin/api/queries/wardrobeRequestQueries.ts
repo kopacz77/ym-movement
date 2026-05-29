@@ -381,6 +381,7 @@ export const wardrobeRequestRouter = createTRPCRouter({
 
 const listRentalsInputSchema = z.object({
   paymentStatus: z.array(z.nativeEnum(RentalPaymentStatus)).optional(),
+  outstandingPayoutsOnly: z.boolean().optional(), // RENTAL-08 — admin "Outstanding Payouts" tab filter
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().max(100).default(20),
 });
@@ -394,6 +395,8 @@ const releaseDepositInputSchema = z.object({ rentalId: z.string().cuid() });
 
 const flagLateFeeInputSchema = z.object({ rentalId: z.string().cuid() });
 
+const markConsignmentPaidOutInputSchema = z.object({ rentalId: z.string().cuid() });
+
 export const wardrobeRentalRouter = createTRPCRouter({
   /**
    * RENTAL-04: admin rentals list. Defaults to active rentals
@@ -406,11 +409,21 @@ export const wardrobeRentalRouter = createTRPCRouter({
    */
   listRentals: adminProcedure.input(listRentalsInputSchema).query(async ({ ctx, input }) => {
     try {
-      const where: Prisma.RentalWhereInput = {
-        paymentStatus: {
-          in: input.paymentStatus ?? ["PAID", "RETURNED"],
-        },
-      };
+      // RENTAL-08: when outstandingPayoutsOnly is set, override the default
+      // paymentStatus filter and constrain to consigned + not-yet-paid rentals.
+      // Otherwise: default to active rentals (PAID + RETURNED) or whatever the
+      // caller-supplied paymentStatus array contains.
+      const where: Prisma.RentalWhereInput = input.outstandingPayoutsOnly
+        ? {
+            consignmentPayoutAmount: { not: null },
+            consignmentPaidOut: false,
+            ...(input.paymentStatus ? { paymentStatus: { in: input.paymentStatus } } : {}),
+          }
+        : {
+            paymentStatus: {
+              in: input.paymentStatus ?? ["PAID", "RETURNED"],
+            },
+          };
 
       const [rentals, total] = await Promise.all([
         ctx.prisma.rental.findMany({
@@ -427,6 +440,7 @@ export const wardrobeRentalRouter = createTRPCRouter({
                   select: { url: true },
                   take: 1,
                 },
+                Owner: { select: { id: true, name: true } }, // RENTAL-08 — confirm-toast in RentalsTable
               },
             },
             Student: {
@@ -592,4 +606,81 @@ export const wardrobeRentalRouter = createTRPCRouter({
       data: { paymentStatus: "LATE_FEE_OWED" },
     });
   }),
+
+  /**
+   * RENTAL-08 / CONSIGN-10: Admin marks a rental's consignment payout as sent.
+   *
+   * Defense-in-depth (4 layers):
+   *   1. NOT_FOUND — unknown rentalId.
+   *   2. BAD_REQUEST — rental.consignmentPayoutAmount IS NULL (Yura-owned dress,
+   *      no consigner to pay).
+   *   3. BAD_REQUEST — rental.consignmentPaidOut === true (idempotency / double-
+   *      toggle guard — matches Phase 17 markReturned/releaseDeposit strictness).
+   *   4. UI-side: button hidden when not eligible (server is belt-and-suspenders).
+   *
+   * Notification: in-app createNotification ONLY (try/catch, non-blocking).
+   * Phase 20 (NOTIFY-09) wires the Resend email side-by-side with this — do NOT
+   * add email here.
+   *
+   * Closed state: once consignmentPaidOut === true, NO transition back. Same
+   * convention as paymentStatus === DEPOSIT_RELEASED and Dress.status === ARCHIVED.
+   */
+  markConsignmentPaidOut: adminProcedure
+    .input(markConsignmentPaidOutInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const rental = await ctx.prisma.rental.findUnique({
+        where: { id: input.rentalId },
+        select: {
+          id: true,
+          consignmentPayoutAmount: true,
+          consignmentPaidOut: true,
+          Dress: {
+            select: {
+              title: true,
+              Owner: { select: { id: true, name: true } },
+            },
+          },
+        },
+      });
+
+      if (!rental) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Rental not found" });
+      }
+      if (rental.consignmentPayoutAmount == null) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This rental has no consignment payout (Yura-owned dress)",
+        });
+      }
+      if (rental.consignmentPaidOut) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Payout already marked as sent",
+        });
+      }
+
+      const updated = await ctx.prisma.rental.update({
+        where: { id: rental.id },
+        data: {
+          consignmentPaidOut: true,
+          consignmentPaidOutAt: new Date(),
+        },
+      });
+
+      // Post-commit in-app notification — non-blocking. Phase 20 adds the email
+      // line beside this call (do NOT replace; both run together).
+      try {
+        await createNotification({
+          userId: rental.Dress.Owner.id,
+          title: "Consignment payout sent",
+          message: `Your payout for "${rental.Dress.title}" has been sent.`,
+          type: "SUCCESS",
+          link: "/wardrobe/consigned?tab=earnings",
+        });
+      } catch (err) {
+        console.error("[WARDROBE] Failed to notify consigner of payout:", err);
+      }
+
+      return { id: updated.id };
+    }),
 });
