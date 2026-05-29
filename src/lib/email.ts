@@ -3,6 +3,7 @@
 import { DateTime } from "luxon";
 import { Resend } from "resend";
 import { REGISTRATION_TOKEN_EXPIRY_HOURS } from "@/lib/auth-tokens";
+import { formatCurrencyFromCents } from "@/lib/utils";
 
 // Initialize Resend with API key
 const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
@@ -669,4 +670,227 @@ export async function sendCoachApprovalEmail(email: string, name: string, token:
   `;
 
   return sendEmail(email, "Your YM Movement Coach Application is Approved", emailContent);
+}
+
+/**
+ * NOTIFY-01: Sent to admin users when a consigner submits a new dress
+ * OR resubmits a previously rejected dress for review.
+ *
+ * Plan 20-02 iterates ADMIN/SUPER_ADMIN users and calls this helper once per
+ * recipient. If no admin users exist, Plan 20-02 falls back to the
+ * ADMIN_NOTIFICATION_EMAIL env var (mirrors sendAdminSignupNotification
+ * pattern at lines 176-225 of this file).
+ */
+export async function sendConsignerDressSubmittedEmail(
+  adminEmail: string,
+  adminName: string,
+  data: {
+    consignerName: string;
+    dressTitle: string;
+    dressCategory: string;
+    isResubmit: boolean;
+  },
+) {
+  const subject = data.isResubmit
+    ? `Resubmitted consigner dress: ${data.dressTitle}`
+    : `New consigner dress: ${data.dressTitle}`;
+
+  const headerTitle = data.isResubmit
+    ? "🔁 Resubmitted Consigner Dress"
+    : "👗 New Consigner Submission";
+
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">${headerTitle}</h1>
+      <p>Hello ${adminName},</p>
+      <p>${data.consignerName} ${data.isResubmit ? "resubmitted" : "submitted"} a dress for your review on YM Wardrobe.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Submission Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">📂 <strong>Category:</strong> ${data.dressCategory}</li>
+          <li style="margin-bottom: 8px;">👤 <strong>Consigner:</strong> ${data.consignerName}</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/admin/wardrobe/pending-approval"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          Review Submission
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(adminEmail, subject, emailContent);
+}
+
+/**
+ * NOTIFY-02: Sent to the consigner when an admin approves their dress.
+ *
+ * Plan 20-02 wires this beside the existing createNotification call at
+ * wardrobeDressQueries.ts:358 (approveDress mutation).
+ */
+export async function sendConsignerDressApprovedEmail(
+  consignerEmail: string,
+  consignerName: string,
+  data: {
+    dressTitle: string;
+    dressId: string;
+    commissionPct: number;
+  },
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">🎉 Your Dress Is Live on YM Wardrobe</h1>
+      <p>Hello ${consignerName},</p>
+      <p>Great news! Your dress has been approved and is now live on the YM Wardrobe catalog.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Listing Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">💼 <strong>Your Commission:</strong> ${data.commissionPct}%</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/consigned/${data.dressId}/edit"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          Manage Your Listing
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(
+    consignerEmail,
+    `🎉 Your dress "${data.dressTitle}" is live on YM Wardrobe`,
+    emailContent,
+  );
+}
+
+/**
+ * NOTIFY-03: Sent to the consigner when an admin rejects their dress
+ * with a required reason. The consigner can edit and resubmit
+ * (CONSIGN-09 — wardrobe.consigner.resubmit).
+ *
+ * Plan 20-02 wires this beside the existing createNotification call at
+ * wardrobeDressQueries.ts:406 (rejectDress mutation).
+ */
+export async function sendConsignerDressRejectedEmail(
+  consignerEmail: string,
+  consignerName: string,
+  data: {
+    dressTitle: string;
+    dressId: string;
+    rejectionReason: string;
+  },
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">📝 Your Dress Needs Changes</h1>
+      <p>Hello ${consignerName},</p>
+      <p>Your dress submission has been reviewed and needs some changes before it can go live on YM Wardrobe.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Submission Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>⏰ Reviewer Feedback:</strong></p>
+        <p style="margin: 8px 0 0 0; font-size: 14px; color: #92400e; white-space: pre-wrap;">${data.rejectionReason}</p>
+      </div>
+
+      <p style="margin-top: 20px;">Edit your listing to address the feedback, then resubmit it for another round of review.</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/consigned/${data.dressId}/edit"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          Edit and Resubmit
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(consignerEmail, `Your dress "${data.dressTitle}" needs changes`, emailContent);
+}
+
+/**
+ * NOTIFY-09: Sent to the consigner when an admin marks their consignment
+ * payout as sent for a rental.
+ *
+ * Plan 20-02 wires this beside the existing createNotification call at
+ * wardrobeRequestQueries.ts:682 (markConsignmentPaidOut mutation).
+ */
+export async function sendConsignmentPayoutSentEmail(
+  consignerEmail: string,
+  consignerName: string,
+  data: {
+    dressTitle: string;
+    payoutAmountCents: number;
+  },
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">💸 Your Payout Has Been Sent</h1>
+      <p>Hello ${consignerName},</p>
+      <p>Good news — your consignment payout has been sent for one of your rented dresses.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Payout Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">💰 <strong>Payout Amount:</strong> ${formatCurrencyFromCents(data.payoutAmountCents)}</li>
+        </ul>
+      </div>
+
+      <p>You can view your full earnings ledger and payout history any time on your consignment dashboard.</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/consigned?tab=earnings"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          View Earnings
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(
+    consignerEmail,
+    `💸 Your payout for "${data.dressTitle}" has been sent`,
+    emailContent,
+  );
 }
