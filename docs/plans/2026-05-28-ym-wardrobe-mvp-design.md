@@ -524,10 +524,20 @@ Sidebar architecture rules in CLAUDE.md remain untouched — only adding a nav e
 
 ## Testing Strategy
 
-- E2E (Playwright) — new spec `tests/e2e/wardrobe.spec.ts` covering: student browse → request → admin approve → mark paid → student sees confirmed rental → admin marks returned → deposit released
-- Unit tests for `consignmentPayoutAmount` calculation
-- Storybook stories for `DressCard`, `RequestRentalDialog`, `RentalStatusBadge`, `ConsignmentEarningsTable`
-- VRT snapshot of `/wardrobe` (empty + populated states)
+### New Wardrobe coverage
+- E2E (Playwright CLI) — new spec `tests/e2e/wardrobe.spec.ts` covering the full happy path: student sets measurements → browses with "fits me" filter → opens dress detail → submits request → admin approves → student pays via Venmo → admin marks paid → student sees confirmed rental → admin marks returned → deposit released. Plus consigner path: consigner uploads dress → goes to PENDING_APPROVAL → admin approves → goes live. Plus rejection path. Run via `pnpm test:e2e tests/e2e/wardrobe.spec.ts`.
+- Unit tests for `consignmentPayoutAmount` calculation and fit scoring algorithm
+- New Storybook stories: `DressCard`, `DressDetailHero`, `FitCheckCard`, `MeasurementEditor`, `RequestRentalDialog`, `RentalStatusBadge`, `ConsignmentEarningsTable`, `WardrobeFilterBar`, `PendingApprovalQueue`
+- VRT snapshots added to `tests/storybook-vrt.spec.ts` covering all new stories + `/wardrobe` empty/populated states
+
+### Project-wide Storybook coverage audit (Phase 10)
+Once Wardrobe ships, sweep the entire project to verify Storybook coverage is correctly mapped:
+- Inventory every component under `src/components/`, `src/features/*/components/`, and `src/app/(protected)/**/page.tsx` rendered components
+- Cross-reference against existing `.stories.tsx` files (current count: 18 story files)
+- Identify gaps — components with no Storybook representation, broken or stale stories, missing variants
+- Backfill stories for high-traffic components and add VRT snapshots
+- Update `pnpm storybook` script reference in CLAUDE.md if needed
+- Goal: every reusable UI primitive and feature surface is browsable + visually regression-tested in Storybook
 
 ## Resolved Questions
 
@@ -543,6 +553,6 @@ Sidebar architecture rules in CLAUDE.md remain untouched — only adding a nav e
 
 ## Rollout Plan
 
-Phase 0 (this spec) → Phase 1 (schema + migrations + Settings extensions + Vercel Blob wiring) → Phase 2 (admin inventory CRUD + image upload) → Phase 3 (student measurements + catalog browse with marketplace filters and fit scoring) → Phase 4 (dress detail page with fit comparison + request flow) → Phase 5 (admin rental queue + payment marking + return flow + deposit release) → Phase 6 (self-serve consigner upload + admin approval queue) → Phase 7 (consignment payout tracking + earnings view) → Phase 8 (notifications + all email templates) → Phase 9 (E2E tests + Storybook stories + seed data + health check extension) → Ship.
+Phase 0 (this spec) → Phase 1 (schema + migrations + Settings extensions + Vercel Blob wiring) → Phase 2 (admin inventory CRUD + image upload) → Phase 3 (student measurements + catalog browse with marketplace filters and fit scoring) → Phase 4 (dress detail page with fit comparison + request flow) → Phase 5 (admin rental queue + payment marking + return flow + deposit release) → Phase 6 (self-serve consigner upload + admin approval queue) → Phase 7 (consignment payout tracking + earnings view) → Phase 8 (notifications + all email templates) → Phase 9 (Wardrobe E2E via Playwright CLI + new Storybook stories + VRT snapshots + seed data + health check extension) → Phase 10 (project-wide Storybook audit + backfill) → Ship.
 
 Each phase becomes a GSD phase under the v2.0 milestone. We are not gating behind a feature flag — internal-only audience is small enough that staged rollout via the GSD phase cadence (each phase shippable in isolation) gives us the same safety without flag complexity. Phases 6–7 (consigner work) can be deferred to a fast-follow if Phase 5 ships and we want immediate dogfooding.
