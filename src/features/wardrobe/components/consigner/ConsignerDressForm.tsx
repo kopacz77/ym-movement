@@ -21,14 +21,14 @@
 
 "use client";
 
+import type { z } from "zod";
+import type { consignerCreateInputSchema } from "@/features/wardrobe/api/queries/consignerQueries";
 import {
   DressFormCore,
   type DressFormValues,
   type FieldLocking,
   type FieldVisibility,
 } from "@/features/wardrobe/components/DressFormCore";
-import type { z } from "zod";
-import type { consignerCreateInputSchema } from "@/features/wardrobe/api/queries/consignerQueries";
 
 export type ConsignerDressInput = z.infer<typeof consignerCreateInputSchema>;
 
