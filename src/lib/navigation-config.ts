@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   Settings,
+  Shirt,
   User,
   Users,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export const adminNavigation: NavItem[] = [
   { name: "Coaches", href: "/admin/coaches", icon: GraduationCap },
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Reports", href: "/admin/reports", icon: BarChart2 },
+  { name: "Wardrobe", href: "/admin/wardrobe", icon: Shirt },
   { name: "Settings", href: "/admin/settings", icon: Settings },
   { name: "Guide", href: "/admin/guide", icon: BookOpen },
 ];
@@ -39,6 +41,7 @@ export const studentNavigation: NavItem[] = [
   { name: "Payments", href: "/student/payments", icon: CreditCard },
   { name: "Policies", href: "/student/policies", icon: FileText },
   { name: "Profile", href: "/student/profile", icon: User },
+  { name: "Wardrobe", href: "/wardrobe", icon: Shirt },
   { name: "Settings", href: "/student/settings", icon: Settings },
   { name: "Guide", href: "/student/guide", icon: BookOpen },
 ];
