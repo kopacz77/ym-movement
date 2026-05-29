@@ -17,6 +17,12 @@ import { type DressStatus, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { catalogFilterSchema } from "@/features/wardrobe/lib/catalogFilters";
+import {
+  passesFitsMeFilter,
+  scoreDress,
+  scoreToPercent,
+  type StudentFitFields,
+} from "@/features/wardrobe/lib/fitScore";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 /**
@@ -190,30 +196,61 @@ export const catalogRouter = createTRPCRouter({
       orderBy: { createdAt: "desc" },
     });
 
-    // 4. Apply sort. Best Fit + Fits Me are stubbed for Wave 1 — Plan 15-02
-    // ships fitScore.ts which provides scoreDress() and passesFitsMeFilter().
-    let result = dresses;
-    if (input.sort === "priceAsc") {
-      result = [...dresses].sort((a, b) => a.competitionPrice - b.competitionPrice);
-    } else if (input.sort === "priceDesc") {
-      result = [...dresses].sort((a, b) => b.competitionPrice - a.competitionPrice);
-    } else if (input.sort === "bestFit") {
-      // TODO(15-02): once fitScore.ts exists, sort using scoreDress(d, callerMeasurements).
-      // For Wave 1 ship, fall back to newest ordering (default findMany order).
-      result = dresses;
+    // 4. Build the StudentFitFields shape if caller has measurements.
+    // `callerHasMeasurements` already guarantees chestCm OR waistCm OR hipsCm
+    // is non-null when this evaluates to non-null.
+    const callerFit: StudentFitFields | null = callerHasMeasurements
+      ? {
+          chestCm: callerMeasurements!.chestCm,
+          waistCm: callerMeasurements!.waistCm,
+          hipsCm: callerMeasurements!.hipsCm,
+          heightCm: callerMeasurements!.heightCm,
+        }
+      : null;
+
+    // 5. fitsMe filter — apply BEFORE sort + pagination (CAT-04).
+    let filtered = dresses;
+    if (input.fitsMe && callerFit) {
+      filtered = filtered.filter((d) => passesFitsMeFilter(d, callerFit));
     }
-    // "newest" — already covered by the orderBy: { createdAt: "desc" } above.
 
-    // TODO(15-02): once passesFitsMeFilter exists, when fitsMe=true filter
-    // `result = result.filter((d) => passesFitsMeFilter(d, callerMeasurements!))`.
-    // For Wave 1 ship, fitsMe is a no-op pass-through (gate above already
-    // rejected callers without measurements via BAD_REQUEST).
+    // 6. Sort. bestFit requires callerFit (BAD_REQUEST gate above guarantees it).
+    let sorted: typeof filtered;
+    if (input.sort === "bestFit" && callerFit) {
+      sorted = [...filtered]
+        .map((d) => ({ d, score: scoreDress(d, callerFit) }))
+        .sort((a, b) => b.score - a.score)
+        .map(({ d }) => d);
+    } else if (input.sort === "priceAsc") {
+      sorted = [...filtered].sort((a, b) => a.competitionPrice - b.competitionPrice);
+    } else if (input.sort === "priceDesc") {
+      sorted = [...filtered].sort((a, b) => b.competitionPrice - a.competitionPrice);
+    } else {
+      // "newest" — already in createdAt desc order from findMany
+      sorted = filtered;
+    }
 
-    const total = result.length;
-    const items = result.slice((input.page - 1) * input.limit, input.page * input.limit);
+    // 7. Paginate.
+    const total = sorted.length;
+    const start = (input.page - 1) * input.limit;
+    const items = sorted.slice(start, start + input.limit);
+
+    // 8. Attach per-card fit info ONLY when caller has measurements — used by
+    // BestFitBadge (Plan 15-05) and FilterBar gating (Plan 15-06).
+    const itemsWithFit = callerFit
+      ? items.map((d) => ({
+          ...d,
+          fitScorePercent: scoreToPercent(scoreDress(d, callerFit)),
+          fitsCaller: passesFitsMeFilter(d, callerFit),
+        }))
+      : items.map((d) => ({
+          ...d,
+          fitScorePercent: null as number | null,
+          fitsCaller: null as boolean | null,
+        }));
 
     return {
-      items,
+      items: itemsWithFit,
       total,
       page: input.page,
       limit: input.limit,
