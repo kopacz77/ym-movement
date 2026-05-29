@@ -620,6 +620,7 @@ model Rental {
   consignmentPaidOut      Boolean             @default(false)
   consignmentPaidOutAt    DateTime?
   notes                   String?
+  returnReminderSentAt    DateTime?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
 
