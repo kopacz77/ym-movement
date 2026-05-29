@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 15 of 22 (Catalog Browse & Measurements) — IN PROGRESS
-Plan: 3/? complete (15-01, 15-02, 15-03 shipped)
-Status: Phase 15 Wave 1+2 progressing. Plan 15-03 (Slider primitive) executed: @radix-ui/react-slider@1.3.6 installed, src/components/ui/slider.tsx ships as the cyan-branded forwardRef wrapper supporting two-thumb range mode for Plan 15-06's length/price filters. Type-check + lint clean on the new file. Next: 15-04 measurement form, 15-05 DressCard + BestFitBadge, 15-06 WardrobeFilterBar (consumes Slider), 15-07 catalog grid composition.
-Last activity: 2026-05-29 — Plan 15-03 complete: `src/components/ui/slider.tsx` exports Slider forwardRef wrapper around @radix-ui/react-slider (1.3.6) with cyan #0891b2 brand styling on Range fill + Thumb border + focus ring; two-thumb range mode supported via polymorphic value/defaultValue inspection.
+Plan: 5/? complete (15-01, 15-02, 15-03, 15-04, 15-05 shipped)
+Status: Phase 15 Wave 2 progressing. Plan 15-05 (DressCard + BestFitBadge presentational primitives) executed and committed. Type-check clean (only pre-existing IceParticles/sidebar errors remain); biome lint clean on both files. Catalog grid tile primitive is import-stable for Plan 15-07 and reusable by Phase 18 consigner view via optional `href` prop. NOTE: Plan 15-04 (MeasurementForm + /wardrobe layout) shipped earlier in the session (commits `81a48a0`, `1f43589`) but no SUMMARY.md was written — STATE.md decisions section reflects this gap; 15-04 SUMMARY may need backfilling.
+Last activity: 2026-05-29 — Plan 15-05 complete: `src/features/wardrobe/components/DressCard.tsx` + `BestFitBadge.tsx` ship as pure presentational primitives. DressCard composes CategoryBadge + DressStatusBadge (14-02) + BestFitBadge (this plan) + formatCurrencyFromCents (14-01). Status badge suppressed when status===AVAILABLE (default), shown for PENDING. BestFitBadge tier thresholds ≥80 emerald / 50-79 cyan / <50 amber; null/negative percent renders nothing. Optional `href` prop on DressCard for Phase 18 reuse.
 
-Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shipped, Phase 15 Wave 1 underway)
+Progress: ██░░░░░░░░ ~24% of v2.0 milestone (Phase 14 shipped, Phase 15 Wave 1 complete + Wave 2 underway)
 
 ## Performance Metrics
 
@@ -27,9 +27,9 @@ Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shippe
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 13 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07, 15-01, 15-02, 15-03)
+- Total plans completed: 15 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07, 15-01, 15-02, 15-03, 15-04, 15-05)
 - Phase 14 plans shipped: 7/7 — PHASE 14 COMPLETE
-- Phase 15 plans shipped: 3/? (15-01 — catalog + measurement TRPC procedures; 15-02 — fitScore.ts pure module + sort=bestFit/fitsMe wiring; 15-03 — Slider UI primitive @radix-ui/react-slider wrapper with cyan brand styling)
+- Phase 15 plans shipped: 5/? (15-01 — catalog + measurement TRPC procedures; 15-02 — fitScore.ts pure module + sort=bestFit/fitsMe wiring; 15-03 — Slider UI primitive @radix-ui/react-slider wrapper with cyan brand styling; 15-04 — MeasurementForm + /wardrobe AppLayout role=student; 15-05 — DressCard + BestFitBadge presentational primitives)
 
 ## Accumulated Context
 
@@ -128,6 +128,13 @@ Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shippe
 - **(15-03) Three cyan #0891b2 surfaces — Range fill (bg), Thumb border (border), focus-visible ring**: extends 2026-04-26 brand sweep convention into a new primitive. Coherent on-brand identity in BOTH default and keyboard-focus states.
 - **(15-03) Removed initial `biome-ignore lint/suspicious/noArrayIndexKey` suppression**: Biome did NOT flag the indexed thumb key, so the precautionary suppression was itself a `suppressions/unused` warning. Dropped it; lint passes cleanly.
 - **(15-03) `pnpm add` ERR_PNPM_IGNORED_BUILDS is POST-install only, not pre-flight**: in Phase 13/14 the warning was identified as a hard blocker for `pnpm <script>` invocations, but `pnpm add <pkg>` completes the install before the build-script check fires. Plan-supplied `--ignore-scripts` workaround was unnecessary; package landed in dependencies with a clean lockfile.
+- **(15-05) Status badge suppression when status === AVAILABLE**: DressCard hides DressStatusBadge for AVAILABLE because every visible tile in the public catalog is AVAILABLE by default — coloring all of them with an emerald pill would compete with CategoryBadge for visual attention AND erase the badge's signal value for non-default states. PENDING (mid-rental flow, surfaced because 15-01 PUBLIC_STATUSES includes both) still shows the cyan "Pending Rental" pill.
+- **(15-05) BestFitBadge tier thresholds locked to 80/50**: ≥80 emerald (excellent — celebrate it), 50-79 cyan (acceptable, brand-neutral), <50 amber (caution — possible misfit). Single source of truth for fit-percent visual encoding; Phase 16 FitCheckCard imports BestFitBadge or reuses these thresholds.
+- **(15-05) Null-guard for fitScorePercent lives in BestFitBadge component itself**: `percent == null || percent < 0` short-circuits to render nothing INSIDE BestFitBadge. DressCard also wraps the mount in `fitScorePercent != null` as a layout optimization (avoids reserving space for a hidden element), but defense-in-depth means any other caller can pass raw values without guarding.
+- **(15-05) Optional `href` prop on DressCard (defaults to `/wardrobe/${dress.id}`)**: enables Phase 18 consigner "My Listings" reuse with `href={`/consigner/dresses/${id}/edit`}` — no forking the primitive. Same pattern as 14-02's directory split (`wardrobe/components/` for cross-role primitives).
+- **(15-05) DressCardProps.dress shape is a strict subset of wardrobe.list per-item output**: id/title/category/status/sizeLabel/competitionPrice/color/Images[url,isPrimary,sortOrder]. Grid in 15-07 maps wardrobe.list results straight through — no adapter layer needed. Phase 18 + Phase 19 reuse the same shape.
+- **(15-05) Plain `<img>` with biome-ignore (NOT next/image) — comment explicitly references 14-05 SUMMARY for traceability**: `blob.vercel-storage.com` not in `next.config.js images.remotePatterns`; deferred until a public image optimization pass. Matches 14-03/14-05 precedent; the lint-ignore comment names the upstream SUMMARY so future readers can find the deferral rationale without grepping git history.
+- **(15-05) No barrel files for new wardrobe primitives**: BestFitBadge and DressCard are imported via direct file paths (`@/features/wardrobe/components/BestFitBadge`, `.../DressCard`). Matches the Phase 14-02 convention; tree-shaking friendly; no barrel-induced re-export friction in Server vs Client Component contexts.
 
 ### Pending Todos
 
@@ -149,6 +156,6 @@ Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shippe
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed Plan 15-03 (Slider UI primitive). 2 atomic task commits. SUMMARY.md written. Phase 14 live-UX checklist still pending user wake-up confirmation; `BLOB_READ_WRITE_TOKEN` env still needed for image upload testing.
+Stopped at: Completed Plan 15-05 (DressCard + BestFitBadge presentational primitives). 2 atomic task commits (`40ff2ac`, `ef959e9`). SUMMARY.md written at `.planning/phases/15-catalog-browse-measurements/15-05-SUMMARY.md`. Phase 14 live-UX checklist still pending user wake-up confirmation; `BLOB_READ_WRITE_TOKEN` env still needed for image upload testing.
 Resume file: None
-Next step: Continue Phase 15. Remaining plans: 15-04 (`/wardrobe/measurements` form consuming `wardrobe.measurements.get/update`), 15-05 (`DressCard` + `BestFitBadge` consuming `item.fitScorePercent`, importing `scoreToPercent` from `fitScore.ts`), 15-06 (`WardrobeFilterBar` consuming `callerHasMeasurements` + `item.fitsCaller` — also consumes the new `Slider` primitive from 15-03 for length + price range filters), 15-07 (catalog grid composition replacing the Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx`). **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab. **Note on plan title vs scope:** the 15-03 plan title mentions "+ image domain" in some references but the actual plan body delivered only the Slider primitive + dependency. No Vercel Blob `next.config.js` images.remotePatterns work was in scope.
+Next step: Continue Phase 15. Remaining plans: 15-06 (`WardrobeFilterBar` consuming `callerHasMeasurements` + `item.fitsCaller` annotations from 15-02; also consumes the Slider primitive from 15-03 for length + price range filters), 15-07 (catalog grid composition consuming DressCard from 15-05, replacing the Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx`). **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab. **Backfill candidate:** Plan 15-04 (MeasurementForm + /wardrobe AppLayout role=student) shipped commits `1f43589` and `81a48a0` but no SUMMARY.md was written — if the user wants per-plan decision traceability for 15-04, a backfilled SUMMARY may be worth writing before 15-06.
