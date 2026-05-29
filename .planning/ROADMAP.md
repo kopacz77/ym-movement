@@ -112,7 +112,14 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. "Request to Rent" modal collects rental type, dates, optional competition info, and required message; conflicting dates produce inline warning
   4. Submit creates `RentalRequest` with status PENDING and fires notification to dress owner
   5. Student can cancel own PENDING request and view full history (all statuses + active/past rentals) at `/wardrobe/my-rentals`
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 16-01-PLAN.md — wardrobe.requests TRPC sub-router (checkAvailability/create/cancel/mine/myRentals) with PERM-03 + notification
+- [ ] 16-02-PLAN.md — fitCheckBars.ts pure helper (green/amber/red/unknown state per dimension)
+- [ ] 16-03-PLAN.md — Detail primitives: DressImageCarousel + PricingTierTable + StructuredSizeSummary + RentalStatusBadge
+- [ ] 16-04-PLAN.md — FitCheckCard (DETAIL-02 — 3 horizontal bars + CTA fallback)
+- [ ] 16-05-PLAN.md — RequestRentalDialog (RHF + zodResolver + debounced availability + schema reuse from 16-01)
+- [ ] 16-06-PLAN.md — /wardrobe/[id] route + DressDetailView composition + DressDetailHero
+- [ ] 16-07-PLAN.md — /wardrobe/my-rentals route + MyRentalsView (5 tabs + cancel)
 
 #### Phase 17: Admin Rental Lifecycle
 **Goal**: Admin can approve/decline rental requests and shepherd a rental through payment, return, and deposit release.
