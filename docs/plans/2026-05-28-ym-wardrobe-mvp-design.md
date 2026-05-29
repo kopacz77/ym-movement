@@ -15,13 +15,15 @@ Add a competition dress rental and resale service inside YM Movement. Students o
 
 ## In Scope (v2.0 MVP)
 
-- Catalog browse with category, size, color, and date-availability filters
-- Dress detail page with image carousel, description, three pricing tiers, request CTA
+- **Marketplace-style catalog** with structured filters: category, color, size, length, price, theme, and a "fits my measurements" toggle
+- **Student body measurements** stored on Student profile, drive a "best fit" sort and "fits me" filter
+- Dress detail page with image carousel, description, three pricing tiers, structured fit/size info, request CTA
 - "Request to Rent" flow with rental type, dates, competition info, free-text message to owner
 - Admin inventory management (create/edit/archive dresses, upload up to 8 images per dress)
+- **Self-serve consignment**: any User can create dresses they own from `/wardrobe/consigned/new`; new consigner dresses go through an admin approval queue before going public
 - Admin request queue with approve/decline + response message
 - Active rentals view with return tracking and deposit release
-- Lightweight consignment: any User can be a dress `owner`; commission auto-calculated; payouts tracked manually
+- Global default consignment commission % via Settings (per-dress override allowed)
 - Notifications (in-app + Resend email) on every state transition
 - Money handling reuses existing Venmo/Zelle/Cash pattern with manual admin verification
 
@@ -51,16 +53,35 @@ model Dress {
   title                     String
   description               String
   category                  DressCategory
-  size                      String        // free text: "Adult S", "Youth 12", "Adult M (alterable to S)"
-  color                     String
-  condition                 String        // "Like new", "Gently used", etc.
+  themeTags                 String[]      // free-form, e.g. ["Spanish", "Tango", "Carmen"] — drives theme search
+  color                     String        // primary color label, e.g. "Red", "Black"
+  secondaryColors           String[]      // ["gold", "rhinestones"]
+  condition                 DressCondition
   yearMade                  Int?
+
+  // Structured sizing — drives "fits me" filter and "best fit" sort
+  sizeLabel                 String        // human label: "Adult S", "Youth 12"
+  chestMinCm                Int?
+  chestMaxCm                Int?
+  waistMinCm                Int?
+  waistMaxCm                Int?
+  hipsMinCm                 Int?
+  hipsMaxCm                 Int?
+  torsoMinCm                Int?
+  torsoMaxCm                Int?
+  lengthCm                  Int?          // skirt length / hem drop, useful for height matching
+  alterableSmaller          Boolean       @default(false)  // can be taken in (extends min range by ~2cm)
+  alterableLarger           Boolean       @default(false)  // can be let out
+
+  // Pricing
   competitionPrice          Int           @default(5000)   // cents, $50 default
   seasonalPrice             Int           @default(37500)  // cents, $375 midpoint of $350-400
   purchasePrice             Int?          // nullable — not all dresses are for sale
   securityDeposit           Int           @default(20000)  // cents, $200 default
   cleaningFee               Int           @default(3000)   // cents, $30 default
-  consignmentCommissionPct  Int           @default(0)      // 0 if Yura-owned; 10-25 for consigners
+
+  // Consignment + lifecycle
+  consignmentCommissionPct  Int           @default(0)      // 0 if Yura-owned; otherwise auto-filled from Settings, admin can override
   status                    DressStatus   @default(AVAILABLE)
   internalNotes             String?       // admin-only
   Images                    DressImage[]
@@ -85,13 +106,51 @@ enum DressCategory {
   TEST
 }
 
-enum DressStatus {
-  AVAILABLE
-  PENDING       // request approved, awaiting payment / pickup
-  RENTED        // currently with a renter
-  MAINTENANCE   // returned, being cleaned/repaired (future v2.1 surfaces this)
-  ARCHIVED      // no longer offered
+enum DressCondition {
+  NEW
+  LIKE_NEW
+  GENTLY_USED
+  USED
 }
+
+enum DressStatus {
+  PENDING_APPROVAL  // consigner just uploaded; admin must approve before public
+  AVAILABLE
+  PENDING           // request approved, awaiting payment / pickup
+  RENTED            // currently with a renter
+  MAINTENANCE       // returned, being cleaned/repaired (v2.1 surfaces this)
+  ARCHIVED          // no longer offered
+  REJECTED          // admin rejected a consigner submission
+}
+```
+
+### `Student` — measurement additions
+
+Add a measurements block to the existing `Student` model. All fields nullable so existing students aren't affected by the migration.
+
+```
+// Add to Student model:
+heightCm              Int?
+chestCm               Int?
+waistCm               Int?
+hipsCm                Int?
+torsoCm               Int?       // shoulder-to-waist length (skating-relevant)
+inseamCm              Int?
+sleeveLengthCm        Int?
+preferredFitNotes     String?    // free text: "prefer slightly loose", "open back OK"
+measurementsUpdatedAt DateTime?
+```
+
+Measurements live on `Student`, not `User`, since they're skating-profile data. Students set/edit at `/wardrobe/measurements` or as a section in their profile settings.
+
+### `Settings` — global wardrobe defaults
+
+Add fields to the existing `Settings` row:
+
+```
+defaultConsignmentCommissionPct  Int     @default(15)
+wardrobeRentalRequestExpiryDays  Int     @default(7)   // auto-cancel pending requests after N days
+wardrobeReturnReminderDays       Int     @default(1)   // send reminder T-N before endDate
 ```
 
 ### `DressImage`
@@ -208,21 +267,26 @@ No changes to `Payment` (lessons) or any other existing model. Rental money is t
 
 ### Student-facing (role: STUDENT, COACH, ADMIN, SUPER_ADMIN)
 
-- `GET /wardrobe` — catalog grid with filters
-- `GET /wardrobe/[id]` — dress detail + request CTA
+- `GET /wardrobe` — catalog grid with marketplace filters
+- `GET /wardrobe/[id]` — dress detail + request CTA + fit comparison vs caller's measurements
 - `GET /wardrobe/my-rentals` — student's own request history and active/past rentals
+- `GET /wardrobe/measurements` — view/edit body measurements (driving "fits me" filter)
 
 ### Owner/consigner (any User with at least one `Dress` they own)
 
-- `GET /wardrobe/consigned` — list of dresses they own + earned commission + payout status
+- `GET /wardrobe/consigned` — list of dresses they own + status (incl. PENDING_APPROVAL) + earned commission + payout status
+- `GET /wardrobe/consigned/new` — self-serve dress upload form (creates with status `PENDING_APPROVAL`)
+- `GET /wardrobe/consigned/[id]/edit` — edit own dress (limited fields — can't change consignment % or pricing once approved)
 
 ### Admin (role: ADMIN, SUPER_ADMIN)
 
 - `GET /admin/wardrobe` — inventory grid (all statuses, filterable)
 - `GET /admin/wardrobe/new` — create dress form with image uploader
-- `GET /admin/wardrobe/[id]/edit` — edit dress
-- `GET /admin/wardrobe/requests` — request queue
+- `GET /admin/wardrobe/[id]/edit` — edit any dress (full field access)
+- `GET /admin/wardrobe/pending-approval` — queue of consigner-submitted dresses awaiting review
+- `GET /admin/wardrobe/requests` — rental request queue
 - `GET /admin/wardrobe/rentals` — active rentals + returns due
+- `GET /admin/wardrobe/settings` — configure defaults (commission %, expiry days, reminder days)
 
 All routes follow the existing `(protected)` layout group with `AppLayout`.
 
@@ -231,29 +295,38 @@ All routes follow the existing `(protected)` layout group with `AppLayout`.
 New router at `src/server/api/routers/wardrobe.ts`, mounted at `wardrobe.*`. Admin router at `src/server/api/routers/admin/wardrobe.ts`, mounted at `admin.wardrobe.*`.
 
 **Public-ish (any authenticated user):**
-- `wardrobe.list({ category?, size?, availableBetween?, ownerId? })` — returns paginated dresses, omitting `internalNotes`
-- `wardrobe.byId(id)` — full dress + images + non-internal availability info
+- `wardrobe.list({ category?, sizeLabel?, color?, theme?, minPrice?, maxPrice?, lengthCmMin?, lengthCmMax?, availableBetween?, fitsMe?, sort? })` — returns paginated dresses (status AVAILABLE or PENDING only, excludes PENDING_APPROVAL/REJECTED), omitting `internalNotes`. `fitsMe=true` uses caller's stored measurements. `sort` ∈ `{newest, priceAsc, priceDesc, bestFit}` — `bestFit` only valid when measurements are set.
+- `wardrobe.byId(id)` — full dress + images + non-internal availability info + fit comparison block for caller
 - `wardrobe.checkAvailability({ dressId, startDate, endDate })` — true/false based on existing `Rental` and approved `RentalRequest` rows
 - `wardrobe.createRequest({ dressId, rentalType, startDate, endDate, competitionName?, competitionDate?, message })`
 - `wardrobe.cancelRequest(requestId)` — student can cancel their own PENDING request
 - `wardrobe.myRequests()` — student's own requests
 - `wardrobe.myRentals()` — student's own rentals
-- `wardrobe.myConsignedDresses()` — dresses where caller is owner
+- `wardrobe.measurements.get()` — caller's own measurements
+- `wardrobe.measurements.update(input)` — caller updates own measurements
+
+**Consigner (any User as owner of the dress in question):**
+- `wardrobe.consigner.myDresses()` — dresses where caller is `ownerId`, including PENDING_APPROVAL and REJECTED
+- `wardrobe.consigner.create(input)` — create dress, status forced to PENDING_APPROVAL, `consignmentCommissionPct` auto-set from `Settings.defaultConsignmentCommissionPct` (consigner cannot set this themselves)
+- `wardrobe.consigner.update({ id, ... })` — limited fields: title, description, themeTags, color, images. Cannot change pricing, size structure, or commission % once status moved past PENDING_APPROVAL
+- `wardrobe.consigner.archive(id)` — soft-archive own dress (only allowed when status is AVAILABLE — can't pull during a pending rental)
+- `wardrobe.consigner.uploadImageUrl({ dressId })` / `attachImage` / `deleteImage` — only on own dresses
 
 **Admin:**
-- `admin.wardrobe.create(input)` — create dress (without images; images uploaded separately)
-- `admin.wardrobe.update(id, input)`
+- `admin.wardrobe.create(input)` — create dress (without images; admin can directly create AVAILABLE, bypassing the queue)
+- `admin.wardrobe.update(id, input)` — full field access on any dress
 - `admin.wardrobe.archive(id)` — soft-archive (status = ARCHIVED, archivedAt set)
-- `admin.wardrobe.uploadImageUrl({ dressId })` — returns signed Vercel Blob upload URL + token
-- `admin.wardrobe.attachImage({ dressId, url, sortOrder, isPrimary })` — record image after upload completes
-- `admin.wardrobe.reorderImages({ dressId, ordering })`
-- `admin.wardrobe.deleteImage(imageId)` — also deletes Blob object
+- `admin.wardrobe.uploadImageUrl({ dressId })` / `attachImage({ dressId, url, sortOrder, isPrimary })` / `reorderImages({ dressId, ordering })` / `deleteImage(imageId)`
+- `admin.wardrobe.listPendingApproval()` — consigner submissions awaiting review
+- `admin.wardrobe.approveDress({ dressId, consignmentCommissionPct?, internalNotes? })` — flips PENDING_APPROVAL → AVAILABLE; can override commission % at this step
+- `admin.wardrobe.rejectDress({ dressId, reason })` — flips PENDING_APPROVAL → REJECTED with reason emailed to consigner
 - `admin.wardrobe.listRequests({ status? })`
 - `admin.wardrobe.respondToRequest({ requestId, decision: 'APPROVE' | 'DECLINE', responseMessage })`
-- `admin.wardrobe.markPaymentReceived({ requestId, paymentMethod })` — flips PENDING → CONVERTED, creates `Rental`, sets dress to RENTED
+- `admin.wardrobe.markPaymentReceived({ requestId, paymentMethod })` — flips APPROVED → CONVERTED, creates `Rental`, sets dress to RENTED
 - `admin.wardrobe.markReturned({ rentalId, conditionOnReturn })` — sets `returnedAt`, status RETURNED
 - `admin.wardrobe.releaseDeposit({ rentalId })` — sets DEPOSIT_RELEASED, releases dress back to AVAILABLE
 - `admin.wardrobe.markConsignmentPaidOut({ rentalId })`
+- `admin.wardrobe.updateSettings({ defaultConsignmentCommissionPct?, wardrobeRentalRequestExpiryDays?, wardrobeReturnReminderDays? })`
 
 ## Image Upload Approach
 
@@ -270,6 +343,54 @@ New router at `src/server/api/routers/wardrobe.ts`, mounted at `wardrobe.*`. Adm
 **Constraints**: 5MB pre-compression max per file, JPEG/PNG/WebP only, 8 images per dress max. Server validates content-type after upload by HEAD request on Blob URL.
 
 **Deletion**: `admin.wardrobe.deleteImage` removes Blob via `del()` from `@vercel/blob` and then deletes the row. Cascade delete on dress archive does NOT delete Blobs (cheap, and might be useful for audit).
+
+## Marketplace Browse & Fit Matching
+
+### Filter bar on `/wardrobe`
+
+Sticky on scroll. Fields:
+- **Category** — multi-select chips (Classical, Dramatic, Themed, Ice Dance Single, Ice Dance Partner, Competition, Test)
+- **Color** — multi-select chips, includes primary + secondary colors
+- **Size label** — multi-select chips (auto-populated from distinct `sizeLabel` values in catalog)
+- **Theme search** — text input, matches against `themeTags` array
+- **Length** — range slider in cm (or "any length")
+- **Price** — range slider per night / per season tab
+- **Availability dates** — date range picker (filters out dresses with overlapping confirmed rentals)
+- **Fits me** — toggle. Disabled with tooltip "Set your measurements first" if measurements not stored. When on, applies measurement-based filtering (see scoring below).
+- **Sort** — Newest / Price ↑ / Price ↓ / Best fit (only when measurements set)
+
+Filter state lives in URL params (shareable links). Default sort: Newest.
+
+### "Fits me" filter logic
+
+A dress is included in `fitsMe=true` results when ALL stored caller measurements satisfy:
+
+```
+dress.chestMinCm - alterableSlack ≤ student.chestCm ≤ dress.chestMaxCm + alterableSlack
+   AND same for waistCm and hipsCm
+   AND (dress.lengthCm is null OR student.heightCm is null OR
+        abs(dress.lengthCm - expectedLengthForHeight(student.heightCm)) ≤ 8cm)
+```
+
+Where `alterableSlack = 2 cm` for the relevant direction if the dress is `alterableSmaller` (lower bound) or `alterableLarger` (upper bound), else 0.
+
+Null student measurements are treated as "match" — we don't exclude a dress because a student hasn't entered their hips. Null dress dimensions are treated as "match" too (the consigner didn't fill it in; don't penalize the listing).
+
+### "Best fit" sort
+
+Computed score per dress (higher is better):
+
+```
+score = sum over [chest, waist, hips] of:
+    let center = (min + max) / 2 in
+    1 - min(1, |studentMeasurement - center| / ((max - min) / 2 + 1))
+```
+
+Dresses with more null dimensions get a small penalty (`-0.1` per missing structured field) so fully-described dresses surface first. Score in [0, 3], displayed on the dress card as a 0–100% fit badge when `fitsMe` is active or sort is `bestFit`.
+
+### Detail page fit comparison
+
+`/wardrobe/[id]` shows a "Fit check" card for authenticated students with measurements set. Three rows (chest, waist, hips) with a horizontal bar showing the dress's min-max range and a marker for the student's measurement. Green if inside range, amber if within `alterableSlack`, red if outside. Includes a "Edit my measurements" link.
 
 ## Workflows
 
@@ -304,7 +425,24 @@ New router at `src/server/api/routers/wardrobe.ts`, mounted at `wardrobe.*`. Adm
 4. If deposit released: `releaseDeposit` mutation → status DEPOSIT_RELEASED, dress AVAILABLE, notification to student
 5. If damage/late: admin sets `paymentStatus = LATE_FEE_OWED`, manually contacts student (no automated billing in MVP)
 
-### D. Consignment payout
+### D. Consigner uploads a dress (self-serve)
+
+1. Consigner (any User with a Student or Coach account) opens `/wardrobe/consigned`
+2. Clicks "List a dress" → routed to `/wardrobe/consigned/new`
+3. Form mirrors admin create flow but:
+   - `consignmentCommissionPct` field is hidden (auto-filled from `Settings.defaultConsignmentCommissionPct`); shown as read-only "YM commission: 15%" with tooltip
+   - `securityDeposit`, `cleaningFee` are read-only (set by admin policy, not consigner)
+   - `internalNotes` is hidden
+   - Pricing tiers and structured sizing are required fields
+4. Upload images (same Vercel Blob flow). At least 1 image required to submit.
+5. Submit → status `PENDING_APPROVAL`, notification to admin: "New consigned dress: \<title\> from \<name\>"
+6. Consigner sees the dress in `/wardrobe/consigned` with a "Pending review" pill; not visible to students browsing the catalog
+7. Admin opens `/admin/wardrobe/pending-approval`, sees thumbnail + all fields + consigner identity
+8. Admin reviews: can `approveDress` (optionally overriding commission %), or `rejectDress` with a reason
+9. On approve: status → AVAILABLE, dress is live; consigner notified
+10. On reject: status → REJECTED, reason emailed to consigner; consigner can edit and resubmit (status flips back to PENDING_APPROVAL on resubmit)
+
+### E. Consignment payout
 
 1. Owner of a non-Yura dress sees their dresses + rental history at `/wardrobe/consigned`
 2. Each completed rental shows `consignmentPayoutAmount` and `consignmentPaidOut` flag
@@ -315,12 +453,16 @@ New router at `src/server/api/routers/wardrobe.ts`, mounted at `wardrobe.*`. Adm
 
 Reuses existing `Notification` model + `pendingEmailNotifications` queue and Resend templates (`src/lib/email.ts`). New template functions:
 
-- `sendRentalRequestReceivedEmail(ownerUser, request)` — to dress owner
+- `sendConsignerDressSubmittedEmail(admin, dress, consigner)` — to admin, on new consigner submission
+- `sendConsignerDressApprovedEmail(consigner, dress)` — dress is live
+- `sendConsignerDressRejectedEmail(consigner, dress, reason)` — with reason and edit link
+- `sendRentalRequestReceivedEmail(ownerUser, request)` — to dress owner (Yura or consigner — owner of record gets the notification)
 - `sendRentalDecisionEmail(student, request, decision)` — APPROVED includes payment instructions; DECLINED includes response message
 - `sendRentalConfirmedEmail(student, rental)` — payment marked received
-- `sendReturnReminderEmail(student, rental)` — T-1 day before endDate (cron via existing notification scheduler)
+- `sendReturnReminderEmail(student, rental)` — T-N day before endDate (cron via existing notification scheduler; N from `Settings.wardrobeReturnReminderDays`)
 - `sendDepositReleasedEmail(student, rental)`
 - `sendConsignmentPayoutDueEmail(admin, rental)` — internal reminder
+- `sendConsignmentPayoutSentEmail(consigner, rental)` — admin marked paid out
 
 All templates follow the cyan `#0891b2` + navy `#1a3a5c` palette per the 2026-04-26 brand sweep.
 
@@ -348,17 +490,21 @@ Sidebar architecture rules in CLAUDE.md remain untouched — only adding a nav e
 | Action | STUDENT | COACH | ADMIN | SUPER_ADMIN | Dress Owner (any role) |
 |---|---|---|---|---|---|
 | Browse catalog | ✓ | ✓ | ✓ | ✓ | ✓ |
+| View/edit own measurements | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Create rental request | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Cancel own pending request | ✓ | ✓ | ✓ | ✓ | ✓ |
 | View own requests/rentals | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Add/edit dresses | — | — | ✓ | ✓ | — (MVP: admin-only adds even consigner dresses) |
-| Approve/decline requests | — | — | ✓ | ✓ | — |
+| Self-serve list a consigned dress | ✓ | ✓ | — | — | — |
+| Edit/archive own consigned dress (limited fields) | — | — | — | — | ✓ |
+| Add/edit ANY dress (full fields, bypass approval) | — | — | ✓ | ✓ | — |
+| Approve/reject pending consigner submissions | — | — | ✓ | ✓ | — |
+| Set/override consignment commission % | — | — | ✓ | ✓ | — |
+| Approve/decline rental requests | — | — | ✓ | ✓ | — |
 | Mark payment received | — | — | ✓ | ✓ | — |
 | Mark returned, release deposit | — | — | ✓ | ✓ | — |
 | View consigned dress earnings | — | — | ✓ | ✓ | ✓ (own dresses only) |
 | Mark consignment paid out | — | — | ✓ | ✓ | — |
-
-MVP intentionally has admin do all data entry — consigners drop off dresses physically and Yura adds them. Self-serve consigner upload comes in v2.2.
+| Edit global wardrobe settings | — | — | ✓ | ✓ | — |
 
 ## Money Handling (MVP)
 
@@ -383,15 +529,20 @@ MVP intentionally has admin do all data entry — consigners drop off dresses ph
 - Storybook stories for `DressCard`, `RequestRentalDialog`, `RentalStatusBadge`, `ConsignmentEarningsTable`
 - VRT snapshot of `/wardrobe` (empty + populated states)
 
-## Open Questions for User Review
+## Resolved Questions
 
-1. **Consigner self-serve**: MVP keeps it admin-only (Yura adds the dress on consigner's behalf). Confirm that's OK for v2.0, or should consigners be able to upload from `/wardrobe/consigned` from day 1?
-2. **Default consignment commission %**: spec assumes admin sets per-dress. Want a global default (e.g., 15%) we can change later?
-3. **Sidebar icon**: `Shirt` from lucide-react is the obvious pick. Acceptable, or want something more specific?
-4. **`/wardrobe/consigned` visibility**: shown to anyone who has at least one owned dress, or hidden behind a feature flag until consignment is actively used?
+1. **Consigner self-serve**: ✅ Enabled in MVP. Consigners upload from `/wardrobe/consigned/new`, dresses go to admin approval queue before going public.
+2. **Marketplace browsing**: ✅ Structured size filters + student measurements + "fits me" toggle + "best fit" sort.
+3. **Default consignment %**: ✅ Global default in `Settings.defaultConsignmentCommissionPct` (starts at 15%), admin can override per dress at approval time.
+4. **Sidebar icon**: ✅ `Shirt` from lucide-react.
+
+## Open Questions (defer to implementation)
+
+1. **`/wardrobe/consigned` visibility for non-owners**: Always show the route, or hide until the user has at least one dress? Recommend: always show — empty state has a "List your first dress" CTA, doubles as the discovery surface.
+2. **Measurement units**: Spec uses cm throughout. Add an inches toggle in the measurement editor for US users, store internally as cm? Recommend yes — answered during implementation, low-risk.
 
 ## Rollout Plan
 
-Phase 0 (this spec) → Phase 1 (schema + migrations + Vercel Blob wiring) → Phase 2 (admin inventory CRUD + image upload) → Phase 3 (student catalog browse + detail) → Phase 4 (request flow + admin queue) → Phase 5 (rentals + payment marking + return flow) → Phase 6 (consignment view + payout tracking) → Phase 7 (notifications + email templates) → Phase 8 (E2E tests + Storybook + seed data) → Ship.
+Phase 0 (this spec) → Phase 1 (schema + migrations + Settings extensions + Vercel Blob wiring) → Phase 2 (admin inventory CRUD + image upload) → Phase 3 (student measurements + catalog browse with marketplace filters and fit scoring) → Phase 4 (dress detail page with fit comparison + request flow) → Phase 5 (admin rental queue + payment marking + return flow + deposit release) → Phase 6 (self-serve consigner upload + admin approval queue) → Phase 7 (consignment payout tracking + earnings view) → Phase 8 (notifications + all email templates) → Phase 9 (E2E tests + Storybook stories + seed data + health check extension) → Ship.
 
-Each phase becomes a GSD phase under the v2.0 milestone. We are not gating behind a feature flag — internal-only audience is small enough that staged rollout via the GSD phase cadence (each phase shippable in isolation) gives us the same safety without flag complexity.
+Each phase becomes a GSD phase under the v2.0 milestone. We are not gating behind a feature flag — internal-only audience is small enough that staged rollout via the GSD phase cadence (each phase shippable in isolation) gives us the same safety without flag complexity. Phases 6–7 (consigner work) can be deferred to a fast-follow if Phase 5 ships and we want immediate dogfooding.
