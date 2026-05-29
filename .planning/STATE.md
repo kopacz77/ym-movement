@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 13 of 22 (Wardrobe Schema Foundation)
-Plan: 01 of N (Wardrobe Schema + Migration) — completed
+Plan: 03 of N (Wardrobe Blob Upload Pipeline + Image TRPC Procedures) — completed
 Status: In progress
-Last activity: 2026-05-29 — Completed 13-01-PLAN.md (wardrobe schema, transaction-wrapped migration applied to dev Neon, zero data loss)
+Last activity: 2026-05-29 — Completed 13-03-PLAN.md (Vercel Blob upload route + wardrobe.images TRPC + client compression helper)
 
-Progress: █░░░░░░░░░ ~10% of v2.0 milestone
+Progress: ██░░░░░░░░ ~20% of v2.0 milestone
 
 ## Performance Metrics
 
@@ -45,6 +45,13 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone
 - **(13-01) All wardrobe money fields stored as Int cents** (no Float, to avoid drift)
 - **(13-01) Settings extension deferred to Plan 02**: existing Settings is key/value JSON, not typed singleton; wardrobe defaults will be a `key: "wardrobe"` row
 - **(13-01) Named `@relation("DressOwner")` on User<->Dress**: pre-empt ambiguity if a `lastEditedById` link is added later
+- **(13-03) handleUpload() route handler (NOT a TRPC signed-URL mutation)**: Vercel SDK owns the auth callback, content-type whitelist, and byte cap — keeps enforcement single-sourced
+- **(13-03) Client-driven attachImage persistence (NOT webhook-driven onUploadCompleted)**: Vercel cannot reach localhost without ngrok; the client calling `wardrobe.images.attachImage` after `upload()` resolves is debuggable and tunnel-free
+- **(13-03) Defense-in-depth caps**: 8-image and 5MB caps enforced at BOTH the route handler AND the TRPC mutation / client compression helper
+- **(13-03) Delete order: `del(url)` first, then `prisma.dressImage.delete`**: orphan row → loud 404 in UI; orphan blob → silent storage cost (avoided)
+- **(13-03) `del()` from `@vercel/blob` (server SDK) NOT `@vercel/blob/client`**: separate runtime targets, different exports
+- **(13-03) `protectedProcedure` + per-call `assertCanModifyDress` (admin OR owner)**: not `adminProcedure`, because owners must legitimately manage their own dress photos
+- **(13-03) `setPrimary` included even though not in plan deliverables**: STORAGE-04 implies it and Phase 14 gallery UI needs it — avoids a forced second touch of `imageQueries.ts`
 
 ### Pending Todos
 
@@ -63,7 +70,7 @@ Progress: █░░░░░░░░░ ~10% of v2.0 milestone
 
 ## Session Continuity
 
-Last session: 2026-05-29T04:25:55Z
-Stopped at: Completed 13-01-PLAN.md (wardrobe schema authored, transaction-wrapped migration applied to dev Neon, zero data loss across 7 critical tables).
+Last session: 2026-05-29T04:38:33Z
+Stopped at: Completed 13-03-PLAN.md (Vercel Blob upload route handler + wardrobe.images TRPC procedures + client-side image compression helper + wardrobeRouter mounted on appRouter).
 Resume file: None
-Next step: `/gsd:plan-phase 13` next plan (Settings JSON blob + wardrobe defaults seed), or proceed to `/gsd:plan-phase 14`.
+Next step: Phase 13 foundation is complete (01 schema, 02 settings, 03 upload pipeline). Proceed to `/gsd:plan-phase 14` to wire React components to the new wardrobe TRPC namespace. **User-setup blocker for Phase 14 end-to-end testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
