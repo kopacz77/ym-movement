@@ -21,6 +21,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { dressInputSchema } from "@/features/admin/api/queries/wardrobeDressQueries";
 import { getWardrobeSettings } from "@/features/admin/api/queries/wardrobeSettingsQueries";
+import { createNotificationForMultipleUsers } from "@/features/notifications/utils/notificationHelpers";
+import { sendConsignerDressSubmittedEmail } from "@/lib/email";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 /**
@@ -142,7 +144,7 @@ export const consignerRouter = createTRPCRouter({
    */
   create: protectedProcedure.input(consignerCreateInputSchema).mutation(async ({ ctx, input }) => {
     const settings = await getWardrobeSettings(ctx.prisma);
-    return ctx.prisma.dress.create({
+    const created = await ctx.prisma.dress.create({
       data: {
         ...input,
         ownerId: ctx.session.user.id,
@@ -152,6 +154,78 @@ export const consignerRouter = createTRPCRouter({
         // rejectionReason intentionally left as schema default (NULL)
       },
     });
+
+    // NOTIFY-01: fan-out admin notification + email (Phase 20). Resolve consigner
+    // display name for the recipient-facing copy, then iterate admins.
+    const consigner = await ctx.prisma.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: { name: true },
+    });
+    const consignerName = consigner?.name ?? "A consigner";
+
+    // In-app fan-out (admin + super-admin). Non-blocking — mutation must succeed
+    // even if notifications fail.
+    try {
+      const admins = await ctx.prisma.user.findMany({
+        where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+        select: { id: true, email: true, name: true },
+      });
+
+      if (admins.length > 0) {
+        await createNotificationForMultipleUsers(
+          admins.map((a) => a.id),
+          {
+            title: "New consigner submission",
+            message: `${consignerName} submitted ${created.title}`,
+            type: "INFO",
+            link: "/admin/wardrobe/pending-approval",
+          },
+        );
+      }
+    } catch (err) {
+      console.error("[WARDROBE] Failed to notify admins of consigner submission (in-app):", err);
+    }
+
+    // Email fan-out (SECOND try block — per RESEARCH §Q4, separate try ensures
+    // in-app inbox row lands even if Resend is down). Iterate admins and call
+    // helper once per recipient. Fallback to ADMIN_NOTIFICATION_EMAIL env var
+    // when zero admin users exist (mirrors sendAdminSignupNotification at
+    // email.ts:176-225).
+    try {
+      const admins = await ctx.prisma.user.findMany({
+        where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+        select: { email: true, name: true },
+      });
+
+      if (admins.length > 0) {
+        for (const admin of admins) {
+          await sendConsignerDressSubmittedEmail(admin.email, admin.name ?? "Admin", {
+            consignerName,
+            dressTitle: created.title,
+            dressCategory: created.category,
+            isResubmit: false,
+          });
+        }
+      } else {
+        const fallback = (process.env.ADMIN_NOTIFICATION_EMAIL || "").trim();
+        if (fallback) {
+          await sendConsignerDressSubmittedEmail(fallback, "Admin", {
+            consignerName,
+            dressTitle: created.title,
+            dressCategory: created.category,
+            isResubmit: false,
+          });
+        } else {
+          console.warn(
+            "[WARDROBE] No admin users found AND ADMIN_NOTIFICATION_EMAIL not set — NOTIFY-01 email skipped",
+          );
+        }
+      }
+    } catch (err) {
+      console.error("[WARDROBE] Failed to email admins of consigner submission:", err);
+    }
+
+    return created;
   }),
 
   /**
@@ -227,13 +301,81 @@ export const consignerRouter = createTRPCRouter({
           message: "Only rejected dresses can be resubmitted",
         });
       }
-      return ctx.prisma.dress.update({
+
+      const updated = await ctx.prisma.dress.update({
         where: { id: input.id },
         data: {
           status: "PENDING_APPROVAL",
           rejectionReason: null, // clear the stale reason on resubmit
         },
       });
+
+      // NOTIFY-01 (resubmit branch): same fan-out as create, isResubmit: true
+      const consigner = await ctx.prisma.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { name: true },
+      });
+      const consignerName = consigner?.name ?? "A consigner";
+
+      try {
+        const admins = await ctx.prisma.user.findMany({
+          where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+          select: { id: true, email: true, name: true },
+        });
+
+        if (admins.length > 0) {
+          await createNotificationForMultipleUsers(
+            admins.map((a) => a.id),
+            {
+              title: "Resubmitted consigner submission",
+              message: `${consignerName} resubmitted ${updated.title}`,
+              type: "INFO",
+              link: "/admin/wardrobe/pending-approval",
+            },
+          );
+        }
+      } catch (err) {
+        console.error(
+          "[WARDROBE] Failed to notify admins of consigner resubmission (in-app):",
+          err,
+        );
+      }
+
+      try {
+        const admins = await ctx.prisma.user.findMany({
+          where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+          select: { email: true, name: true },
+        });
+
+        if (admins.length > 0) {
+          for (const admin of admins) {
+            await sendConsignerDressSubmittedEmail(admin.email, admin.name ?? "Admin", {
+              consignerName,
+              dressTitle: updated.title,
+              dressCategory: updated.category,
+              isResubmit: true,
+            });
+          }
+        } else {
+          const fallback = (process.env.ADMIN_NOTIFICATION_EMAIL || "").trim();
+          if (fallback) {
+            await sendConsignerDressSubmittedEmail(fallback, "Admin", {
+              consignerName,
+              dressTitle: updated.title,
+              dressCategory: updated.category,
+              isResubmit: true,
+            });
+          } else {
+            console.warn(
+              "[WARDROBE] No admin users found AND ADMIN_NOTIFICATION_EMAIL not set — NOTIFY-01 resubmit email skipped",
+            );
+          }
+        }
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email admins of consigner resubmission:", err);
+      }
+
+      return updated;
     }),
 
   /**
