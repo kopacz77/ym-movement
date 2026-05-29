@@ -25,6 +25,7 @@ import { addDays } from "date-fns";
 import { z } from "zod";
 import { getWardrobeSettings } from "@/features/admin/api/queries/wardrobeSettingsQueries";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
+import { sendRentalRequestReceivedEmail } from "@/lib/email";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 /**
@@ -156,7 +157,13 @@ export const requestsRouter = createTRPCRouter({
     // Step 2: dress + ownership/status gates
     const dress = await ctx.prisma.dress.findUnique({
       where: { id: input.dressId },
-      select: { id: true, ownerId: true, title: true, status: true },
+      select: {
+        id: true,
+        ownerId: true,
+        title: true,
+        status: true,
+        Owner: { select: { email: true, name: true } }, // for NOTIFY-04 recipient
+      },
     });
     if (!dress) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Dress not found" });
@@ -237,6 +244,24 @@ export const requestsRouter = createTRPCRouter({
     } catch (err) {
       console.error("[WARDROBE] Failed to notify dress owner:", err);
       // Non-blocking: the request itself succeeded.
+    }
+
+    // NOTIFY-04 (Phase 20): email the dress OWNER (Yura or consigner) — NOT the
+    // requesting student. Second try block ensures Resend failure does not
+    // suppress the in-app inbox row.
+    try {
+      await sendRentalRequestReceivedEmail(dress.Owner.email, dress.Owner.name ?? "Owner", {
+        dressTitle: dress.title,
+        studentName: student.User.name ?? "A student",
+        rentalType: input.rentalType,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        competitionName: input.competitionName ?? null,
+        competitionDate: input.competitionDate ?? null,
+        message: input.message,
+      });
+    } catch (err) {
+      console.error("[WARDROBE] Failed to email dress owner of new request:", err);
     }
 
     return created;
