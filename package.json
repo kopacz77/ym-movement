@@ -54,6 +54,7 @@
     "security:fix": "pnpm audit --fix",
     "db:check": "tsx scripts/pre-migration-check.ts",
     "prisma:migrate": "prisma migrate deploy",
+    "seed:wardrobe:dev": "tsx scripts/seed-wardrobe.ts",
     "migrate:coach-data": "tsx scripts/migrate-coach-data.ts",
     "migrate:lesson-types": "tsx scripts/migrate-lesson-types.ts",
     "migrate:fix-prices": "tsx scripts/fix-lesson-prices.ts",
