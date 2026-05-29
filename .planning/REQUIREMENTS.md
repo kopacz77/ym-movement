@@ -208,18 +208,18 @@ Phase mappings populated by `/gsd:create-roadmap` on 2026-05-28. Each v1 require
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | Phase 13 | Pending |
-| SCHEMA-02 | Phase 13 | Pending |
-| SCHEMA-03 | Phase 13 | Pending |
-| SCHEMA-04 | Phase 13 | Pending |
-| SCHEMA-05 | Phase 13 | Pending |
-| SCHEMA-06 | Phase 13 | Pending |
-| SCHEMA-07 | Phase 13 | Pending |
-| STORAGE-01 | Phase 13 | Pending |
-| STORAGE-02 | Phase 13 | Pending |
-| STORAGE-03 | Phase 13 | Pending |
-| STORAGE-04 | Phase 13 | Pending |
-| STORAGE-05 | Phase 13 | Pending |
+| SCHEMA-01 | Phase 13 | Complete |
+| SCHEMA-02 | Phase 13 | Complete |
+| SCHEMA-03 | Phase 13 | Complete |
+| SCHEMA-04 | Phase 13 | Complete |
+| SCHEMA-05 | Phase 13 | Complete |
+| SCHEMA-06 | Phase 13 | Complete |
+| SCHEMA-07 | Phase 13 | Complete |
+| STORAGE-01 | Phase 13 | Complete |
+| STORAGE-02 | Phase 13 | Complete |
+| STORAGE-03 | Phase 13 | Complete |
+| STORAGE-04 | Phase 13 | Complete |
+| STORAGE-05 | Phase 13 | Complete |
 | CAT-01 | Phase 15 | Pending |
 | CAT-02 | Phase 15 | Pending |
 | CAT-03 | Phase 15 | Pending |
