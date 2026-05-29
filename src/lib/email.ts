@@ -894,3 +894,339 @@ export async function sendConsignmentPayoutSentEmail(
     emailContent,
   );
 }
+
+/**
+ * NOTIFY-04: Sent to the dress OWNER (Yura or consigner) when a student
+ * submits a new rental request. NOT sent to the requesting student.
+ *
+ * Plan 20-02 wires this beside the existing createNotification call at
+ * requestQueries.ts:240 (create mutation). The Owner.email + name come
+ * from an extended findUnique select on the dress (Plan 20-02 detail).
+ */
+export async function sendRentalRequestReceivedEmail(
+  ownerEmail: string,
+  ownerName: string,
+  data: {
+    dressTitle: string;
+    studentName: string;
+    rentalType: string;
+    startDate: Date;
+    endDate: Date;
+    competitionName: string | null;
+    competitionDate: Date | null;
+    message: string;
+  },
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">📩 New Rental Request</h1>
+      <p>Hello ${ownerName},</p>
+      <p>${data.studentName} has requested to rent one of your dresses on YM Wardrobe.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Request Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">👤 <strong>Requested by:</strong> ${data.studentName}</li>
+          <li style="margin-bottom: 8px;">🏷️ <strong>Rental Type:</strong> ${data.rentalType}</li>
+          <li style="margin-bottom: 8px;">📅 <strong>Start Date:</strong> ${formatDate(data.startDate, "America/Los_Angeles")}</li>
+          <li style="margin-bottom: 8px;">📅 <strong>End Date:</strong> ${formatDate(data.endDate, "America/Los_Angeles")}</li>
+          ${data.competitionName ? `<li style="margin-bottom: 8px;">🏆 <strong>Competition:</strong> ${data.competitionName}</li>` : ""}
+          ${data.competitionDate ? `<li style="margin-bottom: 8px;">📆 <strong>Competition Date:</strong> ${formatDate(data.competitionDate, "America/Los_Angeles")}</li>` : ""}
+        </ul>
+      </div>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #0c4a6e; margin-top: 0;">Message from ${data.studentName}</h2>
+        <p style="margin: 0; white-space: pre-wrap;">${data.message}</p>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/admin/wardrobe/requests"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          Review Request
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(ownerEmail, `New rental request for "${data.dressTitle}"`, emailContent);
+}
+
+/**
+ * NOTIFY-05: Sent to the requesting student when an admin responds to
+ * their rental request — either APPROVED (with payment instructions) or
+ * DECLINED (with the owner's response message).
+ *
+ * Discriminated union on data.decision lets one helper render both
+ * branches with identical chrome (greeting / footer / signoff) and only
+ * the middle card varying. The call site (Plan 20-02) branches on
+ * `input.decision === "APPROVE"` mirroring the existing createNotification
+ * call's isApprove branch at wardrobeRequestQueries.ts:249.
+ */
+export async function sendRentalDecisionEmail(
+  studentEmail: string,
+  studentName: string,
+  data:
+    | {
+        decision: "APPROVED";
+        dressTitle: string;
+        responseMessage: string;
+        totalDueCents: number;
+      }
+    | {
+        decision: "DECLINED";
+        dressTitle: string;
+        responseMessage: string;
+      },
+) {
+  const isApproved = data.decision === "APPROVED";
+  const subject = isApproved
+    ? `✅ Approved: your rental request for "${data.dressTitle}"`
+    : `Update on your rental request for "${data.dressTitle}"`;
+
+  const headerTitle = isApproved
+    ? "✅ Your Rental Request Was Approved"
+    : "📋 Update on Your Rental Request";
+
+  const middleCard =
+    isApproved && data.decision === "APPROVED"
+      ? `
+        <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+          <h2 style="color: #1a3a5c; margin-top: 0;">Payment Required to Confirm</h2>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+            <li style="margin-bottom: 8px;">💰 <strong>Total Due:</strong> ${formatCurrencyFromCents(data.totalDueCents)}</li>
+          </ul>
+        </div>
+
+        <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 20px; margin: 20px 0; border-radius: 4px;">
+          <h2 style="color: #0c4a6e; margin-top: 0;">How to Pay</h2>
+          <p style="margin-bottom: 10px;">💳 <strong>Venmo:</strong> @yura-min</p>
+          <p style="margin-bottom: 10px;">💳 <strong>Zelle:</strong> (714) 743-7071</p>
+          <p style="margin-top: 15px; font-size: 14px;">Please include "${data.dressTitle}" in your payment note so we can match it to your reservation.</p>
+        </div>
+
+        <div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 20px; margin: 20px 0; border-radius: 4px;">
+          <h2 style="color: #0c4a6e; margin-top: 0;">Reviewer Message</h2>
+          <p style="margin: 0; white-space: pre-wrap;">${data.responseMessage}</p>
+        </div>
+      `
+      : `
+        <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+          <h2 style="color: #1a3a5c; margin-top: 0;">Request Details</h2>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+          <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>📋 Reviewer Message:</strong></p>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #92400e; white-space: pre-wrap;">${data.responseMessage}</p>
+        </div>
+      `;
+
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">${headerTitle}</h1>
+      <p>Hello ${studentName},</p>
+      <p>${isApproved ? "Great news — your rental request has been approved! Please complete payment to confirm your reservation." : "We have an update on your recent rental request."}</p>
+
+      ${middleCard}
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/my-rentals"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          View My Rentals
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(studentEmail, subject, emailContent);
+}
+
+/**
+ * NOTIFY-06: Sent to the student when an admin marks payment received
+ * for their rental, converting the APPROVED request into a PAID Rental.
+ *
+ * Plan 20-02 wires this beside the existing createNotification call at
+ * wardrobeRequestQueries.ts:372 (markPaymentReceived mutation).
+ */
+export async function sendRentalConfirmedEmail(
+  studentEmail: string,
+  studentName: string,
+  data: {
+    dressTitle: string;
+    rentalType: string;
+    startDate: Date;
+    endDate: Date;
+    totalChargedCents: number;
+    paymentMethod: string;
+  },
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">🎉 Your Rental Is Confirmed</h1>
+      <p>Hello ${studentName},</p>
+      <p>Your payment has been received and your rental is confirmed. See you on the ice!</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Rental Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">🏷️ <strong>Rental Type:</strong> ${data.rentalType}</li>
+          <li style="margin-bottom: 8px;">📅 <strong>Start Date:</strong> ${formatDate(data.startDate, "America/Los_Angeles")}</li>
+          <li style="margin-bottom: 8px;">📅 <strong>End Date:</strong> ${formatDate(data.endDate, "America/Los_Angeles")}</li>
+          <li style="margin-bottom: 8px;">💰 <strong>Total Charged:</strong> ${formatCurrencyFromCents(data.totalChargedCents)}</li>
+          <li style="margin-bottom: 8px;">💳 <strong>Payment Method:</strong> ${data.paymentMethod}</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/my-rentals"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          View My Rentals
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(
+    studentEmail,
+    `🎉 Your rental of "${data.dressTitle}" is confirmed`,
+    emailContent,
+  );
+}
+
+/**
+ * NOTIFY-07: Sent to a student as a return-reminder T-`daysUntilDue`
+ * days before their rental's endDate. Cron-driven (NOT mutation-driven)
+ * — Plan 20-03 wires the daily cron at /api/cron/wardrobe-return-reminders
+ * which iterates Rental rows where endDate is within
+ * wardrobeReturnReminderDays (from Settings) AND returnReminderSentAt
+ * IS NULL, then marks the row sent.
+ */
+export async function sendReturnReminderEmail(
+  studentEmail: string,
+  studentName: string,
+  data: {
+    dressTitle: string;
+    endDate: Date;
+    daysUntilDue: number;
+  },
+) {
+  const dayWord = data.daysUntilDue === 1 ? "day" : "days";
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">⏰ Return Reminder</h1>
+      <p>Hello ${studentName},</p>
+      <p>This is a friendly reminder that your rental is due back in ${data.daysUntilDue} ${dayWord}.</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Rental Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">📅 <strong>Due Back:</strong> ${formatDate(data.endDate, "America/Los_Angeles")}</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 25px; padding: 15px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>⏰ Reminder:</strong> Please return the dress on time so your security deposit can be released promptly.</p>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/my-rentals"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          View My Rentals
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(
+    studentEmail,
+    `⏰ Return reminder: "${data.dressTitle}" due ${formatDate(data.endDate, "America/Los_Angeles")}`,
+    emailContent,
+  );
+}
+
+/**
+ * NOTIFY-08: Sent to the student when an admin releases their security
+ * deposit on a RETURNED rental — the lifecycle close.
+ *
+ * Plan 20-02 wires this beside the existing createNotification call at
+ * wardrobeRequestQueries.ts:571 (releaseDeposit mutation).
+ */
+export async function sendDepositReleasedEmail(
+  studentEmail: string,
+  studentName: string,
+  data: {
+    dressTitle: string;
+    depositAmountCents: number;
+  },
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a3a5c;">✅ Security Deposit Released</h1>
+      <p>Hello ${studentName},</p>
+      <p>Your security deposit has been released. Thank you for returning the dress in good condition!</p>
+
+      <div style="background-color: #f0f9ff; border-left: 4px solid #0891b2; padding: 20px; margin: 20px 0; border-radius: 4px;">
+        <h2 style="color: #1a3a5c; margin-top: 0;">Rental Details</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">👗 <strong>Dress:</strong> ${data.dressTitle}</li>
+          <li style="margin-bottom: 8px;">💰 <strong>Deposit Released:</strong> ${formatCurrencyFromCents(data.depositAmountCents)}</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resolveBaseUrl()}/wardrobe/my-rentals"
+           style="display: inline-block; background-color: #0891b2; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+          View My Rentals
+        </a>
+      </div>
+
+      <p style="margin-top: 20px;">Best regards,</p>
+      <p>The YM Movement Team</p>
+
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
+        <p style="margin: 0;">This is an automated notification. Please do not reply directly to this email.</p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(
+    studentEmail,
+    `Your security deposit for "${data.dressTitle}" has been released`,
+    emailContent,
+  );
+}
