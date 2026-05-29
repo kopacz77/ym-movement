@@ -39,7 +39,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 - [x] **Phase 13: Wardrobe Schema Foundation** — Prisma models, Student measurement fields, Settings extensions, Vercel Blob image upload pipeline ✓ 2026-05-29
 - [x] **Phase 14: Admin Inventory CRUD** — Admin create/edit/list dresses + global settings UI + sidebar entry + admin permission middleware ✓ 2026-05-29
 - [x] **Phase 15: Catalog Browse & Measurements** — Marketplace `/wardrobe` with structured filters, student measurement profile, "fits me" toggle, best-fit sort ✓ 2026-05-29
-- [ ] **Phase 16: Dress Detail & Rental Request** — Detail page with fit comparison, request modal, my-rentals history, conflict warnings
+- [x] **Phase 16: Dress Detail & Rental Request** — Detail page with fit comparison, request modal, my-rentals history, conflict warnings ✓ 2026-05-29
 - [ ] **Phase 17: Admin Rental Lifecycle** — Request queue, payment-received flow, returns, deposit release, consignment payout calculation
 - [ ] **Phase 18: Self-Serve Consignment** — Consigner upload form, PENDING_APPROVAL queue, admin approve/reject with commission override
 - [ ] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking
@@ -198,7 +198,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 13. Wardrobe schema foundation | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 14. Admin inventory CRUD | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 15. Catalog browse measurements | v2.0 | 7/7 | Complete | 2026-05-29 |
-| 16. Dress detail rental request | v2.0 | 0/TBD | Not started | — |
+| 16. Dress detail rental request | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 17. Admin rental lifecycle | v2.0 | 0/TBD | Not started | — |
 | 18. Self-serve consignment | v2.0 | 0/TBD | Not started | — |
 | 19. Consignment payouts | v2.0 | 0/TBD | Not started | — |
