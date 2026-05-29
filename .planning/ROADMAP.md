@@ -42,7 +42,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 - [x] **Phase 16: Dress Detail & Rental Request** — Detail page with fit comparison, request modal, my-rentals history, conflict warnings ✓ 2026-05-29
 - [x] **Phase 17: Admin Rental Lifecycle** — Request queue, payment-received flow, returns, deposit release, consignment payout calculation ✓ 2026-05-29
 - [x] **Phase 18: Self-Serve Consignment** — Consigner upload form, PENDING_APPROVAL queue, admin approve/reject with commission override ✓ 2026-05-29
-- [ ] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking
+- [x] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking ✓ 2026-05-29
 - [ ] **Phase 20: Wardrobe Notifications** — 9 new email + in-app templates spanning rental and consignment lifecycle
 - [ ] **Phase 21: Testing, Seeding & Health Checks** — Playwright E2E specs, unit tests, seed script, health-check extension, new Storybook stories + VRT
 - [ ] **Phase 22: Project-Wide Storybook Audit** — Inventory project components, identify coverage gaps, backfill missing stories + VRT snapshots
@@ -165,7 +165,10 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 **Success Criteria** (what must be TRUE):
   1. `/wardrobe/consigned` shows owner's dresses across all statuses with per-rental earnings and payout status (paid / unpaid)
   2. Admin can mark consignment paid out per rental; `consignmentPaidOut` + `consignmentPaidOutAt` recorded and surfaced back to consigner view
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 19-01-PLAN.md — Extend wardrobe.consigner with myEarnings + extend admin.wardrobeRentals with markConsignmentPaidOut + outstandingPayoutsOnly filter on listRentals (no schema migration — payout columns shipped in initial wardrobe migration)
+- [ ] 19-02-PLAN.md — ConsignerEarningsTable (3-card totals + grouped table) + 5th 'Earnings' tab on MyConsignedDressesList with URL ?tab=earnings persistence
+- [ ] 19-03-PLAN.md — Extend admin RentalsTable with 3rd 'Outstanding Payouts' tab + per-row Mark Payout Sent button + showConfirmationToast flow
 
 #### Phase 20: Wardrobe Notifications
 **Goal**: All 9 lifecycle notifications fire reliably with brand-consistent templates.
@@ -213,7 +216,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 16. Dress detail rental request | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 17. Admin rental lifecycle | v2.0 | 5/5 | Complete | 2026-05-29 |
 | 18. Self-serve consignment | v2.0 | 7/7 | Complete | 2026-05-29 |
-| 19. Consignment payouts | v2.0 | 0/TBD | Not started | — |
+| 19. Consignment payouts | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 20. Wardrobe notifications | v2.0 | 0/TBD | Not started | — |
 | 21. Wardrobe testing seed health | v2.0 | 0/TBD | Not started | — |
 | 22. Project-wide Storybook audit | v2.0 | 0/TBD | Not started | — |

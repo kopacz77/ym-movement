@@ -255,7 +255,7 @@ Phase mappings populated by `/gsd:create-roadmap` on 2026-05-28. Each v1 require
 | CONSIGN-07 | Phase 18 | Complete |
 | CONSIGN-08 | Phase 18 | Complete |
 | CONSIGN-09 | Phase 18 | Complete |
-| CONSIGN-10 | Phase 19 | Pending |
+| CONSIGN-10 | Phase 19 | Complete |
 | RENTAL-01 | Phase 17 | Complete |
 | RENTAL-02 | Phase 17 | Complete |
 | RENTAL-03 | Phase 17 | Complete |
@@ -263,7 +263,7 @@ Phase mappings populated by `/gsd:create-roadmap` on 2026-05-28. Each v1 require
 | RENTAL-05 | Phase 17 | Complete |
 | RENTAL-06 | Phase 17 | Complete |
 | RENTAL-07 | Phase 17 | Complete |
-| RENTAL-08 | Phase 19 | Pending |
+| RENTAL-08 | Phase 19 | Complete |
 | NOTIFY-01 | Phase 20 | Pending |
 | NOTIFY-02 | Phase 20 | Pending |
 | NOTIFY-03 | Phase 20 | Pending |
