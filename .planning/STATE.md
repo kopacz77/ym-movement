@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 
 ## Current Position
 
-Phase: 14 of 22 (Admin Inventory CRUD) — In progress
-Plan: 6/7 complete (14-07 stub shipped; 14-06 page wrappers still pending)
-Status: 14-07 shipped — `/wardrobe` placeholder server-component live (editorial Coming Soon card with Shirt icon, navy + cyan brand). Plan 14-06 NAV-01's link target now resolves to a real page instead of 404'ing. Only Plan 14-06 page wrappers remain before Phase 14 closes.
-Last activity: 2026-05-29 — Completed 14-07-PLAN.md (1 task, 1 min)
+Phase: 14 of 22 (Admin Inventory CRUD) — COMPLETE
+Plan: 7/7 complete (14-06 + 14-07 both shipped in parallel session)
+Status: PHASE 14 CLOSED — 14-06 shipped four admin page wrappers (/admin/wardrobe inventory, /new create-then-redirect, /[id]/edit gallery+form, /settings) + sidebar Wardrobe entries (Shirt icon) for admin AND student. 14-07 shipped /wardrobe Coming Soon student stub. Phase 14 success criteria 1-5 all met. Admin can navigate to wardrobe via sidebar, create a dress, upload images, edit metadata, change settings, archive — full inventory loop is live.
+Last activity: 2026-05-29 — Completed 14-06-PLAN.md (4 tasks, ~4 min) in parallel with 14-07
 
-Progress: ██░░░░░░░░ ~16% of v2.0 milestone (1 of 10 phases shipped + 6/7 plans into Phase 14)
+Progress: ██░░░░░░░░ ~17% of v2.0 milestone (1 of 10 phases shipped + Phase 14 closed)
 
 ## Performance Metrics
 
@@ -27,8 +27,8 @@ Progress: ██░░░░░░░░ ~16% of v2.0 milestone (1 of 10 phases 
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 9 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-07)
-- Phase 14 plans shipped: 6/7
+- Total plans completed: 10 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07)
+- Phase 14 plans shipped: 7/7 — PHASE 14 COMPLETE
 
 ## Accumulated Context
 
@@ -98,6 +98,13 @@ Progress: ██░░░░░░░░ ~16% of v2.0 milestone (1 of 10 phases 
 - **(14-07) Server-component placeholder, no AppLayout wrap**: top-level `(protected)` route group has no `layout.tsx`, so the stub renders raw. Acceptable for a static page with zero sensitive data; Phase 15 decides whether student routes get a consistent `AppLayout role="student"` shell.
 - **(14-07) Brand fidelity on throwaway code**: navy `#1a3a5c` header + cyan `#0891b2` Shirt icon accent + standard luxury card shadow even though the entire file gets deleted in Phase 15. No half-styled stubs shipped to users.
 - **(14-07) Copy explicitly names "Phase 15"**: gives the next planner a literal grep target. Replacing `Coming soon` is a one-search-one-edit operation when the catalog ships.
+- **(14-06) Page = thin client shell pattern**: all four `/admin/wardrobe` pages are `"use client"` with `space-y-8` + editorial header + a single Wave 2 component. No per-page `auth()` call (AdminLayout already gates via `<AppLayout role="admin">`); no business logic. The page exists ONLY to compose the route shape and the brand chrome. Future admin features should mirror this; routing/auth/business logic split is the single most important page-layer contract.
+- **(14-06) Cents↔dollars conversion at the edit page boundary, NOT inside DressForm**: server schema is cents, form schema is dollars. The mapping happens exactly twice: (a) when packing `defaultValues` from `dress.competitionPrice / 100`, and (b) inside `DressForm.handleSubmit` via `Math.round(dollars * 100)`. The page owns the (a) seam because it's where the wire shape arrives; the form owns (b) because it's where the user-typed shape exits. Neither layer leaks into the other.
+- **(14-06) DressImageGallery ABOVE DressForm on the edit page (not side-by-side)**: an admin coming from `/admin/wardrobe/new` lands at the top of the page looking directly at the uploader. The "create then add images" UX is one continuous vertical scroll. Side-by-side would have buried the uploader on narrow viewports and broken the create-then-redirect flow's pedagogical lead-in.
+- **(14-06) Create-then-redirect for new-dress**: `api.admin.wardrobe.create.useMutation` → toast → `router.push('/admin/wardrobe/${dress.id}/edit')`. Forced by Phase 13's `/api/wardrobe/upload` route, which calls `prisma.dress.findUnique` on the `clientPayload.dressId` before minting a Vercel Blob token. No dressId means no token means no upload — so the new-dress page MUST be metadata-only. Toast description ("Add images on the next screen") sets user expectation before the redirect.
+- **(14-06) `useParams<{id: string}>()` on the edit page, not server-component `params: Promise<{id}>`**: the page is `"use client"` because both children (DressForm, DressImageGallery) consume TRPC hooks. A server-component shell would buy nothing. `useParams` is the canonical client-side dynamic-route accessor in Next.js 16 App Router.
+- **(14-06) Sidebar entries via navigation-config.ts ONLY, no AppSidebar/AppLayout edits**: AppSidebar consumes `getNavigationForRole(role)`; new entries flow through automatically. Both files are LOCKED per CLAUDE.md. The lucide `Shirt` icon was added to the existing import block (alphabetical, after Settings), and a single `{ name: "Wardrobe", href, icon: Shirt }` line inserted into BOTH adminNavigation (`/admin/wardrobe`) and studentNavigation (`/wardrobe`), positioned above the Settings entry. coachNavigation intentionally untouched.
+- **(14-06) TRPC procedures that include relations MUST type the local variable with the explicit findUnique generic**, NOT `Awaited<ReturnType<typeof ctx.prisma.dress.findUnique>>`. The latter collapses to the base model with no relations; the TRPC client then loses sight of Owner / Images on the return type. Caught in 14-06 Task 4 as a bug in 14-01's `byId`; fixed by replacing the annotation with `Awaited<ReturnType<typeof ctx.prisma.dress.findUnique<{ where: {...}; include: { Owner: ...; Images: ... } }>>>`.
 
 ### Pending Todos
 
@@ -119,6 +126,6 @@ Progress: ██░░░░░░░░ ~16% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-07-PLAN.md — `/wardrobe` placeholder page shipped (`src/app/(protected)/wardrobe/page.tsx`, 24 lines). Static server component, editorial navy `#1a3a5c` header + cyan `#0891b2`-tinted Shirt icon + standard luxury card shadow. Copy explicitly names "Phase 15" so the next planner can grep+replace cleanly. NAV-01's link target (added by Plan 14-06 to studentNavigation) now resolves to a real page instead of 404'ing. 1 atomic commit (7341d55). Biome + tsc clean; only the 2 pre-existing repo TS errors (IceParticles missing `three` types, sidebar missing `@radix-ui/react-visually-hidden`) unchanged. Working tree retains uncommitted edits to `src/lib/navigation-config.ts` from a prior parallel session — those belong to Plan 14-06 and were deliberately NOT committed under this plan.
+Stopped at: Completed 14-06-PLAN.md — four admin page wrappers shipped under `src/app/(protected)/admin/wardrobe/`: `page.tsx` (inventory, 17 lines, renders DressInventoryGrid), `new/page.tsx` (57 lines, create-then-redirect via `api.admin.wardrobe.create.useMutation` + router.push to /[id]/edit), `[id]/edit/page.tsx` (132 lines, useParams + byId hydration + DressImageGallery above DressForm + cents→dollars defaultValues mapping), `settings/page.tsx` (24 lines, renders WardrobeSettingsForm). Sidebar Wardrobe NavItems (lucide `Shirt` icon) added above Settings to both adminNavigation (`/admin/wardrobe`) and studentNavigation (`/wardrobe`) in `src/lib/navigation-config.ts`. AppSidebar.tsx and AppLayout.tsx UNCHANGED. One Rule 1 auto-fix: `admin.wardrobe.byId` return type annotation collapsed to base Dress and was replaced with the explicit findUnique generic so the client sees Owner + Images. 4 atomic feat commits (a51b3f1, bf221eb, 246cadd, 1eff63c) + this metadata commit. Biome + tsc clean; only the 2 pre-existing repo TS errors (IceParticles missing `three` types, sidebar missing `@radix-ui/react-visually-hidden`) unchanged. PHASE 14 COMPLETE.
 Resume file: None
-Next step: Execute 14-06-PLAN.md (admin page wrappers: `/admin/wardrobe/page.tsx` renders DressInventoryGrid, `/admin/wardrobe/new/page.tsx` and `/admin/wardrobe/[id]/edit/page.tsx` wire DressForm + DressImageGallery, `/admin/wardrobe/settings/page.tsx` hosts WardrobeSettingsForm, plus the navigation-config Wardrobe entries for admin + student). That closes Phase 14. **User-setup blocker for Phase 14 end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Execute Phase 15 (student wardrobe catalog). Replace the `/wardrobe` Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx` with the real catalog. Reuse `DressStatusBadge` + `CategoryBadge` from `@/features/wardrobe/components/` (cross-role primitives). The read-side of `admin.wardrobe.list` may inform a new public/student-scoped procedure that filters out PENDING_APPROVAL + ARCHIVED. **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
