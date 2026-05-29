@@ -1,20 +1,28 @@
 // src/features/wardrobe/components/admin/RentalsTable.tsx
 //
-// Plan 17-03 Task 3 — RentalsTable.
+// Plan 17-03 Task 3 — RentalsTable (original 2-tab shape).
+// Plan 19-03 — extended with 3rd "Outstanding Payouts" tab + per-row
+//              "Mark Payout Sent" action wired to api.admin.wardrobeRentals.markConsignmentPaidOut.
 //
-// Admin view of post-payment rentals. Tabbed surface with two top-level views:
-//   1. Active     — paymentStatus IN [PAID, RETURNED]. Splits internally into
-//                   "Returns Due" (PAID + endDate within wardrobeReturnReminderDays
-//                   of now) and "All Active Rentals" sections.
-//   2. Late Fee   — paymentStatus = LATE_FEE_OWED. Separate sub-tab for flagged
-//                   rentals; admin can still release deposit here after manual
-//                   settlement.
+// Admin view of post-payment rentals. Tabbed surface with three top-level views:
+//   1. Active              — paymentStatus IN [PAID, RETURNED]. Splits internally into
+//                            "Returns Due" (PAID + endDate within wardrobeReturnReminderDays
+//                            of now) and "All Active Rentals" sections.
+//   2. Late Fee            — paymentStatus = LATE_FEE_OWED. Separate sub-tab for flagged
+//                            rentals; admin can still release deposit here after manual
+//                            settlement.
+//   3. Outstanding Payouts — server-filtered (outstandingPayoutsOnly: true) to
+//                            consignmentPayoutAmount IS NOT NULL AND consignmentPaidOut = false.
+//                            Override semantics (does NOT additionally filter by paymentStatus)
+//                            so payouts owed on DEPOSIT_RELEASED / LATE_FEE_OWED rentals appear.
+//                            Only the Mark Payout Sent action is rendered on this focused surface.
 //
 // Per-row actions (state machine matrix per research Pitfall 8):
 //   PAID            -> "Mark Returned" (opens MarkReturnedDialog)
 //                      + "Flag Late Fee" (confirmation toast)
 //   RETURNED        -> "Release Deposit" (confirmation toast)
 //   LATE_FEE_OWED   -> "Release Deposit" only (Flag button omitted via null prop)
+//   CONSIGNED + un-sent payout (any tab) -> "Mark Payout Sent" (confirmation toast)
 //
 // Returns-Due lead time read from api.admin.wardrobeSettings.get
 // (wardrobeReturnReminderDays). Default fallback: 1 day if settings not yet
@@ -25,6 +33,7 @@
 //   - MyRentalsView (16-07) Tabs primitive usage
 //   - showConfirmationToast (toast-confirmations.ts) — object-form helper
 //   - RentalStatusBadge (16-03) handles both RequestStatus + PaymentStatus unions
+//   - markReturned isPending disabled pattern (Phase 17) — applied to markPayoutSent
 
 "use client";
 
@@ -62,12 +71,19 @@ interface RentalRow {
   endDate: Date;
   rentalFee: number;
   securityDeposit: number;
+  // Plan 19-01 / RENTAL-08 payout columns — surfaced by server include shape.
+  consignmentPayoutAmount: number | null;
+  consignmentPaidOut: boolean;
+  consignmentPaidOutAt: Date | null;
   Dress: {
     id: string;
     title: string;
     sizeLabel: string;
     color: string | null;
     Images: { url: string }[];
+    // Plan 19-01 — Dress.Owner.{id,name} added to listRentals include for
+    // RENTAL-08 Mark Payout Sent confirm-toast (consigner name display).
+    Owner: { id: string; name: string | null };
   };
   Student: {
     id: string;
@@ -99,6 +115,15 @@ export function RentalsTable() {
     page: 1,
     limit: 100,
   });
+  // RENTAL-08 — Outstanding Payouts tab: server-filtered to
+  // consignmentPayoutAmount IS NOT NULL AND consignmentPaidOut = false.
+  // Override semantics — does NOT additionally filter by paymentStatus,
+  // so payouts owed on DEPOSIT_RELEASED / LATE_FEE_OWED rentals surface here.
+  const outstandingPayoutsQuery = api.admin.wardrobeRentals.listRentals.useQuery({
+    outstandingPayoutsOnly: true,
+    page: 1,
+    limit: 100,
+  });
 
   // -- Mutations ------------------------------------------------------------
   const releaseDeposit = api.admin.wardrobeRentals.releaseDeposit.useMutation({
@@ -117,6 +142,23 @@ export function RentalsTable() {
     onError: (e) => toast.error("Failed to flag late fee", { description: e.message }),
   });
 
+  // RENTAL-08 — Mark Payout Sent (Plan 19-03).
+  // Idempotent at the UI layer (button hidden when not eligible + disabled-while-pending);
+  // server defends with 3 checks (NOT_FOUND, payout NULL, already paid).
+  // Friendly server error message (e.g. "Payout already marked as sent") surfaces
+  // verbatim in toast.error description for the race-condition / double-click path.
+  const markPayoutSent = api.admin.wardrobeRentals.markConsignmentPaidOut.useMutation({
+    onSuccess: () => {
+      toast.success("Payout marked as sent", {
+        description: "The consigner will see the updated status on their earnings tab.",
+      });
+      utils.admin.wardrobeRentals.listRentals.invalidate();
+    },
+    onError: (e) => {
+      toast.error("Failed to mark payout sent", { description: e.message });
+    },
+  });
+
   // -- Returns-due derivation ----------------------------------------------
   const returnReminderDays = settingsQuery.data?.wardrobeReturnReminderDays ?? 1;
   const now = new Date();
@@ -128,6 +170,8 @@ export function RentalsTable() {
   );
   const others = allActive.filter((r) => !returnsDue.some((d) => d.id === r.id));
   const lateFeeRentals = (lateFeeQuery.data?.rentals ?? []) as unknown as RentalRow[];
+  const outstandingPayouts = (outstandingPayoutsQuery.data?.rentals ??
+    []) as unknown as RentalRow[];
 
   // -- Confirmation handlers (showConfirmationToast object form) ----------
   const handleReleaseDeposit = (r: RentalRow) => {
@@ -163,6 +207,25 @@ export function RentalsTable() {
     });
   };
 
+  const handleMarkPayoutSent = (r: RentalRow) => {
+    // Belt-and-suspenders guard for keyboard activation race conditions —
+    // the button is also conditionally rendered (UX-layer gate).
+    if (r.consignmentPayoutAmount == null || r.consignmentPaidOut) {
+      return;
+    }
+
+    showConfirmationToast({
+      title: "Mark payout sent",
+      description: `Confirm that you have sent ${formatCurrencyFromCents(
+        r.consignmentPayoutAmount,
+      )} payout to ${r.Dress.Owner.name ?? "the consigner"} for "${
+        r.Dress.title
+      }"? This action cannot be undone.`,
+      confirmLabel: "Mark Sent",
+      onConfirm: () => markPayoutSent.mutate({ rentalId: r.id }),
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="active" className="w-full">
@@ -174,6 +237,10 @@ export function RentalsTable() {
           <TabsTrigger value="late-fee">
             Late Fee
             {lateFeeQuery.data ? ` (${lateFeeQuery.data.total})` : ""}
+          </TabsTrigger>
+          <TabsTrigger value="outstanding-payouts">
+            Outstanding Payouts
+            {outstandingPayoutsQuery.data ? ` (${outstandingPayoutsQuery.data.total})` : ""}
           </TabsTrigger>
         </TabsList>
 
@@ -197,6 +264,8 @@ export function RentalsTable() {
                     onMarkReturned={handleMarkReturned}
                     onReleaseDeposit={handleReleaseDeposit}
                     onFlagLateFee={handleFlagLateFee}
+                    onMarkPayoutSent={handleMarkPayoutSent}
+                    markPayoutSentPending={markPayoutSent.isPending}
                   />
                 </Section>
               )}
@@ -206,6 +275,8 @@ export function RentalsTable() {
                   onMarkReturned={handleMarkReturned}
                   onReleaseDeposit={handleReleaseDeposit}
                   onFlagLateFee={handleFlagLateFee}
+                  onMarkPayoutSent={handleMarkPayoutSent}
+                  markPayoutSentPending={markPayoutSent.isPending}
                 />
               </Section>
             </>
@@ -223,6 +294,29 @@ export function RentalsTable() {
               onMarkReturned={handleMarkReturned}
               onReleaseDeposit={handleReleaseDeposit}
               onFlagLateFee={null}
+              onMarkPayoutSent={handleMarkPayoutSent}
+              markPayoutSentPending={markPayoutSent.isPending}
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="outstanding-payouts" className="mt-6">
+          {outstandingPayoutsQuery.isLoading ? (
+            <LoadingState />
+          ) : outstandingPayouts.length === 0 ? (
+            <EmptyState label="No outstanding payouts. All consigned rentals are settled." />
+          ) : (
+            <RentalRows
+              rentals={outstandingPayouts}
+              // The Outstanding Payouts tab is a focused payout-action surface —
+              // hide unrelated state-machine actions so the only affordance is
+              // Mark Payout Sent. The same rows still appear on Active / Late Fee
+              // tabs where their other actions remain available.
+              onMarkReturned={null}
+              onReleaseDeposit={null}
+              onFlagLateFee={null}
+              onMarkPayoutSent={handleMarkPayoutSent}
+              markPayoutSentPending={markPayoutSent.isPending}
             />
           )}
         </TabsContent>
@@ -280,13 +374,26 @@ function Section({ title, subtitle, highlight, children }: SectionProps) {
 
 interface RentalRowsProps {
   rentals: RentalRow[];
-  onMarkReturned: (r: RentalRow) => void;
-  onReleaseDeposit: (r: RentalRow) => void;
-  /** Null = flag button hidden (e.g., already-flagged rentals in the Late Fee tab). */
+  /** Null = Mark Returned button hidden (e.g., the Outstanding Payouts tab — focused payout-action surface). */
+  onMarkReturned: ((r: RentalRow) => void) | null;
+  /** Null = Release Deposit button hidden (e.g., the Outstanding Payouts tab — focused payout-action surface). */
+  onReleaseDeposit: ((r: RentalRow) => void) | null;
+  /** Null = Flag Late Fee button hidden (e.g., already-flagged rentals in the Late Fee tab). */
   onFlagLateFee: ((r: RentalRow) => void) | null;
+  /** Plan 19-03 / RENTAL-08 — Mark Payout Sent action. Always provided when payout columns are present. */
+  onMarkPayoutSent: (r: RentalRow) => void;
+  /** Disables the Mark Payout Sent button while a mutation is in flight (prevents double-clicks). */
+  markPayoutSentPending: boolean;
 }
 
-function RentalRows({ rentals, onMarkReturned, onReleaseDeposit, onFlagLateFee }: RentalRowsProps) {
+function RentalRows({
+  rentals,
+  onMarkReturned,
+  onReleaseDeposit,
+  onFlagLateFee,
+  onMarkPayoutSent,
+  markPayoutSentPending,
+}: RentalRowsProps) {
   if (rentals.length === 0) {
     return <div className="text-xs text-slate-500 italic px-2">No rentals in this section.</div>;
   }
@@ -344,7 +451,7 @@ function RentalRows({ rentals, onMarkReturned, onReleaseDeposit, onFlagLateFee }
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    {r.paymentStatus === "PAID" && (
+                    {onMarkReturned && r.paymentStatus === "PAID" && (
                       <Button
                         size="sm"
                         className="bg-cyan-600 hover:bg-cyan-700 text-white"
@@ -353,15 +460,16 @@ function RentalRows({ rentals, onMarkReturned, onReleaseDeposit, onFlagLateFee }
                         Mark Returned
                       </Button>
                     )}
-                    {(r.paymentStatus === "RETURNED" || r.paymentStatus === "LATE_FEE_OWED") && (
-                      <Button
-                        size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                        onClick={() => onReleaseDeposit(r)}
-                      >
-                        Release Deposit
-                      </Button>
-                    )}
+                    {onReleaseDeposit &&
+                      (r.paymentStatus === "RETURNED" || r.paymentStatus === "LATE_FEE_OWED") && (
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          onClick={() => onReleaseDeposit(r)}
+                        >
+                          Release Deposit
+                        </Button>
+                      )}
                     {onFlagLateFee &&
                       (r.paymentStatus === "PAID" || r.paymentStatus === "RETURNED") && (
                         <Button
@@ -373,6 +481,19 @@ function RentalRows({ rentals, onMarkReturned, onReleaseDeposit, onFlagLateFee }
                           Flag Late Fee
                         </Button>
                       )}
+                    {/* Plan 19-03 / RENTAL-08 — Mark Payout Sent.
+                        UI gate: only consigned rentals with un-sent payouts show
+                        the button. Server defends with 3 checks (Plan 19-01). */}
+                    {r.consignmentPayoutAmount != null && !r.consignmentPaidOut && (
+                      <Button
+                        size="sm"
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                        onClick={() => onMarkPayoutSent(r)}
+                        disabled={markPayoutSentPending}
+                      >
+                        Mark Payout Sent
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
