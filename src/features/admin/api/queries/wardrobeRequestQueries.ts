@@ -32,6 +32,12 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
+import {
+  sendConsignmentPayoutSentEmail,
+  sendDepositReleasedEmail,
+  sendRentalConfirmedEmail,
+  sendRentalDecisionEmail,
+} from "@/lib/email";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 /**
@@ -186,8 +192,20 @@ export const wardrobeRequestRouter = createTRPCRouter({
             expiresAt: true,
             dressId: true,
             studentId: true,
-            Dress: { select: { title: true, status: true, ownerId: true } },
-            Student: { select: { User: { select: { id: true, name: true } } } },
+            rentalType: true, // NEW — needed for NOTIFY-05 APPROVED totalDueCents
+            Dress: {
+              select: {
+                title: true,
+                status: true,
+                ownerId: true,
+                competitionPrice: true,
+                seasonalPrice: true,
+                purchasePrice: true,
+                cleaningFee: true,
+                securityDeposit: true,
+              },
+            },
+            Student: { select: { User: { select: { id: true, name: true, email: true } } } },
           },
         });
 
@@ -260,6 +278,40 @@ export const wardrobeRequestRouter = createTRPCRouter({
         console.error("[WARDROBE] Failed to notify student:", err);
       }
 
+      // NOTIFY-05 (Phase 20): email the student of the decision. Discriminated
+      // union on data.decision lets one helper render APPROVED + DECLINED with
+      // shared chrome. APPROVED branch computes totalDueCents by snapshotting
+      // fees from request.Dress (mirrors RENTAL-02 in markPaymentReceived).
+      try {
+        if (result.decision === "APPROVE") {
+          const rentalFee = pickRentalFee(result.request.Dress, result.request.rentalType);
+          const totalDueCents =
+            rentalFee + result.request.Dress.cleaningFee + result.request.Dress.securityDeposit;
+          await sendRentalDecisionEmail(
+            result.request.Student.User.email,
+            result.request.Student.User.name ?? "Student",
+            {
+              decision: "APPROVED",
+              dressTitle: result.request.Dress.title,
+              responseMessage: input.responseMessage,
+              totalDueCents,
+            },
+          );
+        } else {
+          await sendRentalDecisionEmail(
+            result.request.Student.User.email,
+            result.request.Student.User.name ?? "Student",
+            {
+              decision: "DECLINED",
+              dressTitle: result.request.Dress.title,
+              responseMessage: input.responseMessage,
+            },
+          );
+        }
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email student of decision:", err);
+      }
+
       return { id: result.request.id, decision: result.decision };
     }),
 
@@ -299,7 +351,7 @@ export const wardrobeRequestRouter = createTRPCRouter({
                 consignmentCommissionPct: true,
               },
             },
-            Student: { select: { User: { select: { id: true, name: true } } } },
+            Student: { select: { User: { select: { id: true, name: true, email: true } } } },
           },
         });
 
@@ -369,6 +421,24 @@ export const wardrobeRequestRouter = createTRPCRouter({
         });
       } catch (err) {
         console.error("[WARDROBE] Failed to notify student:", err);
+      }
+
+      // NOTIFY-06 (Phase 20): email the student that their rental is confirmed.
+      try {
+        await sendRentalConfirmedEmail(
+          result.request.Student.User.email,
+          result.request.Student.User.name ?? "Student",
+          {
+            dressTitle: result.request.Dress.title,
+            rentalType: result.request.rentalType,
+            startDate: result.request.startDate,
+            endDate: result.request.endDate,
+            totalChargedCents: result.created.totalCharged,
+            paymentMethod: input.paymentMethod,
+          },
+        );
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email student of rental confirmation:", err);
       }
 
       return { id: result.created.id };
@@ -525,7 +595,8 @@ export const wardrobeRentalRouter = createTRPCRouter({
             id: true,
             dressId: true,
             paymentStatus: true,
-            Student: { select: { User: { select: { id: true, name: true } } } },
+            securityDeposit: true, // NEW — for NOTIFY-08 email body
+            Student: { select: { User: { select: { id: true, name: true, email: true } } } },
             Dress: { select: { title: true } },
           },
         });
@@ -568,6 +639,20 @@ export const wardrobeRentalRouter = createTRPCRouter({
         });
       } catch (err) {
         console.error("[WARDROBE] Failed to notify student:", err);
+      }
+
+      // NOTIFY-08 (Phase 20): email the student that their deposit has been released.
+      try {
+        await sendDepositReleasedEmail(
+          result.rental.Student.User.email,
+          result.rental.Student.User.name ?? "Student",
+          {
+            dressTitle: result.rental.Dress.title,
+            depositAmountCents: result.rental.securityDeposit,
+          },
+        );
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email student of deposit release:", err);
       }
 
       return { id: result.updated.id };
@@ -637,7 +722,7 @@ export const wardrobeRentalRouter = createTRPCRouter({
           Dress: {
             select: {
               title: true,
-              Owner: { select: { id: true, name: true } },
+              Owner: { select: { id: true, name: true, email: true } }, // email NEW for NOTIFY-09
             },
           },
         },
@@ -679,6 +764,23 @@ export const wardrobeRentalRouter = createTRPCRouter({
         });
       } catch (err) {
         console.error("[WARDROBE] Failed to notify consigner of payout:", err);
+      }
+
+      // NOTIFY-09 (Phase 20): email the consigner that their payout has been sent.
+      // consignmentPayoutAmount is non-null here — the defensive check above throws
+      // BAD_REQUEST when it's null, so the `?? 0` fallback is unreachable at
+      // runtime (kept for TS narrowing cleanliness, avoids the `!` assertion).
+      try {
+        await sendConsignmentPayoutSentEmail(
+          rental.Dress.Owner.email,
+          rental.Dress.Owner.name ?? "Consigner",
+          {
+            dressTitle: rental.Dress.title,
+            payoutAmountCents: rental.consignmentPayoutAmount ?? 0,
+          },
+        );
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email consigner of payout:", err);
       }
 
       return { id: updated.id };
