@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 
 ## Current Position
 
-Phase: 14 of 22 (Admin Inventory CRUD) — COMPLETE
-Plan: 7/7 complete (14-06 + 14-07 both shipped in parallel session)
-Status: PHASE 14 CLOSED — 14-06 shipped four admin page wrappers (/admin/wardrobe inventory, /new create-then-redirect, /[id]/edit gallery+form, /settings) + sidebar Wardrobe entries (Shirt icon) for admin AND student. 14-07 shipped /wardrobe Coming Soon student stub. Phase 14 success criteria 1-5 all met. Admin can navigate to wardrobe via sidebar, create a dress, upload images, edit metadata, change settings, archive — full inventory loop is live.
-Last activity: 2026-05-29 — Completed 14-06-PLAN.md (4 tasks, ~4 min) in parallel with 14-07
+Phase: 14 of 22 (Admin Inventory CRUD) — ✓ COMPLETE & VERIFIED
+Plan: 7/7 complete
+Status: Phase 14 verifier returned passed on all 5 programmatic success criteria. Visual UX confirmation (sidebar visible, create-then-redirect round-trip, ARCHIVED opacity, non-admin 403) deferred to user wake-up. Ready to plan Phase 15.
+Last activity: 2026-05-29 — Phase 14 verified complete: 5 TRPC procedures, 7 new components, 4 admin pages, 1 student stub, sidebar wired via navigation-config.ts. Locked AppSidebar.tsx + AppLayout.tsx untouched.
 
-Progress: ██░░░░░░░░ ~17% of v2.0 milestone (1 of 10 phases shipped + Phase 14 closed)
+Progress: ██░░░░░░░░ ~20% of v2.0 milestone (2 of 10 phases shipped)
 
 ## Performance Metrics
 
@@ -108,7 +108,7 @@ Progress: ██░░░░░░░░ ~17% of v2.0 milestone (1 of 10 phases 
 
 ### Pending Todos
 
-(None)
+- **(Phase 14 live-UX checklist for user wake-up)**: (1) confirm sidebar Wardrobe entry visible above Settings for admin AND student roles, (2) `/admin/wardrobe/new` create flow redirects to /[id]/edit after save, (3) image upload works locally once `BLOB_READ_WRITE_TOKEN` is added to `.env`, (4) ARCHIVED rows visually de-emphasized in inventory grid, (5) non-admin caller gets UNAUTHORIZED on `admin.wardrobe.*` procedures. All programmatic checks already passed in 14-VERIFICATION.md.
 
 ### Completed Todos
 
@@ -126,6 +126,8 @@ Progress: ██░░░░░░░░ ~17% of v2.0 milestone (1 of 10 phases 
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed 14-06-PLAN.md — four admin page wrappers shipped under `src/app/(protected)/admin/wardrobe/`: `page.tsx` (inventory, 17 lines, renders DressInventoryGrid), `new/page.tsx` (57 lines, create-then-redirect via `api.admin.wardrobe.create.useMutation` + router.push to /[id]/edit), `[id]/edit/page.tsx` (132 lines, useParams + byId hydration + DressImageGallery above DressForm + cents→dollars defaultValues mapping), `settings/page.tsx` (24 lines, renders WardrobeSettingsForm). Sidebar Wardrobe NavItems (lucide `Shirt` icon) added above Settings to both adminNavigation (`/admin/wardrobe`) and studentNavigation (`/wardrobe`) in `src/lib/navigation-config.ts`. AppSidebar.tsx and AppLayout.tsx UNCHANGED. One Rule 1 auto-fix: `admin.wardrobe.byId` return type annotation collapsed to base Dress and was replaced with the explicit findUnique generic so the client sees Owner + Images. 4 atomic feat commits (a51b3f1, bf221eb, 246cadd, 1eff63c) + this metadata commit. Biome + tsc clean; only the 2 pre-existing repo TS errors (IceParticles missing `three` types, sidebar missing `@radix-ui/react-visually-hidden`) unchanged. PHASE 14 COMPLETE.
+Stopped at: Phase 14 verified complete. 7/7 plans shipped, 6 REQ-IDs marked Complete in REQUIREMENTS.md (ADMIN-01/02/03/07, NAV-01, PERM-02). Programmatic verification all green; live UX confirmation deferred to user wake-up (see Pending Todos below).
+Resume file: None
+Next step: `/gsd:plan-phase 15` — Catalog Browse & Measurements (marketplace `/wardrobe` route, student measurements, "fits me" filter, best-fit sort). **Live UX checks for Phase 14** queued for user to verify after wake-up: (1) sidebar Wardrobe entry visible above Settings for both admin and student roles, (2) `/admin/wardrobe/new` create-then-redirect flow round-trips to /edit, (3) image upload works once `BLOB_READ_WRITE_TOKEN` is in local `.env`, (4) ARCHIVED rows visually de-emphasized in inventory grid, (5) non-admin user gets UNAUTHORIZED when hitting `admin.wardrobe.*` procedures.
 Resume file: None
 Next step: Execute Phase 15 (student wardrobe catalog). Replace the `/wardrobe` Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx` with the real catalog. Reuse `DressStatusBadge` + `CategoryBadge` from `@/features/wardrobe/components/` (cross-role primitives). The read-side of `admin.wardrobe.list` may inform a new public/student-scoped procedure that filters out PENDING_APPROVAL + ARCHIVED. **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.

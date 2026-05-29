@@ -37,7 +37,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 **Design spec:** [docs/plans/2026-05-28-ym-wardrobe-mvp-design.md](../docs/plans/2026-05-28-ym-wardrobe-mvp-design.md)
 
 - [x] **Phase 13: Wardrobe Schema Foundation** — Prisma models, Student measurement fields, Settings extensions, Vercel Blob image upload pipeline ✓ 2026-05-29
-- [ ] **Phase 14: Admin Inventory CRUD** — Admin create/edit/list dresses + global settings UI + sidebar entry + admin permission middleware
+- [x] **Phase 14: Admin Inventory CRUD** — Admin create/edit/list dresses + global settings UI + sidebar entry + admin permission middleware ✓ 2026-05-29
 - [ ] **Phase 15: Catalog Browse & Measurements** — Marketplace `/wardrobe` with structured filters, student measurement profile, "fits me" toggle, best-fit sort
 - [ ] **Phase 16: Dress Detail & Rental Request** — Detail page with fit comparison, request modal, my-rentals history, conflict warnings
 - [ ] **Phase 17: Admin Rental Lifecycle** — Request queue, payment-received flow, returns, deposit release, consignment payout calculation
@@ -74,14 +74,14 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. `/admin/wardrobe` shows full inventory grid filterable by status (including PENDING_APPROVAL/REJECTED/ARCHIVED)
   4. Admin can edit global wardrobe defaults at `/admin/wardrobe/settings`
   5. Sidebar Shirt entry routes admin to `/admin/wardrobe`; TRPC middleware on `admin.wardrobe.*` blocks non-admin callers
-**Plans**: 7 plans
-- [ ] 14-01-PLAN.md — Author admin.wardrobe.{list,byId,create,update,archive} TRPC procedures with shared dressInputSchema; mount sub-router; add formatCurrencyFromCents helper; smoke-test against dev Neon
-- [ ] 14-02-PLAN.md — Reusable wardrobe UI primitives: DressStatusBadge, CategoryBadge, StatusFilterChips (pure presentational, brand palette)
-- [ ] 14-03-PLAN.md — DressForm (tabbed RHF + Zod, mode=create|edit, dollars↔cents conversion) and DressImageGallery (composes wardrobe.images.* + @vercel/blob/client upload, 8-cap UI, primary badge, reorder via arrows)
-- [ ] 14-04-PLAN.md — WardrobeSettingsForm (3 numeric inputs, reuses Phase 13 wardrobeSettingsSchema, hydrates from api.admin.wardrobeSettings.get)
-- [ ] 14-05-PLAN.md — DressInventoryGrid (URL-state filters, status chips, search, pagination, archive via showDeleteConfirmation, ARCHIVED rows de-emphasized)
-- [ ] 14-06-PLAN.md — Wire 4 admin pages (/admin/wardrobe, /new, /[id]/edit, /settings) and add Wardrobe sidebar entries to navigation-config.ts above Settings for admin + student (locked AppSidebar.tsx untouched)
-- [ ] 14-07-PLAN.md — /wardrobe student-side placeholder page so the new sidebar entry does not 404 (Phase 15 replaces it)
+**Plans**: 7 plans — all complete (2026-05-29)
+- [x] 14-01-PLAN.md — admin.wardrobe.{list,byId,create,update,archive} TRPC procedures with shared dressInputSchema; sub-router mounted; formatCurrencyFromCents helper; smoke-tested against dev Neon
+- [x] 14-02-PLAN.md — Reusable wardrobe UI primitives: DressStatusBadge, CategoryBadge, StatusFilterChips
+- [x] 14-03-PLAN.md — DressForm (tabbed RHF + Zod, mode=create|edit, dollars↔cents) and DressImageGallery (wardrobe.images.* + @vercel/blob/client upload, 8-cap UI, primary badge, reorder via arrows)
+- [x] 14-04-PLAN.md — WardrobeSettingsForm (3 numeric inputs, reuses Phase 13 wardrobeSettingsSchema)
+- [x] 14-05-PLAN.md — DressInventoryGrid (URL-state filters, status chips, search, pagination, archive via showDeleteConfirmation, ARCHIVED rows de-emphasized)
+- [x] 14-06-PLAN.md — 4 admin pages (/admin/wardrobe, /new, /[id]/edit, /settings) + Wardrobe sidebar entries in navigation-config.ts (AppSidebar.tsx untouched)
+- [x] 14-07-PLAN.md — /wardrobe student-side Coming Soon placeholder (Phase 15 replaces)
 
 #### Phase 15: Catalog Browse & Measurements
 **Goal**: Students can browse the marketplace with structured filters and a measurement-driven fit toggle.
@@ -182,7 +182,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 1-7 | v1.0 | (see archive) | Complete | 2026-03-16 |
 | 8-12 | v1.1 | (see archive) | Complete | 2026-03-17 |
 | 13. Wardrobe schema foundation | v2.0 | 3/3 | Complete | 2026-05-29 |
-| 14. Admin inventory CRUD | v2.0 | 0/TBD | Not started | — |
+| 14. Admin inventory CRUD | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 15. Catalog browse measurements | v2.0 | 0/TBD | Not started | — |
 | 16. Dress detail rental request | v2.0 | 0/TBD | Not started | — |
 | 17. Admin rental lifecycle | v2.0 | 0/TBD | Not started | — |
