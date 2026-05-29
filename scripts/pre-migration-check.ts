@@ -46,6 +46,21 @@ async function checkDatabase(): Promise<void> {
       { table: "Notification", count: notifications },
     );
 
+    // Wardrobe tables (Phase 13). Legitimately 0 on first migration.
+    const [dresses, dressImages, rentalRequests, rentals] = await Promise.all([
+      prisma.dress.count(),
+      prisma.dressImage.count(),
+      prisma.rentalRequest.count(),
+      prisma.rental.count(),
+    ]);
+
+    tables.push(
+      { table: "Dress", count: dresses },
+      { table: "DressImage", count: dressImages },
+      { table: "RentalRequest", count: rentalRequests },
+      { table: "Rental", count: rentals },
+    );
+
     // Print table
     console.log("Table              | Rows");
     console.log("-------------------|------");
