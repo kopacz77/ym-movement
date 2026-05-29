@@ -43,7 +43,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 - [x] **Phase 17: Admin Rental Lifecycle** — Request queue, payment-received flow, returns, deposit release, consignment payout calculation ✓ 2026-05-29
 - [x] **Phase 18: Self-Serve Consignment** — Consigner upload form, PENDING_APPROVAL queue, admin approve/reject with commission override ✓ 2026-05-29
 - [x] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking ✓ 2026-05-29
-- [ ] **Phase 20: Wardrobe Notifications** — 9 new email + in-app templates spanning rental and consignment lifecycle
+- [x] **Phase 20: Wardrobe Notifications** — 9 new email + in-app templates spanning rental and consignment lifecycle ✓ 2026-05-29
 - [ ] **Phase 21: Testing, Seeding & Health Checks** — Playwright E2E specs, unit tests, seed script, health-check extension, new Storybook stories + VRT
 - [ ] **Phase 22: Project-Wide Storybook Audit** — Inventory project components, identify coverage gaps, backfill missing stories + VRT snapshots
 
@@ -220,6 +220,6 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 17. Admin rental lifecycle | v2.0 | 5/5 | Complete | 2026-05-29 |
 | 18. Self-serve consignment | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 19. Consignment payouts | v2.0 | 3/3 | Complete | 2026-05-29 |
-| 20. Wardrobe notifications | v2.0 | 0/3 | Not started | — |
+| 20. Wardrobe notifications | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 21. Wardrobe testing seed health | v2.0 | 0/TBD | Not started | — |
 | 22. Project-wide Storybook audit | v2.0 | 0/TBD | Not started | — |
