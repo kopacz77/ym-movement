@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 13 of 22 (Wardrobe Schema Foundation)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-28 — Roadmap created with 10 v2.0 phases (13-22), 86 requirements mapped, ready for `/gsd:plan-phase 13`
+Plan: 01 of N (Wardrobe Schema + Migration) — completed
+Status: In progress
+Last activity: 2026-05-29 — Completed 13-01-PLAN.md (wardrobe schema, transaction-wrapped migration applied to dev Neon, zero data loss)
 
-Progress: ░░░░░░░░░░ 0% of v2.0 milestone
+Progress: █░░░░░░░░░ ~10% of v2.0 milestone
 
 ## Performance Metrics
 
@@ -39,6 +39,12 @@ Progress: ░░░░░░░░░░ 0% of v2.0 milestone
 - Sign Out button text must be exactly "Sign Out" to match test selector
 - Use 2 workers for local dev server testing (prevents compilation overload)
 - Use domcontentloaded instead of networkidle to avoid cold-compilation timeouts
+- **(13-01) Author Prisma migration.sql by hand**: CLAUDE.md + .claude/settings.local.json forbid every migrate dev variant; `prisma migrate deploy` (= `pnpm prisma:migrate`) is the only allowed apply command
+- **(13-01) Wrap migrations in `BEGIN;...COMMIT;`**: forces clean rollback on partial failure
+- **(13-01) Restrict cascades on Dress.Owner, RentalRequest.*, Rental.*; Cascade only on DressImage.Dress**: protect audit history, allow orphan-image cleanup
+- **(13-01) All wardrobe money fields stored as Int cents** (no Float, to avoid drift)
+- **(13-01) Settings extension deferred to Plan 02**: existing Settings is key/value JSON, not typed singleton; wardrobe defaults will be a `key: "wardrobe"` row
+- **(13-01) Named `@relation("DressOwner")` on User<->Dress**: pre-empt ambiguity if a `lastEditedById` link is added later
 
 ### Pending Todos
 
@@ -52,11 +58,12 @@ Progress: ░░░░░░░░░░ 0% of v2.0 milestone
 
 ### Blockers/Concerns
 
-(None — all v1.1 blockers resolved)
+- **(13-01) Pre-existing TypeScript errors uncovered after node_modules re-install**: `src/components/landing/IceParticles.tsx` (missing `three` types) and `src/components/ui/sidebar.tsx` (missing `@radix-ui/react-visually-hidden`). Confirmed pre-existing via git stash; out of scope for Plan 13-01 but should be triaged separately.
+- **(13-01) pnpm 11.2.2 ignores legacy `pnpm.overrides` key in package.json** — caused a node_modules wipe + reinstall mid-session. Lockfile was regenerated via `pnpm install --no-frozen-lockfile`. Future invocations of `pnpm db:check` should be stable, but if pnpm tries to "Recreate node_modules" again, the root cause is the same — the `pnpm.overrides` block in package.json should eventually be removed or migrated to pnpm-workspace.yaml.
 
 ## Session Continuity
 
-Last session: 2026-05-28
-Stopped at: Roadmap created. v2.0 phases 13-22 defined with success criteria and requirement mappings; phase directories scaffolded.
+Last session: 2026-05-29T04:25:55Z
+Stopped at: Completed 13-01-PLAN.md (wardrobe schema authored, transaction-wrapped migration applied to dev Neon, zero data loss across 7 critical tables).
 Resume file: None
-Next step: `/gsd:plan-phase 13` (Wardrobe Schema Foundation)
+Next step: `/gsd:plan-phase 13` next plan (Settings JSON blob + wardrobe defaults seed), or proceed to `/gsd:plan-phase 14`.
