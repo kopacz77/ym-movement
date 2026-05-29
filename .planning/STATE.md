@@ -2,17 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md
+See: .planning/PROJECT.md (updated 2026-05-28)
 
-**Core value:** Students can discover, browse, and book lessons from multiple coaches across different disciplines, while the super admin maintains full visibility and control over the entire coaching operation including revenue splits and payouts.
-**Current focus:** Between milestones — v1.1 complete, next milestone not started
+**Core value:** Students can discover, browse, and book lessons from multiple coaches AND browse, fit-match, and rent competition dresses. The super admin manages both coaching operations and the wardrobe marketplace end-to-end.
+**Current focus:** v2.0 YM Wardrobe — defining requirements
 
 ## Current Position
 
-Phase: —
+Phase: Not started (run `/gsd:create-roadmap` after `/gsd:define-requirements`)
 Plan: —
-Status: Milestone v1.1 complete
-Last activity: 2026-03-17 — Completed v1.1 Test & Stabilize milestone
+Status: Defining requirements for v2.0 YM Wardrobe
+Last activity: 2026-05-28 — Started v2.0 YM Wardrobe milestone, design spec committed at docs/plans/2026-05-28-ym-wardrobe-mvp-design.md
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Last activity: 2026-03-17 — Completed v1.1 Test & Stabilize milestone
 
 ## Session Continuity
 
-Last session: 2026-03-17
-Stopped at: Completed v1.1 milestone archival
+Last session: 2026-05-28
+Stopped at: v2.0 milestone initialized; design spec at docs/plans/2026-05-28-ym-wardrobe-mvp-design.md ready for requirements decomposition
 Resume file: None
+Next step: `/gsd:define-requirements`
