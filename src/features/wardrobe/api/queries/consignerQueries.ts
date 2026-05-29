@@ -324,4 +324,105 @@ export const consignerRouter = createTRPCRouter({
       orderBy: { updatedAt: "desc" },
     });
   }),
+
+  /**
+   * CONSIGN-10: List the caller's owned dresses with their rental history and
+   * earnings status. Composite-by-dress shape so the consigner UI can group
+   * earnings under each of their listings without re-grouping client-side.
+   *
+   * Filters:
+   *   - Dress.ownerId === ctx.session.user.id           (caller-owns gate)
+   *   - Rental.consignmentPayoutAmount IS NOT NULL      (Yura-owned excluded — defensive)
+   *   - Rental.paymentStatus IN (PAID, RETURNED,
+   *     DEPOSIT_RELEASED, LATE_FEE_OWED)                (exclude AWAITING_PAYMENT —
+   *     no money has changed hands yet, so no earnings to display)
+   *
+   * Returns ALL caller-owned dresses that HAVE at least one matching rental
+   * (empty-dress entries are filtered out — `mine` already surfaces empty-state
+   * dresses).  Archived dresses with past rentals correctly appear here (CONSIGN
+   * earnings history is forever; archive does NOT hide earnings).
+   *
+   * Server-computed totals (earnedToDate, pendingPayout, rentalCount) returned
+   * as a separate top-level field — client never has to know payout math.
+   *
+   * Explicit select OMITS internalNotes (admin-only) AND consignmentCommissionPct
+   * (commission % is admin-snapshot at Rental-create; the consigner sees the
+   * resulting per-rental consignmentPayoutAmount, not the rate). Includes
+   * Student.User.name only (NOT email/phone) — same PII boundary as Phase 17
+   * wardrobe.requests.mine.
+   */
+  myEarnings: protectedProcedure.query(async ({ ctx }) => {
+    const dresses = await ctx.prisma.dress.findMany({
+      where: {
+        ownerId: ctx.session.user.id,
+        Rentals: {
+          some: {
+            consignmentPayoutAmount: { not: null },
+            paymentStatus: { in: ["PAID", "RETURNED", "DEPOSIT_RELEASED", "LATE_FEE_OWED"] },
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        sizeLabel: true,
+        color: true,
+        status: true, // so UI can render an ARCHIVED badge inline on historic earnings
+        Images: {
+          where: { isPrimary: true },
+          select: { url: true },
+          take: 1,
+        },
+        Rentals: {
+          where: {
+            consignmentPayoutAmount: { not: null },
+            paymentStatus: { in: ["PAID", "RETURNED", "DEPOSIT_RELEASED", "LATE_FEE_OWED"] },
+          },
+          orderBy: { startDate: "desc" },
+          select: {
+            id: true,
+            startDate: true,
+            endDate: true,
+            rentalType: true,
+            rentalFee: true,
+            consignmentPayoutAmount: true,
+            consignmentPaidOut: true,
+            consignmentPaidOutAt: true,
+            paymentStatus: true,
+            Student: { select: { User: { select: { name: true } } } },
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    // Server-computed totals — client doesn't recompute. Cents (Int) throughout.
+    let earnedToDate = 0;
+    let pendingPayout = 0;
+    let rentalCount = 0;
+    const rentalsByDress = dresses.map((d) => {
+      for (const r of d.Rentals) {
+        rentalCount++;
+        const amt = r.consignmentPayoutAmount ?? 0;
+        if (r.consignmentPaidOut) {
+          earnedToDate += amt;
+        } else {
+          pendingPayout += amt;
+        }
+      }
+      return {
+        dress: {
+          id: d.id,
+          title: d.title,
+          sizeLabel: d.sizeLabel,
+          color: d.color,
+          status: d.status,
+          Images: d.Images,
+        },
+        rentals: d.Rentals,
+      };
+    });
+
+    return { rentalsByDress, totals: { earnedToDate, pendingPayout, rentalCount } };
+  }),
 });
