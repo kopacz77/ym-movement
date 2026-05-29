@@ -32,6 +32,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
+import { computeConsignmentPayout } from "@/features/wardrobe/lib/payout";
 import {
   sendConsignmentPayoutSentEmail,
   sendDepositReleasedEmail,
@@ -66,23 +67,6 @@ function pickRentalFee(
       }
       return dress.purchasePrice;
   }
-}
-
-/**
- * RENTAL-03 (LOCKED): consignmentCommissionPct === 0 means Yura/platform-owned
- * → payout null. consignmentCommissionPct > 0 means consigned → payout populated.
- *
- * Math.round used (matches JS half-up convention); document any audit deltas
- * against banker's rounding. Formula: payout = rentalFee - round(rentalFee * pct / 100).
- */
-function computeConsignmentPayout(
-  dress: { consignmentCommissionPct: number },
-  rentalFee: number,
-): number | null {
-  if (dress.consignmentCommissionPct === 0) {
-    return null;
-  }
-  return rentalFee - Math.round((rentalFee * dress.consignmentCommissionPct) / 100);
 }
 
 // ---------------------------------------------------------------------------
