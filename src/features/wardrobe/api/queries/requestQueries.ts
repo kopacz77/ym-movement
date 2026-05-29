@@ -44,10 +44,7 @@ export const createRequestSchema = z
     endDate: z.date(),
     competitionName: z.string().max(120).optional(),
     competitionDate: z.date().optional(),
-    message: z
-      .string()
-      .min(20, "Tell the owner why you're a great match (20+ chars)")
-      .max(1000),
+    message: z.string().min(20, "Tell the owner why you're a great match (20+ chars)").max(1000),
   })
   .refine((d) => d.endDate > d.startDate, {
     message: "End date must be after start date",
@@ -55,8 +52,7 @@ export const createRequestSchema = z
   })
   .refine(
     (d) =>
-      !d.competitionDate ||
-      (d.competitionDate >= d.startDate && d.competitionDate <= d.endDate),
+      !d.competitionDate || (d.competitionDate >= d.startDate && d.competitionDate <= d.endDate),
     {
       message: "Competition date must fall inside the rental window",
       path: ["competitionDate"],
@@ -144,135 +140,263 @@ export const requestsRouter = createTRPCRouter({
    * Email notification is intentionally NOT sent here — Phase 20 owns the
    * email layer; the in-app Notification row is sufficient for the inbox UI.
    */
-  create: protectedProcedure
-    .input(createRequestSchema)
+  create: protectedProcedure.input(createRequestSchema).mutation(async ({ ctx, input }) => {
+    // Step 1: caller Student row
+    const student = await ctx.prisma.student.findUnique({
+      where: { userId: ctx.session.user.id },
+      select: { id: true, User: { select: { name: true } } },
+    });
+    if (!student) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Only students can request a rental",
+      });
+    }
+
+    // Step 2: dress + ownership/status gates
+    const dress = await ctx.prisma.dress.findUnique({
+      where: { id: input.dressId },
+      select: { id: true, ownerId: true, title: true, status: true },
+    });
+    if (!dress) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Dress not found" });
+    }
+    if (dress.status !== "AVAILABLE" && dress.status !== "PENDING") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "This dress is not available for new requests",
+      });
+    }
+    if (dress.ownerId === ctx.session.user.id) {
+      // Pitfall 9: prevent self-requests (admin/owner browsing their own listing)
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "You cannot request your own dress",
+      });
+    }
+
+    // Step 3: server-side overlap re-check (Pitfall 4 — defense in depth)
+    const [conflictingRental, conflictingApproved] = await Promise.all([
+      ctx.prisma.rental.findFirst({
+        where: {
+          dressId: input.dressId,
+          paymentStatus: { in: ["AWAITING_PAYMENT", "PAID"] },
+          startDate: { lte: input.endDate },
+          endDate: { gte: input.startDate },
+        },
+        select: { id: true },
+      }),
+      ctx.prisma.rentalRequest.findFirst({
+        where: {
+          dressId: input.dressId,
+          status: "APPROVED",
+          startDate: { lte: input.endDate },
+          endDate: { gte: input.startDate },
+        },
+        select: { id: true },
+      }),
+    ]);
+    if (conflictingRental || conflictingApproved) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Window no longer available",
+      });
+    }
+
+    // Step 4: expiresAt from Settings (Pitfall 10)
+    const settings = await getWardrobeSettings(ctx.prisma);
+    const expiresAt = addDays(new Date(), settings.wardrobeRentalRequestExpiryDays);
+
+    // Step 5: insert
+    const created = await ctx.prisma.rentalRequest.create({
+      data: {
+        dressId: input.dressId,
+        studentId: student.id,
+        rentalType: input.rentalType,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        competitionName: input.competitionName,
+        competitionDate: input.competitionDate,
+        message: input.message,
+        status: "PENDING",
+        expiresAt,
+      },
+      select: { id: true, dressId: true, status: true },
+    });
+
+    // Step 6: in-app notification to dress owner
+    // notification target is dress owner (Yura or consigner), NOT the requester (Pitfall 5)
+    try {
+      await createNotification({
+        userId: dress.ownerId,
+        title: "New rental request",
+        message: `${student.User.name ?? "A student"} requested ${dress.title}`,
+        type: "INFO",
+        link: "/admin/wardrobe/requests",
+      });
+    } catch (err) {
+      console.error("[WARDROBE] Failed to notify dress owner:", err);
+      // Non-blocking: the request itself succeeded.
+    }
+
+    return created;
+  }),
+
+  /**
+   * Cancel the caller's own PENDING rental request.
+   *
+   * PERM-03: enforced via inline `request.studentId !== student.id` check
+   * (research Pattern 3 — no new middleware). Only PENDING requests can be
+   * canceled (BAD_REQUEST on any other status).
+   *
+   * Pitfall 3: this procedure does NOT touch Dress.status. PENDING requests
+   * do not hold the dress — only APPROVED requests do, and approval flow
+   * lives in Phase 17. Flipping Dress.status here would regress a
+   * correctly-RENTED dress back to AVAILABLE when an unrelated PENDING
+   * request gets canceled by its requester.
+   */
+  cancel: protectedProcedure
+    .input(z.object({ requestId: z.string().cuid() }))
     .mutation(async ({ ctx, input }) => {
-      // Step 1: caller Student row
       const student = await ctx.prisma.student.findUnique({
         where: { userId: ctx.session.user.id },
-        select: { id: true, User: { select: { name: true } } },
+        select: { id: true },
       });
       if (!student) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Only students can request a rental",
+          message: "Only students can cancel a rental request",
         });
       }
 
-      // Step 2: dress + ownership/status gates
-      const dress = await ctx.prisma.dress.findUnique({
-        where: { id: input.dressId },
-        select: { id: true, ownerId: true, title: true, status: true },
+      const request = await ctx.prisma.rentalRequest.findUnique({
+        where: { id: input.requestId },
+        select: { id: true, studentId: true, status: true },
       });
-      if (!dress) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Dress not found" });
-      }
-      if (dress.status !== "AVAILABLE" && dress.status !== "PENDING") {
+      if (!request) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "This dress is not available for new requests",
-        });
-      }
-      if (dress.ownerId === ctx.session.user.id) {
-        // Pitfall 9: prevent self-requests (admin/owner browsing their own listing)
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You cannot request your own dress",
+          code: "NOT_FOUND",
+          message: "Rental request not found",
         });
       }
 
-      // Step 3: server-side overlap re-check (Pitfall 4 — defense in depth)
-      const [conflictingRental, conflictingApproved] = await Promise.all([
-        ctx.prisma.rental.findFirst({
-          where: {
-            dressId: input.dressId,
-            paymentStatus: { in: ["AWAITING_PAYMENT", "PAID"] },
-            startDate: { lte: input.endDate },
-            endDate: { gte: input.startDate },
+      // PERM-03: caller must own the request
+      if (request.studentId !== student.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      if (request.status !== "PENDING") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Only pending requests can be canceled",
+        });
+      }
+
+      // Pitfall 3: PENDING request cancel does NOT touch Dress.status — only
+      // APPROVED requests (Phase 17) hold the dress.
+      return ctx.prisma.rentalRequest.update({
+        where: { id: request.id },
+        data: { status: "CANCELED" },
+        select: { id: true, status: true },
+      });
+    }),
+
+  /**
+   * Caller's own RentalRequest history (PERM-03 — implicit scoping via
+   * studentId in WHERE). Empty array when caller has no Student row, so
+   * admins/coaches hitting /wardrobe/my-rentals see a graceful empty state
+   * instead of a thrown FORBIDDEN.
+   *
+   * Returns the minimal Dress shape needed to render the my-rentals list:
+   * id + title + sizeLabel + color + all three prices + primary image.
+   */
+  mine: protectedProcedure.query(async ({ ctx }) => {
+    const student = await ctx.prisma.student.findUnique({
+      where: { userId: ctx.session.user.id },
+      select: { id: true },
+    });
+    if (!student) {
+      return [];
+    }
+
+    return ctx.prisma.rentalRequest.findMany({
+      where: { studentId: student.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        rentalType: true,
+        startDate: true,
+        endDate: true,
+        competitionName: true,
+        competitionDate: true,
+        message: true,
+        status: true,
+        ownerResponse: true,
+        createdAt: true,
+        respondedAt: true,
+        expiresAt: true,
+        Dress: {
+          select: {
+            id: true,
+            title: true,
+            sizeLabel: true,
+            color: true,
+            competitionPrice: true,
+            seasonalPrice: true,
+            purchasePrice: true,
+            Images: {
+              orderBy: { sortOrder: "asc" },
+              take: 1,
+              select: { url: true, isPrimary: true, sortOrder: true },
+            },
           },
-          select: { id: true },
-        }),
-        ctx.prisma.rentalRequest.findFirst({
-          where: {
-            dressId: input.dressId,
-            status: "APPROVED",
-            startDate: { lte: input.endDate },
-            endDate: { gte: input.startDate },
-          },
-          select: { id: true },
-        }),
-      ]);
-      if (conflictingRental || conflictingApproved) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Window no longer available",
-        });
-      }
-
-      // Step 4: expiresAt from Settings (Pitfall 10)
-      const settings = await getWardrobeSettings(ctx.prisma);
-      const expiresAt = addDays(new Date(), settings.wardrobeRentalRequestExpiryDays);
-
-      // Step 5: insert
-      const created = await ctx.prisma.rentalRequest.create({
-        data: {
-          dressId: input.dressId,
-          studentId: student.id,
-          rentalType: input.rentalType,
-          startDate: input.startDate,
-          endDate: input.endDate,
-          competitionName: input.competitionName,
-          competitionDate: input.competitionDate,
-          message: input.message,
-          status: "PENDING",
-          expiresAt,
         },
-        select: { id: true, dressId: true, status: true },
-      });
-
-      // Step 6: in-app notification to dress owner
-      // notification target is dress owner (Yura or consigner), NOT the requester (Pitfall 5)
-      try {
-        await createNotification({
-          userId: dress.ownerId,
-          title: "New rental request",
-          message: `${student.User.name ?? "A student"} requested ${dress.title}`,
-          type: "INFO",
-          link: "/admin/wardrobe/requests",
-        });
-      } catch (err) {
-        console.error("[WARDROBE] Failed to notify dress owner:", err);
-        // Non-blocking: the request itself succeeded.
-      }
-
-      return created;
-    }),
-
-  // ---------------------------------------------------------------------------
-  // Task 2 stubs — flesh out cancel/mine/myRentals in the next task so this
-  // file stays compilable in between.
-  // ---------------------------------------------------------------------------
-
-  cancel: protectedProcedure
-    .input(z.object({ requestId: z.string().cuid() }))
-    .mutation(async () => {
-      throw new TRPCError({
-        code: "NOT_IMPLEMENTED",
-        message: "cancel not implemented yet",
-      });
-    }),
-
-  mine: protectedProcedure.query(async () => {
-    throw new TRPCError({
-      code: "NOT_IMPLEMENTED",
-      message: "mine not implemented yet",
+      },
     });
   }),
 
-  myRentals: protectedProcedure.query(async () => {
-    throw new TRPCError({
-      code: "NOT_IMPLEMENTED",
-      message: "myRentals not implemented yet",
+  /**
+   * Caller's own Rental history (PERM-03 — implicit scoping via studentId in
+   * WHERE). Returns minimal Dress shape (no prices — the Rental row itself
+   * already carries the contracted fees) + primary image for the list UI.
+   */
+  myRentals: protectedProcedure.query(async ({ ctx }) => {
+    const student = await ctx.prisma.student.findUnique({
+      where: { userId: ctx.session.user.id },
+      select: { id: true },
+    });
+    if (!student) {
+      return [];
+    }
+
+    return ctx.prisma.rental.findMany({
+      where: { studentId: student.id },
+      orderBy: { startDate: "desc" },
+      select: {
+        id: true,
+        rentalType: true,
+        startDate: true,
+        endDate: true,
+        rentalFee: true,
+        cleaningFee: true,
+        securityDeposit: true,
+        totalCharged: true,
+        paymentStatus: true,
+        returnedAt: true,
+        Dress: {
+          select: {
+            id: true,
+            title: true,
+            sizeLabel: true,
+            color: true,
+            Images: {
+              orderBy: { sortOrder: "asc" },
+              take: 1,
+              select: { url: true, isPrimary: true, sortOrder: true },
+            },
+          },
+        },
+      },
     });
   }),
 });
