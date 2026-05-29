@@ -149,7 +149,14 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   4. Rejected dresses can be edited by consigner and resubmitted (REJECTED → PENDING_APPROVAL)
   5. "Consigned" sidebar sub-link visible to any user with at least one owned dress
 
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 18-01-PLAN.md — Add nullable Dress.rejectionReason column via transaction-wrapped Prisma migration (deploy-only)
+- [ ] 18-02-PLAN.md — consignerQueries.ts TRPC router (6 procedures + assertOwnsDress inline guard) + 3 admin extensions (listPendingApproval, approveDress, rejectDress)
+- [ ] 18-03-PLAN.md — Extract DressFormCore from admin DressForm; thin admin wrapper; new ConsignerDressForm wrapper with field visibility + pricing/size locking
+- [ ] 18-04-PLAN.md — PendingApprovalQueue table + ApproveDressDialog (optional commission % override) + RejectDressDialog (required reason)
+- [ ] 18-05-PLAN.md — MyConsignedDressesList with 4 status-bucketed tabs (Live / Pending Review / Needs Attention / Archived) + URL-synced tab state + rejection-reason callouts
+- [ ] 18-06-PLAN.md — Three consigner routes (/wardrobe/consigned, /new with create-then-redirect, /[id]/edit with gallery + form + resubmit + archive)
+- [ ] 18-07-PLAN.md — /admin/wardrobe/pending-approval route shell + Consigned sidebar entry (Tag icon) in all 3 role nav arrays — AppSidebar/AppLayout untouched
 
 #### Phase 19: Consignment Payout Tracking
 **Goal**: Consigners see their earnings; admin tracks which payouts have been sent.
@@ -205,7 +212,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 15. Catalog browse measurements | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 16. Dress detail rental request | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 17. Admin rental lifecycle | v2.0 | 5/5 | Complete | 2026-05-29 |
-| 18. Self-serve consignment | v2.0 | 0/TBD | Not started | — |
+| 18. Self-serve consignment | v2.0 | 0/7 | Planned | — |
 | 19. Consignment payouts | v2.0 | 0/TBD | Not started | — |
 | 20. Wardrobe notifications | v2.0 | 0/TBD | Not started | — |
 | 21. Wardrobe testing seed health | v2.0 | 0/TBD | Not started | — |
