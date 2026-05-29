@@ -4,6 +4,7 @@ import { DressCategory, DressCondition, DressStatus, type Prisma } from "@prisma
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
+import { sendConsignerDressApprovedEmail, sendConsignerDressRejectedEmail } from "@/lib/email";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 /**
@@ -313,6 +314,8 @@ export const wardrobeDressRouter = createTRPCRouter({
           ownerId: true,
           title: true,
           status: true,
+          consignmentCommissionPct: true, // for NOTIFY-02 email body
+          Owner: { select: { email: true, name: true } }, // for NOTIFY-02 recipient
           _count: { select: { Images: true } },
         },
       });
@@ -356,6 +359,18 @@ export const wardrobeDressRouter = createTRPCRouter({
         console.error("[WARDROBE] Failed to notify consigner of approval:", err);
       }
 
+      // NOTIFY-02 (Phase 20): email beside the existing in-app notification.
+      // Separate try block ensures Resend failure does not suppress the in-app row.
+      try {
+        await sendConsignerDressApprovedEmail(dress.Owner.email, dress.Owner.name ?? "Consigner", {
+          dressTitle: dress.title,
+          dressId: dress.id,
+          commissionPct: input.consignmentCommissionPctOverride ?? dress.consignmentCommissionPct,
+        });
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email consigner of approval:", err);
+      }
+
       return updated;
     }),
 
@@ -376,7 +391,13 @@ export const wardrobeDressRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const dress = await ctx.prisma.dress.findUnique({
         where: { id: input.id },
-        select: { id: true, ownerId: true, title: true, status: true },
+        select: {
+          id: true,
+          ownerId: true,
+          title: true,
+          status: true,
+          Owner: { select: { email: true, name: true } }, // for NOTIFY-03 recipient
+        },
       });
       if (!dress) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Dress not found" });
@@ -403,6 +424,17 @@ export const wardrobeDressRouter = createTRPCRouter({
         });
       } catch (err) {
         console.error("[WARDROBE] Failed to notify consigner of rejection:", err);
+      }
+
+      // NOTIFY-03 (Phase 20): email beside the existing in-app notification.
+      try {
+        await sendConsignerDressRejectedEmail(dress.Owner.email, dress.Owner.name ?? "Consigner", {
+          dressTitle: dress.title,
+          dressId: dress.id,
+          rejectionReason: input.reason,
+        });
+      } catch (err) {
+        console.error("[WARDROBE] Failed to email consigner of rejection:", err);
       }
 
       return updated;
