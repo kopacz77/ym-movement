@@ -10,6 +10,7 @@ import { settingsRouter } from "./settingsQueries";
 import { studentRouter } from "./student"; // Updated import
 import { superAdminDashboardRouter } from "./superAdminQueries";
 import { wardrobeDressRouter } from "./wardrobeDressQueries";
+import { wardrobeRentalRouter, wardrobeRequestRouter } from "./wardrobeRequestQueries";
 import { wardrobeSettingsRouter } from "./wardrobeSettingsQueries";
 
 export const adminRouter = createTRPCRouter({
@@ -21,6 +22,8 @@ export const adminRouter = createTRPCRouter({
   settings: settingsRouter,
   wardrobe: wardrobeDressRouter,
   wardrobeSettings: wardrobeSettingsRouter,
+  wardrobeRequests: wardrobeRequestRouter,
+  wardrobeRentals: wardrobeRentalRouter,
   student: studentRouter, // Using the refactored student router
   superAdmin: superAdminDashboardRouter,
   auth: authRouter,
