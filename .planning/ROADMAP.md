@@ -59,7 +59,10 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. Settings row gains wardrobe defaults (`defaultConsignmentCommissionPct`, expiry days, reminder days)
   4. Admin can upload an image to a Dress via signed Vercel Blob PUT URL and see it persisted with `isPrimary` and `sortOrder`
   5. Image deletion removes both Blob object and DB row in one mutation; 8-image cap and 5MB pre-compression cap enforced
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 13-01-PLAN.md — Author Prisma schema (Dress, DressImage, RentalRequest, Rental + 6 enums + Student measurements), generate transaction-wrapped migration, extend pre-migration check, update .env.example
+- [ ] 13-02-PLAN.md — Wardrobe global settings via existing Settings key/value pattern (defaultConsignmentCommissionPct, expiry days, reminder days)
+- [ ] 13-03-PLAN.md — Install @vercel/blob + browser-image-compression, create handleUpload route, image compression helper, wardrobe.images TRPC procedures (attach/reorder/setPrimary/delete)
 
 #### Phase 14: Admin Inventory CRUD
 **Goal**: Admin can create, edit, and govern the dress catalog before any consigner or rental flow exists.
@@ -171,7 +174,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 |-------|-----------|----------------|--------|-----------|
 | 1-7 | v1.0 | (see archive) | Complete | 2026-03-16 |
 | 8-12 | v1.1 | (see archive) | Complete | 2026-03-17 |
-| 13. Wardrobe schema foundation | v2.0 | 0/TBD | Not started | — |
+| 13. Wardrobe schema foundation | v2.0 | 0/3 | Not started | — |
 | 14. Admin inventory CRUD | v2.0 | 0/TBD | Not started | — |
 | 15. Catalog browse measurements | v2.0 | 0/TBD | Not started | — |
 | 16. Dress detail rental request | v2.0 | 0/TBD | Not started | — |
