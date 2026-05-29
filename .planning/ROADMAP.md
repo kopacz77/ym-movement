@@ -74,7 +74,14 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. `/admin/wardrobe` shows full inventory grid filterable by status (including PENDING_APPROVAL/REJECTED/ARCHIVED)
   4. Admin can edit global wardrobe defaults at `/admin/wardrobe/settings`
   5. Sidebar Shirt entry routes admin to `/admin/wardrobe`; TRPC middleware on `admin.wardrobe.*` blocks non-admin callers
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 14-01-PLAN.md — Author admin.wardrobe.{list,byId,create,update,archive} TRPC procedures with shared dressInputSchema; mount sub-router; add formatCurrencyFromCents helper; smoke-test against dev Neon
+- [ ] 14-02-PLAN.md — Reusable wardrobe UI primitives: DressStatusBadge, CategoryBadge, StatusFilterChips (pure presentational, brand palette)
+- [ ] 14-03-PLAN.md — DressForm (tabbed RHF + Zod, mode=create|edit, dollars↔cents conversion) and DressImageGallery (composes wardrobe.images.* + @vercel/blob/client upload, 8-cap UI, primary badge, reorder via arrows)
+- [ ] 14-04-PLAN.md — WardrobeSettingsForm (3 numeric inputs, reuses Phase 13 wardrobeSettingsSchema, hydrates from api.admin.wardrobeSettings.get)
+- [ ] 14-05-PLAN.md — DressInventoryGrid (URL-state filters, status chips, search, pagination, archive via showDeleteConfirmation, ARCHIVED rows de-emphasized)
+- [ ] 14-06-PLAN.md — Wire 4 admin pages (/admin/wardrobe, /new, /[id]/edit, /settings) and add Wardrobe sidebar entries to navigation-config.ts above Settings for admin + student (locked AppSidebar.tsx untouched)
+- [ ] 14-07-PLAN.md — /wardrobe student-side placeholder page so the new sidebar entry does not 404 (Phase 15 replaces it)
 
 #### Phase 15: Catalog Browse & Measurements
 **Goal**: Students can browse the marketplace with structured filters and a measurement-driven fit toggle.
