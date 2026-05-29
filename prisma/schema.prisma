@@ -546,6 +546,7 @@ model Dress {
   consignmentCommissionPct Int             @default(0)
   status                   DressStatus     @default(AVAILABLE)
   internalNotes            String?
+  rejectionReason          String?
   Images                   DressImage[]
   Requests                 RentalRequest[]
   Rentals                  Rental[]
