@@ -57,7 +57,12 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { SortOption } from "@/features/wardrobe/lib/catalogFilters";
 import { api } from "@/lib/api";
 import { formatCurrencyFromCents } from "@/lib/utils";
@@ -455,25 +460,31 @@ export function WardrobeFilterBar(props: WardrobeFilterBarProps) {
                   aria-label="Filter to dresses that fit my measurements"
                 />
               ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      // biome-ignore lint/a11y/noNoninteractiveTabindex: Radix Tooltip needs a focusable trigger to fire on keyboard focus; natively disabled elements do not bubble events (15-RESEARCH Pitfall 9). The span owns focus + aria-disabled while wrapping the non-interactive Switch.
-                      tabIndex={0}
-                      aria-disabled="true"
-                      className="inline-block cursor-not-allowed opacity-50"
-                    >
-                      <Switch
-                        checked={false}
-                        onCheckedChange={() => {
-                          /* no-op */
-                        }}
-                        disabled
-                      />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>Set chest, waist, or hips first</TooltipContent>
-                </Tooltip>
+                // Local TooltipProvider — the app has no global Provider mount
+                // (verified via grep; each Tooltip consumer wraps its own,
+                // matching CoachList.tsx). Without this Provider, Radix throws
+                // "Tooltip must be used within TooltipProvider" at render time.
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        // biome-ignore lint/a11y/noNoninteractiveTabindex: Radix Tooltip needs a focusable trigger to fire on keyboard focus; natively disabled elements do not bubble events (15-RESEARCH Pitfall 9). The span owns focus + aria-disabled while wrapping the non-interactive Switch.
+                        tabIndex={0}
+                        aria-disabled="true"
+                        className="inline-block cursor-not-allowed opacity-50"
+                      >
+                        <Switch
+                          checked={false}
+                          onCheckedChange={() => {
+                            /* no-op */
+                          }}
+                          disabled
+                        />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>Set chest, waist, or hips first</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </div>
             <Button
