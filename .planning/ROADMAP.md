@@ -178,7 +178,10 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   1. All 9 templates fire on the correct lifecycle events (consigner dress submitted/approved/rejected, rental request received, decision, confirmed, return reminder, deposit released, consignment payout sent)
   2. Return reminder runs T-`wardrobeReturnReminderDays` before `endDate` via existing notification scheduler
   3. All templates use cyan `#0891b2` + navy `#1a3a5c` palette matching the 2026-04-26 brand sweep
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 20-01-PLAN.md — Append 9 new email helpers to src/lib/email.ts mirroring sendPaymentReminderEmail template (NOTIFY-01..09 — cyan #0891b2 + navy #1a3a5c brand palette, formatCurrencyFromCents for money, discriminated union on sendRentalDecisionEmail)
+- [ ] 20-02-PLAN.md — Wire 8 immediate-trigger emails to existing mutation call sites in non-blocking second-try blocks (NOTIFY-01..06, 08, 09); ADDS missing in-app + email admin fan-out at consignerQueries.create + resubmit (closes Phase 18 NOTIFY-01 gap)
+- [ ] 20-03-PLAN.md — NEW cron infrastructure for NOTIFY-07 return reminder: add Rental.returnReminderSentAt column via hand-authored BEGIN;...COMMIT; migration, new wardrobe-return-reminder-sender + /api/cron/wardrobe-return-reminders route + vercel.json declaring both crons (existing send-batch-emails @ 0 4 * * * + new wardrobe-return-reminders @ same schedule)
 
 #### Phase 21: Testing, Seeding & Health Checks
 **Goal**: Wardrobe paths are E2E-verified, populated with sample data, and observable via the health endpoint, with Storybook coverage for new components.
@@ -217,6 +220,6 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 17. Admin rental lifecycle | v2.0 | 5/5 | Complete | 2026-05-29 |
 | 18. Self-serve consignment | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 19. Consignment payouts | v2.0 | 3/3 | Complete | 2026-05-29 |
-| 20. Wardrobe notifications | v2.0 | 0/TBD | Not started | — |
+| 20. Wardrobe notifications | v2.0 | 0/3 | Not started | — |
 | 21. Wardrobe testing seed health | v2.0 | 0/TBD | Not started | — |
 | 22. Project-wide Storybook audit | v2.0 | 0/TBD | Not started | — |
