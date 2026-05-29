@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-05-28)
 ## Current Position
 
 Phase: 15 of 22 (Catalog Browse & Measurements) — IN PROGRESS
-Plan: 2/? complete (15-01, 15-02 shipped)
-Status: Phase 15 Wave 1 progressing. Plan 15-02 (fitScore.ts pure module + catalogQueries.list wiring) executed and committed; unit + smoke tests pass against dev Neon; type-check clean. Next: continue with subsequent Phase 15 plans (Slider primitive + image domain, measurement form, filter bar, catalog grid).
-Last activity: 2026-05-29 — Plan 15-02 complete: `src/features/wardrobe/lib/fitScore.ts` ships scoreDress/passesFitsMeFilter/scoreToPercent as a pure module; catalogQueries.list now wires sort=bestFit (descending) + fitsMe filter (CAT-04, CAT-05) and annotates per-item fitScorePercent/fitsCaller; both TODO(15-02) markers from 15-01 resolved.
+Plan: 3/? complete (15-01, 15-02, 15-03 shipped)
+Status: Phase 15 Wave 1+2 progressing. Plan 15-03 (Slider primitive) executed: @radix-ui/react-slider@1.3.6 installed, src/components/ui/slider.tsx ships as the cyan-branded forwardRef wrapper supporting two-thumb range mode for Plan 15-06's length/price filters. Type-check + lint clean on the new file. Next: 15-04 measurement form, 15-05 DressCard + BestFitBadge, 15-06 WardrobeFilterBar (consumes Slider), 15-07 catalog grid composition.
+Last activity: 2026-05-29 — Plan 15-03 complete: `src/components/ui/slider.tsx` exports Slider forwardRef wrapper around @radix-ui/react-slider (1.3.6) with cyan #0891b2 brand styling on Range fill + Thumb border + focus ring; two-thumb range mode supported via polymorphic value/defaultValue inspection.
 
 Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shipped, Phase 15 Wave 1 underway)
 
@@ -27,9 +27,9 @@ Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shippe
 - Average duration: 10.5min
 
 **v2.0 Wardrobe (in progress):**
-- Total plans completed: 12 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07, 15-01, 15-02)
+- Total plans completed: 13 (13-01, 13-02, 13-03, 14-01, 14-02, 14-03, 14-04, 14-05, 14-06, 14-07, 15-01, 15-02, 15-03)
 - Phase 14 plans shipped: 7/7 — PHASE 14 COMPLETE
-- Phase 15 plans shipped: 2/? (15-01 — catalog + measurement TRPC procedures; 15-02 — fitScore.ts pure module + sort=bestFit/fitsMe wiring)
+- Phase 15 plans shipped: 3/? (15-01 — catalog + measurement TRPC procedures; 15-02 — fitScore.ts pure module + sort=bestFit/fitsMe wiring; 15-03 — Slider UI primitive @radix-ui/react-slider wrapper with cyan brand styling)
 
 ## Accumulated Context
 
@@ -122,6 +122,12 @@ Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shippe
 - **(15-02) Filter (fitsMe) BEFORE sort (bestFit) BEFORE paginate**: ranks against the post-filter pool; the alternative (sort then filter) would deliver inconsistent page counts as filter pressure grew.
 - **(15-02) Per-item annotation shape branches on caller capability but ALWAYS has both keys**: `fitScorePercent: number | null` + `fitsCaller: boolean | null`. Client never has to check for property existence, only value type. Items get `null/null` when caller has no measurements.
 - **(15-02) Score-to-percent maps the [0, 3] valid range**: `round((max(0, score) / 3) * 100)` clamped to [0, 100]. A perfect three-dimension match scores 3.0 → 100%; the formula is simple enough to keep in BestFitBadge tooltip copy.
+- **(15-03) @radix-ui/react-slider over hand-rolled two-thumb logic**: keyboard arrows, ARIA value semantics, RTL flipping, and pointer/touch capture are all solved upstream. Matches the project's all-Radix UI primitive convention; first new dep added in Phase 15.
+- **(15-03) forwardRef + React.ComponentPropsWithoutRef pattern (NOT the modern shadcn function-form)**: followed the plan's authoritative code spec verbatim. The codebase has 5 existing forwardRef primitives (command, tooltip, breadcrumb, sidebar, touch-button) so the pattern is precedented; switch.tsx-style function form is the newer convention but the plan body locked the form.
+- **(15-03) Polymorphic thumb count via Array.isArray on value AND defaultValue**: thumb count derived dynamically from props at render time. Single-thumb scalar callers get a [value] fallback; two-thumb callers (Plan 15-06 length + price ranges) get exactly two thumbs. One wrapper handles both, no second component needed.
+- **(15-03) Three cyan #0891b2 surfaces — Range fill (bg), Thumb border (border), focus-visible ring**: extends 2026-04-26 brand sweep convention into a new primitive. Coherent on-brand identity in BOTH default and keyboard-focus states.
+- **(15-03) Removed initial `biome-ignore lint/suspicious/noArrayIndexKey` suppression**: Biome did NOT flag the indexed thumb key, so the precautionary suppression was itself a `suppressions/unused` warning. Dropped it; lint passes cleanly.
+- **(15-03) `pnpm add` ERR_PNPM_IGNORED_BUILDS is POST-install only, not pre-flight**: in Phase 13/14 the warning was identified as a hard blocker for `pnpm <script>` invocations, but `pnpm add <pkg>` completes the install before the build-script check fires. Plan-supplied `--ignore-scripts` workaround was unnecessary; package landed in dependencies with a clean lockfile.
 
 ### Pending Todos
 
@@ -143,6 +149,6 @@ Progress: ██░░░░░░░░ ~22% of v2.0 milestone (Phase 14 shippe
 ## Session Continuity
 
 Last session: 2026-05-29
-Stopped at: Completed Plan 15-02 (fitScore.ts pure module + catalogQueries.list wiring for sort=bestFit and fitsMe). 2 atomic task commits. SUMMARY.md written. Phase 14 live-UX checklist still pending user wake-up confirmation; `BLOB_READ_WRITE_TOKEN` env still needed for image upload testing.
+Stopped at: Completed Plan 15-03 (Slider UI primitive). 2 atomic task commits. SUMMARY.md written. Phase 14 live-UX checklist still pending user wake-up confirmation; `BLOB_READ_WRITE_TOKEN` env still needed for image upload testing.
 Resume file: None
-Next step: Continue Phase 15. Remaining plans: 15-03 (Slider primitive + Vercel Blob `next.config.js` images.remotePatterns), 15-04 (`/wardrobe/measurements` form consuming `wardrobe.measurements.get/update`), 15-05 (`DressCard` + `BestFitBadge` consuming `item.fitScorePercent`, importing `scoreToPercent` from `fitScore.ts`), 15-06 (`WardrobeFilterBar` consuming `callerHasMeasurements` + `item.fitsCaller`), 15-07 (catalog grid composition replacing the Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx`). **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab.
+Next step: Continue Phase 15. Remaining plans: 15-04 (`/wardrobe/measurements` form consuming `wardrobe.measurements.get/update`), 15-05 (`DressCard` + `BestFitBadge` consuming `item.fitScorePercent`, importing `scoreToPercent` from `fitScore.ts`), 15-06 (`WardrobeFilterBar` consuming `callerHasMeasurements` + `item.fitsCaller` — also consumes the new `Slider` primitive from 15-03 for length + price range filters), 15-07 (catalog grid composition replacing the Coming Soon stub at `src/app/(protected)/wardrobe/page.tsx`). **Carried user-setup blocker for end-to-end image upload testing:** `BLOB_READ_WRITE_TOKEN` must be added to local `.env` from Vercel Dashboard → ym-movement project → Storage → wardrobe-images store → `.env.local` tab. **Note on plan title vs scope:** the 15-03 plan title mentions "+ image domain" in some references but the actual plan body delivered only the Slider primitive + dependency. No Vercel Blob `next.config.js` images.remotePatterns work was in scope.
