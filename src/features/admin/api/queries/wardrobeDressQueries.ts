@@ -121,7 +121,21 @@ export const wardrobeDressRouter = createTRPCRouter({
    * summary. Used by the admin edit page to pre-fill the form.
    */
   byId: adminProcedure.input(z.object({ id: z.string().cuid() })).query(async ({ ctx, input }) => {
-    let dress: Awaited<ReturnType<typeof ctx.prisma.dress.findUnique>> = null;
+    // Type inferred from the query so the returned shape includes Owner + Images
+    // relations. A prior `let dress: Awaited<ReturnType<typeof ctx.prisma.dress.findUnique>>`
+    // collapsed the type to the base Dress (no relations), which broke consumers
+    // like the admin edit page that read dress.Owner and dress.Images.
+    let dress: Awaited<
+      ReturnType<
+        typeof ctx.prisma.dress.findUnique<{
+          where: { id: string };
+          include: {
+            Owner: { select: { id: true; name: true; email: true } };
+            Images: { orderBy: { sortOrder: "asc" } };
+          };
+        }>
+      >
+    > = null;
     try {
       dress = await ctx.prisma.dress.findUnique({
         where: { id: input.id },
