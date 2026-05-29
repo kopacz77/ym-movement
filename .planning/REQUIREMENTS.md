@@ -204,102 +204,114 @@ Explicitly excluded for v2.0. Documented to prevent scope creep.
 
 ## Traceability
 
-Phase mapping populated by `/gsd:create-roadmap`. Each v1 requirement maps to exactly one phase.
+Phase mappings populated by `/gsd:create-roadmap` on 2026-05-28. Each v1 requirement maps to exactly one phase.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | TBD | Pending |
-| SCHEMA-02 | TBD | Pending |
-| SCHEMA-03 | TBD | Pending |
-| SCHEMA-04 | TBD | Pending |
-| SCHEMA-05 | TBD | Pending |
-| SCHEMA-06 | TBD | Pending |
-| SCHEMA-07 | TBD | Pending |
-| STORAGE-01 | TBD | Pending |
-| STORAGE-02 | TBD | Pending |
-| STORAGE-03 | TBD | Pending |
-| STORAGE-04 | TBD | Pending |
-| STORAGE-05 | TBD | Pending |
-| CAT-01 | TBD | Pending |
-| CAT-02 | TBD | Pending |
-| CAT-03 | TBD | Pending |
-| CAT-04 | TBD | Pending |
-| CAT-05 | TBD | Pending |
-| CAT-06 | TBD | Pending |
-| CAT-07 | TBD | Pending |
-| CAT-08 | TBD | Pending |
-| MEASURE-01 | TBD | Pending |
-| MEASURE-02 | TBD | Pending |
-| MEASURE-03 | TBD | Pending |
-| DETAIL-01 | TBD | Pending |
-| DETAIL-02 | TBD | Pending |
-| DETAIL-03 | TBD | Pending |
-| REQUEST-01 | TBD | Pending |
-| REQUEST-02 | TBD | Pending |
-| REQUEST-03 | TBD | Pending |
-| REQUEST-04 | TBD | Pending |
-| REQUEST-05 | TBD | Pending |
-| ADMIN-01 | TBD | Pending |
-| ADMIN-02 | TBD | Pending |
-| ADMIN-03 | TBD | Pending |
-| ADMIN-04 | TBD | Pending |
-| ADMIN-05 | TBD | Pending |
-| ADMIN-06 | TBD | Pending |
-| ADMIN-07 | TBD | Pending |
-| CONSIGN-01 | TBD | Pending |
-| CONSIGN-02 | TBD | Pending |
-| CONSIGN-03 | TBD | Pending |
-| CONSIGN-04 | TBD | Pending |
-| CONSIGN-05 | TBD | Pending |
-| CONSIGN-06 | TBD | Pending |
-| CONSIGN-07 | TBD | Pending |
-| CONSIGN-08 | TBD | Pending |
-| CONSIGN-09 | TBD | Pending |
-| CONSIGN-10 | TBD | Pending |
-| RENTAL-01 | TBD | Pending |
-| RENTAL-02 | TBD | Pending |
-| RENTAL-03 | TBD | Pending |
-| RENTAL-04 | TBD | Pending |
-| RENTAL-05 | TBD | Pending |
-| RENTAL-06 | TBD | Pending |
-| RENTAL-07 | TBD | Pending |
-| RENTAL-08 | TBD | Pending |
-| NOTIFY-01 | TBD | Pending |
-| NOTIFY-02 | TBD | Pending |
-| NOTIFY-03 | TBD | Pending |
-| NOTIFY-04 | TBD | Pending |
-| NOTIFY-05 | TBD | Pending |
-| NOTIFY-06 | TBD | Pending |
-| NOTIFY-07 | TBD | Pending |
-| NOTIFY-08 | TBD | Pending |
-| NOTIFY-09 | TBD | Pending |
-| NOTIFY-10 | TBD | Pending |
-| NAV-01 | TBD | Pending |
-| NAV-02 | TBD | Pending |
-| PERM-01 | TBD | Pending |
-| PERM-02 | TBD | Pending |
-| PERM-03 | TBD | Pending |
-| PERM-04 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| TEST-05 | TBD | Pending |
-| TEST-06 | TBD | Pending |
-| TEST-07 | TBD | Pending |
-| TEST-08 | TBD | Pending |
-| STORY-01 | TBD | Pending |
-| STORY-02 | TBD | Pending |
-| STORY-03 | TBD | Pending |
-| STORY-04 | TBD | Pending |
-| STORY-05 | TBD | Pending |
-| STORY-06 | TBD | Pending |
+| SCHEMA-01 | Phase 13 | Pending |
+| SCHEMA-02 | Phase 13 | Pending |
+| SCHEMA-03 | Phase 13 | Pending |
+| SCHEMA-04 | Phase 13 | Pending |
+| SCHEMA-05 | Phase 13 | Pending |
+| SCHEMA-06 | Phase 13 | Pending |
+| SCHEMA-07 | Phase 13 | Pending |
+| STORAGE-01 | Phase 13 | Pending |
+| STORAGE-02 | Phase 13 | Pending |
+| STORAGE-03 | Phase 13 | Pending |
+| STORAGE-04 | Phase 13 | Pending |
+| STORAGE-05 | Phase 13 | Pending |
+| CAT-01 | Phase 15 | Pending |
+| CAT-02 | Phase 15 | Pending |
+| CAT-03 | Phase 15 | Pending |
+| CAT-04 | Phase 15 | Pending |
+| CAT-05 | Phase 15 | Pending |
+| CAT-06 | Phase 15 | Pending |
+| CAT-07 | Phase 15 | Pending |
+| CAT-08 | Phase 15 | Pending |
+| MEASURE-01 | Phase 15 | Pending |
+| MEASURE-02 | Phase 15 | Pending |
+| MEASURE-03 | Phase 15 | Pending |
+| DETAIL-01 | Phase 16 | Pending |
+| DETAIL-02 | Phase 16 | Pending |
+| DETAIL-03 | Phase 16 | Pending |
+| REQUEST-01 | Phase 16 | Pending |
+| REQUEST-02 | Phase 16 | Pending |
+| REQUEST-03 | Phase 16 | Pending |
+| REQUEST-04 | Phase 16 | Pending |
+| REQUEST-05 | Phase 16 | Pending |
+| ADMIN-01 | Phase 14 | Pending |
+| ADMIN-02 | Phase 14 | Pending |
+| ADMIN-03 | Phase 14 | Pending |
+| ADMIN-04 | Phase 17 | Pending |
+| ADMIN-05 | Phase 17 | Pending |
+| ADMIN-06 | Phase 17 | Pending |
+| ADMIN-07 | Phase 14 | Pending |
+| CONSIGN-01 | Phase 18 | Pending |
+| CONSIGN-02 | Phase 18 | Pending |
+| CONSIGN-03 | Phase 18 | Pending |
+| CONSIGN-04 | Phase 18 | Pending |
+| CONSIGN-05 | Phase 18 | Pending |
+| CONSIGN-06 | Phase 18 | Pending |
+| CONSIGN-07 | Phase 18 | Pending |
+| CONSIGN-08 | Phase 18 | Pending |
+| CONSIGN-09 | Phase 18 | Pending |
+| CONSIGN-10 | Phase 19 | Pending |
+| RENTAL-01 | Phase 17 | Pending |
+| RENTAL-02 | Phase 17 | Pending |
+| RENTAL-03 | Phase 17 | Pending |
+| RENTAL-04 | Phase 17 | Pending |
+| RENTAL-05 | Phase 17 | Pending |
+| RENTAL-06 | Phase 17 | Pending |
+| RENTAL-07 | Phase 17 | Pending |
+| RENTAL-08 | Phase 19 | Pending |
+| NOTIFY-01 | Phase 20 | Pending |
+| NOTIFY-02 | Phase 20 | Pending |
+| NOTIFY-03 | Phase 20 | Pending |
+| NOTIFY-04 | Phase 20 | Pending |
+| NOTIFY-05 | Phase 20 | Pending |
+| NOTIFY-06 | Phase 20 | Pending |
+| NOTIFY-07 | Phase 20 | Pending |
+| NOTIFY-08 | Phase 20 | Pending |
+| NOTIFY-09 | Phase 20 | Pending |
+| NOTIFY-10 | Phase 20 | Pending |
+| NAV-01 | Phase 14 | Pending |
+| NAV-02 | Phase 18 | Pending |
+| PERM-01 | Phase 18 | Pending |
+| PERM-02 | Phase 14 | Pending |
+| PERM-03 | Phase 16 | Pending |
+| PERM-04 | Phase 21 | Pending |
+| TEST-01 | Phase 21 | Pending |
+| TEST-02 | Phase 21 | Pending |
+| TEST-03 | Phase 21 | Pending |
+| TEST-04 | Phase 21 | Pending |
+| TEST-05 | Phase 21 | Pending |
+| TEST-06 | Phase 21 | Pending |
+| TEST-07 | Phase 21 | Pending |
+| TEST-08 | Phase 21 | Pending |
+| STORY-01 | Phase 21 | Pending |
+| STORY-02 | Phase 21 | Pending |
+| STORY-03 | Phase 21 | Pending |
+| STORY-04 | Phase 22 | Pending |
+| STORY-05 | Phase 22 | Pending |
+| STORY-06 | Phase 22 | Pending |
 
 **Coverage:**
-- v1 requirements: 82 total
-- Mapped to phases: 0 (pending `/gsd:create-roadmap`)
-- Unmapped: 82 ⚠️ (expected — will be resolved by roadmap)
+- v1 requirements: 86 total (corrected from earlier miscount of 82)
+- Mapped to phases: 86
+- Unmapped: 0 ✓
+
+**Per-phase distribution:**
+- Phase 13 Schema Foundation: 12 (SCHEMA-01..07, STORAGE-01..05)
+- Phase 14 Admin Inventory CRUD: 6 (ADMIN-01/02/03/07, NAV-01, PERM-02)
+- Phase 15 Catalog Browse & Measurements: 11 (CAT-01..08, MEASURE-01..03)
+- Phase 16 Dress Detail & Rental Request: 9 (DETAIL-01..03, REQUEST-01..05, PERM-03)
+- Phase 17 Admin Rental Lifecycle: 10 (ADMIN-04/05/06, RENTAL-01..07)
+- Phase 18 Self-Serve Consignment: 11 (CONSIGN-01..09, NAV-02, PERM-01)
+- Phase 19 Consignment Payout Tracking: 2 (CONSIGN-10, RENTAL-08)
+- Phase 20 Wardrobe Notifications: 10 (NOTIFY-01..10)
+- Phase 21 Testing, Seeding & Health Checks: 12 (PERM-04, TEST-01..08, STORY-01..03)
+- Phase 22 Project-Wide Storybook Audit: 3 (STORY-04..06)
 
 ---
 *Requirements defined: 2026-05-28 from design spec*
-*Last updated: 2026-05-28 at initial definition*
+*Last updated: 2026-05-28 — traceability populated by /gsd:create-roadmap*
