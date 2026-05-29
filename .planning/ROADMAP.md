@@ -131,7 +131,12 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. Mark payment received creates `Rental` row snapshotting fees, sets dress to RENTED, computes `consignmentPayoutAmount` for non-Yura-owned dresses
   4. `/admin/wardrobe/rentals` shows active rentals with returns-due section; mark returned records condition and `returnedAt`
   5. Release deposit returns dress to AVAILABLE; `LATE_FEE_OWED` flag surfaces in admin view for manual resolution
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 17-01-PLAN.md — wardrobeRequestQueries.ts with 7 admin procedures (listRequests/respondToRequest/markPaymentReceived in wardrobeRequestRouter + listRentals/markReturned/releaseDeposit/flagLateFee in wardrobeRentalRouter); state machine matrix encoded with $transaction + post-commit notifications; consignmentPayoutAmount = rentalFee - round(rentalFee * consignmentCommissionPct / 100) when pct > 0, null when == 0
+- [ ] 17-02-PLAN.md — RequestQueueTable (tabbed Pending + Awaiting Payment) + RequestResponseDialog (RHF + Zod APPROVE/DECLINE discriminator)
+- [ ] 17-03-PLAN.md — RecordPaymentDialog (paymentMethod radio) + RentalsTable (Active + Returns Due bucket + Late Fee tab; reads wardrobeReturnReminderDays) + MarkReturnedDialog (conditionOnReturn textarea)
+- [ ] 17-04-PLAN.md — /admin/wardrobe/requests/page.tsx thin client shell composing RequestQueueTable
+- [ ] 17-05-PLAN.md — /admin/wardrobe/rentals/page.tsx thin client shell composing RentalsTable
 
 #### Phase 18: Self-Serve Consignment
 **Goal**: Any user can self-list a dress; admin gates publication via approval queue.
@@ -199,7 +204,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 14. Admin inventory CRUD | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 15. Catalog browse measurements | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 16. Dress detail rental request | v2.0 | 7/7 | Complete | 2026-05-29 |
-| 17. Admin rental lifecycle | v2.0 | 0/TBD | Not started | — |
+| 17. Admin rental lifecycle | v2.0 | 0/5 | Not started | — |
 | 18. Self-serve consignment | v2.0 | 0/TBD | Not started | — |
 | 19. Consignment payouts | v2.0 | 0/TBD | Not started | — |
 | 20. Wardrobe notifications | v2.0 | 0/TBD | Not started | — |
