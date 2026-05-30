@@ -42,6 +42,25 @@ const stories = [
   "wardrobe-request-requestrentaldialog--open",
   "wardrobe-admin-pendingapprovalqueue--default",
   "wardrobe-consigner-consignerearningstable--default",
+  // ── Phase 22 Backfill (STORY-05 — 12 high-leverage components) ──────────────
+  // UI Primitives (Tier 1)
+  "ui-dialog--default",
+  "ui-dialog--with-long-content",
+  "ui-select--default",
+  "ui-table--default",
+  "ui-table--empty",
+  "ui-tabs--default",
+  "ui-form--default",
+  // Wardrobe Widgets (Tier 2)
+  "wardrobe-dressstatusbadge--available",
+  "wardrobe-dressstatusbadge--rented",
+  "wardrobe-bestfitbadge--high-fit",
+  "wardrobe-detail-dressimagecarousel--multiple-images",
+  // Dashboard/Notification Widgets (Tier 3)
+  "student-dashboard-nextlessonhero--upcoming-lesson",
+  "student-dashboard-outstandingpayments--default",
+  "coach-earnings-earningsoverview--default",
+  "notifications-notificationspopover--with-unread",
 ];
 
 for (const storyId of stories) {
