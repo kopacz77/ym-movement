@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 // Story IDs to screenshot — covers all story files for visual regression
 const stories = [
@@ -28,6 +28,20 @@ const stories = [
   "student-dashboard-studentprogress--default",
   // Calendar Events
   "scheduling-fceventcontent--private-lesson",
+  // Wardrobe (Phase 21 — STORY-01/02/03)
+  "wardrobe-catalog-dresscard--default",
+  "wardrobe-catalog-dresscard--with-best-fit-score",
+  "wardrobe-catalog-wardrobefilterbar--default",
+  "wardrobe-catalog-cataloggrid--populated",
+  "wardrobe-catalog-cataloggrid--empty",
+  "wardrobe-measurementform--prefilled",
+  "wardrobe-detail-dressdetailhero--default",
+  "wardrobe-detail-fitcheckcard--all-green",
+  "wardrobe-request-rentalstatusbadge--pending",
+  "wardrobe-request-rentalstatusbadge--approved",
+  "wardrobe-request-requestrentaldialog--open",
+  "wardrobe-admin-pendingapprovalqueue--default",
+  "wardrobe-consigner-consignerearningstable--default",
 ];
 
 for (const storyId of stories) {
