@@ -10,11 +10,6 @@
 // Dialog state is a discriminated union mirroring Phase 17's RequestQueueTable
 // pattern (state.kind: 'none' | 'approve' | 'reject').
 //
-// CROSS-WAVE NOTE (stub-then-swap, Plan 18-04 → 18-02):
-//   `admin.wardrobe.listPendingApproval` ships in Plan 18-02. Until then the
-//   `(api.admin.wardrobe as any).listPendingApproval.useQuery(...)` cast keeps
-//   this file type-correct. Swap to a direct property access once 18-02 lands.
-
 "use client";
 
 import type { DressCategory } from "@prisma/client";
@@ -57,7 +52,7 @@ type DialogState =
 export function PendingApprovalQueue() {
   // Stub-then-swap (Plan 18-02 sibling): listPendingApproval is an 18-02
   // deliverable; `as any` keeps this file type-correct until 18-02 lands.
-  const { data, isLoading } = (api.admin.wardrobe as any).listPendingApproval.useQuery({
+  const { data, isLoading } = api.admin.wardrobe.listPendingApproval.useQuery({
     page: 1,
     limit: 50,
   });

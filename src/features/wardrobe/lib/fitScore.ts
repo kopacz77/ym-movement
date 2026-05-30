@@ -41,22 +41,25 @@ export type StudentFitFields = {
  * deviates from the expected length-for-height by more than
  * EXPECTED_LENGTH_TOLERANCE_CM (8 cm).
  */
-export function passesFitsMeFilter(
-  dress: DressFitFields,
-  student: StudentFitFields,
-): boolean {
+export function passesFitsMeFilter(dress: DressFitFields, student: StudentFitFields): boolean {
   const slackLo = dress.alterableSmaller ? ALTERABLE_SLACK_CM : 0;
   const slackHi = dress.alterableLarger ? ALTERABLE_SLACK_CM : 0;
 
-  const dims: Array<[number | null | undefined, number | null, number | null]> = [
+  const dims: [number | null | undefined, number | null, number | null][] = [
     [student.chestCm, dress.chestMinCm, dress.chestMaxCm],
     [student.waistCm, dress.waistMinCm, dress.waistMaxCm],
     [student.hipsCm, dress.hipsMinCm, dress.hipsMaxCm],
   ];
   for (const [s, dMin, dMax] of dims) {
-    if (s == null || dMin == null || dMax == null) continue;
-    if (s < dMin - slackLo) return false;
-    if (s > dMax + slackHi) return false;
+    if (s == null || dMin == null || dMax == null) {
+      continue;
+    }
+    if (s < dMin - slackLo) {
+      return false;
+    }
+    if (s > dMax + slackHi) {
+      return false;
+    }
   }
 
   // Length check (uses heightCm proxy)
@@ -84,7 +87,7 @@ export function passesFitsMeFilter(
 export function scoreDress(dress: DressFitFields, student: StudentFitFields): number {
   const slackLo = dress.alterableSmaller ? ALTERABLE_SLACK_CM : 0;
   const slackHi = dress.alterableLarger ? ALTERABLE_SLACK_CM : 0;
-  const dims: Array<[number | null | undefined, number | null, number | null]> = [
+  const dims: [number | null | undefined, number | null, number | null][] = [
     [student.chestCm, dress.chestMinCm, dress.chestMaxCm],
     [student.waistCm, dress.waistMinCm, dress.waistMaxCm],
     [student.hipsCm, dress.hipsMinCm, dress.hipsMaxCm],

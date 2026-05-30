@@ -80,28 +80,26 @@ export const measurementRouter = createTRPCRouter({
    * to `new Date()` regardless of whether any field actually changed
    * (MEASURE-03 — stamp even on no-change saves).
    */
-  update: protectedProcedure
-    .input(measurementUpdateSchema)
-    .mutation(async ({ ctx, input }) => {
-      const student = await ctx.prisma.student.findUnique({
-        where: { userId: ctx.session.user.id },
-        select: { id: true },
-      });
+  update: protectedProcedure.input(measurementUpdateSchema).mutation(async ({ ctx, input }) => {
+    const student = await ctx.prisma.student.findUnique({
+      where: { userId: ctx.session.user.id },
+      select: { id: true },
+    });
 
-      if (!student) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Student profile required to update measurements",
-        });
-      }
-
-      return ctx.prisma.student.update({
-        where: { id: student.id },
-        data: {
-          ...input,
-          measurementsUpdatedAt: new Date(),
-        },
-        select: MEASUREMENT_SELECT,
+    if (!student) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Student profile required to update measurements",
       });
-    }),
+    }
+
+    return ctx.prisma.student.update({
+      where: { id: student.id },
+      data: {
+        ...input,
+        measurementsUpdatedAt: new Date(),
+      },
+      select: MEASUREMENT_SELECT,
+    });
+  }),
 });

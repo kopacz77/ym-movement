@@ -57,12 +57,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SortOption } from "@/features/wardrobe/lib/catalogFilters";
 import { api } from "@/lib/api";
 import { formatCurrencyFromCents } from "@/lib/utils";

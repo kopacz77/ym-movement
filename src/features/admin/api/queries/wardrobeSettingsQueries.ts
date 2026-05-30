@@ -27,9 +27,13 @@ type PrismaWithSettings = PrismaClient & {
       update: { value: string; updatedAt?: Date };
       create: { id?: string; key: string; value: string; updatedAt?: Date };
     }) => Promise<{ id: string; key: string; value: string; createdAt: Date; updatedAt: Date }>;
-    findUnique: (args: {
-      where: { key: string };
-    }) => Promise<{ id: string; key: string; value: string; createdAt: Date; updatedAt: Date } | null>;
+    findUnique: (args: { where: { key: string } }) => Promise<{
+      id: string;
+      key: string;
+      value: string;
+      createdAt: Date;
+      updatedAt: Date;
+    } | null>;
   };
 };
 
@@ -37,7 +41,9 @@ export async function getWardrobeSettings(prisma: PrismaClient): Promise<Wardrob
   const row = await (prisma as PrismaWithSettings).settings.findUnique({
     where: { key: WARDROBE_SETTINGS_KEY },
   });
-  if (!row) return DEFAULTS;
+  if (!row) {
+    return DEFAULTS;
+  }
   try {
     return wardrobeSettingsSchema.parse(JSON.parse(row.value));
   } catch {

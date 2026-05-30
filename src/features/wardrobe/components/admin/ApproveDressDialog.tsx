@@ -4,13 +4,6 @@
 // commission % override. Mirrors RequestResponseDialog shape — controlled
 // Dialog + reset-on-close + invalidate-then-close-then-toast lifecycle.
 //
-// CROSS-WAVE NOTE (stub-then-swap, Plan 18-04 → 18-02):
-//   Plan 18-02 ships `admin.wardrobe.approveDress` and `listPendingApproval`
-//   procedures. If 18-02 hasn't landed at type-check time, the
-//   `(api.admin.wardrobe as any).approveDress` cast keeps this file
-//   type-correct; remove the cast once 18-02 lands. Same family as 17-02's
-//   PaymentPlaceholderDialog stub → real-import swap pattern.
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -56,7 +49,7 @@ export function ApproveDressDialog({
 
   // Stub-then-swap (Plan 18-02 sibling): `approveDress` + `listPendingApproval`
   // are 18-02 deliverables; `as any` keeps this file type-correct until 18-02 lands.
-  const approve = (api.admin.wardrobe as any).approveDress.useMutation({
+  const approve = api.admin.wardrobe.approveDress.useMutation({
     onSuccess: () => {
       toast.success("Dress approved", {
         description: `${dressTitle} is now live on the YM Wardrobe catalog.`,

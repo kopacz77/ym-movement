@@ -47,7 +47,9 @@ const ALL_CATEGORIES: DressCategory[] = Object.values(DressCategory) as DressCat
 // ---------------------------------------------------------------------------
 
 function parseEnumArrayParam<T extends string>(raw: string | null, allowed: readonly T[]): T[] {
-  if (!raw) { return []; }
+  if (!raw) {
+    return [];
+  }
   const allowedSet = new Set<string>(allowed);
   return raw
     .split(",")
@@ -56,7 +58,9 @@ function parseEnumArrayParam<T extends string>(raw: string | null, allowed: read
 }
 
 function parseStringArrayParam(raw: string | null): string[] {
-  if (!raw) { return []; }
+  if (!raw) {
+    return [];
+  }
   return raw
     .split(",")
     .map((s) => s.trim())
@@ -64,16 +68,24 @@ function parseStringArrayParam(raw: string | null): string[] {
 }
 
 function parseIntParam(raw: string | null): number | undefined {
-  if (!raw) { return undefined; }
+  if (!raw) {
+    return undefined;
+  }
   const n = Number.parseInt(raw, 10);
-  if (Number.isNaN(n) || n < 0) { return undefined; }
+  if (Number.isNaN(n) || n < 0) {
+    return undefined;
+  }
   return n;
 }
 
 function parseDateParam(raw: string | null): Date | undefined {
-  if (!raw) { return undefined; }
+  if (!raw) {
+    return undefined;
+  }
   const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) { return undefined; }
+  if (Number.isNaN(d.getTime())) {
+    return undefined;
+  }
   return d;
 }
 

@@ -13,15 +13,15 @@
 // studentProcedure exists). Coaches and admins viewing /wardrobe see the same
 // catalog (intentional per research Open Question 4).
 
-import { type DressStatus, type Prisma } from "@prisma/client";
+import type { DressStatus, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { catalogFilterSchema } from "@/features/wardrobe/lib/catalogFilters";
 import {
   passesFitsMeFilter,
+  type StudentFitFields,
   scoreDress,
   scoreToPercent,
-  type StudentFitFields,
 } from "@/features/wardrobe/lib/fitScore";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
@@ -113,15 +113,23 @@ export const catalogRouter = createTRPCRouter({
 
     if (input.lengthCmMin != null || input.lengthCmMax != null) {
       const lengthFilter: Prisma.IntNullableFilter = {};
-      if (input.lengthCmMin != null) lengthFilter.gte = input.lengthCmMin;
-      if (input.lengthCmMax != null) lengthFilter.lte = input.lengthCmMax;
+      if (input.lengthCmMin != null) {
+        lengthFilter.gte = input.lengthCmMin;
+      }
+      if (input.lengthCmMax != null) {
+        lengthFilter.lte = input.lengthCmMax;
+      }
       where.lengthCm = lengthFilter;
     }
 
     if (input.priceMinCents != null || input.priceMaxCents != null) {
       const priceFilter: Prisma.IntFilter = {};
-      if (input.priceMinCents != null) priceFilter.gte = input.priceMinCents;
-      if (input.priceMaxCents != null) priceFilter.lte = input.priceMaxCents;
+      if (input.priceMinCents != null) {
+        priceFilter.gte = input.priceMinCents;
+      }
+      if (input.priceMaxCents != null) {
+        priceFilter.lte = input.priceMaxCents;
+      }
       where.competitionPrice = priceFilter;
     }
 
