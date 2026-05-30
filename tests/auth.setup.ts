@@ -40,6 +40,10 @@ setup("seed test data", async () => {
   execSync("npx tsx tests/helpers/seed-test-data.ts", { stdio: "inherit" });
 });
 
+setup("seed wardrobe data", async () => {
+  execSync("npx tsx scripts/seed-wardrobe.ts", { stdio: "inherit" });
+});
+
 setup("authenticate as super admin", async ({ page }) => {
   await login(page, "admin@test.com", "ADMINPASS2025!", "/admin/dashboard", SUPER_ADMIN_AUTH);
 });
