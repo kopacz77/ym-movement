@@ -44,7 +44,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 - [x] **Phase 18: Self-Serve Consignment** — Consigner upload form, PENDING_APPROVAL queue, admin approve/reject with commission override ✓ 2026-05-29
 - [x] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking ✓ 2026-05-29
 - [x] **Phase 20: Wardrobe Notifications** — 9 new email + in-app templates spanning rental and consignment lifecycle ✓ 2026-05-29
-- [ ] **Phase 21: Testing, Seeding & Health Checks** — Playwright E2E specs, unit tests, seed script, health-check extension, new Storybook stories + VRT
+- [x] **Phase 21: Testing, Seeding & Health Checks** — Playwright E2E specs, unit tests, seed script, health-check extension, new Storybook stories + VRT ✓ 2026-05-29
 - [ ] **Phase 22: Project-Wide Storybook Audit** — Inventory project components, identify coverage gaps, backfill missing stories + VRT snapshots
 
 ## Phase Details
@@ -193,7 +193,12 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   3. Seed script `scripts/seed-wardrobe.ts` populates 6+ sample dresses across categories with placeholder images
   4. `/api/health/data` endpoint extended with dress, rental request, and rental row counts
   5. Storybook stories + VRT snapshots created for all new wardrobe components plus `/wardrobe` empty/populated states
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 21-01-PLAN.md — Extract computeConsignmentPayout to src/features/wardrobe/lib/payout.ts (unblocks 21-02) + extend /api/health/data with dresses/rentalRequests/rentals counts (TEST-07) + scripts/seed-wardrobe.ts with two-layer prod guard + 6 picsum-imaged fixtures (TEST-06)
+- [ ] 21-02-PLAN.md — Vitest unit suites at src/features/wardrobe/lib/__tests__/{fitScore,payout}.test.ts (TEST-05 — ≥36 assertions across passesFitsMeFilter / scoreDress / scoreToPercent / expectedDressLengthForHeight + computeConsignmentPayout commission/rounding/edges)
+- [ ] 21-03-PLAN.md — tests/wardrobe.spec.ts CREATE: 'Rental Happy Path (TEST-01)' 8-phase E2E + 'Permission Negative Paths (PERM-04 + TEST-04)' 5 tests including assertTrpcForbidden helper at tests/helpers/wardrobe-test-utils.ts; auth.setup.ts gains 'seed wardrobe data' step (TEST-08 path = tests/wardrobe.spec.ts NOT tests/e2e/)
+- [ ] 21-04-PLAN.md — tests/wardrobe.spec.ts APPEND (sequential after 21-03): 'Consigner Happy Path (TEST-02)' + 'Consigner Rejection + Resubmit (TEST-03)' + 'Consigner Data Isolation (PERM-04)' isolation check (consigner-A cannot mutate consigner-B's dress)
+- [ ] 21-05-PLAN.md — 10 new .stories.tsx (STORY-01 + STORY-03) for DressCard, WardrobeFilterBar, MeasurementForm (NOT MeasurementEditor), CatalogGrid, DressDetailHero, FitCheckCard, RentalStatusBadge, RequestRentalDialog, PendingApprovalQueue, ConsignerEarningsTable (NOT ConsignmentEarningsTable) + 11+ new IDs appended to tests/storybook-vrt.spec.ts (STORY-02)
 
 #### Phase 22: Project-Wide Storybook Audit
 **Goal**: Storybook coverage is correctly mapped across the entire project, locking visual-regression safety net beyond just wardrobe components.
@@ -221,5 +226,5 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 18. Self-serve consignment | v2.0 | 7/7 | Complete | 2026-05-29 |
 | 19. Consignment payouts | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 20. Wardrobe notifications | v2.0 | 3/3 | Complete | 2026-05-29 |
-| 21. Wardrobe testing seed health | v2.0 | 0/TBD | Not started | — |
+| 21. Wardrobe testing seed health | v2.0 | 5/5 | Complete | 2026-05-29 |
 | 22. Project-wide Storybook audit | v2.0 | 0/TBD | Not started | — |
