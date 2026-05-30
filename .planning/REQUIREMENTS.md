@@ -291,9 +291,9 @@ Phase mappings populated by `/gsd:create-roadmap` on 2026-05-28. Each v1 require
 | STORY-01 | Phase 21 | Complete |
 | STORY-02 | Phase 21 | Complete |
 | STORY-03 | Phase 21 | Complete |
-| STORY-04 | Phase 22 | Pending |
-| STORY-05 | Phase 22 | Pending |
-| STORY-06 | Phase 22 | Pending |
+| STORY-04 | Phase 22 | Complete |
+| STORY-05 | Phase 22 | Complete |
+| STORY-06 | Phase 22 | Complete |
 
 **Coverage:**
 - v1 requirements: 86 total (corrected from earlier miscount of 82)

@@ -45,7 +45,7 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 - [x] **Phase 19: Consignment Payout Tracking** — Owner earnings view, admin payout marking ✓ 2026-05-29
 - [x] **Phase 20: Wardrobe Notifications** — 9 new email + in-app templates spanning rental and consignment lifecycle ✓ 2026-05-29
 - [x] **Phase 21: Testing, Seeding & Health Checks** — Playwright E2E specs, unit tests, seed script, health-check extension, new Storybook stories + VRT ✓ 2026-05-29
-- [ ] **Phase 22: Project-Wide Storybook Audit** — Inventory project components, identify coverage gaps, backfill missing stories + VRT snapshots
+- [x] **Phase 22: Project-Wide Storybook Audit** — Inventory project components, identify coverage gaps, backfill missing stories + VRT snapshots ✓ 2026-05-29
 
 ## Phase Details
 
@@ -208,7 +208,10 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
   1. Audit inventory identifies every component under `src/components/`, `src/features/*/components/`, and protected pages, cross-referenced against existing `.stories.tsx` files
   2. Missing stories backfilled for high-traffic and reusable components identified by audit
   3. New VRT snapshots added for backfilled stories so visual regressions are caught going forward
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 22-01-PLAN.md — docs/storybook-audit.md (STORY-04 inventory deliverable) + .storybook/main.ts viteFinal alias + .storybook/mocks/security.browser.ts browser-safe stub (unblocks pnpm storybook:build)
+- [ ] 22-02-PLAN.md — 12 backfill .stories.tsx (Tier 1: dialog/select/table/tabs/form; Tier 2: DressStatusBadge/BestFitBadge/DressImageCarousel; Tier 3: NextLessonHero/OutstandingPayments/EarningsOverview/NotificationsPopover) + 12+ new IDs appended to tests/storybook-vrt.spec.ts (STORY-05)
+- [ ] 22-03-PLAN.md — VRT baseline PNG generation pass via pnpm test:vrt --update-snapshots covering BOTH the 13 wardrobe-* IDs from Phase 21-05 AND the 12+ new IDs from 22-02 (STORY-06)
 
 ## Progress
 
@@ -227,4 +230,4 @@ Phases: 08-test-infrastructure-legacy-updates, 09-coach-admin-flow-tests, 10-stu
 | 19. Consignment payouts | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 20. Wardrobe notifications | v2.0 | 3/3 | Complete | 2026-05-29 |
 | 21. Wardrobe testing seed health | v2.0 | 5/5 | Complete | 2026-05-29 |
-| 22. Project-wide Storybook audit | v2.0 | 0/TBD | Not started | — |
+| 22. Project-wide Storybook audit | v2.0 | 3/3 | Complete | 2026-05-29 |
