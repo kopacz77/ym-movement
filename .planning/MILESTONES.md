@@ -1,5 +1,23 @@
 # Milestones
 
+## v2.0 YM Wardrobe (2026-05-30)
+
+Added a competition-dress rental and lightweight consignment marketplace inside YM Movement. Students browse a marketplace catalog with body-measurement-driven fit matching, request rentals, and track their requests; consigners self-list dresses with admin approval; Yura runs the full inventory + rental + payout lifecycle from one admin surface.
+
+**Stats:** 10 phases | 47 plans | 86 requirements | 177 commits | 263 files changed | 52,444 insertions | 13,140 LOC wardrobe code
+
+**Key accomplishments:**
+- Full wardrobe domain: Dress + DressImage + RentalRequest + Rental schemas, 6 enums, Student measurement extensions, Vercel Blob image pipeline with 8-image / 5MB caps + 4-layer defense-in-depth
+- Marketplace catalog with structured filters, URL-shareable state, alterable-slack-aware Best Fit scoring, and "Fits Me" toggle backed by stored body measurements
+- Full rental lifecycle: request → admin approve → mark paid (creates Rental snapshot with consignmentPayoutAmount calc) → mark returned → release deposit, with Venmo/Zelle/Cash payment methods
+- Self-serve consigner flow with PENDING_APPROVAL queue, admin approve-with-override / reject-with-reason, rejection-resubmit loop, and per-rental earnings + payout tracking
+- 9 brand-styled lifecycle email templates (cyan #0891b2 + navy #1a3a5c) + new Vercel cron for T-N day return reminders
+- Comprehensive Playwright E2E coverage (TEST-01..08), Vitest unit suites for fitScore + payout (42 tests), seed-wardrobe.ts with two-layer prod guard, /api/health/data extension, 23 new Storybook stories (10 wardrobe + 12 cross-project backfill) + 28 new VRT baselines
+
+**Archive:** [Roadmap](milestones/v2.0-ROADMAP.md) | [Requirements](milestones/v2.0-REQUIREMENTS.md) | [Audit](milestones/v2.0-MILESTONE-AUDIT.md)
+
+---
+
 ## v1.1 Test & Stabilize (2026-03-17)
 
 Comprehensive E2E test suite for all v1.0 multi-coach features with zero failures, Next.js 16 proxy migration, and production-ready test infrastructure.
