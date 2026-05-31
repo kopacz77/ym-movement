@@ -1,7 +1,46 @@
+# pnpm 10+ moved these settings out of package.json. Keep this file even
+# though there are no workspace packages — it's the only place pnpm 11.x
+# reads onlyBuiltDependencies, overrides, and peer-dep rules.
+
 allowBuilds:
-  '@prisma/client': set this to true or false
-  '@prisma/engines': set this to true or false
-  esbuild: set this to true or false
-  msw: set this to true or false
-  prisma: set this to true or false
-  sharp: set this to true or false
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  msw: true
+  prisma: true
+  sharp: true
+
+onlyBuiltDependencies:
+  - "@biomejs/biome"
+  - "@prisma/client"
+  - "@prisma/engines"
+  - esbuild
+  - msw
+  - prisma
+  - sharp
+
+overrides:
+  dompurify: ">=3.3.2"
+  qs: ">=6.14.2"
+  body-parser: ">=1.20.3"
+  glob: ">=11.0.1"
+  preact: ">=10.28.2"
+  h3: ">=1.15.9"
+  lodash: ">=4.17.23"
+  lodash-es: ">=4.17.23"
+  axios: ">=1.13.5"
+  "@isaacs/brace-expansion": ">=5.0.1"
+  minimatch: ">=10.2.1"
+  ajv: ">=8.18.0"
+  rollup: ">=4.59.0"
+  effect: ">=3.20.0"
+  defu: ">=6.1.5"
+  immutable: ">=3.8.3"
+  picomatch: ">=4.0.4"
+  yaml: ">=2.8.3"
+  brace-expansion: ">=5.0.5"
+
+peerDependencyRules:
+  allowedVersions:
+    react: "19"
+    react-dom: "19"
