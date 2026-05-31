@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { DressInventoryGrid } from "@/features/wardrobe/components/admin/DressInventoryGrid";
 
 export default function AdminWardrobePage() {
@@ -11,7 +12,9 @@ export default function AdminWardrobePage() {
           Manage dress inventory. Filter by status, search, edit, or archive.
         </p>
       </div>
-      <DressInventoryGrid />
+      <Suspense fallback={null}>
+        <DressInventoryGrid />
+      </Suspense>
     </div>
   );
 }

@@ -5,6 +5,7 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { MyConsignedDressesList } from "@/features/wardrobe/components/consigner/MyConsignedDressesList";
 
 export default function ConsignerLandingPage() {
@@ -18,7 +19,9 @@ export default function ConsignerLandingPage() {
           when it goes live.
         </p>
       </div>
-      <MyConsignedDressesList />
+      <Suspense fallback={null}>
+        <MyConsignedDressesList />
+      </Suspense>
     </div>
   );
 }

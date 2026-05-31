@@ -10,8 +10,13 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { CatalogGrid } from "@/features/wardrobe/components/CatalogGrid";
 
 export default function WardrobePage() {
-  return <CatalogGrid />;
+  return (
+    <Suspense fallback={null}>
+      <CatalogGrid />
+    </Suspense>
+  );
 }
