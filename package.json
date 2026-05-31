@@ -129,6 +129,7 @@
     "framer-motion": "^12.38.0",
     "geist": "^1.5.1",
     "googleapis": "^171.4.0",
+    "heic2any": "^0.0.4",
     "ioredis": "^5.8.2",
     "lucide-react": "^0.522.0",
     "luxon": "^3.7.2",

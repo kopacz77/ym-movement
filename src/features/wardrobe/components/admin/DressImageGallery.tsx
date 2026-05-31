@@ -54,11 +54,25 @@ interface DressImageGalleryProps {
 }
 
 const MAX_IMAGES = 8;
-const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp";
+// Wide net so iOS shows HEIC photos in the picker; compressForUpload converts
+// any HEIC/HEIF to JPEG before bytes reach the server route's whitelist check.
+const ACCEPTED_TYPES = "image/*,.heic,.heif";
+
+// Retry the direct browser → blob storage PUT this many times on transient
+// network errors before surfacing failure to the user.
+const UPLOAD_RETRY_ATTEMPTS = 3;
+const UPLOAD_RETRY_BACKOFF_MS = 1500;
+
+type UploadStage = "compressing" | "uploading" | "saving" | null;
 
 export function DressImageGallery({ dressId, images, onMutated }: DressImageGalleryProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState<{
+    stage: UploadStage;
+    current: number;
+    total: number;
+  }>({ stage: null, current: 0, total: 0 });
 
   // -----------------------------------------------------------------------
   // Mutation hooks
@@ -116,40 +130,102 @@ export function DressImageGallery({ dressId, images, onMutated }: DressImageGall
     }
 
     setIsUploading(true);
+    setProgress({ stage: "compressing", current: 1, total: filesArr.length });
+
+    let lastStageReached: UploadStage = null;
+    let succeeded = 0;
     try {
-      for (const file of filesArr) {
-        // Client-side compression: 1600px max / 80% quality / ~400KB target.
-        // Throws above 5MB pre-compression to fail fast before bytes leave the device.
+      for (let i = 0; i < filesArr.length; i++) {
+        const file = filesArr[i];
+        const fileNum = i + 1;
+
+        // ------ Stage 1: compress (handles HEIC, resize, quality) ------
+        setProgress({ stage: "compressing", current: fileNum, total: filesArr.length });
+        lastStageReached = "compressing";
         const compressed = await compressForUpload(file);
+        console.log(
+          `[upload] compressed ${file.name} (${(file.size / 1024).toFixed(0)}KB → ${(compressed.size / 1024).toFixed(0)}KB)`,
+        );
 
-        // Server-token upload — handleUploadUrl mints the token at /api/wardrobe/upload.
-        // clientPayload carries dressId so the route handler can enforce ownership
-        // + 8-cap before mint (defense in depth alongside attachImage).
-        const blob = await upload(compressed.name, compressed, {
-          access: "public",
-          handleUploadUrl: "/api/wardrobe/upload",
-          clientPayload: JSON.stringify({ dressId }),
-        });
+        // ------ Stage 2: PUT to Vercel Blob (with retry) ------
+        setProgress({ stage: "uploading", current: fileNum, total: filesArr.length });
+        lastStageReached = "uploading";
+        let blob: { url: string } | undefined;
+        let lastErr: unknown;
+        for (let attempt = 1; attempt <= UPLOAD_RETRY_ATTEMPTS; attempt++) {
+          try {
+            blob = await upload(compressed.name, compressed, {
+              access: "public",
+              handleUploadUrl: "/api/wardrobe/upload",
+              clientPayload: JSON.stringify({ dressId }),
+            });
+            break;
+          } catch (err) {
+            lastErr = err;
+            console.warn(
+              `[upload] attempt ${attempt}/${UPLOAD_RETRY_ATTEMPTS} failed for ${compressed.name}:`,
+              err,
+            );
+            if (attempt < UPLOAD_RETRY_ATTEMPTS) {
+              await new Promise((r) => setTimeout(r, UPLOAD_RETRY_BACKOFF_MS * attempt));
+            }
+          }
+        }
+        if (!blob) {
+          throw lastErr instanceof Error
+            ? lastErr
+            : new Error("Upload to storage failed after retries");
+        }
 
-        // Persist the DressImage row. Phase 13 attachImage auto-promotes the
-        // first image to isPrimary=true; the UI just renders the badge.
+        // ------ Stage 3: persist DressImage row ------
+        setProgress({ stage: "saving", current: fileNum, total: filesArr.length });
+        lastStageReached = "saving";
         await attach.mutateAsync({ dressId, url: blob.url });
+        succeeded++;
       }
+
       onMutated();
-      toast.success(`${filesArr.length} image(s) uploaded`);
+      toast.success(`${succeeded} image${succeeded === 1 ? "" : "s"} uploaded`);
     } catch (e) {
-      // Most TRPC errors surface via the mutation onErrors above. This catches
-      // upload() throws (network failure, 5MB cap, compression error).
-      const message = e instanceof Error ? e.message : "Upload failed";
-      toast.error("Upload failed", { description: message });
+      const baseMessage = e instanceof Error ? e.message : "Upload failed";
+      const stageHint =
+        lastStageReached === "compressing"
+          ? "Compression failed — try a different photo or smaller file."
+          : lastStageReached === "uploading"
+            ? "Network upload failed — check connection and retry."
+            : lastStageReached === "saving"
+              ? "Server save failed — the image uploaded but wasn't recorded. Try again."
+              : "";
+      console.error(`[upload] failed at stage=${lastStageReached}:`, e);
+      toast.error("Upload failed", {
+        description: stageHint ? `${stageHint} (${baseMessage})` : baseMessage,
+      });
+      // Refresh the gallery in case some images succeeded before the failure.
+      if (succeeded > 0) {
+        onMutated();
+      }
     } finally {
       setIsUploading(false);
+      setProgress({ stage: null, current: 0, total: 0 });
       // Reset so the user can re-upload the same file after a fix.
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   };
+
+  const progressLabel = (() => {
+    if (!progress.stage) {
+      return null;
+    }
+    const verb =
+      progress.stage === "compressing"
+        ? "Compressing"
+        : progress.stage === "uploading"
+          ? "Uploading"
+          : "Saving";
+    return `${verb} image ${progress.current} of ${progress.total}…`;
+  })();
 
   // -----------------------------------------------------------------------
   // Reorder (up / down arrows)
@@ -216,7 +292,9 @@ export function DressImageGallery({ dressId, images, onMutated }: DressImageGall
             className="bg-[#0891b2] hover:bg-[#06748f] text-white"
           >
             <Upload className="w-4 h-4 mr-2" />
-            {isUploading ? "Uploading..." : `Add image (${images.length}/${MAX_IMAGES})`}
+            {isUploading
+              ? (progressLabel ?? "Uploading…")
+              : `Add image (${images.length}/${MAX_IMAGES})`}
           </Button>
         </div>
       </div>
