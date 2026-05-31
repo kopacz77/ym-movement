@@ -78,8 +78,20 @@ Carryover signals from v2.0 audit + deferred items:
 - `scripts/audit-stories.ts` to generate `docs/storybook-audit.md` programmatically (instead of hand-maintaining)
 - Continued Storybook backfill from current ~17% project-wide coverage
 - NotificationsPopover open-state Storybook coverage (current stories snapshot closed bell trigger only)
-- Resolve pre-existing `IceParticles` `three` types declaration error (unrelated to v2.0)
-- Resolve pre-existing `pnpm` `ERR_PNPM_IGNORED_BUILDS` wrapper quirk affecting `pnpm vitest run` / `pnpm prisma:migrate` (currently sidestepped via `npx` direct invocation)
+- Resolve pre-existing `IceParticles` `three` types declaration error (unrelated to v2.0) — fixed in v2.0 polish (`@types/three` added)
+- Resolve pre-existing `pnpm` `ERR_PNPM_IGNORED_BUILDS` wrapper quirk affecting `pnpm vitest run` / `pnpm prisma:migrate` — fixed post-v2.0 (`pnpm-workspace.yaml` migration + `approve-builds --all`)
+
+#### Image Storage Scaling — Triggered by Dress Count
+
+Current architecture (Vercel Blob + Postgres `DressImage` metadata) is correctly designed for any scale this project will plausibly reach. Defer all of the below until the named trigger fires. None are urgent.
+
+- **At ~100 dresses**: Switch upload pathname pattern from random hash to `dresses/{dressId}/{imageId}-{slug}.jpg`. Makes the Blob dashboard visually browsable, simplifies bulk per-dress cleanup. ~30 min change to `src/app/api/wardrobe/upload/route.ts` (pass `pathname` through `clientPayload`).
+- **At ~500 dresses**: Add weekly cron `/api/cron/wardrobe-blob-reaper` to scan the Blob store for orphan files (uploaded but no `DressImage.url` matches) and stale `DressImage` rows (URL returns 404). ~2 hours. Mirrors the `wardrobe-return-reminders` cron pattern from Phase 20-03.
+- **At ~1000 dresses**: Generate 3 size variants per upload (thumb 400px / card 800px / hero 1600px). Cuts egress 5-10x. Either in-pipeline (extra `imageCompression` passes) or via Next/Image on-demand transformations (Vercel free tier: 5K/mo). ~4 hours.
+- **Always-on insurance**: Quarterly mirror to S3 Glacier ($0.004/GB/mo — pennies at any scale). Disaster recovery + vendor leverage. ~2 hours; one-time setup.
+- **Only if Vercel Blob bill exceeds $20/month**: Evaluate Cloudflare R2 (zero egress fees) or Backblaze B2 ($5/TB/mo). Migration cost = mass blob copy + URL UPDATE + SDK swap (~1-2 days). Almost certainly never needed.
+
+Optional content-hash dedup at the upload route (idempotency by SHA256) saves ~10-15% storage at scale. Worth ~3 hours when you hit ~5000 images.
 
 Plus the v2.x roadmap deferrals (CLEAN-01..04, SHIP-01..04, STYLE-01..06, ALTER-01..03, PAY-01..04) and v3.0 external marketplace items, all archived in `milestones/v2.0-REQUIREMENTS.md`.
 
