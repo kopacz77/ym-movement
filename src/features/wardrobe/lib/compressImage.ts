@@ -91,10 +91,14 @@ export async function compressForUpload(file: File): Promise<File> {
     workingFile = await convertHeicToJpeg(file);
   }
 
+  // useWebWorker: false — the lib's worker mode tries to load itself from
+  // cdn.jsdelivr.net at runtime via importScripts, which CSP correctly blocks.
+  // Main-thread compression is plenty fast for our <1MB pre-compression inputs
+  // (rough budget: ~250ms for a 5MB photo on a midrange phone).
   return imageCompression(workingFile, {
     maxSizeMB: TARGET_SIZE_MB,
     maxWidthOrHeight: MAX_DIMENSION,
-    useWebWorker: true,
+    useWebWorker: false,
     initialQuality: INITIAL_QUALITY,
     fileType: workingFile.type === "image/png" ? "image/png" : "image/jpeg",
   });
