@@ -90,3 +90,4 @@ debug.log
 
 # Storybook
 storybook-static/
+.env*
