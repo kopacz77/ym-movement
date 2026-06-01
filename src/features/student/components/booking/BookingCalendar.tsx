@@ -649,7 +649,7 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
             selectable={false}
             editable={false}
             slotDuration="00:15:00"
-            slotMinTime="10:00:00"
+            slotMinTime="06:00:00"
             slotMaxTime="22:00:00"
             allDaySlot={false}
             nowIndicator={true}
