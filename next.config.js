@@ -50,6 +50,18 @@ const nextConfig = {
         ],
       },
       {
+        // Auth-gated pages must never be CDN- or browser-cached. Each user's
+        // dashboard/schedule is per-session and changes immediately when we
+        // ship a patch. Without this header, Vercel + the browser cached
+        // stale HTML for hours, and users on phones couldn't easily hard-
+        // refresh to pick up new JS bundles. The HTML itself is cheap to
+        // regenerate (the actual lesson data still comes from TRPC).
+        source: "/(student|coach|admin|wardrobe)/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+        ],
+      },
+      {
         source: "/api/(.*)",
         headers: [
           {
