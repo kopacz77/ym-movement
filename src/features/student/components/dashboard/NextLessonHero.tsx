@@ -1,7 +1,7 @@
 // src/features/student/components/dashboard/NextLessonHero.tsx
 "use client";
 
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
+import { formatRinkTime } from "@/lib/timezone";
 
 export function NextLessonHero() {
   const { id: studentId } = useCurrentUser();
@@ -59,6 +60,10 @@ export function NextLessonHero() {
 
   const lessonDate = new Date(nextLesson.startTime || nextLesson.RinkTimeSlot?.startTime);
   const endDate = new Date(nextLesson.endTime || nextLesson.RinkTimeSlot?.endTime);
+  // Fallback to UTC if rink timezone isn't on the payload; formatRinkTime
+  // logs and degrades cleanly. Real path always supplies a rink.
+  const rinkTimezone =
+    nextLesson.Rink?.timezone || nextLesson.RinkTimeSlot?.Rink?.timezone || "UTC";
   const timeUntil = formatDistanceToNow(lessonDate, { addSuffix: true });
   const lessonType = nextLesson.type || "PRIVATE";
 
@@ -80,12 +85,15 @@ export function NextLessonHero() {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2.5">
             <Calendar className="h-4 w-4 text-slate-400" />
-            <span className="font-semibold text-slate-800">{format(lessonDate, "EEEE, MMMM d")}</span>
+            <span className="font-semibold text-slate-800">
+              {formatRinkTime(lessonDate, rinkTimezone, "EEEE, MMMM d")}
+            </span>
           </div>
           <div className="flex items-center gap-2.5">
             <Clock className="h-4 w-4 text-slate-400" />
             <span className="text-slate-600">
-              {format(lessonDate, "h:mm a")} - {format(endDate, "h:mm a")}
+              {formatRinkTime(lessonDate, rinkTimezone, "h:mm a")} -{" "}
+              {formatRinkTime(endDate, rinkTimezone, "h:mm a")}
             </span>
           </div>
           {nextLesson.RinkTimeSlot?.Rink?.name && (
@@ -100,7 +108,12 @@ export function NextLessonHero() {
           <Badge className="bg-cyan-50 text-cyan-700 border-cyan-200/60">
             {lessonType.replace("_", " ")}
           </Badge>
-          <Button size="sm" variant="outline" className="bg-white hover:bg-cyan-50 border-cyan-200/60 text-cyan-700" asChild>
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white hover:bg-cyan-50 border-cyan-200/60 text-cyan-700"
+            asChild
+          >
             <Link href="/student/book">Book Another</Link>
           </Button>
         </div>

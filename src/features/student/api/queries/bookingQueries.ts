@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek, format } from "date-fns";
+import { endOfWeek as dateEndOfWeek, startOfWeek as dateStartOfWeek } from "date-fns";
 // src/features/student/api/queries/bookingQueries.ts
 import { z } from "zod";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
@@ -9,6 +9,7 @@ import { sendLessonConfirmationEmail } from "@/lib/email";
 import { type CoachWithTokens, googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
 import { isAdminRole, isCoachRole } from "@/lib/roles";
+import { formatRinkTime } from "@/lib/timezone";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
 // Define extended Student type with custom pricing fields
@@ -180,7 +181,11 @@ export const bookingRouter = createTRPCRouter({
         });
 
         if (overlappingLesson) {
-          const overlapTime = format(overlappingLesson.startTime, "h:mm a");
+          const overlapTime = formatRinkTime(
+            overlappingLesson.startTime,
+            overlappingLesson.Rink.timezone,
+            "h:mm a",
+          );
           throw new TRPCError({
             code: "CONFLICT",
             message: `You already have a lesson scheduled at ${overlapTime} that overlaps with this time slot`,
@@ -388,12 +393,15 @@ export const bookingRouter = createTRPCRouter({
         // 8. Create notification for the student
         try {
           const coachSuffix = coachName ? ` with ${coachName}` : "";
+          const bookingDate = formatRinkTime(
+            timeSlot.startTime,
+            timeSlot.Rink.timezone,
+            "MMMM d, yyyy 'at' h:mm a",
+          );
           await createNotification({
             userId: (student as any).User?.id || (student as any).userId,
             title: "Lesson Booked Successfully",
-            message: `Your ${input.type} lesson${coachSuffix} has been scheduled for ${new Date(
-              timeSlot.startTime,
-            ).toLocaleDateString()} at ${timeSlot.Rink.name}`,
+            message: `Your ${input.type} lesson${coachSuffix} has been scheduled for ${bookingDate} at ${timeSlot.Rink.name}`,
             type: "SUCCESS",
             link: `/student/schedule/${result.lesson.id}`,
           });
@@ -410,8 +418,12 @@ export const bookingRouter = createTRPCRouter({
             select: { id: true },
           });
 
-          // Format the date nicely
-          const formattedDate = format(timeSlot.startTime, "MMMM d, yyyy 'at' h:mm a");
+          // Format the date nicely (in rink-local TZ so admins see the actual booked slot)
+          const formattedDate = formatRinkTime(
+            timeSlot.startTime,
+            timeSlot.Rink.timezone,
+            "MMMM d, yyyy 'at' h:mm a",
+          );
 
           // Format lesson type (e.g., PRIVATE -> Private, GROUP -> Group)
           const lessonType = input.type
@@ -451,7 +463,11 @@ export const bookingRouter = createTRPCRouter({
                 .split("_")
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                 .join(" ");
-              const formattedDateForCoach = format(timeSlot.startTime, "MMM d, yyyy 'at' h:mm a");
+              const formattedDateForCoach = formatRinkTime(
+                timeSlot.startTime,
+                timeSlot.Rink.timezone,
+                "MMM d, yyyy 'at' h:mm a",
+              );
               await createNotification({
                 userId: coachRecord.userId,
                 title: "New Lesson Booked",
@@ -594,8 +610,8 @@ export const bookingRouter = createTRPCRouter({
         });
 
         const studentName = lesson.Student.User.name || "A student";
-        const lessonDate = format(lesson.startTime, "MMM d, yyyy");
-        const lessonTime = format(lesson.startTime, "h:mm a");
+        const lessonDate = formatRinkTime(lesson.startTime, lesson.Rink.timezone, "MMM d, yyyy");
+        const lessonTime = formatRinkTime(lesson.startTime, lesson.Rink.timezone, "h:mm a");
         const lessonType = lesson.type.replace("_", " ");
         const lateTag = isLateCancellation ? " (Late cancellation - within 24 hours)" : "";
 

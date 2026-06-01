@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { LessonStatus, LessonType, PaymentMethod, PaymentStatus, RinkArea } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { format } from "date-fns";
 // src/features/admin/api/queries/schedule/lessonQueries.ts
 import { z } from "zod";
 import { createScheduleChangeNotification } from "@/features/notifications/utils/notificationHelpers";
@@ -9,6 +8,7 @@ import { type CoachWithTokens, googleCalendar } from "@/lib/google/calendar";
 import { calculateLessonPrice } from "@/lib/pricing";
 import { isAdminRole } from "@/lib/roles";
 import { logSecurityEvent, sanitizeInput } from "@/lib/security";
+import { formatRinkTime } from "@/lib/timezone";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
 export const lessonRouter = createTRPCRouter({
@@ -86,10 +86,15 @@ export const lessonRouter = createTRPCRouter({
             startTime: { lt: timeSlot.endTime },
             endTime: { gt: timeSlot.startTime },
           },
+          include: { Rink: { select: { timezone: true } } },
         });
 
         if (overlappingLesson) {
-          const overlapTime = format(overlappingLesson.startTime, "h:mm a");
+          const overlapTime = formatRinkTime(
+            overlappingLesson.startTime,
+            overlappingLesson.Rink.timezone,
+            "h:mm a",
+          );
           throw new TRPCError({
             code: "CONFLICT",
             message: `Student already has a lesson at ${overlapTime} that overlaps with this time slot`,
@@ -405,13 +410,21 @@ ${sanitizedInput.notes ? `Notes: ${sanitizedInput.notes}` : ""}`,
           },
           include: {
             Coach: { include: { User: { select: { name: true } } } },
-            Rink: { select: { name: true } },
+            Rink: { select: { name: true, timezone: true } },
           },
         });
 
         if (overlappingLesson) {
-          const overlapTime = format(overlappingLesson.startTime, "h:mm a");
-          const overlapEnd = format(overlappingLesson.endTime, "h:mm a");
+          const overlapTime = formatRinkTime(
+            overlappingLesson.startTime,
+            overlappingLesson.Rink.timezone,
+            "h:mm a",
+          );
+          const overlapEnd = formatRinkTime(
+            overlappingLesson.endTime,
+            overlappingLesson.Rink.timezone,
+            "h:mm a",
+          );
           const coachName = overlappingLesson.Coach?.User?.name || "another coach";
           const rinkName = overlappingLesson.Rink?.name || "";
           throw new TRPCError({
