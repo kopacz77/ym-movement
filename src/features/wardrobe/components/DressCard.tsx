@@ -1,5 +1,6 @@
 import type { DressCategory, DressStatus } from "@prisma/client";
 import { ImageIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { BestFitBadge } from "@/features/wardrobe/components/BestFitBadge";
@@ -36,12 +37,12 @@ export function DressCard({ dress, fitScorePercent, href }: DressCardProps) {
       {/* Image — aspect square; fallback when no images */}
       <div className="relative aspect-square w-full overflow-hidden bg-slate-50">
         {primaryImage ? (
-          // biome-ignore lint/performance/noImgElement: Vercel Blob domain not in next.config remotePatterns (deferred per 14-05 SUMMARY)
-          <img
+          <Image
             src={primaryImage}
             alt={dress.title}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-            loading="lazy"
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover transition-transform group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-slate-300">

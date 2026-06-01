@@ -23,6 +23,13 @@ const nextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     minimumCacheTTL: 60,
+    remotePatterns: [
+      // Vercel Blob — dress images uploaded via /api/wardrobe/upload
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      // Picsum — seed-script placeholder images used in scripts/seed-wardrobe.ts
+      { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "fastly.picsum.photos" },
+    ],
   },
   async rewrites() {
     return [

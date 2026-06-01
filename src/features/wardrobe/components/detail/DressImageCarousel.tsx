@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useState } from "react";
 
 export interface DressImageCarouselProps {
@@ -33,11 +34,13 @@ export function DressImageCarousel({ images, title }: DressImageCarouselProps) {
   return (
     <div className="relative">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-50">
-        {/* biome-ignore lint/performance/noImgElement: Vercel Blob domain not in next.config remotePatterns (deferred per 14-05 SUMMARY) */}
-        <img
+        <Image
           src={images[index].url}
           alt={`${title} (image ${index + 1} of ${total})`}
-          className="h-full w-full object-cover"
+          fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          priority={index === startIdx}
+          className="object-cover"
         />
         {total > 1 && (
           <>

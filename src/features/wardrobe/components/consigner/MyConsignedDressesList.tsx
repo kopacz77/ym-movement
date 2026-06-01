@@ -30,6 +30,7 @@
 import type { DressStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowRight, ImagePlus, Shirt } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -228,10 +229,17 @@ function ConsignerDressCard({ dress, variant }: { dress: ConsignedDress; variant
       href={`/wardrobe/consigned/${dress.id}/edit`}
       className="group block bg-white rounded-xl border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden hover:-translate-y-1 transition-transform"
     >
-      <div className={`aspect-[4/5] bg-slate-100 ${variant === "archived" ? "opacity-60" : ""}`}>
+      <div
+        className={`relative aspect-[4/5] bg-slate-100 ${variant === "archived" ? "opacity-60" : ""}`}
+      >
         {primaryUrl ? (
-          // biome-ignore lint/performance/noImgElement: see 14-05 SUMMARY — blob host not in next.config images
-          <img src={primaryUrl} alt={dress.title} className="w-full h-full object-cover" />
+          <Image
+            src={primaryUrl}
+            alt={dress.title}
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover"
+          />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
             <ImagePlus className="w-10 h-10" />

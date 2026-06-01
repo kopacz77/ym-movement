@@ -30,6 +30,7 @@
 import type { DressStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -241,8 +242,13 @@ export function DressInventoryGrid() {
               >
                 <div className="aspect-square bg-slate-100 relative">
                   {primaryImage ? (
-                    // biome-ignore lint/performance/noImgElement: blob URLs not in next.config images.remotePatterns yet
-                    <img src={primaryImage} alt="" className="w-full h-full object-cover" />
+                    <Image
+                      src={primaryImage}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                       <ImageIcon className="w-12 h-12" />

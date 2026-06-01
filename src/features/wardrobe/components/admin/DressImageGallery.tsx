@@ -28,6 +28,7 @@
 
 import { upload } from "@vercel/blob/client";
 import { ArrowDown, ArrowUp, Star, Trash2, Upload } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -312,12 +313,15 @@ export function DressImageGallery({ dressId, images, onMutated }: DressImageGall
               key={img.id}
               className="relative rounded-xl overflow-hidden border border-slate-200 group shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)]"
             >
-              {/* Blob URLs aren't pre-configured in next.config.js domains list;
-                  using a plain <img> here is the safer choice. Revisit if
-                  next/image is wired for the wardrobe surface later. */}
-              {/* biome-ignore lint/performance/noImgElement: blob URL not in next/image domains */}
-              {/* biome-ignore lint/a11y/useAltText: decorative thumbnail, alt left blank intentionally */}
-              <img src={img.url} alt="" className="w-full aspect-square object-cover" />
+              <div className="relative w-full aspect-square">
+                <Image
+                  src={img.url}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
 
               {img.isPrimary && (
                 <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">

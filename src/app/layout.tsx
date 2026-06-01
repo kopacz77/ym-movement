@@ -10,12 +10,16 @@ const headlineFont = Public_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-sans",
+  // display: "swap" → show fallback font immediately, swap to webfont when it loads.
+  // Eliminates the brief blank text (FOIT) that happens with display: "block".
+  display: "swap",
 });
 
 const bodyFont = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-body",
+  display: "swap",
 });
 
 // Validate environment on app startup

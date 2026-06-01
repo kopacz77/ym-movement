@@ -3,6 +3,7 @@
 import type { RentalRequestStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { ImageIcon, Loader2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
@@ -246,10 +247,9 @@ function RequestRow({ request, actions }: RequestRowProps) {
   return (
     <li className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
       <Link href={`/wardrobe/${request.Dress.id}`} className="flex-shrink-0">
-        <div className="h-20 w-20 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
+        <div className="relative h-20 w-20 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
           {img ? (
-            // biome-ignore lint/performance/noImgElement: Vercel Blob not in remotePatterns (deferred per 14-05 SUMMARY)
-            <img src={img} alt={request.Dress.title} className="h-full w-full object-cover" />
+            <Image src={img} alt={request.Dress.title} fill sizes="80px" className="object-cover" />
           ) : (
             <ImageIcon className="h-8 w-8 text-slate-300" />
           )}
@@ -311,10 +311,9 @@ function RentalRow({ rental }: RentalRowProps) {
   return (
     <li className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
       <Link href={`/wardrobe/${rental.Dress.id}`} className="flex-shrink-0">
-        <div className="h-20 w-20 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
+        <div className="relative h-20 w-20 rounded-lg bg-slate-50 overflow-hidden flex items-center justify-center">
           {img ? (
-            // biome-ignore lint/performance/noImgElement: Vercel Blob not in remotePatterns (deferred per 14-05 SUMMARY)
-            <img src={img} alt={rental.Dress.title} className="h-full w-full object-cover" />
+            <Image src={img} alt={rental.Dress.title} fill sizes="80px" className="object-cover" />
           ) : (
             <ImageIcon className="h-8 w-8 text-slate-300" />
           )}

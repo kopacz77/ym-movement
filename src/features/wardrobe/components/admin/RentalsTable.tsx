@@ -39,6 +39,7 @@
 
 import { addDays, format, isBefore } from "date-fns";
 import { ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -420,10 +421,9 @@ function RentalRows({
             return (
               <TableRow key={r.id} className={isLateFee ? "bg-rose-50" : undefined}>
                 <TableCell>
-                  <div className="h-12 w-12 rounded-md bg-slate-100 overflow-hidden flex items-center justify-center">
+                  <div className="relative h-12 w-12 rounded-md bg-slate-100 overflow-hidden flex items-center justify-center">
                     {image ? (
-                      // biome-ignore lint/performance/noImgElement: blob URLs not in next.config images.remotePatterns (see 14-05 SUMMARY)
-                      <img src={image} alt="" className="w-full h-full object-cover" />
+                      <Image src={image} alt="" fill sizes="48px" className="object-cover" />
                     ) : (
                       <ImageIcon className="w-5 h-5 text-slate-400" />
                     )}

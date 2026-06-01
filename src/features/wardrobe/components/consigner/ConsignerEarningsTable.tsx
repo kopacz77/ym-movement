@@ -22,6 +22,7 @@
 
 import { format } from "date-fns";
 import { CheckCircle2, Clock, ImageIcon, Shirt } from "lucide-react";
+import Image from "next/image";
 import { DressStatusBadge } from "@/features/wardrobe/components/DressStatusBadge";
 import { api } from "@/lib/api";
 import { formatCurrencyFromCents } from "@/lib/utils";
@@ -177,10 +178,9 @@ function DressEarningsGroup({
     <div className="bg-white rounded-xl border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
       {/* Dress header row */}
       <div className="flex items-center gap-4 p-4 border-b border-slate-100">
-        <div className="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+        <div className="relative w-16 h-16 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
           {primaryUrl ? (
-            // biome-ignore lint/performance/noImgElement: see 14-05 SUMMARY — blob host not in next.config images
-            <img src={primaryUrl} alt={dress.title} className="w-full h-full object-cover" />
+            <Image src={primaryUrl} alt={dress.title} fill sizes="64px" className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-400">
               <ImageIcon className="w-6 h-6" />

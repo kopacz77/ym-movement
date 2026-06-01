@@ -14,6 +14,7 @@
 "use client";
 
 import { format } from "date-fns";
+import Image from "next/image";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -395,8 +396,9 @@ function DressThumb({ url, title }: { url: string | undefined; title: string }) 
     );
   }
   return (
-    // biome-ignore lint/performance/noImgElement: blob.vercel-storage.com not in next.config.js images.remotePatterns — see 14-05 SUMMARY
-    <img src={url} alt="" className="h-12 w-12 rounded-md object-cover" />
+    <div className="relative h-12 w-12 rounded-md overflow-hidden">
+      <Image src={url} alt="" fill sizes="48px" className="object-cover" />
+    </div>
   );
 }
 
