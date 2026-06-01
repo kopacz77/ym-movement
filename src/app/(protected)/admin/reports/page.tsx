@@ -31,11 +31,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AttendanceReport } from "@/features/admin/components/reports/AttendanceReport";
-import { PayoutReport } from "@/features/admin/components/reports/PayoutReport";
-import { RevenueReport } from "@/features/admin/components/reports/RevenueReport";
+import { ChartSkeleton } from "@/components/ui/chart-skeleton";
 import { api } from "@/lib/api";
+
+// Lazy-load the recharts-based report bodies. Each pulls ~300KB of chart
+// code (Recharts + d3 internals). Users only ever view one tab at a time,
+// so loading all three upfront wasted ~600KB of initial bundle for nothing.
+// Skeletons render instantly while the chunk loads on first tab activation.
+const AttendanceReport = dynamic(
+  () =>
+    import("@/features/admin/components/reports/AttendanceReport").then((mod) => ({
+      default: mod.AttendanceReport,
+    })),
+  { loading: () => <ChartSkeleton />, ssr: false },
+);
+const PayoutReport = dynamic(
+  () =>
+    import("@/features/admin/components/reports/PayoutReport").then((mod) => ({
+      default: mod.PayoutReport,
+    })),
+  { loading: () => <ChartSkeleton />, ssr: false },
+);
+const RevenueReport = dynamic(
+  () =>
+    import("@/features/admin/components/reports/RevenueReport").then((mod) => ({
+      default: mod.RevenueReport,
+    })),
+  { loading: () => <ChartSkeleton />, ssr: false },
+);
 import {
   exportAttendanceToCSV,
   exportCombinedReportToCSV,
