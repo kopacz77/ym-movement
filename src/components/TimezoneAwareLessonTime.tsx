@@ -3,7 +3,6 @@
 
 import { Clock, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
-import { formatUtcDate } from "@/lib/date-utils";
 import { formatRinkTime } from "@/lib/timezone";
 
 interface TimezoneAwareLessonTimeProps {
@@ -37,8 +36,9 @@ export function TimezoneAwareLessonTime({
       <div>
         <h3 className="font-medium">Date & Time</h3>
         <p className="text-gray-600">
-          {formatUtcDate(startTime)}, {formatRinkTime(startTime, rinkTimezone)} -{" "}
-          {formatRinkTime(endTime, rinkTimezone)} ({duration} minutes)
+          {formatRinkTime(startTime, rinkTimezone, "EEEE, MMMM d, yyyy")},{" "}
+          {formatRinkTime(startTime, rinkTimezone)} - {formatRinkTime(endTime, rinkTimezone)} (
+          {duration} minutes)
         </p>
         <p className="text-xs text-gray-500">
           Times shown in rink timezone ({rinkTimezone.replace("_", " ")})
@@ -91,7 +91,8 @@ export function TimezoneAwareLessonTime({
             <Clock className="h-4 w-4 text-[#0891b2]" />
             <div>
               <p className="text-gray-900 font-medium">
-                {formatUtcDate(startTime)}, {userTimeStart} - {userTimeEnd} ({duration} minutes)
+                {formatRinkTime(startTime, rinkTimezone, "EEEE, MMMM d, yyyy")}, {userTimeStart} -{" "}
+                {userTimeEnd} ({duration} minutes)
               </p>
               <p className="text-xs text-[#0891b2] font-medium">
                 Your current time ({getUserTimezoneAbbr()})
@@ -125,7 +126,8 @@ export function TimezoneAwareLessonTime({
         /* Same timezone - simple display */
         <div>
           <p className="text-gray-600">
-            {formatUtcDate(startTime)}, {rinkTimeStart} - {rinkTimeEnd} ({duration} minutes)
+            {formatRinkTime(startTime, rinkTimezone, "EEEE, MMMM d, yyyy")}, {rinkTimeStart} -{" "}
+            {rinkTimeEnd} ({duration} minutes)
           </p>
           <p className="text-xs text-gray-500">Local time ({getRinkTimezoneAbbr()})</p>
         </div>

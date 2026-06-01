@@ -9,14 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LessonStatusBadge } from "@/components/ui/lesson-status";
 import type { LessonWithDetails } from "@/features/student/types";
-import { formatUtcDate } from "@/lib/date-utils";
+import { formatRinkTime } from "@/lib/timezone";
 import { cn } from "@/lib/utils";
 import { CancellationDialog } from "./CancellationDialog";
 
-const typeConfig: Record<
-  string,
-  { label: string; badgeClass: string }
-> = {
+const typeConfig: Record<string, { label: string; badgeClass: string }> = {
   PRIVATE: {
     label: "Private",
     badgeClass: "bg-blue-100 text-blue-700 border border-blue-200",
@@ -75,7 +72,9 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2.5 text-sm">
             <Calendar className="h-4 w-4 text-slate-400" />
-            <span className="font-medium text-slate-700">{formatUtcDate(lesson.startTime)}</span>
+            <span className="font-medium text-slate-700">
+              {formatRinkTime(lesson.startTime, lesson.Rink.timezone, "EEEE, MMMM d, yyyy")}
+            </span>
           </div>
 
           <div className="flex items-center gap-2.5 text-sm text-slate-600">
@@ -114,7 +113,12 @@ export function LessonCard({ lesson, showActions = true }: LessonCardProps) {
                 Cancel
               </Button>
             )}
-            <Button variant="outline" size="sm" className="hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-200" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-200"
+              asChild
+            >
               <Link href={`/student/schedule/${lesson.id}`}>View Details</Link>
             </Button>
           </div>
