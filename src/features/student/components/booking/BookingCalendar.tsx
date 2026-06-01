@@ -5,8 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import luxon3Plugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { format } from "date-fns";
-import { endOfDay, startOfDay } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import { DateTime } from "luxon";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -22,8 +21,8 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { displayInRinkLocalTime } from "@/lib/timezone";
+import { cn } from "@/lib/utils";
 import { BookingDialog } from "./BookingDialog";
 
 interface Rink {
@@ -162,6 +161,55 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
     );
 
   // Convert to FullCalendar events with transparent tinted blocks
+  // Auto-expanding time-grid range. Default window is 06:00–22:00 (covers
+  // Yura's normal early-morning practice slot through evening lessons). If a
+  // slot exists outside that window, expand with 1-hour padding so it stays
+  // visible. Same pattern as the admin ScheduleCalendar (ScheduleCalendar.tsx
+  // lines 218-263). Enforces a 4-hour minimum window for readability.
+  const timeRange = useMemo(() => {
+    let minHour = 6;
+    let maxHour = 22;
+
+    if (availableSlots && availableSlots.length > 0) {
+      for (const slot of availableSlots) {
+        const tz = (slot as any).Rink?.timezone || rinkTimezone;
+        const startDt =
+          typeof slot.startTime === "string"
+            ? DateTime.fromISO(slot.startTime, { zone: "utc" }).setZone(tz)
+            : DateTime.fromJSDate(slot.startTime as Date, { zone: "utc" }).setZone(tz);
+        const endDt =
+          typeof slot.endTime === "string"
+            ? DateTime.fromISO(slot.endTime, { zone: "utc" }).setZone(tz)
+            : DateTime.fromJSDate(slot.endTime as Date, { zone: "utc" }).setZone(tz);
+
+        if (!startDt.isValid || !endDt.isValid) {
+          continue;
+        }
+
+        if (startDt.hour < minHour) {
+          minHour = Math.max(0, startDt.hour - 1);
+        }
+        const eventEndHour = endDt.minute > 0 ? endDt.hour + 1 : endDt.hour;
+        if (eventEndHour > maxHour) {
+          maxHour = Math.min(24, eventEndHour + 1);
+        }
+      }
+    }
+
+    // Minimum 4-hour window for readability — prevents a single 8am slot from
+    // collapsing the grid to a 1-hour sliver.
+    if (maxHour - minHour < 4) {
+      const mid = Math.floor((minHour + maxHour) / 2);
+      minHour = Math.max(0, mid - 2);
+      maxHour = Math.min(24, mid + 2);
+    }
+
+    return {
+      min: `${String(minHour).padStart(2, "0")}:00:00`,
+      max: `${String(maxHour).padStart(2, "0")}:00:00`,
+    };
+  }, [availableSlots, rinkTimezone]);
+
   const calendarEvents: EventInput[] = useMemo(() => {
     if (!availableSlots || !selectedRink) {
       return [];
@@ -217,7 +265,12 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
     const textClass = (props.textClass as string) || "text-slate-800";
 
     return (
-      <div className={cn("fc-event-scaled px-2 py-1 h-full overflow-hidden flex flex-col gap-0.5", textClass)}>
+      <div
+        className={cn(
+          "fc-event-scaled px-2 py-1 h-full overflow-hidden flex flex-col gap-0.5",
+          textClass,
+        )}
+      >
         <div className="fc-ev-time font-medium leading-tight opacity-70">{timeText}</div>
         <div className="fc-ev-primary font-semibold leading-tight truncate">
           {props.rinkName || "Available"}
@@ -354,7 +407,9 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
   }, [currentDate, currentView, rinkTimezone]);
 
   const mobileSlots = useMemo(() => {
-    if (!availableSlots || !selectedRink) return [];
+    if (!availableSlots || !selectedRink) {
+      return [];
+    }
 
     return availableSlots.filter((slot) => {
       const slotDt = DateTime.fromJSDate(
@@ -376,9 +431,7 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
       }
       groups[dateKey].slots.push(slot as any);
     }
-    return Object.values(groups).sort(
-      (a, b) => a.date.toMillis() - b.date.toMillis(),
-    );
+    return Object.values(groups).sort((a, b) => a.date.toMillis() - b.date.toMillis());
   }, [mobileSlots, rinkTimezone]);
 
   const formatTimeInRinkTimezone = useCallback(
@@ -437,8 +490,12 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
 
   // Date label for toolbar — view-aware
   const dateLabel = useMemo(() => {
-    if (currentView === "dayGridMonth") return format(currentDate, "MMMM yyyy");
-    if (currentView === "timeGridDay") return format(currentDate, "EEEE, MMM d, yyyy");
+    if (currentView === "dayGridMonth") {
+      return format(currentDate, "MMMM yyyy");
+    }
+    if (currentView === "timeGridDay") {
+      return format(currentDate, "EEEE, MMM d, yyyy");
+    }
     return format(currentDate, "MMM d, yyyy");
   }, [currentDate, currentView]);
 
@@ -475,7 +532,11 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
         <div className="flex items-center justify-between flex-wrap gap-2">
           {/* Left: Navigation */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={isMobile ? () => handleMobileNavigate("TODAY") : navigateToday}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={isMobile ? () => handleMobileNavigate("TODAY") : navigateToday}
+            >
               Today
             </Button>
             <Button
@@ -505,7 +566,9 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
                   key={opt.value}
                   onClick={() => changeView(opt.value)}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                    currentView === opt.value ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                    currentView === opt.value
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted"
                   }`}
                 >
                   {opt.label}
@@ -649,8 +712,8 @@ function BookingCalendarComponent({ coachId, coachName }: BookingCalendarProps) 
             selectable={false}
             editable={false}
             slotDuration="00:15:00"
-            slotMinTime="06:00:00"
-            slotMaxTime="22:00:00"
+            slotMinTime={timeRange.min}
+            slotMaxTime={timeRange.max}
             allDaySlot={false}
             nowIndicator={true}
             events={calendarEvents}
