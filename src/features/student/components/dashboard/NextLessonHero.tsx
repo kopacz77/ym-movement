@@ -12,8 +12,34 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { api } from "@/lib/api";
 import { formatRinkTime } from "@/lib/timezone";
 
-export function NextLessonHero() {
+// Loose shape for the server-prefetched lesson. We accept anything that
+// satisfies the fields rendered below — exact Prisma types vary between the
+// page.tsx Prisma findFirst and the TRPC procedure's select shape.
+type NextLessonShape = {
+  startTime: string | Date;
+  endTime: string | Date;
+  type?: string | null;
+  Rink?: { timezone?: string | null; name?: string | null } | null;
+  RinkTimeSlot?: {
+    startTime?: string | Date;
+    endTime?: string | Date;
+    Rink?: { timezone?: string | null; name?: string | null } | null;
+  } | null;
+} | null;
+
+export interface NextLessonHeroProps {
+  /**
+   * Server-prefetched next lesson. When provided, the hero renders with
+   * content from first paint instead of showing a loading skeleton.
+   * Pass `null` to opt out (e.g., from Storybook or tests). Omit entirely
+   * to fall back to client-side TRPC fetch.
+   */
+  initialNextLesson?: NextLessonShape;
+}
+
+export function NextLessonHero({ initialNextLesson }: NextLessonHeroProps = {}) {
   const { id: studentId } = useCurrentUser();
+  const hasServerData = initialNextLesson !== undefined;
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -30,12 +56,22 @@ export function NextLessonHero() {
       status: "SCHEDULED",
       startDate: currentDate,
     },
-    { enabled: isReady && !!studentId, retry: false },
+    {
+      // Don't refetch if the server already gave us the answer — saves one
+      // round-trip per page load. React Query will refetch on focus / mount
+      // per Providers config (refetchOnWindowFocus: false, staleTime: 5min).
+      enabled: isReady && !!studentId && !hasServerData,
+      retry: false,
+    },
   );
 
-  const nextLesson = (lessons as any[])[0];
+  // Server data wins if provided; otherwise use the client-fetched list.
+  const nextLesson = hasServerData ? initialNextLesson : (lessons as any[])[0];
 
-  if (!isReady || isLoading) {
+  // Only show the loading skeleton when we have NO server data AND the client
+  // fetch is still in flight. With server prefetch enabled, this branch is
+  // skipped entirely — first paint shows real content.
+  if (!hasServerData && (!isReady || isLoading)) {
     return (
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardContent className="p-6">
