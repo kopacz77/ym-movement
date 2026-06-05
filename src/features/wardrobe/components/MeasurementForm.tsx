@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { measurementUpdateSchema } from "@/features/wardrobe/api/queries/measurementQueries";
+import { measurementUpdateSchema } from "@/features/wardrobe/lib/measurementSchema";
 import { api } from "@/lib/api";
 
 // Two-flavor schema typing: every field is .nullable().optional() so the

@@ -19,12 +19,15 @@
 // row lookup + studentId equality. No new studentProcedure middleware
 // (research Pattern 3).
 
-import { RentalType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { addDays } from "date-fns";
 import { z } from "zod";
 import { getWardrobeSettings } from "@/features/admin/api/queries/wardrobeSettingsQueries";
 import { createNotification } from "@/features/notifications/utils/notificationHelpers";
+import {
+  type CreateRequestInput,
+  createRequestSchema,
+} from "@/features/wardrobe/lib/requestSchema";
 import { sendRentalRequestReceivedEmail } from "@/lib/email";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
@@ -37,30 +40,12 @@ import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
  *  1. endDate > startDate
  *  2. competitionDate (if present) sits inside [startDate, endDate]
  */
-export const createRequestSchema = z
-  .object({
-    dressId: z.string().cuid(),
-    rentalType: z.nativeEnum(RentalType),
-    startDate: z.date(),
-    endDate: z.date(),
-    competitionName: z.string().max(120).optional(),
-    competitionDate: z.date().optional(),
-    message: z.string().min(20, "Tell the owner why you're a great match (20+ chars)").max(1000),
-  })
-  .refine((d) => d.endDate > d.startDate, {
-    message: "End date must be after start date",
-    path: ["endDate"],
-  })
-  .refine(
-    (d) =>
-      !d.competitionDate || (d.competitionDate >= d.startDate && d.competitionDate <= d.endDate),
-    {
-      message: "Competition date must fall inside the rental window",
-      path: ["competitionDate"],
-    },
-  );
-
-export type CreateRequestInput = z.infer<typeof createRequestSchema>;
+// Canonical schema lives in the client-safe lib module so the rental-request
+// form can import it without pulling @trpc/server into the browser. Imported
+// for local use in .input() below and re-exported so existing server-side
+// importers keep working unchanged.
+export { createRequestSchema };
+export type { CreateRequestInput };
 
 export const requestsRouter = createTRPCRouter({
   /**

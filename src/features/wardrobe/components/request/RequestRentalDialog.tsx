@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { createRequestSchema } from "@/features/wardrobe/api/queries/requestQueries";
+import { createRequestSchema } from "@/features/wardrobe/lib/requestSchema";
 import { api } from "@/lib/api";
 import { useDebouncedState } from "@/lib/context-utils";
 

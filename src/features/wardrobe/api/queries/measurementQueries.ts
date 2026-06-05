@@ -11,31 +11,17 @@
 //   - update : persists submitted measurements + stamps measurementsUpdatedAt
 
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import {
+  type MeasurementUpdateInput,
+  measurementUpdateSchema,
+} from "@/features/wardrobe/lib/measurementSchema";
 import { createTRPCRouter, protectedProcedure } from "@/lib/trpc";
 
-/**
- * Measurement update input.
- *
- * Every field is `.nullable().optional()` so the form can either:
- *   - omit the field entirely (`undefined`) — value untouched
- *   - clear the field (`null`)              — cleared in DB
- *
- * The form layer is responsible for mapping empty-string inputs to `null`
- * (NOT `0`). Server enforces sane upper bounds to reject obviously bad data.
- */
-export const measurementUpdateSchema = z.object({
-  heightCm: z.number().int().positive().max(250).nullable().optional(),
-  chestCm: z.number().int().positive().max(200).nullable().optional(),
-  waistCm: z.number().int().positive().max(200).nullable().optional(),
-  hipsCm: z.number().int().positive().max(200).nullable().optional(),
-  torsoCm: z.number().int().positive().max(200).nullable().optional(),
-  inseamCm: z.number().int().positive().max(200).nullable().optional(),
-  sleeveLengthCm: z.number().int().positive().max(200).nullable().optional(),
-  preferredFitNotes: z.string().max(500).nullable().optional(),
-});
-
-export type MeasurementUpdateInput = z.infer<typeof measurementUpdateSchema>;
+// Canonical schema lives in the client-safe lib module so MeasurementForm can
+// import it without pulling @trpc/server into the browser. Re-exported here so
+// any existing server-side importers keep working unchanged.
+export { measurementUpdateSchema };
+export type { MeasurementUpdateInput };
 
 /**
  * The shape returned by both `get` and `update` — the caller's measurement
