@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { DressInventoryGrid } from "@/features/wardrobe/components/admin/DressInventoryGrid";
+import { WardrobeAdminNav } from "@/features/wardrobe/components/admin/WardrobeAdminNav";
 
 export default function AdminWardrobePage() {
   return (
@@ -12,6 +13,7 @@ export default function AdminWardrobePage() {
           Manage dress inventory. Filter by status, search, edit, or archive.
         </p>
       </div>
+      <WardrobeAdminNav />
       <Suspense fallback={null}>
         <DressInventoryGrid />
       </Suspense>

@@ -46,14 +46,12 @@ export function RejectDressDialog({
     }
   }, [open]);
 
-  // Stub-then-swap (Plan 18-02 sibling): `rejectDress` + `listPendingApproval`
-  // are 18-02 deliverables; `as any` keeps this file type-correct until 18-02 lands.
   const reject = api.admin.wardrobe.rejectDress.useMutation({
     onSuccess: () => {
       toast.success("Dress rejected", {
         description: `${dressTitle} returned to the consigner with your reason.`,
       });
-      (utils.admin.wardrobe as any).listPendingApproval.invalidate();
+      utils.admin.wardrobe.listPendingApproval.invalidate();
       utils.admin.wardrobe.list.invalidate();
       setReason("");
       onOpenChange(false);

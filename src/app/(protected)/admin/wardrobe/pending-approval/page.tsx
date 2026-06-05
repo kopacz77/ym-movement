@@ -7,20 +7,13 @@
 
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { PendingApprovalQueue } from "@/features/wardrobe/components/admin/PendingApprovalQueue";
+import { WardrobeAdminNav } from "@/features/wardrobe/components/admin/WardrobeAdminNav";
 
 export default function AdminPendingApprovalPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Link
-          href="/admin/wardrobe"
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[#0891b2] mb-2"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to inventory
-        </Link>
         <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
           Pending review
         </p>
@@ -31,6 +24,7 @@ export default function AdminPendingApprovalPage() {
           uploads.
         </p>
       </div>
+      <WardrobeAdminNav />
       <PendingApprovalQueue />
     </div>
   );

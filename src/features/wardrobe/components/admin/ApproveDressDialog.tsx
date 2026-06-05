@@ -47,14 +47,12 @@ export function ApproveDressDialog({
     }
   }, [open]);
 
-  // Stub-then-swap (Plan 18-02 sibling): `approveDress` + `listPendingApproval`
-  // are 18-02 deliverables; `as any` keeps this file type-correct until 18-02 lands.
   const approve = api.admin.wardrobe.approveDress.useMutation({
     onSuccess: () => {
       toast.success("Dress approved", {
         description: `${dressTitle} is now live on the YM Wardrobe catalog.`,
       });
-      (utils.admin.wardrobe as any).listPendingApproval.invalidate();
+      utils.admin.wardrobe.listPendingApproval.invalidate();
       utils.admin.wardrobe.list.invalidate();
       setOverrideRaw("");
       onOpenChange(false);
