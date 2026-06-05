@@ -54,6 +54,24 @@ const t = initTRPC.context<TRPCContext>().create({
       error.code === "FORBIDDEN" ||
       error.code === "NOT_FOUND";
 
+    // Surface the real cause of masked internal errors. The generic client message
+    // hides what actually failed; this logs the true cause server-side under a
+    // greppable tag and hands the client a short ref id so a report can be traced
+    // back to the exact log line. Behavior-neutral: no message text leaks to users.
+    let errorRef: string | undefined;
+    if (!isSafeError) {
+      errorRef = globalThis.crypto.randomUUID().slice(0, 8);
+      const cause =
+        error.cause instanceof Error
+          ? `${error.cause.name}: ${error.cause.message}`
+          : String(error.cause ?? "");
+      console.error(
+        `[trpc-error] ref=${errorRef} code=${error.code} path=${
+          shape.data?.path ?? "?"
+        } message=${error.message} cause=${cause}`,
+      );
+    }
+
     let sanitizedMessage: string;
 
     if (process.env.NODE_ENV === "production") {
@@ -61,8 +79,8 @@ const t = initTRPC.context<TRPCContext>().create({
         // Sanitize even safe errors to remove technical details
         sanitizedMessage = sanitizeErrorMessage(error.message);
       } else {
-        // Generic message for internal errors
-        sanitizedMessage = "An unexpected error occurred. Please try again later.";
+        // Generic message for internal errors (with a ref id for log correlation)
+        sanitizedMessage = `An unexpected error occurred. Please try again later. (ref: ${errorRef})`;
       }
     } else {
       // Development: show full error for debugging
@@ -74,6 +92,7 @@ const t = initTRPC.context<TRPCContext>().create({
       message: sanitizedMessage,
       data: {
         ...shape.data,
+        errorRef,
         zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };

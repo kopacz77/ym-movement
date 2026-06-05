@@ -3,8 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Migrations/introspection must bypass pgBouncer (transaction pooling breaks DDL/advisory locks).
+  // Runtime uses the pooled url with pgbouncer=true; migrations use this direct (non-pooler) endpoint.
+  directUrl = env("DIRECT_URL")
 }
 
 model DefaultPricing {
