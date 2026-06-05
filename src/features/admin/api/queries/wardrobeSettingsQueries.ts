@@ -3,20 +3,22 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import {
+  WARDROBE_SETTINGS_DEFAULTS,
+  WARDROBE_SETTINGS_KEY,
+  type WardrobeSettings,
+  wardrobeSettingsSchema,
+} from "@/features/wardrobe/lib/wardrobeSettingsSchema";
 import { adminProcedure, createTRPCRouter } from "@/lib/trpc";
 
-export const WARDROBE_SETTINGS_KEY = "wardrobe" as const;
+// Re-export the client-safe schema/type/key so existing server-side importers
+// (requestQueries, consignerQueries, wardrobe-return-reminder-sender) keep
+// working unchanged. The canonical source is now the pure lib module so client
+// components can import it without pulling in @trpc/server.
+export { WARDROBE_SETTINGS_KEY, wardrobeSettingsSchema };
+export type { WardrobeSettings };
 
-export const wardrobeSettingsSchema = z.object({
-  defaultConsignmentCommissionPct: z.number().int().min(0).max(100).default(15),
-  wardrobeRentalRequestExpiryDays: z.number().int().positive().default(7),
-  wardrobeReturnReminderDays: z.number().int().positive().default(1),
-});
-
-export type WardrobeSettings = z.infer<typeof wardrobeSettingsSchema>;
-
-const DEFAULTS: WardrobeSettings = wardrobeSettingsSchema.parse({});
+const DEFAULTS: WardrobeSettings = WARDROBE_SETTINGS_DEFAULTS;
 
 // Mirror the typing pattern used in settingsQueries.ts -- prisma.settings has narrow
 // upsert/findUnique signatures that benefit from an explicit cast.

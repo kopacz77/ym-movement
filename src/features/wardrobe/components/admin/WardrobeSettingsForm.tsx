@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import {
   type WardrobeSettings,
   wardrobeSettingsSchema,
-} from "@/features/admin/api/queries/wardrobeSettingsQueries";
+} from "@/features/wardrobe/lib/wardrobeSettingsSchema";
 import { api } from "@/lib/api";
 
 // Two-flavor schema: every field has a Zod `.default()` so the *input* type has
