@@ -56,6 +56,11 @@ export type DressInput = z.infer<typeof dressInputSchema>;
 const listInputSchema = z.object({
   statuses: z.array(z.nativeEnum(DressStatus)).optional(),
   search: z.string().optional(),
+  // When true, restrict to dresses owned by someone OTHER than the calling
+  // admin — i.e. dresses consigned by other skaters, excluding the admin's
+  // own house inventory. Lets the admin isolate "things consigned to me to
+  // manage" from their own listings.
+  consignedOnly: z.boolean().optional(),
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().max(100).default(20),
 });
@@ -85,6 +90,11 @@ export const wardrobeDressRouter = createTRPCRouter({
           { title: { contains: input.search, mode: "insensitive" } },
           { description: { contains: input.search, mode: "insensitive" } },
         ];
+      }
+
+      // Consigned-only = owned by anyone except the calling admin.
+      if (input.consignedOnly) {
+        where.ownerId = { not: ctx.session.user.id };
       }
 
       const [dresses, total] = await Promise.all([

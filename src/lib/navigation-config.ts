@@ -31,7 +31,10 @@ export const adminNavigation: NavItem[] = [
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
   { name: "Reports", href: "/admin/reports", icon: BarChart2 },
   { name: "Wardrobe", href: "/admin/wardrobe", icon: Shirt },
-  { name: "Consigned", href: "/wardrobe/consigned", icon: Tag },
+  // Admin sees their OWN dresses + earnings here (admin-created dresses are
+  // owned by the admin). Labeled "My Listings" to distinguish from the
+  // Wardrobe section, which manages ALL owners' dresses + the approval queue.
+  { name: "My Listings", href: "/wardrobe/consigned", icon: Tag },
   { name: "Settings", href: "/admin/settings", icon: Settings },
   { name: "Guide", href: "/admin/guide", icon: BookOpen },
 ];

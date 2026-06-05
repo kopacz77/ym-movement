@@ -82,6 +82,7 @@ export function DressInventoryGrid() {
   // -- URL-derived state ----------------------------------------------------
   const statuses = useMemo(() => parseStatusesParam(searchParams.get("statuses")), [searchParams]);
   const search = searchParams.get("q") ?? "";
+  const consignedOnly = searchParams.get("consigned") === "1";
   const page = Number.parseInt(searchParams.get("page") ?? "1", 10) || 1;
 
   // Local input state so keystrokes don't thrash the URL. Submit flushes.
@@ -92,7 +93,12 @@ export function DressInventoryGrid() {
    * default ["AVAILABLE"] status selection to keep the URL clean. Resets page
    * whenever the filter set changes.
    */
-  const updateParams = (next: { statuses?: DressStatus[]; q?: string; page?: number }) => {
+  const updateParams = (next: {
+    statuses?: DressStatus[];
+    q?: string;
+    consignedOnly?: boolean;
+    page?: number;
+  }) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (next.statuses !== undefined) {
@@ -116,6 +122,15 @@ export function DressInventoryGrid() {
       params.delete("page");
     }
 
+    if (next.consignedOnly !== undefined) {
+      if (next.consignedOnly) {
+        params.set("consigned", "1");
+      } else {
+        params.delete("consigned");
+      }
+      params.delete("page");
+    }
+
     if (next.page !== undefined) {
       if (next.page <= 1) {
         params.delete("page");
@@ -134,6 +149,7 @@ export function DressInventoryGrid() {
   const { data, isLoading, isFetching } = api.admin.wardrobe.list.useQuery({
     statuses: statuses.length === ALL_STATUSES.length ? undefined : statuses,
     search: search || undefined,
+    consignedOnly: consignedOnly || undefined,
     page,
     limit: PAGE_SIZE,
   });
@@ -178,6 +194,16 @@ export function DressInventoryGrid() {
           </form>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant={consignedOnly ? "default" : "outline"}
+            size="sm"
+            onClick={() => updateParams({ consignedOnly: !consignedOnly })}
+            className={consignedOnly ? "bg-[#0891b2] hover:bg-[#06748f] text-white" : undefined}
+            aria-pressed={consignedOnly}
+          >
+            {consignedOnly ? "Consigned only ✓" : "Consigned only"}
+          </Button>
           <Link href="/admin/wardrobe/settings">
             <Button variant="outline" size="sm">
               Settings
